@@ -28,6 +28,7 @@ use App\Http\Models\RetailFranchiseCommission;
 use App\Http\Models\RetailUserCommission;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use Illuminate\Support\Facades\DB;
+use App\Http\Models\TraxCenterAttachment;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -524,6 +525,7 @@ class RetailAdminUserManagementController extends Controller
             
                 // Calculate withholding
                 if ($shipment->franchise_withholding !== null) {
+                    $franchise_withholding_amount = $shipment->franchise_withholding;
                     $franchise_withholding = $shipment->franchise_withholding / 100;
                     $withholding = $charges_with_gst !== null ? $charges_with_gst * $franchise_withholding : null;
                     $charges_without_withholding = $charges_with_gst - $withholding;
@@ -534,9 +536,11 @@ class RetailAdminUserManagementController extends Controller
                 }
                 $shipment->withholding = $withholding;
                 $shipment->charges_without_withholding = $charges_without_withholding;
+                $shipment->franchise_withholding_amount = $franchise_withholding_amount;
             
                 // Calculate deduction
                 if ($shipment->franchise_deduction !== null) {
+                    $franchise_deduction_percentage = $shipment->franchise_deduction;
                     $franchise_deduction = $shipment->franchise_deduction / 100;
                     $deduction = $charges_without_withholding !== null ? $charges_without_withholding * $franchise_deduction : null;
                     $net_commission = $charges_without_withholding - $deduction;
@@ -547,7 +551,7 @@ class RetailAdminUserManagementController extends Controller
                 }
                 $shipment->deduction = $deduction;
                 $shipment->net_commission = $net_commission;
-
+                $shipment->franchise_deduction_percentage = $franchise_deduction_percentage;
                 RetailFranchiseCommission::updateOrCreate(
                     [
                         'franchise_id' => $shipment->category_id,
@@ -585,10 +589,6 @@ class RetailAdminUserManagementController extends Controller
             'franchises' => $franchises
         ]);
     }
-
-
-
-
 
     public function user_commission_view_ajax_list(Request $request)
     {
@@ -665,29 +665,35 @@ class RetailAdminUserManagementController extends Controller
             
                 // Calculate withholding
                 if ($shipment->franchise_withholding !== null) {
+                    $franchise_withholding_amount = $shipment->franchise_withholding;
                     $franchise_withholding = $shipment->franchise_withholding / 100;
                     $withholding = $charges_with_gst !== null ? $charges_with_gst * $franchise_withholding : null;
                     $charges_without_withholding = $charges_with_gst - $withholding;
                 } else {
+                    $franchise_withholding_amount = '-';
                     $withholding = '-';
                     $charges_without_withholding = '-';
                     $shipment->franchise_withholding = '-';
                 }
                 $shipment->withholding = $withholding;
                 $shipment->charges_without_withholding = $charges_without_withholding;
-            
+                $shipment->franchise_withholding_amount = $franchise_withholding_amount;
+
                 // Calculate deduction
                 if ($shipment->franchise_deduction !== null) {
+                    $franchise_deduction_percentage = $shipment->franchise_deduction;
                     $franchise_deduction = $shipment->franchise_deduction / 100;
                     $deduction = $charges_without_withholding !== null ? $charges_without_withholding * $franchise_deduction : null;
                     $net_commission = $charges_without_withholding - $deduction;
                 } else {
+                    $franchise_deduction_percentage = '-';
                     $deduction = '-';
                     $net_commission = '-';
                     $shipment->franchise_deduction = '-';
                 }
                 $shipment->deduction = $deduction;
                 $shipment->net_commission = $net_commission;
+                $shipment->franchise_deduction_percentage = $franchise_deduction_percentage;
 
                 RetailUserCommission::updateOrCreate(
                     [
@@ -719,12 +725,6 @@ class RetailAdminUserManagementController extends Controller
             'shipments' => $shipments,
         ]);
     }
-
-
-
-
-
-
 
     public function trax_center_index()
     {
@@ -810,6 +810,7 @@ class RetailAdminUserManagementController extends Controller
 
     public function trax_center_add(Request $request)
     {
+        $date = Carbon::now()->format('Y_m_d');
         $hub_count = RetailTraxCenter::where('default_hub', $request->hub)->count() + 1;
 
         $trax_center = new RetailTraxCenter();
@@ -840,11 +841,34 @@ class RetailAdminUserManagementController extends Controller
         $pickup_address_id = $this->add_pickup_address($shipper_user_id, $trax_center->name . ' - ' . $hub_name, $trax_center->name, $trax_center->phone_no, $trax_center->email, $trax_center->default_hub, 0, $trax_center->location_latitude, $trax_center->location_longitude);
         $trax_center->pickup_address_id = $pickup_address_id;
         $trax_center->save();
+
+        $trax_center_attachment = new TraxCenterAttachment();
+        $trax_center_attachment->retail_trax_center_id = $trax_center->id;
+        $trax_center_attachment->advance_amount = (int) str_replace(',', '', $request->advance_amount);
+        $trax_center_attachment->rental = (int) str_replace(',', '', $request->rental);
+        $trax_center_attachment->landlord_name = $request->landlord_name;
+        $trax_center_attachment->landlord_contact_number = $request->landlord_contact_number;
+        $trax_center_attachment->shop_address = $request->shop_address;
+        $trax_center_attachment->agreement_start_date = $request->agreement_start_date;
+        $trax_center_attachment->agreement_end_date = $request->agreement_end_date;
+
+        for ($i = 1; $i <= 5; $i++) {
+            if ($request->hasFile('attachment_' . $i)) {
+                $file = $request->file('attachment_' . $i);
+                $fileName = $date . '_' . Carbon::now()->format('His') . '_' . $file->getClientOriginalName();
+                $folderName = 'trax_center_attachment_' . $i;
+                $filePath = $file->storeAs('trax center attachments/' . $folderName, $fileName, 'public');
+                $trax_center_attachment->{'attachment_' . $i} = $fileName;
+            }
+        }
+
+        $trax_center_attachment->save();
         return redirect()->back()->with('success', 'Trax Center Added Successfully!');
     }
 
     public function trax_center_edit(Request $request)
     {
+        $date = Carbon::now()->format('Y_m_d');
         $existing_trax_center = RetailTraxCenter::where('name', $request->name)->where('id', '!=', $request->trax_center_id);
         if (!$existing_trax_center->exists()) {
             $trax_center = RetailTraxCenter::find($request->trax_center_id);
@@ -859,6 +883,76 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->insurance = $request->edit_insurance;
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
+
+
+
+
+
+
+
+
+
+
+            $trax_center_attachment = TraxCenterAttachment::where('retail_trax_center_id', $request->trax_center_id)->first();
+            if ($trax_center_attachment != null) {
+                $trax_center_attachment->advance_amount = (int) str_replace(',', '', $request->advance_amount);
+                $trax_center_attachment->rental = (int) str_replace(',', '', $request->rental);
+                $trax_center_attachment->landlord_name = $request->landlord_name;
+                $trax_center_attachment->landlord_contact_number = $request->landlord_contact_number;
+                $trax_center_attachment->shop_address = $request->shop_address;
+                if ($request->agreement_start_date != null){
+                    $trax_center_attachment->agreement_start_date = $request->agreement_start_date;
+                }
+                if ($request->agreement_end_date != null){
+                    $trax_center_attachment->agreement_end_date = $request->agreement_end_date;
+                }
+                // Handle file uploads
+                for ($i = 1; $i <= 5; $i++) {
+                    $attachment_name = 'attachment_' . $i;
+                    if ($request->hasFile($attachment_name)) {
+                        $file = $request->file($attachment_name);
+                        $fileName = $date . '_' . Carbon::now()->format('His') . '_' . $file->getClientOriginalName();
+                        $folderName = 'trax_center_attachment_' . $i;
+                        $filePath = $file->storeAs('trax center attachments' . DIRECTORY_SEPARATOR . $folderName, $fileName, 'public');
+                        $trax_center_attachment->{$attachment_name} = $fileName;
+                    }
+                }
+            
+                // Save the changes
+                $trax_center_attachment->save();
+            } else {
+                $new_trax_center_attachments = new TraxCenterAttachment();
+                $new_trax_center_attachments->retail_trax_center_id = $request->trax_center_id;
+                $new_trax_center_attachments->advance_amount = $request->advance_amount;
+                $new_trax_center_attachments->rental = $request->rental;
+                $new_trax_center_attachments->landlord_name = $request->landlord_name;
+                $new_trax_center_attachments->landlord_contact_number = $request->landlord_contact_number;
+                $new_trax_center_attachments->shop_address = $request->shop_address;
+                $new_trax_center_attachments->agreement_start_date = $request->agreement_start_date;
+                $new_trax_center_attachments->agreement_end_date = $request->agreement_end_date;
+
+                for ($i = 1; $i <= 5; $i++) {
+                    $attachment_name = 'attachment_' . $i;
+                    if ($request->hasFile($attachment_name)) {
+                        $file = $request->file($attachment_name);
+                        $fileName = $date . '_' . Carbon::now()->format('His') . '_' . $file->getClientOriginalName();
+                        $folderName = 'trax_center_attachment_' . $i;
+                        $filePath = $file->storeAs('trax center attachments' . DIRECTORY_SEPARATOR . $folderName, $fileName, 'public');
+                        $new_trax_center_attachments->{$attachment_name} = $fileName;
+                    }
+                }
+                $new_trax_center_attachments->save();
+            }
+
+
+
+
+
+
+
+
+
+
 
             return redirect()->back()->with('success', 'Trax Center Updated Successfully!');
         } else {
@@ -879,6 +973,14 @@ class RetailAdminUserManagementController extends Controller
         } else {
             return 'false';
         }
+    }
+
+    public function trax_center_edit_attachment(Request $request){
+        $trax_center_id = $request->trax_center_id;
+        $trax_center_attachment = TraxCenterAttachment::where('retail_trax_center_id', $trax_center_id)->first();
+        return response()->json([
+            'data' => $trax_center_attachment
+        ]);
     }
 
     public function user_index()

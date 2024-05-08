@@ -3773,6 +3773,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@trax_center_add')->name('add');
             Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@trax_center_edit')->name('edit');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@trax_center_name')->name('name');
+
+            Route::get('/trax_center_edit_attachment', 'Admins\Retail\RetailAdminUserManagementController@trax_center_edit_attachment')->name('trax_center_edit_attachment');
         });
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@user_index')->name('index');

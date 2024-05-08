@@ -39,7 +39,7 @@
     </div>
 
     <div class="modal fade" id="add_trax_center" role="dialog" aria-labelledby="add_trax_center_title" aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog add_trax_center_modal" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="add_remarks_title">Add Trax Center</h4>
@@ -49,44 +49,120 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="add_trax_center_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.trax_center.add') }}" novalidate="novalidate">
+                    <form id="add_trax_center_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.trax_center.add') }}" novalidate="novalidate" enctype="multipart/form-data">
                         {{ csrf_field()  }}
-                        <div class="form-group">
-                            <input type="text" name="name" id="name" class="form-control" placeholder="Trax Center Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-remote="{{ route('admin.retail.trax_center.name') }}" data-msg-remote="Name must be unique">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="phone_number" id="phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
-                        </div>
-                        <div class="form-group">
-                            <input type="email" name="email" id="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" autocomplete="nope">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="cnic" id="cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required">
-                        </div>
-                        <div class="form-group">
-                            <select name="hub" id="hub" class="form-control select2" data-rule-required="true" data-msg-required="Default Hub is required">
-                                @foreach($hubs as $hub)
-                                    <option value="{{$hub->id}}"> {{$hub->name}} </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="lat" id="lat" class="form-control lat" placeholder="Latitude*" data-rule-required="true" data-msg-required="Latitude is required">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="long" id="long" class="form-control long" placeholder="Longitude*" data-rule-required="true" data-msg-required="Longitude is required">
-                        </div>
-                        <div class="input-group mb-2">
-                            <input type="text" name="insurance" id="insurance" class="form-control insurance" placeholder="Insurance*"  value="" max="100" min="1"
-                                   data-rule-required="true" data-msg-required="Insurance is required">
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="basic-addon2">%</span>
-                            </div>
-                        </div>
-                        <div class="input-group mb-3">
-                            <input type="text" name="discount" id="discount" class="form-control discount" placeholder="Discount"  value="" max="100">
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="basic-addon2">%</span>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <input type="text" name="name" id="name" class="form-control" placeholder="Trax Center Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-remote="{{ route('admin.retail.trax_center.name') }}" data-msg-remote="Name must be unique">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="phone_number" id="phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="email" name="email" id="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" autocomplete="nope">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="cnic" id="cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required">
+                                    </div>
+                                    <div class="form-group">
+                                        <select name="hub" id="hub" class="form-control select2" data-rule-required="true" data-msg-required="Default Hub is required">
+                                            @foreach($hubs as $hub)
+                                                <option value="{{$hub->id}}"> {{$hub->name}} </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="lat" id="lat" class="form-control lat" placeholder="Latitude*" data-rule-required="true" data-msg-required="Latitude is required">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="long" id="long" class="form-control long" placeholder="Longitude*" data-rule-required="true" data-msg-required="Longitude is required">
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <input type="text" name="insurance" id="insurance" class="form-control insurance" placeholder="Insurance*"  value="" max="100" min="1"
+                                               data-rule-required="true" data-msg-required="Insurance is required">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" id="basic-addon2">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" name="discount" id="discount" class="form-control discount" placeholder="Discount"  value="" max="100">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" id="basic-addon2">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col">
+                                    <div class="form-group">
+                                        <input type="text" name="advance_amount" id="advance_amount" class="form-control advance_amount" placeholder="Advance Amount" data-rule-required="true" data-msg-required="Advance Amount is required">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="rental" id="rental" class="form-control rental" placeholder="Rental Amount" data-rule-required="true" data-msg-required="Rental Amount is required">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="landlord_name" id="landlord_name" class="form-control landlord_name" placeholder="Landlord Name" data-rule-required="true" data-msg-required="Landlord name is required">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="landlord_contact_number" id="landlord_contact_number" class="form-control landlord_contact_number" placeholder="Landlord Contact Number" data-rule-required="true" data-msg-required="Landlord contact number is required">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <textarea name="shop_address" id="shop_address" class="form-control shop_address" placeholder="Shop Address" rows="4" cols="50"></textarea>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement Start date">
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="agreement_end_date" id="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement End date">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="attachment_1">Attachment 1</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf">
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_2">Attachment 2</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf">
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_3">Attachment 3</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf">
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_4">Attachment 4</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_4" id="attachment_4" accept="image/*,.doc,.docx,.pdf">
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_5">Attachment 5</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_5" id="attachment_5" accept="image/*,.doc,.docx,.pdf">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group ml-1">
@@ -100,48 +176,128 @@
     </div>
 
     <div class="modal fade" id="edit_trax_center" role="dialog" aria-labelledby="edit_trax_center_title" aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog edit_trax_center_modal" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="edit_remarks_title">Edit Trax Center</h4>
-
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="edit_trax_center_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.trax_center.edit') }}" novalidate="novalidate">
+                    <form id="edit_trax_center_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.trax_center.edit') }}" novalidate="novalidate" enctype="multipart/form-data">
                         {{ csrf_field()  }}
-                        <input type="hidden" name="trax_center_id" id="trax_center_id" value="">
-                        <div class="form-group">
-                            <input type="text" name="name" id="edit_name" class="form-control" placeholder="Trax Center Name*" data-rule-required="true" data-msg-required="Name is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="phone_number" id="edit_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="email" name="email" id="edit_email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="cnic" id="edit_cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="lat" id="edit_lat" class="form-control lat" placeholder="Latitude*" data-rule-required="true" data-msg-required="Latitude is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="long" id="edit_long" class="form-control long" placeholder="Longitude*" data-rule-required="true" data-msg-required="Longitude is required" value="">
-                        </div>
-                        <div class="input-group mb-2">
-                            <input type="text" name="edit_insurance" id="edit_insurance" class="form-control edit_insurance" placeholder="Insurance*"  value="" max="100"
-                                   data-rule-required="true" data-msg-required="Insurance is required" min="1">
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="basic-addon2">%</span>
-                            </div>
-                        </div>
-                        <div class="input-group mb-3">
-                            <input type="text" name="discount" id="edit_discount" class="form-control edit_discount" placeholder="Discount"  value="" max="100">
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="basic-addon2">%</span>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <input type="hidden" name="trax_center_id" id="trax_center_id" value="">
+                                    <div class="form-group">
+                                        <input type="text" name="name" id="edit_name" class="form-control" placeholder="Trax Center Name*" data-rule-required="true" data-msg-required="Name is required" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="phone_number" id="edit_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="email" name="email" id="edit_email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="cnic" id="edit_cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="lat" id="edit_lat" class="form-control lat" placeholder="Latitude*" data-rule-required="true" data-msg-required="Latitude is required" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="long" id="edit_long" class="form-control long" placeholder="Longitude*" data-rule-required="true" data-msg-required="Longitude is required" value="">
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <input type="text" name="edit_insurance" id="edit_insurance" class="form-control edit_insurance" placeholder="Insurance*"  value="" max="100"
+                                            data-rule-required="true" data-msg-required="Insurance is required" min="1">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" id="basic-addon2">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" name="discount" id="edit_discount" class="form-control edit_discount" placeholder="Discount"  value="" max="100">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" id="basic-addon2">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col">
+                                    <div class="form-group">
+                                        <input type="text" name="advance_amount" id="advance_amount_edit" class="form-control advance_amount" placeholder="Advance Amount" data-rule-required="true" data-msg-required="Advance Amount is required" value="">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="rental" id="rental_edit" class="form-control rental" placeholder="Rental Amount" data-rule-required="true" data-msg-required="Rental Amount is required" value="">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="landlord_name" id="landlord_name_edit" class="form-control landlord_name" placeholder="Landlord Name" data-rule-required="true" data-msg-required="Landlord name is required" value="">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="landlord_contact_number" id="landlord_contact_number_edit" class="form-control landlord_contact_number" placeholder="Landlord Contact Number" data-rule-required="true" data-msg-required="Landlord contact number is required" value="">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <textarea name="shop_address" id="shop_address_edit" class="form-control shop_address" placeholder="Shop Address" rows="4" cols="50" value=""></textarea>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement Start date">
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="agreement_end_date" id="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement End date">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="attachment_1">Attachment 1</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1_edit" accept="image/*,.doc,.docx,.pdf">
+                                        <a id="attachment_1_filename" target="_blank"></a>
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_2">Attachment 2</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2_edit" accept="image/*,.doc,.docx,.pdf">
+                                        <a id="attachment_2_filename" target="_blank"></a>
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_3">Attachment 3</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3_edit" accept="image/*,.doc,.docx,.pdf">
+                                        <a id="attachment_3_filename" target="_blank"></a>
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_4">Attachment 4</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_4" id="attachment_4_edit" accept="image/*,.doc,.docx,.pdf">
+                                        <a id="attachment_4_filename" target="_blank"></a>
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_5">Attachment 5</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_5" id="attachment_5_edit" accept="image/*,.doc,.docx,.pdf">
+                                        <a id="attachment_5_filename" target="_blank"></a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group ml-1">
@@ -177,6 +333,9 @@
         span.font-13{
             font-size: 13px;
         }
+        .add_trax_center_modal, .edit_trax_center_modal{
+            max-width: 1300px;
+        }
     </style>
 
 @endsection
@@ -192,7 +351,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('.phone_number').inputmask({
+            $('.phone_number, .landlord_contact_number').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
             });
@@ -221,6 +380,82 @@
                 'allowPlus': false,
                 'rightAlign': false,
                 'digits': 6,
+            });
+
+            $('.advance_amount').inputmask({
+                'alias': 'numeric',
+                'groupSeparator': ',',
+                'autoGroup': true,
+                'digits': 0,
+                'max': 10000000,
+                'rightAlign': false,
+                'clearIncomplete': true
+            });
+
+            $('.rental').inputmask({
+                'alias': 'numeric',
+                'groupSeparator': ',',
+                'autoGroup': true,
+                'digits': 0,
+                'max': 1000000,
+                'rightAlign': false,
+                'clearIncomplete': true
+            });
+
+            $('#add_trax_center_form #delivery_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#add_trax_center_form #delivery_date_to').pickadate('picker').set('min', $('#add_trax_center_form #delivery_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            $('#add_trax_center_form #delivery_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#add_trax_center_form #delivery_date_from').pickadate('picker').set('min', $('#add_trax_center_form #delivery_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            $('#edit_trax_center_form #delivery_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#add_trax_center_form #delivery_date_to').pickadate('picker').set('min', $('#add_trax_center_form #delivery_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            $('#edit_trax_center_form #delivery_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#add_trax_center_form #delivery_date_from').pickadate('picker').set('min', $('#add_trax_center_form #delivery_date_to').pickadate('picker').get('select'));
+                    }
+                }
             });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -434,7 +669,7 @@
                 var long = table.row($(this).parents('tr')).data().location_longitude;
                 var discount = table.row($(this).parents('tr')).data().discount;
                 var insurance = table.row($(this).parents('tr')).data().insurance;
-                console.log(default_hub_id);
+
                 $('#trax_center_id').val(id);
                 $('#edit_name').val(name);
                 $('#edit_phone_number').val(phone_no);
@@ -447,6 +682,31 @@
 
                 $('#edit_remarks_title').text('Edit Trax Center ' + name);
                 $('#edit_trax_center').modal('show');
+
+                // AJAX to show trax center attachments
+                $.ajax({
+                    type: "GET",
+                    url: '{{ route('admin.retail.trax_center.trax_center_edit_attachment') }}',
+                    data: { trax_center_id: id },
+                    success: function (response) {
+                        $('#advance_amount_edit').val(response.data.advance_amount);
+                        $('#rental_edit').val(response.data.rental);
+                        $('#landlord_name_edit').val(response.data.landlord_name);
+                        $('#landlord_contact_number_edit').val(response.data.landlord_contact_number);
+                        $('#shop_address_edit').val(response.data.shop_address);
+                        for (var i = 1; i <= 5; i++) {
+                            var attachmentKey = 'attachment_' + i;
+                            var attachmentFileName = response.data[attachmentKey];
+                            if (attachmentFileName) {
+                                var attachmentURL = '/storage/trax center attachments/trax_center_attachment_' + i + '/' + attachmentFileName;
+                                var attachmentLink = $('<a>').attr('href', attachmentURL).attr('target', '_blank').text(attachmentFileName);
+                                $('#attachment_' + i + '_filename').html(attachmentLink);
+                            } else {
+                                $('#attachment_' + i + '_filename').text('No attachment');
+                            }
+                        }
+                    }
+                });
             });
 
             $('#add_trax_center_form').validate({
@@ -492,5 +752,6 @@
             });
         });
 
+        $('#advance_amount, #rental').css('text-align', '');
     </script>
 @endsection

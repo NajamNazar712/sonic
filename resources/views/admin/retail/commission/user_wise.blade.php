@@ -50,13 +50,14 @@
                                         <th class="border-primary border-darken-1">Franchise Name</th>
                                         <th class="border-primary border-darken-1">Franchise Code</th>
                                         <th class="border-primary border-darken-1">Month</th>
-                                        <th class="border-primary border-darken-1">Product</th> {{-- retail shipping mode id --}}
+                                        <th class="border-primary border-darken-1">Product</th>
                                         <th class="border-primary border-darken-1">Number of shipments</th>
                                         <th class="border-primary border-darken-1">Total Charges</th>
                                         <th class="border-primary border-darken-1">Product %</th>
                                         <th class="border-primary border-darken-1">Commission</th>
                                         <th class="border-primary border-darken-1">GST %</th>
                                         <th class="border-primary border-darken-1">GST Amount</th>
+                                        <th class="border-primary border-darken-1">Total Commission</th>
                                         <th class="border-primary border-darken-1">Withholding %</th>
                                         <th class="border-primary border-darken-1">Franchise Withholding amount</th>
                                         <th class="border-primary border-darken-1">Charges minus withholding</th>
@@ -127,7 +128,6 @@
                         var rowData = {
                             name: item.name,
                             code: item.code,
-                            // shipment_month: item.shipment_month,
                             shipment_month: monthName,
                             shipping_mode_name: item.shipping_mode_name,
                             shipmentCounts: item.shipmentCounts,
@@ -136,8 +136,11 @@
                             commission: item.commission,
                             franchise_gst: item.franchise_gst,
                             gst: item.gst,
+                            charges_with_gst: item.charges_with_gst,
+                            franchise_withholding_amount: item.franchise_withholding_amount,
                             withholding: item.withholding,
                             charges_without_withholding: item.charges_without_withholding,
+                            franchise_deduction_percentage: item.franchise_deduction_percentage,
                             deduction: item.deduction,
                             net_commission: item.net_commission,
                         };
@@ -160,8 +163,11 @@
                                 { data: 'commission' },
                                 { data: 'franchise_gst' },
                                 { data: 'gst' },
+                                { data: 'charges_with_gst' },
+                                { data: 'franchise_withholding_amount' },
                                 { data: 'withholding' },
                                 { data: 'charges_without_withholding' },
+                                { data: 'franchise_deduction_percentage' },
                                 { data: 'deduction' },
                                 { data: 'net_commission' },
                             ],
