@@ -201,7 +201,7 @@ class RiderLogisticApiController extends Controller
                                             $pieces=(isset($booking['booking_pieces_data'])?$booking['total_pieces']:1);
                                             //send data to shipments table
                                             $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Consignee Address',$booking['consignee_phone_1'],$booking['booking_date'],$booking_weight,0,0,$booking['shipping_mode_id'],0,1,1,1,$charges_mode_id, $pieces,1,0.0,null,2);
-                                            dd($shipment_id);
+                                            return response()->json(['status'=>1,'error'=>$shipment_id]);
                                         }
 
                                         //Insert logistic booking pieces

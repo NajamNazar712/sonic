@@ -122,7 +122,7 @@ class LogisticToShipmentSyncController extends Controller
             return $shipment->id;
 
         } catch (\Exception $ex) {
-           dd($ex->getMessage());
+            return response()->json(['status'=>1,'error'=>$ex->getMessage()]);
         }
     }
 
