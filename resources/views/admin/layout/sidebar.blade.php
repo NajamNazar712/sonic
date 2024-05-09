@@ -2414,6 +2414,13 @@
                                                href="{{ route('admin.settings.shipper_negative_payable.index') }}">Negative Payable Limit</a></li>
                                     @endif
 
+                                    @if (session('role_id') == 1 || in_array(949, session('permissions')))
+                                        <li>
+                                            <a class="menu-item" href="{{ route('admin.settings.delivery_revert_access.index') }}">
+                                                Delivery Revert Access
+                                            </a>
+                                        </li>
+                                    @endif
 
                                 </ul>
                             </li>
