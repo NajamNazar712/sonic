@@ -133,7 +133,7 @@
                                         <div>
                                             <select name="shipper_city" id="shipper_city"
                                                 class="select2 form-control required readonly-overlay"
-                                                style="width: 100%" disabled>
+                                                style="width: 100%">
                                                 @foreach ($all_cities as $city)
                                                     <option value="{{ $city->id }}"
                                                         {{ old('shipper_city') == $city->id ? 'selected' : '' }} >
@@ -2876,7 +2876,6 @@
 <script src="{{asset('app-assets/vendors/js/forms/validation/jqBootstrapValidation.js')}}"></script>
 <script src="{{asset('app-assets/vendors/js/pickers/dateTime/moment-with-locales.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/pickers/daterange/daterangepicker.js')}}" type="text/javascript"></script>
-<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}"></script>
 <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
@@ -2900,7 +2899,6 @@
         $('input[name="ol_main_switch"]').removeClass('d-none');
         $('input[name="detain_main_switch"]').removeClass('d-none');
         $('input[name="sameday_main_switch"]').removeClass('d-none');
-        $('input[name="warehouse_main_switch"]').removeClass('d-none');
 
         $('#shipper_city').select2({
             width: '100%',
@@ -3136,10 +3134,10 @@
                 $('#shipInfo').stop().animate({
                     scrollTop: $('#shipInfo')[0].scrollHeight
                 }, 2000);
-                $("input[name='shipping_phone[]']").inputmask({
-                    'mask': "9999-9999999",
-                    'clearIncomplete': true
-                });
+                    $("input[name='shipping_phone[]']").inputmask({
+                        'mask': "9999-9999999",
+                        'clearIncomplete': true
+                    });
 
                 $('#shipping_' + count + ' .select2').select2({
                     // dropdownParent:$('#registership')

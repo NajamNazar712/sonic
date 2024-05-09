@@ -19,8 +19,8 @@ class UpdateAddColumnsInLeadsTable extends Migration
             $table->string('business_address')->after('average_parcel_cod_amount');
             $table->string('company_name')->after('business_address');
             $table->boolean('business_registered_status')->after('company_name');
-            $table->integer('ntn_number')->after('business_registered_status');
-            $table->integer('activation_code')->after('ntn_number');
+            $table->string('ntn_number')->after('business_registered_status');
+            $table->string('activation_code')->after('ntn_number');
             $table->string('cnic_number')->after('activation_code');
 
         });

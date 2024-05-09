@@ -190,7 +190,13 @@ $(".steps-validation").steps({
     },
     onFinished: function (event, currentIndex)
     {
-        $('#registership').submit();
+
+        if ($('input[name="on_main_switch"]').is(':checked') || $('input[name="ol_main_switch"]').is(':checked') || $('input[name="detain_main_switch"]').is(':checked') || $('input[name="sameday_main_switch"]').is(':checked')) {
+            $('#registership').submit();
+        }else{
+            alert('Select Any One Rate');
+            return currentIndex;
+        }
     }
 });
 

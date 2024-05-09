@@ -128,13 +128,13 @@ class RegisterController extends Controller
                         'email' => 'nullable',
                         'password' => 'nullable',
                         'shipper_poc' => 'required|regex:/^[a-zA-Z ]+$/u|max:255',
-                        'company_address' => 'required|string|max:255',
+                        'company_address' => 'nullable',
                         'phone' => 'nullable',
-                        'nature_of_account' => 'required',
+                        'nature_of_account' => 'nullable',
                         'average_shipment' => 'required',
                         'sale_person' => 'nullable',
                         'average_shipment_duration' => 'required',
-                        'cnic' => 'required|string|max:255',
+                        'cnic' => 'nullable',
                         'url' => 'required|string|max:255',
                         'shipper_city' => 'required|string|max:255',
                         'shipper_product_type' => 'required|int',
@@ -297,8 +297,15 @@ class RegisterController extends Controller
             $user_attachment->save();
 
             
-            return $this->registered($request, $user)
+            if(!$request->has('wordpress_account')){
+                return $this->registered($request, $user)
                 ?: redirect($this->redirectPath());
+            }else{
+                return redirect()->route('cod.welcome');
+
+            }
+
+
         }else{
             return redirect()->route('cod.login')->with('success', 'User Register Successfully!');
         }
@@ -391,7 +398,8 @@ class RegisterController extends Controller
      * @return \App\User
      */
     protected function create(array $data, Request $request)
-    {     
+    {    
+        $admin_auto_tag_territory = null; 
         if(isset($data['wordpress_lead_register']) && $data['wordpress_lead_register'] == 1){
             $lead = Lead::find($data['lead_id']);
             User::create([
@@ -411,6 +419,7 @@ class RegisterController extends Controller
                 'rcp_tat_option_id' => '0',
             ]);
 
+            
             $city = City::find($lead->city_id); // Using find() to directly get the city by ID
             if($city){ // Check if city exists
                 $zone_id = $city->zone_id; // Assuming there's a zone_id in your City model
@@ -421,8 +430,9 @@ class RegisterController extends Controller
                     $sale_person->user_id = User::max('id'); // Corrected comma to semicolon
                     $sale_person->status = 0; // Corrected comma to semicolon
                     $sale_person->save(); // Corrected comma to semicolon and added save() method
+                    $admin_auto_tag_territory = $lead_zone->admin_id;
                 }
-
+                
                 if($lead){
                     $lead->sale_person_id = $lead_zone->admin_id;
                     $lead->save();
@@ -439,12 +449,22 @@ class RegisterController extends Controller
             if(array_key_exists('territory_id', $data)){
                 $territory_id = $data['territory_id'];
             } else{
-                $auto_tag_territory = AutoTagTerritory::where('admin_id',$data['sale_person'])->where('status',1);
-                if($auto_tag_territory->exists()){
-                    $auto_tag_territory = $auto_tag_territory->first();
-                    $territory_id = $auto_tag_territory->territory_id;
+                if(isset($data['sale_person'])){
+                    $auto_tag_territory = AutoTagTerritory::where('admin_id',$data['sale_person'])->where('status',1);
+                    if($auto_tag_territory->exists()){
+                        $auto_tag_territory = $auto_tag_territory->first();
+                        $territory_id = $auto_tag_territory->territory_id;
+                    }else{
+                        $territory_id = null;
+                    }
                 }else{
-                    $territory_id = null;
+                    $auto_tag_territory = AutoTagTerritory::where('admin_id', $admin_auto_tag_territory)->where('status',1);
+                    if($auto_tag_territory->exists()){
+                        $auto_tag_territory = $auto_tag_territory->first();
+                        $territory_id = $auto_tag_territory->territory_id;
+                    }else{
+                        $territory_id = null;
+                    }
                 }
             }
             $referral = Referral::where('name',$data['referral'])->get()->first();
@@ -500,8 +520,14 @@ class RegisterController extends Controller
                     'payment_cycle_days' => $payment_cycle_days
                 ]);
 
+                
                 $adminDashboardController = new AdminDashboardController();
                 $adminDashboardController->addRates($request, User::max('id'));
+
+                $lead = Lead::find($data['lead_id']);
+                $lead->status_id = 9;
+                $lead->save();
+
             }else{
                 $newUser = User::create([
                     'name' => $data['name'],
@@ -538,7 +564,7 @@ class RegisterController extends Controller
             $shipper = User::find($newUser->id);
     //        $shipper->products()->attach($data['product_type']);
 
-            if($data['sale_person']){
+            if(isset($data['sale_person'])){
                 $sale_person = new SalePersonTag();
                 $sale_person->admin_id = $data['sale_person'];
                 $sale_person->user_id = $newUser->id;
@@ -719,6 +745,7 @@ class RegisterController extends Controller
             }
 
 
+            
             return $newUser;
         }
 

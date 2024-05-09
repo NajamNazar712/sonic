@@ -11061,6 +11061,22 @@ class NotificationsController extends Controller
                         }
                         self::email($subject, $body, $lead->email_address); // Send email with $body
                     }                    
+                } else if ($id == 231){
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $user_id = $reference_1_id;
+                    $user = User::find($user_id);
+                    if (strpos($body, '[Company name]') !== FALSE) {
+                        $body = str_replace('[Company name]', $user->name, $body); 
+                    }
+                    if (strpos($body, '[account ID]') !== FALSE) {
+                        $body = str_replace('[account ID]', $user->id, $body); 
+                    }
+                    if (strpos($subject, '[Company name]') !== FALSE) {
+                        $subject = str_replace('[Company name]', $user->name, $subject); 
+                    }
+                    self::email($subject, $body, $user->email); // Send email with $body
+                                
                 }
             }
         }

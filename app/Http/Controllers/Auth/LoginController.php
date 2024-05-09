@@ -179,7 +179,7 @@ class LoginController extends Controller
                 session(['sister_users' => $sister_users]);
                 session(['user_id' => $user->id]);
                 session(['status' => $user->status]);
-                session(['rates_added_by' => $user->rates_added_by]);
+                session(['request_custom_quotation' => $user->request_custom_quotation]);
 
                 if (SalePersonTag::where('user_id', session('user_id'))->where('status', 0)->exists()){
                     session(['sale_person_status' => 1]);

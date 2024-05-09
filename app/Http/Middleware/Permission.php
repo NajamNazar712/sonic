@@ -1587,7 +1587,11 @@ class Permission
             
             $routes[] = 'register.submit';
             $routes[] = 'orders.index';
-            
+            $routes[] = 'update.agreement_status';
+            $routes[] = 'get_agreement';
+            $routes[] = 'welcome';
+
+
             if (!in_array($action, $routes)){
                 return redirect()->route('cod.wordpress_access_denied');
             }
