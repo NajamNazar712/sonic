@@ -173,7 +173,7 @@ class RiderLogisticApiController extends Controller
                                         $logistic_booking->user_type = 2; // 1 - Admin, 2 - Rider, 0 -> shipper
                                         $logistic_booking->created_by = $rider_id;
                                         $logistic_booking->payment_mode_id=1;
-//                                        $logistic_booking->save();
+                                        $logistic_booking->save();
 
                                         //update CN status and mark cn used by rider
                                         $rider_cn=TraxRiderCnDetail::where('cn_number',$booking['cn_number']);
