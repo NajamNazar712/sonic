@@ -21,6 +21,7 @@ use App\Http\Models\Admin\Logistic\TraxStation;
 use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShippingMode;
@@ -29,7 +30,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Http\Models\Admin\Logistic\TraxLogisticBookingImages;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -114,13 +115,12 @@ class RiderLogisticApiController extends Controller
             $hub_id = $request->rider_hub;
             $current_date = Carbon::now()->toDateString();
             $already_exists_bookings = [];
-            $cn_not_issue_to_rider =[];
+            $already_used_cns =[];
+            $already_used_child_cns =[];
             try {
 
                 if (isset($bookig_data))
                 {
-
-
                     //check booking batch length for creating a batch
                     $batch_length=10;
                     $booking_batch_length =  GeneralSetting::where('type','booking_batch_length')->first();
@@ -129,196 +129,220 @@ class RiderLogisticApiController extends Controller
                         $batch_length = $booking_batch_length->setting_value;
                     }
 
-                    foreach ($bookig_data as $booking)
-                    {
-//
-//                        $rider_cn=TraxCnIssueToRider::join('trax_rider_cn_details as rd','rd.cn_issue_id','trax_cn_issue_to_riders.id')
-//                            ->where('trax_cn_issue_to_riders.rider_id',$rider_id)->where('rd.cn_number',$booking['cn_number'])->where('is_used',0)->where('is_hold',0);
-
-//                        if($rider_cn->exists())
-//                        {
-                            $old_booking = TraxLogisticBooking::where('cn_number',$booking['cn_number']);
-                            if(!$old_booking->exists())
-                            {
-
-                                $booking_weight=0;
-
-                                if($booking['total_volumetric_weight'] >= $booking['total_dense_weight'])
+                        foreach ($bookig_data as $booking)
+                        {
+                            $cn=TraxCnIssueToRider::join('trax_rider_cn_details as rd','rd.cn_issue_id','trax_cn_issue_to_riders.id')
+                                ->where('trax_cn_issue_to_riders.area_code',$hub_id)
+                                ->where('rd.cn_number',$booking['cn_number'])
+                                ->where('rd.is_used',0)
+                                ->where('rd.is_hold',0);
+                                if ($cn->exists())
                                 {
-                                    $booking_weight= $booking['total_volumetric_weight'];
-
-                                }else{
-                                    $booking_weight= $booking['total_dense_weight'];
-                                }
-
-
-                                DB::beginTransaction();
-
-                                $logistic_booking = new TraxLogisticBooking();
-
-                                $logistic_booking->shipper_id = $booking['shipper_id'];
-                                $logistic_booking->cn_number = $booking['cn_number'];
-                                $logistic_booking->shipper_address_id = $booking['pickup_address_id'];
-                                $logistic_booking->booking_date = $booking['booking_date'];
-                                $logistic_booking->product_id = $booking['product_id'];
-                                $logistic_booking->rider_id = $rider_id;
-                                $logistic_booking->service_id = $booking['service_id'];
-                                $logistic_booking->origin_id = $hub_id;
-                                $logistic_booking->destination_id = $booking['destination_id'];
-                                $logistic_booking->shipper_reference = $booking['shipper_reference'];
-                                $logistic_booking->consignee_name = $booking['consignee_name'];
-                                $logistic_booking->consignee_address = 'Address';
-                                $logistic_booking->consignee_phone_1 = $booking['consignee_phone_1'];
-                                $logistic_booking->total_pieces = $booking['total_pieces'];
-                                $logistic_booking->total_booking_weight = $booking_weight;
-                                $logistic_booking->total_dense_weight = $booking['total_dense_weight'];
-                                $logistic_booking->total_volumetric_weight = $booking['total_volumetric_weight'];
-                                $logistic_booking->user_type = 2; // 1 - Admin, 2 - Rider, 0 -> shipper
-                                $logistic_booking->created_by = $rider_id;
-                                $logistic_booking->payment_mode_id=1;
-
-                                $logistic_booking->save();
-
-                                //update CN status and mark cn used by rider
-                                $rider_cn=TraxRiderCnDetail::where('cn_number',$booking['cn_number']);
-                                if($rider_cn->exists())
-                                {
-                                    $rider_cn=$rider_cn->first();
-                                    $rider_cn->is_used=1;
-                                    $rider_cn->updated_by=$rider_id;
-                                    $rider_cn->save();
-                                }
-
-
-
-                                $shipment=Shipment::where('tracking_number',$logistic_booking['cn_number']);
-                                if(!$shipment->exists())
-                                {
-                                    $charges_mode_id=0;
-
-                                    if($booking['account_type_id']==1)
+                                    $old_booking = TraxLogisticBooking::where('cn_number',$booking['cn_number']);
+                                    if(!$old_booking->exists())
                                     {
-                                        $charges_mode_id=4;
-
-                                    } else  if($booking['account_type_id']==2)
-                                    {
-                                        $charges_mode_id=3;
-                                    }
-                                    //send data to shipments table
-                                    $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Consignee Address',$booking['consignee_phone_1'],$booking['booking_date'],$booking_weight,0,0,$booking['shipping_mode_id'],0,1,1,1,$charges_mode_id,$booking['total_pieces'],1,0.0,null,2);
-                                }
-
-
-                                if (isset($booking['booking_pieces_data']))
-                                {
-                                    foreach ($booking['booking_pieces_data'] as $pieces_data) {
-
-                                        $booking_piece = new TraxBookingPiece();
-
-                                        $booking_piece->booking_id = $logistic_booking->id;
-                                        $booking_piece->from_pieces = $pieces_data['from_pieces'];
-                                        $booking_piece->to_pieces = $pieces_data['to_pieces'];
-                                        $booking_piece->quantity = $pieces_data['quantity'];
-                                        $booking_piece->user_type = 2;
-                                        $booking_piece->created_by = $rider_id;
-
-                                        $booking_piece->save();
-
-                                        //send data to shipment pieces
-                                        if(isset($shipment_id))
+                                        $booking_weight=0;
+                                        if($booking['total_volumetric_weight'] >= $booking['total_dense_weight'])
                                         {
-                                            LogisticToShipmentSyncController::shipment_pieces($shipment_id,$pieces_data['from_pieces'],$pieces_data['to_pieces']);
+                                            $booking_weight= $booking['total_volumetric_weight'];
+
+                                        } else{
+                                            $booking_weight= $booking['total_dense_weight'];
                                         }
-                                    }
-                                }
-                                if (isset($booking['item_refernces_data']))
-                                {
-                                    foreach ($booking['item_refernces_data'] as  $item_data) {
 
-                                        foreach ($item_data['item_detail'] as $detail){
+                                        DB::beginTransaction();
 
-                                            $item_reference = new TraxItemRefernce();
+                                        $logistic_booking = new TraxLogisticBooking();
+                                        $logistic_booking->shipper_id = $booking['shipper_id'];
+                                        $logistic_booking->cn_number = $booking['cn_number'];
+                                        $logistic_booking->shipper_address_id = $booking['pickup_address_id'];
+                                        $logistic_booking->booking_date = $booking['booking_date'];
+                                        $logistic_booking->product_id = $booking['product_id'];
+                                        $logistic_booking->rider_id = $rider_id;
+                                        $logistic_booking->service_id = $booking['service_id'];
+                                        $logistic_booking->origin_id = $hub_id;
+                                        $logistic_booking->destination_id = $booking['destination_id'];
+                                        $logistic_booking->shipper_reference = $booking['shipper_reference'];
+                                        $logistic_booking->consignee_name = $booking['consignee_name'];
+                                        $logistic_booking->consignee_address = 'Address';
+                                        $logistic_booking->consignee_phone_1 = $booking['consignee_phone_1'];
+                                        $logistic_booking->total_pieces = $booking['total_pieces'];
+                                        $logistic_booking->total_booking_weight = $booking_weight;
+                                        $logistic_booking->total_dense_weight = $booking['total_dense_weight'];
+                                        $logistic_booking->total_volumetric_weight = $booking['total_volumetric_weight'];
+                                        $logistic_booking->user_type = 2; // 1 - Admin, 2 - Rider, 0 -> shipper
+                                        $logistic_booking->created_by = $rider_id;
+                                        $logistic_booking->payment_mode_id=1;
+                                        $logistic_booking->save();
 
-                                            $item_reference->booking_id = $logistic_booking->id;
-                                            $item_reference->item_code = $item_data['item_code'];
-                                            $item_reference->width = $detail['width'];
-                                            $item_reference->height = $detail['height'];
-                                            $item_reference->length = $detail['length'];
-                                            $item_reference->weight = $detail['weight'];
-                                            $item_reference->no_piece = $detail['no_piece'];
-                                            $item_reference->user_type = 2;
-                                            $item_reference->created_by = $rider_id;
-
-                                            $item_reference->save();
+                                        //update CN status and mark cn used by rider
+                                        $rider_cn=TraxRiderCnDetail::where('cn_number',$booking['cn_number']);
+                                        if($rider_cn->exists())
+                                        {
+                                            $rider_cn=$rider_cn->first();
+                                            $rider_cn->is_used=1;
+                                            $rider_cn->updated_by=$rider_id;
+                                            $rider_cn->save();
                                         }
+
+                                        $shipment=Shipment::where('tracking_number',$logistic_booking['cn_number']);
+                                        if(!$shipment->exists())
+                                        {
+                                            $charges_mode_id=0;
+
+                                            if($booking['account_type_id']==1)
+                                            {
+                                                $charges_mode_id=4;
+
+                                            } else  if($booking['account_type_id']==2)
+                                            {
+                                                $charges_mode_id=3;
+                                            }
+                                            $pieces=(isset($booking['booking_pieces_data'])?$booking['total_pieces']:1);
+                                            //send data to shipments table
+                                            $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Consignee Address',$booking['consignee_phone_1'],$booking['booking_date'],$booking_weight,0,0,$booking['shipping_mode_id'],0,1,1,1,$charges_mode_id, $pieces,1,0.0,null,2);
+                                        }
+
+                                        //Insert logistic booking pieces
+                                        if (isset($booking['booking_pieces_data']))
+                                        {
+                                            foreach ($booking['booking_pieces_data'] as $pieces_data) {
+                                                $i=1;
+                                                for ($cn_no=$pieces_data['from_pieces'];$cn_no<=$pieces_data['to_pieces'];$cn_no++)
+                                                {
+                                                    $child_cn=TraxCnIssueToRider::join('trax_rider_cn_details as rd','rd.cn_issue_id','trax_cn_issue_to_riders.id')
+                                                        ->where('trax_cn_issue_to_riders.area_code',$hub_id)
+                                                        ->where('rd.cn_number',$cn_no)
+                                                        ->where('rd.is_used',0)
+                                                        ->where('rd.is_hold',0);
+
+                                                    if($child_cn->exists())
+                                                    {
+                                                        $booking_piece = new TraxBookingPiece();
+                                                        $booking_piece->booking_id = $logistic_booking->id;
+                                                        $booking_piece->piece_cn_number = $cn_no;
+                                                        $booking_piece->scan_rider_id = $rider_id;
+                                                        $booking_piece->user_type = 2;
+                                                        $booking_piece->created_by = $rider_id;
+                                                        $booking_piece->save();
+
+                                                        //update Child CN status and mark cn used by rider
+                                                        $rider_cn=TraxRiderCnDetail::where('cn_number',$cn_no);
+                                                        if($rider_cn->exists())
+                                                        {
+                                                            $rider_cn=$rider_cn->first();
+                                                            $rider_cn->is_used=1;
+                                                            $rider_cn->updated_by=$rider_id;
+                                                            $rider_cn->save();
+                                                        }
+
+                                                        //send data to shipment pieces
+                                                        if(isset($shipment_id))
+                                                        {
+                                                            LogisticToShipmentSyncController::shipment_pieces($shipment_id,$cn_no,$i);
+                                                        }
+
+                                                    } else{
+                                                        $already_used_child_cns [] = [
+                                                            'cn_number'=>$booking['cn_number']
+                                                        ];
+                                                    }
+
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            $shipment_item = new ShipmentItem();
+                                            $shipment_item->shipment_id=$shipment_id;
+                                            $shipment_item->product_type_id=24;
+                                            $shipment_item->description= "Logistic Pieces";
+                                            $shipment_item->quantity=$booking['total_pieces'];
+                                            $shipment_item->type=0;
+                                            $shipment_item->save();
+                                        }
+
+                                        //Insert logistic item reference data
+                                        if (isset($booking['item_refernces_data']))
+                                        {
+                                            foreach ($booking['item_refernces_data'] as  $item_data) {
+
+                                                foreach ($item_data['item_detail'] as $detail){
+
+                                                    $item_reference = new TraxItemRefernce();
+
+                                                    $item_reference->booking_id = $logistic_booking->id;
+                                                    $item_reference->item_code = $item_data['item_code'];
+                                                    $item_reference->width = $detail['width'];
+                                                    $item_reference->height = $detail['height'];
+                                                    $item_reference->length = $detail['length'];
+                                                    $item_reference->weight = $detail['weight'];
+                                                    $item_reference->no_piece = $detail['no_piece'];
+                                                    $item_reference->user_type = 2;
+                                                    $item_reference->created_by = $rider_id;
+                                                    $item_reference->save();
+                                                }
+                                            }
+                                        }
+
+                                        //Insert logistic item insurance data
+                                        if (isset($booking['item_insurance_data']))
+                                        {
+                                            foreach ($booking['item_insurance_data'] as $item_insure)
+                                            {
+                                                $item_insurance = new TraxItemInsurance();
+
+                                                $item_insurance->booking_id = $logistic_booking->id;
+                                                $item_insurance->special_handling_id = $item_insure['special_handling_id'];
+                                                $item_insurance->insurance = $item_insure['insurance'];
+                                                $item_insurance->item_code = $item_insure['item_code'];
+                                                $item_insurance->user_type = 2;
+                                                $item_insurance->created_by = $rider_id;
+                                                $item_insurance->save();
+                                            }
+                                        }
+
+                                        //logistic batch process
+                                        $batch = TraxBookingBatch::leftJoin('trax_booking_batch_details as bbd', 'trax_booking_batches.id', '=', 'bbd.batch_id')
+                                            ->where('trax_booking_batches.city_id', $hub_id)
+                                            ->where('trax_booking_batches.batch_date', $current_date)
+                                            ->selectRaw('COUNT(bbd.batch_id) AS batch_count, trax_booking_batches.id AS batch_id')
+                                            ->groupBy('trax_booking_batches.id')
+                                            ->havingRaw('batch_count < ?',[$batch_length]);
+
+                                        //check batch exist than check batch length
+                                        if($batch->exists())
+                                        {
+                                            $batch_id = $batch->first()->batch_id;
+                                        } else {
+                                            //create new batch
+                                            $batch_id = AdminBatchController::booking_batch_store($hub_id,$batch_length);
+                                        }
+
+                                        //create booking batch detail for add bookings in batch
+                                        AdminBatchController::booking_batch_detail_store($batch_id,$logistic_booking->id);
+
+                                        DB::commit();
+
+                                    } else{
+                                        $old_booking = $old_booking->first();
+                                        $already_exists_bookings [] = [
+                                            'booking_id'=>$old_booking->id,
+                                            'cn_number'=>$old_booking->cn_number
+                                        ];
                                     }
-                                }
-                                if (isset($booking['item_insurance_data']))
-                                {
-                                    foreach ($booking['item_insurance_data'] as $item_insure)
-                                    {
-                                        $item_insurance = new TraxItemInsurance();
-
-                                        $item_insurance->booking_id = $logistic_booking->id;
-                                        $item_insurance->special_handling_id = $item_insure['special_handling_id'];
-                                        $item_insurance->insurance = $item_insure['insurance'];
-                                        $item_insurance->item_code = $item_insure['item_code'];
-                                        $item_insurance->user_type = 2;
-                                        $item_insurance->created_by = $rider_id;
-
-                                        $item_insurance->save();
-                                    }
-                                }
-
-                                //logistic batch process
-                                $batch = TraxBookingBatch::leftJoin('trax_booking_batch_details as bbd', 'trax_booking_batches.id', '=', 'bbd.batch_id')
-                                    ->where('trax_booking_batches.city_id', $hub_id)
-                                    ->where('trax_booking_batches.batch_date', $current_date)
-                                    ->selectRaw('COUNT(bbd.batch_id) AS batch_count, trax_booking_batches.id AS batch_id')
-                                    ->groupBy('trax_booking_batches.id')
-                                    ->havingRaw('batch_count < ?',[$batch_length]);
-
-                                //check batch exist than check batch length
-                                //$batch =$batch->first();
-
-                                if($batch->exists())
-                                {
-                                    $batch_id = $batch->first()->batch_id;
                                 } else {
-                                    //create new batch
-                                    $batch_id = AdminBatchController::booking_batch_store($hub_id,$batch_length);
-
+                                    $already_used_cns [] = [
+                                        'cn_number'=>$booking['cn_number']
+                                    ];
                                 }
 
-                                //create booking batch detail for add bookings in batch
-                                AdminBatchController::booking_batch_detail_store($batch_id,$logistic_booking->id);
+                        }
 
-                                DB::commit();
-
-                            }else{
-                                $old_booking = $old_booking->first();
-                                $already_exists_bookings [] = [
-                                    'booking_id'=>$old_booking->id,
-                                    'cn_number'=>$old_booking->cn_number
-                                ];
-                            }
-//                        }
-//                        else{
-//
-//                            $cn_not_issue_to_rider [] = [
-//                                'cn_number'=>$booking['cn_number']
-//                            ];
-//                        }
-
-
-                    }
-
-                    if(!empty($already_exists_bookings) || !empty($cn_not_issue_to_rider))
-                    {
-                        return response()->json(['status'=>0,'success'=>'Booking Completed Successfully','already_exists_bookings'=>$already_exists_bookings,'cn_not_issue_to_rider'=>$cn_not_issue_to_rider]);
-                    }
-                    return response()->json(['status'=>0,'success'=>'Booking Completed Successfully']);
-
+                        if(!empty($already_exists_bookings) || !empty($already_used_cns) || !empty($already_used_child_cns))
+                        {
+                            return response()->json(['status'=>1,'error'=>'Something went wrong','already_exists_bookings'=>$already_exists_bookings,'already_used_cns'=>$already_used_cns,'already_used_child_cns'=>$already_used_child_cns]);
+                        }
+                        return response()->json(['status'=>0,'success'=>'Booking Completed Successfully','already_exists_bookings'=>$already_exists_bookings,'already_used_cns'=>$already_used_cns,'already_used_child_cns'=>$already_used_child_cns]);
                 } else {
                     return response()->json(['status'=>1,'error'=>'Logistic Booking empty not add']);
                 }

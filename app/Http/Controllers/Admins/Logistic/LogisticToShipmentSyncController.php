@@ -125,23 +125,22 @@ class LogisticToShipmentSyncController extends Controller
         }
     }
 
-    public static function  shipment_pieces($shipment_id,$form_piece,$to_piece)
+    public static function  shipment_pieces($shipment_id,$cn_no,$order)
     {
-        $i=1;
-        for ($cn_no=$form_piece;$cn_no<=$to_piece;$cn_no++)
-        {
+//        $i=1;
+//        for ($cn_no=$form_piece;$cn_no<=$to_piece;$cn_no++)
+//        {
             $shipment_piece = ShipmentPiece::where('tracking_number',$cn_no)->where('shipment_id',$shipment_id);
             if(!$shipment_piece->exists())
             {
                 $shipment_piece = new ShipmentPiece();
                 $shipment_piece->shipment_id = $shipment_id;
                 $shipment_piece->tracking_number= $cn_no;
-                $shipment_piece->numbering = $i;
+                $shipment_piece->numbering = $order;
                 $shipment_piece->save();
-                $i++;
             }
 
-        }
+//        }
     }
 
 //
