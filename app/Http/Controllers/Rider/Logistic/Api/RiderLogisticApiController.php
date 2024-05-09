@@ -315,9 +315,12 @@ class RiderLogisticApiController extends Controller
                                             //create new batch
                                             $batch_id = AdminBatchController::booking_batch_store($hub_id,$batch_length);
                                         }
+                                        if(isset($logistic_booking->id))
+                                        {
+                                            //create booking batch detail for add bookings in batch
+                                            AdminBatchController::booking_batch_detail_store($batch_id,$logistic_booking->id);
+                                        }
 
-                                        //create booking batch detail for add bookings in batch
-                                        AdminBatchController::booking_batch_detail_store($batch_id,$logistic_booking->id);
 
                                         DB::commit();
 
