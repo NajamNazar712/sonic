@@ -77,8 +77,9 @@ class ShipperTrackingController extends Controller
     	$tracking = array();
 
     	foreach ($tracking_numbers as $tracking_number) {
-    		$shipment = Shipment::where('tracking_number', $tracking_number);
+//    		$shipment = Shipment::where('tracking_number', $tracking_number);
 
+            $shipment = DB::table('shipments')->where('tracking_number', $tracking_number);
     		if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 $sub_shipment = true;
