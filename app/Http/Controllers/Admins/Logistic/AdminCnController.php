@@ -368,6 +368,7 @@ class AdminCnController extends Controller
                         ->orWhere('cn_from', '>=',$request->cn_from)
                         ->where('cn_to', '<=', $request->cn_to);
                 })->where('status',1);
+
             if($cn_issue->exists()){
                 return  redirect()->back()->with('error','CN Issued Already to Rider');
             }
@@ -382,7 +383,6 @@ class AdminCnController extends Controller
                         ->where('cn_to', '<=', $request->cn_to);
                 })->where('status',1)
                 ->latest('id');
-
             if($cn_store->exists()){
 
                 $time_stamp = now();
@@ -403,6 +403,7 @@ class AdminCnController extends Controller
                 $trax_cn_issue_rider->save();
 
                 for ($i = $request->cn_from; $i <= $request->cn_to; $i++) {
+
                     $child_cn[] = [
                         'cn_issue_id' => $trax_cn_issue_rider->id,
                         'cn_number' => $i,
@@ -410,10 +411,9 @@ class AdminCnController extends Controller
                         'updated_at' => $time_stamp
                     ];
                 }
-
                 TraxRiderCnDetail::insert($child_cn);
-
                 DB::commit();
+
 
                 return redirect()->back()->with('success','CN issue to rider successfully');
             } else {

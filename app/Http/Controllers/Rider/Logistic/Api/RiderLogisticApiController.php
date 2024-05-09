@@ -82,9 +82,8 @@ class RiderLogisticApiController extends Controller
 
         $city_deliveries =  CityDelivery::select('city_id','booking_type_id','shipping_mode_id')->where('booking_type_id',1)->get();
 
-
-        $rider_child_cn = TraxChildCnIssueToRider::select('cn_from','cn_to','quantity')
-            ->where('rider_id',$rider_id)->where('status',1)->get();
+//        $rider_child_cn = TraxChildCnIssueToRider::select('cn_from','cn_to','quantity')
+//            ->where('rider_id',$rider_id)->where('status',1)->get();
         $destination_list = TraxStation::select('id as destination_id','name as destination_name','station_code as destination_code')
             ->where('status',1)->get();
 
@@ -98,7 +97,7 @@ class RiderLogisticApiController extends Controller
             'products'          =>   $products,
             'services'          =>   $services,
             'rider_cn'          =>   $rider_cn,
-            'rider_child_cn'     =>   $rider_child_cn,
+//            'rider_child_cn'     =>   $rider_child_cn,
             'destination_list'  =>   $destination_list,
             'special_handling_list' => $special_handling_list,
             'shipping_modes' => $shipping_modes,
@@ -120,8 +119,6 @@ class RiderLogisticApiController extends Controller
 
                 if (isset($bookig_data))
                 {
-
-
 
 
                     //check booking batch length for creating a batch
