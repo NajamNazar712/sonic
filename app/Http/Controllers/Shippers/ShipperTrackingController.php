@@ -80,7 +80,6 @@ class ShipperTrackingController extends Controller
 //    		$shipment = Shipment::where('tracking_number', $tracking_number);
 
             $shipment = Shipment::where('tracking_number', $tracking_number);
-            dd($shipment->first()->pickup_address);
     		if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 $sub_shipment = true;
