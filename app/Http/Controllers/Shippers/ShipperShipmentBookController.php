@@ -84,21 +84,43 @@ use Validator;
 class ShipperShipmentBookController extends Controller
 {
 
+    // private function unique_order_id($order_id)
+    // {
+    //     if (is_numeric($order_id)) {
+    //         $length = strlen(session('prefix'));
+    //         $check_order_id = str_split($order_id, $length);
+    //         if (session('prefix') == $check_order_id[0]) {
+    //             if (array_key_exists(1, $check_order_id)) {
+    //                 return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+    //             } else {
+    //                 return false;
+    //             }
+    //         } else {
+    //             return false;
+    //         }
+    //     } else {
+    //         return false;
+    //     }
+    // }
+
     private function unique_order_id($order_id)
     {
         if (is_numeric($order_id)) {
-            $length = strlen(session('prefix'));
-            $check_order_id = str_split($order_id, $length);
-            if (session('prefix') == $check_order_id[0]) {
-                if (array_key_exists(1, $check_order_id)) {
-                    return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
-                } else {
-                    return false;
+            $prefixes = session('prefix', []);
+            foreach ($prefixes as $prefix) {
+                $length = strlen($prefix);
+                $check_order_id = str_split($order_id, $length);
+                if ($prefix == $check_order_id[0]) {
+                    if (array_key_exists(1, $check_order_id)) {
+                        return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+                    } else {
+                        return false;
+                    }
                 }
-            } else {
-                return false;
             }
-        } else {
+            return false;
+        }
+        else {
             return false;
         }
     }
@@ -2893,9 +2915,9 @@ class ShipperShipmentBookController extends Controller
             $data = $validator->getData();
             $service_type_id = $data['service_type_id'];
         
-            if ($service_type_id == 2 && ($value < 0.1 || $value > 10)) {
+            if ($service_type_id == 2 && ($value < 0.001 || $value > 10)) {
                 return false;
-            } elseif ($service_type_id != 2 && ($value < 1 || $value > 10000)) {
+            } elseif ($service_type_id != 2 && ($value < 0.001 || $value > 100000)) {
                 return false;
             }else{
                 return true;
@@ -3354,17 +3376,31 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 if (empty($errors[$row_id])) {
+                    // if (Session::has('prefix')) {
+                    //     $length = strlen(session('prefix'));
+                    //     $check_order_id = str_split($row['order_id'], $length);
+                    //     if (session('prefix') != $check_order_id[0]) {
+                    //         $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //     } else {
+                    //         if (!array_key_exists(1, $check_order_id)) {
+                    //             $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //         }
+                    //     }
+                    // }    
+
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);                    
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = str_split($row['order_id'], $length);
+                    
+                            if ($prefix !== $check_order_id[0] || !array_key_exists(1, $check_order_id)) {
+                                $errors[$row_id]['order_id'] = 'Invalid Order ID';
+                                break;
                             }
                         }
                     }
+                    
 
                     if (!empty(trim($row['order_id']))) {
                         if (empty($order_ids)) {
@@ -5264,14 +5300,19 @@ class ShipperShipmentBookController extends Controller
 
                 if (empty($errors[$row_id])) {
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);
+                        $isValid = false;
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = substr($row['order_id'], 0, $length);
+                            if ((string)$prefix === $check_order_id) {
+                                $isValid = true;
+                                break;
                             }
+                        }
+                    
+                        if (!$isValid) {
+                            $errors[$row_id]['order_id'] = 'Invalid Order ID';
                         }
                     }
                     if (!empty(trim($row['order_id']))) {
@@ -6150,14 +6191,19 @@ class ShipperShipmentBookController extends Controller
 
                 if (empty($errors[$row_id])) {
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);
+                        $isValid = false;
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = substr($row['order_id'], 0, $length);
+                            if ((string)$prefix === $check_order_id) {
+                                $isValid = true;
+                                break;
                             }
+                        }
+                    
+                        if (!$isValid) {
+                            $errors[$row_id]['order_id'] = 'Invalid Order ID';
                         }
                     }
                     if (!empty(trim($row['order_id']))) {
@@ -6913,15 +6959,34 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 if (empty($errors[$row_id])) {
+
+
+                    // if (Session::has('prefix')) {
+                    //     $length = strlen(session('prefix'));
+                    //     $check_order_id = str_split($row['order_id'], $length);
+                    //     if (session('prefix') != $check_order_id[0]) {
+                    //         $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //     } else {
+                    //         if (!array_key_exists(1, $check_order_id)) {
+                    //             $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //         }
+                    //     }
+                    // }
+
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);
+                        $isValid = false;
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = substr($row['order_id'], 0, $length);
+                            if ((string)$prefix === $check_order_id) {
+                                $isValid = true;
+                                break;
                             }
+                        }
+                    
+                        if (!$isValid) {
+                            $errors[$row_id]['order_id'] = 'Invalid Order ID';
                         }
                     }
                     if (!empty(trim($row['order_id']))) {
@@ -7275,9 +7340,8 @@ class ShipperShipmentBookController extends Controller
     public function get_consignee_infos(Request $request)
     {
         $data = array();
-        $consignee_info = ConsigneeInfo::where('phone_number_1', 'LIKE', "%" . $request->q . "%")->orWhere('phone_number_2', 'LIKE', "%" . $request->q . "%");
-        if ($consignee_info->exists()) {
-            $consignee_info = $consignee_info->limit(10)->get();
+        $consignee_info = ConsigneeInfo::where('phone_number_1', 'LIKE', "%" . $request->q . "%")->orWhere('phone_number_2', 'LIKE', "%" . $request->q . "%")->limit(10)->get();
+        if (count($consignee_info) > 0) {
             foreach ($consignee_info as $item) {
                 $data[] = ['id' => $item->id, 'full_name' => $item->phone_number_1 . ' / ' . $item->name, 'text' => $item->name];
             }
@@ -7871,14 +7935,19 @@ class ShipperShipmentBookController extends Controller
 
                 if (empty($errors[$row_id])) {
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);
+                        $isValid = false;
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = substr($row['order_id'], 0, $length);
+                            if ((string)$prefix === $check_order_id) {
+                                $isValid = true;
+                                break;
                             }
+                        }
+                    
+                        if (!$isValid) {
+                            $errors[$row_id]['order_id'] = 'Invalid Order ID';
                         }
                     }
 
