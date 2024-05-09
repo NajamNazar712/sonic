@@ -5948,7 +5948,6 @@ class AdminFinanceController extends Controller
                                         }
                                     }
 
->>>>>>> staging
                                     $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
 
                                     if ($pending_invoice_shipment->exists()) {
