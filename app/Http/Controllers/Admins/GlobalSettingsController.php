@@ -9462,7 +9462,6 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.delivery_revert_access.index')->with(['finance_admins' => $finance_admins, 'admins' => $admins]);
     }
 
-
     public function delivery_revert_access_store(Request $request)
     {
         // Check if any finance admins are selected

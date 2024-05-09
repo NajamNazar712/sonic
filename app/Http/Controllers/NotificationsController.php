@@ -256,6 +256,7 @@ class NotificationsController extends Controller
                 }
             }
 
+
             $mail = Mail::to($to);
             
             if ($cc) {
@@ -265,7 +266,7 @@ class NotificationsController extends Controller
             if ($bcc) {
                 $mail->bcc($bcc);
             }
-            
+
             $mail->send(new Notifications($subject, $body, $from));
         }
     }
@@ -520,15 +521,22 @@ class NotificationsController extends Controller
                         if ($details['difference'] == 0) {
                             $details['difference'] = 0;
                         }
-                        if ($weight_types->weight_type == 1) {
-                            $details['weighted_as'] = "Partially Manual";
-                        } else if ($weight_types->weight_type == 2){
-                            $details['weighted_as'] = "Manual";
-                        } else if ($weight_types->weight_type == 3){
-                            $details['weighted_as'] = "Automatic";
-                        } else if ($weight_types->weight_type == 4){
-                            $details['weighted_as'] = "Bulk Arrival";
+
+                        if ($shipment->length != null) {
+                            $details['weighted_as'] = "Volumetric";
+                        } else {
+                            $details['weighted_as'] = "Dense";
                         }
+
+                        // if ($weight_types->weight_type == 1) {
+                        //     $details['weighted_as'] = "Partially Manual";
+                        // } else if ($weight_types->weight_type == 2){
+                        //     $details['weighted_as'] = "Manual";
+                        // } else if ($weight_types->weight_type == 3){
+                        //     $details['weighted_as'] = "Automatic";
+                        // } else if ($weight_types->weight_type == 4){
+                        //     $details['weighted_as'] = "Bulk Arrival";
+                        // }
 
                         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                             foreach ($shipment->items as $item) {
@@ -1004,7 +1012,7 @@ class NotificationsController extends Controller
                     }
 
                     $sms_setting = self::sms_notification_setting(11, $shipper->id);
-                    if($sms_setting){
+                    if ($sms_setting) {
                         self::sms($body, $to);
                     }
                 } else if ($id == 12) {
@@ -1090,7 +1098,7 @@ class NotificationsController extends Controller
                     }
 
                     $sms_setting = self::sms_notification_setting(12, $shipper->id);
-                    if($sms_setting){
+                    if ($sms_setting) {
                         self::sms($body, $to);
                     }
                 } else if ($id == 13) {
@@ -3408,19 +3416,19 @@ class NotificationsController extends Controller
                                 //                                dd($data1);
 
                                 //                                $data1 = ReturnDeliveredToShipperSms::join('return_notes as rn', 'rn.id', '=', 'return_delivered_to_shipper_sms.return_note_id')
-                        //                                    ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
-                        //                                    ->join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
-                        ////                                    ->where('return_delivered_to_shipper_sms.status', 0)
-                        //                                    ->whereBetween('return_delivered_to_shipper_sms.created_at',[$yesterday,$today])
-                        //                                    ->select('return_delivered_to_shipper_sms.return_note_id as return_note_id','shipments.id as shipment_id','return_delivered_to_shipper_sms.user_id as user_id',
-                        //                                        'u.phone as phone_number',
-                        //                                        DB::raw("(select count(return_note_id)
-                        //                                        from return_delivered_to_shipper_sms
-                        //                                        Where  created_at >= '$yesterday'
-                        //                                        and  created_at <= '$today'
-                        //                                        and return_note_id = rn.id) as shipment_count"))
-                        //                                    ->groupBy('return_delivered_to_shipper_sms.return_note_id')
-                        //                                    ->get();
+                                //                                    ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
+                                //                                    ->join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
+                                ////                                    ->where('return_delivered_to_shipper_sms.status', 0)
+                                //                                    ->whereBetween('return_delivered_to_shipper_sms.created_at',[$yesterday,$today])
+                                //                                    ->select('return_delivered_to_shipper_sms.return_note_id as return_note_id','shipments.id as shipment_id','return_delivered_to_shipper_sms.user_id as user_id',
+                                //                                        'u.phone as phone_number',
+                                //                                        DB::raw("(select count(return_note_id)
+                                //                                        from return_delivered_to_shipper_sms
+                                //                                        Where  created_at >= '$yesterday'
+                                //                                        and  created_at <= '$today'
+                                //                                        and return_note_id = rn.id) as shipment_count"))
+                                //                                    ->groupBy('return_delivered_to_shipper_sms.return_note_id')
+                                //                                    ->get();
 
                                 $da = [];
                                 $i = 0;
@@ -3437,7 +3445,6 @@ class NotificationsController extends Controller
                                     $shipment_ids = implode(',', $val['shipment_id']);
                                     $count = $val['count'];
                                     $return_detail .= PHP_EOL . " Return ID : $key ," . PHP_EOL . "Having shipments : $count " . PHP_EOL . "---" . PHP_EOL;
-
                                 }
 
                                 if (strpos($body, '[return_detail]') !== FALSE) {
@@ -3544,8 +3551,8 @@ class NotificationsController extends Controller
                             $to = $pickup_request->pickup_address->email;
                             self::email($subject, $body, $to);
                         }
+                    } else if ($id == 44) {
                     }
-                } else if ($id == 44) {
                     $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name');
                     if ($hubs->exists()) {
                         $hubs = $hubs->get();
@@ -4026,7 +4033,7 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);*/
 
 
-                    $to = ['abbas.ali@trax.pk','ali.cheema@trax.pk','tanveer.malik@trax.pk','waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
+                    $to = ['abbas.ali@trax.pk', 'ali.cheema@trax.pk', 'tanveer.malik@trax.pk', 'waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
                     $cc = array();
                     $bcc = array();
                     $bcc = [ 'faisal.hasan@trax.pk', "asad.ahsan@trax.pk"];
@@ -6126,8 +6133,7 @@ class NotificationsController extends Controller
 
                     foreach ($shipments as $shipment) {
                         $origin = $shipment->pickup_address;
-                        $destination = $shipment->consignee_city;
-                        ;
+                        $destination = $shipment->consignee_city;;
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin->pickup_address . '</td>';
@@ -6911,7 +6917,7 @@ class NotificationsController extends Controller
                          if ($admins->exists()) {
                              $cc = $admins->pluck('email')->toArray();
                          }*/
-                        if (count($to) > 0){
+                        if (count($to) > 0) {
                             self::email($subject, $body, $to);
                         }
                     }
@@ -7667,7 +7673,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
                     $cc = ["faisal.hasan@trax.pk"];
 
@@ -7773,7 +7779,7 @@ class NotificationsController extends Controller
                         $shipper = $shipment->user;
 
                         $sms_setting = self::sms_notification_setting(132, $shipper->id);
-                        if($sms_setting){
+                        if ($sms_setting) {
                             $to = $shipment->consignee_phone_number_1;
 
                             foreach ($delivery_note_fields as $key => $field) {
@@ -7841,7 +7847,6 @@ class NotificationsController extends Controller
                             }
                             self::sms($body, $to);
                         }
-
                     }
                 } else if ($id == 134) {
                     $user = User::find($reference_1_id);
@@ -8612,54 +8617,53 @@ class NotificationsController extends Controller
 
                     $users = Shipment::whereIn('id', $shipment_ids)->pluck('user_id')->toArray();
                     $hubs = Shipment::with(['destination_city', 'pickup_address', 'consignee_city'])
-                    ->whereIn('id', $shipment_ids)
-                    ->get()
-                    ->map(function ($shipment) {
-                        return [
-                            'destination_city' => $shipment->destination_city->hub_id,
-                            'pickup_address' => $shipment->pickup_address->city_id,
-                            'consignee_city' => $shipment->consignee_city->id,
-                        ];
-                    })
-                    ->toArray();
+                        ->whereIn('id', $shipment_ids)
+                        ->get()
+                        ->map(function ($shipment) {
+                            return [
+                                'destination_city' => $shipment->destination_city->hub_id,
+                                'pickup_address' => $shipment->pickup_address->city_id,
+                                'consignee_city' => $shipment->consignee_city->id,
+                            ];
+                        })
+                        ->toArray();
 
                     $hubs = $hubs[0];
                     $admin_ids = AdminHub::whereIn('hub_id', $hubs)->pluck('admin_id')->toArray();
-                    foreach($admin_ids as $admin_id){
+                    foreach ($admin_ids as $admin_id) {
                         $admin = Admin::find($admin_id);
-                        $roles = [3,81,125]; //Area Operation Manager of Origin & Destination, Regional Director Operations of Origin & Destination, Regional Director of Origin & Destination.
-                        if($admin && isset($admin->role_id) && in_array($admin->role_id, $roles)){
+                        $roles = [3, 81, 125]; //Area Operation Manager of Origin & Destination, Regional Director Operations of Origin & Destination, Regional Director of Origin & Destination.
+                        if ($admin && isset($admin->role_id) && in_array($admin->role_id, $roles)) {
                             $to[] = $admin->email;
                         }
                     }
-                    
+
                     $sale_persons = SalePersonTag::join('admins as sale_person', 'sale_person.id', '=', 'sale_person_tags.admin_id')
-                    ->whereIn('sale_person_tags.user_id', $users)
-                    ->select(['sale_person.email as email', 'sale_person.name as name'])
-                    ->latest('sale_person_tags.created_at');
+                        ->whereIn('sale_person_tags.user_id', $users)
+                        ->select(['sale_person.email as email', 'sale_person.name as name'])
+                        ->latest('sale_person_tags.created_at');
 
                     $key_accounts = SaleTierTag::join('admins as key_account_executive', 'key_account_executive.id', '=', 'sale_tier_tags.kam')
-                    ->whereIn('sale_tier_tags.user_id', $users)
-                    ->select(['key_account_executive.email as email', 'key_account_executive.name as name'])
-                    ->latest('sale_tier_tags.created_at');
+                        ->whereIn('sale_tier_tags.user_id', $users)
+                        ->select(['key_account_executive.email as email', 'key_account_executive.name as name'])
+                        ->latest('sale_tier_tags.created_at');
 
                     $emails =  $sale_persons->union($key_accounts)->get();
 
-                    foreach($emails as $concern_email){
+                    foreach ($emails as $concern_email) {
                         $to[] = $concern_email->email;
                     }
-                    
+
                     $email = array_filter(array_unique($to), function ($value) {
                         return $value !== null;
                     });
 
                     $email = array_values($email);
 
-                    $cc = ['m.sohail@trax.pk','tauseef.sarfaraz@trax.pk', 'Shahrukh.raheem@trax.pk', 'Mohsin.khan@trax.pk', 'ops.excellence@trax.pk'];
+                    $cc = ['m.sohail@trax.pk', 'tauseef.sarfaraz@trax.pk', 'Shahrukh.raheem@trax.pk', 'Mohsin.khan@trax.pk', 'ops.excellence@trax.pk'];
                     if (count($email) > 0) {
                         self::email($subject, $body, $email, $cc);
                     }
-
                 } else if ($id == 152) {
                     $shipment = Shipment::find($reference_1_id);
 
@@ -8758,7 +8762,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
                     $cc = [ "faisal.hasan@trax.pk"];
 
@@ -9889,7 +9893,6 @@ class NotificationsController extends Controller
                         $to = $shipment->consignee_phone_number_2;
                         // self::sms($body, $to, 1);
                         self::sms_otp($body, $to, $name, $shipment_otp->otp, 3);
-
                     }
                 } else if ($id == 205) {
                     $subject = $notification->subject;
@@ -9961,7 +9964,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
                     $cc = ["faisal.hasan@trax.pk"];
 
@@ -9980,7 +9983,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
                     $cc = ["faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
 
@@ -10367,12 +10370,11 @@ class NotificationsController extends Controller
                     // $user_ids = $reference_1_id->pluck('user_id')->toArray();
                     // ReturnDeliveredToShipperSms::whereIn('user_id',$user_ids)->update(['status'=>0]);
                     // ReturnDeliveredToShipperSms::insert($notify);
-                }
-
-                else if ($id == 217) {
-                   $fintech_transaction = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
-                    ->join('shipments','trax_pay_transactions.shipment_id','shipments.id')
-                    ->select('trax_pay_transactions.cod_amount as Amont',
+                } else if ($id == 217) {
+                    $fintech_transaction = FintechPaymentDetails::join('trax_pay_transactions', 'fintech_payment_details.trax_pay_id', 'trax_pay_transactions.id')
+                        ->join('shipments', 'trax_pay_transactions.shipment_id', 'shipments.id')
+                        ->select(
+                            'trax_pay_transactions.cod_amount as Amont',
                             'shipments.tracking_number as tracking_no',
                             'fintech_payment_details.rider_tip as tip'
                         )
@@ -10395,9 +10397,7 @@ class NotificationsController extends Controller
                         $to = '03110127222';
                         // self::sms($body, $to);
                     }
-                }
-
-                else if ($id == 228) {
+                } else if ($id == 228) {
                     $employee = $reference_1_id;
                     $role = $reference_2_id;
                     if ($employee && $role) {
@@ -10418,9 +10418,7 @@ class NotificationsController extends Controller
                         $to = $role;
                         self::email($subject, $body, $to);
                     }
-                }
-
-                else if ($id == 220) {
+                } else if ($id == 220) {
                     $from = 'noreply@trax.pk';
                     $emailShipments = [];
                     $subject = $notification->subject;
@@ -10429,13 +10427,12 @@ class NotificationsController extends Controller
                         $shipment = Shipment::where('id', $user->shipment_id)->pluck('user_id')->toArray();
                         $emails = User::whereIn('id', $shipment)->pluck('email')->toArray();
 
-                        
+
                         foreach ($emails as $email) {
                             if (!isset($emailShipments[$email])) {
                                 $emailShipments[$email] = [];
                             }
                             $emailShipments[$email][] = $user->shipment_id;
-                                                 
                         }
                     }
 
@@ -10452,13 +10449,13 @@ class NotificationsController extends Controller
                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Calling Status</th>
                 ';
                     $htmlHeader .= '</tr></thead><tbody>';
-                    
+
                     foreach ($emailShipments as $email => $shipments) {
                         $html = $htmlHeader;
 
                         foreach ($shipments as $rv_shipment) {
                             $shipment = Shipment::find($rv_shipment);
-                            $shipment_journey = ShipmentsJourney::where('shipment_id', $rv_shipment)->whereIn('shipper_status_id',[7,8,9,12,15])->latest()->first();
+                            $shipment_journey = ShipmentsJourney::where('shipment_id', $rv_shipment)->whereIn('shipper_status_id', [7, 8, 9, 12, 15])->latest()->first();
                             $last_unresposnsive_reasons = RvShipmentAssignAgent::where('shipment_id', $rv_shipment)->where('rv_assign_agent_status_id', 7)->where('unresponsive_count', 2)->latest()->first();
 
                             $html .= '<tr>';
@@ -10476,7 +10473,7 @@ class NotificationsController extends Controller
                             // dd($to_user_email);
                         }
                         $html .= '</tbody></table>';
-                        
+
                         // $link = '<a href="https://sonic.pk/cod/tracking">https://sonic.pk/cod/tracking</a>';
                         $link = '<a href="' . route('cod.tracking.index') . '" target="_blank">https://sonic.pk/cod/tracking</a>';
 
@@ -10487,10 +10484,7 @@ class NotificationsController extends Controller
                         // Send the email to the user with all their shipments
                         self::email($subject, $body, $to_user_email, NULL, NULL, $from);
                     }
-
-                }
-
-                else if ($id == 218) {
+                } else if ($id == 218) {
 
                     $subject = $notification->subject;
                     $body = $notification->body;
@@ -10554,16 +10548,15 @@ class NotificationsController extends Controller
                     }
 
                     // dd($subject, $body, $to, $cc);
-                    self::email($subject, $body, $to, $cc);    
-                }
-                else if($id == 219){
+                    self::email($subject, $body, $to, $cc);
+                } else if ($id == 219) {
                     $subject = $notification->subject;
                     $body = $notification->body;
 
                     $to = array('faisal.hasan@trax.pk', "asad.ahsan@trax.pk");
 
                     self::email($subject, $body, $to);
-                }else if ($id == 221) {
+                } else if ($id == 221) {
                     $responses = $reference_1_id;
                     $to = 'mohsin.khan@trax.pk';
                     $cc = 'shahrukh.raheem@trax.pk';
@@ -10573,15 +10566,15 @@ class NotificationsController extends Controller
                     $preview = view('email.crm-response-rate-email-template', [
                         'responses' => $responses,
                         'date' => $date
-                        ])->render();
+                    ])->render();
 
-                    $body=str_replace('[preview]', $preview, $body);
+                    $body = str_replace('[preview]', $preview, $body);
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 222) {
                     $array = array();
                     $crm_case_closeds = $reference_1_id;
-                    
+
                     foreach ($crm_case_closeds as $item) {
                         $shipperId = $item['shipper_id'];
 
@@ -10596,7 +10589,7 @@ class NotificationsController extends Controller
                         $ids = array();
                         $email = User::where('id', $shipperId)->pluck('email')->toArray();
                         $shipper_name = User::where('id', $items[0]['shipper_id'])->value('name');
-                        
+
                         foreach ($items as $key => $value) {
                             $ids[] = $value['id'];
                         }
@@ -10606,7 +10599,7 @@ class NotificationsController extends Controller
                         $html = '<div style="text-align: center; margin-top: 20px;">';
                         $html .= '<a style="margin-bottom:10px; display: inline-block; padding: 10px 20px; background-color: #3498db; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;" href="' . route('survey.feedback.index', ['ids' => $ids]) . '">Click Here To Rate</a>';
                         $html .= '</div>';
-               
+
                         $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                         $html .= '<thead>';
                         $html .= '<tr style="background-color: #f2f2f2;">';
@@ -10622,10 +10615,10 @@ class NotificationsController extends Controller
                         foreach ($items as $item) {
                             $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
                             $type = CrmRequestCaseNatureType::where('id', $item["case_nature_type_id"])->value('type');
-                        
+
                             $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first();
                             $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"])->latest()->first();
-                        
+
                             $html .= '<tr>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $item["id"] . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($type ?? '-') . '</td>';
@@ -10634,7 +10627,7 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
                             $html .= '</tr>';
                         }
-                        
+
                         $html .= '</tbody>';
                         $html .= '</table>';
 
@@ -10642,33 +10635,32 @@ class NotificationsController extends Controller
                         $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);
 
                         self::email($subject, $body, $email);
-                        
                     }
-                } else if($id == 224 || $id == 225){
+                } else if ($id == 224 || $id == 225) {
                     //Weekly Operation Reports And Monthly Operation Reports
                     $mode = $reference_3_id;
-                    $attachmentPath = $reference_1_id;                    
+                    $attachmentPath = $reference_1_id;
                     $date = $reference_2_id;
                     $file = Storage::disk('public')->url('operation_reports/' . $attachmentPath);
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Click Here To Download</u></a>';
                     $replacements = [
                         '[link]' => $link,
-                        '[date_time]' => "Dated: ". $date,
+                        '[date_time]' => "Dated: " . $date,
                     ];
-                    
+
                     foreach ($replacements as $placeholder => $replacement) {
                         if (strpos($body, $placeholder) !== false) {
                             $body = str_replace($placeholder, $replacement, $body);
                         }
                     }
-                    
-                    $role_ids = [19,15,106,91,3,9,123,128,95];
+
+                    $role_ids = [19, 15, 106, 91, 3, 9, 123, 128, 95];
                     $email = ($mode !== 'test')
-                    ? Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique()
-                    : ['muhammad.ahmed@trax.pk','sahban.ghani@trax.pk'];
-                
+                        ? Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique()
+                        : ['muhammad.ahmed@trax.pk', 'sahban.ghani@trax.pk'];
+
                     self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null);
-                } else if ($id == 223){
+                } else if ($id == 223) {
                     //Crm Progress Report
                     $now = Carbon::now();
                     $to = 'mohsin.khan@trax.pk';
@@ -10685,79 +10677,78 @@ class NotificationsController extends Controller
                     $crm_complaints = $reference_1_id;
                     $crm_service_requests = $reference_2_id;
                     $crm_claims = $reference_3_id;
-                    if($crm_complaints->isNotEmpty()){
-                        foreach($crm_complaints as $crm_complaint){
+                    if ($crm_complaints->isNotEmpty()) {
+                        foreach ($crm_complaints as $crm_complaint) {
                             $created_at = $crm_complaint['created_at'];
                             $updated_at = $crm_complaint['updated_at'];
-                            
-                            if($created_at->isToday()){
+
+                            if ($created_at->isToday()) {
                                 $crm_complaints_launched_each_day[] = 1;
                             }
-    
-                            if($updated_at->isToday() && $crm_complaint['status_id'] == 4){
+
+                            if ($updated_at->isToday() && $crm_complaint['status_id'] == 4) {
                                 $crm_complaints_launched_each_day_closed[] = 1;
                             }
-    
+
                             $daysDifference = $created_at->diffInDays($updated_at);
-                            if ($crm_complaint['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2){
+                            if ($crm_complaint['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2) {
                                 $crm_complaints_2_days_closure[] = $daysDifference;
                             }
-    
                         }
-                    }                 
-                    if($crm_service_requests->isNotEmpty()){
-                        foreach($crm_service_requests as $crm_service_request){
+                    }
+                    if ($crm_service_requests->isNotEmpty()) {
+                        foreach ($crm_service_requests as $crm_service_request) {
                             $created_at = $crm_service_request['created_at'];
                             $updated_at = $crm_service_request['updated_at'];
-                            
-                            if($created_at->isToday()){
+
+                            if ($created_at->isToday()) {
                                 $crm_serviced_launched_each_day[] = 1;
                             }
-    
-                            if($updated_at->isToday() && $crm_service_request['status_id'] == 4){
+
+                            if ($updated_at->isToday() && $crm_service_request['status_id'] == 4) {
                                 $crm_serviced_launched_each_day_closed[] = 1;
                             }
-    
+
                             $daysDifference = $created_at->diffInDays($updated_at);
-                            if ($crm_service_request['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2){
+                            if ($crm_service_request['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2) {
                                 $crm_services_2_days_closure[] = $daysDifference;
                             }
                         }
                     }
-                    if($crm_claims->isNotEmpty()){
-                        foreach($crm_claims as $crm_claim){
+                    if ($crm_claims->isNotEmpty()) {
+                        foreach ($crm_claims as $crm_claim) {
                             $created_at = $crm_claim['created_at'];
                             $updated_at = $crm_claim['updated_at'];
-    
-                            if($created_at->isToday()){
+
+                            if ($created_at->isToday()) {
                                 $crm_claims_launched_each_day[] = 1;
                             }
-    
-                            if($updated_at->isToday() && $crm_claim['status_id'] == 4){
+
+                            if ($updated_at->isToday() && $crm_claim['status_id'] == 4) {
                                 $crm_claims_launched_each_day_closed[] = 1;
                             }
-                            
+
                             $daysDifference = $created_at->diffInDays($updated_at);
-                            if ($crm_claim['status_id'] == 4 && $daysDifference <= 10 && $updated_at->diffInDays($now) <= 10){
+                            if ($crm_claim['status_id'] == 4 && $daysDifference <= 10 && $updated_at->diffInDays($now) <= 10) {
                                 $crm_claims_10_days_closure[] = $daysDifference;
                             }
                         }
                     }
                     $resolved_status_10_days = CrmRequest::where('case_nature_id', 4)
-                    ->where('status_id', 3)
-                    ->where(function ($query) {
-                        $query->whereDate('updated_at', '>=', Carbon::today()->subDays(10))
-                              ->orWhereDate('updated_at', Carbon::today());
-                    })
-                    ->get();
+                        ->where('status_id', 3)
+                        ->where(function ($query) {
+                            $query->whereDate('updated_at', '>=', Carbon::today()->subDays(10))
+                                ->orWhereDate('updated_at', Carbon::today());
+                        })
+                        ->get();
 
                     $case_natures = $crm_complaints->merge($crm_service_requests)->merge($crm_claims);
-                    $resolved_claimed = $crm_claims->map(function($result){
+                    $resolved_claimed = $crm_claims->map(function ($result) {
                         return [
                             'status_id' => $result['status_id'],
                             'updated_at' => $result['updated_at'],
                         ];
-                    });              
+                    });
                     $resolved_claimed = $resolved_claimed->filter(function ($item) {
                         return $item['status_id'] == 3 && $item['updated_at']->isToday();
                     });
@@ -10776,26 +10767,24 @@ class NotificationsController extends Controller
                     $html .= '<tbody>';
                     $html .= '<tr>';
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">1</td>';
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.date('y-m-d').'</td>';
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_launched_each_day).'</td>';
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_launched_each_day_closed).'</td>';
-                    if(count($crm_complaints_launched_each_day) > 0){
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_complaints_launched_each_day_closed) / count($crm_complaints_launched_each_day)) * 100 . '%'.'</td>';
-
-                    }else{
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . date('y-m-d') . '</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($crm_complaints_launched_each_day) . '</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($crm_complaints_launched_each_day_closed) . '</td>';
+                    if (count($crm_complaints_launched_each_day) > 0) {
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . (count($crm_complaints_launched_each_day_closed) / count($crm_complaints_launched_each_day)) * 100 . '%' . '</td>';
+                    } else {
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
                     }
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_complaints_2_days_closure),2).'</td>';
-                    if(count($crm_complaints_launched_each_day_closed) > 0){
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_2_days_closure) / count($crm_complaints_launched_each_day_closed) * 100 . '%'.'</td>';
-                    }else{
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . round(count($crm_complaints_2_days_closure), 2) . '</td>';
+                    if (count($crm_complaints_launched_each_day_closed) > 0) {
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($crm_complaints_2_days_closure) / count($crm_complaints_launched_each_day_closed) * 100 . '%' . '</td>';
+                    } else {
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
-
                     }
                     $html .= '</tr>';
                     $html .= '<tbody>';
                     $html .= '</table>';
-                    $html .= '<br>'; 
+                    $html .= '<br>';
                     // Table for CRM Service Requests
                     $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
@@ -10811,28 +10800,26 @@ class NotificationsController extends Controller
                     $html .= '<tbody>';
                     $html .= '<tr>';
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">1</td>';
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.date('y-m-d').'</td>';
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_serviced_launched_each_day).'</td>';
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_serviced_launched_each_day_closed).'</td>';
-                    if(count($crm_serviced_launched_each_day) > 0){
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . date('y-m-d') . '</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($crm_serviced_launched_each_day) . '</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($crm_serviced_launched_each_day_closed) . '</td>';
+                    if (count($crm_serviced_launched_each_day) > 0) {
 
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_serviced_launched_each_day_closed) / count($crm_serviced_launched_each_day)) * 100 . '%'.'</td>';
-                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . (count($crm_serviced_launched_each_day_closed) / count($crm_serviced_launched_each_day)) * 100 . '%' . '</td>';
+                    } else {
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
-
                     }
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_services_2_days_closure),2).'</td>';
-                    if(count($crm_serviced_launched_each_day_closed) > 0){
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . round(count($crm_services_2_days_closure), 2) . '</td>';
+                    if (count($crm_serviced_launched_each_day_closed) > 0) {
 
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_services_2_days_closure) / count($crm_serviced_launched_each_day_closed) * 100 . '%'.'</td>';
-                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($crm_services_2_days_closure) / count($crm_serviced_launched_each_day_closed) * 100 . '%' . '</td>';
+                    } else {
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
-
                     }
                     $html .= '</tr>';
                     $html .= '</tbody>';
                     $html .= '</table>';
-                    $html .= '<br>'; 
+                    $html .= '<br>';
                     // Table for CRM Claims
                     $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
@@ -10850,32 +10837,31 @@ class NotificationsController extends Controller
                     $html .= '<tbody style="margin-bottom:50px">';
                     $html .= '<tr>';
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">1</td>';
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.date('y-m-d').'</td>';
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_launched_each_day).'</td>';
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_launched_each_day_closed).'</td>';
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($resolved_claimed).'</td>';
-                    if(count($crm_claims_launched_each_day) > 0){
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_claims_launched_each_day_closed) / count($crm_claims_launched_each_day)) * 100 . '%'.'</td>';
-                    }else{
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . date('y-m-d') . '</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($crm_claims_launched_each_day) . '</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($crm_claims_launched_each_day_closed) . '</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($resolved_claimed) . '</td>';
+                    if (count($crm_claims_launched_each_day) > 0) {
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . (count($crm_claims_launched_each_day_closed) / count($crm_claims_launched_each_day)) * 100 . '%' . '</td>';
+                    } else {
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
                     }
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_claims_10_days_closure),2).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . round(count($crm_claims_10_days_closure), 2) . '</td>';
 
-                    if(count($crm_claims_launched_each_day_closed) > 0){
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_10_days_closure) / count($crm_claims_launched_each_day_closed) * 100 . '%'.'</td>';
-                    }else{
+                    if (count($crm_claims_launched_each_day_closed) > 0) {
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($crm_claims_10_days_closure) / count($crm_claims_launched_each_day_closed) * 100 . '%' . '</td>';
+                    } else {
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
-
                     }
-                    if(count($crm_claims_launched_each_day_closed) > 0){
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($resolved_status_10_days) / count($crm_claims_launched_each_day_closed) * 100 . '%'.'</td>';
-                    }else{
+                    if (count($crm_claims_launched_each_day_closed) > 0) {
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($resolved_status_10_days) / count($crm_claims_launched_each_day_closed) * 100 . '%' . '</td>';
+                    } else {
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
                     }
                     $html .= '</tr>';
                     $html .= '</tbody>';
                     $html .= '</table>';
-                    $html .= '<br>'; 
+                    $html .= '<br>';
                     //Agent Summary Report
                     $html .= '<table style="width:100%; max-width:1100px; margin-top:50px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
@@ -10892,7 +10878,7 @@ class NotificationsController extends Controller
                     $html .= '<tbody>';
                     $agent = [];
                     $index = 0;
-                    if($case_natures->isNotEmpty()){
+                    if ($case_natures->isNotEmpty()) {
                         foreach ($case_natures as $key => $value) {
                             $agent_id = $value["agent_id"];
                             $agent[$agent_id]['status_id'][] = $value['status_id'];
@@ -10901,22 +10887,21 @@ class NotificationsController extends Controller
                             $agent[$agent_id]['updated_at'][] = $value['updated_at'];
                         }
                     }
-                    foreach ($agent as $key => $value) 
-                    {
+                    foreach ($agent as $key => $value) {
                         $index = $index + 1;
                         $created_at = $value['created_at'];
                         $updated_at = $value['updated_at'];
-                        $statuses = $value['status_id'] ;
+                        $statuses = $value['status_id'];
 
                         if (count($created_at) === count($updated_at) && count($created_at) === count($statuses)) {
-                            $closure_2_days = []; 
-                            $today_tickets = []; 
+                            $closure_2_days = [];
+                            $today_tickets = [];
                             $today_closed = [];
                             $today_inprocess = [];
 
                             for ($i = 0; $i < count($created_at); $i++) {
-                                if(isset($created_at[$i], $updated_at[$i])){
-                                    $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
+                                if (isset($created_at[$i], $updated_at[$i])) {
+                                    $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);
                                     if ($diffInDays <= 2  && $statuses[$i] === 4  && $updated_at[$i]->diffInDays($now) <= 2) {
                                         $closure_2_days[] = 1;
                                     }
@@ -10931,53 +10916,51 @@ class NotificationsController extends Controller
                                     }
                                 }
                             }
-                        }  
-                        
-                        if($key != ""){
+                        }
+
+                        if ($key != "") {
                             $agent = Admin::where('id', $key)->value('name');
                             $html .= '<tr>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $index . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . date('y-m-d') . '</td>';
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $agent. '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $agent . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_tickets) . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_inprocess) . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_closed) . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) . '</td>';
-                            if(count($today_closed) > 0){
-                                $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) / count($today_closed) * 100  . '%'.'</td>';
-                            }else{
+                            if (count($today_closed) > 0) {
+                                $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) / count($today_closed) * 100  . '%' . '</td>';
+                            } else {
                                 $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
                             }
                             $html .= '</tr>';
                         }
-                    }                  
+                    }
                     $html .= '</tbody>';
                     $html .= '</table>';
                     $body = str_replace('[preview]', $html, $notification->body);
                     self::email($subject, $body, $to, $cc);
-                } 
-                else if ($id == 226){
+                } else if ($id == 226) {
                     $file = $reference_1_id;
-                        $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-                        if (strpos($body, '[link]') !== FALSE) {
-                            $body = str_replace('[link]', $link, $body);
-                            $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
-                        }
-                        $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
-    
-                        self::email($subject, $body, $to);
-                } 
-                else if ($id == 227){
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                        $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
+                    }
+                    $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
+
+                    self::email($subject, $body, $to);
+                } else if ($id == 227) {
                     $file = $reference_1_id;
-                        $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-                        if (strpos($body, '[link]') !== FALSE) {
-                            $body = str_replace('[link]', $link, $body);
-                            $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
-                        }
-                        $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
-    
-                        self::email($subject, $body, $to);
-                } 
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                        $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
+                    }
+                    $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
+
+                    self::email($subject, $body, $to);
+                }
                 else if ($id == 229){
                     $email = [];
                     $user = $reference_1_id;
@@ -11452,31 +11435,27 @@ class NotificationsController extends Controller
         }
     }
 
-    static public function sms_notification_setting($id, $shipper_id){
+    static public function sms_notification_setting($id, $shipper_id)
+    {
         $notification_setting = NotificationSetting::where('notification_id', $id);
-        if($notification_setting->exists()){
+        if ($notification_setting->exists()) {
             $notification_setting = $notification_setting->first();
             $notification_setting_shipper = NotificationSettingShipper::where('notification_setting_id', $notification_setting->id)->where('shipper_id', $shipper_id);
-            if($notification_setting->shipper_toggle == 1){
-                if($notification_setting_shipper->exists()){
+            if ($notification_setting->shipper_toggle == 1) {
+                if ($notification_setting_shipper->exists()) {
                     return false; //All shipper selected but this shipper is excluded
-                }
-                else{
+                } else {
                     return true; //All shipper selected
                 }
-            }
-            else{
-                if($notification_setting_shipper->exists()){
+            } else {
+                if ($notification_setting_shipper->exists()) {
                     return true; //All shipper excluded but this shipper is selected
-                }
-                else{
+                } else {
                     return false; //All shipper excluded
                 }
             }
-        }
-        else{
+        } else {
             return true; //Notification not updated yet so by default selected
         }
     }
-   
 }
