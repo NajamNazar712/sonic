@@ -91,7 +91,7 @@ class LogisticToShipmentSyncController extends Controller
             $shipment->consignee_city_id = $consignee_city_id;
             $shipment->consignee_name = $consignee_name;
             $shipment->consignee_address = $consignee_address;
-            $shipment->consignee_phone_number_1 = $consignee_phone_number_1;
+            $shipment->consignee_phone_number_1 = '03100112321';
             $shipment->pickup_date = $pickup_date;
             $shipment->estimated_weight = $estimated_weight;
             $shipment->order_id = $order_id;
@@ -122,7 +122,8 @@ class LogisticToShipmentSyncController extends Controller
             return $shipment->id;
 
         } catch (\Exception $ex) {
-            return response()->json(['status'=>1,'error'=>$ex->getMessage()]);
+            return  false;
+//            return response()->json(['status'=>1,'error'=>$ex->getMessage()]);
         }
     }
 
