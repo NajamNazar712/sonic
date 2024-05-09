@@ -144,7 +144,7 @@ class ShipperDashboardController extends Controller
 {
     public function __construct() {
       $this->middleware('auth:web,substitute_users');
-      $this->middleware('Permission')->except('wordpress_access_denied','contacts','userProfile','getBanks','getPickups','add_notification_emails','welcome_index', 'updateProfile', 'addPickup','editPickup','pickupStatusChange','addBank','add_notification_emails');
+      $this->middleware('Permission')->except('wordpress_access_denied','contacts','userProfile','getBanks','getPickups','add_notification_emails','welcome_index', 'updateProfile', 'addPickup','editPickup','pickupStatusChange','addBank','add_notification_emails','shipper_phone_unique');
     }
 
     public function access_denied() {
