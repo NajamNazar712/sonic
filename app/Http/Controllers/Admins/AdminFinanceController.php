@@ -5344,7 +5344,7 @@ class AdminFinanceController extends Controller
                                         ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id());
                                     }
 
-                                    ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                    ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, "Shipment reverted from delivered status as it was incorrectly updated", NULL, Auth::id());
 
                                     if ($shipment->packaging_material_request == 1) {
                                         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
