@@ -396,18 +396,26 @@ class RiderLogisticApiController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }else {
 
-                $booking_id = TraxLogisticBooking::where('cn_number', $request->cn_number)->pluck('id')->first();
-                $image = new TraxLogisticBookingImages();
-                $time = Carbon::now()->timestamp;
-                $image_name =$booking_id . '_' . $time . '.png';
-                $image_path = 'logistic_bookings/' . $image_name;
-                Storage::disk('public')->put($image_path, file_get_contents($request->booking_image));
-                $image->booking_id = $booking_id;
-                $image->image_name = $image_name;
-                $image->image_path = $image_path;
-                $image->save();
+                $booking_id = TraxLogisticBooking::where('cn_number', $request->cn_number);
+                if($booking_id->exists())
+                {
+                    $booking_id = $booking_id->pluck('id')->first();
+                    $image = new TraxLogisticBookingImages();
+                    $time = Carbon::now()->timestamp;
+                    $image_name =$booking_id . '_' . $time . '.png';
+                    $image_path = 'logistic_bookings/' . $image_name;
+                    Storage::disk('public')->put($image_path, file_get_contents($request->booking_image));
+                    $image->booking_id = $booking_id;
+                    $image->image_name = $image_name;
+                    $image->image_path = $image_path;
+                    $image->save();
+                    return response()->json(['status' => 0, 'message' => 'Image has been stored!']);
+                } else {
+                    return response()->json(['status' => 1, 'error' => 'Image not save','cn_number' => $request->cn_number]);
 
-                return response()->json(['status' => 0, 'message' => 'Image has been stored!']);
+                }
+
+
             }
 
         }
