@@ -140,7 +140,7 @@
 
                                     <div class="form-group">
                                         <label for="attachment_1">Attachment 1</label>
-                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf">
+                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
                                     </div>
             
                                     <div class="form-group">

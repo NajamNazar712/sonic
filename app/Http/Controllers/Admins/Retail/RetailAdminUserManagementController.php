@@ -29,6 +29,7 @@ use App\Http\Models\RetailUserCommission;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use Illuminate\Support\Facades\DB;
 use App\Http\Models\TraxCenterAttachment;
+use App\Http\Models\RetailUserFamilyInformation;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -284,6 +285,11 @@ class RetailAdminUserManagementController extends Controller
 
     public function franchise_edit(Request $request)
     {
+        $request->validate([
+            // 'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
+            'franchise_gst' => 'required|numeric',
+            'franchise_withholding' => 'required|numeric',
+        ]);
         $date = Carbon::now()->format('Y_m_d');
         $admin = $request->user();
         $id = $request->franchise_id;
@@ -382,7 +388,6 @@ class RetailAdminUserManagementController extends Controller
             }
             $franchise_retail_product_attachment_edit->updated_by = $admin->id;
             $franchise_retail_product_attachment_edit->save();
-
             return redirect()->back()->with('success', 'Franchise Updated Successfully!');
         } else {
             return redirect()->back()->with('error', 'Name must be unique!');
@@ -469,6 +474,8 @@ class RetailAdminUserManagementController extends Controller
             $join->on('retail_franchises.id', '=', 'retail_franchise_charges.franchise_id');
         })
         ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id');
+
+        
         if ($franchise != null) {
             $baseQuery->where('retail_shipments.retail_user_id', $franchise);
         } else {
@@ -810,6 +817,9 @@ class RetailAdminUserManagementController extends Controller
 
     public function trax_center_add(Request $request)
     {
+        $request->validate([
+            'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
+        ]);
         $date = Carbon::now()->format('Y_m_d');
         $hub_count = RetailTraxCenter::where('default_hub', $request->hub)->count() + 1;
 
@@ -884,15 +894,6 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
 
-
-
-
-
-
-
-
-
-
             $trax_center_attachment = TraxCenterAttachment::where('retail_trax_center_id', $request->trax_center_id)->first();
             if ($trax_center_attachment != null) {
                 $trax_center_attachment->advance_amount = (int) str_replace(',', '', $request->advance_amount);
@@ -943,17 +944,6 @@ class RetailAdminUserManagementController extends Controller
                 }
                 $new_trax_center_attachments->save();
             }
-
-
-
-
-
-
-
-
-
-
-
             return redirect()->back()->with('success', 'Trax Center Updated Successfully!');
         } else {
             return redirect()->back()->with('error', 'Trax Center Name must be unique!');
@@ -988,7 +978,8 @@ class RetailAdminUserManagementController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 372);
         $trax_centers = RetailTraxCenter::where('status', 1)->get();
         $franchises = RetailFranchise::where('status', 1)->get();
-        return view('admin.retail.users.index')->with(['trax_centers' => $trax_centers, 'franchises' => $franchises]);
+        $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
+        return view('admin.retail.users.index')->with(['trax_centers' => $trax_centers, 'franchises' => $franchises, 'shipping_modes' => $shipping_modes]);
     }
 
     public function user_edit($id)
@@ -1098,7 +1089,6 @@ class RetailAdminUserManagementController extends Controller
     public function user_add(Request $request)
     {
         $retail_user = RetailUser::where('name', $request->name);
-
         if (!$retail_user->exists()) {
             $password = $request->password;
             if ($request->store == 1) {
@@ -1108,6 +1098,24 @@ class RetailAdminUserManagementController extends Controller
             }
 
             $this->add_user($request->name, $password, $request->phone_number, $store->default_hub, $request->cnic, $request->address, $request->store, $store->id);
+            // $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);
+            // $productPercentages = json_decode($request->product_percentage, true);
+            // $retailShippingModeNames = is_array($retailShippingModeNames) ? $retailShippingModeNames : [];
+            // $productPercentages = is_array($productPercentages) ? $productPercentages : [];
+            // $retailShippingModes = RetailShippingMode::whereIn('name', $retailShippingModeNames)->get();
+            // $matchingRetailShippingModeIds = $retailShippingModes->pluck('id')->toArray();
+
+            
+            // foreach ($retailShippingModeNames as $key => $retailShippingModeName) {
+            //     $retailShippingModeName = ($retailShippingModeName !== null) ? $retailShippingModeName : null;
+            //     $productPercentage = ($productPercentages[$key] !== null) ? $productPercentages[$key] : null;
+            //     $retailShippingModeId = $matchingRetailShippingModeIds[$key] ?? null;
+            //     $retail_user_family_information = new RetailUserFamilyInformation();
+            //     $retail_user_family_information->retail_user_id = $retail_user->id;
+            //     $retail_user_family_information->retail_shipping_mode_id = $retailShippingModeId;
+            //     $retail_user_family_information->product_percentage = $productPercentage;
+            //     $retail_user_family_information->save();
+            // }
 
             return redirect()->back()->with('success', 'Retail User Added Successfully!');
         } else {
