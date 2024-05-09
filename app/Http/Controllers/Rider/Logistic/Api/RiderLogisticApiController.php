@@ -251,15 +251,13 @@ class RiderLogisticApiController extends Controller
                                                 }
                                             }
                                         }
-                                        else {
-                                            $shipment_item = new ShipmentItem();
-                                            $shipment_item->shipment_id=$shipment_id;
-                                            $shipment_item->product_type_id=24;
-                                            $shipment_item->description= "Logistic Pieces";
-                                            $shipment_item->quantity=$booking['total_pieces'];
-                                            $shipment_item->type=0;
-                                            $shipment_item->save();
+
+                                        //insert shipment item
+                                        if(isset($shipment_id))
+                                        {
+                                            LogisticToShipmentSyncController::shipment_item($shipment_id,$booking['total_pieces']);
                                         }
+
 
                                         //Insert logistic item reference data
                                         if (isset($booking['item_refernces_data']))

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins\Logistic;
 
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
@@ -141,6 +142,17 @@ class LogisticToShipmentSyncController extends Controller
             }
 
 //        }
+    }
+
+    public static function  shipment_item($shipment_id,$quantity)
+    {
+        $shipment_item = new ShipmentItem();
+        $shipment_item->shipment_id=$shipment_id;
+        $shipment_item->product_type_id=24;
+        $shipment_item->description= "Logistic Pieces";
+        $shipment_item->quantity=$quantity;
+        $shipment_item->type=0;
+        $shipment_item->save();
     }
 
 //
