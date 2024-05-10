@@ -18,7 +18,7 @@ class AddDeliveryRevertAccessToGlobalSetting extends Seeder
             'type' => 'delivery_revert_access',
             'text' => '',
             'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
         ]);
     }
 }
