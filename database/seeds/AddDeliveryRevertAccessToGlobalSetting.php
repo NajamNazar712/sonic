@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Carbon\Carbon;
 use App\Http\Models\Admin\GlobalSettings;
 
 class AddDeliveryRevertAccessToGlobalSetting extends Seeder
@@ -16,6 +17,8 @@ class AddDeliveryRevertAccessToGlobalSetting extends Seeder
             'setting_value' => 0,
             'type' => 'delivery_revert_access',
             'text' => '',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
         ]);
     }
 }
