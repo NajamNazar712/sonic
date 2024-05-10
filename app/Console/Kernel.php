@@ -175,7 +175,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('crm:closed_reason')->dailyAt('23:50')->runInBackground();
         $schedule->command('crm:progress_report')->dailyAt('23:57')->runInBackground();
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
-        $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
+        $schedule->command('shipper:payment')->twiceDaily('01','13')->runInBackground();
         $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
         $schedule->command('email:invalidemailvisit')->dailyAt('6:00')->runInBackground();
         $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();

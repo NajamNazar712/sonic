@@ -50,6 +50,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\CargoManifest\IssueSackBagOrigin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Yajra\Datatables\Datatables;
 use SnappyPDF;
 
@@ -6542,6 +6543,7 @@ class AdminCargoManifestController extends Controller
             return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html]);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::channel('cronJobLog')->error($th);
             return back()->with(['went_wrong' => 'Something Went Wrong']);
     }}
 
