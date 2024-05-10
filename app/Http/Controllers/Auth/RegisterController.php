@@ -417,6 +417,7 @@ class RegisterController extends Controller
                 'status' => '0',
                 'payment_cycle_id' => '0',
                 'rcp_tat_option_id' => '0',
+                'on_board_status' => '0',
             ]);
 
             

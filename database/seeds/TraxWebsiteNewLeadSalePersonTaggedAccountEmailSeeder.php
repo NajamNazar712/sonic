@@ -26,7 +26,7 @@ class TraxWebsiteNewLeadSalePersonTaggedAccountEmailSeeder extends Seeder
                 'type_id' => 1,
                 'subject' => 'Custom Quotes For [Company Name]',
                 'body' => 'Dear salesperson,' . PHP_EOL .
-                          'Your tagged account [Company name], [account ID] has requested custom quotes. Please check in portal',
+                          'Your tagged account [Company Name], [account ID] has requested custom quotes. Please check in portal',
                 'updated_by' => 615,
                 'status' => 1,
             )

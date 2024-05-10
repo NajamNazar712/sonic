@@ -5,7 +5,7 @@
             {{--<li class=" nav-item"><a href="{{route('cod.mentor_health.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-plus-circle"></i>TRAX Health</span><span class="font-weight-bold">Powered by Mentor Health</span></a></li>--}}
             <li class=" nav-item"><a href="{{route('cod.orders.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Order Management</span></a></li>
 
-            @if(session('request_custom_quotation') == null)
+            @if(session('on_board_status') == 0)
                 <li class=" nav-item"><a href="{{route('cod.wordpress.register')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Onboarding</span></a></li>
             @endif
             

@@ -194,7 +194,10 @@ $(".steps-validation").steps({
         if ($('input[name="on_main_switch"]').is(':checked') || $('input[name="ol_main_switch"]').is(':checked') || $('input[name="detain_main_switch"]').is(':checked') || $('input[name="sameday_main_switch"]').is(':checked')) {
             $('#registership').submit();
         }else{
-            alert('Select Any One Rate');
+            toastr.error('Select Any One Rate', 'Error!', {
+                positionClass: 'toast-top-center',
+                containerId: 'toast-top-center'
+            });
             return currentIndex;
         }
     }

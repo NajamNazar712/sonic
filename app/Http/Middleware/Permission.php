@@ -1590,6 +1590,7 @@ class Permission
             $routes[] = 'update.agreement_status';
             $routes[] = 'get_agreement';
             $routes[] = 'welcome';
+            $routes[] = 'orders.list';
 
 
             if (!in_array($action, $routes)){

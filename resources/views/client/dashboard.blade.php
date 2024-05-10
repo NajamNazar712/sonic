@@ -60,7 +60,9 @@
                                         </div>
 
                                         <div class="form-group col-md-3 mt-2 justify-content-center">
-                                            <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                            <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width">
+                                                <i class="la la-search"></i> Search
+                                            </button>
                                         </div>
                                     </form>
                                 </div>

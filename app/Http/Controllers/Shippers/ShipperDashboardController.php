@@ -144,7 +144,7 @@ class ShipperDashboardController extends Controller
 {
     public function __construct() {
       $this->middleware('auth:web,substitute_users');
-      $this->middleware('Permission')->except('wordpress_access_denied','contacts','userProfile','getBanks','getPickups','add_notification_emails','welcome_index', 'updateProfile', 'addPickup','editPickup','pickupStatusChange','addBank','add_notification_emails','shipper_phone_unique');
+      $this->middleware('Permission')->except('wordpress_access_denied','contacts','userProfile','getBanks','getPickups','add_notification_emails','welcome_index', 'updateProfile', 'addPickup','editPickup','pickupStatusChange','addBank','add_notification_emails','shipper_phone_unique','update_profile_password');
     }
 
     public function access_denied() {
@@ -268,6 +268,7 @@ class ShipperDashboardController extends Controller
                 }
 
                 $percentage = null; 
+                $color = null;
                 $user = User::find($shipper_id);
 
                 $weight_charges = WeightCharge::where('user_id' , $shipper_id);
@@ -280,7 +281,7 @@ class ShipperDashboardController extends Controller
                 }else if (isset($user->rates_added_by) && $user->documents_status != 2){
                     $percentage = 80;
                     $color = '#1E9FF2';
-                }else if ($user->documents_statusf == 2){
+                }else if ($user->documents_status == 2 && $user->status != 3){
                     $percentage = 95;
                     $color = '#ffd700';
                 }else if ($user->status == 3){
@@ -1659,7 +1660,12 @@ class ShipperDashboardController extends Controller
                 ]);
                 if($request->password == $request->confirm_password){
                     User::where('id', session('user_id'))->update(['password' => Hash::make($request->password), 'updated_by_type' => 0, 'updated_by_id' => session('user_id')]);
-                    return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
+
+                    if(session('request_custom_quotation') == null){
+                        return redirect()->route('cod.welcome');
+                    }else{
+                        return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
+                    }
                 }
                 else{
                     return redirect()->back()->with(['error'=>"The password and confirmation password do not match"]);
@@ -2444,7 +2450,6 @@ class ShipperDashboardController extends Controller
             return view('client.access_denied');
         }else{
             return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities,'admins'=>$admins,]);
-
         }
     }
 
