@@ -1661,7 +1661,7 @@ class ShipperDashboardController extends Controller
                 if($request->password == $request->confirm_password){
                     User::where('id', session('user_id'))->update(['password' => Hash::make($request->password), 'updated_by_type' => 0, 'updated_by_id' => session('user_id')]);
 
-                    if(session('request_custom_quotation') == null){
+                    if(session('status') == 0){
                         return redirect()->route('cod.welcome');
                     }else{
                         return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
@@ -2446,7 +2446,7 @@ class ShipperDashboardController extends Controller
         }
 
       
-        if(isset($user->request_custom_quotation)){
+        if($user->request_custom_quotation == 1){
             return view('client.access_denied');
         }else{
             return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities,'admins'=>$admins,]);

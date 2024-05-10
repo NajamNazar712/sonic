@@ -1592,7 +1592,6 @@ class Permission
             $routes[] = 'welcome';
             $routes[] = 'orders.list';
 
-
             if (!in_array($action, $routes)){
                 return redirect()->route('cod.wordpress_access_denied');
             }

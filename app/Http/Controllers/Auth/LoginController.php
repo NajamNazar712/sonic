@@ -172,7 +172,7 @@ class LoginController extends Controller
             }
             else if ($user->id == 9358) {
                 auth('web')->logout();
-                return back()->with('info', 'Access Denied!');
+                return back()->with('info', 'Access Dernied!');
             }
             else {
                 $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
@@ -180,6 +180,7 @@ class LoginController extends Controller
                 session(['user_id' => $user->id]);
                 session(['status' => $user->status]);
                 session(['request_custom_quotation' => $user->request_custom_quotation]);
+                session(['on_board_status' => $user->on_board_status]);
 
                 if (SalePersonTag::where('user_id', session('user_id'))->where('status', 0)->exists()){
                     session(['sale_person_status' => 1]);
