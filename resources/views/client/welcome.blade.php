@@ -10,13 +10,13 @@
             <div class="card-body text-center">
                 <h1 class="mb-5">Welcome to Sonic..</h1>
         
-                {{-- @if(($user->status == 0 || $user->status == 2) && ($user>)) --}}
+                @if(isset($user->lead_id) && isset($user->on_board_status))
                     <div class="progress">
                         <div class="progress-bar" role="progressbar" style="width: {{ $percentage }}%; background-color: {{ $color }};" aria-valuenow="{{ $percentage }}">
                             {{ $percentage }}%
                         </div>
                     </div>
-                {{-- @endif --}}
+                @endif
             
                 <div class="row">
                         <div class="col">

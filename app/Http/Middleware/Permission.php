@@ -1578,25 +1578,30 @@ class Permission
             }
         } else if (session('status') == 0) {
             $action = str_replace('cod.', '', $request->route()->getName());
-            $routes = collect(Route::getRoutes())->filter(function ($route) {
+
+            $allowedRoutes = [
+                'register.submit',
+                'orders.index',
+                'update.agreement_status',
+                'get_agreement',
+                'welcome',
+                'orders.list',
+            ];
+            
+            $wordpressRoutes = collect(Route::getRoutes())->filter(function ($route) {
                 return strpos($route->uri(), 'wordpress') !== false;
             })->map(function ($route) {
-                $name = $route->action['as'] ?? null;
-                return str_replace('cod.', '', $name);
+                return str_replace('cod.', '', $route->action['as'] ?? '');
             })->toArray();
             
-            $routes[] = 'register.submit';
-            $routes[] = 'orders.index';
-            $routes[] = 'update.agreement_status';
-            $routes[] = 'get_agreement';
-            $routes[] = 'welcome';
-            $routes[] = 'orders.list';
-
-            if (!in_array($action, $routes)){
+            $allowedRoutes = array_merge($allowedRoutes, $wordpressRoutes);
+            
+            if (!in_array($action, $allowedRoutes)){
                 return redirect()->route('cod.wordpress_access_denied');
             }
-
+            
             return $next($request);
+            
             
         }else{
             return $next($request);
