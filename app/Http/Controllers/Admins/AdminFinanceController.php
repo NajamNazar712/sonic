@@ -1710,14 +1710,12 @@ class AdminFinanceController extends Controller
                 if ($admin->role_id != 1 && !in_array($admin->role_id, $admin_departments->toArray())) {
                     return ['status' => 1, 'error' => 'You are not authorized to perform this action'];
                 }
+                $finance_admins_ids = explode(',', $finance_admins->text);
                 // Not super admins and admins not in global settings
-                if (($finance_admins->text == null || $finance_admins->text == '') && $admin->role_id != 1){
-                    $finance_admins_ids = explode(',', $finance_admins->text);
-                    if (!in_array($admin->id, $finance_admins_ids)){
-                        if ($now->format('Y-m-d') != $shipment_journey->updated_at->format('Y-m-d')){
-                            return ['status' => 1, 'error' => 'This shipment is not delivered in current date, please contact treasury leads/supervisors'];
-                        }
-                    } 
+                if ((($finance_admins->text == null || $finance_admins->text == '') && $admin->role_id != 1) || !in_array($admin->id, $finance_admins_ids)){
+                    if ($now->format('Y-m-d') != $shipment_journey->updated_at->format('Y-m-d')){
+                        return ['status' => 1, 'error' => 'This shipment is not delivered in current date, please contact treasury leads/supervisors'];
+                    }
                     else {
                         $lost_shipment_shipper = LostShipmentShipper::where('user_id', $shipment->user_id);
                         if ($lost_shipment_shipper->exists()) {
@@ -2985,13 +2983,11 @@ class AdminFinanceController extends Controller
             if ($admin->role_id != 1 && !in_array($admin->role_id, $admin_departments->toArray())) {
                 return ['status' => 1, 'error' => 'You are not authorized to perform this action'];
             }
+            $finance_admins_ids = explode(',', $finance_admins->text);
             // Not super admins and admins not in global settings
-            if (($finance_admins->text == null || $finance_admins->text == '') && $admin->role_id != 1){
-                $finance_admins_ids = explode(',', $finance_admins->text);
-                if (!in_array($admin->id, $finance_admins_ids)){
-                    if ($now->format('Y-m-d') != $shipment_journey->updated_at->format('Y-m-d')){
-                        return ['status' => 1, 'error' => 'This shipment is not delivered in current date, please contact treasury leads/supervisors'];
-                    }
+            if ((($finance_admins->text == null || $finance_admins->text == '') && $admin->role_id != 1) || !in_array($admin->id, $finance_admins_ids)){
+                if ($now->format('Y-m-d') != $shipment_journey->updated_at->format('Y-m-d')){
+                    return ['status' => 1, 'error' => 'This shipment is not delivered in current date, please contact treasury leads/supervisors'];
                 }
                 else {
                     $lost_shipment_shipper = LostShipmentShipper::where('user_id', $shipment->user_id);
