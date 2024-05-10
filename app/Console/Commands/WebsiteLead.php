@@ -131,7 +131,7 @@ class WebsiteLead extends Command
                     $lead_log->save();
                     $leads_added[] = $new_lead->id;
                     $token_added[$key] = $token;
-                    $old_leads[] = $lead->id;
+                    $old_leads[] = $new_lead->id;
 
 
                     
