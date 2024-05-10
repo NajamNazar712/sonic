@@ -1711,7 +1711,7 @@ class AdminFinanceController extends Controller
                     return ['status' => 1, 'error' => 'You are not authorized to perform this action'];
                 }
                 // Not super admins and admins not in global settings
-                if (($finance_admins->text != null || $finance_admins->text != '') && $admin->role_id != 1){
+                if (($finance_admins->text == null || $finance_admins->text == '') && $admin->role_id != 1){
                     $finance_admins_ids = explode(',', $finance_admins->text);
                     if (!in_array($admin->id, $finance_admins_ids)){
                         if ($now->format('Y-m-d') != $shipment_journey->updated_at->format('Y-m-d')){
@@ -2986,7 +2986,7 @@ class AdminFinanceController extends Controller
                 return ['status' => 1, 'error' => 'You are not authorized to perform this action'];
             }
             // Not super admins and admins not in global settings
-            if (($finance_admins->text != null || $finance_admins->text != '') && $admin->role_id != 1){
+            if (($finance_admins->text == null || $finance_admins->text == '') && $admin->role_id != 1){
                 $finance_admins_ids = explode(',', $finance_admins->text);
                 if (!in_array($admin->id, $finance_admins_ids)){
                     if ($now->format('Y-m-d') != $shipment_journey->updated_at->format('Y-m-d')){
