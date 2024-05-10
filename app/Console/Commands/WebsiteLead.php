@@ -134,7 +134,7 @@ class WebsiteLead extends Command
         if(count($new_leads) > 0){
             NotificationsController::send(203, $new_leads, Carbon::today());
         }
-        Log::channel('cronJobLog')->info('s ' .'website:leads Running');
+        //Log::channel('cronJobLog')->info('s ' .'website:leads Running');
 
     }
 }

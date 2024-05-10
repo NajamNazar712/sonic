@@ -53,7 +53,7 @@ class AgentSarNotification extends Command
     public function handle()
     {
         try {
-            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Initiated');
+            //Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Initiated');
             $currentDateTime1 = Carbon::now()->toDateTimeString();
             $currentDateTime = Carbon::parse($currentDateTime1);
 
@@ -180,10 +180,10 @@ class AgentSarNotification extends Command
                 }
             }
 
-            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completed');
+            //Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completed');
 
         } catch (\Throwable $th) {
-            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Failed');
+            //Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Failed');
             $this->createRvCronLog($th->getMessage());
         }
     }
