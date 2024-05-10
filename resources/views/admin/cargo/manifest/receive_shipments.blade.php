@@ -152,15 +152,68 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="ShipmentWeightModal" data-backdrop="static" role="dialog" aria-labelledby="ShipmentWeightModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modal_title">Shipment Weight</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_shipment_weight_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                    
+                        <div class="row justify-content-center ">
+                            <div class="form-group col">
+                                <input type="text" name="tracking_number_for_weight" id="tracking_number_for_weight" class="form-control tracking_number_for_weight text-center" readonly>
+                            </div>
+                            <div class="form-group col">
+                                <input type="text" name="weight" id="weight" class="form-control weight" placeholder="Enter Actual Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-group text-center p-1 ">
+                                    <label class="mr-1">Volumetric Weight</label>
+                                    <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm" >
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center volumetric_weights_block d-none">
+ 
+                                <div class="form-group volumetric_weights col ">
+                                    <input type="text" name="length" class="form-control length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,794]" data-msg-range="Length needs to be from 0.1 to 794"  data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="length">
+                                </div>
+ 
+                                <div class="form-group volumetric_weights col ">
+                                    <input type="text" name="breadth" class="form-control breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,794]" data-msg-range="Breadth needs to be from 0.1 to 794"  data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="breadth">
+                                </div>
+
+                                <div class="form-group volumetric_weights col">
+                                    <input type="text" name="height" class="form-control height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,794]" data-msg-range="Height needs to be from 0.1 to 794" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="height">
+                                 </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary weight_confirm" id="weight_confirm" >Confirm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
@@ -184,7 +237,43 @@
               $('#bag_type').attr('disabled',true);
         });
 
+            
+            $('#add_shipment_weight_form input.volumetric_weight').checkboxpicker().bind('change', function() {
+                if (this.checked) {
+                    $('#add_shipment_weight_form input.weight').val('').prop('disabled', true);
+                    $('#add_shipment_weight_form .volumetric_weights_block').removeClass('d-none');
+                }
+                else {
+                    $('#add_shipment_weight_form input.weight').val('').prop('disabled', false);
+                    $('#add_shipment_weight_form .volumetric_weights_block').addClass('d-none');
+                }
+            });
+            $('#weight').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'digits': 2
+            });
+            $('#add_shipment_weight_form .volumetric_weights input.length').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'digits': 2
+            });
 
+            $('#add_shipment_weight_form .volumetric_weights input.breadth').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'digits': 2
+            });
+
+            $('#add_shipment_weight_form .volumetric_weights input.height').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'digits': 2
+            });
 
             var shipment_ids = [];
             var shipment_piece_ids = [];
@@ -346,6 +435,10 @@
                                     }
                                     $('#add_shipment_form button.add').prop('disabled', false);
                                     UnblockPagePermanently();
+                                }else if(data.status == 3) {
+                                    $('#ShipmentWeightModal').modal('show');
+                                    $('#tracking_number_for_weight').val(data.number);
+                                    UnblockPagePermanently();
                                 }
                                 else {
                                     UnblockPagePermanently();
@@ -427,6 +520,86 @@
                     camera_scanning_stop();
                 }
             });
+
+            //new work of taking actual weight if arrival is missing
+            $('#ShipmentWeightModal').on('hide.bs.modal', function (e) {
+                $('#weight').val('');
+                $('#length').val('');
+                $('#breadth').val('');
+                $('#height').val('');
+                $('.volumetric_weight').prop('checked', false);
+            });
+    
+            $('#add_shipment_weight_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function (form) {
+                    var tracking_number = $(form).find('input.tracking_number_for_weight').val();
+                    var new_weight = $(form).find('input.weight').val();
+                    var length = $(form).find('input.length').val();
+                    var breadth = $(form).find('input.breadth').val();
+                    var height = $(form).find('input.height').val();
+                    $.ajax({
+                        url: '{!! route('admin.cargo_manifest.receive.bag.details') !!}',
+                        method: 'POST',
+                        data: {
+                            'tracking_number': tracking_number,
+                            'weight_confirmation': 1,
+                            'weight' : new_weight,
+                            'length' : length,
+                            'breadth' : breadth,
+                            'height' : height,
+                            'bag_type':  $('#shipment_bag_type').val(),
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function(data) {
+                        if (data.status == 0) {
+                                id = data.details.id;
+
+                                var index = $.inArray(id, shipment_ids);
+
+                                if(data.is_open_box==1){
+                                    var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
+
+                                }else{
+
+                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                }
+
+
+                                if (index === -1) {
+                                    var rowNo = table.rows().count();
+
+                                    table.row.add([rowNo + 1, data.details.tracking_number, data.details.bag_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type,open_box]).node().id = data.details.id;
+                                    table.draw(false);
+                                    table.order([0, 'desc']).draw();
+                                    scan_sound(1);
+                                    shipment_ids.push(data.details.id);
+
+                                    $('#information .scanned').html(shipment_ids.length);
+
+                                    $('#add_shipment_form button.add').prop('disabled', false);
+
+                                    $('#receive_form .receive').prop('disabled', false);
+                                    UnblockPagePermanently();
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                            }
+                            else {
+                                UnblockPagePermanently();
+                                $('#add_shipment_form button.add').prop('disabled', false);
+                                scan_sound(2);
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            $('#ShipmentWeightModal').modal('hide');
+                    });
+                }
+            });
+            //end of work
+
 
             $('#add_shipment_pieces_form input.scan_piece').focus();
 

@@ -52,6 +52,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use SnappyPDF;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\ShipmentsEstimatedWeight;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Models\InternationalShipment;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
+use App\Http\Controllers\Webhook\InitialChargesWebhookController;
+use App\Http\Models\Admin\ByPassWeightShippers;
 
 class AdminCargoManifestController extends Controller
 {
@@ -5139,6 +5148,107 @@ class AdminCargoManifestController extends Controller
             //if(($shipment->shipper_status_id == 5) && ($request->bag_type == 2))
             //    return ['status' => 1, 'error' => 'Shipment not arrived at center yet !'];
 
+
+            if(!$shipment->actual_weight && !$request->has('weight_confirmation')) {
+                return ['status' => 3, 'success' => 'Actual weight is missing.!', 'number' => $shipment->tracking_number];
+            }
+            if($request->has('weight_confirmation')) {
+                    $retail_shipment = RetailShipment::where('shipment_id', $shipment->id);
+                    if ($retail_shipment->exists()) {
+                        $actual_weight = $shipment->estimated_weight;
+                    } else {
+                        if ($request->weight) {
+                            $actual_weight = $request->weight;
+                        } else {
+                            $actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+                            $shipment->length = $request->length;
+                            $shipment->breadth = $request->breadth;
+                            $shipment->height = $request->height;
+                        }
+
+                        $not_include_shippers1 = ByPassWeightShippers::all()->pluck('shipper_id')->toArray();
+                        $not_include_shippers = [6693, 12412]; 
+                        $not_include_shippers = array_merge($not_include_shippers, $not_include_shippers1);
+
+                        if (!in_array($shipment->user_id, $not_include_shippers)) {
+                            $estimate_actual_difference = $shipment->estimated_weight - $actual_weight;
+
+                            if ($shipment->estimated_weight != 1 && $estimate_actual_difference > 0 && $estimate_actual_difference < 5) {
+                                $shipment_estimated_weight = ShipmentsEstimatedWeight::where('shipment_id', $shipment->id);
+                                if ($shipment_estimated_weight->exists()) {
+                                    $shipment_estimated_weight = $shipment_estimated_weight->first();
+                                } else {
+                                    $shipment_estimated_weight = new ShipmentsEstimatedWeight();
+                                }
+                                $shipment_estimated_weight->shipment_id = $shipment->id;
+                                $shipment_estimated_weight->estimated_weight = $shipment->estimated_weight;
+                                $shipment_estimated_weight->actual_weight = $actual_weight;
+                                if (empty($request->weight)) {
+                                    $shipment_estimated_weight->length = $request->length;
+                                    $shipment_estimated_weight->breadth = $request->breadth;
+                                    $shipment_estimated_weight->height = $request->height;
+                                } else {
+                                    $shipment_estimated_weight->length = null;
+                                    $shipment_estimated_weight->breadth = null;
+                                    $shipment_estimated_weight->height = null;
+                                }
+                                $shipment_estimated_weight->save();
+                                $actual_weight = $shipment->estimated_weight;
+
+                                $shipment->length = NULL;
+                                $shipment->breadth = NULL;
+                                $shipment->height = NULL;
+                            }
+                        }
+                    }
+                    if ($shipment->booking_type_id == 4) {
+                        $international_shipment = InternationalShipment::where('shipment_id', $shipment->id);
+                        if ($international_shipment->exists()) {
+                            $city = City::find($shipment->consignee_city_id);
+                            $hub_id = $city->hub_id;
+                            $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $hub_id)->first();
+                            $check = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
+
+                            if ($shipment->walk_in_delivery_type_id == 1) {
+                                $check_actual_weight = $check->door_actual_weight;
+                            } else {
+                                $check_actual_weight = $check->hub_actual_weight;
+                            }
+                            if ($actual_weight < $check_actual_weight) {
+                                $actual_weight = $check_actual_weight;
+                            }
+                        } else {
+                            $check = WalkInStandardWeightCharge::where(['shipping_mode_id' => $shipment->shipping_mode_id, 'delivery_type_id' => $shipment->walk_in_delivery_type_id])->first();
+                            if ($actual_weight < $check['actual_weight']) {
+                                $actual_weight = $check['actual_weight'];
+                            }
+                        }
+                    }
+
+                    $shipment->actual_weight = $actual_weight;
+                    $shipment->save();
+
+                if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
+                    if ($shipment->booking_type_id == 4) {
+                        ShipmentChargesController::walkin_weight($shipment->id);
+                    } else {
+                        ShipmentChargesController::weight($shipment->id);
+                        if($shipment->booking_type_id == 5){
+                            ShipmentChargesController::reverse_pickup($shipment->id);
+                        }
+                        if ($shipment->business_category_id == 1) {
+                            ShipmentChargesController::cash_handling($shipment->id);
+                            ShipmentChargesController::insurance($shipment->id);
+                            ShipmentChargesController::fuel_surcharge($shipment->id);
+                        }else {
+                            ShipmentChargesController::international_fuel_surcharge($shipment->id);
+                        }
+                    }
+                    if ($shipment->walk_in_status == 0) {
+                        InitialChargesWebhookController::webhook_subscription($shipment->id);
+                    }
+                } 
+            }
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if (!$dispute_check) {
                 return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
