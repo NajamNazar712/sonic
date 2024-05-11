@@ -36,13 +36,16 @@ use Illuminate\Support\Facades\Storage;
 
 class RiderLogisticApiController extends Controller
 {
+    use RiderCns;
     public function logistic_data(Request $request)
     {
-
         $rider_id = $request->rider_id;
         $hub_id=$request->rider_hub;
+
+
         $logistic_data = array();
 
+        $rider_cn = $this->cn_issue_to_rider_filter($rider_id);
             $shipper_list = User::join('trax_shipper_details as sd','sd.user_id','=','users.id')
             ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','sd.trax_product_id','sd.trax_service_id','sd.piece_setting_id','users.account_type_id')
             ->where('users.status',3)->where('sd.status',1)
@@ -56,17 +59,17 @@ class RiderLogisticApiController extends Controller
 //            ->where('trax_shipper_details.rider_id',$rider_id)->groupBy('rl.pickup_address_id')->get();
 
         $pickup_address_list = TraxShipperDetail::join('riders as r', 'r.id', '=', 'trax_shipper_details.rider_id')
-            ->join('route_locations as rl', 'rl.route_id', '=', 'r.route_id')
-            ->join('user_shipping_infos as usi', function ($join) {
-                $join->on('usi.id', '=', 'rl.pickup_address_id')
-                    ->where('trax_shipper_details.user_id', '=', DB::raw('usi.user_id'));
-            })
-            ->select('rl.pickup_address_id', 'usi.pickup_address', 'usi.poc as contact_person', 'usi.phone as contact_number', 'usi.email as contact_email', 'usi.user_id as shipper_id')
-            ->where('usi.status', 1)
-            ->where('trax_shipper_details.status', 1)
-            ->where('trax_shipper_details.rider_id', $rider_id)
-            ->where('usi.city_id',$hub_id)
-            ->get();
+                ->join('route_locations as rl', 'rl.route_id', '=', 'r.route_id')
+                ->join('user_shipping_infos as usi', function ($join) {
+                    $join->on('usi.id', '=', 'rl.pickup_address_id')
+                        ->where('trax_shipper_details.user_id', '=', DB::raw('usi.user_id'));
+                })
+                ->select('rl.pickup_address_id', 'usi.pickup_address', 'usi.poc as contact_person', 'usi.phone as contact_number', 'usi.email as contact_email', 'usi.user_id as shipper_id')
+                ->where('usi.status', 1)
+                ->where('trax_shipper_details.status', 1)
+                ->where('trax_shipper_details.rider_id', $rider_id)
+                ->where('usi.city_id',$hub_id)
+                ->get();
 
 
         $parent_products = TraxParentProduct::select('id','parent_code','parent_name')
@@ -78,8 +81,6 @@ class RiderLogisticApiController extends Controller
         $services = TraxService::select('id','service_code','service_name','product_id','shipping_mode_id')
             ->where('status',1)->get();
 
-            $rider_cn = TraxCnIssueToRider::select('product_id','cn_from','cn_to','quantity')
-            ->where('rider_id',$rider_id)->where('status',1)->get();
 
         $shipping_modes = ShippingMode::select('id','mode as shipping_mode')->get();
 
