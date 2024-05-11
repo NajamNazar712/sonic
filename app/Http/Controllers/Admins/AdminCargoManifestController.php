@@ -4539,6 +4539,8 @@ class AdminCargoManifestController extends Controller
             return back()->with(['success_html' => $success_html, 'misroute_html' => $misroute_html, 'bag_short_received_error' => $bag_short_received_error, 'bag_not_exists_in_mapping_error' => $bag_not_exists_in_mapping_error, 'bag_not_exists_in_manifest_error' => $bag_not_exists_in_manifest_error, 'bag_not_exist_error' => $bag_not_exists_error]);
         } catch (\Throwable $th) {
             DB::rollBack();
+            $exceptionAsString = (string) $th;
+            Log::channel('cronJobLog')->error($exceptionAsString);
             return back()->with(['went_wrong_html' => 'Something Went Wrong !']);
         }
     }
@@ -6543,7 +6545,8 @@ class AdminCargoManifestController extends Controller
             return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html]);
         } catch (\Throwable $th) {
             DB::rollBack();
-            Log::channel('cronJobLog')->error($th);
+            $exceptionAsString = (string) $th;
+            Log::channel('cronJobLog')->error($exceptionAsString);
             return back()->with(['went_wrong' => 'Something Went Wrong']);
     }}
 
