@@ -78,7 +78,8 @@ class LogisticToShipmentSyncController extends Controller
         $business_category_id,
         $parcel_value,
         $return_address_id,
-        $booked_by
+        $booked_by,
+        $rider_id
     )
     {
         try {
@@ -114,6 +115,7 @@ class LogisticToShipmentSyncController extends Controller
             $shipment_journey->verification = 1;
             $shipment_journey->user_id = $shipment->user_id;
             $shipment_journey->city_id = $shipment->consignee_city_id;
+            $shipment_journey->rider_id = $rider_id;
             $shipment_journey->shipper_status_id = 1;
             $shipment_journey->consignee_status_id = 1;
             $shipment_journey->ip_address = '127.0.0.1';
