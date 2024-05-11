@@ -5888,7 +5888,7 @@ class AdminCargoManifestController extends Controller
         //        return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html]);
 
         // new code without restriction
-        try {
+//        try {
             DB::beginTransaction();
 
         $shipment_status_array = [3, 11,21, 26, 32, 49,68];
@@ -6543,12 +6543,13 @@ class AdminCargoManifestController extends Controller
             DB::commit();
             //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
             return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html]);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            $exceptionAsString = (string) $th;
-            Log::channel('cronJobLog')->error($exceptionAsString);
-            return back()->with(['went_wrong' => 'Something Went Wrong']);
-    }}
+//        } catch (\Throwable $th) {
+//            DB::rollBack();
+//            $exceptionAsString = (string) $th;
+//            Log::channel('cronJobLog')->error($exceptionAsString);
+//            return back()->with(['went_wrong' => 'Something Went Wrong']);
+//    }
+}
 
     public function receive_bag_shipments_store_old(Request $request)
     {
