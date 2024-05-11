@@ -41,10 +41,10 @@ class PushBackupDatatoamazon extends Command
         $now = Carbon::now();
         foreach ($files as $file) {
             $file_name = pathinfo($file);
-                Storage::disk('s3')->put('sonic_storage_archieve/' . $file_name['basename'], file_get_contents($file));
-//                if (Storage::disk('s3')->exists('sonic_storage_archieve/' . $file_name['basename'])) {
-//                    File::delete($file);
-//                }
+            $stream = fopen($file, 'r');
+            Storage::disk('s3')->put('sonic_storage_archieve/' . $file_name['basename'], $stream);
+            fclose($stream);
         }
     }
+
 }

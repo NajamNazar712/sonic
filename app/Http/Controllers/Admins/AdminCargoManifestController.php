@@ -4539,6 +4539,7 @@ class AdminCargoManifestController extends Controller
             return back()->with(['success_html' => $success_html, 'misroute_html' => $misroute_html, 'bag_short_received_error' => $bag_short_received_error, 'bag_not_exists_in_mapping_error' => $bag_not_exists_in_mapping_error, 'bag_not_exists_in_manifest_error' => $bag_not_exists_in_manifest_error, 'bag_not_exist_error' => $bag_not_exists_error]);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::channel('cronJobLog')->info($th);
             return back()->with(['went_wrong_html' => 'Something Went Wrong !']);
         }
     }
@@ -5886,8 +5887,8 @@ class AdminCargoManifestController extends Controller
         //        return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html]);
 
         // new code without restriction
-        try {
-            DB::beginTransaction();
+//        try {
+        DB::beginTransaction();
 
         $shipment_status_array = [3, 11,21, 26, 32, 49,68];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
@@ -6541,11 +6542,12 @@ class AdminCargoManifestController extends Controller
             DB::commit();
             //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
             return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html]);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::channel('cronJobLog')->error($th);
-            return back()->with(['went_wrong' => 'Something Went Wrong']);
-    }}
+//        } catch (\Throwable $th) {
+//            DB::rollBack();
+//            Log::channel('cronJobLog')->info($th);
+//            return back()->with(['went_wrong' => 'Something Went Wronggg']);
+//    }
+}
 
     public function receive_bag_shipments_store_old(Request $request)
     {
