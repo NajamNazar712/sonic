@@ -5886,10 +5886,9 @@ class AdminCargoManifestController extends Controller
         //        return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html]);
 
         // new code without restriction
-        Log::channel('cronJobLog')->info('cargo:check');
         try {
             DB::beginTransaction();
-            Log::channel('cronJobLog')->info('cargo:check_2');
+
         $shipment_status_array = [3, 11,21, 26, 32, 49,68];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $open_box_ids = explode(',', $request->open_box_ids);
