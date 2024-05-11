@@ -5886,10 +5886,10 @@ class AdminCargoManifestController extends Controller
         //        return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html]);
 
         // new code without restriction
-        Log::channel('trax_pay_test')->info('sh '.'cargo:check');
+        Log::channel('cronJobLog')->info('cargo:check');
         try {
             DB::beginTransaction();
-            Log::channel('trax_pay_test')->info('sh '.'cargo:check_2');
+            Log::channel('cronJobLog')->info('cargo:check_2');
 
         $shipment_status_array = [3, 11,21, 26, 32, 49,68];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
@@ -6545,7 +6545,7 @@ class AdminCargoManifestController extends Controller
             return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html]);
         } catch (\Throwable $th) {
             DB::rollBack();
-            Log::channel('trax_pay_test')->error($th->getMessage(), ['trace' => $th->getTraceAsString()]);
+            Log::channel('cronJobLog')->error($th->getMessage(), ['trace' => $th->getTraceAsString()]);
             return back()->with(['went_wrong' => 'Something Went Wrong']);
     }}
 
