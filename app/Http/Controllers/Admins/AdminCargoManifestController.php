@@ -5924,7 +5924,7 @@ class AdminCargoManifestController extends Controller
                 }
             }
             //todo : open box-work end
-            Log::channel('cronJobLog')->info('cargo_bag_id_1');
+
             if ($request->bag_type == 1) {
                 foreach ($shipment_ids as $shipment_id) {
                     $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)/*->where('status', 0)*/;
@@ -6196,7 +6196,6 @@ class AdminCargoManifestController extends Controller
                     }
                     //check previous bag received shipments end
                 }
-                Log::channel('cronJobLog')->info('cargo_bag_id_2');
             }
             else {
                 foreach ($shipment_ids as $shipment_id) {
@@ -6416,7 +6415,6 @@ class AdminCargoManifestController extends Controller
                         }
                     }
                 }
-                Log::channel('cronJobLog')->info('cargo_bag_id_3');
             }
 
             // received and short received
@@ -6466,7 +6464,7 @@ class AdminCargoManifestController extends Controller
                  $all_bag_ids = $all_bag_ids . ', ' .$bag->seal_number;
              }*/
             }
-            Log::channel('cronJobLog')->info('cargo_bag_id_4');
+
             foreach ($bag_ids as $bag_id) {
                 $manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id); // if shipment in bag but bag not in manifest
                 if ($manifest_bag->exists()) {
@@ -6487,7 +6485,7 @@ class AdminCargoManifestController extends Controller
                 }
             }
             // received and short received end
-            Log::channel('cronJobLog')->info('cargo_bag_id_5');
+
             $bag_shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id', $bag_ids)->where('status', 0);
             if ($bag_shipments->exists()) {
                 $shipment_ids = $bag_shipments->pluck('shipment_id')->toArray();
@@ -6540,9 +6538,8 @@ class AdminCargoManifestController extends Controller
                 }
                 $misrouted_html .= "</ul>";
             }
-            Log::channel('cronJobLog')->info('cargo_bag_id_6');
+
             DB::commit();
-            Log::channel('cronJobLog')->info('cargo_bag_id_7');
             //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
             return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html]);
 //        } catch (\Throwable $th) {
