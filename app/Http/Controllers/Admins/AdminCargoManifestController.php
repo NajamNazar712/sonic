@@ -6470,10 +6470,10 @@ class AdminCargoManifestController extends Controller
             }
             Log::channel('cronJobLog')->info('cargo:check_5');
             foreach ($bag_ids as $bag_id) {
-                $manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id); // if shipment in bag but bag not in manifest
-                if ($manifest_bag->exists()) {
+                $manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first();
+                if (!empty($manifest_bag)) {
                     $bag = CargoManifestBag::find($bag_id);
-                    $manifest_id = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first()->cargo_manifest_id; //
+                    $manifest_id = $manifest_bag->cargo_manifest_id; //
                     $manifest = CargoManifest::find($manifest_id); //
                     $manifest->received_bags = ManifestBag::where('cargo_manifest_id', $manifest_id)->where('status', 1)->count(); //
                     $short_received_bags = ManifestBag::where('cargo_manifest_id', $manifest_id)->where('status', 0)->count(); //
