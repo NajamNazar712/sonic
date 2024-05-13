@@ -506,7 +506,7 @@ trait RvTrait
                 ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, Auth::id());
 
                 //Remove Shipment from RV Shipment Ticket
-                $job = new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id);
+                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
@@ -584,6 +584,9 @@ trait RvTrait
             
             ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, NULL, $globalAdminId ?? Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
 
+            //Remove Shipment from RV Shipment Ticket
+            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
         }
         return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Return - Confirm!"];
@@ -611,6 +614,10 @@ trait RvTrait
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 15, 'consignee_status_id' => 15]);
                     ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, NULL, Auth::id());
                 }
+
+                //Remove Shipment from RV Shipment Ticket
+                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+
                 return ['status' => 1, 'success' => "Shipment status successfully updated to Shipment - On Hold for Self Collection"];
             } else {
                 return ['status' => 0, 'error' => "Shipment already updated to Shipment - On Hold for Self Collection!"];
@@ -739,6 +746,10 @@ trait RvTrait
                                 $shipment_parcel_image->save();
                             }
                         }
+
+                        //Remove Shipment from RV Shipment Ticket
+                        dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+
                         return ['status' => 1, 'success' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']];
                     }
                 } else {
