@@ -39,6 +39,7 @@ use App\Http\Controllers\Admins\AdminInterceptRebookRequestHistoryController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\ShipmentStatusReason;
+use App\Jobs\ProcessRemoveShipmentFromRvShipmentTicket;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentTicket;
 
@@ -503,6 +504,9 @@ trait RvTrait
                 $parcel->save();
 
                 ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, Auth::id());
+
+                //Remove Shipment from RV Shipment Ticket
+                $job = new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id);
 
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
