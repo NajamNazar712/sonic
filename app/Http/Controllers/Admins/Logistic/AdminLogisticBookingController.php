@@ -12,6 +12,7 @@ use App\Http\Models\Admin\Logistic\TraxService;
 use App\Http\Models\Admin\Logistic\TraxShipperDetail;
 use App\Http\Models\Admin\Logistic\TraxSpecialHandlingList;
 use App\Http\Models\Admin\Logistic\TraxStation;
+use App\Http\Models\Shipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 
 class AdminLogisticBookingController extends Controller
@@ -295,8 +297,9 @@ class AdminLogisticBookingController extends Controller
             $logistic_booking = $logistic_booking->first();
             $item_insurance = TraxItemInsurance::where('booking_id',$booking_id)->first();
             $item_references = TraxItemRefernce::where('booking_id',$booking_id)->get();
-            $booking_pieces = TraxBookingPiece::where('booking_id',$booking_id)->get();
-
+            $booking_pieces = TraxBookingPiece::select('trax_booking_pieces.piece_cn_number','trax_booking_pieces.booking_id','r.name as rider_name','r.id as rider_id')
+                ->join('riders as r','r.id','trax_booking_pieces.scan_rider_id')
+                ->where('trax_booking_pieces.booking_id',$booking_id)->get();
             $shippers=User::select('id','name')->where('id',$logistic_booking->shipper_id)->where('status',3)->get();
             $product=TraxProduct::select('id','product_name')->where('id',$logistic_booking->product_id)->where('status',1)->get();
             $trax_stations=TraxStation::select('id','name')->where('status',1)->get();
@@ -328,6 +331,16 @@ class AdminLogisticBookingController extends Controller
     public function update(Request $request)
     {
         $admin_id = session('id');
+
+        Validator::extend('item_insurance_required_if_handling', function ($attribute, $value, $parameters, $validator) {
+            $specialHandlingId = $validator->getData()['special_handling_id'];
+
+            if (!empty($specialHandlingId) && empty($value)) {
+                return false;
+            }
+
+            return true;
+        });
         $validate = Validator::make($request->all(),[
             'booking_id'=>['required','integer'],
             'cn_number'=>['required','integer'],
@@ -344,16 +357,22 @@ class AdminLogisticBookingController extends Controller
             'shipper_address_id'=>['required','integer'],
             'consignee_name'=>['required','string','max:255'],
             'consignee_phone_1'=>['required','integer'],
-            'consignee_address'=>['required','string','max:255'],
+//            'consignee_address'=>['required','string','max:255'],
             'consignee_email'=>['sometimes','email'],
             'payment_mode_id'=>['sometimes','integer'],
             'consignment_type'=>['sometimes','max:1','in:L,H'],
-            'handling_inst'=>['string','max:255'],
+            'handling_inst'=>['max:255'],
 
-            'item_insurance_id'=>['sometimes','integer'],
+            'item_insurance_id'=>['nullable','integer'],
             'special_handling_id'=>['sometimes','integer'],
-            'item_insurance'=>['sometimes','numeric'],
-            'insurance_item_code'=>['sometimes','string','max:255'],
+            'item_insurance' => [
+                'nullable',
+                'numeric',
+                Rule::requiredIf(function () use ($request) {
+                    return !empty($request->special_handling_id);
+                }),
+            ],
+            'insurance_item_code'=>['max:255'],
         ]);
         if($validate->fails())
         {
@@ -361,10 +380,20 @@ class AdminLogisticBookingController extends Controller
         }
 
         $logistic_booking= TraxLogisticBooking::find($request->booking_id);
-        if($logistic_booking)
+        if($logistic_booking->exists())
         {
+            $booking_weight=0;
+            if($request->total_volumetric_weight >= $request->total_dense_weight)
+            {
+                $booking_weight= $request->total_volumetric_weight;
+
+            } else{
+                $booking_weight= $request->total_dense_weight;
+            }
+
+
             try {
-                DB::beginTransaction();
+                     DB::beginTransaction();
                     $logistic_booking->cn_number=$request->cn_number;
                     $logistic_booking->rider_id=$request->rider_id;
                     $logistic_booking->booking_date=$request->booking_date;
@@ -373,7 +402,7 @@ class AdminLogisticBookingController extends Controller
                     $logistic_booking->service_id=$request->service_id;
                     $logistic_booking->origin_id=$request->origin_id;
                     $logistic_booking->destination_id=$request->destination_id;
-                    $logistic_booking->total_booking_weight=$request->booking_weight;
+                    $logistic_booking->total_booking_weight=$booking_weight;
                     $logistic_booking->total_dense_weight=$request->dense_weight;
                     $logistic_booking->total_volumetric_weight=$request->volumetric_weight;
                     $logistic_booking->shipper_address_id=$request->shipper_address_id;
@@ -387,72 +416,100 @@ class AdminLogisticBookingController extends Controller
                     $logistic_booking->updated_by = $admin_id;
                     $logistic_booking->save();
 
-                    if(isset($request->item_insurance_id))
+                    $shipment=Shipment::where('tracking_number',$request->cn_number)
+                        ->where('consignee_status_id', 1)
+                        ->where('shipper_status_id', 1)
+                        ->exists();
+                    if($shipment)
                     {
-                        $item_insurance = TraxItemInsurance::where('id',$request->item_insurance_id)->where('booking_id',$request->booking_id);
-                        if($item_insurance->exists()){
-                            $item_insurance = $item_insurance->first();
-                            $item_insurance->special_handling_id=$request->special_handling_id;
-                            $item_insurance->insurance=$request->item_insurance;
-                            $item_insurance->item_code=$request->insurance_item_code;
-                            $item_insurance->updated_by = $admin_id;
-
-                            $item_insurance->save();
-                        }
+                        $shipment=$shipment->first();
+                        $shipment->estimated_weight=$booking_weight;
+                        $shipment->consignee_name=$request->consignee_name;
+                        $shipment->consignee_address=$request->consignee_address;
+                        $shipment->consignee_phone_number_1=$request->consignee_phone_number_1;
+                        $shipment->consignee_email=$request->consignee_email;
+                        $shipment->save();
                     }
 
-                    if(isset($request->no_piece) && is_array($request->no_piece))
+                    if(isset($request->special_handling_id) && isset($request->item_insurance))
                     {
-                        foreach ($request->no_piece as $key => $value)
-                        {
-
-                            if(isset($request->item_reference_id[$key]))
-                            {
-                                $item_reference = TraxItemRefernce::where('id',$request->item_reference_id[$key])->where('booking_id',$request->booking_id);
-                                if($item_reference->exists())
-                                {
-                                    $item_reference = $item_reference->first();
-                                    $item_reference->width =$request->width[$key];
-                                    $item_reference->height =$request->height[$key];
-                                    $item_reference->length =$request->length[$key];
-                                    $item_reference->weight =$request->weight[$key];
-                                    $item_reference->no_piece =$value;
-                                    $item_reference->created_by =$admin_id;
-                                    $item_reference->updated_by =$admin_id;
-                                    $item_reference->user_type =1;
-                                    $item_reference->save();
-                                }
-                            }else {
-                                $item_reference = new TraxItemRefernce();
-                                $item_reference->booking_id = $request->booking_id;
-                                $item_reference->width = $request->width[$key];
-                                $item_reference->height =$request->height[$key];
-                                $item_reference->length =$request->length[$key];
-                                $item_reference->weight =$request->weight[$key];
-                                $item_reference->no_piece =$value;
-                                $item_reference->created_by =$admin_id;
-                                $item_reference->updated_by =$admin_id;
-                                $item_reference->user_type =1;
-                                $item_reference->save();
-                            }
-//                            TraxItemRefernce::updateOrCreate(
-//                                isset($request->item_reference_id[$key]) ? // Check if item_reference_id is set
-//                                    ['id' => $request->item_reference_id[$key], 'booking_id' => $request->booking_id] :
-//                                    [], // Pass null if item_reference_id is not set
-//                                [
-//                                    'booking_id' => $request->booking_id,
-//                                    'width' => $request->width[$key],
-//                                    'height' => $request->height[$key],
-//                                    'length' => $request->length[$key],
-//                                    'weight' => $request->weight[$key],
-//                                    'no_piece' => $value,
-//                                    'created_by' => $admin_id,
-//                                    'updated_by' => $admin_id,
-//                                    'user_type' => 1
-//                                ]
-//                            );
-                        }
+                        TraxItemInsurance::updateOrCreate(
+                            ['id'=>$request->item_insurance_id,'booking_id'=>$request->booking_id],
+                            [
+                                'booking_id' => $request->booking_id,
+                                'special_handling_id' => $request->special_handling_id,
+                                'insurance' => $request->item_insurance,
+                                'item_code' => $request->insurance_item_code,
+                                'updated_by' => $admin_id
+                            ]
+                        );
                     }
+
+//                    if(isset($request->item_insurance_id))
+//                    {
+//                        $item_insurance = TraxItemInsurance::where('id',$request->item_insurance_id)->where('booking_id',$request->booking_id);
+//                        if($item_insurance->exists()){
+//                            $item_insurance = $item_insurance->first();
+//                            $item_insurance->special_handling_id=$request->special_handling_id;
+//                            $item_insurance->insurance=$request->item_insurance;
+//                            $item_insurance->item_code=$request->insurance_item_code;
+//                            $item_insurance->updated_by = $admin_id;
+//                            $item_insurance->save();
+//                        }
+//                    }
+
+//                    if(isset($request->no_piece) && is_array($request->no_piece))
+//                    {
+//                        foreach ($request->no_piece as $key => $value)
+//                        {
+//
+//                            if(isset($request->item_reference_id[$key]))
+//                            {
+//                                $item_reference = TraxItemRefernce::where('id',$request->item_reference_id[$key])->where('booking_id',$request->booking_id);
+//                                if($item_reference->exists())
+//                                {
+//                                    $item_reference = $item_reference->first();
+//                                    $item_reference->width =$request->width[$key];
+//                                    $item_reference->height =$request->height[$key];
+//                                    $item_reference->length =$request->length[$key];
+//                                    $item_reference->weight =$request->weight[$key];
+//                                    $item_reference->no_piece =$value;
+//                                    $item_reference->created_by =$admin_id;
+//                                    $item_reference->updated_by =$admin_id;
+//                                    $item_reference->user_type =1;
+//                                    $item_reference->save();
+//                                }
+//                            }else {
+//                                $item_reference = new TraxItemRefernce();
+//                                $item_reference->booking_id = $request->booking_id;
+//                                $item_reference->width = $request->width[$key];
+//                                $item_reference->height =$request->height[$key];
+//                                $item_reference->length =$request->length[$key];
+//                                $item_reference->weight =$request->weight[$key];
+//                                $item_reference->no_piece =$value;
+//                                $item_reference->created_by =$admin_id;
+//                                $item_reference->updated_by =$admin_id;
+//                                $item_reference->user_type =1;
+//                                $item_reference->save();
+//                            }
+////                            TraxItemRefernce::updateOrCreate(
+////                                isset($request->item_reference_id[$key]) ? // Check if item_reference_id is set
+////                                    ['id' => $request->item_reference_id[$key], 'booking_id' => $request->booking_id] :
+////                                    [], // Pass null if item_reference_id is not set
+////                                [
+////                                    'booking_id' => $request->booking_id,
+////                                    'width' => $request->width[$key],
+////                                    'height' => $request->height[$key],
+////                                    'length' => $request->length[$key],
+////                                    'weight' => $request->weight[$key],
+////                                    'no_piece' => $value,
+////                                    'created_by' => $admin_id,
+////                                    'updated_by' => $admin_id,
+////                                    'user_type' => 1
+////                                ]
+////                            );
+//                        }
+//                    }
 
                 DB::commit();
                 return  redirect()->back()->with('success','Logistic booking updated successfully');

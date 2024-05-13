@@ -268,9 +268,8 @@
                                                                 <thead>
                                                                 <tr role="row" class="bg-primary white">
                                                                     <th class="border-primary border-darken-1">S. No</th>
-                                                                    <th class="border-primary border-darken-1">From Piece</th>
-                                                                    <th class="border-primary border-darken-1">To Pieces</th>
-                                                                    <th class="border-primary border-darken-1">Quantity</th>
+                                                                    <th class="border-primary border-darken-1">CN Number</th>
+                                                                    <th class="border-primary border-darken-1">Scan Rider</th>
                                                                 </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -278,9 +277,8 @@
                                                                     @foreach($booking_pieces as $key=>$booking_piece)
                                                                        <tr>
                                                                            <td class=" align-middle serial_no"> {{$key+1}}</td>
-                                                                           <td class=" align-middle from_pieces"> {{$booking_piece->from_pieces}}</td>
-                                                                           <td class=" align-middle to_pieces"> {{$booking_piece->to_pieces}}</td>
-                                                                           <td class=" align-middle quantity"> {{$booking_piece->quantity}}</td>
+                                                                           <td class=" align-middle from_pieces"> {{$booking_piece->piece_cn_number}}</td>
+                                                                           <td class=" align-middle to_pieces"> {{$booking_piece->rider_name}}</td>
                                                                        </tr>
                                                                     @endforeach
 
@@ -297,7 +295,7 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group"> <h4 style="color: black"><b>Special Handling</b></h4></div>
                                                     </div>
-                                                    <input type="hidden" name="item_insurance_id" value="{{isset($item_insurance->id)?$item_insurance->id:''}}">
+                                                    <input type="hidden" name="item_insurance_id" value="{{isset($item_insurance->id)?$item_insurance->id:0}}">
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <label>Special Handling</label>
@@ -311,19 +309,19 @@
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <label>Insurance</label>
-                                                            <input type="text" name="item_insurance" class="form-control" value="{{isset($item_insurance->insurance)?$item_insurance->insurance:''}}">
+                                                            <input type="number" name="item_insurance" class="form-control" value="{{isset($item_insurance->insurance)?$item_insurance->insurance:old('item_insurance')}}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                           <div class="form-group">
                                                              <label>Item Specification</label>
-                                                             <input type="text" name="insurance_item_code" class="form-control"  value="{{isset($item_insurance->item_code)?$item_insurance->item_code:''}}">
+                                                             <input type="text" name="insurance_item_code" class="form-control"  value="{{isset($item_insurance->item_code)?$item_insurance->item_code:old('insurance_item_code')}}">
                                                            </div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div id="item_sp" class="collapse">
-                                                <hr style="background-color: black;">
+{{--                                                <hr style="background-color: black;">--}}
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <div class="form-group"> <h4 style="color: black"><b>Volumatric Item Specification</b></h4></div>
@@ -331,7 +329,7 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label>Item Specification</label>
-                                                            <input type="text" name="reference_item_code" class="form-control "   value="{{isset($item_references[0]->item_code)?$item_references[0]->item_code:''}}" >
+                                                            <input type="text" name="reference_item_code" class="form-control "   value="{{isset($item_references[0]->item_code)?$item_references[0]->item_code:old('reference_item_code')}}" >
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -462,11 +460,11 @@
                                                                 @endif
 
                                                             </div>
-                                                            <div class="row">
-                                                                <div class="col-md-12">
-                                                                    <div class="form-group" ><span class="btn btn-primary float-right add_row_item_btn ">Add Row</span></div>
-                                                                </div>
-                                                            </div>
+{{--                                                            <div class="row">--}}
+{{--                                                                <div class="col-md-12">--}}
+{{--                                                                    <div class="form-group" ><span class="btn btn-primary float-right add_row_item_btn ">Add Row</span></div>--}}
+{{--                                                                </div>--}}
+{{--                                                            </div>--}}
                                                         </div>
                                                        
                                                     </div>
@@ -641,6 +639,9 @@
             /*Set the size of the magnifier glass:*/
             width: 250px;
             height: 250px; 
+        }
+        #item_sp input {
+            pointer-events: none;
         }
 
     </style>
