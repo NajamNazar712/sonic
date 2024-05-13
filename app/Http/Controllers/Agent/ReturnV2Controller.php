@@ -118,6 +118,11 @@ class ReturnV2Controller extends Controller
         if ($admin->exists()) {
             $admin = $admin->first();
 
+            if($admin->agent_caller_type == null)
+            {
+                return response()->json(['status' => 7, 'error' => 'Contact Your Admin For Shipments']);
+            }
+
             $employee = Employee::where('phone_number', $admin->phone_number)->where('staff_category_id', 3)->where('status_id', '!=', 2);
 
             $shipment = [];
