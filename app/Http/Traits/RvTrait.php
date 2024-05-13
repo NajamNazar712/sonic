@@ -1205,6 +1205,11 @@ trait RvTrait
 
         $agent = Admin::find($agent_id);
 
+        if($agent->agent_caller_type == null)
+        {
+            return response()->json(['status' => 1, 'error' => 'Contact Your Admin For Shipments']);
+        }
+
         $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
         // If excluded_shippers setting is not found, initialize as an empty array
         $included_shippers = [];
