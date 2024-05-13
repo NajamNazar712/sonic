@@ -78,7 +78,7 @@
                         <input type="text" name="agent_name" id="edit_agent_name" class="form-control" readonly>
                     </div>
                     <div class="form-group">
-                        <select name="agent_type" id="edit_agent_type_id" class="form-control" data-rule-required="true"  data-msg-required="Agent Type is required">
+                        <select name="agent_type" id="edit_agent_type_id" class="form-control select2" data-rule-required="true"  data-msg-required="Agent Type is required">
                             @foreach($agent_types as $agent_type)
                                 <option value="{{ $agent_type->id }}"> {{ $agent_type->name }} </option>
                             @endforeach
@@ -448,6 +448,7 @@
                 })
                 
             });
+
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.delete', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
