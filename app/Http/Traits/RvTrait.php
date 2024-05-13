@@ -2021,6 +2021,13 @@ trait RvTrait
                             'assigned_to_type_id' => $rv_shipment_assign_agents->assigned_to_type_id,
                         ];
                     $this->data_rv_shipment_assign_agent_details($data);
+
+                    if($updated_rv_state_id != 3)
+                    {
+                        //Remove Shipment from RV Shipment Ticket
+                        dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+                    }
+
                     DB::commit();
                     return true;
                 } 
