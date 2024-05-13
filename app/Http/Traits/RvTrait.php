@@ -1251,7 +1251,7 @@ trait RvTrait
                     return $query->where('call_count' , '>', 0);
                 }
             })
-            ->whereIn('shipment_status_reason_id',[12, 27, 35])
+            ->whereNotIn('shipment_status_reason_id',[12, 27, 35])
             ->where('in_progress',0)
             ->where('is_completed',0)
             ->orderBy('updated_at','ASC')
@@ -1285,7 +1285,7 @@ trait RvTrait
                         return $query->where('call_count' , 1);
                     }
                 })
-                ->whereIn('shipment_status_reason_id',[12, 27, 35])
+                ->whereNotIn('shipment_status_reason_id',[12, 27, 35])
                 ->where('in_progress',0)
                 ->where('is_completed',0)
                 ->orderBy('updated_at','ASC')
