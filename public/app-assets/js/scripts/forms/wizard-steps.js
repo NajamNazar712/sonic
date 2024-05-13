@@ -66,7 +66,15 @@ $(".steps-validation").steps({
     },
     onStepChanging: function (event, currentIndex, newIndex)
     {
-        if(newIndex === 4){
+        function getLastPartOfUrl() {
+            var urlParts = window.location.href.split('/');
+            return urlParts[urlParts.length - 1];
+        }
+
+        console.log(getLastPartOfUrl())
+
+
+        if(newIndex === 4 && getLastPartOfUrl() === "wordpress"){
             var newLi = $('<li class="clearfix"><button id="customQuotationBtn" class="btn btn-primary">Request For Custom Qoutes</button></li>');
             $('.actions ul').append(newLi);
         }
