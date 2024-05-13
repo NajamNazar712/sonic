@@ -9,10 +9,12 @@ use App\Http\Models\EvaluationActivity;
 use App\Http\Models\EvaluationCampaign;
 use App\Http\Models\EvaluationHandling;
 use App\Http\Models\EvaluationNature;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\QAEvaluation;
 use App\Http\Models\QAEvaluationActivity;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Facades\Datatables;
 
 class QAEvaluationController extends Controller
@@ -29,7 +31,14 @@ class QAEvaluationController extends Controller
     {
         $max_date = Carbon::tomorrow();
         $min_date = Carbon::now()->subYear(1);
-        $agents = Admin::whereIn('role_id', [50, 49, 37.29, 28, 26, 21, 74, 13, 37, 124])->where('status', 1)->get(); // 74,50,49,37.29,28,26,21,74
+        $agents1 = Admin::whereIn('role_id', [50, 49, 29, 28, 26, 21, 74, 13, 37])->where('status', 1)
+        ->select('admins.id','admins.name'); // 74,50,49,37.29,28,26,21,74
+
+        $agents = Employee::join('admins','admins.trax_id','employees.trax_id')->where('staff_category_id', 3)
+        ->select('admins.id','admins.name')
+        ->union($agents1)
+        ->get(); // 74,50,49,37.29,28,26,21,74
+
         $campaigns = EvaluationCampaign::all();
         $evaluated_by = Admin::all();
         $natures = EvaluationNature::all();
