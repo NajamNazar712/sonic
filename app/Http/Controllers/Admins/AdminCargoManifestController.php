@@ -5906,22 +5906,25 @@ class AdminCargoManifestController extends Controller
         // dd($request->all(),session('hubs'),\auth()->id(),$admin_default_hubs);
         //todo : open box-work
         if (count($open_box_ids) > 0) {
-
-                foreach ($shipment_ids as $index => $shipment) {
+                $shipment_details = ShipmentDetail::whereIn('shipment_id', $shipment_ids)->where('is_open', '=', 0)->get()->keyBy('shipment_id');
+                $shipment_detail_success_ids = [];
+                $shipment_data_success_ids = [];
+                foreach ($shipment_ids as $shipment) {
                     if (in_array($shipment, $open_box_ids)) {
-
-                        $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
+                        $shipment_detail = $shipment_details->get($shipment);
                         if ($shipment_detail) {
-                            $shipment_detail->is_open = 1;
-                            $shipment_detail->save();
+                            $shipment_detail_success_ids[] = $shipment_detail->id;
                         }
-
-                        $shipment_data = Shipment::find($shipment);
-                        $shipment_data->open_box = 1;
-                        $shipment_data->save();
-
+                        $shipment_data_success_ids[] = $shipment;
                         ShipmentOpenBoxJourneyController::add($shipment, 2, Auth::id());
                     }
+                }
+                if (!empty($shipment_detail_success_ids)) {
+                    ShipmentDetail::whereIn('id', $shipment_detail_success_ids)->update(['is_open' => 1]);
+                }
+
+                if (!empty($shipment_data_success_ids)) {
+                    Shipment::whereIn('id', $shipment_data_success_ids)->update(['open_box' => 1]);
                 }
                 Log::channel('cronJobLog')->info('cargo:check_2');
             }

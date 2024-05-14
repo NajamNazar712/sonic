@@ -1044,7 +1044,8 @@ class ShipperShipmentBookController extends Controller
 
     public function check_negative_payable(Request $request){
         $user_id = session('user_id');
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+        $account_type = session('account_type');
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$account_type)){
             return 'false';
         }else{
             return 'true';
@@ -2855,7 +2856,8 @@ class ShipperShipmentBookController extends Controller
     public function excel_store(Request $request)
     {
         $user_id = session('user_id');
-        $pending_payable = PendingPayment::check_negative_payable($user_id);
+        $account_type = session('account_type');
+        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -3918,11 +3920,6 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
-
-        $user_id = session('user_id');
-        if(!PendingPayment::check_negative_payable($user_id)){
-            return back()->with(['error' => "Can not process Zero COD Shipment, due to pending negative payable amount."]);
-        }
 
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
@@ -5695,7 +5692,8 @@ class ShipperShipmentBookController extends Controller
     public function corporate_excel_store(Request $request)
     {
         $user_id = session('user_id');
-        $pending_payable = PendingPayment::check_negative_payable($user_id);
+        $account_type = session('account_type');
+        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -7677,7 +7675,8 @@ class ShipperShipmentBookController extends Controller
     public function international_excel_store(Request $request)
     {
         $user_id = session('user_id');
-        $pending_payable = PendingPayment::check_negative_payable($user_id);
+        $account_type = session('account_type');
+        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
 
         Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
             if ($value == 0) {

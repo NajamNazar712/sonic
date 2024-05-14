@@ -488,7 +488,8 @@ class APIController extends Controller
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
         $flag = null;
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+        $user_type = User::where('id', $user_id)->first();
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$user_type['account_type_id'])){
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
 
@@ -595,7 +596,7 @@ class APIController extends Controller
             }
         });
 
-        $user_type = User::where('id', $user_id)->first();
+
         if ($user_type['account_type_id'] == 1) {
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
@@ -1538,8 +1539,8 @@ class APIController extends Controller
     {
         $user_id = $request->user_id;
         $flag = null;
-
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+        $user_type = User::where('id', $user_id)->first();
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$user_type['account_type_id'])){
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
 
@@ -1569,9 +1570,6 @@ class APIController extends Controller
             }
         });
 
-
-
-        $user_type = User::where('id', $user_id)->first();
         if ($user_type['account_type_id'] == 1 && $user_type['international_tariff_status'] == 1) {
             $rules = [
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
@@ -8622,8 +8620,8 @@ class APIController extends Controller
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
         $flag = null;
-
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+        $user_type = User::where('id', $user_id)->first();
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$user_type['account_type_id'])){
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
 
@@ -8719,7 +8717,6 @@ class APIController extends Controller
             }
         });
 
-        $user_type = User::where('id', $user_id)->first();
 
         if (($user_type['account_type_id'] == 1 || $user_type['account_type_id'] == 2) && ($user_id == 2234 || $user_id == 1049)) {
             $pickup_address_id = $request->pickup_address_id;
