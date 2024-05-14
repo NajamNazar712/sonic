@@ -14484,7 +14484,9 @@ class AdminReportsController extends Controller
         if ($service_type_select = $request->get('service_type_select')) {
             $shipments->where('bt.id', '=', $service_type_select);
         }
-
+        if ($search_area = $request->get('search_area')) {
+            $shipments->where('ssjal.area_id', '=', $search_area);
+        }
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
