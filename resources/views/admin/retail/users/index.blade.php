@@ -105,9 +105,9 @@
                                         <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax Id">
                                     </div>
                                     
-                                    <div class="form-group">
-                                        <input type="text" name="commission_percentage" id="commission_percentage" class="form-control" placeholder="GST %">
-                                    </div>
+                                    {{-- <div class="form-group">
+                                        <input type="text" name="gst_percentage" id="gst_percentage" class="form-control" placeholder="GST %">
+                                    </div> --}}
 
                                     <div class="form-group input-group">
                                         <div class="input-group-prepend">
@@ -123,11 +123,11 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" name="father_name" id="father_name" class="form-control" placeholder="Father Name">
+                                        <input type="text" name="family_member_name[]" id="father_name" class="form-control" placeholder="Father Name">
                                     </div>
                                     
                                     <div class="form-group">
-                                        <input type="text" name="mother_name" id="mother_name" class="form-control" placeholder="Mother Name">
+                                        <input type="text" name="family_member_name[]" id="mother_name" class="form-control" placeholder="Mother Name">
                                     </div>
                                 </div>
                                 
@@ -142,10 +142,10 @@
 
                                     <div class="form-group marital_details d-none">
                                         <div class="form-group">
-                                            <input type="text" name="spouse_name" id="spouse_name" class="form-control" placeholder="Spouse Name">
+                                            <input type="text" name="family_member_name[]" id="spouse_name" class="form-control" placeholder="Spouse Name">
                                         </div>
                                         <div class="form-group">
-                                            <input type="date" name="spouse_dob" id="spouse_dob" class="form-control" placeholder="Spouse DOB">
+                                            <input type="date" name="family_member_name[]" id="spouse_dob" class="form-control" placeholder="Spouse DOB">
                                         </div>
                                         <h4 class="">Children</h4>
                                         <div class="row">
@@ -633,7 +633,7 @@
                     childCount++;
                     $childInput.find('.child_input').attr({
                         'id': 'child_' + childCount + '_data',
-                        'name': 'child_' + childCount + '_data',
+                        'name': 'family_member_name[]',
                         'placeholder': 'Child ' + childCount
                     });
                     $('#child_input_container').append($childInput);

@@ -532,6 +532,9 @@ class Kernel extends ConsoleKernel
 		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground();
 		$schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
 		$schedule->command('clean:7DaysQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
+
+        // Commission calculation schedule
+        $schedule->command('commission:calculate_commission')->monthlyOn(1, '00:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

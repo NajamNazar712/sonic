@@ -30,6 +30,7 @@ use App\Http\Models\Admin\Retail\RetailShipment;
 use Illuminate\Support\Facades\DB;
 use App\Http\Models\TraxCenterAttachment;
 use App\Http\Models\RetailUserFamilyInformation;
+use App\Http\Models\RetailUserProductPercentage;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -40,10 +41,10 @@ class RetailAdminUserManagementController extends Controller
         $this->middleware('Permission');
     }
 
-    public static function add_user($name, $password, $phone_number, $hub, $cnic, $address, $category, $category_id)
+    public static function add_user($name, $password, $phone_number, $hub, $cnic, $address, $category, $category_id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages)
     {
         $user = new RetailUser();
-//        $user->trax_id = null;
+        $user->trax_id = $traxId;
         $user->city_id = $hub;
         $user->hub_id = $hub;
         $user->name = $name;
@@ -57,6 +58,45 @@ class RetailAdminUserManagementController extends Controller
         $user->created_by = Auth::id();
         $user->updated_by = Auth::id();
         $user->save();
+
+        // retail user commission
+        $retailShippingModeNames = is_array($retailShippingModeNames) ? $retailShippingModeNames : [];
+        $productPercentages = is_array($productPercentages) ? $productPercentages : [];
+        $retailShippingModes = RetailShippingMode::whereIn('name', $retailShippingModeNames)->get();
+        $matchingRetailShippingModeIds = $retailShippingModes->pluck('id')->toArray();
+
+        foreach ($retailShippingModeNames as $key => $retailShippingModeName){
+            $retailShippingModeName = ($retailShippingModeName !== null) ? $retailShippingModeName : null;
+            $productPercentage = ($productPercentages[$key] !== null) ? $productPercentages[$key] : null;
+            $retailShippingModeId = $matchingRetailShippingModeIds[$key] ?? null;
+
+            
+            $retail_user_product_percentage = new RetailUserProductPercentage();
+            $retail_user_product_percentage->retail_user_id = $user->id;
+            $retail_user_product_percentage->retail_shipping_mode_id = $retailShippingModeId;
+            $retail_user_product_percentage->product_percentage = $productPercentage;
+            $retail_user_product_percentage->created_by = Auth::id();
+            $retail_user_product_percentage->save();
+        }
+
+        // retail user family info
+        foreach ($familyMemberNames as $key => $familyMemberName) {
+            $family_member_type = null;
+            if ($key === 0) {
+                $family_member_type = 3; // Father
+            } elseif ($key === 1) {
+                $family_member_type = 4; // Mother
+            } elseif ($key === 2) {
+                $family_member_type = 1; // Spouse
+            } else {
+                $family_member_type = 2; // children
+            }
+            $retail_user_family_information = new RetailUserFamilyInformation();
+            $retail_user_family_information->retail_user_id = $user->id;
+            $retail_user_family_information->family_member_name = $familyMemberName;
+            $retail_user_family_information->family_member_type = $family_member_type;
+            $retail_user_family_information->save();
+        }
 
         return $user->id;
     }
@@ -455,141 +495,251 @@ class RetailAdminUserManagementController extends Controller
         ]);
     }
 
+    public function user_commission_invoice_print(Request $request)
+    {
+        $trax_user = $request->trax_users;  
+        $data = explode(', ', $trax_user);
+        $trax_retail_users = RetailUser::whereIn('id', $data)->pluck('id');
+        $retail_commissions = RetailUserCommission::whereIn('id', $trax_retail_users)->get();
+
+        $html = '';
+        
+        $html .= '<!doctype html>';
+        $html .= '<html lang="en">';
+        $html .= '<head>';
+        $html .= '<meta charset="utf-8">';
+        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">';
+        $html .= '<title>Invoice</title>';
+        
+        $html .= '<style>';
+        $html .= file_get_contents(public_path('app-assets/css/bootstrap.min.css'));
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}';
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{margin-top: 1rem; margin-bottom: 1rem;}.summary_header .header{width: 10%;}.summary_header .heading{width: 15%;}.summary_footer .footer{width: 75%;}';
+        $html .= '</style>';
+        
+        $html .= '</head>';
+        $html .= '<body>';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+
+
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div class="row align-items-start justify-content-between summary">';
+        $html .= '<div class="col-6">';
+        $html .= '<table class="table table-sm table-bordered border">';
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td class="color primary" colspan="2"><strong></strong></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td class="color secondary"><strong></strong></td>';
+        $html .= '<td></td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        $html .= '<div class="row align-items-start justify-content-between summary">';
+        $html .= '<div class="col-12">';
+        $html .= '<table class="table table-sm table-bordered border">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th class="color primary">Franchise Name</th>';
+        $html .= '<th class="color primary">Franchise Code</th>';
+        $html .= '<th class="color primary">Month</th>';
+        $html .= '<th class="color primary">Retail Shipping Mode ID</th>';
+        $html .= '<th class="color primary">Number of Shipments</th>';
+        $html .= '<th class="color primary">Total Charges Without GST</th>';
+        $html .= '<th class="color primary">Product Percentage</th>';
+        $html .= '<th class="color primary">Commission</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody>';
+        
+        foreach ($retail_commissions as $commission) {
+            $franchise_name = RetailUser::find($commission->franchise_id)->name;
+            $html .= '<tr>';
+            $html .= '<td>' . $franchise_name . '</td>';
+            $html .= '<td>' . $commission->franchise_code . '</td>';
+            $html .= '<td>' . $commission->month . '</td>';
+            $html .= '<td>' . $commission->retail_shipping_mode_id . '</td>';
+            $html .= '<td>' . $commission->number_of_shipments . '</td>';
+            $html .= '<td>' . $commission->total_charges_without_gst . '</td>';
+            $html .= '<td>' . $commission->product_percentage . '</td>';
+            $html .= '<td>' . $commission->commission . '</td>';
+            $html .= '</tr>';
+        }   
+        
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        $html .= '<div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
+
+        $html .= '</div>';
+        $html .= '</div>';
+        
+        $html .= '</body>';
+        $html .= '</html>';
+        return $html;
+    }
+
+    public function franchise_commission_invoice_print(Request $request)
+    {
+        $trax_user = $request->trax_users;  
+        $data = explode(', ', $trax_user);
+        $trax_retail_users = RetailUser::whereIn('id', $data)->pluck('id');
+        $retail_commissions = RetailFranchiseCommission::whereIn('id', $trax_retail_users)->get();
+
+        $html = '';
+        
+        $html .= '<!doctype html>';
+        $html .= '<html lang="en">';
+        $html .= '<head>';
+        $html .= '<meta charset="utf-8">';
+        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">';
+        $html .= '<title>Invoice</title>';
+        
+        $html .= '<style>';
+        $html .= file_get_contents(public_path('app-assets/css/bootstrap.min.css'));
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}';
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{margin-top: 1rem; margin-bottom: 1rem;}.summary_header .header{width: 10%;}.summary_header .heading{width: 15%;}.summary_footer .footer{width: 75%;}';
+        $html .= '</style>';
+        
+        $html .= '</head>';
+        $html .= '<body>';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+
+
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div class="row align-items-start justify-content-between summary">';
+        $html .= '<div class="col-6">';
+        $html .= '<table class="table table-sm table-bordered border">';
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td class="color primary" colspan="2"><strong></strong></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td class="color secondary"><strong></strong></td>';
+        $html .= '<td></td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        $html .= '<div class="row align-items-start justify-content-between summary">';
+        $html .= '<div class="col-12">';
+        $html .= '<table class="table table-sm table-bordered border">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th class="color primary">Franchise Name</th>';
+        $html .= '<th class="color primary">Franchise Code</th>';
+        $html .= '<th class="color primary">Month</th>';
+        $html .= '<th class="color primary">Retail Shipping Mode ID</th>';
+        $html .= '<th class="color primary">Number of Shipments</th>';
+        $html .= '<th class="color primary">Total Charges Without GST</th>';
+        $html .= '<th class="color primary">Product Percentage</th>';
+        $html .= '<th class="color primary">Commission</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody>';
+        
+        foreach ($retail_commissions as $commission) {
+            $franchise_name = RetailFranchise::find($commission->franchise_id)->name;
+            $html .= '<tr>';
+            $html .= '<td>' . $franchise_name . '</td>';
+            $html .= '<td>' . $commission->franchise_code . '</td>';
+            $html .= '<td>' . $commission->month . '</td>';
+            $html .= '<td>' . $commission->retail_shipping_mode_id . '</td>';
+            $html .= '<td>' . $commission->number_of_shipments . '</td>';
+            $html .= '<td>' . $commission->total_charges_without_gst . '</td>';
+            $html .= '<td>' . $commission->product_percentage . '</td>';
+            $html .= '<td>' . $commission->commission . '</td>';
+            $html .= '</tr>';
+        }   
+        
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        $html .= '<div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
+
+        $html .= '</div>';
+        $html .= '</div>';
+        
+        $html .= '</body>';
+        $html .= '</html>';
+        return $html;
+    }
+
     public function franchise_commission_view_ajax_list(Request $request)
     {
-        $franchise = $request->franchise;
-        // Franchise Users
-        $franchise_users = RetailUser::where('category', 1)->get();
-        $user_ids = $franchise_users->pluck('id')->toArray();
-
-        // Base query
-        $baseQuery = RetailShipment::query()
-        ->leftJoin('retail_users', 'retail_shipments.retail_user_id', '=', 'retail_users.id')
-        ->leftJoin('retail_franchises', 'retail_users.category_id', '=', 'retail_franchises.id')
-        ->leftJoin('retail_franchise_product_percentages', function($join) {
-            $join->on('retail_franchises.id', '=', 'retail_franchise_product_percentages.franchise_id')
-                ->on('retail_shipments.shipping_mode', '=', 'retail_franchise_product_percentages.retail_shipping_mode_id');
-        })
-        ->leftJoin('retail_franchise_charges', function($join) {
-            $join->on('retail_franchises.id', '=', 'retail_franchise_charges.franchise_id');
-        })
-        ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id');
-
-        
-        if ($franchise != null) {
-            $baseQuery->where('retail_shipments.retail_user_id', $franchise);
-        } else {
-            $baseQuery
-            // ->where('retail_users.category', 1)
-                ->whereIn('retail_user_id', $user_ids);
-        }
-
         $month = $request->month;
-        $shipments = $baseQuery->whereMonth('retail_shipments.created_at', $month)
-            ->groupBy('retail_shipments.shipping_mode')
-            ->groupBy('retail_franchise_product_percentages.franchise_id')
-            ->select([
-                'retail_shipments.*',
-                'retail_shipments.created_at as shipment_month',
-                'retail_users.*',
-                'retail_franchises.code',
-                'retail_franchise_product_percentages.product_percentage',
-                'retail_franchise_charges.franchise_gst',
-                'retail_franchise_charges.franchise_withholding',
-                'retail_franchise_charges.franchise_deduction',
+        $franchise = $request->franchise;
+        $franchise_users = RetailUser::where('id', $franchise)->pluck('category_id')->toArray();
+        $retail_franchise_commission = RetailFranchiseCommission::query()
+            ->select(
+                'retail_franchise_commissions.*', 
+                'retail_franchises.name as franchise_name',
                 'retail_shipping_modes.name as shipping_mode_name',
-            ])
-            ->get();
-
-            foreach ($shipments as $shipment) {
-                $shipmentCounts = $shipments->where('category_id', $shipment->category_id)
-                ->where('shipping_mode', $shipment->shipping_mode)
-                ->count();
-                $shipment->shipmentCounts = $shipmentCounts;
-                // Calculate commission percentage
-                if ($shipment->product_percentage !== null) {
-                    $product_percentage = $shipment->product_percentage / 100;
-                    $commission = $product_percentage * $shipment->total_charges_without_gst;
-
-                } else {
-                    $commission = '-';
-                    $shipment->product_percentage = '-';
-                }
-                $shipment->commission = $commission;
-
-                // Calculate GST
-                if ($shipment->franchise_gst !== null &&  $commission !== null) {
-                    $franchise_gst = $shipment->franchise_gst / 100;
-                    $gst = $commission * $franchise_gst;
-                    $charges_with_gst = $gst + $commission; 
-                } else {
-                    $gst = '-';
-                    $charges_with_gst = '-';
-                    $shipment->franchise_gst = '-';
-                }
-                $shipment->gst = $gst;
-                $shipment->charges_with_gst = $charges_with_gst;
-            
-                // Calculate withholding
-                if ($shipment->franchise_withholding !== null) {
-                    $franchise_withholding_amount = $shipment->franchise_withholding;
-                    $franchise_withholding = $shipment->franchise_withholding / 100;
-                    $withholding = $charges_with_gst !== null ? $charges_with_gst * $franchise_withholding : null;
-                    $charges_without_withholding = $charges_with_gst - $withholding;
-                } else {
-                    $withholding = '-';
-                    $charges_without_withholding = '-';
-                    $shipment->franchise_withholding = '-';
-                }
-                $shipment->withholding = $withholding;
-                $shipment->charges_without_withholding = $charges_without_withholding;
-                $shipment->franchise_withholding_amount = $franchise_withholding_amount;
-            
-                // Calculate deduction
-                if ($shipment->franchise_deduction !== null) {
-                    $franchise_deduction_percentage = $shipment->franchise_deduction;
-                    $franchise_deduction = $shipment->franchise_deduction / 100;
-                    $deduction = $charges_without_withholding !== null ? $charges_without_withholding * $franchise_deduction : null;
-                    $net_commission = $charges_without_withholding - $deduction;
-                } else {
-                    $deduction = '-';
-                    $net_commission = '-';
-                    $shipment->franchise_deduction = '-';
-                }
-                $shipment->deduction = $deduction;
-                $shipment->net_commission = $net_commission;
-                $shipment->franchise_deduction_percentage = $franchise_deduction_percentage;
-                RetailFranchiseCommission::updateOrCreate(
-                    [
-                        'franchise_id' => $shipment->category_id,
-                        'month' => $month,
-                        'retail_shipping_mode_id' => $shipment->shipping_mode,
-                    ],
-                    [
-                        'franchise_code' => $shipment->code,
-                        'number_of_shipments' => $shipmentCounts,
-                        'total_charges_without_gst' => $shipment->total_charges_without_gst,
-                        'product_percentage' => $shipment->product_percentage,
-                        'commission' => $commission,
-                        'gst_percentage' => $shipment->franchise_gst,
-                        'franchise_gst_amount' => $gst,
-                        'total_charges_with_gst' => $charges_with_gst,
-                        'franchise_withholding_percentage' => $shipment->franchise_withholding,
-                        'franchise_withholding_amount' => $withholding,
-                        'charges_without_withholding' => $charges_without_withholding,
-                        'deduction_percentage' => $shipment->franchise_deduction,
-                        'deduction_amount' => $deduction,
-                        'net_commission' => $net_commission,
-                    ]
-                );
-                
-            }  
-
+                DB::raw('DATE_FORMAT(CONCAT("2022-", retail_franchise_commissions.month, "-01"), "%M") as month_name')
+            )
+            ->where('retail_franchise_commissions.month', $month)
+            ->when($franchise !== '' && $franchise !== null, function ($query) use ($franchise_users) {
+                $query->whereIn('retail_franchise_commissions.franchise_id', $franchise_users);
+            })
+            ->leftJoin('retail_franchises', 'retail_franchises.id', '=', 'retail_franchise_commissions.franchise_id')
+            ->leftJoin('retail_shipping_modes', 'retail_shipping_modes.id', '=', 'retail_franchise_commissions.retail_shipping_mode_id');
+        $results = $retail_franchise_commission->get();
         return response()->json([
-            'shipments' => $shipments,
+            'data' => $results,
         ]);
     }
     
+
     public function user_commission_view(){
         $franchises = RetailUser::where('category', 2)->get();
         return view('admin.retail.commission.user_wise', [
@@ -599,137 +749,24 @@ class RetailAdminUserManagementController extends Controller
 
     public function user_commission_view_ajax_list(Request $request)
     {
-        $franchise = $request->franchise;
-        // Franchise Users
-        $franchise_users = RetailUser::where('category', 2)->get();
-        $user_ids = $franchise_users->pluck('id')->toArray();
-
-        // Base query
-        $baseQuery = RetailShipment::query()
-        ->leftJoin('retail_users', 'retail_shipments.retail_user_id', '=', 'retail_users.id')
-        ->leftJoin('retail_franchises', 'retail_users.category_id', '=', 'retail_franchises.id')
-        ->leftJoin('retail_franchise_product_percentages', function($join) {
-            $join->on('retail_franchises.id', '=', 'retail_franchise_product_percentages.franchise_id')
-                ->on('retail_shipments.shipping_mode', '=', 'retail_franchise_product_percentages.retail_shipping_mode_id');
-        })
-        ->leftJoin('retail_franchise_charges', function($join) {
-            $join->on('retail_franchises.id', '=', 'retail_franchise_charges.franchise_id');
-        })
-        ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id');
-        if ($franchise != null) {
-            $baseQuery->where('retail_shipments.retail_user_id', $franchise);
-        } else {
-            $baseQuery
-            // ->where('retail_users.category', 1)
-                ->whereIn('retail_user_id', $user_ids);
-        }
-
         $month = $request->month;
-        $shipments = $baseQuery->whereMonth('retail_shipments.created_at', $month)
-            ->groupBy('retail_shipments.shipping_mode')
-            ->groupBy('retail_franchise_product_percentages.franchise_id')
-            ->select([
-                'retail_shipments.*',
-                'retail_shipments.created_at as shipment_month',
-                'retail_users.*',
-                'retail_franchises.code',
-                'retail_franchise_product_percentages.product_percentage',
-                'retail_franchise_charges.franchise_gst',
-                'retail_franchise_charges.franchise_withholding',
-                'retail_franchise_charges.franchise_deduction',
+        $franchise = $request->franchise;
+        $retail_user_commission = RetailUserCommission::query()
+            ->select(
+                'retail_user_commissions.*', 
+                'retail_users.name as franchise_name',
                 'retail_shipping_modes.name as shipping_mode_name',
-            ])
-            ->get();
-
-            foreach ($shipments as $shipment) {
-                $shipmentCounts = $shipments->where('category_id', $shipment->category_id)
-                ->where('shipping_mode', $shipment->shipping_mode)
-                ->count();
-                $shipment->shipmentCounts = $shipmentCounts;
-                // Calculate commission percentage
-                if ($shipment->product_percentage !== null) {
-                    $product_percentage = $shipment->product_percentage / 100;
-                    $commission = $product_percentage * $shipment->total_charges_without_gst;
-
-                } else {
-                    $commission = '-';
-                    $shipment->product_percentage = '-';
-                }
-                $shipment->commission = $commission;
-
-                // Calculate GST
-                if ($shipment->franchise_gst !== null &&  $commission !== null) {
-                    $franchise_gst = $shipment->franchise_gst / 100;
-                    $gst = $commission * $franchise_gst;
-                    $charges_with_gst = $gst + $commission; 
-                } else {
-                    $gst = '-';
-                    $charges_with_gst = '-';
-                    $shipment->franchise_gst = '-';
-                }
-                $shipment->gst = $gst;
-                $shipment->charges_with_gst = $charges_with_gst;
-            
-                // Calculate withholding
-                if ($shipment->franchise_withholding !== null) {
-                    $franchise_withholding_amount = $shipment->franchise_withholding;
-                    $franchise_withholding = $shipment->franchise_withholding / 100;
-                    $withholding = $charges_with_gst !== null ? $charges_with_gst * $franchise_withholding : null;
-                    $charges_without_withholding = $charges_with_gst - $withholding;
-                } else {
-                    $franchise_withholding_amount = '-';
-                    $withholding = '-';
-                    $charges_without_withholding = '-';
-                    $shipment->franchise_withholding = '-';
-                }
-                $shipment->withholding = $withholding;
-                $shipment->charges_without_withholding = $charges_without_withholding;
-                $shipment->franchise_withholding_amount = $franchise_withholding_amount;
-
-                // Calculate deduction
-                if ($shipment->franchise_deduction !== null) {
-                    $franchise_deduction_percentage = $shipment->franchise_deduction;
-                    $franchise_deduction = $shipment->franchise_deduction / 100;
-                    $deduction = $charges_without_withholding !== null ? $charges_without_withholding * $franchise_deduction : null;
-                    $net_commission = $charges_without_withholding - $deduction;
-                } else {
-                    $franchise_deduction_percentage = '-';
-                    $deduction = '-';
-                    $net_commission = '-';
-                    $shipment->franchise_deduction = '-';
-                }
-                $shipment->deduction = $deduction;
-                $shipment->net_commission = $net_commission;
-                $shipment->franchise_deduction_percentage = $franchise_deduction_percentage;
-
-                RetailUserCommission::updateOrCreate(
-                    [
-                        'franchise_id' => $shipment->category_id,
-                        'month' => $month,
-                        'retail_shipping_mode_id' => $shipment->shipping_mode,
-                    ],
-                    [
-                        'franchise_code' => $shipment->code,
-                        'number_of_shipments' => $shipmentCounts,
-                        'total_charges_without_gst' => $shipment->total_charges_without_gst,
-                        'product_percentage' => $shipment->product_percentage,
-                        'commission' => $commission,
-                        'gst_percentage' => $shipment->franchise_gst,
-                        'franchise_gst_amount' => $gst,
-                        'total_charges_with_gst' => $charges_with_gst,
-                        'franchise_withholding_percentage' => $shipment->franchise_withholding,
-                        'franchise_withholding_amount' => $withholding,
-                        'charges_without_withholding' => $charges_without_withholding,
-                        'deduction_percentage' => $shipment->franchise_deduction,
-                        'deduction_amount' => $deduction,
-                        'net_commission' => $net_commission,
-                    ]
-                );
-                
-            }  
-
+                DB::raw('DATE_FORMAT(CONCAT("2022-", retail_user_commissions.month, "-01"), "%M") as month_name')
+            )
+            ->where('retail_user_commissions.month', $month)
+            ->when($franchise !== '' && $franchise !== null, function ($query) use ($franchise) {
+                $query->where('retail_user_commissions.franchise_id', $franchise);
+            })
+            ->leftJoin('retail_users', 'retail_users.id', '=', 'retail_user_commissions.franchise_id')
+            ->leftJoin('retail_shipping_modes', 'retail_shipping_modes.id', '=', 'retail_user_commissions.retail_shipping_mode_id');
+        $results = $retail_user_commission->get();
         return response()->json([
-            'shipments' => $shipments,
+            'data' => $results,
         ]);
     }
 
@@ -984,10 +1021,25 @@ class RetailAdminUserManagementController extends Controller
 
     public function user_edit($id)
     {
+        // $retail_user_family_names = [];
         $retail_user = RetailUser::find($id);
+        $retail_user_id = $retail_user->id;
         $trax_centers = RetailTraxCenter::where('status', 1)->get();
         $franchises = RetailFranchise::where('status', 1)->get();
-        return view('admin.retail.users.edit')->with(['retail_user' => $retail_user, 'trax_centers' => $trax_centers, 'franchises' => $franchises]);
+        $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
+        $retail_user_family_names_query = RetailUserFamilyInformation::where('retail_user_id', $retail_user_id);
+        if ($retail_user_family_names_query->exists()) {
+            $retail_user_family_names = $retail_user_family_names_query->pluck('family_member_name')->toArray();
+        }
+            return view('admin.retail.users.edit')->with([
+                'retail_user' => $retail_user, 
+                'trax_centers' => $trax_centers, 
+                'franchises' => $franchises, 
+                'shipping_modes' => $shipping_modes, 
+                'retail_user_id' => $retail_user_id, 
+                'retail_user_family_names' => $retail_user_family_names
+            ]);
+
     }
 
     public function user_list(Request $request)
@@ -1097,30 +1149,31 @@ class RetailAdminUserManagementController extends Controller
                 $store = RetailTraxCenter::find($request->trax_center);
             }
 
-            $this->add_user($request->name, $password, $request->phone_number, $store->default_hub, $request->cnic, $request->address, $request->store, $store->id);
-            // $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);
-            // $productPercentages = json_decode($request->product_percentage, true);
-            // $retailShippingModeNames = is_array($retailShippingModeNames) ? $retailShippingModeNames : [];
-            // $productPercentages = is_array($productPercentages) ? $productPercentages : [];
-            // $retailShippingModes = RetailShippingMode::whereIn('name', $retailShippingModeNames)->get();
-            // $matchingRetailShippingModeIds = $retailShippingModes->pluck('id')->toArray();
+            $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);
+            $productPercentages = json_decode($request->product_percentage, true);
+            $familyMemberNames = $request->family_member_name;
+            $traxId = $request->trax_id;
 
-            
-            // foreach ($retailShippingModeNames as $key => $retailShippingModeName) {
-            //     $retailShippingModeName = ($retailShippingModeName !== null) ? $retailShippingModeName : null;
-            //     $productPercentage = ($productPercentages[$key] !== null) ? $productPercentages[$key] : null;
-            //     $retailShippingModeId = $matchingRetailShippingModeIds[$key] ?? null;
-            //     $retail_user_family_information = new RetailUserFamilyInformation();
-            //     $retail_user_family_information->retail_user_id = $retail_user->id;
-            //     $retail_user_family_information->retail_shipping_mode_id = $retailShippingModeId;
-            //     $retail_user_family_information->product_percentage = $productPercentage;
-            //     $retail_user_family_information->save();
-            // }
+            $this->add_user($request->name, $password, $request->phone_number, $store->default_hub, $request->cnic, $request->address, $request->store, $store->id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages);
 
             return redirect()->back()->with('success', 'Retail User Added Successfully!');
         } else {
             return redirect()->back()->with('success', 'Same Retail User already exists!');
         }
+    }
+
+    public function retail_user_percentage(Request $request){
+        $franchiseId = $request->retail_user_id;
+        $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchiseId)->get();
+        $data = [];
+        foreach ($retail_franchise_product_percentage as $percentage) {
+            $selectedOption = RetailShippingMode::find($percentage->retail_shipping_mode_id)->name;
+            $data[] = [
+                'selected_option' => $selectedOption,
+                'product_percentage' => $percentage->product_percentage,
+            ];
+        }
+        return response()->json(['data' => $data]);
     }
 
     public function user_update(Request $request, $id)
@@ -1139,9 +1192,50 @@ class RetailAdminUserManagementController extends Controller
         $retail_user->address = $request->address;
         $retail_user->updated_by = Auth::id();
         $retail_user->save();
-
+        
+        $familyMemberNames = $request->family_member_name;
+        // retail user family info
+        foreach ($familyMemberNames as $key => $familyMemberName) {
+            $family_member_type = null;
+            if ($key === 0) {
+                $family_member_type = 3; // Father
+            } elseif ($key === 1) {
+                $family_member_type = 4; // Mother
+            } elseif ($key === 2) {
+                $family_member_type = 1; // Spouse
+            } elseif ($key === 3) {
+                $family_member_type = 5;
+            } else {
+                $family_member_type = 2; // Children
+            }
+            
+            if ($request->has('salary') || $request->has('agreement_start_date')) {
+                RetailUserFamilyInformation::updateOrCreate(
+                    [
+                        'retail_user_id' => $retail_user->id,
+                        'family_member_type' => $family_member_type,
+                    ],
+                    [
+                        'family_member_name' => $familyMemberName,
+                    ]
+                )->fill([
+                    'agreement_start_date' => $request->input('agreement_start_date'),
+                    'salary' => $request->input('salary'),
+                ])->save();
+            } else {
+                // If neither salary nor agreement_start_date is present in the request, update only the family_member_name
+                RetailUserFamilyInformation::updateOrCreate(
+                    [
+                        'retail_user_id' => $retail_user->id,
+                        'family_member_type' => $family_member_type,
+                    ],
+                    [
+                        'family_member_name' => $familyMemberName,
+                    ]
+                );
+            }
+        }
         return redirect()->back()->with('success', 'Retail User Updated Successfully!');
-
     }
 
     public function user_name(Request $request)

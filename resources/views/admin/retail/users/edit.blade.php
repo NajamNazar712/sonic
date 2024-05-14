@@ -2,6 +2,7 @@
     {{ method_field('PUT') }}
     {{ csrf_field()  }}
 
+    <input type="hidden" name="retail_user_id" id="retail_user_id" value="{{ $retail_user_id }}">
     <div class="container">
         <div class="row">
             <div class="col">
@@ -69,9 +70,9 @@
                     <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax Id">
                 </div>
                 
-                <div class="form-group">
+                {{-- <div class="form-group">
                     <input type="text" name="commission_percentage" id="commission_percentage" class="form-control" placeholder="GST %">
-                </div>
+                </div> --}}
 
                 <div class="form-group input-group">
                     <div class="input-group-prepend">
@@ -87,35 +88,42 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="text" name="father_name" id="father_name" class="form-control" placeholder="Father Name">
+                    <input type="text" name="family_member_name[]" id="father_name" class="form-control" placeholder="Father Name" value="{{ isset($retail_user_family_names[0]) ? $retail_user_family_names[0] : '' }}">
                 </div>
                 
                 <div class="form-group">
-                    <input type="text" name="mother_name" id="mother_name" class="form-control" placeholder="Mother Name">
+                    <input type="text" name="family_member_name[]" id="mother_name" class="form-control" placeholder="Mother Name" value="{{ isset($retail_user_family_names[1]) ? $retail_user_family_names[1] : '' }}">
                 </div>
             </div>
 
             <div class="col">
                 <div class="form-group">
                     <select name="marital_status" id="marital_status_edit" class="select2 form-control">
-                        <option value="" selected disabled>Select Marital Status</option>
-                        <option value="1">Single</option>
-                        <option value="2">Marital</option>
+                        <option value="" disabled>Select Marital Status</option>
+                        <option value="1" {{ isset($retail_user_family_names[2]) ? '' : 'selected' }}>Single</option>
+                        <option value="2" {{ isset($retail_user_family_names[2]) ? 'selected' : '' }}>Marital</option>
                     </select>
-                </div>
+                </div>                
 
                 <div class="form-group marital_details d-none">
                     <div class="form-group">
-                        <input type="text" name="marital_name" id="marital_name_edit" class="form-control" placeholder="Spouse Name">
+                        <input type="text" name="family_member_name[]" id="marital_name_edit" class="form-control" placeholder="Spouse Name">
                     </div>
                     <div class="form-group">
-                        <input type="text" name="marital_dob" id="marital_dob_edit" class="form-control" placeholder="Spouse DOB">
+                        <input type="text" name="family_member_name[]" id="marital_dob_edit" class="form-control" placeholder="Spouse DOB">
                     </div>
                     <div class="row">
                         <div class="col-9" id="child_input_container_edit">
                             <div class="child-template-edit d-none">
-                                <div class="form-group">
-                                    <input type="text" class="form-control child_input" placeholder="Child">
+                                <div class="form-group row">
+                                    <div class="col-9">
+                                        <input type="text" class="form-control child_input_edit" placeholder="Child">
+                                    </div>
+                                    <div class="col-3">
+                                        <button type="button" class="btn btn-danger" id="remove_child_column_btn_edit_form">
+                                            Remove
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -127,10 +135,53 @@
                     </div>
                 </div>
                 
+                <div class="col">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="form-group">
+                                <select name="retail_shipping_mode_id[]" id="retail_shipping_mode_id_edit" class="select2 form-control retail_shipping_mode_id_edit" data-rule-required="true" data-msg-required="Please choose a shipping mode">
+                                    @foreach($shipping_modes as $shipping_mode)
+                                        <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-5">
+                            <div class="form-group">
+                                <div class="input-group mb-2">
+                                    <input type="text" name="product_percentage[]" id="product_percentage_edit" class="form-control product_percentage_edit" placeholder="Product"  value="" max="100">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="basic-addon2">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <input type="button" class="btn btn-primary" id="edit_retail_product_add_btn" value="Add">
+                        </div>
+                    </div>
+                    <span id="error_message_edit" class="text-danger"></span>
+
+                    <div class="row" id="editTableRow" style="display: none;">
+                        <div class="col">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Selected Option</th>
+                                        <th>Product Percentage</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="editTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <label for="attachment_1">Attachment 1</label>
-                    <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
+                    <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf">
                 </div>
 
                 <div class="form-group">
@@ -233,36 +284,168 @@
                 }
             });
 
+        $('#edit_user_form #delivery_date_from').pickadate({
+            firstDay: 1,
+            clear: '',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            hiddenSuffix: '_formatted',
+            onSet: function(context) {
+                if (context.select) {
+                    $('#add_trax_center_form #delivery_date_to').pickadate('picker').set('min', $('#add_trax_center_form #delivery_date_from').pickadate('picker').get('select'));
+                }
+            }
+        });
+
+        var preSelectedMaritalStatus = $("#marital_status_edit").val();
+        if (preSelectedMaritalStatus == 2) {
+            $(".marital_details").removeClass("d-none");
+            if ({{ isset($retail_user_family_names[2]) }}) {
+                $("#marital_name_edit").val("{{ $retail_user_family_names[2] }}");
+            }
+            if ({{ isset($retail_user_family_names[3]) }}) {
+                $("#marital_dob_edit").val("{{ $retail_user_family_names[3] }}");
+            }   
+        }
+
         $("#marital_status_edit").on('change', function(){
             var selectedOption = $(this).val();
             if (selectedOption == 1){
                 $(".marital_details").addClass("d-none");
                 $("#marital_name_edit").val('');
                 $("#marital_dob_edit").val('');
-                // $("#wife_data").val('');
                 $(".child_input").val('');
             } else if(selectedOption == 2) {
                 $(".marital_details").removeClass("d-none");
             }
         });
 
-        var EditChildCount = 0;
-        function addChildInfo() {
-            // Update the number to increase child count
-            if (EditChildCount < 4){
-                var $EditChildInput = $('.child-template-edit').clone().removeClass('child-template-edit').removeClass('d-none');
-                EditChildCount++;
-                $EditChildInput.find('.child_input').attr({
-                    'id': 'child_' + EditChildCount + '_data_edit',
-                    'name': 'child_' + EditChildCount + '_data',
-                    'placeholder': 'Child ' + EditChildCount
-                });
-                $('#child_input_container_edit').append($EditChildInput);
-            }
+        // Dynamically determine the number of children
+        var numChildren = 0;
+        @for ($i = 4; $i < count($retail_user_family_names); $i++)
+            @if (isset($retail_user_family_names[$i]))
+                numChildren++;
+                if (numChildren <= 4) {
+                    var childName = "{{ $retail_user_family_names[$i] }}";
+                    var $childInput = $('.child-template-edit').clone().removeClass('child-template-edit').removeClass('d-none');
+                    $childInput.find('.child_input_edit').attr({
+                        'id': 'child_' + numChildren + '_data_edit',
+                        'name': 'family_member_name[]',
+                        'placeholder': 'Child ' + numChildren
+                    }).val(childName); // Pre-fill child name here
+                    $('#child_input_container_edit').append($childInput);
+                }
+            @endif
+        @endfor
+
+        if (numChildren >= 4) {
+            $('#edit_child_column_btn').prop('disabled', true);
         }
-        $("#edit_child_column_btn").on('click', function () {
-            addChildInfo();
+
+        // Add child template
+        $(document).on('click', '#edit_child_column_btn', function () {
+            if (numChildren < 4) {
+                numChildren++;
+                var $childInput = $('.child-template-edit').clone().removeClass('child-template-edit').removeClass('d-none');
+                $childInput.find('.child_input_edit').attr({
+                    'id': 'child_' + numChildren + '_data_edit',
+                    'name': 'family_member_name[]',
+                    'placeholder': 'Child ' + numChildren
+                });
+                $('#child_input_container_edit').append($childInput);
+            }
+            if (numChildren >= 4) {
+                $(this).prop('disabled', true);
+            }
         });
 
+        // Remove child template
+        $(document).on('click', '#remove_child_column_btn_edit_form', function () {
+            var $formGroup = $(this).closest('.form-group');
+            $formGroup.remove();
+            numChildren--;
+            $('#edit_child_column_btn').prop('disabled', false);
+        });
+
+        var retail_user_id = $("#retail_user_id").val();
+        var selectedOption = $("#retail_shipping_mode_id_edit option:selected").text();
+        var productPercentage = $(".product_percentage_edit").val();
+        $.ajax({
+            type: "GET",
+            url: '{{ route('admin.retail.users.retail_user_percentage') }}',
+            data: { retail_user_id: retail_user_id },
+            success: function (response) {
+                if (response.data.length > 0) {
+                    $('#editTableBody').empty();
+                    $.each(response.data, function(index, item) {
+                        var row = "<tr><td>" + item.selected_option + "</td><td>" + item.product_percentage + "</td><td><button class='btn btn-danger btn-sm remove-btn-edit-form'>Remove</button></td></tr>";
+                        $("#editTableBody").append(row);
+                    });
+                    $("#editTableRow").show();
+                }
+                else {
+                    $("#editTableRow").hide();
+                }
+            }
+        });
+
+        $('#editTableBody').on('click', '.remove-btn-edit-form', function() {
+            $(this).closest('tr').remove();
+        });
+
+        $("#edit_retail_product_add_btn").on('click', function (event) {
+            var selectedOptionEdit = $("#retail_shipping_mode_id_edit option:selected").text();
+            var productPercentageEdit = $("#product_percentage_edit").val();
+
+            if (productPercentageEdit.trim() === '' || !$.isNumeric(productPercentageEdit)) {
+                $("#error_message_edit").text("Please enter a valid product percentage.").show();
+                $("#product_percentage_edit").attr("required", true);
+            } else {
+                $("#error_message_edit").hide();
+                $("#product_percentage_edit").removeAttr("required");
+                var isDuplicate = false;
+                $("#editTableBody").find("tr").each(function() {
+                    if ($(this).find("td:first").text() === selectedOptionEdit) {
+                        isDuplicate = true;
+                        return false;
+                    }
+                });
+
+                if (isDuplicate) {
+                    $("#error_message_edit").text("Error: Cannot add same product.").show();
+                } else {
+                    var newRow = $("<tr><td>" + selectedOptionEdit + "</td><td>" + productPercentageEdit + "%</td><td><button class='btn btn-danger btn-sm remove-item'>Remove</button></td></tr>");
+                    $("#editTableBody").append(newRow);
+                    newRow.find('.remove-item').click(function() {
+                        $(this).closest("tr").remove();
+                        if ($("#editTableBody").find("tr").length === 0) {
+                            $("#editTableRow").hide();
+                        }
+                    });
+                    $("#editTableRow").show();
+                    $("#product_percentage_edit").val('');
+                }
+            }
+        });
+
+        $("#edit_user_form").submit(function(event) {
+            event.preventDefault();
+            var retailShippingIdsEdit = [];
+            var productPercentagesEdit = [];
+            $("#editTableBody").find("tr").each(function() {
+                var selectedOptionEdit = $(this).find("td:first").text();
+                var productPercentageEdit = $(this).find("td:nth-child(2)").text();
+                retailShippingIdsEdit.push(selectedOptionEdit);
+                productPercentagesEdit.push(productPercentageEdit);
+            });
+            $(this).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIdsEdit) + "'>");
+            $(this).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentagesEdit) + "'>");
+            this.submit();
+        });
+
+        $(".modal_close_btn").click(function() {
+            resetModal();
+        });
     });
 </script>    

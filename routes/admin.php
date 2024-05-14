@@ -3765,6 +3765,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('franchise_commission/ajax', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_view_ajax_list')->name('commission.list');
             Route::get('user_commission', 'Admins\Retail\RetailAdminUserManagementController@user_commission_view')->name('user_wise_commission');
             Route::get('user_commission/ajax', 'Admins\Retail\RetailAdminUserManagementController@user_commission_view_ajax_list')->name('user_commission.list');
+
+            Route::post('print', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_invoice_print')->name('franchise_commission_invoice_print');
         });
         Route::prefix('trax_center')->name('trax_center.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');
@@ -3785,6 +3787,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('update/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_update')->name('update');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@user_name')->name('name');
             Route::get('edit/name/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_edit_name')->name('edit.name');
+
+            Route::get('/retail_user_percentage', 'Admins\Retail\RetailAdminUserManagementController@retail_user_percentage')->name('retail_user_percentage');
+
+            Route::post('print', 'Admins\Retail\RetailAdminUserManagementController@user_commission_invoice_print')->name('user_commission_invoice_print');
         });
 
         Route::prefix('international')->name('international.')->group(function () {

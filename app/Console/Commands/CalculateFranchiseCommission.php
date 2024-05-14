@@ -16,7 +16,7 @@ class CalculateFranchiseCommission extends Command
      *
      * @var string
      */
-    protected $signature = 'command:calculate_commission';
+    protected $signature = 'commission:calculate_commission';
 
     /**
      * The console command description.
@@ -142,7 +142,7 @@ class CalculateFranchiseCommission extends Command
             // $shipment->franchise_deduction_percentage = $franchise_deduction_percentage;
             RetailFranchiseCommission::updateOrCreate(
                 [
-                    'franchise_id' => $shipment->category_id,
+                    'franchise_id' => $shipment->retail_user_id,
                     'month' => $month,
                     'retail_shipping_mode_id' => $shipment->shipping_mode,
                 ],
@@ -169,7 +169,7 @@ class CalculateFranchiseCommission extends Command
     private function user_commission_view()
     {
         $franchise_users = RetailUser::where('category', 2)->get();
-        $user_ids = $franchise_users->pluck('id')->toArray();
+        $user_ids = $franchise_users->pluck('id')->toArray();   
         $month = Carbon::now()->subMonth()->month;
 
         $baseQuery = RetailShipment::query()
@@ -182,7 +182,8 @@ class CalculateFranchiseCommission extends Command
         ->leftJoin('retail_franchise_charges', function($join) {
             $join->on('retail_franchises.id', '=', 'retail_franchise_charges.franchise_id');
         })
-        ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id');
+        ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id')
+        ->leftJoin('retail_user_product_percentages', 'retail_shipments.retail_user_id', '=', 'retail_user_product_percentages.retail_user_id');
 
         $shipments = $baseQuery
         ->whereIn('retail_shipments.retail_user_id', $user_ids)
@@ -199,22 +200,22 @@ class CalculateFranchiseCommission extends Command
             'retail_franchise_charges.franchise_withholding',
             'retail_franchise_charges.franchise_deduction',
             'retail_shipping_modes.name as shipping_mode_name',
+            'retail_user_product_percentages.product_percentage as retail_user_product_percentages'
         ])
         ->get();
-
+        
         foreach ($shipments as $shipment) {
             $shipmentCounts = $shipments->where('category_id', $shipment->category_id)
             ->where('shipping_mode', $shipment->shipping_mode)
             ->count();
             $shipment->shipmentCounts = $shipmentCounts;
             // Calculate commission percentage
-            if ($shipment->product_percentage !== null) {
-                $product_percentage = $shipment->product_percentage / 100;
+            if ($shipment->retail_user_product_percentages !== null) {
+                $product_percentage = $shipment->retail_user_product_percentages / 100;
                 $commission = $product_percentage * $shipment->total_charges_without_gst;
-
             } else {
                 $commission = '-';
-                $shipment->product_percentage = '-';
+                $shipment->retail_user_product_percentages = '-';
             }
             // $shipment->commission = $commission;
 
@@ -262,10 +263,9 @@ class CalculateFranchiseCommission extends Command
             // $shipment->deduction = $deduction;
             // $shipment->net_commission = $net_commission;
             // $shipment->franchise_deduction_percentage = $franchise_deduction_percentage;
-
             RetailUserCommission::updateOrCreate(
                 [
-                    'franchise_id' => $shipment->category_id,
+                    'franchise_id' => $shipment->retail_user_id,
                     'month' => $month,
                     'retail_shipping_mode_id' => $shipment->shipping_mode,
                 ],
@@ -273,7 +273,8 @@ class CalculateFranchiseCommission extends Command
                     'franchise_code' => $shipment->code,
                     'number_of_shipments' => $shipmentCounts,
                     'total_charges_without_gst' => $shipment->total_charges_without_gst,
-                    'product_percentage' => $shipment->product_percentage,
+                    // 'product_percentage' => $shipment->product_percentage,
+                    'product_percentage' => $shipment->retail_user_product_percentages,
                     'commission' => $commission,
                     'gst_percentage' => $shipment->franchise_gst,
                     'franchise_gst_amount' => $gst,
