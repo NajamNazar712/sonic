@@ -318,7 +318,7 @@
 
                                         <div class="row mt-2">
 
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -331,13 +331,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" >Try &amp; Buy</span>
                                                         </div>
                                                         <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[1][0]->try_and_buy_charges}}" name="on_tnb_charges">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text" >%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text" >Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[1][0]->reverse_pickup_charges}}" name="on_reverse_charges">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" >%</span>
                                                         </div>
@@ -911,7 +924,7 @@
                                             <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="overland_hub_weightadd"><i class="la la-plus"></i></button>
                                         </div>
                                         <div class="row mt-2">
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -924,13 +937,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try &amp; Buy</span>
                                                         </div>
                                                         <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" name="ol_tnb_charges" value="{{$shippingType[2][0]->try_and_buy_charges}}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" name="ol_reverse_charges" value="{{$shippingType[2][0]->reverse_pickup_charges}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1504,7 +1530,7 @@
                                             <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="detain_hub_weightadd"><i class="la la-plus"></i></button>
                                         </div>
                                         <div class="row mt-2">
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -1517,13 +1543,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try &amp; Buy</span>
                                                         </div>
                                                         <input type="text"  class="form-control percent" name="detain_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[3][0]->try_and_buy_charges}}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text"  class="form-control percent" name="detain_reverse_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[3][0]->reverse_pickup_charges}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -2047,7 +2086,7 @@
                                             <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="sameday_hub_weightadd"><i class="la la-plus"></i></button>
                                         </div>
                                         <div class="row mt-2">
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -2060,13 +2099,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try & Buy</span>
                                                         </div>
                                                         <input type="text"  class="form-control percent" name="sameday_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[4][0]->try_and_buy_charges}}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text"  class="form-control percent" name="sameday_reverse_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[4][0]->reverse_pickup_charges}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
