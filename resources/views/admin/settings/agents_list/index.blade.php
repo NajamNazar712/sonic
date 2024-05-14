@@ -78,7 +78,8 @@
                         <input type="text" name="agent_name" id="edit_agent_name" class="form-control" readonly>
                     </div>
                     <div class="form-group">
-                        <select name="agent_type" id="edit_agent_type_id" class="form-control select2" data-rule-required="true"  data-msg-required="Agent Type is required">
+                        <select name="agent_type" id="edit_agent_type_id" class="form-control" data-rule-required="true"  data-msg-required="Agent Type is required">
+                            <option disabled selected>Select Agent Type</option>
                             @foreach($agent_types as $agent_type)
                                 <option value="{{ $agent_type->id }}"> {{ $agent_type->name }} </option>
                             @endforeach
@@ -443,7 +444,14 @@
                     $('#edit_agent_id').val(data.agent_id);
                     $('#edit_agent_name').val(data.agent_name);
                     $('#edit_agent_type_name').val(data.agent_type_name);
-                    $('#edit_agent_type_id').val(data.agent_caller_type);
+                    if(data.agent_caller_type !== null)
+                    {
+                        $('#edit_agent_type_id').val(data.agent_caller_type);
+                    }
+                    else
+                    {
+                        $('#edit_agent_type_id').val($('#edit_agent_type_id option:first').val()).trigger('change');
+                    }
                     $('#editAgentTypeModal').modal('show');
                 })
                 
