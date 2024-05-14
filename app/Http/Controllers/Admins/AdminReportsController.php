@@ -95,6 +95,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\IssueSackBagOrigin;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Traits\RvTrait;
+use App\RvAgentCallHistory;
 use DateTime;
 
 
