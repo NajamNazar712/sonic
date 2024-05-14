@@ -24,7 +24,7 @@ class JourneyMissingEntrySeeder extends Seeder
     public function run()
     {
         //
-        $shipmentId = [37065910,37106869,37108954,37175410]; 
+        $shipmentId = [37200837]; 
         if($shipmentId){
             foreach($shipmentId as $value){
                 $shipment = Shipment::find($value);
