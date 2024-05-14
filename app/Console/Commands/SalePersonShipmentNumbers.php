@@ -44,6 +44,6 @@ class SalePersonShipmentNumbers extends Command
         $date = Carbon::yesterday()->format('Y-m-d');
         $response = SalesPersonNumbersReportController::sale_person_numbers_overall($date . ' 00:00:00');
         NotificationsController::send(47, $date, $response);
-        Log::channel('cronJobLog')->info('s ' .'saleperson:numbers Running');
+        //Log::channel('cronJobLog')->info('s ' .'saleperson:numbers Running');
     }
 }

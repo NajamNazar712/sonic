@@ -236,7 +236,7 @@
                                         <div class="row mt-2">
                                         <input type="hidden" name="on_booking_record" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->id != '')? $shippingType[1][0]->id : ''}}">
 
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -249,13 +249,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" >Try &amp; Buy</span>
                                                         </div>
                                                         <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->try_and_buy_charges != '')? $shippingType[1][0]->try_and_buy_charges : ''}}" name="on_tnb_charges" disabled>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text" >%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text" >Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text" class="form-control" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->reverse_pickup_charges != '')? $shippingType[1][0]->reverse_pickup_charges : ''}}" name="on_reverse_charges" disabled>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" >%</span>
                                                         </div>
@@ -1111,7 +1124,7 @@
                                         <div class="row mt-2">
                                         <input type="hidden" name="ol_booking_record" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->id != '')? $shippingType[2][0]->id : ''}}">
 
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -1124,13 +1137,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try &amp; Buy</span>
                                                         </div>
                                                         <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" name="ol_tnb_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->try_and_buy_charges != '')? $shippingType[2][0]->try_and_buy_charges : ''}}" disabled>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" name="ol_reverse_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->reverse_pickup_charges != '')? $shippingType[2][0]->reverse_pickup_charges : ''}}" disabled>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1979,7 +2005,7 @@
                                         <div class="row mt-2">
                                             <input type="hidden" name="detain_booking_record" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->id != '')? $shippingType[3][0]->id : ''}}">
 
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -1992,13 +2018,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try &amp; Buy</span>
                                                         </div>
                                                         <input type="text"  class="form-control percent" name="detain_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->try_and_buy_charges != '')? $shippingType[3][0]->try_and_buy_charges : ''}}" disabled>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text"  class="form-control percent" name="detain_reverse_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->reverse_pickup_charges != '')? $shippingType[3][0]->reverse_pickup_charges : ''}}" disabled>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -2817,7 +2856,7 @@
                                         <div class="row mt-2">
                                         <input type="hidden" name="sameday_booking_record" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->id != '')? $shippingType[4][0]->id : ''}}">
 
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -2830,13 +2869,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try & Buy</span>
                                                         </div>
                                                         <input type="text"  class="form-control percent" name="sameday_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->try_and_buy_charges != '')? $shippingType[4][0]->try_and_buy_charges : ''}}" disabled>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text"  class="form-control percent" name="sameday_reverse_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->reverse_pickup_charges != '')? $shippingType[4][0]->reverse_pickup_charges : ''}}" disabled>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
