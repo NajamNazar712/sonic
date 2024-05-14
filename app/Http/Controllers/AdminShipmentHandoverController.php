@@ -338,26 +338,18 @@ class AdminShipmentHandoverController extends Controller
               );
         })
 
-        ->leftJoin('shipment_scanning_journeys as ssj_hss_f', function ($join) {
+      ->leftJoin('shipment_scanning_journeys as ssj_hss_f', function ($join) {
           $join->on('ssj_hss_f.shipment_id', '=', 'hsj_f.shipment_id')
-               ->whereRaw('ssj_hss_f.id = (
-                              select max(id) 
-                              from shipment_scanning_journeys 
-                              where shipment_scanning_journeys.shipment_id = hsj_f.shipment_id and
-                              shipment_scanning_journeys.screen_location_id = 26
-                              and (a.role_id != 1 or a.id is null)
-                          )');
-        })
-        ->leftJoin('shipment_scanning_journeys as ssj_hss_r', function ($join) {
+               ->where('ssj_hss_f.screen_location_id', '=', 26)
+               ->whereRaw('(a.role_id != 1 or a.id is null)')
+               ->whereRaw('ssj_hss_f.id = (select max(id) from shipment_scanning_journeys where shipment_scanning_journeys.shipment_id = hsj_f.shipment_id)');
+      })
+      ->leftJoin('shipment_scanning_journeys as ssj_hss_r', function ($join) {
           $join->on('ssj_hss_r.shipment_id', '=', 'hsj_r.shipment_id')
-                ->whereRaw('ssj_hss_r.id = (
-                              select max(id) 
-                              from shipment_scanning_journeys 
-                              where shipment_scanning_journeys.shipment_id = ssj_hss_r.shipment_id and
-                              shipment_scanning_journeys.screen_location_id = 27
-                              and (ad.role_id != 1 or ad.id is null)
-                          )');
-        })
+               ->where('ssj_hss_r.screen_location_id', '=', 27)
+               ->whereRaw('(ad.role_id != 1 or ad.id is null)')
+               ->whereRaw('ssj_hss_r.id = (select max(id) from shipment_scanning_journeys where shipment_scanning_journeys.shipment_id = hsj_r.shipment_id)');
+      })
       ->leftJoin('shipment_scanning_journey_area_logs as ssj_f', 'ssj_f.shipment_scanning_journey_id', '=', 'ssj_hss_f.id')
       ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
 
