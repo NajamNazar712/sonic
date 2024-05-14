@@ -1021,7 +1021,7 @@ class RetailAdminUserManagementController extends Controller
 
     public function user_edit($id)
     {
-        // $retail_user_family_names = [];
+        $retail_user_family_names = [];
         $retail_user = RetailUser::find($id);
         $retail_user_id = $retail_user->id;
         $trax_centers = RetailTraxCenter::where('status', 1)->get();
@@ -1029,6 +1029,7 @@ class RetailAdminUserManagementController extends Controller
         $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
         $retail_user_family_names_query = RetailUserFamilyInformation::where('retail_user_id', $retail_user_id);
         if ($retail_user_family_names_query->exists()) {
+            $retail_user_family_names_query = $retail_user_family_names_query->first();
             $retail_user_family_names = $retail_user_family_names_query->pluck('family_member_name')->toArray();
         }
             return view('admin.retail.users.edit')->with([

@@ -88,11 +88,11 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="text" name="family_member_name[]" id="father_name" class="form-control" placeholder="Father Name" value="{{ isset($retail_user_family_names[0]) ? $retail_user_family_names[0] : '' }}">
+                    <input type="text" name="family_member_name[]" id="father_name" class="form-control" placeholder="Father Name" value="{{ count($retail_user_family_names) > 0 ? $retail_user_family_names[0] : '' }}">
                 </div>
                 
                 <div class="form-group">
-                    <input type="text" name="family_member_name[]" id="mother_name" class="form-control" placeholder="Mother Name" value="{{ isset($retail_user_family_names[1]) ? $retail_user_family_names[1] : '' }}">
+                    <input type="text" name="family_member_name[]" id="mother_name" class="form-control" placeholder="Mother Name" value="{{ count($retail_user_family_names) > 0 ? $retail_user_family_names[1] : '' }}">
                 </div>
             </div>
 
@@ -100,8 +100,8 @@
                 <div class="form-group">
                     <select name="marital_status" id="marital_status_edit" class="select2 form-control">
                         <option value="" disabled>Select Marital Status</option>
-                        <option value="1" {{ isset($retail_user_family_names[2]) ? '' : 'selected' }}>Single</option>
-                        <option value="2" {{ isset($retail_user_family_names[2]) ? 'selected' : '' }}>Marital</option>
+                        <option value="1" {{ count($retail_user_family_names) > 0 ? '' : 'selected' }}>Single</option>
+                        <option value="2" {{ count($retail_user_family_names) > 0 ? 'selected' : '' }}>Marital</option>
                     </select>
                 </div>                
 
@@ -299,15 +299,19 @@
         });
 
         var preSelectedMaritalStatus = $("#marital_status_edit").val();
-        if (preSelectedMaritalStatus == 2) {
-            $(".marital_details").removeClass("d-none");
-            if ({{ isset($retail_user_family_names[2]) }}) {
-                $("#marital_name_edit").val("{{ $retail_user_family_names[2] }}");
-            }
-            if ({{ isset($retail_user_family_names[3]) }}) {
-                $("#marital_dob_edit").val("{{ $retail_user_family_names[3] }}");
-            }   
-        }
+        // if (preSelectedMaritalStatus == 2) {
+        //     $(".marital_details").removeClass("d-none");
+        //     if ({{ count($retail_user_family_names) > 0 }}) {
+        //         $("#marital_name_edit").val("{{ count($retail_user_family_names[2]) > 0 ? $retail_user_family_names[2] : '' }}");
+        //     } else {
+        //         return;
+        //     }
+        //     if ({{ count($retail_user_family_names) > 0 }}) {
+        //         $("#marital_dob_edit").val("{{ count$retail_user_family_names[3] }}");
+        //     } else {
+        //         return;
+        //     }
+        // }
 
         $("#marital_status_edit").on('change', function(){
             var selectedOption = $(this).val();
@@ -324,7 +328,7 @@
         // Dynamically determine the number of children
         var numChildren = 0;
         @for ($i = 4; $i < count($retail_user_family_names); $i++)
-            @if (isset($retail_user_family_names[$i]))
+            @if (count($retail_user_family_names) > 0))
                 numChildren++;
                 if (numChildren <= 4) {
                     var childName = "{{ $retail_user_family_names[$i] }}";
