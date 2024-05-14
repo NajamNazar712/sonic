@@ -52,12 +52,12 @@ class AdminLogisticSetupController extends Controller
         }
 
         $trax_shipper_detail = TraxShipperDetail::join('users as u','u.id','trax_shipper_details.user_id')
-            ->join('riders as rd','rd.id','=','trax_shipper_details.rider_id')
+            ->leftjoin('riders as rd','rd.id','=','trax_shipper_details.rider_id')
             ->join('trax_products as tp','tp.id','=','trax_shipper_details.trax_product_id')
             ->join('trax_services as ts','ts.id','=','trax_shipper_details.trax_service_id')
-            ->join('trax_piece_settings as ps','ps.id','=','trax_shipper_details.piece_setting_id')
+//            ->join('trax_piece_settings as ps','ps.id','=','trax_shipper_details.piece_setting_id')
             ->leftjoin('routes as r','r.id','=','rd.route_id')
-            ->SELECT('trax_shipper_details.id','u.id as shipper_id','u.name as shipper_name','rd.trax_id as rider_trax_id','rd.name as rider_name','tp.product_name','ts.service_name','r.code as route_code','r.id as route_id','ps.description as piece_setting')
+            ->SELECT('trax_shipper_details.id','u.id as shipper_id','u.name as shipper_name','rd.trax_id as rider_trax_id','rd.name as rider_name','tp.product_name','ts.service_name','r.code as route_code','r.id as route_id')
             ->where('trax_shipper_details.status',1);
 
         $datatables = Datatables::of($trax_shipper_detail)
@@ -94,7 +94,7 @@ class AdminLogisticSetupController extends Controller
             'rider_id' => ['required','integer'],
             'trax_product_id' => ['required','integer'],
             'trax_service_id' => ['required','integer'],
-            'piece_setting_id'=>['required','integer']
+//            'piece_setting_id'=>['required','integer']
 
         ]);
 
@@ -105,12 +105,18 @@ class AdminLogisticSetupController extends Controller
 
         try {
 
+            $shipper_tagging=TraxShipperDetail::where('user_id',$request->user_id)
+                ->where('trax_product_id',$request->trax_product_id);
+            if($shipper_tagging->exists())
+            {
+                return redirect()->back()->with('error','Shipper already tag with rider and product');
+            }
             $shipper_detail = new TraxShipperDetail();
             $shipper_detail->user_id = $request->user_id;
             $shipper_detail->trax_product_id = $request->trax_product_id;
             $shipper_detail->trax_service_id = $request->trax_service_id;
             $shipper_detail->rider_id = $request->rider_id;
-            $shipper_detail->piece_setting_id=$request->piece_setting_id;
+//            $shipper_detail->piece_setting_id=$request->piece_setting_id;
             $shipper_detail->created_by = $user_id;
             $shipper_detail->save();
 

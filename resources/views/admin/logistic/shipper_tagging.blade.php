@@ -27,7 +27,6 @@
                                     <th class="border-primary border-darken-1">Rider Employee ID</th>
                                     <th class="border-primary border-darken-1">Rider Name</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
-                                    <th class="border-primary border-darken-1">Piece Setting</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
@@ -84,7 +83,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Product</label>
                                     <select class="select select2 mb-1" name="trax_product_id" id="product_id_select" data-rule-required="true" data-msg-required="Product is required">
@@ -95,7 +94,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Service</label>
                                     <select class="select select2 mb-1" name="trax_service_id" id="service_id_select" data-rule-required="true" data-msg-required="Service is required">
@@ -105,16 +104,16 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Piece Setting</label>
-                                    <select class="select select2 mb-1" name="piece_setting_id" id="piece_setting_id_select" data-rule-required="true" data-msg-required="Piece Setting is required">
-                                        @foreach($piece_settings as $piece_setting)
-                                            <option value="{{ $piece_setting->id }}">{{ $piece_setting->description }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+{{--                            <div class="col-md-4">--}}
+{{--                                <div class="form-group">--}}
+{{--                                    <label>Piece Setting</label>--}}
+{{--                                    <select class="select select2 mb-1" name="piece_setting_id" id="piece_setting_id_select" data-rule-required="true" data-msg-required="Piece Setting is required">--}}
+{{--                                        @foreach($piece_settings as $piece_setting)--}}
+{{--                                            <option value="{{ $piece_setting->id }}">{{ $piece_setting->description }}</option>--}}
+{{--                                        @endforeach--}}
+{{--                                    </select>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
                         </div>
 
                         <div class="form-group ml-1">
@@ -179,7 +178,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Product</label>
                                     <select class="select select2 mb-1" name="trax_product_id" id="edit_product_id_select" data-rule-required="true" data-msg-required="Product is required">
@@ -190,7 +189,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Service</label>
                                     <select class="select select2 mb-1" name="trax_service_id" id="edit_service_id_select" data-rule-required="true" data-msg-required="Service is required">
@@ -200,16 +199,16 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Piece Setting</label>
-                                    <select class="select select2 mb-1" name="piece_setting_id" id="edit_piece_setting_id_select" data-rule-required="true" data-msg-required="Piece Setting is required">
-                                        @foreach($piece_settings as $piece_setting)
-                                            <option value="{{ $piece_setting->id }}">{{ $piece_setting->description }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+{{--                            <div class="col-md-4">--}}
+{{--                                <div class="form-group">--}}
+{{--                                    <label>Piece Setting</label>--}}
+{{--                                    <select class="select select2 mb-1" name="piece_setting_id" id="edit_piece_setting_id_select" data-rule-required="true" data-msg-required="Piece Setting is required">--}}
+{{--                                        @foreach($piece_settings as $piece_setting)--}}
+{{--                                            <option value="{{ $piece_setting->id }}">{{ $piece_setting->description }}</option>--}}
+{{--                                        @endforeach--}}
+{{--                                    </select>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
                         </div>
 
                         <div class="form-group ml-1">
@@ -581,7 +580,6 @@
                     {data: 'rider_trax_id', name: 'rd.trax_id', class: 'align-middle rider_trax_id'},
                     {data: 'rider_name', name: 'rd.name', class: 'align-middle rider_name'},
                     {data: 'route_code', name: 'r.code', class: 'align-middle route_code'},
-                    {data: 'piece_setting', name: 'ps.description', class: 'align-middle piece_setting'},
                     {data: 'action', name: 'action', class: 'align-middle action'},
 
                 ],
