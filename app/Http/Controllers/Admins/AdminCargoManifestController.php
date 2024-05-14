@@ -5139,8 +5139,8 @@ class AdminCargoManifestController extends Controller
             //           return ['status' => 1, 'error' => 'Shipment`s origin and destination are same or Bag type is not relevant !'];
             //   }
 
-            if (in_array($shipment->shipper_status_id, [5, 14, 25, 31, 36, 38])) // all delivered statuses
-                return ['status' => 1, 'error' => 'Shipment is on out for delivery !'];
+            if (in_array($shipment->shipper_status_id, [5,6,7,8,9,15, 14, 25, 31, 36, 38])) // all delivered statuses
+                return ['status' => 1, 'error' => 'Shipment is already received at destination and is pending for delivery !'];
 
             if ($shipment->shipper_status_id == 1) // shipment not arrived at center
                 return ['status' => 1, 'error' => 'Shipment not arrived at center yet !'];
