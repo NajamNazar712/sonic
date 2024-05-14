@@ -90,7 +90,8 @@ class ShipperInternationalShipmentBookController extends Controller
 
     public function store(Request $request) {
         $user_id = session('user_id');
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+        $account_type = session('account_type');
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$account_type)){
             return back()->with(['error' => "Can not process Zero COD Shipment, due to pending negative payable amount."]);
         }
         $service_type_id = 1;
@@ -337,7 +338,8 @@ class ShipperInternationalShipmentBookController extends Controller
     }
     public function excel_store(Request $request) {
         $user_id = session('user_id');
-        $pending_payable = PendingPayment::check_negative_payable($user_id);
+        $account_type = session('account_type');
+        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
 
         Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
             if ($value == 0) {
