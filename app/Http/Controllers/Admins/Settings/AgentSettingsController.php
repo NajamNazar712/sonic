@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Settings;
 
+use App\ChangeLogs;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -82,9 +83,25 @@ class AgentSettingsController extends Controller
      public function admin_agent_type_update(Request $request)
      {
          if ($agent_type = Admin::find($request->admin_id)) {
-             $agent_type->agent_caller_type = $request->agent_type;
-             $agent_type->save();
-             return redirect()->back()->with('success', 'Agent Type Updated!');
+
+            $oldData = ['agent_caller_type' => $agent_type->agent_caller_type];
+
+            $agent_type->agent_caller_type = $request->agent_type;
+            $agent_type->save();
+
+            $newData = ['agent_caller_type' => $agent_type->agent_caller_type];
+
+            // Log the changes
+            ChangeLogs::create([
+                'table_name' => $agent_type->getTable(),
+                'record_id' => $agent_type->getKey(),
+                'old_data' => $oldData,
+                'new_data' => $newData,
+                'updated_by' => Auth::id(),
+            ]);
+
+            return redirect()->back()->with('success', 'Agent Type Updated!');
+
          } else {
              return redirect()->back()->with('error', 'Error Updating Agent Type!');
          }
@@ -99,8 +116,21 @@ class AgentSettingsController extends Controller
 
         foreach ($request->admin_ids as $admin_id) {
             if ($agent_type = Admin::find($admin_id)) {
+                $oldData = ['agent_caller_type' => $agent_type->agent_caller_type];
+
                 $agent_type->agent_caller_type = $agent_type_id;
                 $agent_type->save();
+
+                $newData = ['agent_caller_type' => $agent_type->agent_caller_type];
+
+                // Log the changes
+                ChangeLogs::create([
+                    'table_name' => $agent_type->getTable(),
+                    'record_id' => $agent_type->getKey(),
+                    'old_data' => $oldData,
+                    'new_data' => $newData,
+                    'updated_by' => Auth::id(),
+                ]);
             }
         }
 

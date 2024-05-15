@@ -45,6 +45,7 @@
                     <div class="form-group">
                         {{-- <input type="text" name="name" class="form-control" placeholder="Name*" maxlength="50" data-rule-required="true" data-msg-required="Agent Type Name is required"> --}}
                         <select name="agent_type" id="update_agent_type_id" class="form-control" data-rule-required="true"  data-msg-required="Agent Type is required">
+                            <option disabled selected>Select Agent Type</option>
                             @foreach($agent_types as $agent_type)
                                 <option value="{{ $agent_type->id }}"> {{ $agent_type->name }} </option>
                             @endforeach
