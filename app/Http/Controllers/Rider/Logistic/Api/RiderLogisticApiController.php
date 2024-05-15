@@ -122,7 +122,7 @@ class RiderLogisticApiController extends Controller
             $already_used_child_cns =[];
             try {
 
-                if (isset($bookig_data))
+                if (!empty($bookig_data))
                 {
                     //check booking batch length for creating a batch
                     $batch_length=10;

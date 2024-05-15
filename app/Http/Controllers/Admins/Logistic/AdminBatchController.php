@@ -61,13 +61,13 @@ class AdminBatchController extends Controller
             })->addColumn('action', function ($booking_batch) use ($user_id) {
                 if (session('role_id') == 1 || count(array_intersect([977], session('permissions'))) !== 0) {
 
-                    if ($booking_batch->user_id == $user_id)
+                    $button='';
+                    if ($booking_batch->user_id == $user_id && $booking_batch->status_id==2 ||  $booking_batch->status_id==3)
                     {
                         $button = '<a href="' . route("admin.logistic.batch.batch_bookings", ["batch_id" => $booking_batch->id]) . '" class="btn btn-secondary btn-primary btn-sm "><div class="row no-gutters align-items-center"><div class="col-9">View Batch</div></div></a>';
 //                        $button =  '<button type="button" class="btn btn-secondary btn-primary btn-sm view_batch">View Batch</button>';
-                    } else{
+                    } else if($booking_batch->status_id==1){
                         $button = '<button type="button" class="btn btn-secondary btn-primary btn-sm assign_batch">Select this batch</button>';
-
                     }
                     return $button;
 

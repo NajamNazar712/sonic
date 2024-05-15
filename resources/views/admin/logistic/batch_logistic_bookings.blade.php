@@ -27,7 +27,7 @@
                                     <th class="border-primary border-darken-1">Product</th>
                                     <th class="border-primary border-darken-1">Service</th>
                                     <th class="border-primary border-darken-1">Booking Weight</th>
-                                    <th class="border-primary border-darken-1">Total Pieces</th>
+                                    <th class="border-primary border-darken-1">Total Pieces</th>s
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Consignee Name</th>

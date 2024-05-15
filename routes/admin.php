@@ -4268,6 +4268,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('assign_batch','Admins\Logistic\AdminBatchController@booking_batch_assign')->name('assign_batch');
             Route::get('batch_bookings/{batch_id}', 'Admins\Logistic\AdminLogisticBookingController@batch_bookings')->name('batch_bookings');
             Route::post('batch_booking_list','Admins\Logistic\AdminLogisticBookingController@batch_booking_list')->name('batch_booking_list');
+            Route::post('release_batch','Admins\Logistic\AdminLogisticBookingController@release_batch')->name('release_batch');
+
 
 
 //            Route::post('store', 'Admins\Logistic\AdminBatchController@batch_booking_store')->name('store');

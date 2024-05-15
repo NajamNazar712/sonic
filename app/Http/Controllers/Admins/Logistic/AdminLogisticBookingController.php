@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins\Logistic;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Logistic\TraxBookingBatch;
 use App\Http\Models\Admin\Logistic\TraxBookingBatchAssign;
 use App\Http\Models\Admin\Logistic\TraxBookingPiece;
 use App\Http\Models\Admin\Logistic\TraxItemInsurance;
@@ -108,7 +109,7 @@ class AdminLogisticBookingController extends Controller
     {
         $admin_id = session('id');
         $batch_assign=TraxBookingBatchAssign::select('bb.id as batch_id')->join('trax_booking_batches as bb','bb.id','trax_booking_batch_assigns.batch_id')
-            ->where('bb.status_id',2)->where('bb.id',$batch_id)->where('trax_booking_batch_assigns.user_id',$admin_id);
+            ->whereIn('bb.status_id',[2,3])->where('bb.id',$batch_id)->where('trax_booking_batch_assigns.user_id',$admin_id);
         if($batch_assign->exists())
         {
             $batch_assign = $batch_assign->first();
@@ -121,20 +122,23 @@ class AdminLogisticBookingController extends Controller
     {
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
             ->join('trax_booking_batch_details as bd','bd.booking_id','trax_logistic_bookings.id')
+            ->join('trax_booking_batches as bb','bb.id','bd.batch_id')
             ->leftjoin('user_shipping_infos as usi','usi.id','=','trax_logistic_bookings.shipper_address_id')
             ->leftjoin('trax_products as p','p.id','=','trax_logistic_bookings.product_id')
             ->leftjoin('trax_services as s','s.id','=','trax_logistic_bookings.service_id')
             ->leftjoin('trax_stations as oc','oc.id','trax_logistic_bookings.origin_id')
             ->leftjoin('trax_stations as dc','dc.id','trax_logistic_bookings.destination_id')
-            ->select('trax_logistic_bookings.id','trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','p.product_name','trax_logistic_bookings.service_id','s.service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address')
+            ->select('trax_logistic_bookings.id','bb.status_id','trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','p.product_name','trax_logistic_bookings.service_id','s.service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address')
             ->where('bd.batch_id',$request->batch_id);
-
 
 
         $datatables = Datatables::of($logistic_bookings)
             ->addColumn('action',function ($logistic_bookings) use ($request){
                 if (session('role_id') == 1 || count(array_intersect([980], session('permissions'))) !== 0) {
-                      $edit_button = '<a href="' . route("admin.logistic.edit", ["batch_id"=>$request->batch_id,"booking_id" => $logistic_bookings->id]) . '" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
+                    $dropdown='';
+                    if ($logistic_bookings->status_id==2)
+                    {
+                        $edit_button = '<a href="' . route("admin.logistic.edit", ["batch_id"=>$request->batch_id,"booking_id" => $logistic_bookings->id]) . '" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
 
                     $dropdown = '
                             <div class="btn-group">
@@ -147,6 +151,7 @@ class AdminLogisticBookingController extends Controller
                             </div>
                        
                          ';
+                    }
                     return $dropdown;
                 } else{
                     return '';
@@ -156,6 +161,33 @@ class AdminLogisticBookingController extends Controller
         return $datatables->make(true);
     }
 
+    public function release_batch(Request $request)
+    {
+           $validate=Validator::make($request->all(),[
+                    'batch_id'=>['required','integer']
+           ]);
+           if($validate->fails())
+           {
+               return response()->json(['status'=>1,'error'=>'Batch id invalid!']);
+           }
+
+           $booking_batch=TraxBookingBatch::where('id',$request->batch_id)->whereIn('status_id',[1,2]);
+           if($booking_batch->exists())
+           {
+                $booking_batch=$booking_batch->first();
+                if($booking_batch->total_bookings==$booking_batch->complete_bookings)
+                {
+                    $booking_batch->status_id=1;
+                }else{
+                    $booking_batch->status_id=3;
+                }
+                $booking_batch->save();
+                return response()->json(['status'=>0,'success'=>'Batch release successfully!']);
+//                return redirect()->route('admin.logistic.batch.index');
+           }
+
+           return response()->json(['status'=>1,'error'=>'Batch not found!']);
+    }
     /**
      * Show the form for creating a new resource.
      *

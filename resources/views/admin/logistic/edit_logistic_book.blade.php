@@ -579,9 +579,16 @@
                                             <div class="row mt-4">
                                                 <div class="col-md-12 text-center" style="border: 1px solid lightgrey; padding:7px;">
                                                     <button type="submit" name="book" id="add" class="btn btn-primary w-50" value="Book">Update Booking</button>
-                                                    @if(isset($batch_id) && $batch_id!=0)
+{{--                                                    @if(isset($batch_id) && $batch_id!=0)--}}
                                                         <a href="{{route('admin.logistic.batch.batch_bookings',['batch_id'=>$batch_id])}}" class="btn btn-danger">Skip Entry</a>
-                                                    @endif
+
+{{--                                                    @endif--}}
+                                                </div>
+                                            </div>
+                                            <div class="row mt-4">
+                                                <div class="col-md-12 text-center">
+                                                    <input type="hidden" name="batch_id" value="{{$batch_id}}">
+                                                    <button type="button" name="batch_release" id="batch_release" class="btn btn-primary w-50" value="Book">Release Batch</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -835,16 +842,37 @@
                 }
             }); 
 
+            $("#batch_release").on('click',function (){
+                var batch_id = $("input[name=batch_id]").val();
+                $.ajax({
+                    url: '{{ route('admin.logistic.batch.release_batch') }}',
+                    method: 'POST',
+                    data: {
+                        'batch_id': batch_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data){
 
+                    if(data.status==0)
+                    {
+                        window.location = '{{route('admin.logistic.batch.index')}}';
+                    }else{
+                        toastr.error(data.error ,'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
 
 
 
 
         function magnify(imgID, zoom) {
-            
+
             var img, glass, w, h, bw;
             img = document.getElementById(imgID);
-           
+
             /*create magnifier glass:*/
             glass = document.createElement("DIV");
             glass.setAttribute("class", "img-magnifier-glass");
@@ -864,7 +892,7 @@
             glass.addEventListener("touchmove", moveMagnifier);
             img.addEventListener("touchmove", moveMagnifier);
             function moveMagnifier(e) {
-             
+
                 $(".img-magnifier-glass").css('display','block');
                 var pos, x, y;
                 /*prevent any other actions that may occur when moving over the image*/
