@@ -1332,7 +1332,7 @@ trait RvTrait
                                 'assigned_to_type_id' => Null,
                                 'assigned_by' => Null,
                             ];
-                        $this->data_rv_shipment_assign_agent_details($data);
+                        $this->data_rv_shipment_assign_agent_details($data, $ticketId);
                         break;
                     }
                     
@@ -1958,7 +1958,7 @@ trait RvTrait
         }
     }
 
-    protected function data_rv_shipment_assign_agent_details($data){
+    protected function data_rv_shipment_assign_agent_details($data, $ticketId = null){
         $rv_shipment_assign_agent_details = new RvShipmentAssignAgentDetails();
         $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $data['rv_shipment_assign_agent_id'];
         $rv_shipment_assign_agent_details->agent_id = $data['agent_id'];
@@ -1977,6 +1977,11 @@ trait RvTrait
         $rv_shipment_assign_agent_details->assigned_to_type_id  = $data['assigned_to_type_id'];
         $rv_shipment_assign_agent_details->assigned_by  = $data['assigned_by'];
         $rv_shipment_assign_agent_details->save();
+
+        if($ticketId)
+        {
+            RvShipmentTicket::find($ticketId)->update(['in_progress'=>1]);
+        }
     }
 
     // Heading: N/A
