@@ -115,12 +115,12 @@ class LeadAPIController extends Controller
             $new_lead->address = $request->address;
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
-            NotificationsController::send(113, $new_lead);
-            if(isset($new_lead->sale_person_id))
+            if(isset($sales_person_id))
             {
+                  NotificationsController::send(113, $new_lead);
 
-                $new_lead = $new_lead->get();
-                NotificationsController::send(204, $new_lead,$sales_person_id);
+                  $leads=Lead::where('id',$new_lead->id)->get();
+                  NotificationsController::send(204, $leads,$sales_person_id);
             }
             return response()->json(['status' => 0,'success' => 'Lead added successfully']);
 

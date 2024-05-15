@@ -6886,7 +6886,6 @@ class NotificationsController extends Controller
                     $route = route('cod.register', ['lead_id' => $lead->id]);
                     if ($lead != null) {
                         $sales_person = Admin::find($lead->sale_person_id);
-
                         if ($sales_person->official_phone_number != null) {
                             $phone_number = $sales_person->official_phone_number;
                         } else {
@@ -6894,10 +6893,10 @@ class NotificationsController extends Controller
                         }
 
                         $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
-                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
-                        <img src="' . asset('img/sonic_logo_new.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
-                        <img src="' . asset('img/trax_logo_new.png') . '" alt="Trax" style="display: inline-block; width: 15%">
-                    </div>';
+                        <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
+                            <img src="' . asset('img/sonic_logo_new.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
+                            <img src="' . asset('img/trax_logo_new.png') . '" alt="Trax" style="display: inline-block; width: 15%">
+                        </div>';
 
                         if (strpos($body, '[contact_person]') !== FALSE) {
                             $body = str_replace('[contact_person]', $lead->contact_person, $body);
@@ -7173,6 +7172,7 @@ class NotificationsController extends Controller
                     $leads = $reference_1_id;
                     $sale_person_id = $reference_2_id;
                     $sale_person = Admin::find($sale_person_id);
+
                     if ($sale_person) {
                         $html = '<table style="width:100%;">';
                         $html .= '<thead><tr>
