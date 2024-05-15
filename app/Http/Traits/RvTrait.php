@@ -2212,7 +2212,6 @@ trait RvTrait
                 $this->data_rv_shipment_assign_agent_details($updated_data);
             }
 
-            Log::info(print_r($updated_data,true));
             if ($updated_data['rv_state_id'] != 3)
             {
                 //Remove Shipment from RV Shipment Ticket
