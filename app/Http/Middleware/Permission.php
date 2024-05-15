@@ -997,8 +997,12 @@ class Permission
             'settings.project_arrival_shippers.index' => 828,
             'settings.project_arrival_shippers.store' => 828,
 
-            'admin.settings.rv_disable_shippers.index'=> 889,
-            'admin.settings.rv_disable_shippers.store'=> 889,
+            'settings.disable_email_on_arrival.index'=> 978,
+            'settings.disable_email_on_arrival.update'=> 978,
+            
+            'settings.rv_disable_shippers.index'=> 889,
+            'settings.rv_disable_shippers.store'=> 889,
+            
             'settings.background_image.index' => 891,
             'settings.background_image.store' => 891,
 

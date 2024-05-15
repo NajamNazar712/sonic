@@ -8764,6 +8764,86 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
+    //Disable Email On Arrival Status Page
+    public function disable_email_on_arrival_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 783);
+        
+        $excluded_shippers = array();
+        $only_shippers = array();
+        
+        $excluded_shipper = GlobalSettings::where('type', 'disable_email_on_arrival_all_shippers_except');
+        $only_shipper = GlobalSettings::where('type', 'disable_email_on_arrival_only_shippers');
+
+        if ($excluded_shipper->exists()) {
+            $excluded_shipper = $excluded_shipper->first();
+            $excluded_shippers = array_map('intval', explode(',', $excluded_shipper->text));
+        } else {
+            $excluded_shipper = new GlobalSettings();
+            $excluded_shipper->setting_value = 0;
+            $excluded_shipper->type = "disable_email_on_arrival_all_shippers_except";
+            $excluded_shipper->save();
+        }
+
+        if ($only_shipper->exists()) {
+            $only_shipper = $only_shipper->first();
+            $only_shippers = array_map('intval', explode(',', $only_shipper->text));
+        } else {
+            $only_shipper = new GlobalSettings();
+            $only_shipper->setting_value = 0;
+            $only_shipper->type = "disable_email_on_arrival_only_shippers";
+            $only_shipper->save();
+        }
+
+        $shippers = User::select('id', 'name')->where('status', 3)->get();
+
+        $disable_all_shippers_toggle = $excluded_shipper->setting_value;
+
+        return view('admin.settings.disable_email_on_arrival_index')->with([
+                'disable_all_shippers_toggle' => $disable_all_shippers_toggle,
+                'shippers' => $shippers, 
+                'excluded_shippers' => $excluded_shippers,
+                'only_shippers' => $only_shippers
+            ]);
+    
+    }
+
+    public function disable_email_on_arrival_update(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 784);
+
+        $excluded_users = $request->has('excluded_users') ? implode(',', $request->excluded_users) : null;
+        $only_users = $request->has('only_users') ? implode(',', $request->only_users) : null;
+
+        if ($request->has('all_shipper_toggle')) {
+            // Settings for disabling all shippers except given ones
+            GlobalSettings::updateOrCreate(
+                ['type' => 'disable_email_on_arrival_all_shippers_except'],
+                ['setting_value' => 1, 'text' => $excluded_users]
+            );
+
+            // Settings for disabling only given shippers
+            GlobalSettings::updateOrCreate(
+                ['type' => 'disable_email_on_arrival_only_shippers'],
+                ['setting_value' => 0, 'text' => $only_users]
+            );
+        } else {
+            // Update settings if toggle is not enabled
+            GlobalSettings::updateOrCreate(
+                ['type' => 'disable_email_on_arrival_all_shippers_except'],
+                ['setting_value' => 0, 'text' => $excluded_users]
+            );
+
+            GlobalSettings::updateOrCreate(
+                ['type' => 'disable_email_on_arrival_only_shippers'],
+                ['setting_value' => 1, 'text' => $only_users]
+            );
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+
     public function get_city_area(Request $request)
     {
         if (isset($request->city_id)) {
