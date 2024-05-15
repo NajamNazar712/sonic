@@ -58,7 +58,7 @@ class AdminLogisticSetupController extends Controller
 //            ->join('trax_piece_settings as ps','ps.id','=','trax_shipper_details.piece_setting_id')
             ->leftjoin('routes as r','r.id','=','rd.route_id')
             ->SELECT('trax_shipper_details.id','u.id as shipper_id','u.name as shipper_name','rd.trax_id as rider_trax_id','rd.name as rider_name','tp.product_name','ts.service_name','r.code as route_code','r.id as route_id')
-            ->where('trax_shipper_details.status',1);
+            ->where('trax_shipper_details.git ',1);
 
         $datatables = Datatables::of($trax_shipper_detail)
             ->addColumn('action',function ($trax_shipper_detail){

@@ -180,7 +180,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Product</label>
+                                    <label>Parent Product</label>
                                     <select class="select select2 mb-1" name="trax_product_id" id="edit_product_id_select" data-rule-required="true" data-msg-required="Product is required">
                                         @foreach($products as $product)
                                             <option value="{{ $product->id }}">{{ $product->product_name }}</option>

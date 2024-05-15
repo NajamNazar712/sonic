@@ -16,7 +16,8 @@ class CreateTraxShipperDetailsTable extends Migration
         Schema::create('trax_shipper_details', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id');
-            $table->integer('trax_product_id');
+//            $table->integer('trax_product_id');
+            $table->integer('trax_parent_product_id')->nullable();
             $table->integer('trax_service_id')->nullable();
             $table->integer('rider_id')->nullable();
             $table->integer('route_id')->nullable();
