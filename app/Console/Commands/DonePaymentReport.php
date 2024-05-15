@@ -43,6 +43,6 @@ class DonePaymentReport extends Command
     {
         $date = Carbon::today()->format('Y-m-d');
         AdminReportsEmailController::done_payment($date . ' 00:00:00');
-        Log::channel('cronJobLog')->info('s ' .'report:donepayment Running');
+        //Log::channel('cronJobLog')->info('s ' .'report:donepayment Running');
     }
 }

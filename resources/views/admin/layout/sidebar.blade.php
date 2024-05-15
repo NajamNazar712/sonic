@@ -1330,7 +1330,7 @@
 
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64,65,66,67,68,69,70,71,72,73,74,75,113,138,148,153,156,169,170,172,176,200,210,258,259,263,264,275,300,301,319,327,328,337,356,401,437,444,472,476,493,502,524,532,555,613,614,624,642,647,653,679,673,676,688,705,717,780,784,786,793,794,823,824,839,886,892,901,915,925,935,936,937,950],session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64,65,66,67,68,69,70,71,72,73,74,75,113,138,148,153,156,169,170,172,176,200,210,258,259,263,264,275,300,301,319,327,328,337,356,401,437,444,472,476,493,502,524,532,555,613,614,624,642,647,653,679,673,676,688,705,717,780,784,786,793,794,823,824,839,886,892,901,911,915,925,935,936,937,950],session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i
                                 class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">
@@ -1747,6 +1747,10 @@
 
                         @if (session('role_id') == 1 || in_array(899, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.csat_report.index') }}">Csat Report</a></li>
+                        @endif
+                        
+                        @if (session('role_id') == 1 || in_array(911, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.ops_report.index') }}">OPS Report</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(915, session('permissions')))

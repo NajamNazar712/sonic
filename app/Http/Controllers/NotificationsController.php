@@ -3900,7 +3900,7 @@ class NotificationsController extends Controller
                     // }
 
                     // self::email($subject, $body, $to, $cc);
-
+                    $to = [];
                     $cc = ['shahbaz.abbasi@trax.pk'];
 
                     self::email($subject, $body, $to, $cc);
@@ -11039,7 +11039,7 @@ class NotificationsController extends Controller
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account ' . ($status) . ' Date</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">' . ($status) . ' Reason</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account ' . ($status) . ' Remarks</th>';
-
+                    $reason = BlockDisableReasonUser::where('id', $user->blacklist_reason_1)->first();
                     $html .= '</thead>';
                     $html .= '<tbody>';
                     $html .= '<tr>';
@@ -11047,7 +11047,7 @@ class NotificationsController extends Controller
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. count($sale_person_name_array) > 0 ? $sale_person_name : '-' .'</td>';
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.Carbon::parse($user->activated_at).'</td>';
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? Carbon::parse($user->blocked_at) : Carbon::parse($user->disable_at))  .'</td>';
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? BlockDisableReasonUser::where('id', $user->blacklist_reason_1)->first()->name : BlockDisableReasonUser::where('id', $user->disable_reason_1)->first()->name).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' && $reason ? $reason->name : '').'</td>';
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? $user->blacklist_reason : $user->disable_reason) .'</td>';
 
                     $html .= '</tr>';
