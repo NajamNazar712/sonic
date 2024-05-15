@@ -48,7 +48,8 @@ trait RiderCns
                 $arr[]=[
                     'product_id'=>$rider_cns[0]->product_id,
                     'cn_from'=>$sequence['start'],
-                    'cn_to'=>$sequence['end']
+                    'cn_to'=>$sequence['end'],
+                    'quantity'=>0,
                 ];
             }
 
