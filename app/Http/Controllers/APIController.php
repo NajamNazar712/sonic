@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\PendingPayment;
 use DB;
 use SnappyPDF;
 use Validator;
@@ -122,6 +123,7 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 use App\Http\Models\Admin\Settings\GeneralSetting;
+use App\Http\Models\Admin\ShipperInterceptExclude;
 
 class APIController extends Controller
 {
@@ -272,7 +274,7 @@ class APIController extends Controller
     {
 
         $validator = Validator::make($req->all(), [
-            'link'       => 'required',
+            'link'       => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -280,7 +282,13 @@ class APIController extends Controller
         }
 
         $Shipment = new Shipment();
-        $shipmentDetails = $Shipment->where('trax_pay_transactions.link', $req->link)
+        $shipmentDetails = $Shipment->where(function($query) use($req){
+            if(isset($req->trans_id) && !empty($req->trans_id)) {
+                $query->where('trax_pay_transactions.id', $req->trans_id);
+            }else{
+                $query->where('trax_pay_transactions.link', $req->link);
+            }
+        })
             ->join('cities', 'shipments.consignee_city_id', 'cities.id')
             ->join('trax_pay_transactions', 'shipments.id', 'trax_pay_transactions.shipment_id')
             ->select(
@@ -289,7 +297,6 @@ class APIController extends Controller
                 'shipments.consignee_address as address',
                 'trax_pay_transactions.fintech_amount as fintech_amount',
                 'trax_pay_transactions.cod_amount as codAmount',
-                'cities.name as city_name',
                 'cities.name as city_name'
             )->first();
 
@@ -481,7 +488,9 @@ class APIController extends Controller
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
         $flag = null;
-
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
 
         // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
         //     if ($value) {
@@ -782,12 +791,20 @@ class APIController extends Controller
             }
         }
 
-        $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
-        if ($shipment_pre_book->exists()) {
+        // $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
+        // if ($shipment_pre_book->exists()) {
+        //     $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
+        //         $query->where('user_id', $user_id);
+        //     })];
+        // }
+        
+        $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id)->get();
+        if ($shipment_pre_book->isNotEmpty()) {
             $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })];
-        } else {
+        }
+        else {
             if ($user_type['restrict_order_id'] == 1) {
                 $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
@@ -856,18 +873,42 @@ class APIController extends Controller
             }
             $return_address_id = NULL;
             $service_type_id = $request->input('service_type_id');
-            if ($shipment_pre_book->exists()) {
-                $shipment_pre_book = $shipment_pre_book->first();
-                $length = strlen($shipment_pre_book->prefix);
-                $check_order_id = str_split($request->input('order_id'), $length);
-                if ($shipment_pre_book->prefix != $check_order_id[0]) {
-                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
-                } else {
-                    if (!array_key_exists(1, $check_order_id)) {
-                        return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            // if ($shipment_pre_book->exists()) {
+            //     $shipment_pre_book = $shipment_pre_book->first();
+            //     $length = strlen($shipment_pre_book->prefix);
+            //     $check_order_id = str_split($request->input('order_id'), $length);
+            //     if ($shipment_pre_book->prefix != $check_order_id[0]) {
+            //         return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            //     } else {
+            //         if (!array_key_exists(1, $check_order_id)) {
+            //             return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            //         }
+            //     }
+            // }
+            
+            if ($shipment_pre_book->isNotEmpty()) {
+                $shipment_pre_book = $shipment_pre_book->pluck('prefix')->toArray();
+                $order_id = $request->input('order_id');
+                $prefix_matched = false;
+
+                foreach ($shipment_pre_book as $prefix) {
+                    $length = strlen($prefix);
+                    $check_order_id = substr($order_id, 0, $length);
+                    if ($prefix == $check_order_id) {
+                        $prefix_matched = true;
+                        $remaining_order_id = substr($order_id, $length);
+                        if (empty($remaining_order_id)) {
+                            return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                        }
+                        break;
                     }
                 }
-            } else {
+                // If none of the prefixes matched
+                if (!$prefix_matched) {
+                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                }
+            } 
+            else {
                 $shipment_pre_book = null;
             }
             if ($service_type_id != 5) {
@@ -1497,6 +1538,10 @@ class APIController extends Controller
     {
         $user_id = $request->user_id;
         $flag = null;
+
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
 
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
@@ -4832,7 +4877,6 @@ class APIController extends Controller
     {
         $user_id = $request->user_id;
 
-
         $rules = [
             'type' => ['required', 'integer', 'digits_between:1,3'],
             'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
@@ -4905,6 +4949,7 @@ class APIController extends Controller
                             'shipment_id' => $shipment->id,
                             'rv_assign_agent_status_id' => 1, //ReturnConfirm
                             'updated_by_id' =>  $user_id,
+                            'type_id'=> 3, // set the user_type_id 3 against to the shipper default function set is 1.
                         ];
                         $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
@@ -4964,7 +5009,10 @@ class APIController extends Controller
                                 'shipment_id' => $shipment->id,
                                 'rv_assign_agent_status_id' => 2, //Reattempt
                                 'updated_by_id' =>  $user_id,
+                                'state_id' => 3,//Open rv state id 3 is Open
+                                'type_id'=> 3, // set the user_type_id 3 against to the shipper default function set is 1.
                             ];
+                           
                             $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
 
@@ -4976,12 +5024,19 @@ class APIController extends Controller
                     }
                     return response()->json(['status' => 1, 'message' => 'Shipment not found!']);
                 } elseif ($request->type == 3) {
+
                     $rules = [
                         'consignee_type' => ['required', 'integer', 'between:1,2'],
                     ];
                     $validate = Validator::make($request->all(), $rules, $this->messages);
 
                     $validate->setAttributeNames($this->names);
+
+                    $exclude_shipper = ShipperInterceptExclude::where('user_id', $user_id)->where('exclude_shipper', 1)->first();
+
+                    if($exclude_shipper){
+                        return response()->json(['status' => 1, 'message' => 'You are not allowed to mark intercept, contact sales person']);
+                    }
 
                     if ($validate->fails()) {
                         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
@@ -4997,6 +5052,12 @@ class APIController extends Controller
                             $validate = Validator::make($request->all(), $rules, $this->messages);
 
                             $validate->setAttributeNames($this->names);
+
+                            $disable_same_consignee = ShipperInterceptExclude::where('user_id', $user_id)->where('same_consignee', 1)->first();
+                            if($disable_same_consignee){
+                                return response()->json(['status' => 1, 'message' => 'You are not allowed to mark intercept - same consignee, contact sales person']);
+                            }
+
 
                             if ($validate->fails()) {
                                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
@@ -5073,6 +5134,7 @@ class APIController extends Controller
                                                 'shipment_id' => $shipment->id,
                                                 'rv_assign_agent_status_id' => 4, //Intercept Approved
                                                 'updated_by_id' =>  $user_id,
+                                                'type_id'=> 3, // set the user_type_id 3 against to the shipper default function set is 1.
                                             ];
                                             $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
@@ -5090,7 +5152,9 @@ class APIController extends Controller
                                     return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment->status_shipper->name . ' against Tracking Number: ' . $shipment->tracking_number]);
                                 }
                             }
-                        } else {
+                        } 
+                        
+                        else {
                             //different consignee
                             $rules = [
 
@@ -5106,6 +5170,14 @@ class APIController extends Controller
                             $validate = Validator::make($request->all(), $rules, $this->messages);
 
                             $validate->setAttributeNames($this->names);
+
+
+                            $disable_different_consignee = ShipperInterceptExclude::where('user_id', $user_id)->where('different_consignee', 1)->first();
+                            if($disable_different_consignee){
+                                return response()->json(['status' => 1, 'message' => 'You are not allowed to mark intercept - different consignee, contact sales person']);
+                            }
+
+
 
                             if ($validate->fails()) {
                                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
@@ -7578,7 +7650,13 @@ class APIController extends Controller
         $shipments = Shipment::join('delivery_note_shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
             ->join('delivery_notes', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
             ->join('trax_pay_transactions', 'shipments.id', 'trax_pay_transactions.shipment_id')
-            ->where('trax_pay_transactions.link', $req->link)
+            ->where(function($query) use($req){
+                if(isset($req->trans_id) && !empty($req->trans_id)) {
+                    $query->where('trax_pay_transactions.id', $req->trans_id);
+                }else{
+                    $query->where('trax_pay_transactions.link', $req->link);
+                }
+            })
             ->select(
                 'delivery_notes.rider_id as rider',
                 'shipments.user_id as shipper_id',
@@ -7747,7 +7825,7 @@ class APIController extends Controller
                 }
                 return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $errors]);
             } else {
-
+                
                 $retail_note_cash_collection_id = $request->retail_note_cash_collection_id;
                 $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);
                 if ($retail_note->exists()) {
@@ -7769,7 +7847,7 @@ class APIController extends Controller
                             $admin_trax_id = $admin->trax_id;
                             $admin_cnic = $admin->cnic;
                         }
-                        return response()->json(['status' => 1, 'retail_note_id' =>  str_pad($retail_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'admin_name' => $admin_name, 'admin_trax_id' => $admin_trax_id, 'admin_cnic' => $admin_cnic]);
+                        return response()->json(['status' => 0, 'retail_note_id' =>  str_pad($retail_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'admin_name' => $admin_name, 'admin_trax_id' => $admin_trax_id, 'admin_cnic' => $admin_cnic]);
                     } else {
                         return response()->json(['status' => 0, 'message' => 'Retail Note restricted!']);
                     }
@@ -7778,7 +7856,7 @@ class APIController extends Controller
                 }
             }
         } else {
-            return ['status' => 2, 'message' => 'Access Denied!'];
+            return ['status' => 0, 'message' => 'Access Denied!'];
         }
     }
 
@@ -7860,7 +7938,7 @@ class APIController extends Controller
                 $amount = $request->amount;
                 $existing_hbl_konnect_transaction = HblKonnectTransactionRetail::where('transaction_id', $transaction_id);
                 if ($existing_hbl_konnect_transaction->exists()) {
-                    return ['status' => 1, 'message' => 'Transaction Already Exists !'];
+                    return ['status' => 2, 'message' => 'Transaction Already Exists !'];
                 } else {
                     $retail_note = RetailCashDeposit::where('id', $retail_note_id);
                     if ($retail_note->exists()) {
@@ -7903,11 +7981,11 @@ class APIController extends Controller
                     $hbl_konnect_transaction->amount = $amount;
                     $hbl_konnect_transaction->save();
 
-                    return ['status' => 1, 'message' => 'Request completed successfully!'];
+                    return ['status' => 1, 'message' => 'Payment completed successfully!'];
                 }
             }
         } else {
-            return ['status' => 2, 'message' => 'Access Denied!'];
+            return ['status' => 0, 'message' => 'Access Denied!'];
         }
     }
 
@@ -8544,6 +8622,10 @@ class APIController extends Controller
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
         $flag = null;
+
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
 
         // check if user_id is 2234 or not
         if ($user_id != 2234 && $user_id != 1049) {

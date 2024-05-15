@@ -88,6 +88,11 @@ class Employee extends Model
         return $this->belongsTo('App\Http\Models\CityArea', 'area_id', 'id');
     }
 
+    public function employee_status()
+    {
+        return $this->belongsTo('App\Http\Models\HR\EmployeeStatus', 'status_id', 'id');
+    }
+
 
     
 

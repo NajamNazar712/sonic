@@ -113,6 +113,13 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <select name="service_type_select" id="service_type_select" class="select2">
+                            @foreach($service_types as $service_type)
+                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
 
                     <div class="col-4">
@@ -175,6 +182,7 @@
                         <th class="border-primary border-darken-1">Case Nature Type</th>
                         <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -405,6 +413,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Service Type",
+                allowClear:true,
+            });
             $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -464,6 +477,7 @@
                             head.push('Case Nature Type');
                             head.push('Description');
                             head.push('Shipper');
+                            head.push('Service Type');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
@@ -517,6 +531,8 @@
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
                                 row.push(values.shipper_name);
+                                row.push(values.service_type);
+
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
@@ -611,7 +627,7 @@
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                         d.search_request_number = $('#search_request_number').val();
-
+                        d.service_type_select = $('#service_type_select').val();
                     }
                 },
                 // rowId: 'shipment_id',
@@ -626,6 +642,8 @@
                     {data: 'case_nature_type', name: 'crcnt.type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
+                    { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
+
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},

@@ -451,7 +451,7 @@
 												<span class="input-group-text">Rs</span>
 											</div>
 
-											<input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
+											<input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required" data-rule-remote="{{ route('cod.shipment.book.check_negative_payable') }}" data-msg-remote="Can not process Zero COD Shipment, due to pending negative payable amount.">
 										</div>
 
 
@@ -727,6 +727,7 @@
 			$('#parcel_value').prop('disabled', true);
 			$( "#amount" ).keyup(function() {
 				var amt = $('#amount').val();
+
 				if (amt == 0 )
 				{
 					// $("#parcel_value").css("background-color", "yellow");
@@ -1010,7 +1011,35 @@
 			if (service_type == 2) {
 				$('#replacement').removeClass('d-none');
 				$('#try_and_buy_charges_div').addClass('d-none');
-
+				
+				$('.weight').inputmask({
+						'alias': 'decimal',
+						'allowMinus': false,
+						'allowPlus': false,
+						'digits': 2,
+						'min': 0.1,
+						'max': 10,
+						'oncomplete': function() {
+							var val = parseFloat($(this).val());
+							if (val > 10) {
+									var error = 'Number should be less than or equal to 10 Kg';
+									toastr.error(error, 'Error!', {
+										positionClass: 'toast-top-center',
+										containerId: 'toast-top-center'
+									});
+								$(this).val('');
+							}
+							}
+						});
+			}else{
+					$('.weight').inputmask({
+					'alias': 'decimal',
+					'allowMinus': false,
+					'allowPlus': false,
+					'digits': 2,
+					'min': 0.1,
+					'max': 100000
+				});
 			}
 			if (service_type == 3) {
 				$('#regular').addClass('d-none');
@@ -1149,6 +1178,37 @@
 
 					shipping_modes();
 					set_return_city();
+
+					if (service_type == 2) {
+						$('.weight').inputmask({
+						'alias': 'decimal',
+						'allowMinus': false,
+						'allowPlus': false,
+						'digits': 2,
+						'min': 0.1,
+						'max': 10,
+						'oncomplete': function() {
+							var val = parseFloat($(this).val());
+							if (val > 10) {
+									var error = 'Number should be less than or equal to 10';
+									toastr.error(error, 'Error!', {
+										positionClass: 'toast-top-center',
+										containerId: 'toast-top-center'
+									});
+								$(this).val('');
+							}
+							}
+						});
+					}else{
+							$('.weight').inputmask({
+							'alias': 'decimal',
+							'allowMinus': false,
+							'allowPlus': false,
+							'digits': 2,
+							'min': 0.1,
+							'max': 100000
+						});
+					}
 				}
 				else {
 					$('#select_service_type form #service_type-error').removeClass('d-none');
@@ -1932,15 +1992,7 @@
 				}
 			});
 
-			$('.weight').inputmask({
-				'alias': 'decimal',
-				'allowMinus': false,
-				'allowPlus': false,
-				'digits': 2,
-				'min': 0.1,
-				'max': 100000
-			});
-
+			
 			$('.amount').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,

@@ -49,211 +49,6 @@
                 <input type="hidden" name="number_of_oldest_shipments_value_div" id="number_of_oldest_shipments_value_div">
 
                 <div class="row justify-content-center" >
-
-                    {{-- Cards --}}
-                    @if (session('role_id') == 1 || in_array(943, session('permissions')))
-
-                        <div class="col-3">
-                            <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-clock text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="total_of_shipments">
-                                                    0
-                                                </h3>
-                                                <span>Total Of Shipments</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-3" id="search_rvr_div">
-                            <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-grid text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="total_rvr"></span> / <span id="percentage_reason_validation_required"></span>%
-                                                </h3>
-                                                <span>Reason Validation Required</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-3">
-                            <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="search_sar_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-flag text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="shipper_advised_requested"></span> / <span id="percentage_shipper_advised_requested"></span>%
-                                                </h3>
-                                                <span>Shipper Advised Requested </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> 
-
-                        <div class="col-3">
-                            <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_unresponsive_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="la la-calculator text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="unresponsive_count">
-                                                    0
-                                                </h3>
-                                                <span>Unresponsive Count</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-3" >
-                            <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="number_of_pending_tickets_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-clock text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="number_of_pending_tickets"></span> / <span id="number_of_pending_ticket_percentage"></span>%
-                                                </h3>
-                                                <span>Pending Tickets</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-3" >
-                            <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="number_of_inprocess_tickets_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-check text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="number_of_inprocess_tickets"></span> / <span id="number_of_inprocess_tickets_percentage"></span>%
-                                                </h3>
-                                                <span>No. of Inprocess Ticket</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-3" >
-                            <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="number_of_available_agents_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-flag text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="online_agents"></span> / <span id="number_of_available_agents"></span>
-                                                </h3>
-                                                <span>Online/ Available Agents </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-3" >
-                            <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="average_aging"></span>
-                                                </h3>
-                                                <span>Average Aging.</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- <div class="col-3" >
-                            <div class="card bg-gradient-directional-delivered pull-up cursor-pointer">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="average_response_time"></span>
-                                                </h3>
-                                                <span>Average Response Time.</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> --}}
-
-                        <div class="col-3" >
-                            <div class="card bg-gradient-directional-oldest_shipment pull-up cursor-pointer" id="number_of_oldest_shipments_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="oldest_shipments">
-                                                    0
-                                                </h3>
-                                                <span>Oldest Shipment Count.</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    
-                @endif
                     
                     <div class="col justify-content-end mb-3">
                         <div class="card">
@@ -785,6 +580,36 @@
          </div>
      </div>
 
+     {{-- Enter Remarks Modal --}}
+     <div class="modal fade" id="add_remarks_modal" role="dialog" aria-labelledby="add_remarks_title" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="add_remarks_title">Remarks</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_remarks_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            <input type="text" name="add_remarks" id="add_remarks" class="form-control add_remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
+
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add Remarks</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
 
         <div class="modal fade text-left" id="ConsigneeInformationModal" data-backdrop="static" tabindex="-1"
             role="dialog" aria-labelledby="ConsigneeInformationModal" aria-hidden="true">
@@ -889,6 +714,7 @@
                 </div>
             </div>
         </div>
+        <div class="loader"></div>
 
     @endsection
 
@@ -1247,114 +1073,6 @@
                             }
                         });
                 });
-                $('#search_rvr_div').on('click', function() {
-                    $('#search_rvr_value_div').val(1);
-                    $('#number_of_inprocess_tickets_value_div').val('');
-                    $('#number_of_available_agents_value_div').val('');
-                    $('#number_of_oldest_shipments_value_div').val('');
-                    $('#search_sar_value_div').val('');
-                    $('#search_total_value_div').val('');
-                    $('#search_unresponsive_value_div').val('');
-                    $('#number_of_pending_tickets_value_div').val('');
-
-
-                    // Assuming 'table' is defined elsewhere in your code
-                    table.draw();
-                });
-
-                $('#search_sar_div').on('click', function() {
-                    $('#search_sar_value_div').val(2);
-                    $('#number_of_inprocess_tickets_value_div').val('');
-                    $('#number_of_available_agents_value_div').val('');
-                    $('#number_of_oldest_shipments_value_div').val('');
-                    $('#search_rvr_value_div').val('');
-                    $('#search_total_value_div').val('');
-                    $('#search_unresponsive_value_div').val('');
-                    $('#number_of_pending_tickets_value_div').val('');
-
-                    // Assuming 'table' is defined elsewhere in your code
-                    table.draw();
-                });
-
-                $('#search_total_div').on('click', function() {
-                    $('#search_total_value_div').val(3);
-                    $('#number_of_inprocess_tickets_value_div').val('');
-                    $('#number_of_available_agents_value_div').val('');
-                    $('#number_of_oldest_shipments_value_div').val('');
-                    $('#search_sar_value_div').val('');
-                    $('#search_rvr_value_div').val('');
-                    $('#search_unresponsive_value_div').val('');
-                    $('#number_of_pending_tickets_value_div').val('');
-
-                    // Assuming 'table' is defined elsewhere in your code
-                    table.draw();
-                });
-
-
-                $('#search_unresponsive_div').on('click', function() {
-                    $('#search_unresponsive_value_div').val(4);
-                    $('#number_of_inprocess_tickets_value_div').val('');
-                    $('#number_of_available_agents_value_div').val('');
-                    $('#number_of_oldest_shipments_value_div').val('');
-                    $('#search_total_value_div').val('');
-                    $('#search_sar_value_div').val('');
-                    $('#search_rvr_value_div').val('');
-                    $('#number_of_pending_tickets_value_div').val('');
-
-
-                    // Assuming 'table' is defined elsewhere in your code
-                    table.draw();
-                });
-
-                $('#number_of_pending_tickets_div').on('click', function() {
-                    $('#number_of_pending_tickets_value_div').val(5);
-                    $('#number_of_inprocess_tickets_value_div').val('');
-                    $('#number_of_available_agents_value_div').val('');
-                    $('#number_of_oldest_shipments_value_div').val('');
-                    $('#search_unresponsive_value_div').val('');
-                    $('#search_total_value_div').val('');
-                    $('#search_sar_value_div').val('');
-                    $('#search_rvr_value_div').val('');
-                    table.draw();
-                });
-
-                $('#number_of_inprocess_tickets_div').on('click', function() {
-                    $('#number_of_inprocess_tickets_value_div').val(6);
-                    $('#number_of_available_agents_value_div').val('');
-                    $('#number_of_pending_tickets_value_div').val('');
-                    $('#number_of_oldest_shipments_value_div').val('');
-                    $('#search_unresponsive_value_div').val('');
-                    $('#search_total_value_div').val('');
-                    $('#search_sar_value_div').val('');
-                    $('#search_rvr_value_div').val('');
-                    table.draw();
-                });
-
-                $('#number_of_available_agents_div').on('click', function() {
-                    $('#number_of_available_agents_value_div').val(7);
-                    $('#number_of_pending_tickets_value_div').val('');
-                    $('#number_of_inprocess_tickets_value_div').val('');
-                    $('#number_of_oldest_shipments_value_div').val('');
-                    $('#search_unresponsive_value_div').val('');
-                    $('#search_total_value_div').val('');
-                    $('#search_sar_value_div').val('');
-                    $('#search_rvr_value_div').val('');
-                    table.draw();
-                });
-
-                $('#number_of_oldest_shipments_div').on('click', function() {
-                    $('#number_of_oldest_shipments_value_div').val(8);
-                    $('#number_of_available_agents_value_div').val('');
-                    $('#number_of_pending_tickets_value_div').val('');
-                    $('#number_of_inprocess_tickets_value_div').val('');
-                    $('#search_unresponsive_value_div').val('');
-                    $('#search_total_value_div').val('');
-                    $('#search_sar_value_div').val('');
-                    $('#search_rvr_value_div').val('');
-                    table.draw();
-                });
-
-             
 
 
                 // End call_history_modal datatable function
@@ -1991,100 +1709,174 @@
                                     enabled: false,
                                     action: function(e, dt, node, config) {
                                         if (selected_rows != '' && restricted_rows.length == 0) {
-                                            swal({
-                                                title: 'Are You Sure?',
-                                                text: 'Select Yes to change shipment status to Re-Attempt!',
-                                                icon: 'warning',
-                                                buttons: {
-                                                    cancel: {
-                                                        text: 'No',
-                                                        value: null,
-                                                        visible: true,
-                                                        closeModal: true,
-                                                    },
-                                                    confirm: {
-                                                        text: 'Yes',
-                                                        value: true,
-                                                        visible: true,
-                                                        closeModal: true
-                                                    }
+                                            $('#add_remarks_modal').modal('show');
+                                            $('#add_remarks_modal').on('hide.bs.modal', function () {
+                                                $('#add_remarks_form input.add_remarks').val('');
+                                            });
+                                            $('#add_remarks_form').validate({
+                                                ignore: [],
+                                                errorClass: 'danger',
+                                                successClass: 'success',
+                                                errorPlacement: function(error, element) {
+                                                    error.addClass('w-100').appendTo(element.parent('.form-group'));
                                                 },
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false,
-                                                dangerMode: true
-                                            }).then(function(confirm) {
-                                                if (confirm) {
-                                                    blockPagePermanently();
-                                                    table.rows().nodes().each(function(index) {
-                                                        var row = table.row(index);
+                                                normalizer: function(value) {
+                                                    return $.trim(value);
+                                                },
+                                                submitHandler: function(form) {
+                                                    var remarks = $('#add_remarks').val();
 
-                                                        if ($(row.node()).hasClass(
-                                                                'selected')) {
-                                                            var id = parseInt(row.id());
-                                                            var remark = $(row.node())
-                                                                .find(
-                                                                    'td.shipment_remarks textarea'
-                                                                ).val();
-                                                            shipment_remarks[id] =
-                                                                remark;
+                                                    swal({
+                                                        title: 'Are You Sure?',
+                                                        text: 'Select Yes to change shipment status to Re-Attempt!',
+                                                        icon: 'warning',
+                                                        buttons: {
+                                                            cancel: {
+                                                                text: 'No',
+                                                                value: null,
+                                                                visible: true,
+                                                                closeModal: true,
+                                                            },
+                                                            confirm: {
+                                                                text: 'Yes',
+                                                                value: true,
+                                                                visible: true,
+                                                                closeModal: true
+                                                            }
+                                                        },
+                                                        closeOnClickOutside: false,
+                                                        closeOnEsc: false,
+                                                        dangerMode: true
+                                                    }).then(function(confirm) {
+                                                        if (confirm) {
+                                                            blockPagePermanently();
+                                                            table.rows().nodes().each(function(index) {
+                                                                var row = table.row(index);
+        
+                                                                if ($(row.node()).hasClass('selected')) {
+                                                                    var id = parseInt(row.id());
+                                                                    shipment_remarks[id] = remarks;
+                                                                }
+                                                            });
+        
+                                                            $.ajax({
+                                                                url: "{{ route('admin.return.reattempt.status') }}",
+                                                                method: 'POST',
+                                                                data: {
+                                                                    'shipment_ids': selected_rows,
+                                                                    '_token': '{{ csrf_token() }}',
+                                                                    'action': 'reattempt',
+                                                                    'remark': shipment_remarks
+                                                                }
+                                                            }).done(function(data) {
+                                                                UnblockPagePermanently();
+                                                                $('#add_remarks_modal').modal('hide');
+                                                                selected_rows = [];
+                                                                restricted_rows = [];
+                                                                shipment_remarks = {};
+                                                                table.button('.confirm')
+                                                                    .disable();
+                                                                table.button('.re-attempt')
+                                                                    .disable();
+                                                                table.button('.assign')
+                                                                    .disable();
+                                                                table.button('.un-assign')
+                                                                    .disable();
+                                                                table.rows().deselect();
+                                                                table.draw('false');
+        
+                                                                if (data.status == 1) {
+                                                                    UnblockPagePermanently();
+                                                                    table.draw('false');
+                                                                    toastr.success(data.success,
+                                                                        'Success!', {
+                                                                            positionClass: 'toast-bottom-center',
+                                                                            containerId: 'toast-bottom-center'
+                                                                        });
+                                                                } else {
+                                                                    UnblockPagePermanently();
+                                                                    toastr.error(data.error,
+                                                                        'Error!', {
+                                                                            positionClass: 'toast-top-center',
+                                                                            containerId: 'toast-top-center'
+                                                                        });
+                                                                }
+        
+                                                            });
                                                         }
                                                     });
 
-                                                    $.ajax({
-                                                        url: "{{ route('admin.return.reattempt.status') }}",
-                                                        method: 'POST',
-                                                        data: {
-                                                            'shipment_ids': selected_rows,
-                                                            '_token': '{{ csrf_token() }}',
-                                                            'action': 'reattempt',
-                                                            'remark': shipment_remarks
-                                                        }
-                                                    }).done(function(data) {
-                                                        UnblockPagePermanently();
-                                                        selected_rows = [];
-                                                        restricted_rows = [];
-                                                        shipment_remarks = {};
-                                                        table.button('.confirm')
-                                                            .disable();
-                                                        table.button('.re-attempt')
-                                                            .disable();
-                                                        table.button('.assign')
-                                                            .disable();
-                                                        table.button('.un-assign')
-                                                            .disable();
-                                                        table.rows().deselect();
-                                                        table.draw('false');
-
-                                                        if (data.status == 1) {
-                                                            UnblockPagePermanently();
-                                                            table.draw('false');
-                                                            toastr.success(data.success,
-                                                                'Success!', {
-                                                                    positionClass: 'toast-bottom-center',
-                                                                    containerId: 'toast-bottom-center'
-                                                                });
-                                                        } else {
-                                                            UnblockPagePermanently();
-                                                            toastr.error(data.error,
-                                                                'Error!', {
-                                                                    positionClass: 'toast-top-center',
-                                                                    containerId: 'toast-top-center'
-                                                                });
-                                                        }
-
-                                                    });
                                                 }
                                             });
-
+                                
                                         }
                                     }
-                                },
+                            },
                                 
                             @endif {
                                 extend: 'excel',
                                 title: 'Return Marked',
                                 className: 'btn btn-primary',
                                 text: '<i class="la la-file-excel-o"></i> Excel',
+                                action: function(e){
+
+                                    //start Loader
+                                    $(".loader").append(data_table_loader);
+
+                                    //data table parameters
+                                    var dtParams = table.ajax.params();
+                                    dtParams.start = 0;
+                                    dtParams.length = -1;
+                                    dtParams.excel = true;
+
+                                    //additional parameters
+                                    var additionalParams = {
+                                        _token: $('meta[name="csrf-token"]').attr('content'),
+                                        tracking_numbers : $('#track_form .tracking_numbers').val(),
+                                        search_shipping_mode : $('#search_shipping_mode').val(),
+                                        star_shipper_filter : $('#star_shippers_filter').val(),
+                                        complaint_filter : $('#complaint_filter').val(),
+                                        out_of_service_area_filter : $('#out_of_service_area_filter').val(),
+                                        shipment_re_attempt_request_filter : $('#shipment_re_attempt_request_filter').val(),
+                                        try_buy_filter : $('#try_buy_filter').val(),
+                                        return_confirmation_pending_filter : $('#return_confirmation_pending_filter').val(),
+                                        search_rvr_value_div : $('#search_rvr_value_div').val(),
+                                        search_sar_value_div : $('#search_sar_value_div').val(),
+                                        search_total_value_div : $('#search_total_value_div').val(),
+                                        search_unresponsive_value_div : $('#search_unresponsive_value_div').val(),
+                                        number_of_pending_tickets_value_div : $('#number_of_pending_tickets_value_div').val(),
+                                        number_of_inprocess_tickets_value_div : $('#number_of_inprocess_tickets_value_div').val(),
+                                        number_of_available_agents_value_div : $('#number_of_available_agents_value_div').val(),
+                                        number_of_oldest_shipments_value_div : $('#number_of_oldest_shipments_value_div').val()
+                                    };
+                                    
+                                    //mergin all parameters
+                                    var allParams = Object.assign({}, dtParams, additionalParams);
+
+                                    $.post("{{ route('admin.return.list') }}", allParams).done(function(response) {
+                                        
+                                        var blob = new Blob([response], { type: 'text/csv' });
+
+                                        var url = window.URL.createObjectURL(blob);
+
+                                        var a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = 'Return_Marked.csv';
+
+                                        document.body.appendChild(a);
+                                        a.click();
+
+                                        window.URL.revokeObjectURL(url);
+                                        document.body.removeChild(a);
+
+                                        $(".loader").empty();
+
+                                    }).fail(function(xhr, status, error) {
+                                        $(".loader").empty();
+                                        console.error('Failed to fetch Return Marked Excel data:', status, error);
+                                    });
+
+                                }
                             }, {
                                 extend: 'selectAll',
                                 text: 'Select All',
@@ -3456,73 +3248,64 @@
 
                 $('#star_shippers_filter').on('click', function() {
                     $('#star_shippers_filter').val(1);
+                    $('#complaint_filter').val(0);
+                    $('#out_of_service_area_filter').val(0);
+                    $('#shipment_re_attempt_request_filter').val(0);
+                    $('#try_buy_filter').val(0);
+                    $('#return_confirmation_pending_filter').val(0);
                     table.draw(true);
-                    $('#star_shippers_filter').val(0);
+                    // $('#star_shippers_filter').val(0);
                 });
                 $('#complaint_filter').on('click', function() {
                     $('#complaint_filter').val(1);
+                    $('#star_shippers_filter').val(0);
+                    $('#out_of_service_area_filter').val(0);
+                    $('#shipment_re_attempt_request_filter').val(0);
+                    $('#try_buy_filter').val(0);
+                    $('#return_confirmation_pending_filter').val(0);
                     table.draw(true);
-                    $('#complaint_filter').val(0);
+                    // $('#complaint_filter').val(0);
                 });
                 $('#out_of_service_area_filter').on('click', function() {
                     $('#out_of_service_area_filter').val(1);
+                    $('#complaint_filter').val(0);
+                    $('#star_shippers_filter').val(0);
+                    $('#shipment_re_attempt_request_filter').val(0);
+                    $('#try_buy_filter').val(0);
+                    $('#return_confirmation_pending_filter').val(0);
                     table.draw(true);
-                    $('#out_of_service_area_filter').val(0);
+                    // $('#out_of_service_area_filter').val(0);
                 });
                 $('#shipment_re_attempt_request_filter').on('click', function() {
                     $('#shipment_re_attempt_request_filter').val(1);
+                    $('#out_of_service_area_filter').val(0);
+                    $('#complaint_filter').val(0);
+                    $('#star_shippers_filter').val(0);
+                    $('#try_buy_filter').val(0);
+                    $('#return_confirmation_pending_filter').val(0);
                     table.draw(true);
-                    $('#shipment_re_attempt_request_filter').val(0);
+                    // $('#shipment_re_attempt_request_filter').val(0);
                 });
                 $('#try_buy_filter').on('click', function() {
                     $('#try_buy_filter').val(1);
+                    $('#shipment_re_attempt_request_filter').val(0);
+                    $('#out_of_service_area_filter').val(0);
+                    $('#complaint_filter').val(0);
+                    $('#star_shippers_filter').val(0);
+                    $('#return_confirmation_pending_filter').val(0);
                     table.draw(true);
-                    $('#try_buy_filter').val(0);
+                    // $('#try_buy_filter').val(0);
                 });
                 $('#return_confirmation_pending_filter').on('click', function() {
                     $('#return_confirmation_pending_filter').val(1);
+                    $('#try_buy_filter').val(0);
+                    $('#shipment_re_attempt_request_filter').val(0);
+                    $('#out_of_service_area_filter').val(0);
+                    $('#complaint_filter').val(0);
+                    $('#star_shippers_filter').val(0);
                     table.draw(true);
-                    $('#return_confirmation_pending_filter').val(0);
+                    // $('#return_confirmation_pending_filter').val(0);
                 });
-
-                @if (session('role_id') == 1 || in_array(943, session('permissions')))
-
-                function fetchData() {
-                $.ajax({
-                        url: '{!! route('admin.return.data') !!}',
-                        method: 'GET'
-                    }).done(function (data) 
-                    {
-                       if(data.status){
-                            $('#total_of_shipments').text(data.stats.total_of_shipments);
-                            $('#total_rvr').text(data.stats.reason_validation_required);
-                            $('#percentage_reason_validation_required').text(data.stats.percentage_reason_validation_required);
-                            $('#shipper_advised_requested').text(data.stats.shipper_advised_requested);
-                            $('#percentage_shipper_advised_requested').text(data.stats.percentage_shipper_advised_requested);
-                            $('#unresponsive_count').text(data.stats.unresponsive_count);
-                            $('#number_of_pending_tickets').text(data.stats.number_of_pending_tickets);
-                            $('#number_of_pending_ticket_percentage').text(data.stats.number_of_pending_ticket_percentage);
-                            $('#number_of_inprocess_tickets').text(data.stats.number_of_inprocess_tickets);
-                            $('#number_of_inprocess_tickets_percentage').text(data.stats.number_of_inprocess_tickets_percentage);
-                            $('#online_agents').text(data.stats.online_agents);
-                            $('#number_of_available_agents').text(data.stats.number_of_available_agents);
-
-                            var averageAging = parseFloat(data.stats.average_aging);
-                            var content = averageAging > 24 ? (Math.round(averageAging / 60 * 100) / 100) + ' days' : Math.round(averageAging * 100) / 100 + ' hrs';
-                            $('#average_aging').text(content);
-
-                            //var average_response_time = parseFloat(data.stats.average_response_time);
-                            //var average_response_time_content = average_response_time > 24 ? (Math.round(average_response_time / 60 * 100) / 100) + ' days' : Math.round(average_response_time * 100) / 100 + ' hrs';
-                            //$('#average_response_time').text(average_response_time_content);
-
-                            $('#oldest_shipments').text(data.stats.oldest_shipments);
-                       }
-                    });
-                }
-
-                fetchData();
-
-                @endif
                 
             });
         </script>

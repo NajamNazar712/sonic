@@ -123,7 +123,7 @@ class AdminShipmentScanningHistoryController extends Controller
                         $details[$index]['ip_address'] = $scanning_history->ip_address;
                         $details[$index]['latitude'] = $scanning_history->latitude ?? '-';
                         $details[$index]['longitude'] = $scanning_history->longitude ?? '-';
-                        $details[$index]['area_log'] = ShipmentScanningJourneyAreaLog::where('shipment_scanning_journey_id', $scanning_history->id)->first();
+                        $details[$index]['area_log'] = in_array($scanning_history->screen_location_id, [1, 2, 20, 21, 4, 3, 10, 7, 31]) ? ShipmentScanningJourneyAreaLog::where('shipment_scanning_journey_id', $scanning_history->id)->first() : [];
                         $details[$index]['rider_picked'] = ($scanning_history->screen_location_id == 1)
                         ? (
                             optional(ShipmentsJourney::where('shipment_id', $scanning_history->shipment_id)->latest()->first())->shipper_status_id == 53

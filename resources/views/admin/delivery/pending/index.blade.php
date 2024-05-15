@@ -54,6 +54,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Sub-Segment</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -236,6 +237,7 @@
                         head.push('S.No');
                         head.push('Tracking .No');
                         head.push('Shipper');
+                        head.push('Sub-Segment');
                         head.push('Origin');
                         head.push('Destination');
                         head.push('Hub');
@@ -266,6 +268,7 @@
                             row.push(index + 1);
                             row.push(values.tracking_number);
                             row.push(values.shipper);
+                            row.push(values.sub_segment_name);
                             row.push(values.origin);
                             row.push(values.destination);
                             row.push(values.hub);
@@ -336,6 +339,7 @@
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                {data: 'sub_segment_name', name: 'scs.name', class: 'align-middle sub_segment_name'},
                 {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
