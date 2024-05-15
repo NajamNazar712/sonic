@@ -36,7 +36,7 @@ class DisableEmailOnArrivalSeeder extends Seeder
             [
             'setting_value' => 0,
             'type' => 'disable_email_on_arrival_all_shippers_except',
-            'text' => null
+            'text' => ''
             ]
         );
         
@@ -44,7 +44,7 @@ class DisableEmailOnArrivalSeeder extends Seeder
             [
             'setting_value' => 1,
             'type' => 'disable_email_on_arrival_only_shippers',
-            'text' => null
+            'text' => ''
             ]
         );
     }
