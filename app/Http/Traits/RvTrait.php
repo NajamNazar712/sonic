@@ -40,6 +40,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\ShipmentStatusReason;
 use App\RvAssignAgentSubStatus;
+use App\Http\Models\Admin\DeliveryNoteShipment;
 
 trait RvTrait
 {
@@ -491,7 +492,10 @@ trait RvTrait
                         ShipmentChargesController::nsa_osa_charges($request->shipment_id);
                     }
                 }
-
+                $shipmentDeliveryNote = DeliveryNoteShipment::with('delivery_note:id,pending_status,rider_id')->where('shipment_id',$request->shipment_id)->first();
+                if($shipmentDeliveryNote->delivery_note->pending_status < 1){
+                    NotificationsController::app_notification(22, $shipmentDeliveryNote->delivery_note->rider_id, 2, $request->shipment_id);
+                }
                 $parcel->shipper_status_id = 13;
                 $parcel->consignee_status_id = 13;
                 $parcel->save();
