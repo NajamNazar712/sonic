@@ -3125,6 +3125,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@sms_notifications_limit_index')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@sms_notifications_limit_update')->name('update');
         });
+        
+        Route::prefix('disable_email_on_arrival')->name('disable_email_on_arrival.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@disable_email_on_arrival_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@disable_email_on_arrival_update')->name('update');
+        });
 
         Route::prefix('omni')->name('omni.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@omni_user_setting_index')->name('index');
