@@ -46,6 +46,7 @@ trait RiderCns
             // Output the sequences
             foreach ($sequences as $index => $sequence) {
                 $arr[]=[
+                    'product_id'=>$rider_cns[0]->product_id,
                     'from'=>$sequence['start'],
                     'to'=>$sequence['end']
                 ];
