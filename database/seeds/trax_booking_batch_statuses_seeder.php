@@ -12,8 +12,10 @@ class trax_booking_batch_statuses_seeder extends Seeder
     public function run()
     {
         $time_stamp =\Carbon\Carbon::now();
-        DB::table('general_settings')->insert(array(
-            array('type'=>'booking_batch_length','setting_value'=>3,'description'=>'Logistic Booking Batches','created_at'=>$time_stamp,'updated_at'=>$time_stamp),
+        DB::table('trax_booking_batch_statuses')->insert(array(
+            array('id'=>1,'name'=>'Pending','created_at'=>$time_stamp,'updated_at'=>$time_stamp),
+            array('id'=>2,'name'=>'In-Process','created_at'=>$time_stamp,'updated_at'=>$time_stamp),
+            array('id'=>3,'name'=>'Complete','created_at'=>$time_stamp,'updated_at'=>$time_stamp),
         ));
     }
 }

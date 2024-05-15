@@ -18,7 +18,7 @@ class CreateTraxBookingBatchDetailsTable extends Migration
             $table->integer('batch_id');
             $table->integer('booking_id');
             $table->integer('user_id')->nullable();
-            $table->integer('status')->default(1);
+            $table->integer('status_id')->default(1);
             $table->timestamp('start_time')->nullable();
             $table->timestamp('end_time')->nullable();
             $table->integer('created_by')->nullable();
