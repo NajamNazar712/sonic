@@ -42,7 +42,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 'shipment_user_id' => $this->shipment['shipment_user_id'],
                 'call_count' => $this->shipment['call_count'],
                 'in_progress' => 0,
-                'in_completed' => 0,
+                'is_completed' => 0,
                 'deleted_at' => null,
                 'delete_reason' => null
             ]);
