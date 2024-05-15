@@ -2213,7 +2213,7 @@ trait RvTrait
             }
 
             Log::info(print_r($updated_data,true));
-            if ($updated_data['state_id'] != 3)
+            if ($updated_data['rv_state_id'] != 3)
             {
                 //Remove Shipment from RV Shipment Ticket
                 dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
