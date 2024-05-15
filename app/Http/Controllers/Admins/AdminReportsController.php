@@ -97,6 +97,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\IssueSackBagOrigin;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Traits\RvTrait;
+use App\RvAgentCallHistory;
 use DateTime;
 
 
@@ -4496,7 +4497,7 @@ class AdminReportsController extends Controller
         return view('admin.reports.debriefing_report')->with(['hubs' => $hubs, 'zones' => $zones, 'shipping_modes' => $shipping_modes]);
     }
 
-    static function debriefing_data($date, $hub, $zone, $export = FALSE, $mode)
+    static function debriefing_data($date, $hub, $zone, $export = FALSE, $mode,$date_start =null)
     {
 
         $settings = DB::table('global_settings')->where('type', 'debriefing_report_arrival_cut_off_time')->first();
@@ -4554,26 +4555,25 @@ class AdminReportsController extends Controller
 
             foreach ($hubs as $hub) {
                 foreach ($types as $type) {
-                    $rows = DB::table('cities');
+                    $rows = DB::table('shipments as s');
 
                     if ($type == 'status_not_attempted' || $type == 'delivery_tomorrow') {
-                        $rows = $rows->join('shipments as s', function ($join) {
+                        $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+                            ->join('cities', function ($join) {
                             $join->where(function ($query) {
                                 $query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
                                     ->orWhere(function ($sub_query) {
-                                        $sub_query->on('cities.id', '=', DB::raw('(select usii.city_id from user_shipping_infos as usii where usii.id = s.pickup_address_id)'));
+                                        $sub_query->on('cities.id', '=',DB::raw('usi.city_id'));
                                     });
                             });
-                        })
-                            ->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
-                            ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
+                        })->join('cities as pc', 'usi.city_id', '=', 'pc.id')
                             //->leftjoin('cities as sch', 's.consignee_city_id', '=', 'sch.id')
                             ->leftjoin('zone_class_cities as zcc', function ($join) {
                                 $join->on('pc.zone_id', '=', 'zcc.zone_id')
                                     ->on('s.consignee_city_id', '=', 'zcc.city_id');
                             });
                     } else {
-                        $rows = $rows->join('shipments as s', 'cities.id', '=', 's.consignee_city_id');
+                        $rows = $rows->join('cities', 'cities.id', '=', 's.consignee_city_id');
                     }
 
                     if ($type == 'status_not_attempted') {
@@ -4611,35 +4611,35 @@ class AdminReportsController extends Controller
                                 $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
                                     ->where('sj.shipper_status_id', '=', 7);
                             })
-                                ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
-                                    $sub_query->where(function ($sub_sub_query) use ($arrival_cut_off_time, $from) {
-                                        $sub_sub_query->where(function ($sub_sub_sub_query) use ($arrival_cut_off_time) {
-                                            $sub_sub_sub_query->where(function ($sub_sub_sub_sub_query) use ($arrival_cut_off_time) {
-                                                $sub_sub_sub_sub_query->where(function ($sub_sub_sub_sub_sub_query) {
-                                                    $sub_sub_sub_sub_sub_query->where('usi.city_id', '=', DB::raw('s.consignee_city_id'))
-                                                        ->orWhereNull('zcc.class')
-                                                        ->orWhereIn('zcc.class', [0, 1]);
-                                                })
-                                                    ->where(function ($sub_sub_sub_sub_sub_sub_sub_query) {
-                                                        $sub_sub_sub_sub_sub_sub_sub_query->where('cities.id', '=', DB::raw('usi.city_id'))
-                                                            ->where('sj.shipper_status_id', '=', 2);
-                                                    });
-                                            });
-                                        })
-                                            ->where(function ($sub_sub_sub_query) use ($arrival_cut_off_time, $from) {
-                                                $sub_sub_sub_query->whereRaw('date(`sj`.`created_at`) < date(?)', [$from])
-                                                    ->orWhere(function ($sub_sub_sub_sub_query) use ($arrival_cut_off_time, $from) {
-                                                        $sub_sub_sub_sub_query->whereRaw('date(`sj`.`created_at`) = date(?)', [$from])
-                                                            ->whereRaw('hour(`sj`.`created_at`) < ?', [$arrival_cut_off_time]);
-                                                    });
-                                            });
-                                    });
-                                })
-                                ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
-                                    $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
-                                        ->whereIn('sj.shipper_status_id', [8, 13])
-                                        ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
+                            ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
+                                $sub_query->where(function ($sub_sub_query) use ($arrival_cut_off_time, $from) {
+                                    $sub_sub_query->where(function ($sub_sub_sub_query) use ($arrival_cut_off_time) {
+                                        $sub_sub_sub_query->where(function ($sub_sub_sub_sub_query) use ($arrival_cut_off_time) {
+                                            $sub_sub_sub_sub_query->where(function ($sub_sub_sub_sub_sub_query) {
+                                                $sub_sub_sub_sub_sub_query->where('usi.city_id', '=', DB::raw('s.consignee_city_id'))
+                                                    ->orWhereNull('zcc.class')
+                                                    ->orWhereIn('zcc.class', [0, 1]);
+                                            })
+                                                ->where(function ($sub_sub_sub_sub_sub_sub_sub_query) {
+                                                    $sub_sub_sub_sub_sub_sub_sub_query->where('cities.id', '=', DB::raw('usi.city_id'))
+                                                        ->where('sj.shipper_status_id', '=', 2);
+                                                });
+                                        });
+                                    })
+                                        ->where(function ($sub_sub_sub_query) use ($arrival_cut_off_time, $from) {
+                                            $sub_sub_sub_query->whereRaw('date(`sj`.`created_at`) < date(?)', [$from])
+                                                ->orWhere(function ($sub_sub_sub_sub_query) use ($arrival_cut_off_time, $from) {
+                                                    $sub_sub_sub_sub_query->whereRaw('date(`sj`.`created_at`) = date(?)', [$from])
+                                                        ->whereRaw('hour(`sj`.`created_at`) < ?', [$arrival_cut_off_time]);
+                                                });
+                                        });
                                 });
+                            })
+                            ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
+                                $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
+                                    ->whereIn('sj.shipper_status_id', [8, 13])
+                                    ->whereRaw('date(`sj`.`created_at`) < date(?)', [$from]);
+                            });
                             // ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
                             //     $sub_query->where(function ($sub_sub_query) {
                             //         $sub_sub_query->where('usi.city_id', '=', DB::raw('sch.hub_id'))
@@ -4663,11 +4663,11 @@ class AdminReportsController extends Controller
                         $rows = $rows->where(function ($query) use ($arrival_cut_off_time, $from) {
                             $query->where(function ($sub_query) use ($arrival_cut_off_time) {
                                 $sub_query->where(function ($sub_sub_query) {
-                                    $sub_sub_query->where(function ($sub_sub_sub_query) {
-                                        $sub_sub_sub_query->where('usi.city_id', '=', DB::raw('s.consignee_city_id'))
-                                            ->where('cities.id', '=', DB::raw('usi.city_id'))
-                                            ->where('sj.shipper_status_id', 2);
-                                    })
+                                        $sub_sub_query->where(function ($sub_sub_sub_query) {
+                                            $sub_sub_sub_query->where('usi.city_id', '=', DB::raw('s.consignee_city_id'))
+                                                ->where('cities.id', '=', DB::raw('usi.city_id'))
+                                                ->where('sj.shipper_status_id', 2);
+                                        })
                                         ->orWhere(function ($sub_sub_sub_query) {
                                             $sub_sub_sub_query->where('usi.city_id', '!=', DB::raw('s.consignee_city_id'))
                                                 ->where('cities.id', '=', DB::raw('s.consignee_city_id'))
@@ -4682,11 +4682,11 @@ class AdminReportsController extends Controller
                                         });
                                     });
                             })
-                                ->orWhere(function ($sub_query) use ($from) {
-                                    $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
-                                        ->where('sj.shipper_status_id', '=', 13)
-                                        ->whereRaw('date(`sj`.`created_at`) = date(?)', [$from]);
-                                });
+                            ->orWhere(function ($sub_query) use ($from) {
+                                $sub_query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
+                                    ->where('sj.shipper_status_id', '=', 13)
+                                    ->whereRaw('date(`sj`.`created_at`) = date(?)', [$from]);
+                            });
                             // ->orWhere(function ($sub_query) use ($arrival_cut_off_time, $from) {
                             //     $sub_query->where(function ($sub_sub_query) {
                             //         $sub_sub_query->where('usi.city_id', '=', DB::raw('sch.hub_id'))
@@ -4700,6 +4700,11 @@ class AdminReportsController extends Controller
                             //     });
                             // });
                         });
+
+                    }
+                    if(!empty($date_start) && $type != 'delivery_tomorrow'){
+                        $rows = $rows->whereBetween('s.created_at',[$date_start,$from]);
+                        //$date_start = date('Y-m-d H:i:s',strtotime($from.'-6 months'));
                     }
 
                     $rows = $rows->select('s.tracking_number')
@@ -4851,15 +4856,16 @@ class AdminReportsController extends Controller
 
     public function debriefing_list(Request $request)
     {
+        $date_start = $request->get('search_date_start');
         $date = $request->get('search_date');
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
         $mode = $request->get('search_shipping_mode');
 
-        return self::debriefing_data($date, $hub, $zone, NULL, $mode);
+        return self::debriefing_data($date, $hub, $zone, NULL, $mode,$date_start);
     }
 
-    static public function debriefing_export_file($date, $hub, $zone, $mode, $report_type)
+    static public function debriefing_export_file($date, $hub, $zone, $mode, $report_type,$date_start = null)
     {
         $file_name = 'debriefing_report_';
 
@@ -4879,7 +4885,7 @@ class AdminReportsController extends Controller
 
         $details[] = ['Hubs', 'Delivered', 'Delivery Unsuccessful', 'On Hold', 'Status Not Attempted', 'Fake Status', 'Confirmation Pending', 'Total', 'Ratio', 'Delivery Note Pending', 'Total', 'Ratio', 'Delivery Tomorrow', 'Grand Total', 'Ratio'];
 
-        $result = self::debriefing_data($date, $hub, $zone, TRUE, $mode);
+        $result = self::debriefing_data($date, $hub, $zone, TRUE, $mode,$date_start);
 
         if ($result['status'] == 0) {
             $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_attempted', 'fake_status', 'confirmation_pending', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
@@ -5048,11 +5054,12 @@ class AdminReportsController extends Controller
     public function debriefing_export(Request $request)
     {
         $date = $request->get('search_date');
+        $date_start = $request->get('search_date_start');
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
         $mode = $request->get('search_shipping_mode');
         ActivityTrailController::createActivityTrailLog(Auth::id(), 162);
-        return self::debriefing_export_file($date, $hub, $zone, $mode, 0);
+        return self::debriefing_export_file($date, $hub, $zone, $mode, 0,$date_start);
     }
 
     static public function debriefing_hub_wise_report($date)
@@ -12727,6 +12734,135 @@ class AdminReportsController extends Controller
         return response()->json(['data' => $mergedArray]);
     }
 
+    //RVR Call History
+    public function rvr_call_history_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 761);
+
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
+        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                        ->leftjoin('cities as c','c.id','a.default_hub_id')
+
+                        ->where('a.trax_id','like','%Trax-C%')
+                        
+                        ->where('a.status',1)
+                        ->select('a.id', 'a.name','a.trax_id', 'c.name as city_name')->get();
+
+        return view('admin.reports.rvr_call_history.index', [
+            'shippers' => $shippers, 'agents' => $agents,
+        ]);
+    }
+    
+    public function rvr_call_history_list(Request $request)
+    {   
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 762);
+        }
+
+        $rv_report = RvAgentCallHistory::join('shipments', 'rv_agent_call_histories.shipment_id','shipments.id')
+        ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_agent_call_histories.rv_shipment_assign_agent_id')
+        ->leftjoin('rv_shipment_assign_agent_details',function($join){
+            $join->on('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id', '=' ,'rv_shipment_assign_agents.id')
+            // ->whereRaw('DATE(rv_shipment_assign_agent_details.created_at) = DATE(rv_agent_call_histories.created_at)');
+            ->whereRaw('TIMESTAMPDIFF(MINUTE, rv_shipment_assign_agent_details.created_at, rv_agent_call_histories.created_at) <= 10');
+        })
+        ->leftjoin('users', 'shipments.user_id', 'users.id')
+        ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
+        ->leftjoin('cities as origin_city', 'uso.city_id', 'origin_city.id')
+        ->leftjoin('cities as destination_city', 'shipments.consignee_city_id', 'destination_city.id')
+        ->leftjoin('cities as hub', 'destination_city.hub_id', 'hub.id')
+        ->leftjoin('rv_assign_agent_statuses as rv_aas', 'rv_shipment_assign_agent_details.rv_assign_agent_status_id', 'rv_aas.id')
+        ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
+        ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')
+
+        ->leftjoin('shipments_journey as sj', function($join) {
+            $join->on('sj.shipment_id', '=', 'shipments.id')
+                 ->where('sj.shipper_status_id', '=', 12);
+        })
+        ->leftjoin('shipment_status as rv_status', 'sj.shipper_status_id', 'rv_status.id')
+        
+        ->leftjoin('shipments_journey as sja', function ($join) {
+            $join->on('sja.shipment_id', '=', 'shipments.id')
+                ->where('sja.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12)'));
+        })
+        
+        ->leftjoin('shipments_journey as sjj', function($join) {
+            $join->on('sjj.shipment_id', '=', 'shipments.id')
+            ->where('sjj.shipper_status_id', '=', 2);
+        })
+
+        ->join('rv_assign_agent_sub_statuses as rvaass','rv_agent_call_histories.call_finding_id','rvaass.id')
+
+        ->select(
+            'shipments.id as shipment_id',
+            'sjj.created_at as arrival_date', 
+            'shipments.tracking_number as tracking_number',
+            'users.name as shipper_name', 
+            'origin_city.name as origin', 
+            'destination_city.name as destination', 
+            'hub.name as hub',
+            'shipments.amount as cod_amount', 
+            'rv_aas.name as action', 
+            'rv_agent_call_histories.created_at as action_date',
+            's_status.name as current_status', 
+            'shipments.updated_at as current_status_date', 
+            'rv_status.name as rv_status_name',
+            'sj.updated_at as rv_status_date',
+            'rv_agent_call_histories.updated_at as calling_datetime',
+            'rv_agent_call_histories.remarks as call_remarks',
+            'rvaass.name as call_finding_reason'
+        )
+        ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
+        ->groupBy('rv_agent_call_histories.id','sjj.created_at');
+
+        $datatable = Datatables::of($rv_report)
+                    ->editColumn('tracking_number', function($rv_report) {
+                        $route = route('admin.tracking.index');
+                        return "<u><a href='{$route}?tracking_number=$rv_report->tracking_number' class='tracking' target='_blank'>$rv_report->tracking_number</a></u>";
+                    })
+                    ->editColumn('action', function($rv_report) {
+                        if ($rv_report['action'] == "") { 
+                            return '-';
+                        }
+                        else {
+                            return $rv_report['action'];
+                        }
+                    })
+
+                    ->editColumn('calling_datetime', function($rv_report){
+                        return substr($rv_report->calling_datetime,0,10);
+                    })
+                    ->addColumn('calling_time', function($rv_report){
+                        return substr($rv_report->calling_datetime,10);
+                    })
+                    ->addColumn('call_findings', function(){
+                        return 'Unresponsive';
+                    });
+
+        if ($tracking_num = $request->get('search_tracking_no')) {
+            $rv_report->where('shipments.tracking_number', '=', $tracking_num);
+        }
+        if ($shipper_id = $request->get('search_shipper_name')) {
+            $shipper_name = User::where('id', $shipper_id)->value('name');
+            $rv_report->where('users.name', '=', $shipper_name);
+        }
+        if ($agent_id = $request->get('search_agent_name')) {
+            // $from = $request->get('search_date_from');
+            // $to = $request->get('search_date_to');
+            $rv_report->where('add.id', '=', $agent_id);
+            // $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
+            $rv_report->where('rv_shipment_assign_agent_details.updated_type_id',2);
+            
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            // $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
+            $rv_report->whereBetween('rv_agent_call_histories.created_at', [$from, $to]);
+        }   
+
+        return $datatable->make(true);
+    }
 
      public function operations_performance_index()
     {

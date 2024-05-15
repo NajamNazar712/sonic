@@ -100,7 +100,7 @@ class RiderDeactivateAutomatically extends Command
                                             DB::raw('(select max(created_at) from return_notes where return_notes.rider_id = riders.id)'));
                                 })
                                 ->select('riders.name','riders.id','delivery_notes.created_at as delivery_notes_created_at','pickup_notes.created_at as pickup_notes_created_at','return_notes.created_at as return_notes_created_at')
-                                ->where('riders.id',1)
+                                ->where('riders.id',$datum->id)
                                 ->get();
                                 $pickup_date = Carbon::createFromFormat('Y-m-d H:i:s', $riders->first()->pickup_notes_created_at)->format('Y-m-d');
                                 $delivery_date = Carbon::createFromFormat('Y-m-d H:i:s', $riders->first()->delivery_notes_created_at)->format('Y-m-d');
