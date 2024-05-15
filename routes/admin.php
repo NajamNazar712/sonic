@@ -2451,6 +2451,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@cargo_manifest_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
         });
+        Route::prefix('ops')->name('ops_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@ops_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@ops_report_list')->name('list');
+        });
     });
 
     //Reports end
