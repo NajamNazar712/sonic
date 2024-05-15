@@ -35,7 +35,7 @@ class AdminLogisticSetupController extends Controller
 
         $shippers = User::select('id','name')->where('status',3)->get();
         $riders = Rider::select('id','name','trax_id')->where('status',1)->whereNotNull('route_id')->get();
-        $products =  TraxProduct::select('id','product_code','product_name','parent_id')
+        $parent_products =  TraxParentProduct::select('id','parent_code','parent_name')
             ->where('status',1)->get();
 
         $services = TraxService::select('id','service_code','service_name','product_id')
@@ -43,7 +43,7 @@ class AdminLogisticSetupController extends Controller
 
         $piece_settings = TraxPieceSetting::where('status',1)->get();
 
-        return view('admin.logistic.shipper_tagging')->with(['shippers'=>$shippers,'riders'=>$riders,'products'=>$products,'services'=>$services,'piece_settings'=>$piece_settings]);
+        return view('admin.logistic.shipper_tagging')->with(['shippers'=>$shippers,'riders'=>$riders,'parent_products'=>$parent_products,'services'=>$services,'piece_settings'=>$piece_settings]);
     }
     public function shipper_tagging_list(Request $request)
     {
@@ -53,12 +53,12 @@ class AdminLogisticSetupController extends Controller
 
         $trax_shipper_detail = TraxShipperDetail::join('users as u','u.id','trax_shipper_details.user_id')
             ->leftjoin('riders as rd','rd.id','=','trax_shipper_details.rider_id')
-            ->join('trax_products as tp','tp.id','=','trax_shipper_details.trax_product_id')
-            ->join('trax_services as ts','ts.id','=','trax_shipper_details.trax_service_id')
+            ->join('trax_parent_products as tp','tp.id','=','trax_shipper_details.trax_parent_product_id')
+//            ->join('trax_services as ts','ts.id','=','trax_shipper_details.trax_service_id')
 //            ->join('trax_piece_settings as ps','ps.id','=','trax_shipper_details.piece_setting_id')
             ->leftjoin('routes as r','r.id','=','rd.route_id')
-            ->SELECT('trax_shipper_details.id','u.id as shipper_id','u.name as shipper_name','rd.trax_id as rider_trax_id','rd.name as rider_name','tp.product_name','ts.service_name','r.code as route_code','r.id as route_id')
-            ->where('trax_shipper_details.git ',1);
+            ->SELECT('trax_shipper_details.id','u.id as shipper_id','u.name as shipper_name','rd.trax_id as rider_trax_id','rd.name as rider_name','tp.parent_name','r.code as route_code','r.id as route_id')
+            ->where('trax_shipper_details.status',1);
 
         $datatables = Datatables::of($trax_shipper_detail)
             ->addColumn('action',function ($trax_shipper_detail){
@@ -92,8 +92,8 @@ class AdminLogisticSetupController extends Controller
         $validate = Validator::make($request->all(),[
             'user_id' => ['required','integer'],
             'rider_id' => ['required','integer'],
-            'trax_product_id' => ['required','integer'],
-            'trax_service_id' => ['required','integer'],
+            'trax_parent_product_id' => ['required','integer'],
+//            'trax_service_id' => ['required','integer'],
 //            'piece_setting_id'=>['required','integer']
 
         ]);
@@ -106,15 +106,15 @@ class AdminLogisticSetupController extends Controller
         try {
 
             $shipper_tagging=TraxShipperDetail::where('user_id',$request->user_id)
-                ->where('trax_product_id',$request->trax_product_id);
+                ->where('trax_parent_product_id',$request->trax_parent_product_id);
             if($shipper_tagging->exists())
             {
                 return redirect()->back()->with('error','Shipper already tag with rider and product');
             }
             $shipper_detail = new TraxShipperDetail();
             $shipper_detail->user_id = $request->user_id;
-            $shipper_detail->trax_product_id = $request->trax_product_id;
-            $shipper_detail->trax_service_id = $request->trax_service_id;
+            $shipper_detail->trax_parent_product_id = $request->trax_parent_product_id;
+//            $shipper_detail->trax_service_id = $request->trax_service_id;
             $shipper_detail->rider_id = $request->rider_id;
 //            $shipper_detail->piece_setting_id=$request->piece_setting_id;
             $shipper_detail->created_by = $user_id;
@@ -146,9 +146,9 @@ class AdminLogisticSetupController extends Controller
             'shipper_tagging_id'=>['required','integer'],
             'user_id' => ['required','integer'],
             'rider_id' => ['required','integer'],
-            'trax_product_id' => ['required','integer'],
-            'trax_service_id' => ['required','integer'],
-            'piece_setting_id'=>['required','integer']
+            'trax_parent_product_id' => ['required','integer'],
+//            'trax_service_id' => ['required','integer'],
+//            'piece_setting_id'=>['required','integer']
         ]);
 
         if($validate->fails())
@@ -159,10 +159,10 @@ class AdminLogisticSetupController extends Controller
         try {
             $shipper_detail = TraxShipperDetail::find($request->shipper_tagging_id);
             $shipper_detail->user_id = $request->user_id;
-            $shipper_detail->trax_product_id = $request->trax_product_id;
-            $shipper_detail->trax_service_id = $request->trax_service_id;
+            $shipper_detail->trax_parent_product_id = $request->trax_parent_product_id;
+//            $shipper_detail->trax_service_id = $request->trax_service_id;
             $shipper_detail->rider_id = $request->rider_id;
-            $shipper_detail->piece_setting_id=$request->piece_setting_id;
+//            $shipper_detail->piece_setting_id=$request->piece_setting_id;
             $shipper_detail->updated_by = $user_id;
             $shipper_detail->save();
 

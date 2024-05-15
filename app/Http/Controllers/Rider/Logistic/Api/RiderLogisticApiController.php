@@ -45,9 +45,10 @@ class RiderLogisticApiController extends Controller
 
         $logistic_data = array();
 
+//        'sd.trax_service_id','sd.piece_setting_id'
         $rider_cn = $this->cn_issue_to_rider_filter($rider_id);
             $shipper_list = User::join('trax_shipper_details as sd','sd.user_id','=','users.id')
-            ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','sd.trax_product_id','sd.trax_service_id','sd.piece_setting_id','users.account_type_id')
+            ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','sd.trax_parent_product_id','users.account_type_id')
             ->where('users.status',3)->where('sd.status',1)
             ->where('sd.rider_id',$rider_id)
             ->get();
@@ -72,8 +73,8 @@ class RiderLogisticApiController extends Controller
                 ->get();
 
 
-        $parent_products = TraxParentProduct::select('id','parent_code','parent_name')
-            ->where('status',1)->get();
+//        $parent_products = TraxParentProduct::select('id','parent_code','parent_name')
+//            ->where('status',1)->get();
 
         $products =  TraxProduct::select('id','product_code','product_name','parent_id')
             ->where('status',1)->get();
@@ -97,7 +98,7 @@ class RiderLogisticApiController extends Controller
         $logistic_data = [
             'shipper_list'        =>   $shipper_list,
             'pickup_address_list' => $pickup_address_list,
-            'parent_products'   =>   $parent_products,
+//            'parent_products'   =>   $parent_products,
             'products'          =>   $products,
             'services'          =>   $services,
             'rider_cn'          =>   $rider_cn,

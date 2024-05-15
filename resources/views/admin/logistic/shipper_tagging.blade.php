@@ -23,7 +23,7 @@
                                     <th class="border-primary border-darken-1">Shipper ID</th>
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Product</th>
-                                    <th class="border-primary border-darken-1">Service</th>
+{{--                                    <th class="border-primary border-darken-1">Service</th>--}}
                                     <th class="border-primary border-darken-1">Rider Employee ID</th>
                                     <th class="border-primary border-darken-1">Rider Name</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
@@ -61,7 +61,7 @@
                           class="form-horizontal mb-1" novalidate="novalidate">
                         @csrf
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Shipper</label>
                                     <select class="select select2 mb-1" name="user_id" id="user_id_select" data-rule-required="true" data-msg-required="Shipper is required">
@@ -71,7 +71,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Rider</label>
                                     <select class="select select2 mb-1" name="rider_id" id="rider_id_select" data-rule-required="true" data-msg-required="Rider is required">
@@ -81,29 +81,30 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Product</label>
-                                    <select class="select select2 mb-1" name="trax_product_id" id="product_id_select" data-rule-required="true" data-msg-required="Product is required">
-                                        @foreach($products as $product)
-                                            <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                    <label>Master Product</label>
+                                    <select class="select select2 mb-1" name="trax_parent_product_id" id="product_id_select" data-rule-required="true" data-msg-required="Product is required">
+                                        @foreach($parent_products as $parent)
+                                            <option value="{{ $parent->id }}">{{ $parent->parent_name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Service</label>
-                                    <select class="select select2 mb-1" name="trax_service_id" id="service_id_select" data-rule-required="true" data-msg-required="Service is required">
+                        </div>
+                        <div class="row">
+
+{{--                            <div class="col-md-6">--}}
+{{--                                <div class="form-group">--}}
+{{--                                    <label>Service</label>--}}
+{{--                                    <select class="select select2 mb-1" name="trax_service_id" id="service_id_select" data-rule-required="true" data-msg-required="Service is required">--}}
 {{--                                        @foreach($services as $service)--}}
 {{--                                            <option value="{{ $service->id }}">{{ $service->service_name }}</option>--}}
 {{--                                        @endforeach--}}
-                                    </select>
-                                </div>
-                            </div>
+{{--                                    </select>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
 {{--                            <div class="col-md-4">--}}
 {{--                                <div class="form-group">--}}
 {{--                                    <label>Piece Setting</label>--}}
@@ -180,25 +181,25 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Parent Product</label>
-                                    <select class="select select2 mb-1" name="trax_product_id" id="edit_product_id_select" data-rule-required="true" data-msg-required="Product is required">
-                                        @foreach($products as $product)
-                                            <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                    <label>Master Product</label>
+                                    <select class="select select2 mb-1" name="trax_parent_product_id" id="edit_product_id_select" data-rule-required="true" data-msg-required="Product is required">
+                                        @foreach($parent_products as $parent)
+                                            <option value="{{ $parent->id }}">{{ $parent->parent_name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Service</label>
-                                    <select class="select select2 mb-1" name="trax_service_id" id="edit_service_id_select" data-rule-required="true" data-msg-required="Service is required">
-                                        @foreach($services as $service)
-                                            <option value="{{ $service->id }}">{{ $service->service_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+{{--                            <div class="col-md-6">--}}
+{{--                                <div class="form-group">--}}
+{{--                                    <label>Service</label>--}}
+{{--                                    <select class="select select2 mb-1" name="trax_service_id" id="edit_service_id_select" data-rule-required="true" data-msg-required="Service is required">--}}
+{{--                                        @foreach($services as $service)--}}
+{{--                                            <option value="{{ $service->id }}">{{ $service->service_name }}</option>--}}
+{{--                                        @endforeach--}}
+{{--                                    </select>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
 {{--                            <div class="col-md-4">--}}
 {{--                                <div class="form-group">--}}
 {{--                                    <label>Piece Setting</label>--}}
@@ -575,8 +576,8 @@
                     },
                     {data: 'shipper_id', name: 'u.id', class: 'align-middle shipper_id'},
                     {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
-                    {data: 'product_name', name: 'tp.name', class: 'align-middle cn_from'},
-                    {data: 'service_name', name: 'ts.name', class: 'align-middle service_name'},
+                    {data: 'parent_name', name: 'tp.parent_name', class: 'align-middle parent_name'},
+                    // {data: 'service_name', name: 'ts.name', class: 'align-middle service_name'},
                     {data: 'rider_trax_id', name: 'rd.trax_id', class: 'align-middle rider_trax_id'},
                     {data: 'rider_name', name: 'rd.name', class: 'align-middle rider_name'},
                     {data: 'route_code', name: 'r.code', class: 'align-middle route_code'},
@@ -654,8 +655,8 @@
                         $("#shipper_tagging_id").val(shipper_tagging.id);
                         $("#edit_user_id_select").val(shipper_tagging.user_id).trigger('change');
                         $("#edit_rider_id_select").val(shipper_tagging.rider_id).trigger('change');
-                        $("#edit_product_id_select").val(shipper_tagging.trax_product_id).trigger('change');
-                        $("#edit_service_id_select").val(shipper_tagging.trax_service_id).trigger('change');
+                        $("#edit_product_id_select").val(shipper_tagging.trax_parent_product_id).trigger('change');
+                        // $("#edit_service_id_select").val(shipper_tagging.trax_service_id).trigger('change');
                         $("#edit_piece_setting_id_select").val(shipper_tagging.piece_setting_id).trigger('change');
                         $("#EditShipperTaggingModal").modal("show");
 
