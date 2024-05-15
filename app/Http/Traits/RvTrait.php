@@ -2211,8 +2211,11 @@ trait RvTrait
                 $this->data_rv_shipment_assign_agent_details($updated_data);
             }
 
-            //Remove Shipment from RV Shipment Ticket
-            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
+            if ($data['state_id'] !== 3)
+            {
+                //Remove Shipment from RV Shipment Ticket
+                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
+            }
 
         }
         else{
