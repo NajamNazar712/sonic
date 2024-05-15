@@ -42,6 +42,7 @@ use App\Http\Models\ShipmentStatusReason;
 use App\Jobs\ProcessRemoveShipmentFromRvShipmentTicket;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentTicket;
+use Illuminate\Support\Facades\Log;
 
 trait RvTrait
 {
@@ -2211,7 +2212,8 @@ trait RvTrait
                 $this->data_rv_shipment_assign_agent_details($updated_data);
             }
 
-            if ($data['state_id'] != 3)
+            Log::info(print_r($updated_data,true));
+            if ($updated_data['state_id'] != 3)
             {
                 //Remove Shipment from RV Shipment Ticket
                 dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
