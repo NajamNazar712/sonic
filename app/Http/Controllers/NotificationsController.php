@@ -497,6 +497,12 @@ class NotificationsController extends Controller
 
                     foreach ($reference_1_id as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
+                        
+                        if(self::isEmailDisabledOnArrival($shipment->user_id))
+                        {
+                            continue;//Skip this Shipment for Notification if Email is Disabled on Arrival Status
+                        }
+
                         $weight_types = ShipmentsWeightType::where('shipment_id', $shipment_id)->first();
                         $origin_hub_id = $shipment->pickup_address->city->hub_id;
 
@@ -9075,6 +9081,11 @@ class NotificationsController extends Controller
                     foreach ($reference_1_id as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
 
+                        if(self::isEmailDisabledOnArrival($shipment->user_id))
+                        {
+                            continue;
+                        }
+
                         $origin_hub_id = $shipment->pickup_address->city->hub_id;
 
                         if (!in_array($origin_hub_id, $origin_hub_ids)) {
@@ -11458,4 +11469,30 @@ class NotificationsController extends Controller
             return true; //Notification not updated yet so by default selected
         }
     }
+
+    static public function isEmailDisabledOnArrival($shipper_user_id)
+    {
+        $setting1 = GlobalSettings::where('type', 'disable_email_on_arrival_only_shippers')->first();
+        $setting2 = GlobalSettings::where('type', 'disable_email_on_arrival_all_shippers_except')->first();
+
+        if ($setting1->setting_value == 1) {
+            if($setting1->text != null){
+                $shipper_ids1 = explode(",", $setting1->text);
+                return in_array($shipper_user_id, $shipper_ids1);
+            }
+            return false;
+        }
+
+        //second setting
+        if ($setting2->setting_value == 1) {
+            if($setting2->text != null)
+            {
+                $shipper_ids2 = explode(",", $setting2->text);
+                return !in_array($shipper_user_id, $shipper_ids2);
+            }
+            return true;
+        }
+        return false;
+    }
+
 }
