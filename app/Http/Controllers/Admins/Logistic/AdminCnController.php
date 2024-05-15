@@ -294,9 +294,9 @@ class AdminCnController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 774);
         }
-        $trax_cn_issue_rider = TraxCnIssueToRider::Join('segments as s','trax_cn_issue_to_riders.product_id','=','s.id')
+        $trax_cn_issue_rider = TraxCnIssueToRider::Join('trax_products as s','trax_cn_issue_to_riders.product_id','=','s.id')
             ->join('riders as rd','rd.id','=','trax_cn_issue_to_riders.rider_id')
-            ->SELECT('trax_cn_issue_to_riders.id','trax_cn_issue_to_riders.issue_date','trax_cn_issue_to_riders.company_code','rd.name as rider_name','rd.trax_id as rider_trax_id','trax_cn_issue_to_riders.product_id','s.name as segment_name','trax_cn_issue_to_riders.cn_from','trax_cn_issue_to_riders.cn_to','trax_cn_issue_to_riders.quantity')
+            ->SELECT('trax_cn_issue_to_riders.id','trax_cn_issue_to_riders.issue_date','trax_cn_issue_to_riders.company_code','rd.name as rider_name','rd.trax_id as rider_trax_id','trax_cn_issue_to_riders.product_id','s.product_name as segment_name','trax_cn_issue_to_riders.cn_from','trax_cn_issue_to_riders.cn_to','trax_cn_issue_to_riders.quantity')
             ->where('trax_cn_issue_to_riders.status',1);
 
         $datatables = Datatables::of($trax_cn_issue_rider)
