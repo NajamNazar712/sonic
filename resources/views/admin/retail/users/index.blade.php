@@ -50,7 +50,7 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="add_user_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.users.add') }}" novalidate="novalidate">
+                    <form id="add_user_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.users.add') }}" novalidate="novalidate" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="container">
                             <div class="row">

@@ -1,4 +1,4 @@
-<form id="edit_user_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.users.update',['id'=>$retail_user->id]) }}" novalidate="novalidate">
+<form id="edit_user_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.users.update',['id'=>$retail_user->id]) }}" novalidate="novalidate" enctype="multipart/form-data">
     {{ method_field('PUT') }}
     {{ csrf_field()  }}
 
@@ -84,7 +84,7 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="number" name="salary" id="salary" class="form-control" placeholder="Salary">
+                    <input type="number" name="salary" id="salary" class="form-control" placeholder="Salary" value="{{ count($retail_user_salary) > 0 ? $retail_user_salary[0] : '' }}">
                 </div>
 
                 <div class="form-group">
@@ -110,7 +110,7 @@
                         <input type="text" name="family_member_name[]" id="marital_name_edit" class="form-control" placeholder="Spouse Name">
                     </div>
                     <div class="form-group">
-                        <input type="text" name="family_member_name[]" id="marital_dob_edit" class="form-control" placeholder="Spouse DOB">
+                        <input type="date" name="family_member_name[]" id="marital_dob_edit" class="form-control" placeholder="Spouse DOB">
                     </div>
                     <div class="row">
                         <div class="col-9" id="child_input_container_edit">
@@ -182,26 +182,31 @@
                 <div class="form-group">
                     <label for="attachment_1">Attachment 1</label>
                     <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf">
+                    <a id="attachment_1_filename" target="_blank"></a>
                 </div>
 
                 <div class="form-group">
                     <label for="attachment_2">Attachment 2</label>
                     <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf">
+                    <a id="attachment_2_filename" target="_blank"></a>
                 </div>
 
                 <div class="form-group">
                     <label for="attachment_3">Attachment 3</label>
                     <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf">
+                    <a id="attachment_3_filename" target="_blank"></a>
                 </div>
 
                 <div class="form-group">
                     <label for="attachment_4">Attachment 4</label>
                     <input class="form-control form-control-sm" type="file" name="attachment_4" id="attachment_4" accept="image/*,.doc,.docx,.pdf">
+                    <a id="attachment_4_filename" target="_blank"></a>
                 </div>
 
                 <div class="form-group">
                     <label for="attachment_5">Attachment 5</label>
                     <input class="form-control form-control-sm" type="file" name="attachment_5" id="attachment_5" accept="image/*,.doc,.docx,.pdf">
+                    <a id="attachment_5_filename" target="_blank"></a>
                 </div>
             </div>
         </div>
@@ -299,19 +304,23 @@
         });
 
         var preSelectedMaritalStatus = $("#marital_status_edit").val();
-        // if (preSelectedMaritalStatus == 2) {
-        //     $(".marital_details").removeClass("d-none");
-        //     if ({{ count($retail_user_family_names) > 0 }}) {
-        //         $("#marital_name_edit").val("{{ count($retail_user_family_names[2]) > 0 ? $retail_user_family_names[2] : '' }}");
-        //     } else {
-        //         return;
-        //     }
-        //     if ({{ count($retail_user_family_names) > 0 }}) {
-        //         $("#marital_dob_edit").val("{{ count$retail_user_family_names[3] }}");
-        //     } else {
-        //         return;
-        //     }
-        // }
+        var family_member_info = @json($retail_user_family_names);
+        var spouse_name = @json($retail_user_family_names[2] ?? '');
+        var spouse_dob = @json($retail_user_family_names[3] ?? '');
+
+        if (preSelectedMaritalStatus == 2) {
+            $(".marital_details").removeClass("d-none");
+            if (family_member_info.length > 0) {
+                $("#marital_name_edit").val(spouse_name);
+            } else {
+                return;
+            }
+            if (family_member_info.length > 0 ) {
+                $("#marital_dob_edit").val(spouse_dob);
+            } else {
+                return;
+            }
+        }
 
         $("#marital_status_edit").on('change', function(){
             var selectedOption = $(this).val();
@@ -322,45 +331,6 @@
                 $(".child_input").val('');
             } else if(selectedOption == 2) {
                 $(".marital_details").removeClass("d-none");
-            }
-        });
-
-        // Dynamically determine the number of children
-        var numChildren = 0;
-        @for ($i = 4; $i < count($retail_user_family_names); $i++)
-            @if (count($retail_user_family_names) > 0))
-                numChildren++;
-                if (numChildren <= 4) {
-                    var childName = "{{ $retail_user_family_names[$i] }}";
-                    var $childInput = $('.child-template-edit').clone().removeClass('child-template-edit').removeClass('d-none');
-                    $childInput.find('.child_input_edit').attr({
-                        'id': 'child_' + numChildren + '_data_edit',
-                        'name': 'family_member_name[]',
-                        'placeholder': 'Child ' + numChildren
-                    }).val(childName); // Pre-fill child name here
-                    $('#child_input_container_edit').append($childInput);
-                }
-            @endif
-        @endfor
-
-        if (numChildren >= 4) {
-            $('#edit_child_column_btn').prop('disabled', true);
-        }
-
-        // Add child template
-        $(document).on('click', '#edit_child_column_btn', function () {
-            if (numChildren < 4) {
-                numChildren++;
-                var $childInput = $('.child-template-edit').clone().removeClass('child-template-edit').removeClass('d-none');
-                $childInput.find('.child_input_edit').attr({
-                    'id': 'child_' + numChildren + '_data_edit',
-                    'name': 'family_member_name[]',
-                    'placeholder': 'Child ' + numChildren
-                });
-                $('#child_input_container_edit').append($childInput);
-            }
-            if (numChildren >= 4) {
-                $(this).prop('disabled', true);
             }
         });
 
@@ -448,8 +418,88 @@
             this.submit();
         });
 
-        $(".modal_close_btn").click(function() {
-            resetModal();
+        // Function to reset the modal state
+        function resetModalState() {
+            numChildren = 0; // Reset numChildren variable
+            $('#child_input_container_edit').empty(); // Remove all dynamically added child inputs
+            $('#edit_child_column_btn').prop('disabled', false); // Enable the add child button
+        }
+
+        var numChildren = 0;
+
+        // Function to initialize child inputs based on family member info
+        function initializeChildInputs() {
+            for (var i = 4; i < family_member_info.length; i++) {
+                if (numChildren < 4) {
+                    numChildren++;
+                    var childName = family_member_info[i];
+                    var childInput = $('.child-template-edit').clone().removeClass('child-template-edit').removeClass('d-none');
+                    childInput.find('.child_input_edit').attr({
+                        'id': 'child_' + numChildren + '_data_edit',
+                        'name': 'family_member_name[]',
+                        'placeholder': 'Child ' + numChildren
+                    }).val(childName); // Pre-fill child name here
+                    $('#child_input_container_edit').append(childInput);
+                }
+            }
+            
+            // Disable add child button if the maximum number of children is reached
+            if (numChildren >= 4) {
+                $('#edit_child_column_btn').prop('disabled', true);
+            }
+        }
+
+        // Initialize child inputs
+        initializeChildInputs();
+
+        // Add child template
+        $(document).on('click', '#edit_child_column_btn', function () {
+            if (numChildren < 4) {
+                numChildren++;
+                var $childInput = $('.child-template-edit').clone().removeClass('child-template-edit').removeClass('d-none');
+                $childInput.find('.child_input_edit').attr({
+                    'id': 'child_' + numChildren + '_data_edit',
+                    'name': 'family_member_name[]',
+                    'placeholder': 'Child ' + numChildren
+                });
+                $('#child_input_container_edit').append($childInput);
+
+                // Disable add child button if the maximum number of children is reached
+                if (numChildren >= 4) {
+                    $(this).prop('disabled', true);
+                }
+            }
         });
+
+        // Code to reset modal state when modal is closed without saving
+        $('#close_modal_button').click(function() {
+            resetModalState();
+        });
+
+        var retail_user_id = $('#retail_user_id').val();
+        $.ajax({
+            type: "GET",
+            url: '{{ route('admin.retail.users.retail_user_attachments') }}',
+            data: { retail_user_id: retail_user_id },
+            success: function (response) {
+                if (response.data) {
+                    var retail_user_id = response.data.franchise_id;
+                    if (retail_user_id === retail_user_id) {
+                        for (var i = 1; i <= 5; i++) {
+                            var attachmentKey = 'attachment_' + i;
+                            var attachmentFileName = response.data[attachmentKey];
+                            if (attachmentFileName) {
+                                var attachmentURL = '/storage/' + attachmentFileName;
+                                var fileNameParts = attachmentFileName.split('/');
+                                var fileName = fileNameParts[fileNameParts.length - 1];
+                                var attachmentLink = $('<a>').attr('href', attachmentURL).attr('target', '_blank').text(fileName);
+                                $('#attachment_' + i + '_filename').html(attachmentLink);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
     });
 </script>    

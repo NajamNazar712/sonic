@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Models\TraxCenterAttachment;
 use App\Http\Models\RetailUserFamilyInformation;
 use App\Http\Models\RetailUserProductPercentage;
+use App\Http\Models\RetailUserAttachment;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -41,8 +42,9 @@ class RetailAdminUserManagementController extends Controller
         $this->middleware('Permission');
     }
 
-    public static function add_user($name, $password, $phone_number, $hub, $cnic, $address, $category, $category_id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages)
+    public static function add_user($name, $password, $phone_number, $hub, $cnic, $address, $category, $category_id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages, $attachment_1, $attachment_2, $attachment_3, $attachment_4, $attachment_5, $file_1, $file_2, $file_3, $file_4, $file_5)
     {
+
         $user = new RetailUser();
         $user->trax_id = $traxId;
         $user->city_id = $hub;
@@ -97,6 +99,27 @@ class RetailAdminUserManagementController extends Controller
             $retail_user_family_information->family_member_type = $family_member_type;
             $retail_user_family_information->save();
         }
+
+        $retail_user_attachment = new RetailUserAttachment();
+        $retail_user_attachment->retail_user_id = $user->id;
+        $baseDirectory = 'retail user attachments';
+
+        if (!Storage::disk('public')->exists($baseDirectory)) {
+            Storage::disk('public')->makeDirectory($baseDirectory);
+        }
+        for ($i = 1; $i <= 5; $i++) {
+            $file = ${"file_" . $i};
+            if ($file) {
+                $filename = 'attachment_' . $i . '_' . Carbon::now()->format('YmdHis') . '.' . $file->getClientOriginalExtension();
+                $attachmentDirectory = $baseDirectory . '/attachment_' . $i;
+                if (!Storage::disk('public')->exists($attachmentDirectory)) {
+                    Storage::disk('public')->makeDirectory($attachmentDirectory);
+                }
+                Storage::disk('public')->putFileAs($attachmentDirectory, $file, $filename);                
+                $retail_user_attachment->{'attachment_' . $i} = $attachmentDirectory . '/' . $filename;
+            }
+        }
+        $retail_user_attachment->save();
 
         return $user->id;
     }
@@ -503,7 +526,6 @@ class RetailAdminUserManagementController extends Controller
         $retail_commissions = RetailUserCommission::whereIn('id', $trax_retail_users)->get();
 
         $html = '';
-        
         $html .= '<!doctype html>';
         $html .= '<html lang="en">';
         $html .= '<head>';
@@ -550,16 +572,25 @@ class RetailAdminUserManagementController extends Controller
         $html .= '<table class="table table-sm table-bordered border">';
         $html .= '<tbody>';
         $html .= '<tr>';
-        $html .= '<td class="color primary" colspan="2"><strong></strong></td>';
+        $html .= '<td class="color primary" colspan="3"><strong>Franchise Details</strong></td>';
         $html .= '</tr>';
+
+        // table set
         $html .= '<tr>';
-        $html .= '<td class="color secondary"><strong></strong></td>';
-        $html .= '<td></td>';
+        $html .= '<td class="color secondary"><strong></strong>Franchise Name</td>';
+        $html .= '<td class="color secondary"><strong></strong>Franchise Code</td>';
+        $html .= '<td class="color secondary"><strong></strong>Month</td>';
         $html .= '</tr>';
-        $html .= '</tbody>';
-        $html .= '</table>';
-        $html .= '</div>';
-        $html .= '</div>';
+        // table set
+
+        foreach ($retail_commissions as $commission) {
+            $franchise_name = RetailFranchise::find($commission->franchise_id)->name;
+            $html .= '<tr>';
+            $html .= '<td><strong></strong>'. $franchise_name .'</td>';
+            $html .= '<td><strong></strong>'. $commission->franchise_code .'</td>';
+            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
+            $html .= '</tr>';
+        }
 
         $html .= '<div class="row align-items-start justify-content-between summary">';
         $html .= '<div class="col-12">';
@@ -583,7 +614,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<tr>';
             $html .= '<td>' . $franchise_name . '</td>';
             $html .= '<td>' . $commission->franchise_code . '</td>';
-            $html .= '<td>' . $commission->month . '</td>';
+            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
             $html .= '<td>' . $commission->retail_shipping_mode_id . '</td>';
             $html .= '<td>' . $commission->number_of_shipments . '</td>';
             $html .= '<td>' . $commission->total_charges_without_gst . '</td>';
@@ -613,7 +644,6 @@ class RetailAdminUserManagementController extends Controller
         $retail_commissions = RetailFranchiseCommission::whereIn('id', $trax_retail_users)->get();
 
         $html = '';
-        
         $html .= '<!doctype html>';
         $html .= '<html lang="en">';
         $html .= '<head>';
@@ -660,12 +690,26 @@ class RetailAdminUserManagementController extends Controller
         $html .= '<table class="table table-sm table-bordered border">';
         $html .= '<tbody>';
         $html .= '<tr>';
-        $html .= '<td class="color primary" colspan="2"><strong></strong></td>';
+        $html .= '<td class="color primary" colspan="3"><strong>Franchise Details</strong></td>';
         $html .= '</tr>';
+
+        // table set
         $html .= '<tr>';
-        $html .= '<td class="color secondary"><strong></strong></td>';
-        $html .= '<td></td>';
+        $html .= '<td class="color secondary"><strong></strong>Franchise Name</td>';
+        $html .= '<td class="color secondary"><strong></strong>Franchise Code</td>';
+        $html .= '<td class="color secondary"><strong></strong>Month</td>';
         $html .= '</tr>';
+        // table set
+
+        foreach ($retail_commissions as $commission) {
+            $franchise_name = RetailFranchise::find($commission->franchise_id)->name;
+            $html .= '<tr>';
+            $html .= '<td><strong></strong>'. $franchise_name .'</td>';
+            $html .= '<td><strong></strong>'. $commission->franchise_code .'</td>';
+            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
+            $html .= '</tr>';
+        }
+
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';
@@ -684,6 +728,16 @@ class RetailAdminUserManagementController extends Controller
         $html .= '<th class="color primary">Total Charges Without GST</th>';
         $html .= '<th class="color primary">Product Percentage</th>';
         $html .= '<th class="color primary">Commission</th>';
+        $html .= '<th class="color primary">GST %</th>';
+        $html .= '<th class="color primary">GST Amount</th>';
+        $html .= '<th class="color primary">Total Commission</th>';
+        $html .= '<th class="color primary">Withholding %</th>';
+        $html .= '<th class="color primary">Franchise withholding Amount</th>';
+        $html .= '<th class="color primary">Charges minus withholding</th>';
+        $html .= '<th class="color primary">Deduction %</th>';
+        $html .= '<th class="color primary">Franchise deduction amount</th>';
+        $html .= '<th class="color primary">Net Commission</th>';
+
         $html .= '</tr>';
         $html .= '</thead>';
         $html .= '<tbody>';
@@ -693,12 +747,21 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<tr>';
             $html .= '<td>' . $franchise_name . '</td>';
             $html .= '<td>' . $commission->franchise_code . '</td>';
-            $html .= '<td>' . $commission->month . '</td>';
+            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
             $html .= '<td>' . $commission->retail_shipping_mode_id . '</td>';
             $html .= '<td>' . $commission->number_of_shipments . '</td>';
             $html .= '<td>' . $commission->total_charges_without_gst . '</td>';
             $html .= '<td>' . $commission->product_percentage . '</td>';
             $html .= '<td>' . $commission->commission . '</td>';
+            $html .= '<td>' . $commission->gst_percentage . '</td>';
+            $html .= '<td>' . $commission->total_charges_with_gst . '</td>';
+            $html .= '<td>' . $commission->franchise_gst_amount . '</td>';
+            $html .= '<td>' . $commission->franchise_withholding_percentage . '</td>';
+            $html .= '<td>' . $commission->franchise_withholding_amount . '</td>';
+            $html .= '<td>' . $commission->charges_without_withholding . '</td>';
+            $html .= '<td>' . $commission->deduction_percentage . '</td>';
+            $html .= '<td>' . $commission->deduction_amount . '</td>';
+            $html .= '<td>' . $commission->net_commission . '</td>';
             $html .= '</tr>';
         }   
         
@@ -1022,6 +1085,7 @@ class RetailAdminUserManagementController extends Controller
     public function user_edit($id)
     {
         $retail_user_family_names = [];
+        $retail_user_salary = [];
         $retail_user = RetailUser::find($id);
         $retail_user_id = $retail_user->id;
         $trax_centers = RetailTraxCenter::where('status', 1)->get();
@@ -1031,15 +1095,17 @@ class RetailAdminUserManagementController extends Controller
         if ($retail_user_family_names_query->exists()) {
             $retail_user_family_names_query = $retail_user_family_names_query->first();
             $retail_user_family_names = $retail_user_family_names_query->pluck('family_member_name')->toArray();
+            $retail_user_salary = $retail_user_family_names_query->pluck('salary')->toArray();
         }
-            return view('admin.retail.users.edit')->with([
-                'retail_user' => $retail_user, 
-                'trax_centers' => $trax_centers, 
-                'franchises' => $franchises, 
-                'shipping_modes' => $shipping_modes, 
-                'retail_user_id' => $retail_user_id, 
-                'retail_user_family_names' => $retail_user_family_names
-            ]);
+        return view('admin.retail.users.edit')->with([
+            'retail_user' => $retail_user, 
+            'trax_centers' => $trax_centers, 
+            'franchises' => $franchises, 
+            'shipping_modes' => $shipping_modes, 
+            'retail_user_id' => $retail_user_id, 
+            'retail_user_family_names' => $retail_user_family_names,
+            'retail_user_salary' => $retail_user_salary,
+        ]);
 
     }
 
@@ -1154,8 +1220,18 @@ class RetailAdminUserManagementController extends Controller
             $productPercentages = json_decode($request->product_percentage, true);
             $familyMemberNames = $request->family_member_name;
             $traxId = $request->trax_id;
+            $attachment_1 = $request->hasFile('attachment_1');
+            $attachment_2 = $request->hasFile('attachment_2');
+            $attachment_3 = $request->hasFile('attachment_3');
+            $attachment_4 = $request->hasFile('attachment_4');
+            $attachment_5 = $request->hasFile('attachment_5');
+            $file_1 = $request->file('attachment_1');
+            $file_2 = $request->file('attachment_2');
+            $file_3 = $request->file('attachment_3');
+            $file_4 = $request->file('attachment_4');
+            $file_5 = $request->file('attachment_5');
 
-            $this->add_user($request->name, $password, $request->phone_number, $store->default_hub, $request->cnic, $request->address, $request->store, $store->id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages);
+            $this->add_user($request->name, $password, $request->phone_number, $store->default_hub, $request->cnic, $request->address, $request->store, $store->id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages, $attachment_1, $attachment_2, $attachment_3, $attachment_4, $attachment_5, $file_1, $file_2, $file_3, $file_4, $file_5);
 
             return redirect()->back()->with('success', 'Retail User Added Successfully!');
         } else {
@@ -1180,6 +1256,7 @@ class RetailAdminUserManagementController extends Controller
     public function user_update(Request $request, $id)
     {
         $retail_user = RetailUser::find($id);
+        $admin = $request->user();
         $retail_user->name = $request->name;
         $retail_user->category = $request->store;
         if ($request->store == 1) {
@@ -1194,49 +1271,128 @@ class RetailAdminUserManagementController extends Controller
         $retail_user->updated_by = Auth::id();
         $retail_user->save();
         
-        $familyMemberNames = $request->family_member_name;
-        // retail user family info
-        foreach ($familyMemberNames as $key => $familyMemberName) {
-            $family_member_type = null;
-            if ($key === 0) {
-                $family_member_type = 3; // Father
-            } elseif ($key === 1) {
-                $family_member_type = 4; // Mother
-            } elseif ($key === 2) {
-                $family_member_type = 1; // Spouse
-            } elseif ($key === 3) {
-                $family_member_type = 5;
+        // retail user commission
+        $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);
+        $productPercentages = json_decode($request->product_percentage, true);
+        $retailShippingModeNames = is_array($retailShippingModeNames) ? $retailShippingModeNames : [];
+        $productPercentages = is_array($productPercentages) ? $productPercentages : [];
+        $retailShippingModes = RetailShippingMode::whereIn('name', $retailShippingModeNames)->get();
+        $matchingRetailShippingModeIds = $retailShippingModes->pluck('id')->toArray();
+
+        $retail_user_old_product_percentage = RetailUserProductPercentage::where('retail_user_id', $retail_user->id)->first();
+
+        if ($request->has('retail_shipping_mode_id')) {
+            if ($retail_user_old_product_percentage) {
+                $retail_user_old_product_percentage->delete();
             } else {
-                $family_member_type = 2; // Children
-            }
-            
-            if ($request->has('salary') || $request->has('agreement_start_date')) {
-                RetailUserFamilyInformation::updateOrCreate(
-                    [
-                        'retail_user_id' => $retail_user->id,
-                        'family_member_type' => $family_member_type,
-                    ],
-                    [
-                        'family_member_name' => $familyMemberName,
-                    ]
-                )->fill([
-                    'agreement_start_date' => $request->input('agreement_start_date'),
-                    'salary' => $request->input('salary'),
-                ])->save();
-            } else {
-                // If neither salary nor agreement_start_date is present in the request, update only the family_member_name
-                RetailUserFamilyInformation::updateOrCreate(
-                    [
-                        'retail_user_id' => $retail_user->id,
-                        'family_member_type' => $family_member_type,
-                    ],
-                    [
-                        'family_member_name' => $familyMemberName,
-                    ]
-                );
+                foreach ($retailShippingModeNames as $key => $retailShippingModeName){
+                    $retailShippingModeName = ($retailShippingModeName !== null) ? $retailShippingModeName : null;
+                    $productPercentage = ($productPercentages[$key] !== null) ? $productPercentages[$key] : null;
+                    $retailShippingModeId = $matchingRetailShippingModeIds[$key] ?? null;
+                    
+                    $retail_user_product_percentage = new RetailUserProductPercentage();
+                    $retail_user_product_percentage->retail_user_id = $retail_user->id;
+                    $retail_user_product_percentage->retail_shipping_mode_id = $retailShippingModeId;
+                    $retail_user_product_percentage->product_percentage = $productPercentage;
+                    $retail_user_product_percentage->created_by = Auth::id();
+                    $retail_user_product_percentage->save();
+                }
             }
         }
+
+        // retail user family info
+        $familyMemberNames = $request->family_member_name;
+        foreach ($familyMemberNames as $key => $familyMemberName) {
+            // Delete existing records for the retail user only if new family member information is present
+            RetailUserFamilyInformation::where('retail_user_id', $retail_user->id)->delete();
+            foreach ($familyMemberNames as $key => $familyMemberName) {
+                $family_member_type = null;
+                if ($key == 0) {
+                    $family_member_type = 3; // Father
+                } elseif ($key == 1) {
+                    $family_member_type = 4; // Mother
+                } elseif ($key == 2) {
+                    $family_member_type = 1; // Spouse
+                } elseif ($key == 3) {
+                    $family_member_type = 5; // Assuming this is for a specific family member type
+                } else {
+                    $family_member_type = 2; // Children
+                }
+
+                $family_member_new_data = new RetailUserFamilyInformation();
+                $family_member_new_data->retail_user_id = $retail_user->id;
+                $family_member_new_data->family_member_name = $familyMemberName;
+                $family_member_new_data->family_member_type = $family_member_type;
+                $family_member_new_data->salary = $request->salary;
+                $family_member_new_data->agreement_start_date = $request->agreement_start_date;
+                $family_member_new_data->save();
+            }
+        }
+
+        $baseDirectory = 'retail user attachments';
+        if (!Storage::disk('public')->exists($baseDirectory)) {
+            Storage::disk('public')->makeDirectory($baseDirectory);
+        }
+        $old_attachments = RetailUserAttachment::where('retail_user_id', $retail_user->id)->first();
+        if ($old_attachments) {
+            // Update existing attachments
+            for ($i = 1; $i <= 5; $i++) {
+                $attachment_name = 'attachment_' . $i;
+                if ($request->hasFile($attachment_name)) {
+                    $file = $request->file($attachment_name);
+                    $filename = 'attachment_' . $i . '_' . Carbon::now()->format('YmdHis') . '.' . $file->getClientOriginalExtension();
+                    
+                    // Delete old attachment if it exists
+                    $old_attachment = $old_attachments->$attachment_name;
+                    if ($old_attachment) {
+                        Storage::disk('public')->delete($old_attachment);
+                    }
+                    
+                    // Store new attachment
+                    $attachmentDirectory = $baseDirectory . '/' . $attachment_name;
+                    Storage::disk('public')->putFileAs($attachmentDirectory, $file, $filename);
+                    
+                    // Update attachment field in the database
+                    $old_attachments->$attachment_name = $attachmentDirectory . '/' . $filename;
+                }
+            }
+            $old_attachments->updated_by = $admin->id;
+            $old_attachments->save();
+        } else {
+            // Create new attachments
+            $new_attachments = new RetailUserAttachment();
+            $new_attachments->retail_user_id = $retail_user->id;
+            
+            for ($i = 1; $i <= 5; $i++) {
+                $attachment_name = 'attachment_' . $i;
+                if ($request->hasFile($attachment_name)) {
+                    $file = $request->file($attachment_name);
+                    $filename = 'attachment_' . $i . '_' . Carbon::now()->format('YmdHis') . '.' . $file->getClientOriginalExtension();
+                    
+                    // Store new attachment
+                    $attachmentDirectory = $baseDirectory . '/' . $attachment_name;
+                    Storage::disk('public')->putFileAs($attachmentDirectory, $file, $filename);
+                    
+                    // Update attachment field in the database
+                    $new_attachments->$attachment_name = $attachmentDirectory . '/' . $filename;
+                }
+            }
+            $new_attachments->updated_by = $admin->id;
+            $new_attachments->save();
+        }
         return redirect()->back()->with('success', 'Retail User Updated Successfully!');
+    }
+
+    public function retail_user_attachments(Request $request){
+        $retailUserId = $request->retail_user_id;
+        $retail_user_attachment = RetailUserAttachment::where('retail_user_id', $retailUserId)->first();
+        if ($retail_user_attachment != null){
+            $data = $retail_user_attachment;
+        } else {
+            $data = null;
+        }
+        
+        return response()->json(['data' => $data]);
     }
 
     public function user_name(Request $request)
