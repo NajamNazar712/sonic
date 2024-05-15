@@ -1552,7 +1552,6 @@ class AdminTrackingController extends Controller
                                         ->whereBetween('updated_at', [date('Y-m-d H:i:s', strtotime($journey->updated_at)), date('Y-m-d H:i:s', strtotime($journey->updated_at) + 10)])
                                         ->groupBy('user_id');
                                 })->get();
-                                
 
                                 
                                 foreach($latest_lost_responsible_shipments as $key => $lost_responsible_shipment){

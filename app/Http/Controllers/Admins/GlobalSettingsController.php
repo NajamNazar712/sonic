@@ -9452,4 +9452,74 @@ class GlobalSettingsController extends Controller
             
             return redirect()->back()->with('success', 'Settings Updated!');
         }
+
+    public function shipper_negative_payable_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 787);
+        $settings = GlobalSettings::where('type', 'negative_payable_limit');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $negative_payable = $settings->setting_value;
+        } else {
+            $negative_payable = -1000;
+        }
+
+        return view('admin.settings.negative_payable')->with(['negative_payable' => $negative_payable]);
+    }
+
+    public function shipper_negative_payable_update(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 788);
+        $negative_payable = $request->negative_payable;
+        if ($negative_payable) {
+            $shipperSettings = GlobalSettings::where('type', 'negative_payable_limit');
+
+            if ($shipperSettings->exists()) {
+                $shipperSettings = $shipperSettings->first();
+            } else {
+                $shipperSettings = new GlobalSettings();
+
+                $shipperSettings->type = 'negative_payable_limit';
+            }
+            $shipperSettings->setting_value = $negative_payable;
+            $shipperSettings->save();
+        }
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function delivery_revert_access_index()
+    {
+        $admin_departments = AdminDepartment::where('id', 4)->first();
+        $admin_roles = AdminRole::where('department_id', $admin_departments->id)->pluck('id')->toArray(); 
+        $finance_admins = Admin::whereIn('role_id', $admin_roles)->where('status', 1)->get();
+        $admins = GlobalSettings::where('setting_value', 0)->where('type', 'delivery_revert_access')->first();
+        return view('admin.settings.delivery_revert_access.index')->with(['finance_admins' => $finance_admins, 'admins' => $admins]);
+    }
+
+    public function delivery_revert_access_store(Request $request)
+    {
+        // Check if any finance admins are selected
+        if ($request->has('finance_admins')) {
+            $finance_admins_id = implode(',', $request->finance_admins);
+        } else {
+            $finance_admins_id = null;
+        }
+
+        // Check if a global setting for delivery revert access already exists
+        $settings = GlobalSettings::where('setting_value', 0)->where('type', 'delivery_revert_access')->first();
+        if ($settings) {
+            // Update the existing global setting
+            $settings->text = $finance_admins_id;
+            $settings->save();
+        } else {
+            $settings = new GlobalSettings();
+            $settings->type = 'delivery_revert_access';
+            $settings->setting_value = 0;
+            $settings->text = $finance_admins_id;
+            $settings->save();
+        }
+        return redirect()->back()->with('success', 'Admins have been assigned!');
+    }
 }

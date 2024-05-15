@@ -65,6 +65,7 @@ use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Http\Models\ShipmentsWeightType;
+use App\Http\Models\ShipmentServicesCharges;
 
 
 class ShipmentChargesController extends Controller
@@ -2670,6 +2671,78 @@ class ShipmentChargesController extends Controller
             $credit_user = $credit_user->first();
             $credit_user->limit_usage = $credit_user->limit_usage + $amount;
             $credit_user->save();
+        }
+    }
+    static public function reverse_pickup($id) {
+        $shipment = Shipment::find($id);
+        if($shipment->business_category_id == 2){
+            return false;
+        }
+        $account_type_id = $shipment->user->account_type_id;
+        $rate_type_id =  $shipment->user->corporate_rate_type_id;
+        if ($account_type_id == 1) {
+            $booking_type_charge = BookingTypeCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+        }
+        else {
+            if($rate_type_id != 3){
+                $booking_type_charge = CorporateBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            }
+            else{
+                $booking_type_charge = CorporateDefaultBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            }
+        }
+
+        if ($booking_type_charge->exists()) {
+            $booking_type_charge = $booking_type_charge->first();
+
+            $today = Carbon::today();
+
+            if ($account_type_id == 1) {
+                $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+            }
+            else {
+                if($rate_type_id != 3){
+                    $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                }
+                else{
+                    $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                }
+            }
+
+            if ($discount_charge->exists()) {
+                $discount_charge = $discount_charge->first();
+
+                $discount = $discount_charge->weight;
+            }
+            else {
+                $discount = 0;
+            }
+
+            $reverse_pickup_multiplier = ($booking_type_charge->reverse_pickup_charges / 100);
+
+            $charges = ($shipment->weight_charges * $reverse_pickup_multiplier);
+
+            if (strpos($discount, '%') !== FALSE) {
+                $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+            }
+            else {
+                $discount = floatval($discount);
+            }
+
+            $service_charges = ShipmentServicesCharges::where('shipment_id', $id);
+            if($service_charges->exists()){
+                $service_charges = $service_charges->first();
+            }else{
+                $service_charges = new ShipmentServicesCharges;
+            }
+            if ($charges < $discount) {
+                $service_charges->reverse_pickup_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+            }
+            else {
+                $service_charges->reverse_pickup_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+            }
+            $service_charges->shipment_id = $id;
+            $service_charges->save();
         }
     }
 }
