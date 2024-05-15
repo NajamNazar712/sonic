@@ -8771,7 +8771,7 @@ class GlobalSettingsController extends Controller
         
         $excluded_shippers = array();
         $only_shippers = array();
-        
+
         $excluded_shipper = GlobalSettings::where('type', 'disable_email_on_arrival_all_shippers_except');
         $only_shipper = GlobalSettings::where('type', 'disable_email_on_arrival_only_shippers');
 
@@ -8812,8 +8812,8 @@ class GlobalSettingsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 784);
 
-        $excluded_users = $request->has('excluded_users') ? implode(',', $request->excluded_users) : null;
-        $only_users = $request->has('only_users') ? implode(',', $request->only_users) : null;
+        $excluded_users = $request->has('excluded_users') ? implode(',', $request->excluded_users) : '';
+        $only_users = $request->has('only_users') ? implode(',', $request->only_users) : '';
 
         if ($request->has('all_shipper_toggle')) {
             // Settings for disabling all shippers except given ones
