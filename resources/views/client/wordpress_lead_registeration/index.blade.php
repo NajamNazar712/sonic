@@ -132,7 +132,7 @@
                                         </label>
                                         <div>
                                             <select name="shipper_city" id="shipper_city"
-                                                class="select2 form-control required readonly-overlay"
+                                                class="select2 form-control required"
                                                 style="width: 100%">
                                                 @foreach ($all_cities as $city)
                                                     <option value="{{ $city->id }}"
@@ -140,7 +140,7 @@
                                                         {{ $city->name }}</option>
                                                 @endforeach
                                             </select>
-                                            <div class="readonly-overlay"></div>
+                                            <input type="hidden" name="shipper_city" value="{{ $lead->city_id }}">
 
                                         </div>
                                     </div>
@@ -2847,20 +2847,16 @@
             background-color: #56e73c;
         }
 
-        .readonly-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: transparent;
-            pointer-events: none; /* Allows clicks to fall through */
-            z-index: 999; /* Ensure overlay is on top */
-            }
+      
 
         .hide {
             display: none;
         }
+
+        .readonly-overlay {
+    pointer-events: none; /* Mouse events disabled */
+    opacity: 0.6; /* Opacity set for visual indication */
+}
     </style>
     
 @endsection
@@ -2907,7 +2903,7 @@
 
 
         @if ($lead != null)
-            $('#shipper_city').val({{ $lead->city_id }}).trigger('change');
+            $('#shipper_city').val({{ $lead->city_id }}).prop('disabled', true).trigger('change');
             $('#sale_person').val({{ $lead->sale_person_id }}).trigger('change');
         @endif
 
@@ -3613,6 +3609,15 @@
             allowClear: true
         });
 
+        $("input[name='phone'],input[name='phone2'],input[name='billing_person_phone'],input[name='shipping_phone[]']")
+                .inputmask({
+                    'mask': "9999-9999999",
+                    'clearIncomplete': true
+                });
+                $("input[name='ntn_no']").inputmask({
+                    'mask': "*******-*",
+                'clearIncomplete': true
+        });
 
          
 

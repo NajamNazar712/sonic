@@ -1586,6 +1586,8 @@ class Permission
                 'get_agreement',
                 'welcome',
                 'orders.list',
+                'new.address',
+                'new.bank'
             ];
             
             $wordpressRoutes = collect(Route::getRoutes())->filter(function ($route) {

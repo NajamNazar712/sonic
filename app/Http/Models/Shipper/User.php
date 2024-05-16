@@ -91,4 +91,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo('App\BlockDisableReasonUser','blacklist_reason_1', 'id');
     }
+
+    public function lead()
+    {
+        return $this->belongsTo('App\Http\Models\Admin\Lead', 'lead_id', 'id');
+    }
 }

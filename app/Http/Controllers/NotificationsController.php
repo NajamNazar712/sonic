@@ -11066,6 +11066,7 @@ class NotificationsController extends Controller
                     $body = $notification->body;
                     $user_id = $reference_1_id;
                     $user = User::find($user_id);
+                    $sale_person = Admin::find($user->lead->sale_person_id);
                     if (strpos($body, '[Company Name]') !== FALSE) {
                         $body = str_replace('[Company Name]', $user->name, $body); 
                     }
@@ -11075,7 +11076,7 @@ class NotificationsController extends Controller
                     if (strpos($subject, '[Company Name]') !== FALSE) {
                         $subject = str_replace('[Company Name]', $user->name, $subject); 
                     }
-                    self::email($subject, $body, $user->email); // Send email with $body
+                    self::email($subject, $body, $sale_person->email); // Send email with $body
                                 
                 }
             }
