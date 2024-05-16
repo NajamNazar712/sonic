@@ -94,6 +94,6 @@ class User extends Authenticatable
 
     public function lead()
     {
-        return $this->belongsTo('App\Http\Models\Admin\Lead', 'lead_id', 'id');
+        return $this->belongsTo('App\Http\Models\Admin\Lead\Lead', 'lead_id', 'id');
     }
 }
