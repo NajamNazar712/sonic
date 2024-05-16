@@ -96,7 +96,6 @@
         <div class="col">
              <fieldset class="form-group">
                 <select name="hub_id[]" id="hub_ids" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required" multiple="multiple">
-                    
                     @foreach($hubs as $hub)
                         <option value="{{$hub->id}}">{{$hub->name}}</option>
                     @endforeach
@@ -258,7 +257,7 @@
             placeholder:'Select Reporting Location',
             dropdownParent: $("#addRiderForm")
         });
-        $('#hub_ids').prepend('<option value="" selected="selected"></option>').select2({
+        $('#hub_ids').select2({
             width:'100%',
             placeholder:"Select Hubs",
             allowClear:true,
