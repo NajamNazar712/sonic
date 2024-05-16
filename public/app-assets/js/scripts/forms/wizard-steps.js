@@ -225,7 +225,7 @@ $(".steps-validation").validate({
     unhighlight: function(element, errorClass) {
         $(element).removeClass(errorClass);
     },
-    errorPlacement: function(error, element)
+    errorPlacement: function(error, element) {
         error.insertAfter(element);
     },
     rules: {
