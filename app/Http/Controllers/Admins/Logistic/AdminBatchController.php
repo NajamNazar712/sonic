@@ -33,6 +33,8 @@ class AdminBatchController extends Controller
     }
     public function booking_batch_list(Request $request)
     {
+        $hub_ids= $request->admin_hubs;
+        dd($hub_ids);
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 782);
         }
@@ -43,7 +45,7 @@ class AdminBatchController extends Controller
                         ->whereRaw('bba.id = (SELECT MAX(id) FROM trax_booking_batch_assigns WHERE batch_id = trax_booking_batches.id)');
             })
             ->select('trax_booking_batches.id', 'trax_booking_batches.total_bookings', 'trax_booking_batches.complete_bookings', 'trax_booking_batches.status_id', 'bs.name as status_name','bba.user_id')
-            ->where('bba.user_id',$user_id)->orWhere('trax_booking_batches.status_id', 1);
+            ->whereIn('trax_booking_batches.city_id',[$hub_ids])->where('bba.user_id',$user_id)->orWhere('trax_booking_batches.status_id', 1);
 //                ->where(function($query) use ($user_id) {
 //                $query->where('bba.user_id', $user_id) // Condition for bba.user_id
 //                ->orWhere('trax_booking_batches.status_id', 1); // Condition for trax_booking_batches.status_id
