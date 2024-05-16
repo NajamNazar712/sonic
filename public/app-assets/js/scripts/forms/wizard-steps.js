@@ -72,7 +72,7 @@ $(".steps-validation").steps({
         }
 
 
-        if(newIndex === 4 && getLastPartOfUrl() === "wordpress"){
+        if(currentIndex === 4 && getLastPartOfUrl() === "wordpress"){
             var newLi = $('<li class="clearfix"><button id="customQuotationBtn" class="btn btn-primary">Request For Custom Qoutes</button></li>');
             $('.actions ul').append(newLi);
         }else if(newIndex != 4){
