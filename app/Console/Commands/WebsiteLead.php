@@ -139,7 +139,7 @@ class WebsiteLead extends Command
             }
         }
 
-        if(count($leads_added) > 0){
+        if(count($old_leads) > 0){
             $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
             $client->delete('leads', [
                 'form_params' => [
@@ -147,13 +147,14 @@ class WebsiteLead extends Command
                     "ids" => $old_leads
                     ]
                 ]);
+            }
             
-            NotificationsController::send(230, $leads_added, $token_added);
-        }
+            if(count($old_leads) > 0){
+                NotificationsController::send(203, $old_leads, Carbon::today());
+                NotificationsController::send(230, $leads_added, $token_added);    
+            }
 
-        if(count($old_leads) > 0){
-            NotificationsController::send(203, $old_leads, Carbon::today());
-        }
+
 
         Log::channel('cronJobLog')->info('s ' .'website:leads Running');
 
