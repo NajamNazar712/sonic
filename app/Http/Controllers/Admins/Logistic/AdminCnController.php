@@ -332,6 +332,7 @@ class AdminCnController extends Controller
     {
         $user_id = session('id');
         $admin = Admin::where('id',$user_id)->whereNotNull('default_hub_id');
+        $cn_exist=0;
         if(!$admin->exists())
         {
             return redirect()->back()->with('error','Hub not found!');
@@ -369,21 +370,44 @@ class AdminCnController extends Controller
                         ->where('cn_to', '<=', $request->cn_to);
                 })->where('status',1);
 
+
             if($cn_issue->exists()){
                 return  redirect()->back()->with('error','CN Issued Already to Rider');
             }
 
-            $cn_store =  TraxCnReceiveAdminStore::where('area_code', $admin->default_hub_id)
-                ->where(function ($query) use ($request) {
-                    $query->where('cn_from', '<=', $request->cn_from)
-                        ->where('cn_to', '>=', $request->cn_from)
-                        ->orWhere('cn_from', '<=', $request->cn_to)
-                        ->where('cn_to', '>=', $request->cn_to)
-                        ->orWhere('cn_from', '>=',$request->cn_from)
-                        ->where('cn_to', '<=', $request->cn_to);
-                })->where('status',1)
-                ->latest('id');
-            if($cn_store->exists()){
+//            $cn_store =  TraxCnReceiveAdminStore::where('area_code', $admin->default_hub_id)
+//                ->where(function ($query) use ($request) {
+//                    $query->where('cn_from', '<=', $request->cn_from)
+//                        ->where('cn_to', '>=', $request->cn_from)
+//                        ->orWhere('cn_from', '<=', $request->cn_to)
+//                        ->where('cn_to', '>=', $request->cn_to)
+//                        ->orWhere('cn_from', '>=',$request->cn_from)
+//                        ->where('cn_to', '<=', $request->cn_to);
+//                })->where('status',1)
+//                ->latest('id');
+//            $cn_store = TraxCnReceiveAdminStore::where('area_code', 202)
+//                ->where('cn_from', '<=', 20202000021)
+//                ->where('cn_to', '>=', 20202000029)
+//                ->where('status',1)
+//                ->latest('id');
+            $cn_store =  TraxCnReceiveAdminStore::select('cn_from','cn_to')->where('status',1)->where('area_code', $admin->default_hub_id);
+            if($cn_store->exists())
+            {
+                $cn_store = $cn_store->get();
+                foreach ($cn_store as $cn)
+                {
+                    if($request->cn_from >= $cn->cn_from  &&  $request->cn_to <= $cn->cn_to)
+                    {
+                        $cn_exist=1;
+                        break;
+                    }else{
+                        $cn_exist=0;
+                    }
+                }
+            }else{
+                return redirect()->back()->with('error','CN not found in admin store!');
+            }
+            if($cn_exist==1){
 
                 $time_stamp = now();
                 $quantity = ($request->cn_to - $request->cn_from + 1);
@@ -427,7 +451,6 @@ class AdminCnController extends Controller
             return redirect()->back()->with('error','Failed CN issue to rider');
         }
     }
-
     public function cn_issue_to_rider_edit($id)
     {
         $trax_cn_issue_rider= TraxCnIssueToRider::where('id',$id)->where('status',1);
