@@ -1577,6 +1577,7 @@ class Permission
                 return redirect()->route('cod.access_denied');
             }
         } else if (session('status') == 0) {
+            
             $action = str_replace('cod.', '', $request->route()->getName());
 
             $allowedRoutes = [
@@ -1586,8 +1587,7 @@ class Permission
                 'get_agreement',
                 'welcome',
                 'orders.list',
-                'new.address',
-                'new.bank'
+
             ];
             
             $wordpressRoutes = collect(Route::getRoutes())->filter(function ($route) {

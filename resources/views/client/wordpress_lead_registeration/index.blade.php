@@ -155,11 +155,13 @@
                                         <div>
                                             <select name="nature_of_account"
                                                 id="nature_of_account"
-                                                class="select2 form-control required">
+                                                class="select2 form-control required" disabled>
                                                 @foreach ($account_types as $type)
                                                     <option value="{{ $type->id }}" {{ $user->account_type_id == $type->id ? 'selected' : '' }}> {{ $type->name }}</option>
                                                 @endforeach
                                             </select>
+                                            <input type="hidden" name="nature_of_account" value="1">
+
                                         </div>
                                     </div>
                                 </div>
@@ -3094,7 +3096,7 @@
 
         var count = parseInt('{{ $i }}');
         $('body').on('click', '#addMoreAddress', function() {
-            $.get('new/address', function(data) {
+            $.get('/cod/address1', function(data) {
                 $('#newAddress').append(data);
 
             }).done(function() {

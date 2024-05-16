@@ -11,6 +11,11 @@
 |
 */
 
+
+
+
+
+
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
 
 Route::get('/', function () {
@@ -56,6 +61,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/register/wordpress', 'Shippers\ShipperDashboardController@wordpressLeadRegistration')->name('wordpress.register');
     Route::post('/register/wordpress/salesPerson', 'Shippers\ShipperDashboardController@sales_person')->name('wordpress.salesPerson');
     Route::post('/register/wordpress/get_sub_segment', 'Shippers\ShipperDashboardController@get_sub_segment')->name('wordpress.get_sub_segment');
+    Route::get('/address1', 'Shippers\ShipperDashboardController@wordpressAddressView')->name('wordpress.new.address');
+    Route::get('/bank1', 'Shippers\ShipperDashboardController@wordpressBankView')->name('wordpress.new.bank');
 
     Route::post('/login', 'Auth\LoginController@login')->name('login.submit');
     //    Route::get('/register/','Auth\GetStartedController@index')->name('register');
@@ -66,6 +73,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('/register', 'Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address', 'Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank', 'Auth\RegisterController@bankView')->name('new.bank');
+
+ 
+
+
     Route::get('/email/verified/{id?}', 'Auth\RegisterController@email_verified')->name('email.verified');
     Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
     Route::post('/territory', 'Auth\RegisterController@territory')->name('territory');

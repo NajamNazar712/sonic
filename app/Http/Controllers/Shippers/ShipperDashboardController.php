@@ -144,7 +144,7 @@ class ShipperDashboardController extends Controller
 {
     public function __construct() {
       $this->middleware('auth:web,substitute_users');
-      $this->middleware('Permission')->except('wordpress_access_denied','contacts','userProfile','getBanks','getPickups','add_notification_emails','welcome_index', 'updateProfile', 'addPickup','editPickup','pickupStatusChange','addBank','add_notification_emails','shipper_phone_unique','update_profile_password');
+      $this->middleware('Permission')->except('wordpress_access_denied','contacts','userProfile','getBanks','getPickups','add_notification_emails','welcome_index', 'updateProfile', 'addPickup','editPickup','pickupStatusChange','addBank','add_notification_emails','shipper_phone_unique','update_profile_password','wordpressAddressView','wordpressBankView');
     }
 
     public function access_denied() {
@@ -2482,5 +2482,19 @@ class ShipperDashboardController extends Controller
         }else{
             return response()->json(['status' => 1]);
         }
+    }
+
+    public function wordpressAddressView(){
+        $products = Product::all();
+
+        // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
+        // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
+        $cities = City::where('pickup',1)->get();
+        return view('client.components.pickup_address')->with(['cities'=>$cities,'products'=>$products]);
+    }
+    public function wordpressBankView(){
+        $banks = BanksList::all();
+        $city_list = City::where('status',1)->get();
+        return view('client.components.banks')->with(['banks'=>$banks,'all_cities'=>$city_list]);
     }
 }
