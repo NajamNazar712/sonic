@@ -362,21 +362,27 @@ class RiderLogisticApiController extends Controller
         {
                 $hub_id = $request->rider_hub;
                 $shipper_id = $request->shipper_id;
+                $pickup_address_list='';
                 if(isset($request->shipper_id))
                 {
-                    $shipper = User::join('trax_shipper_details as sd','sd.user_id','=','users.id')
-                        ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','sd.trax_parent_product_id','users.account_type_id')
-                        ->where('users.status',3)->where('sd.status',1)
-                        ->where('users.id', $shipper_id)
-                        ->get();
+                    $shipper = User::join('trax_parent_products as pp','pp.segment_id','=','users.segment_id')
+                        ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','pp.id AS trax_parent_product_id','users.account_type_id')
+                        ->where('users.status',3)->where('pp.status',1)
+                        ->where('users.id', $shipper_id);
+                        if($shipper->exists())
+                        {
+                            $shipper = $shipper->get();
+                            $pickup_address_list = UserShippingInfo::select('id as pickup_address_id', 'pickup_address', 'poc as contact_person', 'phone as contact_number', 'email as contact_email', 'user_id as shipper_id')
+                                ->where('user_id',$shipper_id)->where('city_id',$hub_id)->get();
 
-                    $pickup_address_list = UserShippingInfo::select('id as pickup_address_id', 'pickup_address', 'poc as contact_person', 'phone as contact_number', 'email as contact_email', 'user_id as shipper_id')
-                        ->where('user_id',$shipper_id)->where('city_id',$hub_id)->get();
+                        }
 
-                    $shipper_detail = [
-                        'shipper'        =>   $shipper,
-                        'pickup_address_list' => $pickup_address_list
-                    ];
+                        $shipper_detail = [
+                            'shipper'        =>   $shipper,
+                            'pickup_address_list' => $pickup_address_list
+                        ];
+
+
                     return response()->json(['status'=>0,'shipper_detail'=> $shipper_detail]);
 
                 }

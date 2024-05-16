@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins\Logistic;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Logistic\TraxBookingBatch;
 use App\Http\Models\Admin\Logistic\TraxBookingBatchAssign;
+use App\Http\Models\Admin\Logistic\TraxBookingBatchDetail;
 use App\Http\Models\Admin\Logistic\TraxBookingPiece;
 use App\Http\Models\Admin\Logistic\TraxItemInsurance;
 use App\Http\Models\Admin\Logistic\TraxLogisticBookingImages;
@@ -177,9 +178,9 @@ class AdminLogisticBookingController extends Controller
                 $booking_batch=$booking_batch->first();
                 if($booking_batch->total_bookings==$booking_batch->complete_bookings)
                 {
-                    $booking_batch->status_id=1;
-                }else{
                     $booking_batch->status_id=3;
+                }else{
+                    $booking_batch->status_id=1;
                 }
                 $booking_batch->save();
                 return response()->json(['status'=>0,'success'=>'Batch release successfully!']);
@@ -384,19 +385,19 @@ class AdminLogisticBookingController extends Controller
             'origin_id'=>['required','integer'],
             'destination_id'=>['required','integer'],
             'booking_weight'=>['required','numeric'],
-            'dense_weight'=>['sometimes','numeric'],
-            'volumetric_weight'=>['sometimes','numeric'],
+            'dense_weight'=>['nullable','numeric'],
+            'volumetric_weight'=>['nullable','numeric'],
             'shipper_address_id'=>['required','integer'],
             'consignee_name'=>['required','string','max:255'],
-            'consignee_phone_1'=>['required','integer'],
+//            'consignee_phone_1'=>['required','integer'],
 //            'consignee_address'=>['required','string','max:255'],
-            'consignee_email'=>['sometimes','email'],
-            'payment_mode_id'=>['sometimes','integer'],
-            'consignment_type'=>['sometimes','max:1','in:L,H'],
+            'consignee_email'=>['nullable','email'],
+            'payment_mode_id'=>['nullable','integer'],
+            'consignment_type'=>['nullable','max:1','in:L,H'],
             'handling_inst'=>['max:255'],
 
             'item_insurance_id'=>['nullable','integer'],
-            'special_handling_id'=>['sometimes','integer'],
+            'special_handling_id'=>['nullable','integer'],
             'item_insurance' => [
                 'nullable',
                 'numeric',
@@ -450,9 +451,9 @@ class AdminLogisticBookingController extends Controller
 
                     $shipment=Shipment::where('tracking_number',$request->cn_number)
                         ->where('consignee_status_id', 1)
-                        ->where('shipper_status_id', 1)
-                        ->exists();
-                    if($shipment)
+                        ->where('shipper_status_id', 1);
+
+                    if($shipment->exists())
                     {
                         $shipment=$shipment->first();
                         $shipment->estimated_weight=$booking_weight;
@@ -543,6 +544,22 @@ class AdminLogisticBookingController extends Controller
 //                        }
 //                    }
 
+                $batch_booking_detail=TraxBookingBatchDetail::where('status_id',1)
+                        ->where('batch_id',$request->batch_id)
+                        ->where('booking_id',$request->booking_id);
+                    if($batch_booking_detail->exists())
+                    {
+                        $batch_booking_detail=$batch_booking_detail->first();
+                        $batch_booking_detail->status_id=2;
+                        $batch_booking_detail->save();
+
+                        $booking_batch =  TraxBookingBatch::find($request->batch_id);
+                        if($booking_batch)
+                        {
+                            $booking_batch->complete_bookings+=1;
+                            $booking_batch->save();
+                        }
+                    }
                 DB::commit();
                 return  redirect()->back()->with('success','Logistic booking updated successfully');
 
