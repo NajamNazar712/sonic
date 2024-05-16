@@ -435,7 +435,7 @@ class RegisterController extends Controller
                 }
                 
                 if($lead){
-                    $lead->sale_person_id = $lead_zone->admin_id;
+                    $lead->sale_person_id = $lead_zone->admin_id ?? null;
                     $lead->save();
                 }
             }
