@@ -11435,9 +11435,9 @@ class NotificationsController extends Controller
                 //For reattempt Request agent side
                 else if ($id == 22) {
                     $tracking = Shipment::find($reference1_id);
-                    if (strpos($body, '[shipment_id]') !== FALSE) {
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
 
-                        $body = str_replace('[shipment_id]', $tracking->tracking_number, $body);
+                        $body = str_replace('[tracking_number]', $tracking->tracking_number, $body);
                     }
                     self::push_notification($employee_id, $employee_type, $title, $body);
                 }
