@@ -457,7 +457,9 @@
                     </div> --}}
                        <div class="col-12 form-group">
                             <table class="table" id="shipper_table">
-
+                                <div id="no_info_div" class="d-none">
+                                    <span id="no_info_text"></span>
+                                </div>
                             </table>
                        </div>
                    </div>
@@ -1511,26 +1513,38 @@
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
                             });
-                        }else{
+                        }
+                        else if (data.data.length < 1){
+                            $('#AutoFetchShipper').modal('show');
+                            $("#no_info_div").removeClass('d-none');
+                            $("#no_info_div").addClass('text-center font-medium-2');
+                            $("#no_info_text").text('No information found')
+                        }
+                        else{
+                            // console.log(data.data.length);
                             // if(data.blacklist == 0){
                             //     $('#black_listed_employee').addClass('d-none');
                             // }else{
                             //     $('#black_listed_employee').removeClass('d-none');
                             // }
+                            $("#no_info_div").addClass('d-none');
                             $('#AutoFetchShipper').modal('show');
                             var html = '';
                             $.each(data.data, function (index, details) {
                                     html +='<tr><td><a href="javascript:void(0)" class="btn btn-outline-success btn-sm shipper_auto_fetch_btn"><i class="ft-check"></i></a></td>';
                                     html +='<td>'+details.shipper_name+'</td>';
-                                    html +='<td>'+details.shipper_address+'</td></tr>';
+                                    html +='<td>'+details.shipper_address+'</td>';
+                                    html +='<td>'+details.shipper_cnic+'</td></tr>';
                                 });
                                 $('#shipper_table').html(html);   
                                 $('.shipper_auto_fetch_btn  ').on('click', function(){
                                     var name = $(this).parent().next().html();
                                     var address = $(this).parent().next().next().html();
+                                    var shipper_cnic = $(this).parent().next().next().next().html();
 
                                     $('#shipper_name').val(name);
                                     $('#shipper_address').val(address);
+                                    $('#shipper_cnic').val(shipper_cnic);
                                     $('#AutoFetchShipper').modal('hide');
 
                                 });
