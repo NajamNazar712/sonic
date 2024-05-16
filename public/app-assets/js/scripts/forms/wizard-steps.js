@@ -71,13 +71,17 @@ $(".steps-validation").steps({
             return urlParts[urlParts.length - 1];
         }
 
-        console.log(getLastPartOfUrl())
-
 
         if(newIndex === 4 && getLastPartOfUrl() === "wordpress"){
             var newLi = $('<li class="clearfix"><button id="customQuotationBtn" class="btn btn-primary">Request For Custom Qoutes</button></li>');
             $('.actions ul').append(newLi);
+            $('#customQuotationBtn').removeClass('d-none');
+        }else{
+            if ($('#customQuotationBtn').length) {
+                $('#customQuotationBtn').addClass('d-none');
+            }        
         }
+
         if(currentIndex === 0){
             var caddress = $('input[name="company_address"]').val();
             var cphone = $('input[name="shipper_phone"]').val();
