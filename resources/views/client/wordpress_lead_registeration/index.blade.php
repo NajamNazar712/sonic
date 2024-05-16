@@ -3052,7 +3052,7 @@
         var banks_count = parseInt('{{ $b }}');
         $('body').on('click', '#addMoreBanks', function() {
 
-            $.get('new/bank', function(bView) {
+            $.get('/cod/bank1', function(bView) {
                 $('#multiple_banks_section').append(bView);
             }).done(function() {
                 var bcc = $('.card.nbank').length;

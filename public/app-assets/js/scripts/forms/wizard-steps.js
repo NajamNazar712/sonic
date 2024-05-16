@@ -75,12 +75,11 @@ $(".steps-validation").steps({
         if(newIndex === 4 && getLastPartOfUrl() === "wordpress"){
             var newLi = $('<li class="clearfix"><button id="customQuotationBtn" class="btn btn-primary">Request For Custom Qoutes</button></li>');
             $('.actions ul').append(newLi);
-            $('#customQuotationBtn').removeClass('d-none');
-        }else{
-            if ($('#customQuotationBtn').length) {
-                $('#customQuotationBtn').addClass('d-none');
-            }        
+        }else if(newIndex != 4){
+            $('#customQuotationBtn').closest('li').remove();
         }
+
+        console.log(newIndex);
 
         if(currentIndex === 0){
             var caddress = $('input[name="company_address"]').val();
