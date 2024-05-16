@@ -33,7 +33,7 @@
 
         <div class="col">
             <fieldset class="form-group">
-                <select name="rider_shift" id="shift_list_add" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                <select name="rider_shift" id="shift_list_add" class="form-control select2 select2-hidden-accessible" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                     @foreach($shifts as $shift)
                         <option value="{{$shift->id}}"> {{$shift->name}}</option>
                     @endforeach
@@ -89,6 +89,16 @@
                     <option value="" selected>Select a Rider Main Category</option>
                     @foreach($main_category as $category)
                         <option value="{{$category->id}}">{{$category->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+        <div class="col">
+             <fieldset class="form-group">
+                <select name="hub_id[]" id="hub_ids" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required">
+                    
+                    @foreach($hubs as $hub)
+                        <option value="{{$hub->id}}">{{$hub->name}}</option>
                     @endforeach
                 </select>
             </fieldset>
@@ -187,9 +197,9 @@
     </div>
 </form>
 <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-
 <script type="text/javascript">
     $(document).ready(function () {
+        
         @if($type == 1)
         var ccd_elem = document.querySelector('.ccd_rider_checkbox');
         var ccd_switchery = new Switchery(ccd_elem);
@@ -247,6 +257,12 @@
         $('#location_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Reporting Location',
             dropdownParent: $("#addRiderForm")
+        });
+        $('#hub_ids').select2({
+            width:'100%',
+            placeholder:"Select Hubs",
+            allowClear:true,
+            dropdownParent:$('#search_form')
         });
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
