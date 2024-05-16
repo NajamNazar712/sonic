@@ -183,8 +183,8 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        var latitude = 1;
-        var longitude = 1;
+        var latitude = null;
+        var longitude = null;
         var name = null;
         var password = null;
 
