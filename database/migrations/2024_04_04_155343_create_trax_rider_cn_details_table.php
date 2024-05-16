@@ -16,7 +16,7 @@ class CreateTraxRiderCnDetailsTable extends Migration
         Schema::create('trax_rider_cn_details', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('cn_issue_id')->nullable();
-            $table->integer('cn_number')->nullable();
+            $table->bigInteger('cn_number')->nullable();
             $table->tinyInteger('is_used')->default(0);
             $table->tinyInteger('is_hold')->default(0);
             $table->integer('created_by')->nullable();
