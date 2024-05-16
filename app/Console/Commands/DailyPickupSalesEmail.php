@@ -7,6 +7,7 @@ use App\Http\Controllers\Admins\DailyPickupSalesReportController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class DailyPickupSalesEmail extends Command
 {
@@ -44,5 +45,6 @@ class DailyPickupSalesEmail extends Command
         $date = Carbon::yesterday()->format('Y-m-d');
         $response = DailyPickupSalesReportController::daily_pickup_sales_report_overall($date . ' 00:00:00');
         NotificationsController::send(26,$date,$response);
+        //Log::channel('cronJobLog')->info('s ' .'email:dailypickupsalesreport Running');
     }
 }

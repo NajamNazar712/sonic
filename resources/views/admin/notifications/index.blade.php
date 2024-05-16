@@ -209,6 +209,12 @@
 													</div>
 
 													<div class="form-group">
+														<label>Receivers</label>
+														<div class="receivers">
+														</div>
+													</div>
+
+													<div class="form-group">
 														<label>Fields</label>
 														<div class="fields">
 														</div>
@@ -252,6 +258,9 @@
 		/* .note-modal .modal-body .note-form-label {
 			display: none!important
 		} */
+	 	.linebreak{
+				line-break:anywhere
+		}
 	</style>
 
 @endsection
@@ -569,14 +578,20 @@
 							$('#edit .body').val(data.body);
 
 							$('#edit .fields').html('');
+							$('#edit .receivers').html('');
 
 							valid_fields = [];
 
 							$.each(data.fields, function(index, field) {
 								$('#edit .fields').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white">[' + field + ']</span>');
-
 								valid_fields.push(field);
 							});
+							$.each(data.receiver, function(index, receiver) {
+								$('#edit .receivers').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white linebreak">[' + receiver + ']</span>');
+
+								// valid_fields.push(field);
+							});
+
 
 							$('#edit').modal('show');
 						});
