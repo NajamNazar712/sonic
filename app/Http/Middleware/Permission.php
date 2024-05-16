@@ -1576,8 +1576,7 @@ class Permission
             } else {
                 return redirect()->route('cod.access_denied');
             }
-        } else if (session('status') == 0) {
-            
+        } else if (in_array(session('status'), [0,1,2,5]) ) {
             $action = str_replace('cod.', '', $request->route()->getName());
 
             $allowedRoutes = [
