@@ -5238,337 +5238,81 @@ class AdminFinanceController extends Controller
 
     public function tracking_number_wise_dncc_info_list(Request $request)
     {
-    
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 790);
         }
-
         $trackingNumbers = explode(',',$request->tracking_numbers);
-        dd($trackingNumbers);
         $shipments = DeliveryNoteShipment::join('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
-        ->join('')
+        ->join('users as u', 'shipments.user_id', '=', 'u.id')
+        ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+        ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+        ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+        ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+        ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+        ->join('delivery_notes', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
+        // ->join('shipments_journey', 'shipments_journey.reference_1_id', '=', 'delivery_note_shipments.delivery_note_id')
         ->whereIn('shipments.tracking_number',$trackingNumbers)
-
-        ;
-
-        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->leftJoin('zones as z', 'z.id', '=', 'dc.zone_id')
-            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
-            ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
-            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->join('shipments_journey', function ($join) {
-                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'shipments_journey.id',
-                        '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
-                    );
-            })
-            ->leftjoin('shipments_journey as ras', function ($join) {
-                $join->on('ras.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'ras.id',
-                        '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)')
-                    );
-            })
-            ->leftjoin('admins as agent', 'agent.id', '=', 'ras.admin_id')
-            ->join('shipments_journey as sj', function ($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sj.id',
-                        '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
-                    );
-            })
-            ->leftJoin('shipments_journey as sjd', function ($join) {
-                $join->on('sjd.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sjd.id',
-                        '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
-                    );
-            })
-            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-            ->leftjoin('intercept_re_book_request_histories as irrh', 'irrh.shipment_id', '=', 'shipments.id')
-            ->leftjoin('crm_requests as crm', function ($join) {
-                $join->on('crm.shipment_id', '=', 'shipments.id')
-                    ->whereIn('crm.status_id', [DB::raw(2), DB::raw(3), DB::raw(5)])
-                    ->where('crm.case_nature_id', DB::raw(1));
-            })
-            ->leftjoin('shipment_items as si', function ($join) {
-                $join->on('si.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'si.id',
-                        '=',
-                        DB::raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id)')
-                    );
-            })
-            ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
-            ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id')
-
-            ->leftjoin('delivery_note_shipments as dns', function ($join) {
-                $join->on('dns.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'dns.delivery_note_id',
-                        '=',
-                        DB::raw('(select max(delivery_note_id) from delivery_note_shipments WHERE shipment_id = shipments.id)')
-                    );
-            })
-            ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'dns.delivery_note_id')
-            ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
-        
-            ->leftJoin('shipments_journey as sjl', function ($join) {
-                $join->on('sjl.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sjl.id',
-                        '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
-                    );
-            })
-
-            ->leftJoin('shipments_journey as journey', function ($join) {
-                $join->on('journey.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'journey.id',
-                        '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
-                    );
-            })
-            ->select(
-                'agent.name as agent',
+        ->select(
                 'shipments.id as shId',
-                'shipments.tracking_number as tracking_number_link',
                 'shipments.tracking_number',
-                'u.name as shipper',
                 'oc.name as origin',
                 'dc.name as destination',
-                'dc.id as destination_city_id',
-                'h.name as hub',
-                'shipments.consignee_name',
-                'shipments.consignee_phone_number_1',
-                'shipments.consignee_phone_number_2',
-                'shipments.consignee_address',
-                'shipments.amount',
-                'sm.mode as shipping_mode',
-                'bt.booking_type as service_type',
-                'ss.name as status',
-                'ssr.name as reason',
-                'shipments_journey.remarks as remarks',
-                'shipments_journey.created_at as status_date',
-                'shipments_journey.created_at as current_status_date',
-                'sjd.created_at as destination_arrival',
-                'sj.created_at as arrival',
-                'shipments.booking_type_id',
-                'usi.poc',
-                'crm.id as complaint',
-                'shipments.actual_weight as weight',
-                'si.description as shipment_description',
-                'prod.product_name as product_type',
-                'sts.status as star_status',
-                'ca.name as area',
-                'r.name as last_rider',
-                'z.name as d_zone',
-                'r.trax_id as rider_trax_id',
-                'shipments.shipper_status_id as shipper_status_id',
-                'sjl.shipment_id as journey_latest_id',
-                'sjl.updated_at as journey_latest_updated_at',
-                'sjl.shipper_status_id as latest_shipper_status_id'
-
-            )
-
-            ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
-            ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
-            ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
-            ->whereIn('shipments.shipper_status_id', $status)
-            ->groupBy('shipments.id');
-
-
-        if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
-        }
-
-        if (session('department_id') == 8) {
-            $shipments = $shipments->where('shipments.shipment_type', 2);
-        }
-
-        if ($hub = $request->get('search_hub')) {
-            $shipments = $shipments->where('h.id', '=', $hub);
-        }
-
-        if ($area = $request->get('search_area')) {
-            $shipments = $shipments->where('caa.city_area_id', '=', $area);
-        }
+                'h.name as destination_hub',
+                'delivery_notes.id as dncc_no',
+                'delivery_notes.created_at as dncc_created_at',
+                'delivery_notes.updated_at as dncc_updated_at',
+                'delivery_notes.received_cod_amount as cod_amount',
+                'delivery_notes.status as status'
+        );
         $datatables = Datatables::of($shipments)
-            ->setRowAttr([
-                'class' => function ($shipments) {
-                    if ($shipments->complaint != null) {
-                        return 'complaint_row';
-                    } else if ($shipments->booking_type_id == 3) {
-                        return "tnb_row";
-                    } else {
-                        return '';
-                    }
-                    if ($shipments->star_status == 1) {
-                        return 'star_sippers';
-                    }
-                },
-            ])
-            ->editColumn('tracking_number_link', function ($shipments) {
-                $route = route('admin.tracking.index');
-                if ($shipments->star_status == 1) {
-                    return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'><i class='star_shippers_icon'></i>$shipments->tracking_number</a></u>";
-                } else {
-                    return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
-                }
-            })
-            ->editColumn('amount', function ($shipment) {
-                return number_format($shipment->amount);
-            })
-            ->editColumn('shipper', function ($shipment) {
-                if ($shipment->booking_type_id == 4) {
-                    return $shipment->shipper . ' (' . $shipment->poc . ')';
-                } else {
-                    return $shipment->shipper;
-                }
-            })
-            ->filterColumn('u.name', function ($query, $keyword) {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('shipments.booking_type_id', '!=', 4)
-                        ->where('u.name', 'like', '%' . $keyword . '%');
-                })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.booking_type_id', '=', 4)
-                            ->where('usi.poc', 'like', '%' . $keyword . '%');
-                    });
-            })
-            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
-            ->editColumn('status_date', function ($shipments) {
-                if ($shipments->status_date) {
-                    if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
-                        return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
-                    } else {
-                        return $shipments->status_date;
-                    }
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('arrival', function ($shipments) {
-                if ($shipments->arrival) {
-                    return $shipments->arrival;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('destination_arrival', function ($shipments) {
-                if ($shipments->destination_arrival) {
-                    return $shipments->destination_arrival;
-                } else {
-                    return '-';
-                }
-            })
-            ->filterColumn('status', function ($query, $keyword) {
-
-                if ($keyword != '') {
-                    $query->where('ss.id', $keyword);
-                } else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->filterColumn('shipping_mode', function ($query, $keyword) {
-
-                if ($keyword != '') {
-                    $query->where('sm.id', $keyword);
-                } else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->filterColumn('service_type', function ($query, $keyword) {
-
-                if ($keyword != '') {
-                    $query->where('bt.id', $keyword);
-                } else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->addColumn('consignee_phone', function ($shipper) {
-                $consignee_phone = '';
-                $consignee_phone .= $shipper->consignee_phone_number_1;
-                if ($shipper->consignee_phone_number_2 != null) {
-                    $consignee_phone .= "| " . $shipper->consignee_phone_number_2;
-                }
-                return $consignee_phone;
-            })
-            ->filterColumn('consignee_phone', function ($query, $keyword) {
-                $keyword = strtolower($keyword);
-                if ($keyword != '') {
-                    $query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
-                } else {
-                    $query->whereRaw('false');
-                }
-            })
-
-            ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
-            ->addColumn('sub_station', function ($shipments) {
-                $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
-                $msg_string = null;
-                $str_arr = null;
-                $str_arr = preg_split("/[ ,]+/", $shipments->consignee_address);
-                foreach ($check as $nsa) {
-                    foreach ($str_arr as $arr_value) {
-                        if (strtolower($nsa) == strtolower($arr_value)) {
-                            $msg_string = $arr_value;
-                        }
-                    }
-                }
-                $delivery_area = null;
-                if ($msg_string != null) {
-                    $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
-                        ->where('delivery_location_mapping_keywords.keyword', $msg_string)
-                        ->where('dlm.city_id', $shipments->destination_city_id)
-                        //                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
-                        ->select('dlm.area_name as area_name', 'dlm.id', 'delivery_location_mapping_keywords.mapping_id');
-
-                    if ($found->exists()) {
-                        $found = $found->first();
-                        $delivery_area = $found->area_name;
-                    }
-                }
-                return isset($delivery_area) ? $delivery_area : '-';
-            })
-            ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || in_array(34, session('permissions'))) {
-                    $dropdown = '
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                            <a href="#" class="dropdown-item dispute_modal"><i class="ft-alert-circle primary"></i> Dispute</a>
-                        </div>
-                      </div>
-                    ';
-
-                    return $dropdown;
-                } else {
-                    return '';
-                }
-            });
-            
-        if ($mode = $request->get('search_shipping_mode')) {
-
-            $datatables->where('sm.id', '=', $mode);
-        }
-
-        if ($request->get('star_shipper_filter') == 1) {
-            $datatables->where('sts.status', 1);
-        }
-
+        ->editColumn('dncc_no', function ($deliveries) {
+            return str_pad($deliveries->dncc_no, 6, '0', STR_PAD_LEFT);
+        })
+        ->editColumn('cod_amount', function($shipment){
+            return number_format($shipment->cod_amount);
+        })
+        ->filterColumn('dncc_no', function ($query, $keyword) {
+                return $query->where('delivery_notes.id', '=', $keyword);
+        })
+        ->addColumn('dncc_status', function($shipment) {
+            $status = $shipment->status;
+            $cash_collection_status = $shipment->cash_collection_status;
+            $pending_status = $shipment->pending_status;
+            $dncc_status = $shipment->dncc_status;
+            $message = '';
+            if ($status == 0 && $cash_collection_status == 0 && $pending_status == 1) {
+                $message = 'Pending for Verification';
+            } 
+            elseif ($status == 0 && $cash_collection_status == 0 && $pending_status == 0) {
+                $message = 'Pending for Update';
+            }
+            elseif ($status == 1 && $cash_collection_status == 0 && $pending_status == 0) {
+                $message = 'Verified';
+            }
+            elseif ($status == 4) {
+                $message = 'Canceled';
+            }
+            elseif ($status == 1 && $cash_collection_status == 1 && $pending_status == 1 && $dncc_status == 0) {
+                $message = 'Cash Collected';
+            }
+            elseif ($status == 1 && $cash_collection_status == 1 && $pending_status == 1 && $dncc_status == 1) {
+                $message = 'Completed';
+            }
+            return $message;
+        })
+        ->addColumn('shipment_status_dncc', function($shipment){
+            $shipments_journey_id = ShipmentsJourney::where('shipment_id', $shipment->shId)
+            ->whereNotNull('reference_1_id')    
+            ->where('reference_1_id', $shipment->dncc_no)
+            ->pluck('id')
+            ->max();            
+            $shipment_journey_status = ShipmentsJourney::where('id', $shipments_journey_id)->first();
+            $shipment_status = ShipmentStatus::where('id', $shipment_journey_status->shipper_status_id)
+                ->select('name')
+                ->first();
+            return $shipment_status->name;
+        });
+        
         return $datatables->make(true);
     }
 

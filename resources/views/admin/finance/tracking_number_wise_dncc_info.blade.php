@@ -1,4 +1,3 @@
-
 @extends('admin.layout.master')
 @section('title','Tracking number wise DNCC info')
 
@@ -27,20 +26,19 @@
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
-                    <tr role="row" class="bg-primary white">
-
-                        <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Origin</th>
-                        <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Destination Hub</th>
-                        <th class="border-primary border-darken-1">DNCC #</th>
-                        <th class="border-primary border-darken-1">DNCC Created at</th>
-                        <th class="border-primary border-darken-1">DNCC Last Updated at</th>
-                        <th class="border-primary border-darken-1">COD Amount</th>
-                        <th class="border-primary border-darken-1">DNCC Status</th>
-                        <th class="border-primary border-darken-1">Shipment Status in DNCC</th>
-                    </tr>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Tracking No.</th>
+                            <th class="border-primary border-darken-1">Origin</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Destination Hub</th>
+                            <th class="border-primary border-darken-1">DNCC #</th>
+                            <th class="border-primary border-darken-1">DNCC Created at</th>
+                            <th class="border-primary border-darken-1">DNCC Last Updated at</th>
+                            <th class="border-primary border-darken-1">COD Amount</th>
+                            <th class="border-primary border-darken-1">DNCC Status</th>
+                            <th class="border-primary border-darken-1">Shipment Status in DNCC</th>
+                        </tr>
                     </thead>
                 </table>
             </div>
@@ -139,6 +137,9 @@
                 params.excel = true;
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.finance.tracking_number_wise_dncc_info.list') }}',
+                    data:function(d){
+                        d.tracking_numbers = $('#tracking_number').val();
+                    },
                     data: params,
                     success: function (result) {
                         head = [];
@@ -153,20 +154,22 @@
                         head.push('DNCC Last Updated at');
                         head.push('COD Amount');
                         head.push('DNCC Status');
+                        head.push('Shipment Status in DNCC');
                         
                         $.each(result.data, function(index, values) {
                             row = [];
 
                             row.push(index + 1);
                             row.push(values.tracking_number);
-                            row.push(values.shipper);
                             row.push(values.origin);
                             row.push(values.destination);
-                            row.push(values.hub);
-                            row.push(values.area);
-                            row.push(values.consignee_name);
-                            row.push(values.consignee_phone);
-                            row.push(values.agent);
+                            row.push(values.destination_hub);
+                            row.push(values.dncc_no);
+                            row.push(values.dncc_created_at);
+                            row.push(values.dncc_updated_at);
+                            row.push(values.cod_amount);
+                            row.push(values.dncc_status);
+                            row.push(values.shipment_status_dncc);
 
                             body.push(row);
                         });
@@ -194,6 +197,7 @@
             pageLength: 50,
             pagingType: 'full_numbers',
             processing: true,
+            deferLoading: 0,
             language: {
                 processing: data_table_loader
             },
@@ -205,20 +209,23 @@
                 }
             },
             rowId: 'shId',
-            order: [[9, 'desc']],
+            order: [[1, 'desc']],
             columns: [
-                {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
-                {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                {data: 'area', name: 'ca.name', class: 'align-middle area'},
-                {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
-                {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
-                {data: 'agent', name: 'agent.name', class: 'align-middle agent'}
-
+                {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0,
+                        render: function (data, type, row, meta) {
+                            return meta.row + 1;
+                        }
+                    },
+                {data: 'tracking_number', name: 'tracking_number', class: 'align-middle', orderable: false},
+                {data: 'origin', name: 'origin', class: 'align-middle origin', orderable: false},
+                {data: 'destination', name: 'destination', class: 'align-middle destination', orderable: false},
+                {data: 'destination_hub', name: 'destination_hub', class: 'align-middle destination_hub', orderable: false},
+                {data: 'dncc_no', name: 'dncc_no', class: 'align-middle dncc_no', orderable: false},
+                {data: 'dncc_created_at', name: 'dncc_created_at', class: 'align-middle dncc_created_at', orderable: false},
+                {data: 'dncc_updated_at', name: 'dncc_updated_at', class: 'align-middle dncc_updated_at', orderable: false},
+                {data: 'cod_amount', name: 'cod_amount', class: 'align-middle cod_amount', orderable: false},
+                {data: 'dncc_status', name: 'dncc_status', class: 'align-middle dncc_status', orderable: false},
+                {data: 'shipment_status_dncc', name: 'shipment_status_dncc', class: 'align-middle shipment_status_dncc', orderable: false},
             ],
         });
 
