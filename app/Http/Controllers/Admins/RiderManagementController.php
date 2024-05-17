@@ -39,6 +39,7 @@ use App\Http\Models\Rider\RiderRemarkStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
+use App\RiderAssignedHubForDeliveryNote;
 use DB;
 
 class RiderManagementController extends Controller
@@ -266,7 +267,10 @@ class RiderManagementController extends Controller
             $employee->rider_type_id = $type;
             $employee->area_id = $request->area;
             $employee->save();
-
+            if ($request->rider_main_category == 3) {
+                $request->request->add(['select_rider_id' => $rider->id]);
+                GlobalSettingsController::rider_assigned_hub_add($request);
+            }
             $rider->employee_id = $employee->id;
             $rider->update();
 
@@ -301,7 +305,9 @@ class RiderManagementController extends Controller
         $shifts =  EmployeeShift::where('status', 1)->get();
         $reporting_locations = ReportingLocation::where('status', 1)->get();
         $areas_list = CityArea::where('city_id', $rider->city_id)->select('id', 'name')->get();
-        return view('admin.management.edit_rider_form')->with(['rider_id' => $id, 'cities' => $city, 'categories' => $category, 'rider' => $rider, 'routes' => $route, 'route_types' => $route_types, 'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations, 'areas_list' => $areas_list]);
+        $hubs = City::select('id', 'name')->where('hub', 1)->get();
+        $riderhubIsd = RiderAssignedHubForDeliveryNote::where('rider_id', $id)->select('hubs')->first();
+        return view('admin.management.edit_rider_form')->with(['rider_id' => $id, 'cities' => $city, 'categories' => $category, 'rider' => $rider, 'routes' => $route, 'route_types' => $route_types, 'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations, 'areas_list' => $areas_list, 'hubs' => $hubs, 'hubIds' => $riderhubIsd]);
     }
     public function editRiderDetails(Request $request, $id)
     {
@@ -380,7 +386,10 @@ class RiderManagementController extends Controller
                 NotificationsController::send(61, $rider->id, $request->pin);
             }
         }
-
+        if ($request->rider_main_category == 3) {
+            $hubs = implode(',', $request->hubs);
+            RiderAssignedHubForDeliveryNote::where('rider_id', $id)->update(['hubs' => $hubs]);
+        }
 
         $rider->save();
 
