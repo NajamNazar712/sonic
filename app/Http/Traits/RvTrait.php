@@ -1241,27 +1241,6 @@ trait RvTrait
         //Rv Disable Shippers Setting when all shippers are enbale and there are exluded shipper(agents can get those shippers shipments)
         if (!empty($included_shippers)) {
 
-            // $shipments = RvShipmentTicket::whereIn('shipment_user_id',$included_shippers)
-            // ->whereNotIn('shipment_status_reason_id',[12, 27, 35])
-            // ->where('in_progress',0)
-            // ->where('is_completed',0)
-            // ->when($agent, function ($query, $agent) {
-            //     if($agent->agent_caller_type == 1) //These Agents will get shipments pending with first call only
-            //     {
-            //         return $query->where('call_count' , 0);
-            //     }
-            //     else if($agent->agent_caller_type == 2)//These Agents will get shipments pending with second call only
-            //     {
-            //         return $query->where('call_count' , '>', 0);
-            //     }
-            //     else
-            //     {
-            //         return $query->orderBy('call_count','ASC');
-            //     }
-            // })
-            // ->orderBy('updated_at','ASC')
-            // ->get(['id','shipment_id']);
-
             $shipments = $this->getShipmentsFromRvShipmentTicket($included_shippers,$agent);
 
         }
@@ -1280,27 +1259,6 @@ trait RvTrait
             });
             
             if (!empty($included_shippers)){
-
-                // $shipments = RvShipmentTicket::whereIn('shipment_user_id',$included_shippers)
-                // ->whereNotIn('shipment_status_reason_id',[12, 27, 35])
-                // ->where('in_progress',0)
-                // ->where('is_completed',0)
-                // ->when($agent, function ($query, $agent) {
-                //     if($agent->agent_caller_type == 1) //These Agents will get shipments pending with first call only
-                //     {
-                //         return $query->where('call_count' , 0);
-                //     }
-                //     else if($agent->agent_caller_type == 2)//These Agents will get shipments pending with second call only
-                //     {
-                //         return $query->where('call_count' , '>', 0);
-                //     }
-                //     else
-                //     {
-                //         return $query->orderBy('call_count','ASC');
-                //     }
-                // })
-                // ->orderBy('updated_at','ASC')
-                // ->get(['id','shipment_id']);
 
                 $shipments = $this->getShipmentsFromRvShipmentTicket($included_shippers,$agent);
                 
