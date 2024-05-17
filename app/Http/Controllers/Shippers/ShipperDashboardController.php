@@ -269,24 +269,35 @@ class ShipperDashboardController extends Controller
 
                 $percentage = null; 
                 $color = null;
+                $description = "";
                 $user = User::find($shipper_id);
 
                 $weight_charges = WeightCharge::where('user_id' , $shipper_id);
                 if($user->status == 0 && !$weight_charges->exists() && (!isset($user->request_custom_quotation) || $user->request_custom_quotation != 1)){
                     $percentage = 30;
                     $color = '#FF4961';
+                    $description = "Your account is 30% completed";
+                    
                 }else if(($weight_charges->exists() || $user->request_custom_quotation == 1) && !isset($user->rates_added_by)){
                     $percentage = 50;
                     $color = '#FF9149';
+                    $description = "Your account is 50% completed";
+
                 }else if (isset($user->rates_added_by) && $user->documents_status != 2){
                     $percentage = 80;
                     $color = '#1E9FF2';
+                    $description = "Your account is 80% completed";
+
                 }else if ($user->documents_status == 2 && $user->status != 3){
                     $percentage = 95;
                     $color = '#ffd700';
+                    $description = "Your account is 90% completed";
+
                 }else if ($user->status == 3){
                     $percentage = 100;
                     $color = '#00d082';
+                    $description = "Your account is activated";
+
                 }
 
                 /*$shipper_payment = ShipperPayment::where('user_id', $shipper_id);
@@ -298,7 +309,7 @@ class ShipperDashboardController extends Controller
                 }*/
                 $shipper_payment = null;
 
-                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment, 'percentage' => $percentage, 'user' => $user, 'color' => $color]);
+                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment, 'percentage' => $percentage, 'user' => $user, 'color' => $color , 'description' => $description]);
             }
  
         }
