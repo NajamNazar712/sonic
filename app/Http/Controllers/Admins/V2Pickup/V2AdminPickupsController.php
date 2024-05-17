@@ -1633,7 +1633,7 @@ class V2AdminPickupsController extends Controller
                     }
                 }
             } else {
-                unset($shipment_ids[$key]);
+                unset($shipments[$key]);
             }
         }
 
