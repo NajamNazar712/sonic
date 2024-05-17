@@ -22,7 +22,7 @@
           </ul>
           <ul class="nav navbar-nav float-right">
             <li class="dropdown dropdown-user nav-item">
-              @if(session('status') != 0)
+              @if(session('status') === 3)
 
                 <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('cod.order.index') }}" target="_blank">
                     <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
