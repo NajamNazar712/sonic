@@ -150,7 +150,7 @@ class WebsiteLead extends Command
             }
             
             if(count($old_leads) > 0){
-                NotificationsController::send(203, $old_leads, Carbon::today());
+                NotificationsController::send(203, $leads_added, Carbon::today());
                 NotificationsController::send(230, $leads_added, $token_added);    
             }
 
