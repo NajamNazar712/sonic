@@ -66,20 +66,6 @@ $(".steps-validation").steps({
     },
     onStepChanging: function (event, currentIndex, newIndex)
     {
-        function getLastPartOfUrl() {
-            var urlParts = window.location.href.split('/');
-            return urlParts[urlParts.length - 1];
-        }
-
-
-        if(newIndex === 4 && getLastPartOfUrl() == "wordpress"){
-            var newLi = $('<li class="clearfix"><button id="customQuotationBtn" class="btn btn-primary">Request For Custom Qoutes</button></li>');
-            $('.actions ul').append(newLi);
-        }else if(newIndex != 4){
-            $('#customQuotationBtn').closest('li').remove();
-        }
-
-        console.log(newIndex);
 
         if(currentIndex === 0){
             var caddress = $('input[name="company_address"]').val();
@@ -183,6 +169,20 @@ $(".steps-validation").steps({
         }
         form.validate().settings.ignore = ":disabled,:hidden";
         return form.valid();
+    },
+    onStepChanged: function (event, currentIndex, priorIndex) {
+        function getLastPartOfUrl() {
+            var urlParts = window.location.href.split('/');
+            return urlParts[urlParts.length - 1];
+        }
+
+        if(currentIndex === 4 && getLastPartOfUrl() == "wordpress"){
+            var newLi = $('<li class="clearfix"><button id="customQuotationBtn" class="btn btn-primary">Request For Custom Qoutes</button></li>');
+            $('.actions ul').append(newLi);
+        }else if(currentIndex != 4){
+            $('#customQuotationBtn').closest('li').remove();
+        }
+
     },
     onFinishing: function (event, currentIndex)
     {
