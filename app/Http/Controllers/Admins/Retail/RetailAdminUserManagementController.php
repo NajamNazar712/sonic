@@ -1093,7 +1093,7 @@ class RetailAdminUserManagementController extends Controller
         $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
         $retail_user_family_names_query = RetailUserFamilyInformation::where('retail_user_id', $retail_user_id);
         if ($retail_user_family_names_query->exists()) {
-            $retail_user_family_names_query = $retail_user_family_names_query->first();
+            $retail_user_family_names_query = $retail_user_family_names_query->get();
             $retail_user_family_names = $retail_user_family_names_query->pluck('family_member_name')->toArray();
             $retail_user_salary = $retail_user_family_names_query->pluck('salary')->toArray();
         }
@@ -1241,7 +1241,7 @@ class RetailAdminUserManagementController extends Controller
 
     public function retail_user_percentage(Request $request){
         $franchiseId = $request->retail_user_id;
-        $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchiseId)->get();
+        $retail_franchise_product_percentage = RetailUserProductPercentage::where('retail_user_id', $franchiseId)->get();
         $data = [];
         foreach ($retail_franchise_product_percentage as $percentage) {
             $selectedOption = RetailShippingMode::find($percentage->retail_shipping_mode_id)->name;
