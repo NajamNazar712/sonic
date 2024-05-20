@@ -3,7 +3,11 @@
         resize: none;
     }
 </style>
-
+@php 
+if (isset($main_category[2]) && $type == 1) {
+    unset($main_category[2]);
+}
+@endphp
 <form action="{{route('admin.management.riders.add')}}" method="post" class="mt-1" id="addRiderForm" novalidate="novalidate">
     {{csrf_field()}}
     <div class="row justify-content-center">
@@ -87,6 +91,7 @@
             <fieldset class="form-group">
                 <select name="rider_main_category" id="category_main_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                     <option value="" selected>Select a Rider Main Category</option>
+                    
                     @foreach($main_category as $category)
                         <option value="{{$category->id}}">{{$category->name}}</option>
                     @endforeach
@@ -96,6 +101,7 @@
         <div class="col" id="rider_hub_add">
              <fieldset class="form-group">
                 <select name="hubs[]" id="hub_ids" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required" multiple="multiple">
+                    
                     @foreach($hubs as $hub)
                         <option value="{{$hub->id}}">{{$hub->name}}</option>
                     @endforeach

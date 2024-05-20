@@ -10,6 +10,11 @@
         resize: none;
     }
 </style>
+@php 
+if (isset($main_category[2]) && $type == 1) {
+    unset($main_category[2]);
+}
+@endphp
 {{--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMo9kqvMhqVAe_GCXZXOfzfAZ_oeBapkQ&callback=initMap" type="text/javascript"></script>--}}
 <form action="{{route('admin.management.riders.edit',['id'=>$rider_id])}}" method="post" class="mt-2" id="editRiderForm" novalidate="novalidate">
     @csrf
@@ -109,11 +114,13 @@
             </div>
             <div class="col" id="rider_hub_add">
                 <fieldset class="form-group">
+                    @if ($hubs)
                     <select name="hubs[]" id="hub_ids" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required" multiple="multiple">
                         @foreach($hubs as $hub)
                             <option value="{{$hub->id}}">{{$hub->name}}</option>
                         @endforeach
                     </select>
+                    @endif
                 </fieldset>
             </div>
             <div class="col" id="incentive_amount_div">
@@ -218,6 +225,7 @@
         // var switchery = new Switchery(elem);
         @if($type == 1)
         var edit_ccd_elem = document.querySelector('.edit_ccd_rider_checkbox');
+        $('#rider_hub_add').addClass('d-none')
         var edit_ccd_switchery = new Switchery(edit_ccd_elem);
         @endif
 
@@ -329,11 +337,11 @@
             dropdownParent: $("#editRiderForm")
         });
         @endif
-        @if($hubIds->hubs != Null)
-            $('#hub_ids').val([{!! $hubIds->hubs !!}]).select2({ width:'100%',
-                placeholder:"Select Hubs",
-                allowClear:true,
-                dropdownParent:$('#editRiderForm')}).trigger('change');
+        @if($rider->rider_main_category_id == 3 && !empty($hubIds->hubs))
+                $('#hub_ids').val([{!! $hubIds->hubs !!}]).select2({ width:'100%',
+                    placeholder:"Select Hubs",
+                    allowClear:true,
+                    dropdownParent:$('#editRiderForm')}).trigger('change');
         @else
             $('#hub_ids').select2({
                 width:'100%',
