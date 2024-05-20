@@ -114,18 +114,17 @@
                     </div>
                     <div class="row">
                         <div class="col-9" id="child_input_container_edit">
-                            <div class="child-template-edit d-none">
+
+                            {{-- <div class="child-template-edit d-none">
                                 <div class="form-group row">
                                     <div class="col-9">
                                         <input type="text" class="form-control child_input_edit" placeholder="Child">
                                     </div>
-                                    <div class="col-3">
-                                        <button type="button" class="btn btn-danger" id="remove_child_column_btn_edit_form">
-                                            Remove
-                                        </button>
-                                    </div>
+                                    <div class="col-3 remove_btn_div"></div>
                                 </div>
-                            </div>
+                            </div> --}}
+
+
                         </div>
                         <div class="col-3">
                             <button type="button" class="btn btn-primary" id="edit_child_column_btn">
@@ -334,14 +333,6 @@
             }
         });
 
-        // Remove child template
-        $(document).on('click', '#remove_child_column_btn_edit_form', function () {
-            var $formGroup = $(this).closest('.form-group');
-            $formGroup.remove();
-            numChildren--;
-            $('#edit_child_column_btn').prop('disabled', false);
-        });
-
         var retail_user_id = $("#retail_user_id").val();
         var selectedOption = $("#retail_shipping_mode_id_edit option:selected").text();
         var productPercentage = $(".product_percentage_edit").val();
@@ -418,62 +409,101 @@
             this.submit();
         });
 
-        // Function to reset the modal state
-        function resetModalState() {
-            numChildren = 0; // Reset numChildren variable
-            $('#child_input_container_edit').empty(); // Remove all dynamically added child inputs
-            $('#edit_child_column_btn').prop('disabled', false); // Enable the add child button
-        }
-
         var numChildren = 0;
-
         // Function to initialize child inputs based on family member info
         function initializeChildInputs() {
+            numChildren = 0;
             for (var i = 4; i < family_member_info.length; i++) {
                 if (numChildren < 4) {
                     numChildren++;
                     var childName = family_member_info[i];
-                    var childInput = $('.child-template-edit').clone().removeClass('child-template-edit').removeClass('d-none');
-                    childInput.find('.child_input_edit').attr({
-                        'id': 'child_' + numChildren + '_data_edit',
-                        'name': 'family_member_name[]',
-                        'placeholder': 'Child ' + numChildren
-                    }).val(childName); // Pre-fill child name here
-                    $('#child_input_container_edit').append(childInput);
+                    var childTemplate = `
+                        <div class="form-group row initial_child_template">
+                            <div class="col-9">
+                                <input type="text" class="form-control child_input_edit" 
+                                    id="child_${numChildren}_data_edit" 
+                                    name="family_member_name[]" 
+                                    placeholder="Child ${numChildren}" 
+                                    value="${childName}">
+                            </div>
+                            <div class="col-3 remove_btn_div">
+                                <button type="button" class="btn btn-danger remove-child-btn" 
+                                        id="remove_child_column_btn_${numChildren}">Remove</button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Append the child template to the container
+                    $('#child_input_container_edit').append(childTemplate);
+                    childTemplate.length
                 }
             }
-            
+
             // Disable add child button if the maximum number of children is reached
             if (numChildren >= 4) {
                 $('#edit_child_column_btn').prop('disabled', true);
             }
         }
 
-        // Initialize child inputs
         initializeChildInputs();
 
-        // Add child template
-        $(document).on('click', '#edit_child_column_btn', function () {
+        $('#edit_child_column_btn').on('click', function () {
             if (numChildren < 4) {
                 numChildren++;
-                var $childInput = $('.child-template-edit').clone().removeClass('child-template-edit').removeClass('d-none');
-                $childInput.find('.child_input_edit').attr({
-                    'id': 'child_' + numChildren + '_data_edit',
-                    'name': 'family_member_name[]',
-                    'placeholder': 'Child ' + numChildren
-                });
-                $('#child_input_container_edit').append($childInput);
+                // Create the child input template
+                var childTemplate = `
+                    <div class="form-group row">
+                        <div class="col-9">
+                            <input type="text" class="form-control child_input_edit_field" 
+                                id="child_${numChildren}_data_edit" 
+                                name="family_member_name[]" 
+                                placeholder="Child ${numChildren}">
+                        </div>
+                        <div class="col-3 remove_btn_div">
+                            <button type="button" class="btn btn-danger remove_child_column_btn_form" 
+                                    id="remove_child_column_btn_form_${numChildren}">Remove</button>
+                        </div>
+                    </div>
+                `;
+
+                // Append the child template to the container
+                $('#child_input_container_edit').append(childTemplate);
+
+                var numChildTemplates = $('#child_input_container_edit').find('.initial_child_template').length;
 
                 // Disable add child button if the maximum number of children is reached
-                if (numChildren >= 4) {
+                if (numChildTemplates >= 4) {
                     $(this).prop('disabled', true);
                 }
             }
         });
 
-        // Code to reset modal state when modal is closed without saving
-        $('#close_modal_button').click(function() {
-            resetModalState();
+        // Event handler for removing a child input (initialized inputs)
+        $(document).on('click', '.remove-child-btn', function () {
+            var $formGroup = $(this).closest('.form-group');
+            $formGroup.remove();
+            if (numChildren > 0) {
+                numChildren--;
+            }
+            $('#edit_child_column_btn').prop('disabled', false);
+        });
+
+        // Event handler for removing a child input (dynamically added inputs)
+        $(document).on('click', '.remove_child_column_btn_form', function () {
+            var $formGroup = $(this).closest('.form-group');
+            $formGroup.remove();
+            if (numChildren > 0) {
+                numChildren--;
+            }
+            $('#edit_child_column_btn').prop('disabled', false);
+        });
+
+        $('.edit_user_close_modal').on('click', function(event){
+            $('#edit_child_column_btn').off('click');
+        });
+
+        $('#editRetailUser').on('hidden.bs.modal', function () {
+            $('#edit_child_column_btn').off('click');
         });
 
         var retail_user_id = $('#retail_user_id').val();
