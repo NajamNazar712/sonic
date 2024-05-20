@@ -600,7 +600,7 @@ class RetailAdminUserManagementController extends Controller
         $html .= '<th class="color primary">Franchise Name</th>';
         $html .= '<th class="color primary">Franchise Code</th>';
         $html .= '<th class="color primary">Month</th>';
-        $html .= '<th class="color primary">Retail Shipping Mode ID</th>';
+        $html .= '<th class="color primary">Retail Shipping Mode</th>';
         $html .= '<th class="color primary">Number of Shipments</th>';
         $html .= '<th class="color primary">Total Charges Without GST</th>';
         $html .= '<th class="color primary">Product Percentage</th>';
@@ -611,11 +611,14 @@ class RetailAdminUserManagementController extends Controller
         
         foreach ($retail_commissions as $commission) {
             $franchise_name = RetailUser::find($commission->franchise_id)->name;
+            $retail_shipping_modes = RetailShippingMode::where('id', $commission->retail_shipping_mode_id)->pluck('name')->toArray();
+            $retail_shipping_mode = implode(', ', $retail_shipping_modes);
+
             $html .= '<tr>';
             $html .= '<td>' . $franchise_name . '</td>';
             $html .= '<td>' . $commission->franchise_code . '</td>';
             $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
-            $html .= '<td>' . $commission->retail_shipping_mode_id . '</td>';
+            $html .= '<td>' . $retail_shipping_mode . '</td>';
             $html .= '<td>' . $commission->number_of_shipments . '</td>';
             $html .= '<td>' . $commission->total_charges_without_gst . '</td>';
             $html .= '<td>' . $commission->product_percentage . '</td>';
@@ -723,7 +726,7 @@ class RetailAdminUserManagementController extends Controller
         $html .= '<th class="color primary">Franchise Name</th>';
         $html .= '<th class="color primary">Franchise Code</th>';
         $html .= '<th class="color primary">Month</th>';
-        $html .= '<th class="color primary">Retail Shipping Mode ID</th>';
+        $html .= '<th class="color primary">Retail Shipping Mode</th>';
         $html .= '<th class="color primary">Number of Shipments</th>';
         $html .= '<th class="color primary">Total Charges Without GST</th>';
         $html .= '<th class="color primary">Product Percentage</th>';
@@ -744,11 +747,14 @@ class RetailAdminUserManagementController extends Controller
         
         foreach ($retail_commissions as $commission) {
             $franchise_name = RetailFranchise::find($commission->franchise_id)->name;
+            $retail_shipping_modes = RetailShippingMode::where('id', $commission->retail_shipping_mode_id)->pluck('name')->toArray();
+            $retail_shipping_mode = implode(', ', $retail_shipping_modes);
+
             $html .= '<tr>';
             $html .= '<td>' . $franchise_name . '</td>';
             $html .= '<td>' . $commission->franchise_code . '</td>';
             $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
-            $html .= '<td>' . $commission->retail_shipping_mode_id . '</td>';
+            $html .= '<td>' . $retail_shipping_mode . '</td>';
             $html .= '<td>' . $commission->number_of_shipments . '</td>';
             $html .= '<td>' . $commission->total_charges_without_gst . '</td>';
             $html .= '<td>' . $commission->product_percentage . '</td>';
