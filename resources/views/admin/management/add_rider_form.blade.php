@@ -266,7 +266,7 @@ if (isset($main_category[2]) && $type == 1) {
             placeholder:'Select Reporting Location',
             dropdownParent: $("#addRiderForm")
         });
-        $('#hub_ids').prepend('<option value="" selected="selected"></option>').select2({
+        $('#hub_ids').select2({
             width:'100%',
             placeholder:"Select Hubs",
             allowClear:true,
