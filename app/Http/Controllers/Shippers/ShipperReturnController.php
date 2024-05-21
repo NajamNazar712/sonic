@@ -510,7 +510,6 @@ class ShipperReturnController extends Controller
                     // $this->shipment_status_update_shipper($request, 7, 2, 3);
 
 
-
                     request()->request->add(['shipment_id' => $parcel->id]);
 
                     $updated_by_id = Auth::id();
