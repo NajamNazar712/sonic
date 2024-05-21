@@ -22,8 +22,8 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Batch #</th>
                                     <th class="border-primary border-darken-1">No of Consignments</th>
-                                    <th class="border-primary border-darken-1">Action</th>
                                     <th class="border-primary border-darken-1">Batch Status</th>
+                                    <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
                             </table>

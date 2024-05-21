@@ -142,7 +142,8 @@ class AdminCnController extends Controller
         $trax_cn_receive_admin_stores = TraxCnReceiveAdminStore::Join('trax_products as s','trax_cn_receive_admin_stores.product_id','=','s.id')
             ->Join('cities as c','c.id','=','trax_cn_receive_admin_stores.area_code')
             ->SELECT('trax_cn_receive_admin_stores.id','trax_cn_receive_admin_stores.receive_date','trax_cn_receive_admin_stores.company_code','trax_cn_receive_admin_stores.area_code','c.name as area_name','trax_cn_receive_admin_stores.product_id','s.product_name as segment_name','trax_cn_receive_admin_stores.cn_from','trax_cn_receive_admin_stores.cn_to','trax_cn_receive_admin_stores.quantity')
-            ->where('trax_cn_receive_admin_stores.status',1);
+            ->where('trax_cn_receive_admin_stores.status',1)
+            ->orderByDesc('trax_cn_receive_admin_stores.id');
         if (session('role_id') != 1)
         {
             $trax_cn_receive_admin_stores = $trax_cn_receive_admin_stores->whereIn('trax_cn_receive_admin_stores.area_code',[$hub_ids]);
@@ -304,7 +305,8 @@ class AdminCnController extends Controller
         $trax_cn_issue_rider = TraxCnIssueToRider::Join('trax_products as s','trax_cn_issue_to_riders.product_id','=','s.id')
             ->join('riders as rd','rd.id','=','trax_cn_issue_to_riders.rider_id')
             ->SELECT('trax_cn_issue_to_riders.id','trax_cn_issue_to_riders.issue_date','trax_cn_issue_to_riders.company_code','rd.name as rider_name','rd.trax_id as rider_trax_id','trax_cn_issue_to_riders.product_id','s.product_name as segment_name','trax_cn_issue_to_riders.cn_from','trax_cn_issue_to_riders.cn_to','trax_cn_issue_to_riders.quantity')
-            ->where('trax_cn_issue_to_riders.status',1);
+            ->where('trax_cn_issue_to_riders.status',1)
+            ->orderByDesc('trax_cn_issue_to_riders.id');
 
         if (session('role_id') != 1)
         {
@@ -556,8 +558,8 @@ class AdminCnController extends Controller
             ->select('trax_rider_cn_details.id','trax_rider_cn_details.cn_number','trax_rider_cn_details.is_used','ir.rider_id','r.name as rider_name','r.trax_id')
             ->where('trax_rider_cn_details.cn_issue_id',$request->rider_issue_id)
             ->where('ir.status',1)
-            ->where('trax_rider_cn_details.is_hold',0);
-
+            ->where('trax_rider_cn_details.is_hold',0)
+            ->orderByDesc('trax_rider_cn_details.id');
 
         $datatables = Datatables::of($rider_cn_list)
         ->editColumn('is_used',function ($rider_cn_list){

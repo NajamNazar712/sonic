@@ -26,6 +26,7 @@
                                     <th class="border-primary border-darken-1">Pickup Address</th>
                                     <th class="border-primary border-darken-1">Product</th>
                                     <th class="border-primary border-darken-1">Service</th>
+                                    <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Booking Weight</th>
                                     <th class="border-primary border-darken-1">Total Pieces</th>s
                                     <th class="border-primary border-darken-1">Origin</th>
@@ -306,6 +307,7 @@
                     {data: 'pickup_address', name: 'pickup_address', class: 'align-middle pickup_address'},
                     {data: 'product_name', name: 'p.product_name', class: 'align-middle product_name'},
                     {data: 'service_name', name: 's.service_name', class: 'align-middle service_name'},
+                    {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
                     {data: 'total_booking_weight', name: 'total_booking_weight', class: 'align-middle total_booking_weight'},
                     {data: 'total_pieces', name: 'total_pieces', class: 'align-middle total_pieces'},
                     {data: 'origin_name', name: 'oc.name', class: 'align-middle origin_name'},

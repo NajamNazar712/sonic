@@ -35,6 +35,7 @@ class AdminBatchController extends Controller
     public function booking_batch_list(Request $request)
     {
 
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 782);
         }
@@ -49,7 +50,8 @@ class AdminBatchController extends Controller
             ->where(function ($query) use ($user_id){
                 $query->where('bba.user_id',$user_id)
                     ->orWhere('trax_booking_batches.status_id', 1);
-            });
+            })
+            ->orderByDesc('trax_booking_batches.id');
         if (session('role_id') != 1)
         {
             $booking_batch = $booking_batch->whereIn('trax_booking_batches.city_id',[$hub_ids]);

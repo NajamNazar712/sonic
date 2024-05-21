@@ -67,7 +67,8 @@ class AdminLogisticSetupController extends Controller
 //            ->join('trax_piece_settings as ps','ps.id','=','trax_shipper_details.piece_setting_id')
             ->leftjoin('routes as r','r.id','=','rd.route_id')
             ->SELECT('trax_shipper_details.id','u.id as shipper_id','u.name as shipper_name','rd.trax_id as rider_trax_id','rd.name as rider_name','tp.parent_name','r.code as route_code','r.id as route_id')
-            ->where('trax_shipper_details.status',1);
+            ->where('trax_shipper_details.status',1)
+            ->orderByDesc('trax_shipper_details.id');
 
         if(session('role_id') != 1)
         {
@@ -201,7 +202,7 @@ class AdminLogisticSetupController extends Controller
 
          $master_product = TraxParentProduct::leftjoin('segments as s','s.id','trax_parent_products.segment_id')
          ->select('trax_parent_products.id','trax_parent_products.parent_code','trax_parent_products.parent_name','s.name as segment_name','trax_parent_products.status')
-             ->where('status',1);
+             ->where('status',1)->orderByDesc('trax_parent_products.id');
          $datatables = Datatables::of($master_product)
          ->editColumn('status',function ($master_product){
              if($master_product->status == 1)
@@ -321,7 +322,8 @@ class AdminLogisticSetupController extends Controller
 
         $product = TraxProduct::join('trax_parent_products as pp','pp.id','trax_products.parent_id')
             ->leftjoin('sub_category_segments as sb','sb.id','trax_products.sub_segment_id')
-        ->select('trax_products.id','trax_products.product_code','trax_products.product_name','pp.parent_name as master_product_name','sb.name as sub_segment_name','trax_products.status');
+        ->select('trax_products.id','trax_products.product_code','trax_products.product_name','pp.parent_name as master_product_name','sb.name as sub_segment_name','trax_products.status')
+        ->orderByDesc('trax_products.id');
 
         $datatables = Datatables::of($product)
             ->editColumn('status',function ($product){
@@ -443,8 +445,8 @@ class AdminLogisticSetupController extends Controller
         }
         $product = TraxService::join('trax_products as p','p.id','trax_services.product_id')
             ->leftjoin('shipping_modes as sm','sm.id','trax_services.shipping_mode_id')
-            ->select('trax_services.id','trax_services.service_code','trax_services.service_name','p.product_name as product_name','sm.mode as shipping_mode_name','trax_services.status');
-
+            ->select('trax_services.id','trax_services.service_code','trax_services.service_name','p.product_name as product_name','sm.mode as shipping_mode_name','trax_services.status')
+            ->orderByDesc('trax_services.id');
         $datatables = Datatables::of($product)
             ->editColumn('status',function ($product){
                 if($product->status == 1)
