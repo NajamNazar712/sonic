@@ -1239,6 +1239,15 @@ class RetailAdminUserManagementController extends Controller
             } else {
                 $store = RetailTraxCenter::find($request->trax_center);
             }
+            $request->validate([
+                'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
+                'name' => 'required',
+                'phone_number' => 'required',
+                'password' => 'required',
+                'cnic' => 'required',
+                'address' => 'required',
+                'store' => 'required'
+            ]);
 
             $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);
             $productPercentages = json_decode($request->product_percentage, true);

@@ -87,7 +87,7 @@
                                     </div>
 
                                     <div class="form-group position-relative">
-                                        <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters" autocomplete="nope">
+                                        <input type="password" class="form-control" id="password" placeholder="Password*" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters" autocomplete="nope">
                                         <div class="form-control-position" id="eye">
                                             <i class="la la-eye success"></i>
                                         </div>
@@ -586,6 +586,17 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
+                    var retailShippingIds = [];
+                    var productPercentages = [];
+                    $("#tableBody").find("tr").each(function() {
+                        var selectedOption = $(this).find("td:first").text();
+                        var productPercentage = $(this).find("td:nth-child(2)").text();
+                        retailShippingIds.push(selectedOption);
+                        productPercentages.push(productPercentage);
+                    });
+                    $(form).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIds) + "'>");
+                    $(form).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentages) + "'>");
+
                     swal({
                         title: 'Please Wait!',
                         text: 'User is being added!',
@@ -634,7 +645,7 @@
                     $childInput.find('.child_input').attr({
                         'id': 'child_' + childCount + '_data',
                         'name': 'family_member_name[]',
-                        'placeholder': 'Child ' + childCount
+                        'placeholder': 'Child name'
                     });
                     $('#child_input_container').append($childInput);
                 }
@@ -700,21 +711,6 @@
 
             $(".modal_close_btn").click(function() {
                 resetModal();
-            });
-
-            $("#add_user_form").submit(function(event) {
-                event.preventDefault();
-                var retailShippingIds = [];
-                var productPercentages = [];
-                $("#tableBody").find("tr").each(function() {
-                    var selectedOption = $(this).find("td:first").text();
-                    var productPercentage = $(this).find("td:nth-child(2)").text();
-                    retailShippingIds.push(selectedOption);
-                    productPercentages.push(productPercentage);
-                });
-                $(this).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIds) + "'>");
-                $(this).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentages) + "'>");
-                this.submit();
             });
         });
 
