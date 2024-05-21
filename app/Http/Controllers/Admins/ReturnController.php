@@ -1456,7 +1456,6 @@ class ReturnController extends Controller
                     'remarks' => $remark,
                 ];
                 $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
-                $this->reattemptNotification($request->shipment_id);
                 return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
             }
             return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Return - Confirm!"];
@@ -1564,6 +1563,7 @@ class ReturnController extends Controller
                         'updated_by_id' =>  Auth::id(),
                     ];
                     $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
+                    $this->reattemptNotification($request->shipment_id);
 
                     NotificationsController::send(15, 0, $request->shipment_id);
                     NotificationsController::send(16, 0, $request->shipment_id);
