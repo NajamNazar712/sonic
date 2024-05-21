@@ -368,8 +368,8 @@ class ReturnV2Controller extends Controller
                 $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at', date('Y-m-d'))->first();
                 $admin_agent = Admin::where('id', Auth::id())->first();
                 $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
-                $employee = Employee::where('phone_number', $request->phone_number)->first();
-                $employee_shift = EmployeeShift::where('id', $employee->shift_id)->first();
+                // $employee = Employee::where('phone_number', $request->phone_number)->first();
+                // $employee_shift = EmployeeShift::where('id', $employee->shift_id)->first();
     
                 // Check Employee Shift Time
                     try{
@@ -399,6 +399,7 @@ class ReturnV2Controller extends Controller
                                         // $shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->latest()->first();
                                         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
                                         // //adding logs in rv_shipment_assign_agent_details table
+                                        dd('found here');
                                         $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
                                         if($rv_shipment_assign_agent_details != true){
                                             DB::rollBack();
