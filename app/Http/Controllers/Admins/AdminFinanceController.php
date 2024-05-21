@@ -5287,7 +5287,7 @@ class AdminFinanceController extends Controller
             elseif ($status == 0 && $cash_collection_status == 0 && $pending_status == 0) {
                 $message = 'Pending for Update';
             }
-            elseif ($status == 1 && $cash_collection_status == 0 && $pending_status == 0) {
+            elseif ($status == 1 && $cash_collection_status == 0 && $pending_status == 1) {
                 $message = 'Verified';
             }
             elseif ($status == 4) {
