@@ -558,8 +558,7 @@ class AdminCnController extends Controller
             ->select('trax_rider_cn_details.id','trax_rider_cn_details.cn_number','trax_rider_cn_details.is_used','ir.rider_id','r.name as rider_name','r.trax_id')
             ->where('trax_rider_cn_details.cn_issue_id',$request->rider_issue_id)
             ->where('ir.status',1)
-            ->where('trax_rider_cn_details.is_hold',0)
-            ->orderByDesc('trax_rider_cn_details.id');
+            ->where('trax_rider_cn_details.is_hold',0);
 
         $datatables = Datatables::of($rider_cn_list)
         ->editColumn('is_used',function ($rider_cn_list){

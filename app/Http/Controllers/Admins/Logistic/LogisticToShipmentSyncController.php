@@ -8,6 +8,7 @@ use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LogisticToShipmentSyncController extends Controller
@@ -112,7 +113,6 @@ class LogisticToShipmentSyncController extends Controller
             $shipment->booked_by = $booked_by;
             $shipment->save();
 
-            $pickup_address=$shipment->pickup_address;
 
             $shipment_journey = new ShipmentsJourney();
             $shipment_journey->shipment_id = $shipment->id;
@@ -129,7 +129,7 @@ class LogisticToShipmentSyncController extends Controller
 
         } catch (\Exception $ex) {
             Log::info($ex->getMessage());
-            return response()->json(['status'=>1,'error'=>$ex->getMessage()]);
+            throw $ex;
         }
     }
 
@@ -153,13 +153,19 @@ class LogisticToShipmentSyncController extends Controller
 
     public static function  shipment_item($shipment_id,$quantity)
     {
-        $shipment_item = new ShipmentItem();
-        $shipment_item->shipment_id=$shipment_id;
-        $shipment_item->product_type_id=24;
-        $shipment_item->description= "Logistic Pieces";
-        $shipment_item->quantity=$quantity;
-        $shipment_item->type=0;
-        $shipment_item->save();
+        try {
+            $shipment_item = new ShipmentItem();
+            $shipment_item->shipment_id=$shipment_id;
+            $shipment_item->product_type_id=24;
+            $shipment_item->description= "Logistic Pieces";
+            $shipment_item->quantity=$quantity;
+            $shipment_item->type=0;
+            $shipment_item->save();
+
+        }  catch (\Exception $ex) {
+            Log::info($ex->getMessage());
+            throw $ex;
+        }
     }
 
 //
