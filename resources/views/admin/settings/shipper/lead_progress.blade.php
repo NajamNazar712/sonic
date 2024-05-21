@@ -38,7 +38,52 @@
             </div>
         </div>
     </div>
- 
+
+    <div class="modal fade text-left" id="colorModal" data-backdrop="static" tabindex="-1" role="dialog"
+        aria-labelledby="colorModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Color Percentage Setting</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="color_percent_form" method="post" action="{{ route('admin.settings.shippers.lead_progress.update') }}">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+                            <div class="form-group row align-items-center">
+
+                                <input type="hidden" name="id" id="id">
+                                <label for="colorPicker" class="col-md-4 col-form-label">Color:</label>
+                                <div class="col-md-6">
+                                    <input type="color" id="colorHex" class="form-control" value="1" name="colorHex">
+                                </div>
+                            </div>
+                            <div class="form-group row align-items-center">
+                                <label for="percent" class="col-md-4 col-form-label">Percent:</label>
+                                <div class="col-md-6">
+                                    <input type="text" id="percent" class="form-control" name="percent" value="1">
+                                </div>
+                                <div class="col-md-2">
+                                    <span class="opacity-percent">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer text-center">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" form="color_percent_form" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
     </div>
 @endsection
 
@@ -95,6 +140,83 @@
             width: auto !important;
             text-align: left;
         }
+
+        .modal-header.bg-primary {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .modal-header .close {
+            color: #fff;
+            opacity: 1;
+        }
+
+        .modal-header .close:hover {
+            color: #ddd;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        #colorPicker {
+            width: 100%;
+            height: 45px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #hexValue {
+            background-color: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #opacityInput {
+            width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .opacity-percent {
+            display: inline-block;
+            line-height: 38px;
+            font-weight: bold;
+        }
+
+        .modal-dialog {
+            margin-top: 100px;
+        }
+
+        .modal-content {
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-dialog {
+                width: 100%;
+                margin: 10px;
+            }
+            .container {
+                width: 100%;
+            }
+        }
+
+
+
     </style>
 @endsection
 @section('js')
@@ -162,7 +284,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.settings.shippers.lead_progress.list') }}',
-                order: [[1, 'desc']],
+                order: [[0, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'stage', name: 'lead_progress_settings.stage', class: 'align-middle name'},
@@ -210,7 +332,17 @@
                 }
             });
 
-            $(doucment).on('')
+            $(document).on('click', '.edit_color_percent', function(){
+                var id = $(this).data('id');
+                var color = $(this).data('color');
+                var percent = $(this).data('percent');
+                $('#colorHex').val(color);
+                $('#percent').val(percent);
+                $('#id').val(id);
+
+                $('#colorModal').modal('show')
+
+            });
 
         });
 

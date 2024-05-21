@@ -2526,7 +2526,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('lead_progress')->name('lead_progress.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@lead_progress_index')->name('index');
                 Route::get('list', 'Admins\GlobalSettingsController@lead_progress_list')->name('list');
-
+                Route::post('update', 'Admins\GlobalSettingsController@lead_progress_update')->name('update');
             });
         });
 
