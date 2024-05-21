@@ -448,7 +448,6 @@ class ShipperReturnController extends Controller
                     $updated_rv_state_id = 3; //updating rv state id to 3 i.e open
 
                     $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $updated_rv_assign_agent_status_id, $updated_rv_state_id);
-                    $this->reattemptNotification($request->shipment_id);
 
 
                     if ($parcel->shipper_status_id == 12 && ($journey['status_reason_id'] == 12)) {
