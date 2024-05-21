@@ -8,6 +8,7 @@ use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 
 class LogisticToShipmentSyncController extends Controller
 {
@@ -127,6 +128,7 @@ class LogisticToShipmentSyncController extends Controller
             return $shipment->id;
 
         } catch (\Exception $ex) {
+            Log::info($ex->getMessage());
             return response()->json(['status'=>1,'error'=>$ex->getMessage()]);
         }
     }
