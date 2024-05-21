@@ -12,4 +12,6 @@ class TraxLogisticBooking extends Model
     public function getHandlingInstAttribute(){
         return $this->attributes['handling_inst'] ?? "N/A";
     }
+
+
 }

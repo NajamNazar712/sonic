@@ -16,7 +16,7 @@ class CreateTraxBookingPiecesTable extends Migration
         Schema::create('trax_booking_pieces', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('booking_id');
-            $table->integer('piece_cn_number');
+            $table->bigInteger('piece_cn_number');
 //            $table->integer('from_pieces')->nullable();
 //            $table->integer('to_pieces')->nullable();
             $table->integer('scan_rider_id')->nullable();

@@ -382,6 +382,8 @@
                             // $("#add_sack_bag_form")[0].reset();
                             // $("#sackbag_detail tr:not(:first-child)").empty();
                             // $("#add_sack_bag_form select").val(null).trigger('change.select2');
+                            $('#add_master_product_form').find('.select2').val(null).trigger('change');
+                            $('#add_master_product_form').find('input[type="text"], input[type="number"]').val('');
                             $('#AddMasterProductModal').modal('show');
 
                         }

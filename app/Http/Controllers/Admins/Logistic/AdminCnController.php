@@ -321,12 +321,12 @@ class AdminCnController extends Controller
                               <div class="dropdown-menu dropdown-menu-sm">
                         ';
 
-                    if(in_array(965,session('permissions')))
+                    if(session('role_id') == 1 || in_array(965,session('permissions')))
                     {
                         $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                         $dropdown .= $edit_button;
                     }
-                    if(in_array(963,session('permissions')))
+                    if(session('role_id') == 1 || in_array(963,session('permissions')))
                     {
                         $cn_list_link = '<a href="'.route('admin.logistic.cn.issue_to_rider.cn_index',['issue_id'=>$trax_cn_issue_rider->id]).'" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-search"></i></div><div class="col-9 offset-1">View CN List</div></div></a>';
                         $dropdown .= $cn_list_link;

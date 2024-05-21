@@ -338,7 +338,6 @@ class AdminLogisticBookingController extends Controller
         if($logistic_booking->exists())
         {
             $payment_modes=PaymentMode::all();
-            $paymentmodes=PaymentMode::all();
             $riders=Rider::where('status',1)->get();
             $special_handlings = TraxSpecialHandlingList::where('status',1)->get();
 
@@ -352,7 +351,7 @@ class AdminLogisticBookingController extends Controller
             $shippers=User::select('id','name')->where('id',$logistic_booking->shipper_id)->where('status',3)->get();
             $product=TraxProduct::select('id','product_name')->where('id',$logistic_booking->product_id)->where('status',1)->get();
             $trax_stations=TraxStation::select('id','name')->where('status',1)->get();
-            $pickup_addresses=UserShippingInfo::select('id','pickup_address','poc','phone','email')->get();
+            $pickup_addresses=UserShippingInfo::select('id','pickup_address','poc','phone','email')->where('user_id',$logistic_booking->shipper_id)->get();
             $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id);
             $booking_img_url=null;
             if ($booking_img->exists())
@@ -362,7 +361,7 @@ class AdminLogisticBookingController extends Controller
             }
 
             return view('admin.logistic.edit_logistic_book')
-                ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shippers'=>$shippers,'product'=>$product,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'paymentmodes'=>$paymentmodes,'riders'=>$riders]);
+                ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shippers'=>$shippers,'product'=>$product,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'riders'=>$riders]);
         }
         return  redirect()->back()->with('error','Booking not found!');
 

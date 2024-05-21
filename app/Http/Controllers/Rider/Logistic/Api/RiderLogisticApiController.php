@@ -120,18 +120,19 @@ class RiderLogisticApiController extends Controller
             $current_date = Carbon::now()->toDateString();
             $already_exists_bookings = [];
             $already_used_cns =[];
+            $un_inserted_cns=[];
             $already_used_child_cns =[];
             try {
 
                 if (!empty($bookig_data))
                 {
-                    //check booking batch length for creating a batch
-                    $batch_length=10;
-                    $booking_batch_length =  GeneralSetting::where('type','booking_batch_length')->first();
-                    if($booking_batch_length->exists())
-                    {
-                        $batch_length = $booking_batch_length->setting_value;
-                    }
+                        //check booking batch length for creating a batch
+                        $batch_length=10;
+                        $booking_batch_length =  GeneralSetting::where('type','booking_batch_length')->first();
+                        if($booking_batch_length->exists())
+                        {
+                            $batch_length = $booking_batch_length->setting_value;
+                        }
 
                         foreach ($bookig_data as $booking)
                         {
@@ -140,11 +141,14 @@ class RiderLogisticApiController extends Controller
                                 ->where('rd.cn_number',$booking['cn_number'])
                                 ->where('rd.is_used',0)
                                 ->where('rd.is_hold',0);
-                                if ($cn->exists())
+
+                            $old_booking = TraxLogisticBooking::where('cn_number',$booking['cn_number']);
+
+                                if ($cn->exists() && !$old_booking->exists())
                                 {
-                                    $old_booking = TraxLogisticBooking::where('cn_number',$booking['cn_number']);
-                                    if(!$old_booking->exists())
-                                    {
+//                                    $old_booking = TraxLogisticBooking::where('cn_number',$booking['cn_number']);
+//                                    if(!$old_booking->exists())
+//                                    {
                                         $booking_weight=0;
                                         if($booking['total_volumetric_weight'] >= $booking['total_dense_weight'])
                                         {
@@ -156,6 +160,13 @@ class RiderLogisticApiController extends Controller
 
                                         DB::beginTransaction();
 
+                                        $origin_id=$hub_id;
+                                        $user_ship_info=UserShippingInfo::where('id',$booking['pickup_address_id']);
+                                        if($user_ship_info->exists())
+                                        {
+                                            $user_ship_info=$user_ship_info->first();
+                                            $origin_id=$user_ship_info->city_id;
+                                        }
                                         $logistic_booking = new TraxLogisticBooking();
                                         $logistic_booking->shipper_id = $booking['shipper_id'];
                                         $logistic_booking->cn_number = $booking['cn_number'];
@@ -164,7 +175,7 @@ class RiderLogisticApiController extends Controller
                                         $logistic_booking->product_id = $booking['product_id'];
                                         $logistic_booking->rider_id = $rider_id;
                                         $logistic_booking->service_id = $booking['service_id'];
-                                        $logistic_booking->origin_id = $hub_id;
+                                        $logistic_booking->origin_id = $origin_id;
                                         $logistic_booking->destination_id = $booking['destination_id'];
                                         $logistic_booking->shipper_reference = $booking['shipper_reference'];
                                         $logistic_booking->consignee_name = $booking['consignee_name'];
@@ -204,7 +215,14 @@ class RiderLogisticApiController extends Controller
                                             }
 
                                             //send data to shipments table
-                                            $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Consignee Address','03100112321',$booking['booking_date'],$booking_weight,0,0,$booking['shipping_mode_id'],0,1,1,1,$charges_mode_id, 1,1,0.0,null,2,$rider_id);
+                                            $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Consignee Address','03100112321',$booking['booking_date'],$booking_weight,0,0,$booking['shipping_mode_id'],0,1,1,1,$charges_mode_id, 1,1,0.0,null,2,$rider_id,$origin_id);
+
+                                            //insert shipment item
+                                            if(isset($shipment_id))
+                                            {
+                                                LogisticToShipmentSyncController::shipment_item($shipment_id,$booking['total_pieces']);
+                                            }
+
                                         }
 
                                         //Insert logistic booking pieces
@@ -240,11 +258,11 @@ class RiderLogisticApiController extends Controller
                                                             $rider_cn->save();
                                                         }
 
-                                                        //send data to shipment pieces
-                                                        if(isset($shipment_id))
-                                                        {
-                                                            LogisticToShipmentSyncController::shipment_pieces($shipment_id,$cn_no,$i);
-                                                        }
+                                                        //send data to shipment pieces atif sir said only set 1 piece of shipment
+//                                                        if(isset($shipment_id))
+//                                                        {
+//                                                            LogisticToShipmentSyncController::shipment_pieces($shipment_id,$cn_no,$i);
+//                                                        }
 
                                                     } else{
                                                         $already_used_child_cns [] = [
@@ -255,13 +273,6 @@ class RiderLogisticApiController extends Controller
                                                 }
                                             }
                                         }
-
-                                        //insert shipment item
-                                        if(isset($shipment_id))
-                                        {
-                                            LogisticToShipmentSyncController::shipment_item($shipment_id,$booking['total_pieces']);
-                                        }
-
 
                                         //Insert logistic item reference data
                                         if (isset($booking['item_refernces_data']))
@@ -325,29 +336,37 @@ class RiderLogisticApiController extends Controller
                                             AdminBatchController::booking_batch_detail_store($batch_id,$logistic_booking->id);
                                         }
 
-
                                         DB::commit();
 
-                                    } else{
-                                        $old_booking = $old_booking->first();
-                                        $already_exists_bookings [] = [
-                                            'booking_id'=>$old_booking->id,
-                                            'cn_number'=>$old_booking->cn_number
-                                        ];
-                                    }
+//                                    } else{
+//                                        $old_booking = $old_booking->first();
+//                                        $already_exists_bookings [] = [
+//                                            'booking_id'=>$old_booking->id,
+//                                            'cn_number'=>$old_booking->cn_number
+//                                        ];
+//                                    }
                                 } else {
-                                    $already_used_cns [] = [
+                                    $un_inserted_cns [] = [
                                         'cn_number'=>$booking['cn_number']
                                     ];
+//                                    $already_used_cns [] = [
+//
+//                                    ];
                                 }
 
                         }
 
-                        if(!empty($already_exists_bookings) || !empty($already_used_cns) || !empty($already_used_child_cns))
+//                        if(!empty($already_exists_bookings) || !empty($un_inserted_cns) || !empty($already_used_child_cns))
+//                        {
+//                            return response()->json(['status'=>1,'error'=>'Something went wrong','already_exists_bookings'=>$already_exists_bookings,'already_used_cns'=>$already_used_cns,'already_used_child_cns'=>$already_used_child_cns]);
+//                        }
+                        if( !empty($un_inserted_cns) || !empty($already_used_child_cns))
                         {
-                            return response()->json(['status'=>1,'error'=>'Something went wrong','already_exists_bookings'=>$already_exists_bookings,'already_used_cns'=>$already_used_cns,'already_used_child_cns'=>$already_used_child_cns]);
+                            return response()->json(['status'=>1,'error'=>'Something went wrong','un_inserted_cns'=>$un_inserted_cns,'already_used_child_cns'=>$already_used_child_cns]);
                         }
-                        return response()->json(['status'=>0,'success'=>'Booking Completed Successfully','already_exists_bookings'=>$already_exists_bookings,'already_used_cns'=>$already_used_cns,'already_used_child_cns'=>$already_used_child_cns]);
+//                        return response()->json(['status'=>0,'success'=>'Booking Completed Successfully','already_exists_bookings'=>$already_exists_bookings,'already_used_cns'=>$already_used_cns,'already_used_child_cns'=>$already_used_child_cns]);
+                          return response()->json(['status'=>0,'success'=>'Booking Completed Successfully','un_inserted_cns'=>$un_inserted_cns,'already_used_child_cns'=>$already_used_child_cns]);
+
                 } else {
                     return response()->json(['status'=>1,'error'=>'Logistic Booking empty not add']);
                 }

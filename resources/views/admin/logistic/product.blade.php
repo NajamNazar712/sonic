@@ -417,9 +417,8 @@
                         text: '<i class="la la-plus"></i> Add New',
                         className: 'btn btn-primary request_add',
                         action: function (e, dt, node, config) {
-                            // $("#add_sack_bag_form")[0].reset();
-                            // $("#sackbag_detail tr:not(:first-child)").empty();
-                            // $("#add_sack_bag_form select").val(null).trigger('change.select2');
+                            $("#add_product_form")[0].reset();
+                            $('#add_product_form').find('.select2').val(null).trigger('change');
                             $('#AddProductModal').modal('show');
 
                         }

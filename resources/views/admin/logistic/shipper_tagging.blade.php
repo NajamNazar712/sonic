@@ -528,6 +528,7 @@
                             // $("#add_sack_bag_form")[0].reset();
                             // $("#sackbag_detail tr:not(:first-child)").empty();
                             // $("#add_sack_bag_form select").val(null).trigger('change.select2');
+                            $('#add_Shipper_tagging_form').find('.select2').val(null).trigger('change');
                             $('#AddShipperTaggingModal').modal('show');
 
                         }

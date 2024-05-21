@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">Update Logistic Booking</h1>
-              
+
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
@@ -43,7 +43,7 @@
                                                                         <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}}</option>
                                                                     @endif
                                                                 @endforeach
-                                                                
+
                                                             </select>
                                                         </div>
                                                     </div>
@@ -82,7 +82,7 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                
+
                                                     <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Origin</label>
@@ -103,10 +103,10 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                
+
                                             </div>
                                             <div class="row">
-                                                   
+
                                                     <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Total Pieces</label>
@@ -138,7 +138,7 @@
                                                     <div class="form-group">
                                                         <label>Pay Mode</label>
                                                         <select class="select select2 mb-1" name="payment_mode_id" id="payment_mode_select">
-                                                            @foreach ($paymentmodes as $paymentmode)
+                                                            @foreach ($payment_modes as $paymentmode)
                                                                 <option value="{{ $paymentmode->id }}">{{  $paymentmode->mode }}</option>
                                                             @endforeach
                                                         </select>
