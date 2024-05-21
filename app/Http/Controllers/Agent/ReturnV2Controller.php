@@ -383,7 +383,7 @@ class ReturnV2Controller extends Controller
                                 return response()->json(['status' => 4, 'error' => $update_shipment_status['error']]);
                             } 
                             else{
-                                $rv_agent_call_history_record_id = $update_shipment_status['rv_agent_call_history_record_id'];
+                                $rv_agent_call_history_record_id = $update_shipment_status['rv_agent_call_history_record_id'] ?? null;
                                 $shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->where('rv_assign_agent_status_id', 8)->latest()->first();
                                 if($shipment_assign_agents){
                                     $shipment_assign_agent = $shipment_assign_agents;
