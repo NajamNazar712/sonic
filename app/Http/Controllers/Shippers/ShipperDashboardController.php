@@ -137,6 +137,7 @@ use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
+use App\LeadProgressSetting;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -271,31 +272,41 @@ class ShipperDashboardController extends Controller
                 $color = null;
                 $description = "";
                 $user = User::find($shipper_id);
-
+                
                 $weight_charges = WeightCharge::where('user_id' , $shipper_id);
                 if($user->status == 0 && !$weight_charges->exists() && (!isset($user->request_custom_quotation) || $user->request_custom_quotation != 1)){
-                    $percentage = 30;
-                    $color = '#FF4961';
-                    $description = "Your account is 30% completed";
+                    $lead_progress_setting = LeadProgressSetting::find(1);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
+
+                    $description = "Your account is $percentage% completed";
                     
                 }else if(($weight_charges->exists() || $user->request_custom_quotation == 1) && !isset($user->rates_added_by)){
-                    $percentage = 50;
-                    $color = '#FF9149';
-                    $description = "Your account is 50% completed";
+                    $lead_progress_setting = LeadProgressSetting::find(2);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
+
+                    $description = "Your account is $percentage% completed";
 
                 }else if (isset($user->rates_added_by) && $user->documents_status != 2){
-                    $percentage = 80;
-                    $color = '#1E9FF2';
-                    $description = "Your account is 80% completed";
+                    $lead_progress_setting = LeadProgressSetting::find(3);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
+
+                    $description = "Your account is $percentage% completed";
 
                 }else if ($user->documents_status == 2 && $user->status != 3){
-                    $percentage = 95;
-                    $color = '#ffd700';
-                    $description = "Your account is 90% completed";
+                    $lead_progress_setting = LeadProgressSetting::find(4);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
+                    
+                    $description = "Your account is $percentage% completed";
 
                 }else if ($user->status == 3){
-                    $percentage = 100;
-                    $color = '#00d082';
+                    $lead_progress_setting = LeadProgressSetting::find(5);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
+
                     $description = "Your account is activated";
 
                 }

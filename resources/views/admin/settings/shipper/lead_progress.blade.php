@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Business Projection Reasons')
+@section('title', 'Lead Progress Setting')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Business Projection Reasons
+                    Lead Progress Setting
                 </h1>
                 {{--{{dd($case_nature)}}--}}
 
@@ -27,6 +27,8 @@
                                     <th class="border-primary border-darken-1">Color</th>
                                     <th class="border-primary border-darken-1">Updated_at</th>
                                     <th class="border-primary border-darken-1">Updated_by</th>
+                                    <th class="border-primary border-darken-1">Action</th>
+
                                 </tr>
                                 </thead>
                             </table>
@@ -113,21 +115,29 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.settings.sales.projection.reasons.list') }}',
+                        url: '{{ route('admin.settings.shippers.lead_progress.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
 
                             head.push('S.No');
-                            head.push('Name');
+                            head.push('Stage');
+                            head.push('Trigger');
+                            head.push('Percent');
+                            head.push('Color');
+                            head.push('Updated_at');
+                            head.push('Updated_By');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.name);
-                                row.push(values.case_nature);
-
-
+                                row.push(values.stage);
+                                row.push(values.trigger);
+                                row.push(values.percent);
+                                row.push(values.color);
+                                row.push(values.updated_at);
+                                row.push(values.updated_by);
                                 body.push(row);
                             });
                         },
@@ -151,21 +161,25 @@
                 },
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.settings.sales.projection.reasons.list') }}',
+                ajax: '{{ route('admin.settings.shippers.lead_progress.list') }}',
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'name', name: 'name', class: 'align-middle name'}
-                    {data: 'name', name: 'name', class: 'align-middle name'}
-                    {data: 'name', name: 'name', class: 'align-middle name'}
-                    {data: 'name', name: 'name', class: 'align-middle name'}
-                    {data: 'name', name: 'name', class: 'align-middle name'}
-                    {data: 'name', name: 'name', class: 'align-middle name'}
+                    {data: 'stage', name: 'lead_progress_settings.stage', class: 'align-middle name'},
+                    {data: 'trigger', name: 'lead_progress_settings.trigger', class: 'align-middle name'},
+                    {data: 'percent', name: 'lead_progress_settings.percent', class: 'align-middle percent'},
+                    {data: 'color', name: 'lead_progress_settings.color', class: 'align-middle color'},
+                    {data: 'updated_at', name: 'lead_progress_settings.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
+                    {data: 'action', name: 'action', class: 'align-middle action'},
+
 
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(4)', row).css('background-color', data.color); // Assuming 'color' contains a valid color value
+
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -195,6 +209,8 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+            $(doucment).on('')
 
         });
 
