@@ -160,6 +160,7 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\Product;
 use App\Http\Models\UserIbftCharge;
 use App\Http\Models\UserIbftChargeDetail;
+use LeadProgressSettingTableSeeder;
 
 class GlobalSettingsController extends Controller
 {
@@ -9416,40 +9417,82 @@ class GlobalSettingsController extends Controller
         }
 
     public function logistic_report_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 735);
+        $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
+        $settings = GlobalSettings::where('type', 'logistic_setting');
+        $logistic_setting_tags = array();
+        if ($settings->exists())
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 735);
-            $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
-            $settings = GlobalSettings::where('type', 'logistic_setting');
-            $logistic_setting_tags = array();
-            if ($settings->exists())
-            {
-                $settings = $settings->first();
-                $logistic_setting_tags = array_map('intval',explode(',' , $settings->text));
-            }
-            return view('admin.settings.logistic_setting')->with(['users' => $users , 'logistic_setting_tags' =>$logistic_setting_tags]);
+            $settings = $settings->first();
+            $logistic_setting_tags = array_map('intval',explode(',' , $settings->text));
         }
+        return view('admin.settings.logistic_setting')->with(['users' => $users , 'logistic_setting_tags' =>$logistic_setting_tags]);
+    }
     
     public function logistic_report_store(Request $request)
-        {
-                ActivityTrailController::createActivityTrailLog(Auth::id(), 736);
-                if ($request->has('users') && count($request->users) > 0) {
-                    $users = implode(',', $request->users);
-                } else{
-                    $users = null;
-                }
-                $settings = GlobalSettings::where('type', 'logistic_setting');
+    {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 736);
+            if ($request->has('users') && count($request->users) > 0) {
+                $users = implode(',', $request->users);
+            } else{
+                $users = null;
+            }
+            $settings = GlobalSettings::where('type', 'logistic_setting');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+
+                $settings->type = 'logistic_setting';
+                $settings->setting_value = 0;
+            }
+            $settings->text = $users;
+            $settings->save();
+        
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function lead_progress_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 795);
+        return view('admin.settings.shipper.lead_progress')->with([]);
+    }
     
-                if ($settings->exists()) {
-                    $settings = $settings->first();
-                } else {
-                    $settings = new GlobalSettings();
-    
-                    $settings->type = 'logistic_setting';
-                    $settings->setting_value = 0;
-                }
-                $settings->text = $users;
-                $settings->save();
-            
-            return redirect()->back()->with('success', 'Settings Updated!');
+    public function lead_progress_list()
+    {
+
+        $query = LeadProgressSetting::join('users as u', 'u.id', 'user_ibft_charges.user_id')
+            ->leftJoin('admins as a', 'a.id', 'user_ibft_charges.updated_by')
+            ->leftJoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'u.id')
+                    ->where('spt.admin_id', '=', Auth::id())
+                    ->where('spt.status', 0);
+            })
+            ->select(
+                'u.name as shipper',
+                'user_ibft_charges.current_charges as current_charges',
+                'a.name as updated_by',
+                'user_ibft_charges.updated_at as updated_at'
+            )
+            ->orderBy('updated_at', 'desc');
+
+        if ($all_shippers) {
+            $all_shippers = $all_shippers->toArray();
+            $authorized = in_array(Auth::id(), explode(',', $all_shippers['text']));
+
+            if (session('department_id') == 7 && !$authorized) {
+                $query->where('spt.admin_id', Auth::id());
+            }
         }
+
+        if (session('department_id') == 7 && !$all_shippers) {
+            $query->where('spt.admin_id', Auth::id());
+        }
+
+        $datatable = Datatables::of($query);
+        return $datatable->make(true);
+    }
+    
 }
