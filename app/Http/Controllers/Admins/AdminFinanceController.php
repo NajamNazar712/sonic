@@ -5275,10 +5275,11 @@ class AdminFinanceController extends Controller
                 return $query->where('delivery_notes.id', '=', $keyword);
         })
         ->addColumn('dncc_status', function($shipment) {
-            $status = $shipment->status;
-            $cash_collection_status = $shipment->cash_collection_status;
-            $pending_status = $shipment->pending_status;
-            $dncc_status = $shipment->dncc_status;
+            $delivery_notes = DeliveryNote::where('id', $shipment->dncc_no)->first();
+            $status = $delivery_notes->status;
+            $cash_collection_status = $delivery_notes->cash_collection_status;
+            $pending_status = $delivery_notes->pending_status;
+            $dncc_status = $delivery_notes->dncc_status;
             $message = '';
             if ($status == 0 && $cash_collection_status == 0 && $pending_status == 1) {
                 $message = 'Pending for Verification';
