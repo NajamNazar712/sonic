@@ -9483,10 +9483,26 @@ class GlobalSettingsController extends Controller
               <div class="dropdown-menu dropdown-menu-sm">
           ';
 
-          $dropdown .= '<button type="button" class="dropdown-item edit_color_perent" data-target-id="' . $datatable->id . '" data-color="' . $datatable->color . '" data-percent="' . $datatable->percent . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Color-Percent</div></button>';
+          $dropdown .= '<button type="button" class="dropdown-item edit_color_percent" data-id="' . $datatable->id . '" data-color="' . $datatable->color . '" data-percent="' . $datatable->percent . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Color-Percent</div></button>';
         return $dropdown;        
             });
         return $datatable->make(true);
+    }
+
+
+    public function lead_progress_update(Request $request){
+        $id = $request->id;
+        $lead_progress_setting = LeadProgressSetting::find($id);
+        if($lead_progress_setting){
+            $lead_progress_setting->color = $request->colorHex;
+            $lead_progress_setting->percent = $request->percent;
+            $lead_progress_setting->updated_at = now();
+            $lead_progress_setting->updated_by = Auth::id();
+            $lead_progress_setting->save(); 
+
+            return redirect()->back()->with('success', 'Color/Percent Updated !!!');
+
+        }
     }
     
 }
