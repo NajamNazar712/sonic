@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
+use function foo\func;
 
 
 class AdminBatchController extends Controller
@@ -33,19 +34,30 @@ class AdminBatchController extends Controller
     }
     public function booking_batch_list(Request $request)
     {
-        $hub_ids= $request->admin_hubs;
-        dd($hub_ids);
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 782);
         }
         $user_id = session('id');
+        $hub_ids= session('hubs');
         $booking_batch = TraxBookingBatch::join('trax_booking_batch_statuses as bs', 'bs.id', 'trax_booking_batches.status_id')
             ->leftjoin('trax_booking_batch_assigns as bba',function ($join){
                     $join->on('bba.batch_id','trax_booking_batches.id')
                         ->whereRaw('bba.id = (SELECT MAX(id) FROM trax_booking_batch_assigns WHERE batch_id = trax_booking_batches.id)');
             })
             ->select('trax_booking_batches.id', 'trax_booking_batches.total_bookings', 'trax_booking_batches.complete_bookings', 'trax_booking_batches.status_id', 'bs.name as status_name','bba.user_id')
-            ->whereIn('trax_booking_batches.city_id',[$hub_ids])->where('bba.user_id',$user_id)->orWhere('trax_booking_batches.status_id', 1);
+            ->where(function ($query) use ($user_id){
+                $query->where('bba.user_id',$user_id)
+                    ->orWhere('trax_booking_batches.status_id', 1);
+            });
+        if (session('role_id') != 1)
+        {
+            $booking_batch = $booking_batch->whereIn('trax_booking_batches.city_id',[$hub_ids]);
+        }
+
+
+
+
 //                ->where(function($query) use ($user_id) {
 //                $query->where('bba.user_id', $user_id) // Condition for bba.user_id
 //                ->orWhere('trax_booking_batches.status_id', 1); // Condition for trax_booking_batches.status_id

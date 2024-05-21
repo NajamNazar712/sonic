@@ -447,40 +447,40 @@
                 dropdownParent:$('#AddShipperTaggingModal')
             });
 
-            var services = @json($services);
             $('#product_id_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
                 placeholder: 'Select Product',
                 width: '100%',
                 dropdownParent:$('#AddShipperTaggingModal')
-            }).bind('select2:select',function (){
-                var product_id = parseInt($(this).val());
-                $('#service_id_select').empty();
-                $.each(services,function (key,value){
-                    if(value.product_id == product_id)
-                    {
-                        var service_option = new Option(value.service_name, value.id, false, false);
-                        $('#service_id_select').append(service_option).trigger('change');
-                    }
-                });
-                $('#service_id_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
-                    placeholder: 'Select Service',
-                    width: '100%',
-                    dropdownParent:$('#AddShipperTaggingModal')
-                });
-
             });
+                // .bind('select2:select',function (){
+            {{--    var product_id = parseInt($(this).val());--}}
+            {{--    $('#service_id_select').empty();--}}
+            {{--    $.each(services,function (key,value){--}}
+            {{--        if(value.product_id == product_id)--}}
+            {{--        {--}}
+            {{--            var service_option = new Option(value.service_name, value.id, false, false);--}}
+            {{--            $('#service_id_select').append(service_option).trigger('change');--}}
+            {{--        }--}}
+            {{--    });--}}
+            {{--    $('#service_id_select').prepend('<option value="" selected="selected">Select Service</option>').select2({--}}
+            {{--        placeholder: 'Select Service',--}}
+            {{--        width: '100%',--}}
+            {{--        dropdownParent:$('#AddShipperTaggingModal')--}}
+            {{--    });--}}
 
-            $('#service_id_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
-                placeholder: 'Select Service',
-                width: '100%',
-                dropdownParent:$('#AddShipperTaggingModal')
-            });
+            {{--});--}}
 
-            $('#piece_setting_id_select').prepend('<option value="" selected="selected">Select Setting</option>').select2({
-                placeholder: 'Select Setting',
-                width: '100%',
-                dropdownParent:$('#AddShipperTaggingModal')
-            });
+            // $('#service_id_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
+            //     placeholder: 'Select Service',
+            //     width: '100%',
+            //     dropdownParent:$('#AddShipperTaggingModal')
+            // });
+            //
+            // $('#piece_setting_id_select').prepend('<option value="" selected="selected">Select Setting</option>').select2({
+            //     placeholder: 'Select Setting',
+            //     width: '100%',
+            //     dropdownParent:$('#AddShipperTaggingModal')
+            // });
 
             // Edit fields
             $('#edit_user_id_select').prepend('<option value="" selected="selected">Select Shipper</option>').select2({

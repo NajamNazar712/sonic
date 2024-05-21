@@ -60,7 +60,7 @@ class AdminLogisticBookingController extends Controller
      */
     public function index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 783 );
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 791);
 
         return view('admin.logistic.logistic_bookings');
     }
@@ -69,8 +69,9 @@ class AdminLogisticBookingController extends Controller
     public function list(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 784);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 792);
         }
+        $hub_ids=session('hubs');
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
             ->leftjoin('user_shipping_infos as usi','usi.id','=','trax_logistic_bookings.shipper_address_id')
             ->leftjoin('segments as s','s.id','=','trax_logistic_bookings.product_id')
@@ -79,9 +80,13 @@ class AdminLogisticBookingController extends Controller
             ->leftjoin('cities as dc','dc.id','trax_logistic_bookings.destination_id')
             ->select('trax_logistic_bookings.id','trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','s.name as product_name','trax_logistic_bookings.service_id','sb.name as service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address');
 
+        if (session('role_id') != 1)
+        {
+            $logistic_bookings = $logistic_bookings->whereIn('trax_logistic_bookings.origin_id',[$hub_ids]);
+        }
         $datatables = Datatables::of($logistic_bookings)
             ->addColumn('action',function ($logistic_bookings){
-                if (session('role_id') == 1 || count(array_intersect([980], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([987], session('permissions'))) !== 0) {
 //                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                       $edit_button = '<a href="' . route("admin.logistic.edit", ["batch_id"=>0,"booking_id" => $logistic_bookings->id]) . '" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
 
@@ -108,6 +113,9 @@ class AdminLogisticBookingController extends Controller
 
     public function batch_bookings($batch_id)
     {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 793);
+
         $admin_id = session('id');
         $batch_assign=TraxBookingBatchAssign::select('bb.id as batch_id')->join('trax_booking_batches as bb','bb.id','trax_booking_batch_assigns.batch_id')
             ->whereIn('bb.status_id',[2,3])->where('bb.id',$batch_id)->where('trax_booking_batch_assigns.user_id',$admin_id);
@@ -121,6 +129,10 @@ class AdminLogisticBookingController extends Controller
 
     public function batch_booking_list(Request $request)
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 794);
+        }
+        $hub_ids=session('hubs');
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
             ->join('trax_booking_batch_details as bd','bd.booking_id','trax_logistic_bookings.id')
             ->join('trax_booking_batches as bb','bb.id','bd.batch_id')
@@ -132,6 +144,10 @@ class AdminLogisticBookingController extends Controller
             ->select('trax_logistic_bookings.id','bb.status_id','trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','p.product_name','trax_logistic_bookings.service_id','s.service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address')
             ->where('bd.batch_id',$request->batch_id);
 
+        if (session('role_id') != 1)
+        {
+            $logistic_bookings = $logistic_bookings->whereIn('bb.city_id',[$hub_ids]);
+        }
 
         $datatables = Datatables::of($logistic_bookings)
             ->addColumn('action',function ($logistic_bookings) use ($request){

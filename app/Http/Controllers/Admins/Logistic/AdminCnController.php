@@ -134,14 +134,19 @@ class AdminCnController extends Controller
 
     public  function cn_receive_admin_store_list(Request $request)
     {
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 772);
         }
+        $hub_ids= session('hubs');
         $trax_cn_receive_admin_stores = TraxCnReceiveAdminStore::Join('trax_products as s','trax_cn_receive_admin_stores.product_id','=','s.id')
             ->Join('cities as c','c.id','=','trax_cn_receive_admin_stores.area_code')
             ->SELECT('trax_cn_receive_admin_stores.id','trax_cn_receive_admin_stores.receive_date','trax_cn_receive_admin_stores.company_code','trax_cn_receive_admin_stores.area_code','c.name as area_name','trax_cn_receive_admin_stores.product_id','s.product_name as segment_name','trax_cn_receive_admin_stores.cn_from','trax_cn_receive_admin_stores.cn_to','trax_cn_receive_admin_stores.quantity')
             ->where('trax_cn_receive_admin_stores.status',1);
-
+        if (session('role_id') != 1)
+        {
+            $trax_cn_receive_admin_stores = $trax_cn_receive_admin_stores->whereIn('trax_cn_receive_admin_stores.area_code',[$hub_ids]);
+        }
 
         $datatables = Datatables::of($trax_cn_receive_admin_stores)
             ->addColumn('action',function ($trax_cn_receive_admin_stores){
@@ -294,26 +299,39 @@ class AdminCnController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 774);
         }
+
+        $hub_ids=session('hubs');
         $trax_cn_issue_rider = TraxCnIssueToRider::Join('trax_products as s','trax_cn_issue_to_riders.product_id','=','s.id')
             ->join('riders as rd','rd.id','=','trax_cn_issue_to_riders.rider_id')
             ->SELECT('trax_cn_issue_to_riders.id','trax_cn_issue_to_riders.issue_date','trax_cn_issue_to_riders.company_code','rd.name as rider_name','rd.trax_id as rider_trax_id','trax_cn_issue_to_riders.product_id','s.product_name as segment_name','trax_cn_issue_to_riders.cn_from','trax_cn_issue_to_riders.cn_to','trax_cn_issue_to_riders.quantity')
             ->where('trax_cn_issue_to_riders.status',1);
 
+        if (session('role_id') != 1)
+        {
+            $trax_cn_issue_rider = $trax_cn_issue_rider->whereIn('trax_cn_issue_to_riders.area_code',[$hub_ids]);
+        }
+
         $datatables = Datatables::of($trax_cn_issue_rider)
             ->addColumn('action',function ($trax_cn_issue_rider){
-                if (session('role_id') == 1 || count(array_intersect([965], session('permissions'))) !== 0) {
-                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
-                    $cn_list_link = '<a href="'.route('admin.logistic.cn.issue_to_rider.cn_index',['issue_id'=>$trax_cn_issue_rider->id]).'" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-search"></i></div><div class="col-9 offset-1">View CN List</div></div></a>';
-
-
+                if (session('role_id') == 1 || count(array_intersect([965,963], session('permissions'))) !== 0) {
 
                     $dropdown = '
                             <div class="btn-group">
                               <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                               <div class="dropdown-menu dropdown-menu-sm">
                         ';
-                    $dropdown .= $edit_button;
-                    $dropdown .= $cn_list_link;
+
+                    if(in_array(965,session('permissions')))
+                    {
+                        $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                        $dropdown .= $edit_button;
+                    }
+                    if(in_array(963,session('permissions')))
+                    {
+                        $cn_list_link = '<a href="'.route('admin.logistic.cn.issue_to_rider.cn_index',['issue_id'=>$trax_cn_issue_rider->id]).'" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-search"></i></div><div class="col-9 offset-1">View CN List</div></div></a>';
+                        $dropdown .= $cn_list_link;
+                    }
+
                     $dropdown .= '
                               </div>
                             </div>

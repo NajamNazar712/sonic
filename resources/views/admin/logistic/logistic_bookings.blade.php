@@ -246,7 +246,7 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || count(array_intersect([934], session('permissions'))) !== 0)
+                @if (session('role_id') == 1 || count(array_intersect([988], session('permissions'))) !== 0)
 
                 buttons: [
                     {

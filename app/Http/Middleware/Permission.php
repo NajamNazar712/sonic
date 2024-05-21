@@ -1463,11 +1463,13 @@ class Permission
 
             'logistic.batch.index' => 976,
             'logistic.batch.assign_batch' =>977,
-            'logistic.batch.batch_bookings' =>978,
+            'logistic.batch.batch_bookings' =>985,
 
-            'logistic.index' => 979,
-            'logistic.edit' => 980,
-            'logistic.update' => 980,
+            'logistic.index' => 986,
+            'logistic.list' => 986,
+            'logistic.store' => 988,
+            'logistic.edit' => 987,
+            'logistic.update' => 987,
 
             'logistic.shipper_tagging.index' =>973,
             'logistic.shipper_tagging.list' =>973,

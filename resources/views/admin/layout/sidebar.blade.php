@@ -254,7 +254,7 @@
                                 <a href="{{ route('admin.logistic.batch.index') }}">Batches</a>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(979, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(986, session('permissions')))
                             <li  class="menu-item">
                                 <a href="{{ route('admin.logistic.index') }}">Logistic Book</a>
                             </li>

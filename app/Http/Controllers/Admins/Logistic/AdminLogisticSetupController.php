@@ -33,17 +33,25 @@ class AdminLogisticSetupController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 779);
 
-        $shippers = User::select('id','name')->where('status',3)->get();
-        $riders = Rider::select('id','name','trax_id')->where('status',1)->whereNotNull('route_id')->get();
+        $hub_ids=session('hubs');
+        $shippers = User::select('id', 'name')->where('status', 3);
+        $riders = Rider::select('id','name','trax_id')->where('status',1)->whereNotNull('route_id');
+        if (session('role_id') != 1) {
+            $shippers->whereIn('city_id', $hub_ids);
+            $riders->whereIn('city_id', $hub_ids);
+        }
+        $shippers = $shippers->get();
+        $riders = $riders->get();
+
         $parent_products =  TraxParentProduct::select('id','parent_code','parent_name')
             ->where('status',1)->get();
 
-        $services = TraxService::select('id','service_code','service_name','product_id')
-            ->where('status',1)->get();
+//        $services = TraxService::select('id','service_code','service_name','product_id')
+//            ->where('status',1)->get();
 
-        $piece_settings = TraxPieceSetting::where('status',1)->get();
+//        $piece_settings = TraxPieceSetting::where('status',1)->get();
 
-        return view('admin.logistic.shipper_tagging')->with(['shippers'=>$shippers,'riders'=>$riders,'parent_products'=>$parent_products,'services'=>$services,'piece_settings'=>$piece_settings]);
+        return view('admin.logistic.shipper_tagging')->with(['shippers'=>$shippers,'riders'=>$riders,'parent_products'=>$parent_products]);
     }
     public function shipper_tagging_list(Request $request)
     {
@@ -51,6 +59,7 @@ class AdminLogisticSetupController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 780);
         }
 
+        $hub_ids = session('hubs');
         $trax_shipper_detail = TraxShipperDetail::join('users as u','u.id','trax_shipper_details.user_id')
             ->leftjoin('riders as rd','rd.id','=','trax_shipper_details.rider_id')
             ->join('trax_parent_products as tp','tp.id','=','trax_shipper_details.trax_parent_product_id')
@@ -60,6 +69,10 @@ class AdminLogisticSetupController extends Controller
             ->SELECT('trax_shipper_details.id','u.id as shipper_id','u.name as shipper_name','rd.trax_id as rider_trax_id','rd.name as rider_name','tp.parent_name','r.code as route_code','r.id as route_id')
             ->where('trax_shipper_details.status',1);
 
+        if(session('role_id') != 1)
+        {
+            $trax_shipper_detail = $trax_shipper_detail->whereIn('u.city_id',[$hub_ids]);
+        }
         $datatables = Datatables::of($trax_shipper_detail)
             ->addColumn('action',function ($trax_shipper_detail){
                 if (session('role_id') == 1 || count(array_intersect([975], session('permissions'))) !== 0) {
