@@ -5015,7 +5015,7 @@ class APIController extends Controller
                                 'shipper_status_id' => 66,
                                 'status_reason_id' => $last_reason_id,
                                 'shipment_user_id' => $shipment->user_id,
-                                'call_count' => 0
+                                'call_count' => 2
                             ];
                             dispatch(new ProcessRvShipmentTicket($rvData));
 
