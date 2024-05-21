@@ -12886,6 +12886,7 @@ class RiderAPIController extends Controller
                             ->skip(1)
                             ->first();
                     }
+                    
                     else {
                         $shipment_reattempt = NULL;
                     }
@@ -12901,6 +12902,7 @@ class RiderAPIController extends Controller
                     $deliveries['longitude'] = NULL;
                     $deliveries['status'] = $status;
                     $deliveries['shipment_reattempt'] = ($shipment_reattempt && $shipment_reattempt->shipper_status_id == 13) ? 1 : 0;
+                    $deliveries['shipment_reattempt_marked'] = ($shipment_data && $shipment_data->shipper_status_id == 13) ? 1 : 0; // using this key for the color mark in api
                     $deliveries['shipper'] = $shipper_name;
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['dbf_otp'] = ($dbf_otp != null) ? (string)$dbf_otp : null;
