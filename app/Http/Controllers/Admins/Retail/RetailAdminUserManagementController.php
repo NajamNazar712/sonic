@@ -540,8 +540,9 @@ class RetailAdminUserManagementController extends Controller
     {
         $trax_user = $request->trax_users;  
         $data = explode(', ', $trax_user);
-        $trax_retail_users = RetailUser::whereIn('id', $data)->pluck('id');
-        $retail_commissions = RetailUserCommission::whereIn('id', $trax_retail_users)->get();
+        $trax_franchise_id = RetailUserCommission::whereIn('id', $data)->pluck('franchise_id')->toArray();
+        $trax_retail_users = RetailUser::whereIn('id', $trax_franchise_id)->pluck('id');
+        $retail_commissions = RetailUserCommission::whereIn('franchise_id', $trax_retail_users)->get();
 
         $html = '';
         $html .= '<!doctype html>';
@@ -595,14 +596,14 @@ class RetailAdminUserManagementController extends Controller
 
         // table set
         $html .= '<tr>';
-        $html .= '<td class="color secondary"><strong></strong>Franchise Name</td>';
+        $html .= '<td class="color secondary"><strong></strong>Trax User Name</td>';
         $html .= '<td class="color secondary"><strong></strong>Franchise Code</td>';
         $html .= '<td class="color secondary"><strong></strong>Month</td>';
         $html .= '</tr>';
         // table set
 
         foreach ($retail_commissions as $commission) {
-            $franchise_name = RetailFranchise::find($commission->franchise_id)->name;
+            $franchise_name = RetailUser::find($commission->franchise_id)->name;
             $html .= '<tr>';
             $html .= '<td><strong></strong>'. $franchise_name .'</td>';
             $html .= '<td><strong></strong>'. $commission->franchise_code .'</td>';
@@ -661,7 +662,8 @@ class RetailAdminUserManagementController extends Controller
     {
         $trax_user = $request->trax_users;  
         $data = explode(', ', $trax_user);
-        $trax_retail_users = RetailUser::whereIn('id', $data)->pluck('id');
+        $franchise_id = RetailUserCommission::whereIn('id', $data)->pluck('franchise_id')->toArray();
+        $trax_retail_users = RetailUser::whereIn('id', $franchise_id)->pluck('id');
         $retail_commissions = RetailFranchiseCommission::whereIn('id', $trax_retail_users)->get();
 
         $html = '';
@@ -723,7 +725,7 @@ class RetailAdminUserManagementController extends Controller
         // table set
 
         foreach ($retail_commissions as $commission) {
-            $franchise_name = RetailFranchise::find($commission->franchise_id)->name;
+            $franchise_name = RetailUser::find($commission->franchise_id)->name;
             $html .= '<tr>';
             $html .= '<td><strong></strong>'. $franchise_name .'</td>';
             $html .= '<td><strong></strong>'. $commission->franchise_code .'</td>';
