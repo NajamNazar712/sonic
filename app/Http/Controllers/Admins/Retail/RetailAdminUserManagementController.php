@@ -240,6 +240,16 @@ class RetailAdminUserManagementController extends Controller
             'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
             'franchise_gst' => 'required|numeric',
             'franchise_withholding' => 'required|numeric',
+            'name' => 'required',
+            'phone_number' => 'required',
+            'email' => 'required',
+            'cnic' => 'required',
+            'hub' => 'required',
+            'lat' => 'required',
+            'long' => 'required',
+            'insurance' => 'required',
+            'franchise_gst' => 'required',
+            'retail_shipping_mode_id' => 'required',
         ]);
 
         $admin = $request->user();
@@ -349,9 +359,17 @@ class RetailAdminUserManagementController extends Controller
     public function franchise_edit(Request $request)
     {
         $request->validate([
-            // 'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
             'franchise_gst' => 'required|numeric',
             'franchise_withholding' => 'required|numeric',
+            'name' => 'required',
+            'phone_number' => 'required',
+            'email' => 'required',
+            'cnic' => 'required',
+            'lat' => 'required',
+            'long' => 'required',
+            'edit_insurance' => 'required',
+            'franchise_gst' => 'required',
+            'retail_shipping_mode_id' => 'required',
         ]);
         $date = Carbon::now()->format('Y_m_d');
         $admin = $request->user();

@@ -92,7 +92,7 @@
                                         <input type="number" name="discount" id="discount" class="form-control discount" placeholder="Discount" max="100">
                                     </div>--}}
             
-                                    <div class="input-group mb-2">
+                                    <div class="input-group mb-2 form-group">
                                         <input type="text" name="insurance" id="insurance" class="form-control insurance" placeholder="Insurance*"  value="" max="100" min="1"
                                             data-rule-required="true" data-msg-required="Insurance is required">
                                         <div class="input-group-append">
@@ -705,6 +705,17 @@
                     error.addClass('w-100').appendTo(element.parents('.input-group'));
                 },
                 submitHandler: function(form) {
+                    var retailShippingIds = [];
+                    var productPercentages = [];
+                    $("#tableBody").find("tr").each(function() {
+                        var selectedOption = $(this).find("td:first").text();
+                        var productPercentage = $(this).find("td:nth-child(2)").text();
+                        retailShippingIds.push(selectedOption);
+                        productPercentages.push(productPercentage);
+                    });
+                    $(form).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIds) + "'>");
+                    $(form).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentages) + "'>");
+
                     swal({
                         title: 'Please Wait!',
                         text: 'Franchise is being added!',
@@ -726,6 +737,17 @@
                     error.addClass('w-100').appendTo(element.parents('.input-group'));
                 },
                 submitHandler: function(form) {
+                    var retailShippingIdsEdit = [];
+                    var productPercentagesEdit = [];
+                    $("#editTableBody").find("tr").each(function() {
+                        var selectedOptionEdit = $(this).find("td:first").text();
+                        var productPercentageEdit = $(this).find("td:nth-child(2)").text();
+                        retailShippingIdsEdit.push(selectedOptionEdit);
+                        productPercentagesEdit.push(productPercentageEdit);
+                    });
+                    $(form).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIdsEdit) + "'>");
+                    $(form).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentagesEdit) + "'>");
+
                     swal({
                         title: 'Please Wait!',
                         text: 'Franchise is being Updated!',
@@ -787,28 +809,6 @@
                         $("#product_percentage").val('');
                     }
                 }
-            });
-
-            $("#add_franchise_form").submit(function(event) {
-                event.preventDefault();
-                // var attachment1 = $("#attachment_1")[0].files[0];
-                // var gst_commission = $('#commission_percentage').val();
-                // var withholding_tax_percentage = $('#withholding_tax_percentage').val();
-                // if (!attachment1 || !gst_commission || !withholding_tax_percentage){
-                //     return;
-                // }
-                var retailShippingIds = [];
-                var productPercentages = [];
-                $("#tableBody").find("tr").each(function() {
-                    var selectedOption = $(this).find("td:first").text();
-                    var productPercentage = $(this).find("td:nth-child(2)").text();
-                    retailShippingIds.push(selectedOption);
-                    productPercentages.push(productPercentage);
-                });
-                $(this).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIds) + "'>");
-                $(this).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentages) + "'>");
-
-                this.submit();
             });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function(event) {
@@ -875,30 +875,9 @@
                 }
             });
 
-            $("#edit_franchise_form").submit(function(event) {
-                event.preventDefault();
-                // var gst_commission = $('#commission_percentage').val();
-                // var withholding_tax_percentage = $('#withholding_tax_percentage').val();
-                // if (!gst_commission || !withholding_tax_percentage){
-                //     return;
-                // }
-                var retailShippingIdsEdit = [];
-                var productPercentagesEdit = [];
-                $("#editTableBody").find("tr").each(function() {
-                    var selectedOptionEdit = $(this).find("td:first").text();
-                    var productPercentageEdit = $(this).find("td:nth-child(2)").text();
-                    retailShippingIdsEdit.push(selectedOptionEdit);
-                    productPercentagesEdit.push(productPercentageEdit);
-                });
-                $(this).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIdsEdit) + "'>");
-                $(this).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentagesEdit) + "'>");
-                this.submit();
-            });
-
             $(".modal_close_btn").click(function() {
                 resetModal();
             });
-
         });
 
     </script>
