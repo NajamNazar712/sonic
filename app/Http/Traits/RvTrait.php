@@ -1241,7 +1241,7 @@ trait RvTrait
         //Rv Disable Shippers Setting when all shippers are enbale and there are exluded shipper(agents can get those shippers shipments)
         if (!empty($included_shippers)) {
 
-            $shipments = $this->getShipmentsFromRvShipmentTicket($included_shippers,$agent);
+            $shipments = $this->getShipmentsFromRvShipmentTicket($agent);
 
         }
 
@@ -1260,7 +1260,7 @@ trait RvTrait
             
             if (!empty($included_shippers)){
 
-                $shipments = $this->getShipmentsFromRvShipmentTicket($included_shippers,$agent);
+                $shipments = $this->getShipmentsFromRvShipmentTicket($agent);
                 
             }
         }
@@ -1370,9 +1370,9 @@ trait RvTrait
             return $shipment;
     }
 
-    protected function getShipmentsFromRvShipmentTicket($shipperUserIds, $agent = null)
+    protected function getShipmentsFromRvShipmentTicket($agent = null)
     {
-        $shipments = RvShipmentTicket::whereIn('shipment_user_id',$shipperUserIds)
+        $shipments = RvShipmentTicket::where('disabled_shippper',0)
                 ->when($agent, function ($query, $agent) {
                     if($agent->agent_caller_type == 1) //These Agents will get shipments pending with first call only
                     {
