@@ -253,7 +253,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey)
+    protected function rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey, $rv_agent_call_history_record_id = null)
     {   
         try {
             $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
@@ -273,6 +273,7 @@ trait RvTrait
             $rv_shipment_assign_agent_details->call_to_id  = $request->call_to_id;
             $rv_shipment_assign_agent_details->assigned_to_type_id  = $shipment_assign_agent->assigned_to_type_id;
             $rv_shipment_assign_agent_details->assigned_by  = $shipment_assign_agent->assigned_by;
+            $rv_shipment_assign_agent_details->rv_agent_call_history_id  = $rv_agent_call_history_record_id;
             $rv_shipment_assign_agent_details->save();
     
             return true;
@@ -802,7 +803,7 @@ trait RvTrait
                         'rv_assign_agent_sub_status_id' => null
                     ]);
                     $this->return_confirm($request);
-                    return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
+                    return ['status' => 1, 'success'=> 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
                 }
                 //if unresponsive count is 2 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
                 else if ($rv_shipment_assign_agent->unresponsive_count == 2) {
@@ -812,7 +813,7 @@ trait RvTrait
                     
                     // //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
                     ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id());
-                    return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
+                    return ['status' => 1, 'success'=> 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
                 }
 
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
@@ -835,7 +836,7 @@ trait RvTrait
                     ]);
                     $this->return_confirm($request);
                 }
-                return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
+                return ['status' => 1, 'success'=> 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
             } 
             catch (\Throwable $th) {
                     $th->getMessage();
