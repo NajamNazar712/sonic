@@ -5290,9 +5290,6 @@ class AdminFinanceController extends Controller
             elseif ($status == 1 && $cash_collection_status == 0 && $pending_status == 1) {
                 $message = 'Verified';
             }
-            elseif ($status == 4) {
-                $message = 'Canceled';
-            }
             elseif ($status == 1 && $cash_collection_status == 1 && $pending_status == 1 && $dncc_status == 0) {
                 $message = 'Cash Collected';
             }
