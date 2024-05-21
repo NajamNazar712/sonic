@@ -9153,7 +9153,7 @@ class GlobalSettingsController extends Controller
     public function rider_assigned_hub_list()
     {
         $reasons = RiderAssignedHubForDeliveryNote::join('riders as r', 'r.id', 'rider_assigned_hub_for_delivery_notes.rider_id')
-            ->select('rider_assigned_hub_for_delivery_notes.id as id', 'r.id as rider_id', 'r.name as name', 'rider_assigned_hub_for_delivery_notes.hubs as hubs');
+            ->select('rider_assigned_hub_for_delivery_notes.id as id', 'r.id as rider_id', 'r.name as name', 'r.rider_main_category_id as main_category', 'rider_assigned_hub_for_delivery_notes.hubs as hubs');
 
         $datatable = Datatables::of($reasons)
             ->addColumn('hubs', function ($data) {
@@ -9162,14 +9162,23 @@ class GlobalSettingsController extends Controller
                 $count = count(explode(',', $hubs));
                 return '<button ref="' . $rider_id . '" class="btn btn-sm btn-outline-info align-middle hubs_count">' . $count . '</button>';
             })->addColumn('action', function ($data) {
+                if($data['main_category'] < 3){
+                    $dropdown = '
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    if (session('role_id') == 1 || in_array(896, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    }
+                    
 
-                $dropdown = '
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
-                if (session('role_id') == 1 || in_array(896, session('permissions'))) {
-                    $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                }else{
+                    $dropdown = '
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    '; 
                 }
                 return $dropdown;
             });
