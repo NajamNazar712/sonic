@@ -12761,6 +12761,8 @@ class RiderAPIController extends Controller
                 foreach ($delivery_note_shipments as $delivery_note_shipment) {
                     $replacement_parcel_image = null;
                     $shipment_data = $delivery_note_shipment->shipment;
+                    $information['summary']['requests']['shipment_reattempt_marked'] = ($shipment_data && $shipment_data->shipper_status_id == 13) ? 1 : 0; // using this key for the color mark in api
+
                     $shipment_id = $shipment_data->id;
                     $refusal_otp = null;
                     $dbf_otp = null;
@@ -12902,7 +12904,6 @@ class RiderAPIController extends Controller
                     $deliveries['longitude'] = NULL;
                     $deliveries['status'] = $status;
                     $deliveries['shipment_reattempt'] = ($shipment_reattempt && $shipment_reattempt->shipper_status_id == 13) ? 1 : 0;
-                    $deliveries['shipment_reattempt_marked'] = ($shipment_data && $shipment_data->shipper_status_id == 13) ? 1 : 0; // using this key for the color mark in api
                     $deliveries['shipper'] = $shipper_name;
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['dbf_otp'] = ($dbf_otp != null) ? (string)$dbf_otp : null;
