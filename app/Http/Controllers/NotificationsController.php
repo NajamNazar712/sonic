@@ -3618,7 +3618,7 @@ class NotificationsController extends Controller
                             }
                             $cc = array();
 
-                            $general_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 8, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub->id)->whereNotNull('admins.email');
+                            $general_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 8, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub->id)->whereNotNull('admins.email')->where('id','!=',2985); //exclude hassan.arman@trax.pk on request
 
                             if ($general_managers->exists()) {
                                 $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
@@ -8295,7 +8295,11 @@ class NotificationsController extends Controller
                         ->join('sale_tier_tags as stt', function ($join) {
                             $join->on('stt.user_id', 'u.id');
                         })
-                        ->join('admins as a', 'a.id', 'stt.kam')
+//                        ->join('admins as a', 'a.id', 'stt.kam')
+                        ->join('admins as a', function ($join) {
+                            $join->on('a.id', '=', 'stt.kam')
+                                ->where('a.status', '=', 1);
+                        })
                         ->select('u.name as username', 'u.id as userid', 'a.name as adminname', 'a.email as email')
                         ->where('shipments.shipper_status_id', 20)
                         ->groupBy('userid')
