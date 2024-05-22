@@ -10290,7 +10290,8 @@ class AdminReportsController extends Controller
             $datatable->where('shipments.user_id', $user);
         }
         if ($hub = $request->get('search_origin_hub')) {
-            $datatable->where('oc.hub_id', $hub);
+            // $datatable->where('oc.hub_id', $hub);
+            $datatable->whereIn('oc.hub_id', $hub);
         }
         if ($hub = $request->get('search_destination_hub')) {
             $datatable->where('dc.hub_id', $hub);
