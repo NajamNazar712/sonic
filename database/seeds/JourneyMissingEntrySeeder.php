@@ -24,7 +24,7 @@ class JourneyMissingEntrySeeder extends Seeder
     public function run()
     {
         //
-        $shipmentId = [20215838016898,20217837578949,22338437949708,22338438037227,20238737894720,20238737907261,22338737925174
+        $shipmentId = [777374426522,777374433304,28328837310837,20228837170629,20228837000426,20217436991659,223138636941286,28328836838756
         ];
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
@@ -33,12 +33,10 @@ class JourneyMissingEntrySeeder extends Seeder
 
                 if ($shipment->shipper_status_id === 5) {
                     // $shipment->created_at = $shipment->updated_at;
-                    $shipment->updated_at = $shipment->updated_at;
                     $shipment->shipper_status_id = 14;
                     $shipment->consignee_status_id = 14;
                     $shipment->save();
                 }
-
                 if ($shipment->shipper_status_id === 14) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
                     $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->first();
