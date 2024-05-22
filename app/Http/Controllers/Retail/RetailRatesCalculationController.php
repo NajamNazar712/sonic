@@ -164,7 +164,7 @@ class RetailRatesCalculationController extends Controller
                 }
             }
 
-            $zone_city_gst = ZoneCitiesGst::where('zone_id',$pickup_city->zone->id)->where('city_id',$pickup_city);
+            $zone_city_gst = ZoneCitiesGst::where('zone_id',$pickup_city->zone->id)->where('city_id',$pickup_city->id);
             if ($zone_city_gst->exists())
             {
                 $zone_city_gst = $zone_city_gst->first();
