@@ -5230,6 +5230,90 @@ class AdminFinanceController extends Controller
         return redirect()->route('admin.finance.add_shipment_adjustment.index')->with('success', 'Shipment\'s adjustment has been added');
     }
 
+    public function tracking_number_wise_dncc_info_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 789);
+        return view('admin.finance.tracking_number_wise_dncc_info');
+    }
+
+    public function tracking_number_wise_dncc_info_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 790);
+        }
+        $trackingNumbers = explode(',',$request->tracking_numbers);
+        $shipments = DeliveryNoteShipment::join('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
+        ->join('users as u', 'shipments.user_id', '=', 'u.id')
+        ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+        ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+        ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+        ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+        ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+        ->join('delivery_notes', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
+        // ->join('shipments_journey', 'shipments_journey.reference_1_id', '=', 'delivery_note_shipments.delivery_note_id')
+        ->whereIn('shipments.tracking_number',$trackingNumbers)
+        ->select(
+                'shipments.id as shId',
+                'shipments.tracking_number',
+                'oc.name as origin',
+                'dc.name as destination',
+                'h.name as destination_hub',
+                'delivery_notes.id as dncc_no',
+                'delivery_notes.created_at as dncc_created_at',
+                'delivery_notes.updated_at as dncc_updated_at',
+                'delivery_notes.received_cod_amount as cod_amount',
+                'delivery_notes.status as status'
+        );
+        $datatables = Datatables::of($shipments)
+        ->editColumn('dncc_no', function ($deliveries) {
+            return str_pad($deliveries->dncc_no, 6, '0', STR_PAD_LEFT);
+        })
+        ->editColumn('cod_amount', function($shipment){
+            return number_format($shipment->cod_amount);
+        })
+        ->filterColumn('dncc_no', function ($query, $keyword) {
+                return $query->where('delivery_notes.id', '=', $keyword);
+        })
+        ->addColumn('dncc_status', function($shipment) {
+            $delivery_notes = DeliveryNote::where('id', $shipment->dncc_no)->first();
+            $status = $delivery_notes->status;
+            $cash_collection_status = $delivery_notes->cash_collection_status;
+            $pending_status = $delivery_notes->pending_status;
+            $dncc_status = $delivery_notes->dncc_status;
+            $message = '';
+            if ($status == 0 && $cash_collection_status == 0 && $pending_status == 1) {
+                $message = 'Pending for Verification';
+            } 
+            elseif ($status == 0 && $cash_collection_status == 0 && $pending_status == 0) {
+                $message = 'Pending for Update';
+            }
+            elseif ($status == 1 && $cash_collection_status == 0 && $pending_status == 1) {
+                $message = 'Verified';
+            }
+            elseif ($status == 1 && $cash_collection_status == 1 && $pending_status == 1 && $dncc_status == 0) {
+                $message = 'Cash Collected';
+            }
+            elseif ($status == 1 && $cash_collection_status == 1 && $pending_status == 1 && $dncc_status == 1) {
+                $message = 'Completed';
+            }
+            return $message;
+        })
+        ->addColumn('shipment_status_dncc', function($shipment){
+            $shipments_journey_id = ShipmentsJourney::where('shipment_id', $shipment->shId)
+            ->whereNotNull('reference_1_id')    
+            ->where('reference_1_id', $shipment->dncc_no)
+            ->pluck('id')
+            ->max();            
+            $shipment_journey_status = ShipmentsJourney::where('id', $shipments_journey_id)->first();
+            $shipment_status = ShipmentStatus::where('id', $shipment_journey_status->shipper_status_id)
+                ->select('name')
+                ->first();
+            return $shipment_status->name;
+        });
+        
+        return $datatables->make(true);
+    }
+
     static public function return_confirmed_revert($shipment_id, $adjustment_type)
     {
         $shipment = Shipment::find($shipment_id);
