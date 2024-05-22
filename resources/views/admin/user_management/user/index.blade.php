@@ -92,9 +92,9 @@
 								<div class="col-4">
 									<fieldset class="form-group">
 										<select name="search_roles[]" id="search_roles" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-											@foreach($roles as $role)
+											{{-- @foreach($roles as $role)
 												<option value="{{$role->id}}">{{$role->name}} - {{$role->department->name}}</option>
-											@endforeach
+											@endforeach --}}
 										</select>
 									</fieldset>
 								</div>
