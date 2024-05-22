@@ -33,12 +33,10 @@ class JourneyMissingEntrySeeder extends Seeder
 
                 if ($shipment->shipper_status_id === 5) {
                     // $shipment->created_at = $shipment->updated_at;
-                    $shipment->updated_at = $shipment->updated_at;
                     $shipment->shipper_status_id = 14;
                     $shipment->consignee_status_id = 14;
                     $shipment->save();
                 }
-
                 if ($shipment->shipper_status_id === 14) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
                     $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->first();
