@@ -11076,7 +11076,10 @@ class NotificationsController extends Controller
                     if (strpos($subject, '[Company Name]') !== FALSE) {
                         $subject = str_replace('[Company Name]', $user->name, $subject); 
                     }
-                    self::email($subject, $body, $sale_person->email); // Send email with $body
+
+                    if(isset($sale_person)){
+                        self::email($subject, $body, $sale_person->email); // Send email with $body
+                    }
                                 
                 }
             }

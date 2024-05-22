@@ -966,11 +966,7 @@
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <h3 class="display-inline card-title lead success">Rush</h3>
-                                                            @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
-                                                                <label class="display-inline ml-1">Make Default</label>
-                                                                <input type="checkbox" name="on_default" id="on_default"
-                                                                       class="switchery on_default" data-size="xs" data-switchery="true">
-                                                            @endif
+                                                            
                                                         </div>
                                                         <div class="col-md-6">
                                                             <a href="javascript:void(0);" class="pull-right" id="on_main_switch"><input
@@ -1445,11 +1441,7 @@
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <h3 class="display-inline card-title lead success">Saver Plus</h3>
-                                                            @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
-                                                                <label class="display-inline ml-1">Make Default</label>
-                                                                <input type="checkbox" name="ol_default" id="ol_default"
-                                                                       class="switchery ol_default" data-size="xs" data-switchery="true">
-                                                            @endif
+                                                         
                                                         </div>
                                                         <div class="col-md-6">
                                                             <a id="ol_main_switch" href="javascript:void(0);" class="pull-right"><input
@@ -1917,11 +1909,8 @@
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <h3 class="display-inline card-title lead success">Swift</h3>
-                                                            @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
-                                                                <label class="display-inline ml-1">Make Default</label>
-                                                                <input type="checkbox" name="det_default" id="det_default"
-                                                                       class="switchery det_default" data-size="xs" data-switchery="true">
-                                                            @endif
+                                                           
+                                                             
                                                         </div>
                                                         <div class="col-md-6">
                                                             <a id="detain_main_switch" href="javascript:void(0);" class="pull-right"><input
@@ -2391,12 +2380,7 @@
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <h3 class="display-inline card-title lead success">Sameday</h3>
-                                                            @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
-                                                                <label class="display-inline ml-1">Make Default</label>
-                                                                <input type="checkbox" name="sameday_default" id="sameday_default"
-                                                                       class="switchery sameday_default" data-size="xs"
-                                                                       data-switchery="true">
-                                                            @endif
+                                                      
                                                         </div>
                                                         <div class="col-md-6">
                                                             <a id="sameday_main_switch" href="javascript:void(0);" class="pull-right"><input
@@ -2906,7 +2890,7 @@
 
         @if ($lead != null)
             $('#shipper_city').val({{ $lead->city_id }}).prop('disabled', true).trigger('change');
-            $('#sale_person').val({{ $lead->sale_person_id }}).trigger('change');
+            $('#sale_person').val(@json($lead->sale_person_id ?? null)).trigger('change');
         @endif
 
         $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({

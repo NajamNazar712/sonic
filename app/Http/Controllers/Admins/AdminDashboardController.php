@@ -1395,7 +1395,7 @@ class AdminDashboardController extends Controller
                 $old_sale_person_date = $old_sale_person->created_at;
                 if ($old_sale_person) {
                     $old_sale_person = $old_sale_person->sales_person;
-                } else {
+                } else {    
                     $old_sale_person = null;
                 }
                 $new_sale_person = Admin::find($tag_id);
