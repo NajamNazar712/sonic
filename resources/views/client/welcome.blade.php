@@ -26,7 +26,7 @@
                             @endif
                         </div>
                         <div style="flex-shrink: 0; margin-left: 20px;">
-                            <img src="{{ asset('img/on-boarding-lead.jpg') }}" alt="Onboarding Image" style="width: 150px; height: auto;">
+                            <img src="{{ asset('img/proposed_lead_image_onboard.png') }}" alt="Onboarding Image" style="width: 150px; height: auto;">
                         </div>
                     </div>
                     
