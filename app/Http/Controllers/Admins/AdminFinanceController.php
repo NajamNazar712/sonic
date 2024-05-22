@@ -11719,8 +11719,7 @@ class AdminFinanceController extends Controller
 
             $origin = $origin_city->name;
             $origin_city_id = $origin_city->id;
-            $gst = self::gst($origin_city->zone_id);
-
+            $gst = self::gst($origin_city->zone_id,$origin_city_id);
             if (!in_array($origin, $origins)) {
                 $origins[] = $origin;
 
