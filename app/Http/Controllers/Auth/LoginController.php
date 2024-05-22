@@ -158,7 +158,7 @@ class LoginController extends Controller
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Blacklisted, Contact Admin');
             }
-            else if (!in_array($user->status, [0,1,2,5]) || $user->status == 4) {
+            else if (!in_array($user->status, [0,1,3,2,5]) || $user->status == 4) {
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
             }
