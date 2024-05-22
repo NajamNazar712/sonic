@@ -1248,7 +1248,12 @@ class RetailAdminUserManagementController extends Controller
                 'password' => 'required',
                 'cnic' => 'required',
                 'address' => 'required',
-                'store' => 'required'
+                'store' => 'required',
+                'trax_id' => [
+                    'nullable',
+                    'required_unless:store,1',
+                    'regex:/^[0-9]*$/',
+                ],
             ]);
 
             $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);

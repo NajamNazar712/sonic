@@ -712,6 +712,20 @@
             $(".modal_close_btn").click(function() {
                 resetModal();
             });
+
+            $('#store').on('change', function(){
+                var category = $(this).val();
+                if (category == 1) {
+                    $('#trax_id').addClass("d-none");
+                } else {
+                    $('#trax_id').removeClass("d-none");
+                    $('#trax_id').on('input', function(event) {
+                        $(this).val(function(_, value) {
+                            return value.replace(/\D/g, '');
+                        });
+                    });
+                }
+            });
         });
 
         $("#editRetailUser").on("show.bs.modal", function(e) {
