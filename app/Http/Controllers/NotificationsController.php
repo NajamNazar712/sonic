@@ -8523,7 +8523,9 @@ class NotificationsController extends Controller
                         ->first();
 
                     if (strpos($sale_person_body, '[person_of_contact]') !== FALSE) {
-                        $sale_person_body = str_replace('[person_of_contact]', $sale_person->name, $sale_person_body);
+                        if(count($sale_person) > 0){
+                            $sale_person_body = str_replace('[person_of_contact]', $sale_person->name, $sale_person_body);
+                        }
                     }
 
                     $to = $sale_person->email;
@@ -11077,7 +11079,7 @@ class NotificationsController extends Controller
                         $subject = str_replace('[Company Name]', $user->name, $subject); 
                     }
 
-                    if(isset($sale_person)){
+                    if($sale_person){
                         self::email($subject, $body, $sale_person->email); // Send email with $body
                     }
                                 
