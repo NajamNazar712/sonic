@@ -48,6 +48,8 @@
                                         <th class="border-primary border-darken-1">REF Tagged</th>
                                         <th class="border-primary border-darken-1">Remarks</th>
                                         <th class="border-primary border-darken-1">Reason</th>
+                                        <th class="border-primary border-darken-1">Activation Date</th>
+                                        <th class="border-primary border-darken-1">Disabled Date</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -212,6 +214,8 @@
                         head.push('REF Tagged');
                         head.push('Remarks');
                         head.push('Reason');
+                        head.push('Activation Date');
+                        head.push('Disabled Date');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -227,6 +231,8 @@
                             row.push(values.ref);
                             row.push(values.remarks);
                             row.push(values.reason);
+                            row.push(values.activated_at);
+                            row.push(values.blocked_at);
 
                             body.push(row);
                         });
@@ -443,6 +449,8 @@
                 {data: 'ref', name: 'h.name', class: 'align-middle ref'},
                 {data: 'remarks', name: 'users.blacklist_reason', class: 'remarks'},
                 {data: 'reason', name: 'bdru.name', class: 'reason'},
+                {data: 'activated_at', name: 'users.activated_at', class: 'activated_at'},
+                {data: 'blocked_at', name: 'users.blocked_at', class: 'blocked_at'},
                 {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
             ],
             rowCallback: function(row, data, index) {
