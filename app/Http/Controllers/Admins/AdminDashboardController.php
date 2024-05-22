@@ -53,6 +53,7 @@ use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipperContact;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Territory;
@@ -11010,6 +11011,15 @@ class AdminDashboardController extends Controller
                             $osa_charges->save();
                         }
                     }
+
+                    $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
+                    foreach($admin_ids as $admin_id){
+                        $admin_hub = new AdminHub();
+                        $admin_hub->admin_id = $admin_id;
+                        $admin_hub->hub_id = $request->hubs;
+                        $admin_hub->save();
+                    }
+                
                     return redirect()->back()->with('success', 'Hub/city updated successfully');
                 }
             } else {
@@ -11204,6 +11214,14 @@ class AdminDashboardController extends Controller
                     $osa_charges->admin_id = Auth::id();
                     $osa_charges->save();
                 }
+            }
+
+            $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
+            foreach($admin_ids as $admin_id){
+                $admin_hub = new AdminHub();
+                $admin_hub->admin_id = $admin_id;
+                $admin_hub->hub_id = $request->hubs;
+                $admin_hub->save();
             }
             return redirect()->back()->with('success', 'Hub city added successfully');
         }
