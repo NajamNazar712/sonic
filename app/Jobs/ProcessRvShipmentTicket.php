@@ -32,10 +32,8 @@ class ProcessRvShipmentTicket implements ShouldQueue
      */
     public function handle()
     {
-        RvShipmentTicket::updateOrCreate(
-            [
-                'shipment_id' => $this->shipment['shipment_id']
-            ],
+        RvShipmentTicket::withTrashed()->updateOrCreate(
+            ['shipment_id' => $this->shipment['shipment_id']],
             [
                 'shipment_shipper_status_id' => $this->shipment['shipper_status_id'],
                 'shipment_status_reason_id' => $this->shipment['status_reason_id'],
