@@ -566,7 +566,7 @@ class AdminCnController extends Controller
             {
                 return 'Used';
             }
-            return  'Not Used';
+            return  'Not Used' ;
         })->addColumn('barcode',function($rider_cn_list){
                 $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
                 $cn_number = (string)($rider_cn_list->cn_number);
