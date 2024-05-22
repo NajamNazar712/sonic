@@ -50,9 +50,6 @@ class RiderLogisticApiController extends Controller
         $hub_id=$request->rider_hub;
 
 
-            $logistic_data = array();
-
-//            $shipper_shipping_modes=[];
             $shipper_list=[];
 
             $rider_cn = $this->cn_issue_to_rider_filter($rider_id);
@@ -69,13 +66,13 @@ class RiderLogisticApiController extends Controller
                 {
                     if($shipper->corporate_rate_type_id!=3)
                     {
-                        $shipper_shipping_modes = CorporateRateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('user_id as shipper_id','shipping_mode_id')->get();
+                        $shipper_shipping_modes = CorporateRateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('shipping_mode_id')->get();
                     } else{
-                        $shipper_shipping_modes = CorporateDefaultRateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('user_id as shipper_id','shipping_mode_id')->get();
+                        $shipper_shipping_modes = CorporateDefaultRateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('shipping_mode_id')->get();
                     }
 
                 } else if($shipper->account_type_id==1){
-                    $shipper_shipping_modes = RateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('user_id as shipper_id','shipping_mode_id')->get();
+                    $shipper_shipping_modes = RateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('shipping_mode_id')->get();
                 }
 
                 $shipper_list[] = [
