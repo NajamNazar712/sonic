@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\CronDonePayment;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Models\Shipment;
@@ -14,7 +15,7 @@ class CreatePaymentsForMissingShipments extends Command
      *
      * @var string
      */
-    protected $signature = 'make:payments {shipment_ids}';
+    protected $signature = 'make:payments';
 
     /**
      * The console command description.
@@ -40,8 +41,8 @@ class CreatePaymentsForMissingShipments extends Command
      */
     public function handle()
     {
-        $shipment_ids = $this->argument('shipment_ids');
-        $shipment_ids = explode(',', $shipment_ids);
+        $tracking_number = CronDonePayment::where('status',1)->pluck('tracking_number')->toArray();
+        $shipment_ids = Shipment::whereIn('tracking_number',$tracking_number)->select('id')->pluck('id')->toArray();
         if(count($shipment_ids) > 0){
             foreach ($shipment_ids as $shipment_id){
                 $shipment = Shipment::find($shipment_id);
@@ -63,6 +64,9 @@ class CreatePaymentsForMissingShipments extends Command
                     }
                 }
             }
+        }
+        if(count($tracking_number) > 0){
+            CronDonePayment::whereIn('tracking_number',$tracking_number)->update(['status'=>0]);
         }
     }
 }

@@ -93,7 +93,7 @@ class ReturnV2Controller extends Controller
         $employee_attendance = EmployeeAttendance::where('employee_id', $admin->employee_id)->where('attendance_date', date('Y-m-d'));
 
         if ($employee_attendance->exists()) {
-            $employee_attendance->update(['clock_in' => date('H:i:s'),'clock_out'=>null]);
+            $employee_attendance->update(['clock_in' => date('H:i:s'), 'clock_out' => null]);
         } else {
             $employee_attendance = new EmployeeAttendance();
             $employee_attendance->employee_id = $admin->employee_id;
@@ -219,22 +219,15 @@ class ReturnV2Controller extends Controller
                                 ->latest()
                                 ->first();
                                 if (isset($latest_shipments_journey)) {
-                                    // $rider_details['reason'] = ShipmentStatusReason::where('id', $rider_info->rider_status_reason_id)->first();
-                                    // $rider_details['reason'] = $rider_details['reason']['name'] ? $rider_details['reason']['name'] : '-';
-                                    // $rider_details['reason'] =ShipmentStatusReason::where('id', ShipmentsJourney::where('shipper_status_id',12)->where('shipment_id', $shipment->id)->latest()->first()->status_reason_id)->first();
                                     $rider_details['reason'] =ShipmentStatusReason::where('id', $latest_shipments_journey->status_reason_id)->first();
                                     $rider_details['reason'] = $rider_details['reason'] ? $rider_details['reason']['name'] : '-';
                                     $rider_details['attempted_time'] = (isset($latest_shipments_journey->created_at)) ? ($latest_shipments_journey->created_at)->format('Y/m/d H:i:s') : '-';
                                     $rider_details['remarks'] = $latest_shipments_journey;
                                     $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
                                 } else {
-                                    // $rider_details['reason'] = '-';
-                                    $rider_details['reason'] =ShipmentStatusReason::where('id', $latest_shipments_journey->status_reason_id)->first();
-                                    $rider_details['reason'] = $rider_details['reason']['name'] ? $rider_details['reason']['name'] : '-';
+                                    $rider_details['reason'] = '-';
                                     $rider_details['attempted_time'] = '-';
-                                    // $rider_details['remarks'] = '-';
-                                    $rider_details['remarks'] = $latest_shipments_journey;
-                                    $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
+                                    $rider_details['remarks'] = '-';
                                 }
 
                                 $call_history = $this->get_call_status_history($request , $shipment->id);

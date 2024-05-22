@@ -101,6 +101,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\InactiveRiderReport',
         'App\Console\Commands\EmailsOfReturnConfirmToKams',
 		'App\Console\Commands\RetailDonePaymentReport',
+        'App\Console\Commands\DonePaymentReport',
         'App\Console\Commands\PasswordUpdateForAdminUser',
         'App\Console\Commands\NotPickedShipmentsJourney',
         'App\Console\Commands\LastMileStatusReport',
@@ -174,7 +175,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('crm:closed_reason')->dailyAt('23:50')->runInBackground();
         $schedule->command('crm:progress_report')->dailyAt('23:57')->runInBackground();
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
-        $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
+        $schedule->command('shipper:payment')->twiceDaily('01','13')->runInBackground();
         $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
         $schedule->command('email:invalidemailvisit')->dailyAt('6:00')->runInBackground();
         $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
@@ -220,11 +221,12 @@ class Kernel extends ConsoleKernel
         //     }
         // }
 
-        $schedule->command('agent:changeStatus')->dailyAt("00:10")->withoutOverlapping()->runInBackground();
+        // $schedule->command('agent:changeStatus')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('agent:changeStatus')->twiceDaily('22','00')->runInBackground(); // Dailt at 9:55
 
         //SarNotification Email Cron
         $agent_sar_settings = GlobalSettings::where('type', 'agent_sar_notification');
-        $agent_sar_notify_time = '23:00'; //11 pm
+        $agent_sar_notify_time = '01:30'; //1:30 am
         if ($agent_sar_settings->exists()) {
             $sar_setting = $agent_sar_settings->first();
             $agent_sar_notify_time = $sar_setting->setting_value . ':00';
@@ -370,7 +372,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
 
         $schedule->command('report:donepayment')->dailyAt('17:30')->runInBackground();
-        $schedule->command('report:retaildonepayment')->dailyAt('17:30')->runInBackground();
+        $schedule->command('report:retaildonepayment')->dailyAt('17:45')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'completed_aging_report_time');
 
