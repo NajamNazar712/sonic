@@ -1418,6 +1418,10 @@ class AdminNotificationsController extends Controller
                 $details['fields'] = ["employee_name","trax_id","date"];
             }else if($id == 19){
                 $details['fields'] = ['rider', 'amount', 'tracking_number'];
+            } else if ($id == 21) {
+                $details['fields'] = ['rider', 'amount', 'tip', "tracking_number"];
+            } else if ($id == 22) {
+                $details['fields'] = ['tracking_number'];
             }
             return $details;
         }else{

@@ -2451,6 +2451,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@cargo_manifest_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
         });
+        Route::prefix('ops')->name('ops_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@ops_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@ops_report_list')->name('list');
+        });
     });
 
     //Reports end
@@ -3120,6 +3124,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('sms_notifications_limit')->name('sms_notifications_limit.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@sms_notifications_limit_index')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@sms_notifications_limit_update')->name('update');
+        });
+        
+        Route::prefix('disable_email_on_arrival')->name('disable_email_on_arrival.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@disable_email_on_arrival_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@disable_email_on_arrival_update')->name('update');
         });
 
         Route::prefix('omni')->name('omni.')->group(function () {
