@@ -7359,6 +7359,11 @@ class DeliveryController extends Controller
 
                 }             
             })
+            ->addColumn('total_weight', function($deliveries){
+                $shipments = DeliveryNoteShipment::where('delivery_note_id',$deliveries->delivery_note)->pluck('shipment_id')->toArray();
+                $total_weight = Shipment::whereIn('id',$shipments)->sum('actual_weight');
+                return $total_weight;
+            })
             ->editColumn('fintech_amount_percent', function ($deliveries) {
                 $dncc_amount = $deliveries->amount;
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
