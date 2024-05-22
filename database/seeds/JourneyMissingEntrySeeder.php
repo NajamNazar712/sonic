@@ -24,7 +24,7 @@ class JourneyMissingEntrySeeder extends Seeder
     public function run()
     {
         //
-        $shipmentId = [22322337173280,22322336880027,25140637986000,20220437904178
+        $shipmentId = [20215838016898,20217837578949,22338437949708,22338438037227,20238737894720,20238737907261,22338737925174
         ];
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
