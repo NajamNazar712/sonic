@@ -20,6 +20,12 @@ use App\Http\Models\Admin\Logistic\TraxSpecialHandlingList;
 use App\Http\Models\Admin\Logistic\TraxStation;
 use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\CorporateDefaultWeightCharge;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CorporateWeightChargeZoneWise;
+use App\Http\Models\RateStatus;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
@@ -44,73 +50,90 @@ class RiderLogisticApiController extends Controller
         $hub_id=$request->rider_hub;
 
 
-        $logistic_data = array();
+            $logistic_data = array();
 
-//        'sd.trax_service_id','sd.piece_setting_id'
-        $rider_cn = $this->cn_issue_to_rider_filter($rider_id);
-            $shipper_list = User::join('trax_shipper_details as sd','sd.user_id','=','users.id')
-            ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','sd.trax_parent_product_id','users.account_type_id')
+//            $shipper_shipping_modes=[];
+            $shipper_list=[];
+
+            $rider_cn = $this->cn_issue_to_rider_filter($rider_id);
+
+            $shippers = User::join('trax_shipper_details as sd','sd.user_id','=','users.id')
+            ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','sd.trax_parent_product_id','users.account_type_id','users.corporate_rate_type_id')
             ->where('users.status',3)->where('sd.status',1)
             ->where('sd.rider_id',$rider_id)
             ->get();
 
-//        $pickup_address_list = TraxShipperDetail::join('route_locations as rl','rl.route_id','trax_shipper_details.route_id')
-//            ->join('user_shipping_infos as usi','usi.id','rl.pickup_address_id')
-//            ->select('rl.pickup_address_id','usi.pickup_address','usi.poc as contact_person','usi.phone as contact_number','usi.email as contact_email','trax_shipper_details.user_id as shipper_id')
-//            ->where('usi.status',1)->where('trax_shipper_details.status',1)
-//            ->where('trax_shipper_details.rider_id',$rider_id)->groupBy('rl.pickup_address_id')->get();
+            foreach ($shippers as $shipper)
+            {
+                if($shipper->account_type_id==2)
+                {
+                    if($shipper->corporate_rate_type_id!=3)
+                    {
+                        $shipper_shipping_modes = CorporateRateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('user_id as shipper_id','shipping_mode_id')->get();
+                    } else{
+                        $shipper_shipping_modes = CorporateDefaultRateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('user_id as shipper_id','shipping_mode_id')->get();
+                    }
 
-        $pickup_address_list = TraxShipperDetail::join('riders as r', 'r.id', '=', 'trax_shipper_details.rider_id')
-                ->join('route_locations as rl', 'rl.route_id', '=', 'r.route_id')
-                ->join('user_shipping_infos as usi', function ($join) {
-                    $join->on('usi.id', '=', 'rl.pickup_address_id')
-                        ->where('trax_shipper_details.user_id', '=', DB::raw('usi.user_id'));
-                })
-                ->select('rl.pickup_address_id', 'usi.pickup_address', 'usi.poc as contact_person', 'usi.phone as contact_number', 'usi.email as contact_email', 'usi.user_id as shipper_id')
-                ->where('usi.status', 1)
-                ->where('trax_shipper_details.status', 1)
-                ->where('trax_shipper_details.rider_id', $rider_id)
-                ->where('usi.city_id',$hub_id)
-                ->get();
+                } else if($shipper->account_type_id==1){
+                    $shipper_shipping_modes = RateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('user_id as shipper_id','shipping_mode_id')->get();
+                }
+
+                $shipper_list[] = [
+                    'shipper_id' => $shipper->shipper_id,
+                    'shipper_name' => $shipper->shipper_name,
+                    'shipper_phone' => $shipper->shipper_phone,
+                    'address' => $shipper->address,
+                    'city_id' => $shipper->city_id,
+                    'trax_parent_product_id' => $shipper->trax_parent_product_id,
+                    'account_type_id' => $shipper->account_type_id,
+                    'corporate_rate_type_id' => $shipper->corporate_rate_type_id,
+                    'shipper_shipping_modes' => $shipper_shipping_modes
+                ];
+            }
+            $pickup_address_list = TraxShipperDetail::join('riders as r', 'r.id', '=', 'trax_shipper_details.rider_id')
+                    ->join('route_locations as rl', 'rl.route_id', '=', 'r.route_id')
+                    ->join('user_shipping_infos as usi', function ($join) {
+                        $join->on('usi.id', '=', 'rl.pickup_address_id')
+                            ->where('trax_shipper_details.user_id', '=', DB::raw('usi.user_id'));
+                    })
+                    ->select('rl.pickup_address_id', 'usi.pickup_address', 'usi.poc as contact_person', 'usi.phone as contact_number', 'usi.email as contact_email', 'usi.user_id as shipper_id')
+                    ->where('usi.status', 1)
+                    ->where('trax_shipper_details.status', 1)
+                    ->where('trax_shipper_details.rider_id', $rider_id)
+                    ->where('usi.city_id',$hub_id)
+                    ->get();
 
 
-//        $parent_products = TraxParentProduct::select('id','parent_code','parent_name')
-//            ->where('status',1)->get();
+            $products =  TraxProduct::select('id','product_code','product_name','parent_id')
+                    ->where('status',1)->get();
 
-        $products =  TraxProduct::select('id','product_code','product_name','parent_id')
-            ->where('status',1)->get();
-
-        $services = TraxService::select('id','service_code','service_name','product_id','shipping_mode_id')
-            ->where('status',1)->get();
+            $services = TraxService::select('id','service_code','service_name','product_id','shipping_mode_id')
+                ->where('status',1)->get();
 
 
-        $shipping_modes = ShippingMode::select('id','mode as shipping_mode')->get();
+            $shipping_modes = ShippingMode::select('id','mode as shipping_mode')->get();
 
-        $city_deliveries =  CityDelivery::select('city_id','booking_type_id','shipping_mode_id')->where('booking_type_id',1)->get();
+            $city_deliveries =  CityDelivery::select('city_id','booking_type_id','shipping_mode_id')->where('booking_type_id',1)->get();
 
-//        $rider_child_cn = TraxChildCnIssueToRider::select('cn_from','cn_to','quantity')
-//            ->where('rider_id',$rider_id)->where('status',1)->get();
-        $destination_list = TraxStation::select('id as destination_id','name as destination_name','station_code as destination_code')
-            ->where('status',1)->get();
+            $destination_list = TraxStation::select('id as destination_id','name as destination_name','station_code as destination_code')
+                ->where('status',1)->get();
 
-        $special_handling_list = TraxSpecialHandlingList::select('id as handling_id','description','rate','pay_mode')
-            ->where('status',1)->get();
+            $special_handling_list = TraxSpecialHandlingList::select('id as handling_id','description','rate','pay_mode')
+                ->where('status',1)->get();
 
-        $logistic_data = [
-            'shipper_list'        =>   $shipper_list,
-            'pickup_address_list' => $pickup_address_list,
-//            'parent_products'   =>   $parent_products,
-            'products'          =>   $products,
-            'services'          =>   $services,
-            'rider_cn'          =>   $rider_cn,
-//            'rider_child_cn'     =>   $rider_child_cn,
-            'destination_list'  =>   $destination_list,
-            'special_handling_list' => $special_handling_list,
-            'shipping_modes' => $shipping_modes,
-            'city_deliveries' => $city_deliveries
-        ];
+            $logistic_data = [
+                'shipper_list'        =>   $shipper_list,
+                'pickup_address_list' => $pickup_address_list,
+                'products'          =>   $products,
+                'services'          =>   $services,
+                'rider_cn'          =>   $rider_cn,
+                'destination_list'  =>   $destination_list,
+                'special_handling_list' => $special_handling_list,
+                'shipping_modes' => $shipping_modes,
+                'city_deliveries' => $city_deliveries
+            ];
 
-        return response()->json(['status'=>0,'logistic_data'=> $logistic_data]);
+             return response()->json(['status'=>0,'logistic_data'=> $logistic_data]);
     }
 
         public function logistic_booking_store(Request $request) {
