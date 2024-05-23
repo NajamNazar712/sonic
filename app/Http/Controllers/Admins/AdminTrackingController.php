@@ -1453,16 +1453,12 @@ class AdminTrackingController extends Controller
                                 }
                             }
                             $shipment_scanning_query = ShipmentScanningJourney::select(
-                                'shipment_scanning_journeys.id',
-                                'ssjal.shipment_id',
                                 'ssjal.location_status',
                                 'shipment_scanning_journeys.latitude',
                                 'shipment_scanning_journeys.longitude',
                                 'ssjal.area_id',
-                                'ssjal.admin_id',
                                 'shipment_scanning_journeys.created_at',
-                                'ssjal.hub_id',
-                                'sj.shipper_status_id'
+                                'ssjal.hub_id'
                             )
                             ->join('shipments_journey as sj', function($join) use ($journey) {
                                 $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
@@ -1737,12 +1733,42 @@ class AdminTrackingController extends Controller
 
                         $handover_shipment_journey = $shipment->handover_shipments_journeys;
                         
-                        
                         if ($handover_shipment_journey) {
                             foreach ($handover_shipment_journey as $journey) {
+
+                                $shipment_scanning_query = ShipmentScanningJourney::select(
+                                    'ssjal.location_status',
+                                    'shipment_scanning_journeys.latitude',
+                                    'shipment_scanning_journeys.longitude',
+                                    'ssjal.area_id',
+                                    'shipment_scanning_journeys.created_at',
+                                    'ssjal.hub_id'
+                                )
+                                ->join('handover_shipments_journeys as hsj', 'hsj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                                ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                                ->join('handovers', 'hsj.handover_id', '=', 'handovers.id') // added this join
+                                ->join('admins as ad', 'ad.id', '=', 'handovers.created_by') // added this join
+                                ->where('shipment_scanning_journeys.updated_at', '<=', $journey->updated_at)
+                                ->where('hsj.handover_id', '=', $journey->handover_id)
+                                ->where('ad.role_id' , '!=', 1);
+
+                                switch ($journey->status) {
+                                    case 1:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 26)->latest()->first();
+                                        break;
+                                    case 2:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 27)->latest()->first();
+                                        break;
+                     
+                                    default:
+                                        $scanning_data = null;
+                                        break;
+                                }
+                                
                                 $journey_details = array();
                                 $journey_details['handover_id'] = $journey->handover_id;
                                 $journey_details['status'] = $journey->my_status->name;
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
                                 $journey_details['created_at'] = Carbon::parse($journey->created_at)->toDateTimeString();
                                 $details['handover_history'][] = $journey_details;
                             }
