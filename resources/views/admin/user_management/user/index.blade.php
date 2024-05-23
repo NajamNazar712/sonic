@@ -377,13 +377,17 @@
                                                         icon: 'success',
                                                     });
 
-                                                    table.draw();
+										
+												table.rows().deselect();
+												selected_rows = [];
+												table.draw();
+
                                                 }else{
                                                     swal(res.status, {
                                                         icon: 'warning',
                                                     });
 
-                                                    table.draw();
+													table.clear().draw();
                                                 }
                                             }, 
                                             error: function(xhr, status, error) {

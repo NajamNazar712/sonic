@@ -11014,10 +11014,14 @@ class AdminDashboardController extends Controller
 
                     $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
                     foreach($admin_ids as $admin_id){
-                        $admin_hub = new AdminHub();
-                        $admin_hub->admin_id = $admin_id;
-                        $admin_hub->hub_id = $request->hubs;
-                        $admin_hub->save();
+                        $admin_hub_exist = AdminHub::where('admin_id', $admin_id)->where('hub_id', $id)->first();
+                        if (!$admin_hub_exist) {
+                            $admin_hub = new AdminHub();
+                            $admin_hub->admin_id = $admin_id;
+                            $admin_hub->hub_id = $id;
+                            $admin_hub->save();
+
+                        }
                     }
                 
                     return redirect()->back()->with('success', 'Hub/city updated successfully');
@@ -11218,10 +11222,14 @@ class AdminDashboardController extends Controller
 
             $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
             foreach($admin_ids as $admin_id){
-                $admin_hub = new AdminHub();
-                $admin_hub->admin_id = $admin_id;
-                $admin_hub->hub_id = $request->hubs;
-                $admin_hub->save();
+                $admin_hub_exist = AdminHub::where('admin_id', $admin_id)->where('hub_id', $city->id)->first();
+                if (!$admin_hub_exist) {
+                    $admin_hub = new AdminHub();
+                    $admin_hub->admin_id = $admin_id;
+                    $admin_hub->hub_id = $city->id;
+                    $admin_hub->save();
+
+                }
             }
             return redirect()->back()->with('success', 'Hub city added successfully');
         }
