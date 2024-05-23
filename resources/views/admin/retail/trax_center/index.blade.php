@@ -692,7 +692,7 @@
                             var attachmentKey = 'attachment_' + i;
                             var attachmentFileName = response.data[attachmentKey];
                             if (attachmentFileName) {
-                                var attachmentURL = '/storage/trax center attachments/trax_center_attachment_' + i + '/' + attachmentFileName;
+                                var attachmentURL = '/storage/trax_center_attachments/trax_center_attachment_' + i + '/' + attachmentFileName;
                                 var attachmentLink = $('<a>').attr('href', attachmentURL).attr('target', '_blank').text(attachmentFileName);
                                 $('#attachment_' + i + '_filename').html(attachmentLink);
                             } else {

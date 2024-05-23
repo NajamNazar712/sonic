@@ -67,7 +67,7 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax Id">
+                    <input type="text" name="trax_id" id="trax_id_edit" class="form-control" placeholder="Trax Id" value="{{ $retail_user->trax_id ?? '' }}">
                 </div>
                 
                 {{-- <div class="form-group">
@@ -530,6 +530,20 @@
                 }
             }
         });
+
+        $('#edit_store').on('change', function(){
+                var category = $(this).val();
+                if (category == 1) {
+                    $('#trax_id_edit').addClass("d-none");
+                } else {
+                    $('#trax_id_edit').removeClass("d-none");
+                    $('#trax_id_edit').on('input', function(event) {
+                        $(this).val(function(_, value) {
+                            return value.replace(/\D/g, '');
+                        });
+                    });
+                }
+            });
 
     });
 </script>    

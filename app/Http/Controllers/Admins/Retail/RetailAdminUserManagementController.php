@@ -102,7 +102,7 @@ class RetailAdminUserManagementController extends Controller
 
         $retail_user_attachment = new RetailUserAttachment();
         $retail_user_attachment->retail_user_id = $user->id;
-        $baseDirectory = 'retail user attachments';
+        $baseDirectory = 'retail_user_attachments';
 
         if (!Storage::disk('public')->exists($baseDirectory)) {
             Storage::disk('public')->makeDirectory($baseDirectory);
@@ -991,9 +991,9 @@ class RetailAdminUserManagementController extends Controller
         for ($i = 1; $i <= 5; $i++) {
             if ($request->hasFile('attachment_' . $i)) {
                 $file = $request->file('attachment_' . $i);
-                $fileName = $date . '_' . Carbon::now()->format('His') . '_' . $file->getClientOriginalName();
+                $fileName = $file->getClientOriginalName() . '_' . $date . '_' . Carbon::now()->format('His');
                 $folderName = 'trax_center_attachment_' . $i;
-                $filePath = $file->storeAs('trax center attachments/' . $folderName, $fileName, 'public');
+                $filePath = $file->storeAs('trax_center_attachments/' . $folderName, $fileName, 'public');
                 $trax_center_attachment->{'attachment_' . $i} = $fileName;
             }
         }
@@ -1038,9 +1038,9 @@ class RetailAdminUserManagementController extends Controller
                     $attachment_name = 'attachment_' . $i;
                     if ($request->hasFile($attachment_name)) {
                         $file = $request->file($attachment_name);
-                        $fileName = $date . '_' . Carbon::now()->format('His') . '_' . $file->getClientOriginalName();
+                        $fileName = $file->getClientOriginalName() . '_' . $date . '_' . Carbon::now()->format('His');
                         $folderName = 'trax_center_attachment_' . $i;
-                        $filePath = $file->storeAs('trax center attachments' . DIRECTORY_SEPARATOR . $folderName, $fileName, 'public');
+                        $filePath = $file->storeAs('trax_center_attachments' . DIRECTORY_SEPARATOR . $folderName, $fileName, 'public');
                         $trax_center_attachment->{$attachment_name} = $fileName;
                     }
                 }
@@ -1062,9 +1062,9 @@ class RetailAdminUserManagementController extends Controller
                     $attachment_name = 'attachment_' . $i;
                     if ($request->hasFile($attachment_name)) {
                         $file = $request->file($attachment_name);
-                        $fileName = $date . '_' . Carbon::now()->format('His') . '_' . $file->getClientOriginalName();
+                        $fileName = $file->getClientOriginalName() . '_' . $date . '_' . Carbon::now()->format('His');
                         $folderName = 'trax_center_attachment_' . $i;
-                        $filePath = $file->storeAs('trax center attachments' . DIRECTORY_SEPARATOR . $folderName, $fileName, 'public');
+                        $filePath = $file->storeAs('trax_center_attachments' . DIRECTORY_SEPARATOR . $folderName, $fileName, 'public');
                         $new_trax_center_attachments->{$attachment_name} = $fileName;
                     }
                 }
@@ -1295,6 +1295,13 @@ class RetailAdminUserManagementController extends Controller
 
     public function user_update(Request $request, $id)
     {
+        $request->validate([
+            'trax_id' => [
+                'nullable',
+                'required_unless:store,1',
+                'regex:/^[0-9]*$/',
+            ],
+        ]);
         $retail_user = RetailUser::find($id);
         $admin = $request->user();
         $retail_user->name = $request->name;
@@ -1369,7 +1376,7 @@ class RetailAdminUserManagementController extends Controller
             }
         }
 
-        $baseDirectory = 'retail user attachments';
+        $baseDirectory = 'retail_user_attachments';
         if (!Storage::disk('public')->exists($baseDirectory)) {
             Storage::disk('public')->makeDirectory($baseDirectory);
         }
