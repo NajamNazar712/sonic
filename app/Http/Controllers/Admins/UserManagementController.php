@@ -2,30 +2,32 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\ModulePermission;
-use App\Http\Models\EmployeeShift;
-use App\Http\Models\HR\Employee;
-use App\Http\Models\HR\EmployeeBloodGroup;
-use App\Http\Models\HR\EmployeeDesignation;
-use App\Http\Models\ReportingLocation;
-use App\Http\Models\Rider;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\City;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AdminHub;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\AdminRoleModulePermission;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\Module;
-
-use Illuminate\Support\Facades\Auth;
-use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use App\Http\Models\City;
+use App\Http\Models\Rider;
+use App\UserLostShipmentHub;
+use Illuminate\Http\Request;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\HR\Employee;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\Admin\Module;
+use App\Http\Models\EmployeeShift;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Models\BusinessCategory;
+use App\Http\Models\ReportingLocation;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\HR\EmployeeBloodGroup;
+
+use App\Http\Models\Admin\ModulePermission;
+use App\Http\Models\HR\EmployeeDesignation;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\AdminRoleModulePermission;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Controllers\Admins\AdminHumanResourseController;
 
 class UserManagementController extends Controller
 {
@@ -133,6 +135,8 @@ class UserManagementController extends Controller
 
                     $rejoin_button = '<button type="button" class="dropdown-item rejoin" data-target-id="' . $user->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Rejoin Admin</div></button>';
 
+                    $lost_hub_user_shipment_button = '<button type="button" class="dropdown-item lost_hub_user_shipment" data-target-id="' . $user->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">User Lost Shipment Hub</div></button>';
+
                     $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -155,6 +159,9 @@ class UserManagementController extends Controller
                         $dropdown .= $phone_edit_button;
                     }
 
+                    if (session('role_id') == 1 || in_array(979, session('permissions'))) {
+                        $dropdown .= $lost_hub_user_shipment_button;
+                    }
 
                     if (session('role_id') == 1 || in_array(620, session('permissions'))) {
                         if ($user->status == 0 && $user->first_inactive == 1) {
@@ -1175,7 +1182,22 @@ class UserManagementController extends Controller
 
     }
 
+    public function lost_hub_user_shipment(Request $request){
 
+        UserLostShipmentHub::where('admin_id', $request->admin_id)->delete();
+        foreach ($request->select_lost_hub_user_shipment as $user_hub) {
+            UserLostShipmentHub::create([
+                'admin_id' => $request->admin_id,
+                'hub_id' => $user_hub,
+            ]);
+        }
 
+        return redirect()->back()->with(['success' => 'Hub has been updated!']);
+    }
 
+    public function get_lost_hub_user_shipment(Request $request) {
+        $userLostShipments = UserLostShipmentHub::where('admin_id', $request->admin_id)->get()->pluck('hub_id')->toArray();
+        return response()->json(['success' => true, 'data' => $userLostShipments]);
+    }
+    
 }

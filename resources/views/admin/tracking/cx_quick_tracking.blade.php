@@ -1020,13 +1020,39 @@
                     $('#update_special_instructions').val('');
                 });
             }
-            $('#search_filter_btn').on('click', function () {
-                if($('#tracking_info').hasClass('d-none')) {
-                    $('#tracking_info').removeClass('d-none');
-                    init();
+
+            function check_inputs(){
+                var isInputFilled = $('#search_form input[type="text"]').filter(function() {
+                    return $(this).val().trim() !== '';
+                }).length > 0;
+
+                // Check if at least one select is selected
+                var isSelectSelected = $('#search_form select').filter(function() {
+                    return $(this).val() !== '';
+                }).length > 0;
+
+                // Check if at least one dropdown is selected
+                var isDropdownSelected = $('#search_form .select2').filter(function() {
+                    return $(this).val() !== '';
+                }).length > 0;
+
+                // If none of the conditions are met, display an alert
+                if (!isInputFilled && !isSelectSelected && !isDropdownSelected) {
+                    alert('At least one input field, select, or dropdown must be filled or selected.');
+                    return false; // prevent form submission
+                }else{
+                    return true;
                 }
-                else {
-                    table.draw();
+            }
+
+            $('#search_filter_btn').on('click', function () {
+                if(check_inputs()) {
+                    if ($('#tracking_info').hasClass('d-none')) {
+                        $('#tracking_info').removeClass('d-none');
+                        init();
+                    } else {
+                        table.draw();
+                    }
                 }
             });
         });

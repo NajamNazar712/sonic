@@ -160,6 +160,7 @@ class DeliveryController extends Controller
         
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries (old)
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('sub_category_segments as scs', 'scs.id' , 'u.sub_segment_id')
 //        $shipments = DB::connection('reports')->table('shipments')
 //            ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -289,7 +290,8 @@ class DeliveryController extends Controller
                 'shipments.shipper_status_id as shipper_status_id',
                 'sjl.shipment_id as journey_latest_id',
                 'sjl.updated_at as journey_latest_updated_at',
-                'sjl.shipper_status_id as latest_shipper_status_id'
+                'sjl.shipper_status_id as latest_shipper_status_id',
+                'scs.name as sub_segment_name'
 
             )
 
@@ -1191,9 +1193,10 @@ class DeliveryController extends Controller
                                 $rand = $payment_details['unique_key'];
                                 $payment_link = $payment_details['payment_link'];
                                 $url = $payment_details['url'];
+                                $trans_id = $payment_details['id'];
                                 Log::channel('trax_pay_test')->info('sh '. json_encode($shipment_id, true));
-                                
-                                CountFintechCharges::dispatch($shipment_id, $payment_link, $rand, $url);
+
+                                CountFintechCharges::dispatch($shipment_id, $payment_link, $rand, $url , $trans_id);
                                 NotificationsController::send(12, $note->id, $shipment_id, $payment_link);
                             }
                         }
@@ -1417,6 +1420,10 @@ class DeliveryController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
+            })->addColumn('total_weight', function($result){
+                $shipments = DeliveryNoteShipment::where('delivery_note_id',$result->delivery_note)->pluck('shipment_id')->toArray();
+                $total_weight = Shipment::whereIn('id',$shipments)->sum('actual_weight');
+                return $total_weight;
             })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.delivery.receive.status', ['id' => $result->delivery_note]);
@@ -1770,6 +1777,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Item Qty</strong></td>
+                            <td class="color primary"><strong>Weight</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
                             <td class="color primary"><strong>Special Instructions</strong></td>
                             <td class="color primary"><strong>Open Shipment</strong></td>
@@ -1838,6 +1846,8 @@ class DeliveryController extends Controller
 
                 $shipment_details_row_start .= '
                     <td class="' . $class . '">' . $shipment->items->sum('quantity') . '</td>';
+                $shipment_details_row_start .= '
+                    <td class="' . $class . '">' . $shipment->actual_weight . '</td>';
 
                 if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
                     $shipment_details_row_start .= '
@@ -3798,6 +3808,7 @@ class DeliveryController extends Controller
                                         //                                    continue;
                                     }
                                 }
+
                             }
                         }
                         $verify_fake = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
@@ -4194,6 +4205,31 @@ class DeliveryController extends Controller
                                     }
                                 }
                             }
+                        }
+
+                        // Mark Return Confirm if $shipper_status_id == 12 And $status_reason_id == (27 or 35)
+                        // 27 = Shipment Damaged
+                        // 35 = Delivery Stopped
+                        if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
+                            $globalAdminId = 346;
+
+                            Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+
+                            if ($shipment_details->shipment_type == 1) {
+                                if ($shipment_details->booking_type_id != 4) {
+                                    ShipmentChargesController::return($shipment);
+                                    if ($shipment_details->packaging_material_request != 1) {
+                                        AdminFinanceController::add_payment($shipment, 1);
+                                    }
+                                } else {
+                                    ShipmentChargesController::walk_in_return($shipment);
+                                    $shipment_details->walk_in_status = 2;
+                                    $shipment_details->save();
+                                    AdminFinanceController::done_payment($shipment, 1);
+                                }
+                            }
+                            
+                            ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
                         }
                     }
 
@@ -5911,11 +5947,11 @@ class DeliveryController extends Controller
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
-                if (($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) == 0 && $result->status == 1) {
+                // if (($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) == 0 && $result->status == 1) {
 
-                    $closed_status = '<button type="button" class="dropdown-item update_status_closed"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Update Status To Closed</div></button>';
-                    $dropdown .= $closed_status;
-                }
+                //     $closed_status = '<button type="button" class="dropdown-item update_status_closed"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Update Status To Closed</div></button>';
+                //     $dropdown .= $closed_status;
+                // }
 
                 if (($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) <= 0 && $result->status != 2) {
                     $reconcile_to_resolved = '<button type="button" class="dropdown-item update_status_resolved"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Update Status To Resolved</div></button>';
@@ -6076,8 +6112,10 @@ class DeliveryController extends Controller
                     return '-';
                 }
             })
+
             ->addColumn('cash_amount', function ($sdn) {
                 $id = $sdn->sdn;
+                $sdn_adjustment_amount = $sdn->adjustment_amount;
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
@@ -6129,18 +6167,21 @@ class DeliveryController extends Controller
                         $c = 0;
                     }
 
-                    $sum = $a + $b + $c;
+                    // $sum = $a + $b + $c;
+                    $sum = $a + $b + $c + $sdn_adjustment_amount;
 
                     if ($sum > 0) {
                         $total = $sdn->sdn_amount - $sum;
                         return $total;
                     } else {
-                        return '-';
+                        // return '-';
+                        return $sdn->sdn_amount;
                     }
                 } else {
                     return '-';
                 }
             });
+            
         // ->filterColumn('zone', function ($query, $keyword) {
         //     if ($keyword == 0) {
         //         $query->where('station_deposit_notes.status', '=', $keyword);
@@ -7317,6 +7358,11 @@ class DeliveryController extends Controller
                     return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
                 }             
+            })
+            ->addColumn('total_weight', function($deliveries){
+                $shipments = DeliveryNoteShipment::where('delivery_note_id',$deliveries->delivery_note)->pluck('shipment_id')->toArray();
+                $total_weight = Shipment::whereIn('id',$shipments)->sum('actual_weight');
+                return $total_weight;
             })
             ->editColumn('fintech_amount_percent', function ($deliveries) {
                 $dncc_amount = $deliveries->amount;
@@ -9874,8 +9920,9 @@ class DeliveryController extends Controller
                         $rand = $payment_details['unique_key'];
                         $payment_link = $payment_details['payment_link'];
                         $url = $payment_details['url'];
+                        $trans_id = $payment_details['id'];
                         $shipments_id = array_wrap($shipment);
-                        CountFintechCharges::dispatch($shipments_id, $payment_link, $rand, $url);
+                        CountFintechCharges::dispatch($shipments_id, $payment_link, $rand, $url , $trans_id);
                         NotificationsController::send(10, $note->id, $shipment);
                         NotificationsController::send(11, $note->id, $shipment);
                         if (in_array($shipment, $notifications)) {

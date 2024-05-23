@@ -47,7 +47,7 @@ class AdminShipmentCancelController extends Controller
       $this->middleware('Permission');
     }
 
-    static public function cancel() {
+    static public function cancel_old() {
         $active_users = User::whereIn('status', [3,4])->get();
         if(count($active_users)){
             foreach ($active_users as $user){
@@ -96,6 +96,84 @@ class AdminShipmentCancelController extends Controller
                                         }
                                     }
                                     if($flag == true){
+                                        $pickup_request = V2PickupRequest::find($pickup_request_shipment->pickup_request_id);
+                                        $pickup_request->status_id = 4;
+                                        $pickup_request->save();
+                                    }
+                                }
+                            }
+                            //cacel from warehouse
+                            if($shipment->warehouse == 1){
+                                $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->where('courier_id', 1)->get();
+                                if($shipment_products){
+                                    foreach ($shipment_products as $shipment_product){
+                                        $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
+                                        if($current_stock_addition){
+                                            $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
+                                            $current_stock_addition->in_process_stock = $current_stock_addition->in_process_stock - $shipment_product->quantity;
+                                            $current_stock_addition->save();
+                                        }
+                                    }
+                                }
+                                $shipment->warehouse_order_status = 9;
+                                $shipment->save();
+                                WmsProductBarcode::where('shipment_id', $shipment->id)->where('courier_id', 1)->update(['shipment_id' => null, 'courier_id' => null, 'picklist_id' => null]);
+                            }
+                            //cacel from warehouse end
+
+                            ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    static public function cancel() {
+        $active_users = User::whereIn('status', [3,4])->get();
+        if(count($active_users)){
+            foreach ($active_users as $user){
+                if($user->auto_shipment_cancellation_days == null){
+                    $settings = GlobalSettings::where('type', 'shipment_cancellation_cut_off_days')->first();
+
+                    $days = $settings->setting_value;
+
+                    $date = Carbon::now()->subDays($days);
+                }
+                else{
+                    $days = $user->auto_shipment_cancellation_days;
+                    $date = Carbon::now()->subDays($days);
+                }
+                $shipments = Shipment::where('shipper_status_id', 1)->where('user_id', $user->id)->where('created_at', '<', $date)->groupBy('id');
+
+                if ($shipments->exists()) {
+                    foreach ($shipments->get() as $shipment) {
+                        // $shipment->warehouse_order_status = 9;
+
+                        $cancellation_check = true;
+
+                        if($shipment->warehouse == 1){
+                            if($shipment->warehouse_order_status != 1){
+                                $cancellation_check = false;
+                            }
+                        }
+                        if($cancellation_check){
+                            $shipment->shipper_status_id = 17;
+                            $shipment->consignee_status_id = 17;
+                            $shipment->save();
+                            ShipmentsPickupJourneyController::add($shipment->id, 4);
+
+                            V2AdminPickupsController::cancel($shipment->id);
+
+                            $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
+                            if($pickup_request_shipment){
+                                $shipment_ids= V2PickupRequestShipment::where('pickup_request_id', $pickup_request_shipment->pickup_request_id)->pluck('shipment_id')->toArray();
+                                if(count($shipment_ids) > 0){
+                                    $flag = Shipment::whereIn('id', $shipment_ids)
+                                        ->where('shipper_status_id', 17)
+                                        ->select('shipper_status_id')
+                                        ->count();
+                                    if($flag == count($shipment_ids)){
                                         $pickup_request = V2PickupRequest::find($pickup_request_shipment->pickup_request_id);
                                         $pickup_request->status_id = 4;
                                         $pickup_request->save();

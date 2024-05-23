@@ -38,6 +38,7 @@ use App\Http\Models\DeliveryType;
 use App\Http\Models\DistributionProduct;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PaymentMode;
+use App\Http\Models\PendingPayment;
 use App\Http\Models\Product;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
@@ -84,21 +85,43 @@ use Validator;
 class ShipperShipmentBookController extends Controller
 {
 
+    // private function unique_order_id($order_id)
+    // {
+    //     if (is_numeric($order_id)) {
+    //         $length = strlen(session('prefix'));
+    //         $check_order_id = str_split($order_id, $length);
+    //         if (session('prefix') == $check_order_id[0]) {
+    //             if (array_key_exists(1, $check_order_id)) {
+    //                 return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+    //             } else {
+    //                 return false;
+    //             }
+    //         } else {
+    //             return false;
+    //         }
+    //     } else {
+    //         return false;
+    //     }
+    // }
+
     private function unique_order_id($order_id)
     {
         if (is_numeric($order_id)) {
-            $length = strlen(session('prefix'));
-            $check_order_id = str_split($order_id, $length);
-            if (session('prefix') == $check_order_id[0]) {
-                if (array_key_exists(1, $check_order_id)) {
-                    return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
-                } else {
-                    return false;
+            $prefixes = session('prefix', []);
+            foreach ($prefixes as $prefix) {
+                $length = strlen($prefix);
+                $check_order_id = str_split($order_id, $length);
+                if ($prefix == $check_order_id[0]) {
+                    if (array_key_exists(1, $check_order_id)) {
+                        return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+                    } else {
+                        return false;
+                    }
                 }
-            } else {
-                return false;
             }
-        } else {
+            return false;
+        }
+        else {
             return false;
         }
     }
@@ -514,6 +537,8 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
+
+        $user_id = session('user_id');
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
@@ -1014,6 +1039,16 @@ class ShipperShipmentBookController extends Controller
         } else {
             return redirect()->back()->with('error', 'Invalid Service Type Selected');
         }
+        }
+    }
+
+    public function check_negative_payable(Request $request){
+        $user_id = session('user_id');
+        $account_type = session('account_type');
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$account_type)){
+            return 'false';
+        }else{
+            return 'true';
         }
     }
 
@@ -2821,6 +2856,8 @@ class ShipperShipmentBookController extends Controller
     public function excel_store(Request $request)
     {
         $user_id = session('user_id');
+        $account_type = session('account_type');
+        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -2837,6 +2874,12 @@ class ShipperShipmentBookController extends Controller
                     return FALSE;
                 }
             }
+        });
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
+            if ($value == 0) {
+                return $pending_payable;
+            }
+            return true;
         });
 
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
@@ -2887,6 +2930,20 @@ class ShipperShipmentBookController extends Controller
                 else
                     return true;
             }
+        });
+
+        Validator::extend('estimated_weight_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $service_type_id = $data['service_type_id'];
+        
+            if ($service_type_id == 2 && ($value < 0.001 || $value > 10)) {
+                return false;
+            } elseif ($service_type_id != 2 && ($value < 0.001 || $value > 100000)) {
+                return false;
+            }else{
+                return true;
+            }
+        
         });
 
 
@@ -2999,7 +3056,9 @@ class ShipperShipmentBookController extends Controller
             'check_parcel_min_value' => ':attribute is required at least 1',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
             'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus, else 0 to 10 for other modes !',
-        ];
+            'negative_balance' => 'Can not process Zero COD Shipment, due to pending negative payable amount.',
+            'estimated_weight_check' => 'The :attribute should be less than or equal to 10 Kg',
+         ];
 
         $rules = [
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
@@ -3058,12 +3117,12 @@ class ShipperShipmentBookController extends Controller
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
             'special_instructions' => ['nullable', 'between:0,190'],
-            'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
+            'estimated_weight' => ['numeric', 'estimated_weight_check'],
             'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0','negative_balance'],
 //            'parcel_value' => [
 //                'required_if:amount,0',
 //                'nullable',
@@ -3322,8 +3381,6 @@ class ShipperShipmentBookController extends Controller
                         ];
                     }
                 }
-
-
                 $validate = Validator::make($row, $rules, $messages);
 
                 $validate->setAttributeNames($names);
@@ -3339,17 +3396,31 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 if (empty($errors[$row_id])) {
+                    // if (Session::has('prefix')) {
+                    //     $length = strlen(session('prefix'));
+                    //     $check_order_id = str_split($row['order_id'], $length);
+                    //     if (session('prefix') != $check_order_id[0]) {
+                    //         $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //     } else {
+                    //         if (!array_key_exists(1, $check_order_id)) {
+                    //             $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //         }
+                    //     }
+                    // }    
+
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);                    
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = str_split($row['order_id'], $length);
+                    
+                            if ($prefix !== $check_order_id[0] || !array_key_exists(1, $check_order_id)) {
+                                $errors[$row_id]['order_id'] = 'Invalid Order ID';
+                                break;
                             }
                         }
                     }
+                    
 
                     if (!empty(trim($row['order_id']))) {
                         if (empty($order_ids)) {
@@ -5249,14 +5320,19 @@ class ShipperShipmentBookController extends Controller
 
                 if (empty($errors[$row_id])) {
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);
+                        $isValid = false;
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = substr($row['order_id'], 0, $length);
+                            if ((string)$prefix === $check_order_id) {
+                                $isValid = true;
+                                break;
                             }
+                        }
+                    
+                        if (!$isValid) {
+                            $errors[$row_id]['order_id'] = 'Invalid Order ID';
                         }
                     }
                     if (!empty(trim($row['order_id']))) {
@@ -5616,6 +5692,8 @@ class ShipperShipmentBookController extends Controller
     public function corporate_excel_store(Request $request)
     {
         $user_id = session('user_id');
+        $account_type = session('account_type');
+        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -5633,6 +5711,13 @@ class ShipperShipmentBookController extends Controller
                     return FALSE;
                 }
             }
+        });
+
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
+            if ($value == 0) {
+                return $pending_payable;
+            }
+            return true;
         });
 
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
@@ -5774,6 +5859,7 @@ class ShipperShipmentBookController extends Controller
             'origin_check' => 'Origin city not allowed, please contact your sales person!',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
             'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus, else 0 to 10 for other modes !',
+            'negative_balance' => 'Can not process Zero COD Shipment, due to pending negative payable amount.',
         ];
 
         $rules = [
@@ -5842,7 +5928,7 @@ class ShipperShipmentBookController extends Controller
             'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0','negative_balance'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             // 'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
             //     $query->whereNotIn('id', [3]);
@@ -6135,14 +6221,19 @@ class ShipperShipmentBookController extends Controller
 
                 if (empty($errors[$row_id])) {
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);
+                        $isValid = false;
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = substr($row['order_id'], 0, $length);
+                            if ((string)$prefix === $check_order_id) {
+                                $isValid = true;
+                                break;
                             }
+                        }
+                    
+                        if (!$isValid) {
+                            $errors[$row_id]['order_id'] = 'Invalid Order ID';
                         }
                     }
                     if (!empty(trim($row['order_id']))) {
@@ -6898,15 +6989,34 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 if (empty($errors[$row_id])) {
+
+
+                    // if (Session::has('prefix')) {
+                    //     $length = strlen(session('prefix'));
+                    //     $check_order_id = str_split($row['order_id'], $length);
+                    //     if (session('prefix') != $check_order_id[0]) {
+                    //         $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //     } else {
+                    //         if (!array_key_exists(1, $check_order_id)) {
+                    //             $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //         }
+                    //     }
+                    // }
+
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);
+                        $isValid = false;
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = substr($row['order_id'], 0, $length);
+                            if ((string)$prefix === $check_order_id) {
+                                $isValid = true;
+                                break;
                             }
+                        }
+                    
+                        if (!$isValid) {
+                            $errors[$row_id]['order_id'] = 'Invalid Order ID';
                         }
                     }
                     if (!empty(trim($row['order_id']))) {
@@ -7260,9 +7370,13 @@ class ShipperShipmentBookController extends Controller
     public function get_consignee_infos(Request $request)
     {
         $data = array();
-        $consignee_info = ConsigneeInfo::where('phone_number_1', 'LIKE', "%" . $request->q . "%")->orWhere('phone_number_2', 'LIKE', "%" . $request->q . "%");
-        if ($consignee_info->exists()) {
-            $consignee_info = $consignee_info->limit(10)->get();
+        $user_id = session('user_id');
+        $consignee_info = ConsigneeInfo::where(function ($query) use($request){
+            $query->orWhere('phone_number_1', 'LIKE', "%" . $request->q . "%")->orWhere('phone_number_2', 'LIKE', "%" . $request->q . "%");
+        })
+        ->where('shipper_id', $user_id)
+        ->limit(10)->get();
+        if (count($consignee_info) > 0) {
             foreach ($consignee_info as $item) {
                 $data[] = ['id' => $item->id, 'full_name' => $item->phone_number_1 . ' / ' . $item->name, 'text' => $item->name];
             }
@@ -7560,8 +7674,17 @@ class ShipperShipmentBookController extends Controller
 
     public function international_excel_store(Request $request)
     {
-
         $user_id = session('user_id');
+        $account_type = session('account_type');
+        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
+
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
+            if ($value == 0) {
+                return $pending_payable;
+            }
+            return true;
+        });
+
         $names = [
             'service_type_id' => 'Service Type ID',
             'pickup_address_id' => 'Pickup Address ID',
@@ -7649,7 +7772,8 @@ class ShipperShipmentBookController extends Controller
             'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
             'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
-            'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
+            'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+            'negative_balance' => 'Can not process Zero COD Shipment, due to pending negative payable amount.',
         ];
 
         $rules = [
@@ -7712,7 +7836,7 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0','negative_balance'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->whereNotIn('id', [3]);
@@ -7856,14 +7980,19 @@ class ShipperShipmentBookController extends Controller
 
                 if (empty($errors[$row_id])) {
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);
+                        $isValid = false;
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = substr($row['order_id'], 0, $length);
+                            if ((string)$prefix === $check_order_id) {
+                                $isValid = true;
+                                break;
                             }
+                        }
+                    
+                        if (!$isValid) {
+                            $errors[$row_id]['order_id'] = 'Invalid Order ID';
                         }
                     }
 
