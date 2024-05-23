@@ -2527,6 +2527,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('shippers')->name('shippers.')->group(function () {
+
+            Route::prefix('base_rate_revisions')->name('base_rate_revisions.')->group(function () {
+                Route::get('', 'Admins\Settings\Shippers\BaseRateRivisionController@index')->name('index');
+                // Route::get('list', 'Admins\GlobalSettingsController@status_webhook_list')->name('list');
+                // Route::get('{id}/edit', 'Admins\GlobalSettingsController@status_webhook_edit')->name('edit');
+                // Route::put('update', 'Admins\GlobalSettingsController@status_webhook_update')->name('update');
+            });
+
             Route::prefix('status_webhook')->name('status_webhook.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@status_webhook_index')->name('index');
                 Route::get('list', 'Admins\GlobalSettingsController@status_webhook_list')->name('list');
