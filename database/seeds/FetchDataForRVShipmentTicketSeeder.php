@@ -36,7 +36,7 @@ class FetchDataForRVShipmentTicketSeeder extends Seeder
             )
         )
         ->orderBy('shipments.id')
-        ->chunk(100, function($shipments){
+        ->chunk(1000, function($shipments){
 
             $transformedData = [];
 
