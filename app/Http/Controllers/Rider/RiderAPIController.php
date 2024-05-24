@@ -12904,6 +12904,7 @@ class RiderAPIController extends Controller
                     $deliveries['longitude'] = NULL;
                     $deliveries['status'] = $status;
                     $deliveries['shipment_reattempt'] = ($shipment_reattempt && $shipment_reattempt->shipper_status_id == 13) ? 1 : 0;
+                    $deliveries['reattempt_marked_status'] = ($information['summary']['completed']['shipment_reattempt_marked'] > 0) ? 1 : 0;
                     $deliveries['shipper'] = $shipper_name;
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['dbf_otp'] = ($dbf_otp != null) ? (string)$dbf_otp : null;

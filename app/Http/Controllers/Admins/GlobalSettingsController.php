@@ -1965,7 +1965,7 @@ class GlobalSettingsController extends Controller
         }
     }
 
-    
+
     public function rv_shipper_priority_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 906);
@@ -1990,9 +1990,9 @@ class GlobalSettingsController extends Controller
         $result_str = implode(',', $unique_values_array);
 
         if ($request->has('unsorted_zones')) {
-            
+
             if (count($unique_values_array) > 0) {
-                $settings = GlobalSettings::where('type', 'rv_shipper_priority');                
+                $settings = GlobalSettings::where('type', 'rv_shipper_priority');
                 if ($settings->exists()) {
                     $settings = $settings->first();
                 } else {
@@ -8768,7 +8768,7 @@ class GlobalSettingsController extends Controller
     public function disable_email_on_arrival_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 783);
-        
+
         $excluded_shippers = array();
         $only_shippers = array();
 
@@ -8800,12 +8800,11 @@ class GlobalSettingsController extends Controller
         $disable_all_shippers_toggle = $excluded_shipper->setting_value;
 
         return view('admin.settings.disable_email_on_arrival_index')->with([
-                'disable_all_shippers_toggle' => $disable_all_shippers_toggle,
-                'shippers' => $shippers, 
-                'excluded_shippers' => $excluded_shippers,
-                'only_shippers' => $only_shippers
-            ]);
-    
+            'disable_all_shippers_toggle' => $disable_all_shippers_toggle,
+            'shippers' => $shippers,
+            'excluded_shippers' => $excluded_shippers,
+            'only_shippers' => $only_shippers
+        ]);
     }
 
     public function disable_email_on_arrival_update(Request $request)
@@ -8955,9 +8954,8 @@ class GlobalSettingsController extends Controller
             $settings->setting_value = 1;
             $settings->text = $excluded_users;
             $settings->save();
-
         } else {
-            GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
+            GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value' => 0, 'text' => NULL]);
         }
         if (!$request->has('all_shipper_toggle') && $request->has('only_users')) {
             $only_users = implode(',', $request->only_users);
@@ -8972,16 +8970,17 @@ class GlobalSettingsController extends Controller
             $settings->setting_value = 1;
             $settings->text = $only_users;
             $settings->save();
-            GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
-            GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
+            GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->update(['setting_value' => 0, 'text' => NULL]);
+            GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value' => 0, 'text' => NULL]);
         } else {
-            GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
+            GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->update(['setting_value' => 0, 'text' => NULL]);
         }
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-    public function get_hub(Request  $request){
-        if(isset($request->zone_id)) {
+    public function get_hub(Request  $request)
+    {
+        if (isset($request->zone_id)) {
             $zone = $request->zone_id;
             $hubs = City::where('hub', 1)->whereIn('zone_id', $zone)->select('id', 'name')->orderby('name', 'asc')->get();
 
@@ -9154,7 +9153,7 @@ class GlobalSettingsController extends Controller
     public function rider_assigned_hub_list()
     {
         $reasons = RiderAssignedHubForDeliveryNote::join('riders as r', 'r.id', 'rider_assigned_hub_for_delivery_notes.rider_id')
-            ->select('rider_assigned_hub_for_delivery_notes.id as id', 'r.id as rider_id', 'r.name as name', 'rider_assigned_hub_for_delivery_notes.hubs as hubs');
+            ->select('rider_assigned_hub_for_delivery_notes.id as id', 'r.id as rider_id', 'r.name as name', 'r.rider_main_category_id as main_category', 'rider_assigned_hub_for_delivery_notes.hubs as hubs');
 
         $datatable = Datatables::of($reasons)
             ->addColumn('hubs', function ($data) {
@@ -9163,14 +9162,23 @@ class GlobalSettingsController extends Controller
                 $count = count(explode(',', $hubs));
                 return '<button ref="' . $rider_id . '" class="btn btn-sm btn-outline-info align-middle hubs_count">' . $count . '</button>';
             })->addColumn('action', function ($data) {
+                if($data['main_category'] < 3){
+                    $dropdown = '
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    if (session('role_id') == 1 || in_array(896, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    }
+                    
 
-                $dropdown = '
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
-                if (session('role_id') == 1 || in_array(896, session('permissions'))) {
-                    $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                }else{
+                    $dropdown = '
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    '; 
                 }
                 return $dropdown;
             });
@@ -9178,7 +9186,7 @@ class GlobalSettingsController extends Controller
         return $datatable->make(true);
     }
 
-    public function rider_assigned_hub_add(Request $request)
+    static public function rider_assigned_hub_add(Request $request)
     {
         $rider_id = $request->select_rider_id;
         $rider_hubs = $request->hubs;
@@ -9192,7 +9200,6 @@ class GlobalSettingsController extends Controller
             $new_setting->hubs = $rider_selected_hubs;
             $new_setting->save();
         }
-
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
@@ -9480,58 +9487,57 @@ class GlobalSettingsController extends Controller
         $shippers = $request->shippers;
         $Ibft_charges = $request->Ibft_charges;
         $updated_by = Auth::id();
-            foreach ($shippers as $shipper){
-                UserIbftCharge::updateOrCreate(
-                    ['user_id' => $shipper],
-                    ['current_charges' => $Ibft_charges, 'updated_by' => $updated_by]
-                );
-                $ibft_charges_log = new UserIbftChargeDetail();
-                $ibft_charges_log->charges = $Ibft_charges;
-                $ibft_charges_log->user_id = $shipper;
-                $ibft_charges_log->updated_by = $updated_by;
-                $ibft_charges_log->save();
-            }
-            
-         return response()->json(['status' => 1, 'success' => 'Ibft Charges successfully updated']);
+        foreach ($shippers as $shipper) {
+            UserIbftCharge::updateOrCreate(
+                ['user_id' => $shipper],
+                ['current_charges' => $Ibft_charges, 'updated_by' => $updated_by]
+            );
+            $ibft_charges_log = new UserIbftChargeDetail();
+            $ibft_charges_log->charges = $Ibft_charges;
+            $ibft_charges_log->user_id = $shipper;
+            $ibft_charges_log->updated_by = $updated_by;
+            $ibft_charges_log->save();
         }
 
+        return response()->json(['status' => 1, 'success' => 'Ibft Charges successfully updated']);
+    }
+
     public function logistic_report_index()
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 735);
-            $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
-            $settings = GlobalSettings::where('type', 'logistic_setting');
-            $logistic_setting_tags = array();
-            if ($settings->exists())
-            {
-                $settings = $settings->first();
-                $logistic_setting_tags = array_map('intval',explode(',' , $settings->text));
-            }
-            return view('admin.settings.logistic_setting')->with(['users' => $users , 'logistic_setting_tags' =>$logistic_setting_tags]);
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 735);
+        $users = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'logistic_setting');
+        $logistic_setting_tags = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $logistic_setting_tags = array_map('intval', explode(',', $settings->text));
         }
-    
+        return view('admin.settings.logistic_setting')->with(['users' => $users, 'logistic_setting_tags' => $logistic_setting_tags]);
+    }
+
     public function logistic_report_store(Request $request)
-        {
-                ActivityTrailController::createActivityTrailLog(Auth::id(), 736);
-                if ($request->has('users') && count($request->users) > 0) {
-                    $users = implode(',', $request->users);
-                } else{
-                    $users = null;
-                }
-                $settings = GlobalSettings::where('type', 'logistic_setting');
-    
-                if ($settings->exists()) {
-                    $settings = $settings->first();
-                } else {
-                    $settings = new GlobalSettings();
-    
-                    $settings->type = 'logistic_setting';
-                    $settings->setting_value = 0;
-                }
-                $settings->text = $users;
-                $settings->save();
-            
-            return redirect()->back()->with('success', 'Settings Updated!');
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 736);
+        if ($request->has('users') && count($request->users) > 0) {
+            $users = implode(',', $request->users);
+        } else {
+            $users = null;
         }
+        $settings = GlobalSettings::where('type', 'logistic_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'logistic_setting';
+            $settings->setting_value = 0;
+        }
+        $settings->text = $users;
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 
     public function shipper_negative_payable_index()
     {
@@ -9572,7 +9578,7 @@ class GlobalSettingsController extends Controller
     public function delivery_revert_access_index()
     {
         $admin_departments = AdminDepartment::where('id', 4)->first();
-        $admin_roles = AdminRole::where('department_id', $admin_departments->id)->pluck('id')->toArray(); 
+        $admin_roles = AdminRole::where('department_id', $admin_departments->id)->pluck('id')->toArray();
         $finance_admins = Admin::whereIn('role_id', $admin_roles)->where('status', 1)->get();
         $admins = GlobalSettings::where('setting_value', 0)->where('type', 'delivery_revert_access')->first();
         return view('admin.settings.delivery_revert_access.index')->with(['finance_admins' => $finance_admins, 'admins' => $admins]);
