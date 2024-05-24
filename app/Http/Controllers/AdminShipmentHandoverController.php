@@ -344,8 +344,8 @@ class AdminShipmentHandoverController extends Controller
                ->whereRaw('ssj_hss_f.id = (
                 select max(id) 
                 from shipment_scanning_journeys 
-                where shipment_scanning_journeys.updated_at >= DATE_SUB(hsj_f.updated_at, INTERVAL 10 SECOND) 
-                and shipment_scanning_journeys.updated_at <= DATE_ADD(hsj_f.updated_at, INTERVAL 10 SECOND)
+                where shipment_scanning_journeys.updated_at >= hsj_f.updated_at - INTERVAL 10 SECOND
+                and shipment_scanning_journeys.updated_at <= hsj_f.updated_at + INTERVAL 10 SECOND
             )');
         })
       ->leftJoin('shipment_scanning_journeys as ssj_hss_r', function ($join) {
@@ -356,9 +356,10 @@ class AdminShipmentHandoverController extends Controller
                 select max(id) 
                 from shipment_scanning_journeys 
                 where shipment_scanning_journeys.shipment_id = hsj_r.shipment_id 
-                and shipment_scanning_journeys.updated_at >= DATE_SUB(hsj_r.updated_at, INTERVAL 10 SECOND) 
-                and shipment_scanning_journeys.updated_at <= DATE_ADD(hsj_r.updated_at, INTERVAL 10 SECOND)
+                and shipment_scanning_journeys.updated_at >= hsj_r.updated_at - INTERVAL 10 SECOND 
+                and shipment_scanning_journeys.updated_at <= hsj_r.updated_at + INTERVAL 10 SECOND
             )');
+            
       })
       ->leftJoin('shipment_scanning_journey_area_logs as ssj_f', 'ssj_f.shipment_scanning_journey_id', '=', 'ssj_hss_f.id')
       ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
