@@ -3670,11 +3670,14 @@ class ShipperShipmentBookController extends Controller
                                         $row['amount'] = 0;
                                     }
                                 }
-                                if (in_array($user_id, [32722, 3324])) {
-                                    dispatch(new ProcessShipmentBookingDBPriority($row));
-                                } else {
-                                    dispatch(new ProcessShipmentBookingDB($row));
-                                }
+
+                                $new_data[] = $row;
+                               
+                            }
+                            if (in_array($user_id, [32722, 3324])) {
+                                dispatch(new ProcessShipmentBookingDBPriority($new_data));
+                            } else {
+                                dispatch(new ProcessShipmentBookingDB($new_data));
                             }
 
                             return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
@@ -5510,13 +5513,14 @@ class ShipperShipmentBookController extends Controller
                                 }
                                 $row['business_category_id'] = 1;
 
-                                dispatch(new ProcessShipmentBookingDBPriority($row));
-                                // if (in_array($user_id, [32722, 3324])) {
-                                //     dispatch(new ProcessShipmentBookingDBPriority($row));
-                                // } else {
-                                //     dispatch(new ProcessShipmentBookingDB($row));
-                                // }
+                                $new_data[] = $row;
                             }
+                            dispatch(new ProcessShipmentBookingDBPriority($new_data));
+                            // if (in_array($user_id, [32722, 3324])) {
+                            //     dispatch(new ProcessShipmentBookingDBPriority($row));
+                            // } else {
+                            //     dispatch(new ProcessShipmentBookingDB($row));
+                            // }
 
                             return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
                         } else {
@@ -6503,11 +6507,13 @@ class ShipperShipmentBookController extends Controller
                                 if ($row['payment_mode_id'] == 4) {
                                     $row['amount'] = 0;
                                 }
-                                if (in_array($user_id, [32722, 3324])) {
-                                    dispatch(new ProcessShipmentBookingDBPriority($row));
-                                } else {
-                                    dispatch(new ProcessShipmentBookingDB($row));
-                                }
+                                
+                                $new_data[] = $row;
+                            }
+                            if (in_array($user_id, [32722, 3324])) {
+                                dispatch(new ProcessShipmentBookingDBPriority($new_data));
+                            } else {
+                                dispatch(new ProcessShipmentBookingDB($new_data));
                             }
 
                             return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
@@ -8209,11 +8215,13 @@ class ShipperShipmentBookController extends Controller
                                 $row['amount'] = 0;
                             }
 
-                            if (in_array($user_id, [32722, 3324])) {
-                                dispatch(new ProcessShipmentBookingDBPriority($row));
-                            } else {
-                                dispatch(new ProcessShipmentBookingDB($row));
-                            }
+                            $new_data[] = $row;
+                            
+                        }
+                        if (in_array($user_id, [32722, 3324])) {
+                            dispatch(new ProcessShipmentBookingDBPriority($new_data));
+                        } else {
+                            dispatch(new ProcessShipmentBookingDB($new_data));
                         }
 
                         return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);

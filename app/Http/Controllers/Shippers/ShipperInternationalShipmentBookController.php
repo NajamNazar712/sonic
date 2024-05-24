@@ -733,12 +733,13 @@ class ShipperInternationalShipmentBookController extends Controller
                             }
 
                             $row['business_category_id'] = 2;
-                            if ($user_id != 3324) {
-                                dispatch(new ProcessShipmentBookingDB($row));
-                            }
-                            else {
-                                dispatch(new ProcessShipmentBookingDBPriority($row));
-                            }
+                            $new_data[] = $row;
+                        }
+                        if ($user_id != 3324) {
+                            dispatch(new ProcessShipmentBookingDB($row));
+                        }
+                        else {
+                            dispatch(new ProcessShipmentBookingDBPriority($row));
                         }
 
                         return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
