@@ -11,6 +11,39 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+
+                <div class="row upload_shippers_form_div " style="display: none">
+                    <form id="upload_shippers_form" class="form-horizontal w-100 p-2" method="POST" action="{{ route('admin.finance.add_shipment_adjustment.bulk_store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="file" name="shippers" class="w-100 border-primary rounded" style="padding: 6px" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <select class="form-control" name="adjustment_type" id="adjustment_types" data-rule-required="true" data-msg-required="Adjustment Type is required">
+                                        <option value="">Testing</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary mb-2">Upload</button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 justify-content-end">
+                                <div class="form-group text-right">
+                                    <a href="{{ asset('file/Bulk Shipment Adjustment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Download Template</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                         <tr role="row" class="bg-primary white">
@@ -382,6 +415,13 @@
                     //         }
                     //     },
                     // @endif 
+                    {
+                        text: '<i class="la la-file-excel-o"></i> Import',
+                        className: 'btn btn-primary',
+                        action: function(e, dt, node, config) {
+                            $('.upload_shippers_form_div').toggle();
+                        }
+                    },
                     {
                         extend: 'excel',
                         title: 'Base Rate Revision',
