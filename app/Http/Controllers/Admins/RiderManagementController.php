@@ -743,7 +743,7 @@ class RiderManagementController extends Controller
                         }
                     }
                     if (session('role_id') == 1 || in_array(381, session('permissions'))) {
-                        if($rider->main_category_id < 2){
+                        if($rider->main_category_id < 3){
                             $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Make Rider Permanent</div></button>';
                         }
                     }
