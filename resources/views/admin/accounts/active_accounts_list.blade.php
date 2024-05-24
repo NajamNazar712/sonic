@@ -63,7 +63,7 @@
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
-                                        {{-- <th class="border-primary border-darken-1">Contact Person</th> --}}
+                                        <th class="border-primary border-darken-1">Contact Person</th>
                                         {{-- <th class="border-primary border-darken-1">Address</th> --}}
                                         <th class="border-primary border-darken-1">Zone</th>
                                         <th class="border-primary border-darken-1">City</th>
@@ -1071,7 +1071,7 @@ function checkboxStatus() {
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
-                        //head.push('Contact Person');
+                        head.push('Contact Person');
                         //head.push('Address');
                         head.push('Zone');
                         head.push('City');
@@ -1124,7 +1124,7 @@ function checkboxStatus() {
                             row.push(values.id);
                             row.push(values.account_type);
                             row.push(values.name);
-                            //row.push(values.poc);
+                            row.push(values.poc);
                             //row.push(values.address);
                             row.push(values.zone);
                             row.push(values.city);
@@ -1744,7 +1744,7 @@ function checkboxStatus() {
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
-                //{data: 'poc', name: 'poc', class: 'align-middle contact_person'},
+                {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
                 //{data: 'address', name: 'users.address', class: 'align-middle address'},
                 {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},

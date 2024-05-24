@@ -459,6 +459,9 @@ class Permission
             'finance.retail.done_payments.index' => 455,
             'finance.retail.done_payments.list' => 455,
 
+            'finance.tracking_number_wise_dncc_info.index' => 984,
+            'finance.tracking_number_wise_dncc_info.list' => 984,
+
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
             'petty_cash.statements.list' => 146,
@@ -997,8 +1000,12 @@ class Permission
             'settings.project_arrival_shippers.index' => 828,
             'settings.project_arrival_shippers.store' => 828,
 
-            'admin.settings.rv_disable_shippers.index'=> 889,
-            'admin.settings.rv_disable_shippers.store'=> 889,
+            'settings.disable_email_on_arrival.index'=> 978,
+            'settings.disable_email_on_arrival.update'=> 978,
+            
+            'settings.rv_disable_shippers.index'=> 889,
+            'settings.rv_disable_shippers.store'=> 889,
+            
             'settings.background_image.index' => 891,
             'settings.background_image.store' => 891,
 
@@ -1012,6 +1019,7 @@ class Permission
             'settings.shipper_ibft_charges_settings.index' => 917,
             'settings.shipper_ibft_charges_settings.list' => 917,
 
+            'settings.shipper_negative_payable.index' => 982,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -1432,6 +1440,9 @@ class Permission
 
             'reports.operations_performance.index' => 892,
             'reports.operations_performance.export_to_excel' => 892,
+
+            'reports.ops_report.index' => 911,
+            'reports.ops_report.list' => 911,
             'settings.parcel_value_bypass.index' => 910,
             'settings.logistic_report.index' =>932,
 
