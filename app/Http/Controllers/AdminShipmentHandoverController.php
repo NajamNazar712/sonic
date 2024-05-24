@@ -320,7 +320,6 @@ class AdminShipmentHandoverController extends Controller
 //                ->where('c_to.default', 1);
         })
 
-
         ->leftjoin('handover_shipments_journeys as hsj_f', function ($join) {
           $join->on('hsj_f.handover_id', '=', 'handovers.id')
               ->where(
@@ -342,13 +341,24 @@ class AdminShipmentHandoverController extends Controller
           $join->on('ssj_hss_f.shipment_id', '=', 'hsj_f.shipment_id')
                ->where('ssj_hss_f.screen_location_id', '=', 26)
                ->whereRaw('(a.role_id != 1 or a.id is null)')
-               ->whereRaw('ssj_hss_f.id = (select max(id) from shipment_scanning_journeys where shipment_scanning_journeys.shipment_id = hsj_f.shipment_id)');
-      })
+               ->whereRaw('ssj_hss_f.id = (
+                select max(id) 
+                from shipment_scanning_journeys 
+                where shipment_scanning_journeys.updated_at >= DATE_SUB(hsj_f.updated_at, INTERVAL 10 SECOND) 
+                and shipment_scanning_journeys.updated_at <= DATE_ADD(hsj_f.updated_at, INTERVAL 10 SECOND)
+            )');
+        })
       ->leftJoin('shipment_scanning_journeys as ssj_hss_r', function ($join) {
           $join->on('ssj_hss_r.shipment_id', '=', 'hsj_r.shipment_id')
                ->where('ssj_hss_r.screen_location_id', '=', 27)
                ->whereRaw('(ad.role_id != 1 or ad.id is null)')
-               ->whereRaw('ssj_hss_r.id = (select max(id) from shipment_scanning_journeys where shipment_scanning_journeys.shipment_id = hsj_r.shipment_id)');
+               ->whereRaw('ssj_hss_r.id = (
+                select max(id) 
+                from shipment_scanning_journeys 
+                where shipment_scanning_journeys.shipment_id = hsj_r.shipment_id 
+                and shipment_scanning_journeys.updated_at >= DATE_SUB(hsj_r.updated_at, INTERVAL 10 SECOND) 
+                and shipment_scanning_journeys.updated_at <= DATE_ADD(hsj_r.updated_at, INTERVAL 10 SECOND)
+            )');
       })
       ->leftJoin('shipment_scanning_journey_area_logs as ssj_f', 'ssj_f.shipment_scanning_journey_id', '=', 'ssj_hss_f.id')
       ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
@@ -362,7 +372,8 @@ class AdminShipmentHandoverController extends Controller
         'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name',
         'handovers.from_dept_area_desg as from_dept_area_desg','handovers.to_dept_area_desg as to_dept_area_desg','handovers.received_at','handovers.created_at',
         DB::raw('(select shipments - received_shipments from handovers where handovers.id= hss.handover_id ) as remaining'),
-        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area', 'ssj_f.location_status as forward_location_status','ssj_r.location_status as received_location_status','caf.name as forwarded_area_name', 'car.name as received_area_name'
+        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area', 'ssj_f.location_status as forward_location_status','ssj_r.location_status as received_location_status','caf.name as forwarded_area_name', 'car.name as received_area_name',
+       
       ])
       ->whereBetween('handovers.created_at', [$from,$to])
       ->orderBy('handovers.id', 'DESC')
@@ -450,7 +461,7 @@ class AdminShipmentHandoverController extends Controller
             return '<button class="btn btn-sm btn-outline-info shipment_pieces align-middle">Piece(s) Breakup</button>';
         })
 
-        ->addColumn('created_at_area', function($handover_list) {
+        ->editColumn('created_at_area', function($handover_list) {
      
           $forward_location_status = $handover_list->forward_location_status === 0 ? 'Off-site' : ($handover_list->forward_location_status === 1 ? 'On-site' : '-');
           $forwarded_area_name = $handover_list->forwarded_area_name ?? '-';
@@ -458,7 +469,7 @@ class AdminShipmentHandoverController extends Controller
           return $forwarded_area_name . ' | ' . $forward_location_status;
         })
 
-        ->addColumn('received_at_area', function($handover_list) {
+        ->editColumn('received_at_area', function($handover_list) {
     
           $received_location_status = $handover_list->received_location_status === 0 ? 'Off-site' : ($handover_list->received_location_status === 1 ? 'On-site' : '-');
           $received_area_name = $handover_list->received_area_name ?? '-';
