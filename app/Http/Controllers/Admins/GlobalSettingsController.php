@@ -160,6 +160,7 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\Product;
 use App\Http\Models\UserIbftCharge;
 use App\Http\Models\UserIbftChargeDetail;
+use App\RvShipmentTicket;
 
 class GlobalSettingsController extends Controller
 {
@@ -8849,6 +8850,7 @@ class GlobalSettingsController extends Controller
 
     public function rv_disable_shippers_store(Request $request)
     {
+
         ActivityTrailController::createActivityTrailLog(Auth::id(), 682);
 
         $all_shipper_settings = GlobalSettings::where('type', 'rv_disable_shippers_all_shippers');
@@ -8876,6 +8878,10 @@ class GlobalSettingsController extends Controller
             $settings->text = $excluded_users;
             $settings->save();
 
+            // Update disabled users in RV shipment tickets (Set disable_shipper to 0 of given shippers)
+            $shippers = explode(',', $excluded_users);
+            $this->updateDisabledUserInRvShipmentTickets($shippers, 0);
+
         } else {
             GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
         }
@@ -8894,12 +8900,35 @@ class GlobalSettingsController extends Controller
             $settings->save();
             GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
             GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
+
+            // Update disabled users in RV shipment tickets (Set disable_shipper to 1 of given shippers)
+            $shippers = explode(',', $only_users);
+            $this->updateDisabledUserInRvShipmentTickets($shippers, 1);
+
         } else {
             GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
         }
 
+        if (!($request->has('all_shipper_toggle') && $request->has('excluded_users')) && !(!$request->has('all_shipper_toggle') && $request->has('only_users')))
+        {
+            $this->updateDisabledUserInRvShipmentTickets(null, 1);
+        }
+
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    private function updateDisabledUserInRvShipmentTickets($shipperUserIds = null, $isDisabled = null)
+    {
+        if(!empty($shipperUserIds)) {
+            RvShipmentTicket::whereIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => $isDisabled]);
+            RvShipmentTicket::whereNotIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => !$isDisabled]);
+        }
+        else
+        {
+            RvShipmentTicket::where('disabled_shipper', $isDisabled ? 0 : 1)->update(['disabled_shipper' => $isDisabled]);
+        }
+    }
+
     public function get_hub(Request  $request){
         if(isset($request->zone_id)) {
             $zone = $request->zone_id;
