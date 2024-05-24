@@ -1781,6 +1781,8 @@
                                     shipment += '<tr role="row">';
                                     shipment += '<th><strong>Handover Id</strong></th>';
                                     shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>Location</strong></th>';
+
                                     shipment += '<th><strong>Date / Time</strong></th>';
 
                                     shipment += '</tr>';
@@ -1788,10 +1790,15 @@
                                     shipment += '<tbody>';
 
                                     $.each(details.handover_history, function (index, history) {
-
+                                        var googleMapsUrl = '';
+                                    if (history.area_log && history.area_log.latitude && history.area_log.longitude) {
+                                        googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
+                                    }
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.handover_id + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
+                                        shipment += '<td>' + (history.area_log ? history.area_log.location_status + ' | (' + history.area_log.area + ') | <a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>' : '') + '</td>';
+
                                         shipment += '<td>' + history.created_at + '</td>';
 
                                         shipment += '</tr>';
