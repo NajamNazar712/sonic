@@ -1798,6 +1798,11 @@
                                     
                                     @if (session('role_id') == 1 || in_array(942, session('permissions')))
                                             <li><a class="menu-item"
+                                                    href="{{ route('admin.settings.shippers.base_rate_revisions.index') }}">Base Rate Revision</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(942, session('permissions')))
+                                            <li><a class="menu-item"
                                                     href="{{ route('admin.settings.shipper_cap.index') }}">Shipper Cap</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(149, session('permissions')))
