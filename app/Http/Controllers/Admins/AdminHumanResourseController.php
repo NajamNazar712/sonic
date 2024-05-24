@@ -484,7 +484,7 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('employee_shifts as ess', 'ess.id', '=', 'employees.shift_id')
 			->leftjoin('city_areas as ca', 'ca.id', '=', 'employees.area_id')
             ->leftjoin('education_lists as el','el.id','=','employees.education_id')
-            ->select(['employees.official_phone_number as official_phone_number','r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_main_category_id as main_category',
+            ->select(['employees.official_phone_number as official_phone_number','r.name as check_if_rider_present_bit','r.ccd as ccd',
             'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 
             'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 
             'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 
@@ -690,14 +690,14 @@ class AdminHumanResourseController extends Controller
                         if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item update_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
                         }
-
                         if ($result->status_id != 2) {
                             if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                                 if ($result->active_rider_type_id == 1) {
                                     $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Incentive</div></button>';
                                 } else {
-                                    if($result->main_category < 2){
+                                    if($result->rider_main_category_id < 2){
                                         $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Permanent</div></button>';
+
                                     }
                                 }
 
