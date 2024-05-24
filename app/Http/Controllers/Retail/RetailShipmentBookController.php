@@ -490,6 +490,10 @@ class RetailShipmentBookController extends Controller
             $cat_id = $center_n_franchise = null;
         }
 
+        $parcelAmount = $request->input('parcel_amount');
+        $parcelAmount = trim($parcelAmount);
+        $parcelAmount = str_replace(',', '', $parcelAmount);
+
         $retail_shipment = new RetailShipment();
         $retail_shipment->shipment_id = $shipment_id;
         $retail_shipment->product_type_id = $request->product;
@@ -532,6 +536,7 @@ class RetailShipmentBookController extends Controller
                 $retail_shipment->admin_discount_type = 1;
             }
         }
+        $retail_shipment->parcel_amount = (int)$parcelAmount;
         $retail_shipment->save();
 
         $shipment = Shipment::find($shipment_id);
@@ -1910,6 +1915,9 @@ class RetailShipmentBookController extends Controller
             'account_number' => 'Account Number',
             'bank_id' => 'Bank ID',
             'special_instruction' => 'Special Instruction',
+            'admin_discount' => 'Admin Discount',
+            'admin_discount_type' => 'Admin Discount Type',
+            'parcel_amount' => 'Parcel Amount',
         ];
 
         $messages = [
@@ -1963,6 +1971,9 @@ class RetailShipmentBookController extends Controller
             'account_number' => ['nullable', 'numeric'],
             'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')],
             'special_instruction' => ['nullable', 'between:1,190'],
+            'admin_discount_type' => ['nullable'],
+            'admin_discount' => ['nullable', 'between:1,100'],
+            'parcel_amount' => ['required', 'integer'],
             
         ];
 
@@ -1973,8 +1984,50 @@ class RetailShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction'];
-            if (count($spreadsheet[0]) != 29){
+                // $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction'];
+
+            $fields = [
+                0 => 'product_id',
+                1 => 'business_category_id',
+                2 => 'shipping_mode_id',
+                3 => 'destination',
+                4 => 'volumetric_weight',
+                5 => 'weight',
+                6 => 'length',
+                7 => 'breadth',
+                8 => 'height',
+                9 => 'pieces',
+                10 => 'payment_mode_id',
+                11 => 'charges_mode_id',
+                12 => 'shipper_cell_number',
+                13 => 'shipper_name',
+                14 => 'shipper_cnic',
+                15 => 'shipper_address',
+                16 => 'consignee_cell_number',
+                17 => 'consignee_name',
+                18 => 'consignee_cnic',
+                19 => 'consignee_address',
+                20 => 'order_id',
+                21 => 'insurance_offered',
+                22 => 'insurance_value',
+                23 => 'packaging_charges',
+                24 => 'trax_box_id',
+                25 => 'iban_number',
+                26 => 'account_number',
+                27 => 'bank_id',
+                28 => 'special_instruction',
+                29 => 'admin_discount',
+                30 => 'admin_discount_type',
+                31 => 'parcel_amount'
+            ];
+
+            // dd($fields, $rules);
+
+            // if (count($spreadsheet[0]) != 29){
+            //     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            // }
+
+            if (count($spreadsheet[0]) != count($fields)){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
             unset($spreadsheet[0]);
@@ -2019,6 +2072,11 @@ class RetailShipmentBookController extends Controller
                 if(!isset($row['pieces']) || $row['pieces'] == null){
                     $row['pieces'] = 1;
                 }
+
+                if (!isset($row['parcel_amount']) || $row['parcel_amount'] == null){
+                    $errors[$row_id]['parcel_amount'] = 'Parcel Amount is required';
+                }
+                $rows[$key]['parcel_amount'] = $row['parcel_amount'];
 
                 $rows[$key]['pieces'] = $row['pieces'];
                 $rows[$key]['packaging_charges'] = $row['packaging_charges'];
