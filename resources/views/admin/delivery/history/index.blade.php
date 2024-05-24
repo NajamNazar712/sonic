@@ -69,6 +69,7 @@
                         <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
+                        <th class="border-primary border-darken-1">Total Weight</th>
                         <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
@@ -409,6 +410,7 @@
                             head.push('Rider Category');
                             head.push('Route');
                             head.push('No. Of Shipments');
+                            head.push('Total Weight');
                             head.push('No. Of Shipments Delivered');
                             head.push('Assigned By');
                             head.push('Assigned Date');
@@ -443,6 +445,7 @@
                                 row.push(values.operation_rider_id);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
+                                row.push(values.total_weight);
                                 row.push(values.delivered_shipments);
                                 row.push(values.assignee);
                                 row.push(values.created_at);
@@ -512,6 +515,7 @@
                     { data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    { data: 'total_weight', name: 'total_weight', class: 'align-middle total_weight text-center'},
                     { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},

@@ -8,6 +8,6 @@ class HistoryBookingTypeCharges extends Model
 {
     //
     protected $fillable = [
-        'user_id','shipping_mode_id','replacement_charges','try_and_buy_charges'
+        'user_id','shipping_mode_id','replacement_charges','try_and_buy_charges', 'reverse_pickup_charges'
     ];
 }

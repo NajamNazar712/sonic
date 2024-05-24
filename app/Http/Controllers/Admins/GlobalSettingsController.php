@@ -8765,6 +8765,86 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
+    //Disable Email On Arrival Status Page
+    public function disable_email_on_arrival_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 783);
+        
+        $excluded_shippers = array();
+        $only_shippers = array();
+
+        $excluded_shipper = GlobalSettings::where('type', 'disable_email_on_arrival_all_shippers_except');
+        $only_shipper = GlobalSettings::where('type', 'disable_email_on_arrival_only_shippers');
+
+        if ($excluded_shipper->exists()) {
+            $excluded_shipper = $excluded_shipper->first();
+            $excluded_shippers = array_map('intval', explode(',', $excluded_shipper->text));
+        } else {
+            $excluded_shipper = new GlobalSettings();
+            $excluded_shipper->setting_value = 0;
+            $excluded_shipper->type = "disable_email_on_arrival_all_shippers_except";
+            $excluded_shipper->save();
+        }
+
+        if ($only_shipper->exists()) {
+            $only_shipper = $only_shipper->first();
+            $only_shippers = array_map('intval', explode(',', $only_shipper->text));
+        } else {
+            $only_shipper = new GlobalSettings();
+            $only_shipper->setting_value = 0;
+            $only_shipper->type = "disable_email_on_arrival_only_shippers";
+            $only_shipper->save();
+        }
+
+        $shippers = User::select('id', 'name')->where('status', 3)->get();
+
+        $disable_all_shippers_toggle = $excluded_shipper->setting_value;
+
+        return view('admin.settings.disable_email_on_arrival_index')->with([
+                'disable_all_shippers_toggle' => $disable_all_shippers_toggle,
+                'shippers' => $shippers, 
+                'excluded_shippers' => $excluded_shippers,
+                'only_shippers' => $only_shippers
+            ]);
+    
+    }
+
+    public function disable_email_on_arrival_update(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 784);
+
+        $excluded_users = $request->has('excluded_users') ? implode(',', $request->excluded_users) : '';
+        $only_users = $request->has('only_users') ? implode(',', $request->only_users) : '';
+
+        if ($request->has('all_shipper_toggle')) {
+            // Settings for disabling all shippers except given ones
+            GlobalSettings::updateOrCreate(
+                ['type' => 'disable_email_on_arrival_all_shippers_except'],
+                ['setting_value' => 1, 'text' => $excluded_users]
+            );
+
+            // Settings for disabling only given shippers
+            GlobalSettings::updateOrCreate(
+                ['type' => 'disable_email_on_arrival_only_shippers'],
+                ['setting_value' => 0, 'text' => $only_users]
+            );
+        } else {
+            // Update settings if toggle is not enabled
+            GlobalSettings::updateOrCreate(
+                ['type' => 'disable_email_on_arrival_all_shippers_except'],
+                ['setting_value' => 0, 'text' => $excluded_users]
+            );
+
+            GlobalSettings::updateOrCreate(
+                ['type' => 'disable_email_on_arrival_only_shippers'],
+                ['setting_value' => 1, 'text' => $only_users]
+            );
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+
     public function get_city_area(Request $request)
     {
         if (isset($request->city_id)) {
@@ -9481,4 +9561,74 @@ class GlobalSettingsController extends Controller
             
             return redirect()->back()->with('success', 'Settings Updated!');
         }
+
+    public function shipper_negative_payable_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 787);
+        $settings = GlobalSettings::where('type', 'negative_payable_limit');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $negative_payable = $settings->setting_value;
+        } else {
+            $negative_payable = -1000;
+        }
+
+        return view('admin.settings.negative_payable')->with(['negative_payable' => $negative_payable]);
+    }
+
+    public function shipper_negative_payable_update(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 788);
+        $negative_payable = $request->negative_payable;
+        if ($negative_payable) {
+            $shipperSettings = GlobalSettings::where('type', 'negative_payable_limit');
+
+            if ($shipperSettings->exists()) {
+                $shipperSettings = $shipperSettings->first();
+            } else {
+                $shipperSettings = new GlobalSettings();
+
+                $shipperSettings->type = 'negative_payable_limit';
+            }
+            $shipperSettings->setting_value = $negative_payable;
+            $shipperSettings->save();
+        }
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function delivery_revert_access_index()
+    {
+        $admin_departments = AdminDepartment::where('id', 4)->first();
+        $admin_roles = AdminRole::where('department_id', $admin_departments->id)->pluck('id')->toArray(); 
+        $finance_admins = Admin::whereIn('role_id', $admin_roles)->where('status', 1)->get();
+        $admins = GlobalSettings::where('setting_value', 0)->where('type', 'delivery_revert_access')->first();
+        return view('admin.settings.delivery_revert_access.index')->with(['finance_admins' => $finance_admins, 'admins' => $admins]);
+    }
+
+    public function delivery_revert_access_store(Request $request)
+    {
+        // Check if any finance admins are selected
+        if ($request->has('finance_admins')) {
+            $finance_admins_id = implode(',', $request->finance_admins);
+        } else {
+            $finance_admins_id = null;
+        }
+
+        // Check if a global setting for delivery revert access already exists
+        $settings = GlobalSettings::where('setting_value', 0)->where('type', 'delivery_revert_access')->first();
+        if ($settings) {
+            // Update the existing global setting
+            $settings->text = $finance_admins_id;
+            $settings->save();
+        } else {
+            $settings = new GlobalSettings();
+            $settings->type = 'delivery_revert_access';
+            $settings->setting_value = 0;
+            $settings->text = $finance_admins_id;
+            $settings->save();
+        }
+        return redirect()->back()->with('success', 'Admins have been assigned!');
+    }
 }

@@ -1546,12 +1546,11 @@ class AdminTrackingController extends Controller
                             if($journey->shipper_status_id == 18){
                                 $shipment_id = $journey->shipment_id;
                                 $latest_lost_responsible_shipments = LostShipmentResponsible::whereIn('id', function($query) use ($shipment_id, $journey) {
-                                $query->selectRaw('MAX(id)')
-                                    ->from('lost_shipment_responsibles')
-                                    ->where('shipment_id', $shipment_id)
-                                    ->where('updated_at', '>=', date('Y-m-d H:i:s', strtotime($journey->updated_at) - 10)) // Adjust time range
-                                    ->where('updated_at', '<=', $journey->updated_at) // Assuming $journey->updated_at is the latest time
-                                    ->groupBy('user_id');
+                                    $query->selectRaw('MAX(id)')
+                                        ->from('lost_shipment_responsibles')
+                                        ->where('shipment_id', $shipment_id)
+                                        ->whereBetween('updated_at', [date('Y-m-d H:i:s', strtotime($journey->updated_at)), date('Y-m-d H:i:s', strtotime($journey->updated_at) + 10)])
+                                        ->groupBy('user_id');
                                 })->get();
 
                                 

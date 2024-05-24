@@ -1529,6 +1529,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::post('user_info', 'Admins\UserManagementController@user_info')->name('user_info');
             Route::post('phone_update', 'Admins\UserManagementController@user_phone_update')->name('phone_update');
+            Route::post('lost_hub_user_shipment', 'Admins\UserManagementController@lost_hub_user_shipment')->name('lost_hub_user_shipment');
+            Route::get('get_lost_hub_user_shipment', 'Admins\UserManagementController@get_lost_hub_user_shipment')->name('get_lost_hub_user_shipment');
+
+
         });
 
         Route::prefix('fuel_management')->name('fuel_management.')->group(function () {
@@ -2447,6 +2451,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@cargo_manifest_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
         });
+        Route::prefix('ops')->name('ops_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@ops_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@ops_report_list')->name('list');
+        });
     });
 
     //Reports end
@@ -2494,6 +2502,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {
+
+        Route::prefix('delivery_revert_access')->name('delivery_revert_access.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@delivery_revert_access_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@delivery_revert_access_store')->name('store');
+            // Route::post('udpate', 'Admins\GlobalSettingsController@delivery_revert_access_update')->name('update');
+        });
+
         Route::prefix('pickup')->name('pickup.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@pickup_index')->name('index');
             Route::post('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
@@ -3110,6 +3125,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@sms_notifications_limit_index')->name('index');
             Route::post('update', 'Admins\GlobalSettingsController@sms_notifications_limit_update')->name('update');
         });
+        
+        Route::prefix('disable_email_on_arrival')->name('disable_email_on_arrival.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@disable_email_on_arrival_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@disable_email_on_arrival_update')->name('update');
+        });
 
         Route::prefix('omni')->name('omni.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@omni_user_setting_index')->name('index');
@@ -3348,6 +3368,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@shipper_ibft_charges_settings_update')->name('update');
         });
 
+        Route::prefix('shipper_negative_payable')->name('shipper_negative_payable.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shipper_negative_payable_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@shipper_negative_payable_update')->name('update');
+        });
+
         Route::prefix('mms_excel_booking_setting')->name('mms_excel_booking_setting.')->group(function () {
             Route::get('', 'Admins\Settings\GeneralSettingController@mms_excel_booking_setting_index')->name('index');
             Route::post('', 'Admins\Settings\GeneralSettingController@mms_excel_booking_setting_store')->name('store');
@@ -3538,6 +3563,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('airway_journey')->name('airway_journey.')->group(function () {
         Route::get('', 'AdminAirwayBillJournyController@index')->name('index');
         Route::post('details', 'AdminAirwayBillJournyController@details')->name('details');
+    });
+
+    Route::prefix('barcode_generator')->name('barcode_generator.')->group(function () {
+        Route::get('', 'BarcodeGeneratorController@index')->name('index');
+        Route::get('list', 'BarcodeGeneratorController@list')->name('list');
+        Route::post('submit', 'BarcodeGeneratorController@store')->name('submit');
+        Route::post('print_barcodes', 'BarcodeGeneratorController@print_barcodes')->name('print_barcodes');
+
     });
 
     Route::prefix('coordinates')->name('coordinates.')->group(function () {
