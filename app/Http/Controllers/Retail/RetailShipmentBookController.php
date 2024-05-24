@@ -536,7 +536,7 @@ class RetailShipmentBookController extends Controller
                 $retail_shipment->admin_discount_type = 1;
             }
         }
-        $retail_shipment->parcel_amount = (int)$parcelAmount;
+        $retail_shipment->parcel_amount = $parcelAmount;
         $retail_shipment->save();
 
         $shipment = Shipment::find($shipment_id);
