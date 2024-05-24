@@ -319,17 +319,67 @@ class AdminShipmentHandoverController extends Controller
             $join->on('c_to.id',   '=', 'hor.city_area_id');
 //                ->where('c_to.default', 1);
         })
+
+        ->leftjoin('handover_shipments_journeys as hsj_f', function ($join) {
+          $join->on('hsj_f.handover_id', '=', 'handovers.id')
+              ->where(
+                  'hsj_f.id',
+                  '=',
+                  DB::connection('reports')->raw('(select max(id) from handover_shipments_journeys where handover_shipments_journeys.handover_id = handovers.id and status = 1)')
+              );
+        })
+        ->leftjoin('handover_shipments_journeys as hsj_r', function ($join) {
+          $join->on('hsj_r.handover_id', '=', 'handovers.id')
+              ->where(
+                  'hsj_r.id',
+                  '=',
+                  DB::connection('reports')->raw('(select max(id) from handover_shipments_journeys where handover_shipments_journeys.handover_id = handovers.id and status = 2)')
+              );
+        })
+
+      ->leftJoin('shipment_scanning_journeys as ssj_hss_f', function ($join) {
+          $join->on('ssj_hss_f.shipment_id', '=', 'hsj_f.shipment_id')
+               ->where('ssj_hss_f.screen_location_id', '=', 26)
+               ->whereRaw('(a.role_id != 1 or a.id is null)')
+               ->whereRaw('ssj_hss_f.id = (
+                select max(id) 
+                from shipment_scanning_journeys 
+                where shipment_scanning_journeys.updated_at >= hsj_f.updated_at - INTERVAL 10 SECOND
+                and shipment_scanning_journeys.updated_at <= hsj_f.updated_at + INTERVAL 10 SECOND
+            )');
+        })
+      ->leftJoin('shipment_scanning_journeys as ssj_hss_r', function ($join) {
+          $join->on('ssj_hss_r.shipment_id', '=', 'hsj_r.shipment_id')
+               ->where('ssj_hss_r.screen_location_id', '=', 27)
+               ->whereRaw('(ad.role_id != 1 or ad.id is null)')
+               ->whereRaw('ssj_hss_r.id = (
+                select max(id) 
+                from shipment_scanning_journeys 
+                where shipment_scanning_journeys.shipment_id = hsj_r.shipment_id 
+                and shipment_scanning_journeys.updated_at >= hsj_r.updated_at - INTERVAL 10 SECOND 
+                and shipment_scanning_journeys.updated_at <= hsj_r.updated_at + INTERVAL 10 SECOND
+            )');
+            
+      })
+      ->leftJoin('shipment_scanning_journey_area_logs as ssj_f', 'ssj_f.shipment_scanning_journey_id', '=', 'ssj_hss_f.id')
+      ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
+
+      ->leftJoin('city_areas as caf', 'caf.id', '=', 'ssj_f.area_id')
+      ->leftJoin('city_areas as car', 'car.id', '=', 'ssj_r.area_id')
+
         ->select(['handovers.id as handover_id','a.name as created_by','a.id as created_by_id','ad.name as received_by','ad.id as received_by_id',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
         'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
         'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name',
         'handovers.from_dept_area_desg as from_dept_area_desg','handovers.to_dept_area_desg as to_dept_area_desg','handovers.received_at','handovers.created_at',
-        DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),
-        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area'
+        DB::raw('(select shipments - received_shipments from handovers where handovers.id= hss.handover_id ) as remaining'),
+        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area', 'ssj_f.location_status as forward_location_status','ssj_r.location_status as received_location_status','caf.name as forwarded_area_name', 'car.name as received_area_name',
+       
       ])
       ->whereBetween('handovers.created_at', [$from,$to])
       ->orderBy('handovers.id', 'DESC')
       ->groupBy('hss.handover_id');
+
 
         $datatable = Datatables::of($handover_list)
             ->addColumn('handover_id_padded', function ($handover) {
@@ -408,14 +458,30 @@ class AdminShipmentHandoverController extends Controller
                 return 0;
             }
         })
-          ->addColumn('shipment_pieces', function($handover_list) {
-              return '<button class="btn btn-sm btn-outline-info shipment_pieces align-middle">Piece(s) Breakup</button>';
-          });
+        ->addColumn('shipment_pieces', function($handover_list) {
+            return '<button class="btn btn-sm btn-outline-info shipment_pieces align-middle">Piece(s) Breakup</button>';
+        })
+
+        ->editColumn('created_at_area', function($handover_list) {
+     
+          $forward_location_status = $handover_list->forward_location_status === 0 ? 'Off-site' : ($handover_list->forward_location_status === 1 ? 'On-site' : '-');
+          $forwarded_area_name = $handover_list->forwarded_area_name ?? '-';
+
+          return $forwarded_area_name . ' | ' . $forward_location_status;
+        })
+
+        ->editColumn('received_at_area', function($handover_list) {
+    
+          $received_location_status = $handover_list->received_location_status === 0 ? 'Off-site' : ($handover_list->received_location_status === 1 ? 'On-site' : '-');
+          $received_area_name = $handover_list->received_area_name ?? '-';
+      
+          return $received_area_name . ' | ' . $received_location_status;
+        });
 
         if ($tracking_number = $request->get('search_tracking')) {
             $datatable->where('s.tracking_number', '=', $tracking_number);
         }
-
+        
         if ($hub = $request->get('search_hub')) {
             $datatable->where('handovers.hub', '=', $hub);
         }
@@ -423,11 +489,17 @@ class AdminShipmentHandoverController extends Controller
         if ($from_admin = $request->get('search_from_admin')) {
             $datatable->where('handovers.from', '=', $from_admin);
         }
-
         if ($to_admin = $request->get('search_to_admin')) {
             $datatable->where('handovers.to', '=', $to_admin);
         }
-  
+        
+        if ($search_area = $request->get('search_area')) {
+          $datatable->where(function($query) use ($search_area) {
+              $query->where('ssj_f.area_id', '=', $search_area)
+                    ->orWhere('ssj_r.area_id', '=', $search_area);
+          });
+        } 
+
         return  $datatable->make(true);
 
     }

@@ -14842,7 +14842,9 @@ class AdminReportsController extends Controller
         if ($service_type_select = $request->get('service_type_select')) {
             $shipments->where('bt.id', '=', $service_type_select);
         }
-
+        if ($search_area = $request->get('search_area')) {
+            $shipments->where('ssjal.area_id', '=', $search_area);
+        }
         if($search_sale_person =  $request->get('search_sale_person')) {
             $shipments->where('spt.admin_id', $search_sale_person);
         }

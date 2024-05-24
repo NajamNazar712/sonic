@@ -131,6 +131,14 @@
                         </fieldset>
                     </div>
 
+                    <div class="col-4">
+                        <select name="search_area" id="search_area" class="select2">
+                            @foreach($areas as $area)
+                                <option value="{{$area->id}}">{{$area->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -373,6 +381,12 @@
             $('#search_sale_person').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Search Sales Person'
+            });
+            
+            $('#search_area').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Area',
+                width:'100%',
+                allowClear:true
             });
 
             $('#export').select2({
@@ -628,6 +642,8 @@
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
                         d.search_types = $('#search_types').val();
                         d.selectedValue = $('#export').val();
+                        d.search_area = $("#search_area").val();
+
                         d.selectedTexts = $('#export option:selected').map(function () {
                             return $(this).text()
                         }).get();
