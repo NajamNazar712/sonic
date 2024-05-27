@@ -14903,20 +14903,20 @@ class AdminReportsController extends Controller
                     return $shipment->shipper;
                 }
             })
-            ->editColumn('location_status', function ($shipment) {
-                if(isset($shipment->location_status)){
-                    return $shipment->location_status == 1 ? 'On-site' : 'Off-site';
-                }else{
-                    return '-';
-                }
-            })
-            ->editColumn('location_status_hss', function ($shipment) {
-                if(isset($shipment->location_status_hss)){
-                    return $shipment->location_status_hss == 1 ? 'On-site' : 'Off-site';
-                }else{
-                    return '-';
-                }
-            })
+            // ->editColumn('location_status', function ($shipment) {
+            //     if(isset($shipment->location_status)){
+            //         return $shipment->location_status == 1 ? 'On-site' : 'Off-site';
+            //     }else{
+            //         return '-';
+            //     }
+            // })
+            // ->editColumn('location_status_hss', function ($shipment) {
+            //     if(isset($shipment->location_status_hss)){
+            //         return $shipment->location_status_hss == 1 ? 'On-site' : 'Off-site';
+            //     }else{
+            //         return '-';
+            //     }
+            // })
             ->editColumn('current_hub', function ($shipment) {
                 if ($shipment->current_hub_id != null) {
                     return $shipment->current_hub_name;
@@ -15050,12 +15050,12 @@ class AdminReportsController extends Controller
                 $rowArray = (array) $row;
                 //dd($rowArray);
                 // Apply modifications to the row
-                if (isset($rowArray['location_status'])) {
-                    $rowArray['location_status'] = ($rowArray['location_status']) ? (($rowArray['location_status'] == 1) ? 'On-site' : 'Off-site') : '-';
-                }
-                if (isset($rowArray['location_status_hss'])) {
-                    $rowArray['location_status_hss'] = ($rowArray['location_status_hss']) ? (($rowArray['location_status_hss'] == 1) ? 'On-site' : 'Off-site') : '-';
-                }
+                // if (isset($rowArray['location_status'])) {
+                //     $rowArray['location_status'] = ($rowArray['location_status']) ? (($rowArray['location_status'] == 1) ? 'On-site' : 'Off-site') : '-';
+                // }
+                // if (isset($rowArray['location_status_hss'])) {
+                //     $rowArray['location_status_hss'] = ($rowArray['location_status_hss']) ? (($rowArray['location_status_hss'] == 1) ? 'On-site' : 'Off-site') : '-';
+                // }
                 
                 $rowArray['shipper'] = ($rowArray['booking_type_id'] == 4) ? ($rowArray['shipper'] . ' (' . $rowArray['poc'] . ')') : $rowArray['shipper'];
                 
