@@ -1008,6 +1008,8 @@
 			if(service_type == 1){
 				$('#pieces_quantity').removeClass('d-none');
 			}
+
+
 			if (service_type == 2) {
 				$('#replacement').removeClass('d-none');
 				$('#try_and_buy_charges_div').addClass('d-none');
@@ -1041,6 +1043,8 @@
 					'max': 100000
 				});
 			}
+
+			
 			if (service_type == 3) {
 				$('#regular').addClass('d-none');
 				$('#try_and_buy').removeClass('d-none');

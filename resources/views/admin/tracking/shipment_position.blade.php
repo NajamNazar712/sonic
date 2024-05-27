@@ -53,7 +53,7 @@
                                     <th class="border-primary border-darken-1">COD Amount</th>
                                     <th class="border-primary border-darken-1">Last Scanned Location</th>
                                     <th class="border-primary border-darken-1">Last Scanned City</th>
-                                    <th class="border-primary border-darken-1">Last Scanned Area</th>
+                                    <th class="border-primary border-darken-1">Sub Hub</th>
                                     <th class="border-primary border-darken-1">Last Scanned Area Location</th>
                                     <th class="border-primary border-darken-1">Trax Id</th>
                                     <th class="border-primary border-darken-1">Last Scanned By</th>
@@ -198,7 +198,7 @@
                             head.push('COD Amount');
                             head.push('Last Scanned Location');
                             head.push('Last Scanned City');
-                            head.push('Location Status Area');
+                            head.push('Sub Hub');
                             head.push('Last Scanned Area Location');
                             head.push('Trax Id');
                             head.push('Last Scanned By');

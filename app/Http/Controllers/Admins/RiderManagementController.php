@@ -674,7 +674,7 @@ class RiderManagementController extends Controller
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'riders.trax_id')
-            ->select('cities.name as city', 'c.name as hub', 'z.name as zone', 'riders.id as rider_id', 'riders.id', 'riders.name as rider', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.address', 'routes.code as route', 'routes.start', 'routes.end', 'rider_main_categories.name as main_category', 'rider_categories.name as category', 'riders.status as status', 'riders.created_at', 'cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id', 'riders.blacklist', 'riders.updated_at', 'emp.first_inactive')
+            ->select('cities.name as city', 'c.name as hub', 'z.name as zone', 'riders.id as rider_id', 'riders.id', 'riders.name as rider', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.address', 'routes.code as route', 'routes.start', 'routes.end', 'rider_main_categories.name as main_category', 'riders.rider_main_category_id as main_category_id', 'rider_categories.name as category', 'riders.status as status', 'riders.created_at', 'cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id', 'riders.blacklist', 'riders.updated_at', 'emp.first_inactive')
             ->where('riders.rider_type_id', 2)
             ->where('riders.blacklist', 0);
 
@@ -742,9 +742,10 @@ class RiderManagementController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
                         }
                     }
-
                     if (session('role_id') == 1 || in_array(381, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Make Rider Permanent</div></button>';
+                        if($rider->main_category_id < 3){
+                            $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Make Rider Permanent</div></button>';
+                        }
                     }
                     if (session('role_id') == 1 || in_array(382, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
