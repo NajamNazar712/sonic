@@ -37,6 +37,7 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Admins\AdminInterceptRebookRequestHistoryController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\ShipmentStatusReason;
 use App\Jobs\ProcessRemoveShipmentFromRvShipmentTicket;
