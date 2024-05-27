@@ -243,6 +243,7 @@
              @if ($retail_user->category == 1)
                 $('#edit_user_form #trax_center_div').addClass('d-none');
                 $('#edit_franchise').val(store_id).trigger('change');
+                $('#trax_id_edit').addClass('d-none');
 
              @else
                  $('#edit_user_form #franchise_div').addClass('d-none');
