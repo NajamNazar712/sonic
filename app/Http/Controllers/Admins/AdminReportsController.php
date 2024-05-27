@@ -15011,7 +15011,7 @@ class AdminReportsController extends Controller
                 }else{
                     return '-';
                 }
-            });;
+            });
       
 
         //return $datatable->make(true);
