@@ -303,6 +303,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
             $retail_shipment->admin_discount_type = $admin_discount_type;
         }
             $retail_shipment->parcel_amount = $this->booking['parcel_amount'];
+            $retail_shipment->quantity = $this->booking['quantity'];
             $retail_shipment->save();
 
         $shipment = Shipment::find($shipment_id);

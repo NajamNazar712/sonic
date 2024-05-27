@@ -494,6 +494,11 @@ class RetailShipmentBookController extends Controller
         $parcelAmount = trim($parcelAmount);
         $parcelAmount = str_replace(',', '', $parcelAmount);
 
+        $quantity = $request->input('quantity');
+        $quantity = trim($quantity);
+        $quantity = str_replace(',', '', $quantity);
+
+
         $retail_shipment = new RetailShipment();
         $retail_shipment->shipment_id = $shipment_id;
         $retail_shipment->product_type_id = $request->product;
@@ -537,6 +542,7 @@ class RetailShipmentBookController extends Controller
             }
         }
         $retail_shipment->parcel_amount = $parcelAmount;
+        $retail_shipment->quantity = $quantity;
         $retail_shipment->save();
 
         $shipment = Shipment::find($shipment_id);
@@ -1918,6 +1924,7 @@ class RetailShipmentBookController extends Controller
             'admin_discount' => 'Admin Discount',
             'admin_discount_type' => 'Admin Discount Type',
             'parcel_amount' => 'Parcel Amount',
+            'quantity' => 'Quantity',
         ];
 
         $messages = [
@@ -1973,7 +1980,8 @@ class RetailShipmentBookController extends Controller
             'special_instruction' => ['nullable', 'between:1,190'],
             'admin_discount_type' => ['nullable'],
             'admin_discount' => ['nullable', 'between:1,100'],
-            'parcel_amount' => ['required', 'integer'],
+            'parcel_amount' => ['required'],
+            'quantity' => ['required'],
             
         ];
 
@@ -2018,7 +2026,8 @@ class RetailShipmentBookController extends Controller
                 28 => 'special_instruction',
                 29 => 'admin_discount',
                 30 => 'admin_discount_type',
-                31 => 'parcel_amount'
+                31 => 'parcel_amount',
+                32 => 'quantity'
             ];
 
             // dd($fields, $rules);
@@ -2077,6 +2086,11 @@ class RetailShipmentBookController extends Controller
                     $errors[$row_id]['parcel_amount'] = 'Parcel Amount is required';
                 }
                 $rows[$key]['parcel_amount'] = $row['parcel_amount'];
+
+                if (!isset($row['quantity']) || $row['quantity'] == null){
+                    $errors[$row_id]['quantity'] = 'Parcel Amount is required';
+                }
+                $rows[$key]['quantity'] = $row['quantity'];
 
                 $rows[$key]['pieces'] = $row['pieces'];
                 $rows[$key]['packaging_charges'] = $row['packaging_charges'];

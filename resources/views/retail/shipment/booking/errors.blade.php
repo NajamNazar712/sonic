@@ -258,6 +258,26 @@
                                                 </td>
                                             @endif
 
+                                            @if(isset($errors[$no]['quantity']))
+                                                <td>
+                                                    {!! Form::text('form[' . $no . '][quantity]', null, [
+                                                        'class' => 'form-control is-invalid quantity',
+                                                        'id' => 'quantity',
+                                                        'style' => 'width:auto',
+                                                        'placeholder' => ''
+                                                    ]) !!}
+                                                    <font color="red">{{$errors[$no]['quantity']}}</font>
+                                                </td>
+                                            @else
+                                                <td>
+                                                    {!! Form::text('form[' . $no . '][quantity]', $ro['quantity'], [
+                                                        'class' => 'form-control',
+                                                        'style' => 'width:144px',
+                                                        'readonly' => 'readonly'
+                                                    ]) !!}
+                                                </td>
+                                            @endif
+
                                             <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                         </tr>
                                     @endforeach
