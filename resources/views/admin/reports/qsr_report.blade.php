@@ -227,7 +227,7 @@
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">History Status</th>
-                        <th class="border-primary border-darken-1">History Status Location</th>
+                        {{-- <th class="border-primary border-darken-1">History Status Location</th> --}}
                         <th class="border-primary border-darken-1">Cargo Status</th>
                         <th class="border-primary border-darken-1">Bag Seal Number</th>
                         <th class="border-primary border-darken-1">Bag Status</th>
@@ -683,7 +683,7 @@
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks',text:'Remarks',value:'remarks',download:true},
                     {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt',text:'Total Attempt',value:'total_attempt',download:true},
                     {data: 'history_status', name: 'hss.name', as:'history_status', class: 'align-middle history_status',text:'History Status',value:'history_status',download:true},
-                    {data: 'location_status_hss', name: 'ssjal_hss.location_status', as:'location_status_hss', class: 'align-middle location_status_hss',text:'History Location Status',value:'location_status_hss',download:true},
+                    // {data: 'location_status_hss', name: 'ssjal_hss.location_status', as:'location_status_hss', class: 'align-middle location_status_hss',text:'History Location Status',value:'location_status_hss',download:true},
                     {data: 'cargo_status', name: 'cargo_status.name', as:'cargo_status', class: 'align-middle history_status',text:'Cargo Status',value:'cargo_status',download:true},
                     {data: 'seal_number', name: 'cmb.seal_number', class: 'align-middle history_status',text:'Bag Seal Number',value:'seal_number',download:true},
                     {data: 'bag_status', name: 'bs.name', as:'bag_status', class: 'align-middle history_status',text:'Bag Status',value:'bag_status',download:true},
