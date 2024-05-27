@@ -12,8 +12,8 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row upload_shippers_form_div " style="display: none">
-                    <form id="upload_shippers_form" class="form-horizontal w-100 p-2" method="POST" action="{{ route('admin.finance.add_shipment_adjustment.bulk_store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                <div class="row upload_shippers_form_div px-1" style="display: none">
+                    <form id="upload_shippers_form" class="form-horizontal w-100 p-2" method="POST" action="{{ route('admin.settings.shippers.base_rate_revisions.bulk_store') }}" novalidate="novalidate" enctype="multipart/form-data">
                         @csrf
                         <div class="row">
                             <div class="col-md-6">
@@ -39,7 +39,7 @@
 
                             <div class="col-md-2 justify-content-end">
                                 <div class="form-group text-right">
-                                    <a href="{{ asset('file/Bulk Shipment Adjustment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Download Template</a>
+                                    <a href="{{ asset('file/Base Rate Revisions Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Download Template</a>
                                 </div>
                             </div>
                         </div>
@@ -297,6 +297,15 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            $('#upload_shippers_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+			});
+
             // $("#cnic").inputmask({
             //     'mask': "99999-9999999-9",
             //     'clearIncomplete': true
