@@ -2574,7 +2574,6 @@ class AdminTrackingController extends Controller
                 );
         })
         ->leftJoin('scanned_user_types as sp', 'shipment_positions.scanned_by_user_type', '=', 'sp.id')
-        ->leftJoin('admins as adm', 'adm.id', '=', 'shipment_positions.scanned_by_id')
         ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
             $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
                  ->whereRaw('ssj.id = (
@@ -2583,12 +2582,14 @@ class AdminTrackingController extends Controller
                                 where shipment_scanning_journeys.shipment_id = journey.shipment_id
                                 and shipment_scanning_journeys.screen_location_id = shipment_positions.screen_location_id
                             )');
-            // Conditionally join 'admins' table based on the value of 'scanned_by_user_type'
-            
-            $join->when(\DB::raw("sp.id = 1"), function ($query) {
-                $query->where('adm.role_id', '<>', 1);
+        })
+        ->when(\DB::raw('sp.id = 1'), function ($join) {
+            $join->leftJoin('admins as adm', function ($join) {
+                $join->on('adm.id', '=', 'shipment_positions.scanned_by_id')
+                     ->where('adm.role_id', '<>', 1);
             });
         })
+        
         
         ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
         ->leftJoin('admins as new_admin', 'new_admin.id', '=', 'ssj.admin_id')        
