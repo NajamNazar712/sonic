@@ -408,6 +408,18 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_address = $request->shipper_address;
             $shipper_info->city_id = $pickup_city_id;
 
+            if (!$shipper_info->iban_no && (!$request->iban_no || $request->iban_no == '')) {
+                return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
+            }
+            if (!$shipper_info->account_no && (!$request->account_no || $request->account_no == '')) {
+                return redirect()->back()->with(['error' => 'Please provide the account number']);
+            }
+            if (!$shipper_info->bank && (!$request->bank || $request->bank == '')) {
+                return redirect()->back()->with(['error' => 'Please choose a bank']);
+            }
+            if (!$shipper_info->cheque_image && !$request->hasFile('cheque_image')) {
+                return redirect()->back()->with(['error' => 'Please provide the cheque image']);
+            }
 
             if ($request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $shipper_info->bank_id = $request->bank;
@@ -433,6 +445,20 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_address = $request->shipper_address;
             $shipper_info->city_id = $pickup_city_id;
             $shipper_info->save();
+
+            if ($request->iban_no == null || $request->iban_no == ''){
+                return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
+            } 
+            if ($request->account_no == null || $request->account_no == '') {
+                return redirect()->back()->with(['error' => 'Please provide the account number']);
+            } 
+            if ($request->bank == null || $request->bank == ''){
+                return redirect()->back()->with(['error' => 'Please choose a bank']);
+            } 
+            if (!$request->hasFile('cheque_image')){
+                return redirect()->back()->with(['error' => 'Please provide the cheque image']);
+            } 
+
             if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $shipper_info->bank_id = $request->bank;
                 $shipper_info->iban = $request->iban_no;
@@ -545,7 +571,7 @@ class RetailShipmentBookController extends Controller
         $retail_reference->ref = $ref;
         $retail_reference->save();
 
-        $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address);
+        $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address, $shipper_info->id);
 
         if($request->book_button == 0){
             return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);
@@ -2205,33 +2231,72 @@ class RetailShipmentBookController extends Controller
 
   }
 
-    static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address)
+    static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address, $id)
     {
         $phone_number = str_replace('-', '', $phone_number);
         $shipper_cnic = str_replace('-', '', $shipper_cnic);
+
+        $existing_records = RetailShipperNameVerification::where('phone_number', $phone_number)->get();
+
+        if ($existing_records->isNotEmpty()) {
+            $foundDuplicate = false;
+
+            foreach ($existing_records as $existing_record) {
+                if (
+                    $existing_record->phone_number == $phone_number &&
+                    $existing_record->shipper_name == $shipper_name &&
+                    $existing_record->shipper_cnic == $shipper_cnic &&
+                    $existing_record->shipper_address == $shipper_address
+                ) {
+                    $foundDuplicate = true;
+                    break; // Exit the loop as soon as an exact match is found
+                }
+            }
+
+            if (!$foundDuplicate) {
+                // No exact match found, create a new record
+                $new_shipper = new RetailShipperNameVerification();
+                $new_shipper->phone_number = $phone_number;
+                $new_shipper->shipper_name = $shipper_name;
+                $new_shipper->shipper_cnic = $shipper_cnic;
+                $new_shipper->shipper_address = $shipper_address;
+                $new_shipper->retail_shipper_info_id = $id;
+                $new_shipper->save();
+            }
+        } else {
+            // No existing record found, create a new one
+            $new_shipper = new RetailShipperNameVerification();
+            $new_shipper->phone_number = $phone_number;
+            $new_shipper->shipper_name = $shipper_name;
+            $new_shipper->shipper_cnic = $shipper_cnic;
+            $new_shipper->shipper_address = $shipper_address;
+            $new_shipper->retail_shipper_info_id = $id;
+            $new_shipper->save();
+        }
+
 //        if (RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name)->where('shipper_cnic',$shipper_cnic)->where('shipper_address',$shipper_address))
 //        {
 //            return 0;
 //        }
 //        else
 //        {
-            $record_exist = RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name);
-            if($record_exist->exists())
-            {
-                $record_exist = $record_exist->first();
-                $record_exist->shipper_cnic = $shipper_cnic;
-                $record_exist->shipper_address = $shipper_address;
-                $record_exist->save();
-            }
-            else
-            {
-                $update_shipper = new RetailShipperNameVerification();
-                $update_shipper->phone_number = $phone_number;
-                $update_shipper->shipper_name = $shipper_name;
-                $update_shipper->shipper_cnic = $shipper_cnic;
-                $update_shipper->shipper_address = $shipper_address;
-                $update_shipper->save();
-            }
+            // $record_exist = RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name);
+            // if($record_exist->exists())
+            // {
+            //     $record_exist = $record_exist->first();
+            //     $record_exist->shipper_cnic = $shipper_cnic;
+            //     $record_exist->shipper_address = $shipper_address;
+            //     $record_exist->save();
+            // }
+            // else
+            // {
+            //     $update_shipper = new RetailShipperNameVerification();
+            //     $update_shipper->phone_number = $phone_number;
+            //     $update_shipper->shipper_name = $shipper_name;
+            //     $update_shipper->shipper_cnic = $shipper_cnic;
+            //     $update_shipper->shipper_address = $shipper_address;
+            //     $update_shipper->save();
+            // }
 //        }
     }
 

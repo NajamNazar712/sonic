@@ -690,13 +690,16 @@ class AdminHumanResourseController extends Controller
                         if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item update_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
                         }
-
                         if ($result->status_id != 2) {
                             if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                                 if ($result->active_rider_type_id == 1) {
                                     $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Incentive</div></button>';
                                 } else {
-                                    $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Permanent</div></button>';
+                                    
+                                    if($result->rider_main_category_id < 3){
+                                        $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Permanent</div></button>';
+
+                                    }
                                 }
 
                             }
@@ -5855,19 +5858,20 @@ class AdminHumanResourseController extends Controller
     }
 
     public function get_employee_info_name_type(Request $request){
-      
         $employee = Employee::where('trax_id',$request->trax_id);
         if($employee->exists()){
             $employee = $employee->first();
-            $details = array();
-            $details['trax_id'] = $employee->trax_id;
-            $details['name'] = $employee->name;
-            $details['type'] = $employee->employee_type->name;
-            $details['status'] = $employee->employee_status->name;
-
-            return response()->json(['status' => 1, 'success' => 'Employee found!','details' => $details]);
-        }
-        else{
+            if($employee->admin != null || $employee->rider != null){
+                $details = array();
+                $details['trax_id'] = $employee->trax_id;
+                $details['name'] = $employee->name;
+                $details['type'] = $employee->employee_type->name;
+                $details['status'] = $employee->employee_status->name;
+                return response()->json(['status' => 1, 'success' => 'Employee found!','details' => $details]);
+            }else{
+                return response()->json(['status' => 0, 'error' => 'Employee not found!']);
+            }
+        }else{
             return response()->json(['status' => 0, 'error' => 'Employee not found!']);
         }
     }

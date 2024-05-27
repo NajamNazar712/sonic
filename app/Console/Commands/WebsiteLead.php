@@ -12,6 +12,7 @@ use App\Http\Models\ServiceList;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class WebsiteLead extends Command
 {
@@ -133,6 +134,7 @@ class WebsiteLead extends Command
         if(count($new_leads) > 0){
             NotificationsController::send(203, $new_leads, Carbon::today());
         }
+        //Log::channel('cronJobLog')->info('s ' .'website:leads Running');
 
     }
 }

@@ -44,6 +44,7 @@ class ShipperInterceptReBookController extends Controller
             return view('errors.404');
         }
 
+
         if($shipment_id){
             $shipment = Shipment::where('id',$shipment_id)->first();            
             $intercept_type = ShipperInterceptExclude::where('user_id', $shipment->user_id)->first();
@@ -101,13 +102,18 @@ class ShipperInterceptReBookController extends Controller
         // if ($shipment['shipper_status_id'] == 12) {
             if ($shipment['shipper_status_id'] == 65 || $shipment['shipper_status_id'] == 12) {
             if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
-                
+
                 $shipper_intercept_type = ShipperInterceptExclude::where('user_id', $shipment->user_id)->first();
-                if (
-                    ($intercept_type == 1 && $shipper_intercept_type->different_consignee == 1)|| // different_consignee == 0 means allow different
-                    ($intercept_type == 0 && $shipper_intercept_type->same_consignee == 1) // same_consignee == 0 means that allow same
-                ){
-                    return redirect()->back()->with('error', 'You cannot select the same shipper intercept type as the consignee type');
+                if ($shipper_intercept_type){
+                    // different_consignee == 0 means allow different
+                    if ($shipper_intercept_type->different_consignee == 1 && $request->consignee == 1){
+                        return redirect()->back()->with('error', 'You are not allowed to intercept or re-book to different consignee');
+                    } 
+
+                    // same_consignee == 0 means that allow same
+                    if ($shipper_intercept_type->same_consignee == 1 && $request->consignee == 0){
+                        return redirect()->back()->with('error', 'You are not allowed to intercept or re-book to same consignee');
+                    }
                 }
                 
                 if ($shipment['intercepted'] == 1) {

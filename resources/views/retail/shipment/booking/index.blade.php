@@ -127,10 +127,15 @@
                                             <input type="text" name="order_id" id="order_id" class="form-control" placeholder="Order ID">
                                         </div>
                                     </div>
-                                    <div class="form-group col-6 previous-names">
+                                    {{-- <div class="form-group col-6 previous-names">
                                         <select name="previous_name" id="previous_name" class="select2 form-control">
                                         </select>
+                                    </div> --}}
+
+                                    <div class="form-group col-6">
+                                        <a href="javascript:void(0);" id="auto_fetch_shipper" class="btn btn-sm btn-outline-success sm" disabled="disabled">Auto Fetch</a>
                                     </div>
+
                                     <div class="form-group col-6">
                                         <input type="text" name="shipper_name" id="shipper_name" class="form-control shipper_name" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">
                                     </div>
@@ -424,6 +429,37 @@
                        <div class="col-12 form-group">
                             <table class="table" id="consignee_table">
 
+                            </table>
+                       </div>
+                   </div>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
+
+<div class="modal fade text-left" id="AutoFetchShipper" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AutoFetchShipper"
+    aria-hidden="true">
+   <div class="modal-dialog modal-lg" role="document">
+       <div class="modal-content">
+           <div class="modal-header bg-primary white">
+               <h4 class="modal-title white">Shipper Details</h4>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <form id="auto_fetch_shipper_form" class="form-horizontal" novalidate="novalidate">
+               @csrf
+               <div class="modal-body">
+                   <div class="row justify-content-center">
+                    {{-- <div class="col-12 form-group">
+                        <h3 class="text-danger text-center" id="black_listed_employee">Employee is Blacklisted</h3>
+                    </div> --}}
+                       <div class="col-12 form-group">
+                            <table class="table" id="shipper_table">
+                                <div id="no_info_div" class="d-none">
+                                    <span id="no_info_text"></span>
+                                </div>
                             </table>
                        </div>
                    </div>
@@ -1454,6 +1490,74 @@
 
             });
 
+            $('#auto_fetch_shipper').on('click', function(){
+                if($('input[name="shipper_phone_no"]').val().match(/\d/g) != null){
+					var length = $('input[name="shipper_phone_no"]').val().match(/\d/g).length;
+				}
+				else{
+					var length = 0;
+				}
+				if(length == 11){
+					$.ajax({
+                    url: '{!! route('retail.shipment.book.previous_names_verify') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'phone_number': $('input[name="shipper_phone_no"]').val(),
+                        
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status == 0){
+                            toastr.error(data.message, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                            });
+                        }
+                        else if (data.data.length < 1){
+                            $('#AutoFetchShipper').modal('show');
+                            $("#no_info_div").removeClass('d-none');
+                            $("#no_info_div").addClass('text-center font-medium-2');
+                            $("#no_info_text").text('No information found')
+                        }
+                        else{
+                            // console.log(data.data.length);
+                            // if(data.blacklist == 0){
+                            //     $('#black_listed_employee').addClass('d-none');
+                            // }else{
+                            //     $('#black_listed_employee').removeClass('d-none');
+                            // }
+                            $("#no_info_div").addClass('d-none');
+                            $('#AutoFetchShipper').modal('show');
+                            var html = '';
+                            $.each(data.data, function (index, details) {
+                                    html +='<tr><td><a href="javascript:void(0)" class="btn btn-outline-success btn-sm shipper_auto_fetch_btn"><i class="ft-check"></i></a></td>';
+                                    html +='<td>'+details.shipper_name+'</td>';
+                                    html +='<td>'+details.shipper_address+'</td>';
+                                    html +='<td>'+details.shipper_cnic+'</td></tr>';
+                                });
+                                $('#shipper_table').html(html);   
+                                $('.shipper_auto_fetch_btn  ').on('click', function(){
+                                    var name = $(this).parent().next().html();
+                                    var address = $(this).parent().next().next().html();
+                                    var shipper_cnic = $(this).parent().next().next().next().html();
+
+                                    $('#shipper_name').val(name);
+                                    $('#shipper_address').val(address);
+                                    $('#shipper_cnic').val(shipper_cnic);
+                                    $('#AutoFetchShipper').modal('hide');
+
+                                });
+                        }
+                    });
+				}
+                
+            });
+
+            $('#AutoFetchShipper').on('hidden.bs.modal', function () {
+                $('#shipper_table').html('');   
+            });
+
             $('#previous_name').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Previous Name",
@@ -1512,6 +1616,40 @@
                 $('#shipper_name').val(name);
 
             });
+
+            $('[name="book_and_print"]').on('click', function () {
+                var ibanNoValue = $('#iban_no').val();
+                var accountNoValue = $('#account_no').val();
+                var bankValue = $('#bank').val();
+                var chequeImageValue = $('#cheque_image').val();
+
+                if (ibanNoValue === '' || accountNoValue === '' || bankValue === '' || chequeImageValue === '') {
+                    if (ibanNoValue === '') {
+                        $('#iban_no').addClass('required');
+                    } else {
+                        $('#iban_no').removeClass('required');
+                    }
+
+                    if (accountNoValue === '') {
+                        $('#account_no').addClass('required');
+                    } else {
+                        $('#account_no').removeClass('required');
+                    }
+
+                    if (bankValue === '') {
+                        $('#bank').addClass('required');
+                    } else {
+                        $('#bank').removeClass('required');
+                    }
+
+                    if (chequeImageValue === '') {
+                        $('#cheque_image').addClass('required');
+                    } else {
+                        $('#cheque_image').removeClass('required');
+                    }
+                }
+            });
+
         });
     </script>
 @endsection

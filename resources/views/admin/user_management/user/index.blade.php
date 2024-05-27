@@ -37,8 +37,8 @@
                                                 @endforeach
                                             </select>
                                             <div class="d-none text-danger" id="assign_hubs_msg_error">Please Select Hub(s)</div>
-
                                         </div>
+
 										<div class="row justify-content-center">
 											<div class="col-6">
 												<button id="edit" type="submit" class="btn btn-primary btn-block">Assign Hub</button>
@@ -51,6 +51,37 @@
 					</div>
 				</div>
 
+				
+				<div class="modal fade text-left" id="lost_hub_user_shipment" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="lost_hub_user_shipment" aria-hidden="true">
+						<div class="modal-dialog modal-md" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h4 class="modal-title" id="">User Lost Shipment Hub</h4>
+								</div>
+								<form id="lost_hub_user_shipment_form" action="{{ route('admin.user_management.users.lost_hub_user_shipment') }}" method="POST">
+									@method('POST')
+									@csrf						
+									<div class="modal-body">
+										<input type="hidden" id="admin_id" name="admin_id">
+										<div class="col-12 form-group">
+											<select name="select_lost_hub_user_shipment[]" id="select_lost_hub_user_shipment" class="form-control select2" multiple="multiple">
+												@foreach($hubs as $hub)
+													<option value="{{ $hub->id }}" > {{ $hub->name }} </option>
+												@endforeach
+											</select>
+											<div class="d-none text-danger" id="assign_hubs_msg_error_1">Please Select Hub(s)</div>
+										</div>
+
+									</div>
+									<div class="modal-footer">
+										<button type="submit" class="btn btn-success" id="lost_hub_user_shipment_submit">Submit</button>
+										<button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				
 
 
 				<div class="card">
@@ -61,9 +92,9 @@
 								<div class="col-4">
 									<fieldset class="form-group">
 										<select name="search_roles[]" id="search_roles" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-											@foreach($roles as $role)
+											{{-- @foreach($roles as $role)
 												<option value="{{$role->id}}">{{$role->name}} - {{$role->department->name}}</option>
-											@endforeach
+											@endforeach --}}
 										</select>
 									</fieldset>
 								</div>
@@ -72,7 +103,37 @@
 								</div>
 							</div>
 
+							<div class="row">
+                                <div class="col-md-8"></div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="heading-elements">
+                                                <ul class="list-inline mb-0">
+                                                    <li class="primary border-primary round"><a
+                                                                data-action="collapse">Legend
+                                                            <i class="ft-minus"></i></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="card-content collapse">
+                                            <div class="card-body p-1">
+                                                <h4 class=" info">Legend</h4>
+                                                <input type="hidden" id="legend_filter">
 
+                                                <table class="table mb-0">
+                                                    <tbody>
+                                                    <tr style="background-color: yellow; color:#010a10;" class="legends">
+                                                        <td class="align-middle" id="filter_management_users_btn">Management Users</td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
@@ -148,6 +209,14 @@
 
             margin-bottom: 10px
         }
+
+		.legends{
+            cursor:pointer;
+        }
+        
+        .is_management_user{
+            background-color: yellow;
+        }
     </style>
 
 @endsection
@@ -164,20 +233,28 @@
 
             var selectedValue = [];
 
-$('#hub_select').select2().on('change', function() {
-    selectedValue = $('#hub_select').val();
-    $('#assign_hubs_msg_error').addClass('d-none')
+			$('#hub_select').select2().on('change', function() {
+				selectedValue = $('#hub_select').val();
+				$('#assign_hubs_msg_error').addClass('d-none')
 
-});
+			});
 
-$('#selectAllBtn').on('click', function() {
-    $('#hub_select').val($('#hub_select option').map(function() {
-        return $(this).val();
-    })).trigger('change');
+			$('#selectAllBtn').on('click', function() {
+				$('#hub_select').val($('#hub_select option').map(function() {
+					return $(this).val();
+				})).trigger('change');
 
-});
+			});
 
-$('#deSelectAllBtn').on('click', function() {
+			$('#select_lost_hub_user_shipment').select2({
+                placeholder:'Select Hub',
+                width:'100%',
+                allowClear:true,
+            }).on('change', function(){
+				$('#assign_hubs_msg_error_1').addClass('d-none')
+			});
+
+			$('#deSelectAllBtn').on('click', function() {
                 $('#hub_select').val([]).trigger('change');
             });
 
@@ -269,6 +346,62 @@ $('#deSelectAllBtn').on('click', function() {
 
 						}
 					},
+
+					{
+                        text: '<i class="la la-disable"></i> Management Users',
+                        className: 'btn btn-primary management_users',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if (selected_rows.length > 0) { 
+                                swal({
+                                    title: 'Management Users',
+                                    text: 'Are you sure you want to add management users?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: 'Cancel',
+                                        confirm: 'Yes, Add it'
+                                    },
+                                }).then((willDisable) => {
+                                    if (willDisable) {
+                                        $.ajax({
+                                            type: 'POST',
+											url: '{{ route('admin.user_management.users.add_management_users') }}',
+
+                                            data: {
+                                                userIDS: selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            },
+                                            success: function(res) {
+                                                if (res.status == '1') {
+                                                    swal('Added Successfully!', {
+                                                        icon: 'success',
+                                                    });
+
+										
+												table.rows().deselect();
+												selected_rows = [];
+												table.draw();
+
+                                                }else{
+                                                    swal(res.status, {
+                                                        icon: 'warning',
+                                                    });
+
+													table.clear().draw();
+                                                }
+                                            }, 
+                                            error: function(xhr, status, error) {
+                                                swal(status.status, {
+                                                    icon: 'warning',
+                                                })                                                
+                                            }
+                                        });
+                                      
+                                    } 
+                                });
+                            }
+                        }
+                    },
 					{
 						extend: 'selectAll',
 						text: 'Select All',
@@ -291,6 +424,8 @@ $('#deSelectAllBtn').on('click', function() {
 									}
 
 									table.button('.assign').enable();
+									table.button('.management_users').enable();
+
 								}
 							});
 						}
@@ -316,6 +451,7 @@ $('#deSelectAllBtn').on('click', function() {
 									}
 
 									if (selected_rows.length == 0) {
+										table.button('.management_users').disable();
 										table.button('.assign').disable();
 									}
 								}
@@ -354,6 +490,7 @@ $('#deSelectAllBtn').on('click', function() {
 					url: '{{ route('admin.user_management.users.list') }}',
 					data: function (d) {
 						d.search_roles = $('#search_roles').val();
+						d.filter_management_users = $('#filter_management_users_btn').val();
 				}
 				},
 				rowId: 'id',
@@ -633,40 +770,48 @@ $('#deSelectAllBtn').on('click', function() {
 
                 if (selected_rows.length > 0) {
                     table.button('.assign').enable();
+					table.button('.management_users').enable();
+
+					
                 }
                 else {
                     table.button('.assign').disable();
+					table.button('.management_users').disable();
+
                 }
 			});
 			
             $("#assign_hub_form").validate({
 
-errorClass: "danger",
-errorPlacement: function(error, element) {
-    error.addClass('w-100').appendTo(element.parent('.form-group'));
-},
-submitHandler: function(form) {
-    if (selectedValue.length > 0) {
+				errorClass: "danger",
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					if (selectedValue.length > 0) {
 
-        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+						$(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-        swal({
-            title: 'Please Wait!',
-            text: 'Multiple Hub has been assigned!',
-            icon: 'info',
-            buttons: false,
-            closeOnClickOutside: false,
-            closeOnEsc: false
-        });
+						swal({
+							title: 'Please Wait!',
+							text: 'Multiple Hub has been assigned!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
 
-        form.submit();
+						form.submit();
 
-    } else {
-        $('#assign_hubs_msg_error').removeClass('d-none');
-    }
-}
-});
-
+					} else {
+						$('#assign_hubs_msg_error').removeClass('d-none');
+					}
+				}
+			});
+			$("#filter_management_users_btn").on('click',function (){
+                $("#filter_management_users_btn").val(1);
+                table.draw();
+            });
 			
 
 		});

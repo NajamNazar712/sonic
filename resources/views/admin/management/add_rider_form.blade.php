@@ -3,7 +3,11 @@
         resize: none;
     }
 </style>
-
+@php 
+if (isset($main_category[2]) && $type == 1) {
+    unset($main_category[2]);
+}
+@endphp
 <form action="{{route('admin.management.riders.add')}}" method="post" class="mt-1" id="addRiderForm" novalidate="novalidate">
     {{csrf_field()}}
     <div class="row justify-content-center">
@@ -23,7 +27,7 @@
     <div class="row mb-2">
         <div class="col">
             <fieldset class="form-group">
-                <select name="city_id" id="city_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                <select name="city_id" id="city_list_add" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                     @foreach($cities as $city)
                         <option value="{{$city->id}}">{{$city->name}}</option>
                     @endforeach
@@ -33,7 +37,7 @@
 
         <div class="col">
             <fieldset class="form-group">
-                <select name="rider_shift" id="shift_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                <select name="rider_shift" id="shift_list_add" class="form-control select2 select2-hidden-accessible" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                     @foreach($shifts as $shift)
                         <option value="{{$shift->id}}"> {{$shift->name}}</option>
                     @endforeach
@@ -87,20 +91,31 @@
             <fieldset class="form-group">
                 <select name="rider_main_category" id="category_main_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                     <option value="" selected>Select a Rider Main Category</option>
+                    
                     @foreach($main_category as $category)
                         <option value="{{$category->id}}">{{$category->name}}</option>
                     @endforeach
                 </select>
             </fieldset>
         </div>
-        <div class="col" id="incentive_amount_div">
+        <div class="col" id="rider_hub_add">
+             <fieldset class="form-group">
+                <select name="hubs[]" id="hub_ids" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required" multiple="multiple">
+                    
+                    @foreach($hubs as $hub)
+                        <option value="{{$hub->id}}">{{$hub->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+        <div class="col" id="incentive_amount_div_add">
             <fieldset class="form-group">
-                <input type="text" name="incentive_amount" id="incentive_amount_input" class="form-control decimal" maxlength="6" placeholder="Enter Incentive Amount" data-rule-required="true" data-msg-required="Incentive Amount is required">
+                <input type="text" name="incentive_amount" id="incentive_amount_input_add" class="form-control decimal" maxlength="6" placeholder="Enter Incentive Amount" data-rule-required="true" data-msg-required="Incentive Amount is required">
             </fieldset>
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <select name="rider_category" id="category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                <select name="rider_category" id="category_list_add" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                     <option value="" selected>Select a Rider Sub Category</option>
                     @foreach($categories as $category)
                         <option value="{{$category->id}}">{{$category->name}}</option>
@@ -112,7 +127,7 @@
     <div class="row">
         <div class="col">
             <fieldset class="form-group">
-                <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                <select name="route_id" id="route_list_add" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                     <option value="" selected>Select a Route</option>
 
                 </select>
@@ -120,7 +135,7 @@
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                <select name="operation_rider_id" id="operation_rider_id_add" class="form-control select2" required>
                     <option value="" selected>Select a Category</option>
                     @foreach($operation_riders as $operation)
                         <option value="{{$operation->id}}">{{$operation->name}}</option>
@@ -152,7 +167,7 @@
         <div class="row mb-2">
             <div class="col">
                 <fieldset class="form-group">
-                    <select name="route_type_id" id="route_type_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    <select name="route_type_id" id="route_type_id_add" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                         <option value="" selected>Select Route Type</option>
                         @foreach($route_types as $route_type)
                             <option value="{{$route_type->id}}">{{$route_type->name}}</option>
@@ -169,12 +184,12 @@
             </div>
         </div>
     </div>
-    <div class='row' id="allow_delivered_row"> 
+    <div class='row d-none' id="allow_delivered_row_add"> 
         <div class="col text-center">
                 <label class="font-medium-2 font-weight-bold block">This rider will mark delivered status?</label>
                 <div class="form-group">
                     <label for="allow_delivered_status" class="font-medium-2 text-bold-600 mr-1">No</label>
-                    <input type="checkbox" name="allow_delivered_status" id="allow_delivered_status" class="checkbox allow_delivered_status" data-size="sm" data-switchery="true">
+                    <input type="checkbox" name="allow_delivered_status" id="allow_delivered_status_add" class="checkbox allow_delivered_status_add" data-size="sm" data-switchery="true">
                     <label for="allow_delivered_status" class="font-medium-2 text-bold-600 ml-1">Yes</label>
                 </div>
         </div>
@@ -187,25 +202,26 @@
     </div>
 </form>
 <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-
 <script type="text/javascript">
     $(document).ready(function () {
+        
         @if($type == 1)
         var ccd_elem = document.querySelector('.ccd_rider_checkbox');
         var ccd_switchery = new Switchery(ccd_elem);
         @endif
-        var allow_elem = document.querySelector('.allow_delivered_status');
+        var allow_elem = document.querySelector('.allow_delivered_status_add');
         var allow_switchery = new Switchery(allow_elem);
         
-        $('#incentive_amount_div').addClass('d-none');
-        $('#allow_delivered_row').addClass('d-none');
+        $('#incentive_amount_div_add').addClass('d-none');
+        $('#rider_hub_add').addClass('d-none');
+        //$('#allow_delivered_row_add').addClass('d-none');
 
 
-        $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
+        $('#city_list_add').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select City',
             dropdownParent: $("#addRiderForm")
         });
-        $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
+        $('#route_list_add').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select a route',
             dropdownParent: $("#addRiderForm")
         });
@@ -213,19 +229,19 @@
             placeholder:'Select an Area',
             dropdownParent: $("#addRiderForm")
         });
-        $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+        $('#operation_rider_id_add').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Functional Category',
             dropdownParent: $("#addRiderForm")
         }).bind('change', function () {
                 var id = parseInt($(this).val());
                 if(id == 2){
-                    $('#allow_delivered_row').removeClass('d-none');
+                    $('#allow_delivered_row_add').removeClass('d-none');
                 }else{
-                    $('#allow_delivered_status').prop('checked', false)
-                    $('#allow_delivered_row').addClass('d-none');
+                    $('#allow_delivered_status_add').prop('checked', false)
+                    $('#allow_delivered_row_add').addClass('d-none');
                 }
         });
-        $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
+        $('#category_list_add').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Rider Sub-Category',
             dropdownParent: $("#addRiderForm")
         });
@@ -235,18 +251,26 @@
         }).bind('change', function () {
                 var id = parseInt($(this).val());
                 if(id == 1){
-                    $('#incentive_amount_div').removeClass('d-none');
+                    $('#incentive_amount_div_add').removeClass('d-none');
                 }else{
-                    $('#incentive_amount_div').addClass('d-none');
+                    $('#incentive_amount_div_add').addClass('d-none');
                 }
+                (id == 3 ? $('#rider_hub_add').removeClass('d-none') : $('#rider_hub_add').addClass('d-none'));
+                
             });
-        $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
+        $('#shift_list_add').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Shift',
             dropdownParent: $("#addRiderForm")
         });
         $('#location_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Reporting Location',
             dropdownParent: $("#addRiderForm")
+        });
+        $('#hub_ids').select2({
+            width:'100%',
+            placeholder:"Select Hubs",
+            allowClear:true,
+            dropdownParent:$('#addRiderForm')
         });
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
@@ -258,7 +282,7 @@
             'mask':"9999"
         });
 
-        $('#incentive_amount_input').inputmask({
+        $('#incentive_amount_input_add').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
@@ -270,10 +294,10 @@
         $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled','disabled');
 
 
-        $('#city_list').on('change',function () {
-            var routelist = $('#route_list');
+        $('#city_list_add').on('change',function () {
+            var routelist = $('#route_list_add');
             var area_list = $('#area_list');
-            var id = $('#city_list').val();
+            var id = $('#city_list_add').val();
             if($(this).val() != ''){
                 $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').removeAttr('disabled');
             }
@@ -317,7 +341,7 @@
                 }
             });
         });
-        $('#route_list').on('change', function () {
+        $('#route_list_add').on('change', function () {
             var selection = $(this).val();
             if(selection == 'other'){
                 $('#new_route_div').removeClass('d-none');
