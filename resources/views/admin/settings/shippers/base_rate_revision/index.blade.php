@@ -69,162 +69,6 @@
             </div>
         </div>
     </div>
-    <div class="modal fade text-left" id="AddFleetModal" data-backdrop="static" tabindex="-1" role="dialog"
-        aria-labelledby="AddFleetModal" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Fleet</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form id="fleet_add_form" class="form-horizontal" action="{{ route('admin.settings.fleet.store') }}"
-                    method="POST" novalidate="novalidate">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="row justify-content-center">
-                            <div class="col-12 form-group">
-                                <input type="text" name="reg_number" id="reg_number" class="form-control reg_number"
-                                    placeholder="Registration Number*" data-rule-required="true"
-                                    data-msg-required="Registration Number is required"
-                                    data-rule-remote="{{ route('admin.settings.fleet.unique') }}"
-                                    data-msg-remote="Registration Number must be unique">
-                            </div>
-                        </div>
-                        <div class="row justify-content-center">
-                            <div class="col-12 form-group">
-                                <select class="form-control" id="vehicle_select" name="vehicle_select"
-                                    data-rule-required="true" data-msg-required="Vehicle Type is required">
-                                    {{-- @foreach ($vehicles as $vehicle)
-                                <option value="{{$vehicle->id}}">{{$vehicle->name}}</option>
-                            @endforeach --}}
-                                </select>
-                            </div>
-
-                            <div class="col-12 d-none" id="other_picker_name_div">
-                                <div class="form-group">
-                                    <input type="text" name="vehicle_type_name" id="vehicle_type_name"
-                                        class="form-control" placeholder="New Vehicle Type" data-rule-required="true"
-                                        data-msg-required="Vehicle Type is required">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row justify-content-center">
-                            <div class="col-12 form-group">
-                                <input type="text" name="tracking_id" id="tracking_id" class="form-control tracking_id"
-                                    placeholder="Tracking ID*" data-rule-required="true"
-                                    data-msg-required="Tracking ID is required">
-                            </div>
-                        </div>
-                        <div class="row justify-content-center">
-                            <div class="col-12 form-group">
-                                <select class="form-control" id="driver_select" name="driver" data-rule-required="true"
-                                    data-msg-required="Driver is required">
-                                    {{-- @foreach ($drivers as $driver)
-                                   <option value="{{$driver->id}}">{{$driver->name}} - {{$driver->cnic_no}}</option>
-                               @endforeach --}}
-                                </select>
-                            </div>
-
-                        </div>
-                        <div class="row justify-content-center">
-                            <div class="col-12 form-group">
-                                <select class="form-control" id="vendor_select" name="vendor" data-rule-required="true"
-                                    data-msg-required="Vendor is required">
-                                    {{-- @foreach ($vendors as $vendor)
-                                   <option value="{{$vendor->id}}">{{$vendor->name}}</option>
-                               @endforeach --}}
-                                </select>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button id="AddFleetBtn" type="submit" class="btn btn-info">Add</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade text-left" id="AddDriverModal" data-backdrop="static" tabindex="-1" role="dialog"
-        aria-labelledby="AddDriverModal" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Driver</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form id="driver_add_form" class="form-horizontal"
-                    action="{{ route('admin.settings.fleet.store.driver') }}" method="POST" novalidate="novalidate">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="row justify-content-center">
-                            <div class="col-12 form-group">
-                                <input type="text" name="driver_name" id="driver_name"
-                                    class="form-control driver_name" placeholder="Driver Name*" data-rule-required="true"
-                                    data-msg-required="Driver Name is required">
-                            </div>
-                        </div>
-                        <div class="row justify-content-center">
-                            <div class="col-12 form-group">
-                                <input type="text" name="phone_number" id="phone_number"
-                                    class="form-control phone_number" placeholder="Phone Number*"
-                                    data-rule-required="true" data-msg-required="Phone Number is required">
-                            </div>
-                        </div>
-                        <div class="row justify-content-center">
-                            <div class="col-12 form-group">
-
-                                <input type="text" name="cnic" id="cnic" class="form-control cnic"
-                                    placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required"
-                                    data-rule-remote="{{ route('admin.settings.fleet.unique.cnic') }}"
-                                    data-msg-remote="CNIC must be unique">
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button id="AddDriverBtn" type="submit" class="btn btn-info">Add</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade text-left" id="AddVendorModal" data-backdrop="static" tabindex="-1" role="dialog"
-        aria-labelledby="AddVendorModal" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Vendor</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form id="vendor_add_form" class="form-horizontal"
-                    action="{{ route('admin.settings.fleet.store.vendor') }}" method="POST" novalidate="novalidate">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="row justify-content-center">
-                            <div class="col-12 form-group">
-                                <input type="text" name="vendor_name" id="vendor_name"
-                                    class="form-control vendor_name" data-rule-required="true"
-                                    data-msg-required="Vendor Name is required">
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button id="AddDriverBtn" type="submit" class="btn btn-info">Add</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
 @endsection
 
@@ -306,45 +150,6 @@
 				},
 			});
 
-            // $("#cnic").inputmask({
-            //     'mask': "99999-9999999-9",
-            //     'clearIncomplete': true
-            // });
-            // $("#phone_number").inputmask({
-            //     'mask': '9999-9999999',
-            //     'clearIncomplete': true
-            // });
-            // $('#vehicle_select').prepend('<option value="" selected="selected"></option>').append(
-            //     '<option value="other">Other</option>').select2({
-            //     width: '100%',
-            //     placeholder: 'Select Vehicle Type*',
-            //     dropdownParent: $('#fleet_add_form')
-            // }).bind('change', function() {
-            //     if ($(this).val() === 'other') {
-            //         $('#other_picker_name_div').removeClass('d-none');
-            //     } else {
-            //         $('#other_picker_name_div').addClass('d-none');
-            //     }
-            // });
-
-            // $('#driver_select').prepend('<option value="" selected="selected"></option>').append(
-            //     '<option value="other">Other</option>').select2({
-            //     width: '100%',
-            //     placeholder: 'Select Driver*',
-            //     dropdownParent: $('#fleet_add_form')
-            // });
-            // $('#vendor_select').prepend('<option value="" selected="selected"></option>').append(
-            //     '<option value="other">Other</option>').select2({
-            //     width: '100%',
-            //     placeholder: 'Select Vendor*',
-            //     dropdownParent: $('#fleet_add_form')
-            // });
-
-            // $("#runner").prepend('<option value="" selected></option>').select2({
-            //     placeholder: "Select Runner",
-            //     width:'100%',
-            //     dropdownParent:$('#SelectRunnerModal')
-            // });
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function(options) {
                 if (this.context.length) {
                     body = [];
@@ -353,7 +158,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.settings.fleet.list') }}',
+                        url: '{{ route('admin.settings.shippers.base_rate_revisions.list') }}',
                         data: params,
                         success: function(result) {
                             head = [];
@@ -372,14 +177,17 @@
                             $.each(result.data, function(index, values) {
                                 row = [];
 
-
                                 row.push(index + 1);
-                                row.push(values.reg_number);
-                                row.push(values.vehicle_type);
-                                row.push(values.tracking_id);
-                                row.push(values.driver);
-                                row.push(values.vendor);
-                                row.push(values.status);
+                                row.push(values.shippers_count);
+                                row.push(values.rate_type);
+                                row.push(values.created_at);
+                                row.push(values.added_by_admin);
+                                row.push(values.approved1_by_admin);
+                                row.push(values.approval1_at);
+                                row.push(values.approval1_status);
+                                row.push(values.approved2_by_admin);
+                                row.push(values.approval2_at);
+                                row.push(values.approval2_status);
 
                                 body.push(row);
                             });
@@ -454,7 +262,7 @@
                 },
                 serverSide: true,
                 autoWidth: false,
-                ajax: '{{ route('admin.settings.fleet.list') }}',
+                ajax: '{{ route('admin.settings.shippers.base_rate_revisions.list') }}',
                 rowId: 'id',
                 order: [
                     [1, 'desc']
@@ -470,81 +278,81 @@
                         }
                     },
                     {
-                        data: 'reg_number',
-                        name: 'reg_number',
-                        class: 'align-middle text-center reg_number',
+                        data: 'shippers_count',
+                        name: 'shippers_count',
+                        class: 'align-middle text-center shippers_count',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'rate_type',
+                        name: 'rate_type',
+                        class: 'align-middle text-center rate_type',
                         orderable: false,
                         searchable: false
                     },
                     {
                         searchable: false,
-                        data: 'vehicle_type',
-                        name: 'vt.name',
-                        class: 'align-middle text-center vehicle_type',
+                        data: 'file_view',
+                        name: 'file_view',
+                        class: 'align-middle text-center file_view',
                         orderable: false,
                         searchable: false
                     },
                     {
-                        data: 'tracking_id',
-                        name: 'tracking_id',
-                        class: 'align-middle text-center tracking_id',
+                        data: 'created_at',
+                        name: 'created_at',
+                        class: 'align-middle text-center created_at',
                         orderable: false,
                         searchable: false
                     },
                     {
                         searchable: false,
-                        data: 'driver',
-                        name: 'fd.name',
-                        class: 'align-middle text-center driver',
+                        data: 'added_by_admin',
+                        name: 'added_by_admin',
+                        class: 'align-middle text-center added_by_admin',
                         orderable: false,
                         searchable: false
                     },
                     {
-                        data: 'vendor',
-                        name: 'fv.name',
-                        class: 'align-middle text-center vendor',
+                        data: 'approved1_by_admin',
+                        name: 'approved1_by_admin',
+                        class: 'align-middle text-center approved1_by_admin',
                         orderable: false,
                         searchable: false
                     },
                     {
-                        data: 'status',
-                        name: 'status',
-                        class: 'align-middle text-center status',
+                        data: 'approval1_at',
+                        name: 'approval1_at',
+                        class: 'align-middle text-center approval1_at',
                         orderable: false,
                         searchable: false
                     },
                     {
-                        data: 'status',
-                        name: 'status',
-                        class: 'align-middle text-center status',
+                        data: 'approval1_status',
+                        name: 'approval1_status',
+                        class: 'align-middle text-center approval1_status',
                         orderable: false,
                         searchable: false
                     },
                     {
-                        data: 'status',
-                        name: 'status',
-                        class: 'align-middle text-center status',
+                        data: 'approved2_by_admin',
+                        name: 'approved2_by_admin',
+                        class: 'align-middle text-center approved2_by_admin',
                         orderable: false,
                         searchable: false
                     },
                     {
-                        data: 'status',
-                        name: 'status',
-                        class: 'align-middle text-center status',
+                        data: 'approval2_at',
+                        name: 'approval2_at',
+                        class: 'align-middle text-center approval2_at',
                         orderable: false,
                         searchable: false
                     },
                     {
-                        data: 'status',
-                        name: 'status',
-                        class: 'align-middle text-center status',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'status',
-                        name: 'status',
-                        class: 'align-middle text-center status',
+                        data: 'approval2_status',
+                        name: 'approval2_status',
+                        class: 'align-middle text-center approval2_status',
                         orderable: false,
                         searchable: false
                     },
@@ -580,49 +388,23 @@
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
-
-
-                        // if ($(header).is('.serial_number') || $(header).is('.action')) {
-                        //     $(td).appendTo($(search));
-                        // }
-                        // //  else if ($(header).is('.status')) {
-                        // //     $(status_select).appendTo($(search))
-                        // //         .on('change', function() {
-                        // //             column.search($(this).val(), false, false, true).draw();
-                        // //         }).wrap(td);
-                        // // } 
-                        // else {
-                        //     var current = $(input).appendTo($(search)).on('change', function() {
-                        //         column.search($(this).val(), false, false, true).draw();
-                        //     }).wrap(td).after(icon);
-
-                        //     if (column.search()) {
-                        //         current.val(column.search());
-                        //     }
-                        // }
                     });
-                    // $("#status_select").prepend('<option value="" selected></option>').select2({
-                    //     placeholder: "Select Status",
-                    //     width: '100%',
-                    //     containerCssClass: 'select-xs',
-                    //     dropdownCssClass: 'form-control-sm p-0'
-                    // });
                     this.api().table().columns.adjust();
                 }
             });
 
-            $("#editFleet").on("show.bs.modal", function(e) {
-                var $invoker = $(e.relatedTarget);
-                var action = $invoker.attr('rel');
-                var id = $(e.relatedTarget).data('target-id');
+            // $("#editFleet").on("show.bs.modal", function(e) {
+            //     var $invoker = $(e.relatedTarget);
+            //     var action = $invoker.attr('rel');
+            //     var id = $(e.relatedTarget).data('target-id');
 
 
-                if (action == 'edit_fleet') {
-                    $.get("/admin/settings/fleet/" + id + "/edit/form", function(data) {
-                        $("#editFleetDiv").html(data);
-                    });
-                }
-            });
+            //     if (action == 'edit_fleet') {
+            //         $.get("/admin/settings/fleet/" + id + "/edit/form", function(data) {
+            //             $("#editFleetDiv").html(data);
+            //         });
+            //     }
+            // });
 
 
 
@@ -632,126 +414,29 @@
 
 
                 if ($(this).hasClass('status')) {
-                    $.ajax({
-                        url: '{!! route('admin.settings.fleet.enable_disable') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function(data) {
-                        if (data.status) {
+                    // $.ajax({
+                    //     url: '{!! route('admin.settings.fleet.enable_disable') !!}',
+                    //     method: 'POST',
+                    //     data: {
+                    //         'id': id,
+                    //         '_token': '{{ csrf_token() }}'
+                    //     }
+                    // }).done(function(data) {
+                    //     if (data.status) {
 
-                            table.draw(true);
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
+                    //         table.draw(true);
+                    //         toastr.success(data.success, 'Success!', {
+                    //             positionClass: 'toast-bottom-center',
+                    //             containerId: 'toast-bottom-center'
+                    //         });
 
-                        }
-                    });
+                    //     }
+                    // });
+                    
                 }
             });
 
 
-
-            $('#fleet_add_form').validate({
-                ignore: ":not(:visible),:disabled",
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Creating Fleet!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-
-            });
-
-            $('#driver_add_form').validate({
-                ignore: ":not(:visible),:disabled",
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Adding Driver!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-
-            });
-
-            var select = $('#vendor_name').selectize({
-                placeholder: 'Vendor Name(s)*',
-                delimiter: ',',
-                createOnBlur: true,
-                persist: false,
-                plugins: ['remove_button'],
-                onDropdownOpen: function(dropdown) {
-                    dropdown.remove();
-                },
-                create: function(input) {
-                    var regex = /^[a-zA-Z0-9]+$/;
-
-                    if (!regex.test(input)) {
-                        return false;
-                    }
-                    return {
-                        value: input,
-                        text: input
-                    }
-
-                }
-            });
-
-            $('#vendor_add_form').validate({
-                ignore: [],
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-                },
-                submitHandler: function(form) {
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Adding Vendor!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-            });
         });
     </script>
 @endsection

@@ -19,10 +19,10 @@ class CreateBaseRateRevisionsTable extends Migration
             $table->integer('added_by_admin_id')->index();
             $table->integer('approval1_by_admin_id')->nullable()->index();
             $table->timestamp('approval1_at')->nullable();
-            $table->tinyInteger('approval1_status')->default(1);
+            $table->tinyInteger('approval1_status')->default(1)->index();
             $table->integer('approval2_by_admin_id')->nullable()->index();
             $table->timestamp('approval2_at')->nullable();
-            $table->tinyInteger('approval2_status')->default(1);
+            $table->tinyInteger('approval2_status')->default(1)->index();
             $table->timestamps();
         });
     }

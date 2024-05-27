@@ -13,9 +13,9 @@ class BaseRateRevision extends Model
 
 
     //Relationships
-    public function shippers()
+    public function shippersWithRateChange()
     {
-        return $this->belongsTo('App\Models\Admin\BaseRateRevisionApprovalStatus','base_rate_revision_id');
+        return $this->hasMany('App\Models\Admin\BaseRateRevisionShipper','base_rate_revision_id');
     }
 
     public function rateType()

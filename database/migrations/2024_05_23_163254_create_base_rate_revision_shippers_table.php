@@ -15,9 +15,9 @@ class CreateBaseRateRevisionShippersTable extends Migration
     {
         Schema::create('base_rate_revision_shippers', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('base_rate_revision_id');
+            $table->unsignedInteger('base_rate_revision_id')->index();
             $table->foreign('base_rate_revision_id')->references('id')->on('base_rate_revisions');
-            $table->unsignedInteger('shipper_id');
+            $table->unsignedInteger('shipper_id')->index();
             $table->float('rate_change_percent');
             $table->timestamps();
         });

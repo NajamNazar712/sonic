@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Admins\Settings\Shippers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Admin\BaseRateRevision;
 use App\Models\Admin\BaseRateType;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Yajra\Datatables\Datatables;
 
 class BaseRateRivisionController extends Controller
 {
@@ -23,10 +27,11 @@ class BaseRateRivisionController extends Controller
         return view('admin.settings.shippers.base_rate_revision.index',['baseRateTypes' => $baseRateTypes]);
     }
 
-    public function add_bulk_shipper_adjustment_store(Request $request)
+    public function add_bulk_shipper_rate_adjustment_store(Request $request)
     {
 
         $rateAdjustmentTypeId = $request->adjustment_type;
+        $adminId = Auth::id();
 
         $names = [
             'shipper_id' => 'Account Number',
@@ -89,10 +94,15 @@ class BaseRateRivisionController extends Controller
                 unset($spreadsheet);
             }
 
-            // dd($rows);
+            //Validation for Duplicate Entries
             $duplicateValidation = Validator::make($rows,
-            ['*.shipper_id' => 'required|unique']
+            ['*.shipper_id' => 'required|distinct'],
+            ['*.shipper_id.distinct' => 'Duplicate Account Numbers Found!']
             );
+
+            if ($duplicateValidation->fails()) {
+                return redirect()->back()->withErrors($duplicateValidation->errors()->first());
+            }
 
             foreach ($rows as $key => $row) {
                 $row_id = $key + 1;
@@ -111,20 +121,103 @@ class BaseRateRivisionController extends Controller
                 }, array_keys($errors), $errors);
                 return redirect()->back()->withErrors($errors);
             } else {
+
+                $data= [];
+                $rate_adjustment_type_id = $rateAdjustmentTypeId;
+                $baseRateRevision = BaseRateRevision::create([
+                    'rate_type_id' => $rate_adjustment_type_id,
+                    'added_by_admin_id' => $adminId,
+                    'approval1_status' => 1,
+                    'approval2_status' => 1
+                ]);
+
                 foreach ($rows as $key => $row) {
 
                     $shipper_id = (int)$row['shipper_id'];
                     $rateAdjustmentPercentage = floatval($row['percentage']);
-                    $rate_adjustment_type_id = $rateAdjustmentTypeId;
-                    // $this->add_adjustment($shipment->id, $payable, $remarks, $adjustment_type_id);
+                    $data[] = [
+                        'shipper_id' => $shipper_id,
+                        'rate_change_percent' => $rateAdjustmentPercentage
+                    ];
 
-                    }
                 }
-                return redirect()->back()->with(['success' => count($rows) . ' Adjustment Added']);
+
+                $baseRateRevision->shippersWithRateChange()->createMany($data);
+                
+                }
+
+                return redirect()->back()->with(['success' => count($rows) . ' Revision'.(count($rows) > 1 ? 's' : '').' Added']);
             }
 
          else {
             return redirect()->back()->with('error', 'Invalid Tracking Numbers');
         }
     }
+
+    public function base_rate_revisions_list(Request $request)
+    {
+        // if ($request->get('excel') && $request->get('excel') == true) {
+        //     ActivityTrailController::createActivityTrailLog(Auth::id(), 247);
+        // }
+
+        $baseRateRevisions = BaseRateRevision::withCount('shippersWithRateChange')
+        ->with([
+            'rateType:id,name',
+            'addedByAdmin:id,name',
+            'approved1ByAdmin:id,name',
+            'approval1Status:id,name',
+            'approved2ByAdmin:id,name',
+            'approval2Status:id,name',
+        ]);
+
+        $datatable = Datatables::of($baseRateRevisions)
+        ->addColumn('rate_type', function ($revision) {
+            return $revision->rateType->name;
+        })
+        ->addColumn('file_view', function ($revision) {
+            return $revision->id;
+        })
+        ->addColumn('added_by_admin', function ($revision) {
+            return $revision->addedByAdmin->name;
+        })
+        ->addColumn('approved1_by_admin', function ($revision) {
+            return $revision->approved1ByAdmin ? $revision->approved1ByAdmin->name : '-';
+        })
+        ->addColumn('approval1_status', function ($revision) {
+            return $revision->approval1Status->name;
+        })
+        ->editColumn('approval1_at', function ($revision) {
+            return $revision->approval1_at ?? '-';
+        })
+        ->addColumn('approved2_by_admin', function ($revision) {
+            return $revision->approved2ByAdmin ? $revision->approved2ByAdmin->name : '-';
+        })
+        ->editColumn('approval2_at', function ($revision) {
+            return $revision->approval2_at ?? '-';
+        })
+        ->addColumn('approval2_status', function ($revision) {
+            return $revision->approval2Status->name;
+        })
+        ->addColumn('shippers_count', function ($revision) {
+            return $revision->shippers_with_rate_change_count;
+        })
+        ->addColumn('action', function ($revision) {
+            $approve = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Approve</div></button>';
+            $reject = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Reject</div></button>';
+    
+            $dropdown = '
+                <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">';
+            
+            $dropdown .= $approve;
+            $dropdown .= $reject;
+    
+            $dropdown .= '</div></div>';
+            return $dropdown;
+        });
+
+        return $datatable->make(true);
+    }
+
 }

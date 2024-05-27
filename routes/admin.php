@@ -2530,9 +2530,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::prefix('base_rate_revisions')->name('base_rate_revisions.')->group(function () {
                 Route::get('', 'Admins\Settings\Shippers\BaseRateRivisionController@index')->name('index');
-                // Route::get('list', 'Admins\GlobalSettingsController@status_webhook_list')->name('list');
-                // Route::get('{id}/edit', 'Admins\GlobalSettingsController@status_webhook_edit')->name('edit');
-                Route::post('store', 'Admins\Settings\Shippers\BaseRateRivisionController@add_bulk_shipper_adjustment_store')->name('bulk_store');
+                Route::get('list', 'Admins\Settings\Shippers\BaseRateRivisionController@base_rate_revisions_list')->name('list');
+                Route::post('store', 'Admins\Settings\Shippers\BaseRateRivisionController@add_bulk_shipper_rate_adjustment_store')->name('bulk_store');
             });
 
             Route::prefix('status_webhook')->name('status_webhook.')->group(function () {
