@@ -2575,8 +2575,6 @@ class AdminTrackingController extends Controller
         })
         ->leftJoin('scanned_user_types as sp', 'shipment_positions.scanned_by_user_type', '=', 'sp.id')
         ->leftJoin('admins as adm', 'adm.id', '=', 'shipment_positions.scanned_by_id')
-
-        ->leftJoin('shipment_status_screen_locations as sssl', 'sssl.shipment_status_id', '=', 'journey.shipper_status_id')
         ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
             $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
                  ->whereRaw('ssj.id = (
