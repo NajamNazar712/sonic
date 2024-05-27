@@ -258,8 +258,9 @@ class DeliveryController extends Controller
                                     select max(id) 
                                     from shipment_scanning_journeys 
                                     where shipment_scanning_journeys.shipment_id = journey.shipment_id
-                                )');
-            })
+                                    and shipment_scanning_journeys.screen_location_id not in (9, 18)
+                    )');
+            })        
             ->when(\DB::raw('ssj_last_location.user_type = 1'), function ($join) {
                 $join->leftJoin('admins as adm', function ($join) {
                     $join->on('adm.id', '=', 'ssj_last_location.admin_id')
