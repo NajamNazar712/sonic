@@ -56,11 +56,11 @@
                             <th class="border-primary border-darken-1">File</th>
                             <th class="border-primary border-darken-1">Added At</th>
                             <th class="border-primary border-darken-1">Added By</th>
-                            <th class="border-primary border-darken-1">Approved By</th>
-                            <th class="border-primary border-darken-1">Approved At</th>
+                            <th class="border-primary border-darken-1">Approved/Rejected By</th>
+                            <th class="border-primary border-darken-1">Approved/Rejected At</th>
                             <th class="border-primary border-darken-1">Status</th>
-                            <th class="border-primary border-darken-1">Approved By Finance</th>
-                            <th class="border-primary border-darken-1">Approved At (Finance)</th>
+                            <th class="border-primary border-darken-1">Approved/Rejected By Finance</th>
+                            <th class="border-primary border-darken-1">Approved/Rejected At (Finance)</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Action</th>
                         </tr>
@@ -432,7 +432,7 @@
 
                     //     }
                     // });
-                    
+
                 }
             });
 

@@ -202,22 +202,47 @@ class BaseRateRivisionController extends Controller
             return $revision->shippers_with_rate_change_count;
         })
         ->addColumn('action', function ($revision) {
-            $approve = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Approve</div></button>';
-            $reject = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Reject</div></button>';
-    
+            $approve = '<a href="'.route('admin.settings.shippers.base_rate_revisions.approval1_update',[$revision->id,2]).'" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Approve</div></div></a>';
+            $reject = '<a href="'.route('admin.settings.shippers.base_rate_revisions.approval1_update',[$revision->id,3]).'" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Reject</div></div></a>';
+
             $dropdown = '
                 <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">';
             
-            $dropdown .= $approve;
-            $dropdown .= $reject;
+            if (session('role_id') == 1 || in_array(503, session('permissions')))
+            {
+                $dropdown .= $approve;
+                $dropdown .= $reject;
+            }
+                
+
     
             $dropdown .= '</div></div>';
             return $dropdown;
         });
 
         return $datatable->make(true);
+    }
+
+    public function approval1_update($baseRateRevisionId, $status)
+    {
+        $baseRateRevision = BaseRateRevision::find($baseRateRevisionId);
+        $baseRateRevision->approval1_status = $status;
+        $baseRateRevision->approval1_at = now();
+        $baseRateRevision->approval1_by_admin_id = Auth::id();
+        $baseRateRevision->save();
+        return redirect()->back()->with([($status == 2 ? 'success' : 'error') => 'Base Rate Revision '.($status == 2 ? 'Approved' : 'Rejected')]);
+    }
+
+    public function approval2_update($baseRateRevisionId, $status)
+    {
+        $baseRateRevision = BaseRateRevision::find($baseRateRevisionId);
+        $baseRateRevision->approval2_status = $status;
+        $baseRateRevision->approval2_at = now();
+        $baseRateRevision->approval2_by_admin_id = Auth::id();
+        $baseRateRevision->save();
+        return redirect()->back()->with([($status == 2 ? 'success' : 'error') => 'Base Rate Revision '.($status == 2 ? 'Approved' : 'Rejected')]);
     }
 
 }
