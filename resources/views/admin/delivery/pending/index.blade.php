@@ -373,7 +373,7 @@
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 
 
-                {data: 'last_location_screen_location_name', name: 'shipment_scanning_screen_locations.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name'},
+                {data: 'last_location_screen_location_name', name: 'last_screen_location.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name'},
                 {data: 'ca_scanning_last_location_name', name: 'ca_scanning_last_location_name.name', as:'ca_scanning_last_location_name', class: 'align-middle ca_scanning_last_location_name'},
                 {data: 'last_location_updated_at', name: 'ssjal_last_location.updated_at', as:'last_location_updated_at', class: 'align-middle last_location_updated_at'},
 

@@ -417,6 +417,8 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
+
+            
             ->filterColumn('shipping_mode', function ($query, $keyword) {
 
                 if ($keyword != '') {
@@ -445,6 +447,14 @@ class DeliveryController extends Controller
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
                     $query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+
+            ->filterColumn('last_location_screen_location_name', function ($query, $keyword) {
+                if ($keyword != '') {
+                    $query->where('last_screen_location.name', 'like', '%' . $keyword . '%');
                 } else {
                     $query->whereRaw('false');
                 }
