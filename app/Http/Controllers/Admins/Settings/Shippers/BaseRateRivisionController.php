@@ -202,6 +202,8 @@ class BaseRateRivisionController extends Controller
             return $revision->shippers_with_rate_change_count;
         })
         ->addColumn('action', function ($revision) {
+            //Status = 2  => Approve
+            //Status = 3  => Reject
             $approve = '<a href="'.route('admin.settings.shippers.base_rate_revisions.approval1_update',[$revision->id,2]).'" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Approve</div></div></a>';
             $reject = '<a href="'.route('admin.settings.shippers.base_rate_revisions.approval1_update',[$revision->id,3]).'" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Reject</div></div></a>';
 
