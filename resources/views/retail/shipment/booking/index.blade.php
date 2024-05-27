@@ -184,7 +184,7 @@
                                             </div>
 
                                             <div class="form-group col-6">
-                                                <input type="text" name="parcel_amount" id="parcel_amount" class="form-control rounded-right" placeholder="Parcel Amount*" data-rule-required="true" data-msg-required="Parcel Amount is required">
+                                                <input type="text" name="parcel_amount" id="parcel_amount" class="form-control rounded-right" placeholder="Parcel Value*" data-rule-required="true" data-msg-required="Parcel Value is required">
                                             </div>
                                         </div>
                                         <div class="row">

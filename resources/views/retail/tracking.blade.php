@@ -591,7 +591,8 @@
                                     shipment += '<td><strong>Description</strong></td>';
                                     shipment += '<td>' + ((item.description) ? item.description : '-') + '</td>';
                                     shipment += '<td><strong>Quantity</strong></td>';
-                                    shipment += '<td>' + item.quantity + '</td>';
+                                    // shipment += '<td>' + item.quantity + '</td>';
+                                    shipment += '<td>' + details.order_information.quantity + '</td>';
                                     shipment += '</tr>';
                                 });
 
@@ -623,9 +624,6 @@
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Parcel Value</strong></td>';
                                 shipment += '<td>' + details.order_information.parcel_value + '</td>';
-
-                                shipment += '<td><strong>Retail Booking Qunatity</strong></td>';
-                                shipment += '<td>' + details.order_information.quantity + '</td>';
 
                                 shipment += '</tr>';
                                 shipment += '<tr>';
