@@ -2676,6 +2676,8 @@ class AdminTrackingController extends Controller
                     }else{
                         return '-';
                     }
+                }else if(isset($shipment->scanning_city_area_name)){
+                    return $shipment->scanning_city_area_name;
                 }else{
                     return '-';
                 }
