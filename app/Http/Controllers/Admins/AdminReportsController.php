@@ -14591,9 +14591,9 @@ class AdminReportsController extends Controller
             'bs.name as bag_status',
             'sjfa.created_at as first_attempt_date',
             'sjrp.created_at as rider_picked_status_date',
-            'ssjal.location_status as location_status',
-            'ssjal_hss.location_status as location_status_hss',
-            'ca_scanning.name as scanning_city_area_name',
+            // 'ssjal.location_status as location_status',
+            // 'ssjal_hss.location_status as location_status_hss',
+            // 'ca_scanning.name as scanning_city_area_name',
             'spt.admin_id as sales_person_id',
             'sales_person.name as sales_person_name',
             'stt.kam as stt_kam_id',
@@ -14735,34 +14735,34 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
-            ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
-                $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
-                     ->whereRaw('ssj.id = (
-                                    select max(id) 
-                                    from shipment_scanning_journeys 
-                                    where shipment_scanning_journeys.shipment_id = journey.shipment_id
-                                    and shipment_scanning_journeys.screen_location_id IN (
-                                        select screen_location_id 
-                                        from shipment_status_screen_locations 
-                                        where shipment_status_id = journey.shipper_status_id
-                                    )
-                                    and (admin.role_id != 1 or admin.id is null)
-                                )');
-            })
-            ->leftJoin('shipment_scanning_journeys as ssj_hss', function ($join) {
-                $join->on('ssj_hss.shipment_id', '=', 'journey.shipment_id')
-                     ->whereRaw('ssj_hss.id = (
-                                    select max(id) 
-                                    from shipment_scanning_journeys 
-                                    where shipment_scanning_journeys.shipment_id = journey.shipment_id
-                                    and shipment_scanning_journeys.screen_location_id IN (
-                                        select screen_location_id 
-                                        from shipment_status_screen_locations 
-                                        where shipment_status_id = hss.id
-                                    )
-                                    and (admin.role_id != 1 or admin.id is null)
-                                )');
-            })
+            // ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
+            //     $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
+            //          ->whereRaw('ssj.id = (
+            //                         select max(id) 
+            //                         from shipment_scanning_journeys 
+            //                         where shipment_scanning_journeys.shipment_id = journey.shipment_id
+            //                         and shipment_scanning_journeys.screen_location_id IN (
+            //                             select screen_location_id 
+            //                             from shipment_status_screen_locations 
+            //                             where shipment_status_id = journey.shipper_status_id
+            //                         )
+            //                         and (admin.role_id != 1 or admin.id is null)
+            //                     )');
+            // })
+            // ->leftJoin('shipment_scanning_journeys as ssj_hss', function ($join) {
+            //     $join->on('ssj_hss.shipment_id', '=', 'journey.shipment_id')
+            //          ->whereRaw('ssj_hss.id = (
+            //                         select max(id) 
+            //                         from shipment_scanning_journeys 
+            //                         where shipment_scanning_journeys.shipment_id = journey.shipment_id
+            //                         and shipment_scanning_journeys.screen_location_id IN (
+            //                             select screen_location_id 
+            //                             from shipment_status_screen_locations 
+            //                             where shipment_status_id = hss.id
+            //                         )
+            //                         and (admin.role_id != 1 or admin.id is null)
+            //                     )');
+            // })
 
 
             ->leftJoin('shipment_scanning_journeys as ssj_last_location', function ($join) {
@@ -14784,9 +14784,9 @@ class AdminReportsController extends Controller
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
 
 
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
-            ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
+            // ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+            // ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
+            // ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
             ->select($select)
             ->groupBy('shipments.id');
 
