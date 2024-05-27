@@ -24,7 +24,10 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <select class="form-control" name="adjustment_type" id="adjustment_types" data-rule-required="true" data-msg-required="Adjustment Type is required">
-                                        <option value="">Testing</option>
+                                        <option disabled selected>Select Rate Type</option>
+                                        @foreach ($baseRateTypes as $baseRateType)
+                                        <option value="{{$baseRateType->id}}">{{$baseRateType->name}}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
