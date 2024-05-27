@@ -620,6 +620,13 @@
                                     shipment += '<td colspan="3">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
                                 }
 
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Parcel Value</strong></td>';
+                                shipment += '<td>' + details.order_information.parcel_value + '</td>';
+
+                                shipment += '<td><strong>Retail Booking Qunatity</strong></td>';
+                                shipment += '<td>' + details.order_information.quantity + '</td>';
+
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Piece(s)</strong></td>';
