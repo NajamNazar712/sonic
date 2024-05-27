@@ -14599,8 +14599,13 @@ class AdminReportsController extends Controller
             'stt.kam as stt_kam_id',
             'kam.name as stt_kam_name',
             'scu.user_id as scu_kam_id',
-            'scun.name as scu_kam_name'
-            
+            'scun.name as scu_kam_name',
+            'ssjal_last_location.updated_at as last_location_updated_at',
+            'ca_scanning_last_location_name.name as ca_scanning_last_location_name',
+            'ssj_last_location.user_type as scanned_by_user_type',
+            'ssj_last_location.admin_id as scanned_by_id',
+            'last_screen_location.name as last_location_screen_location_name'
+
         ];
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('sale_person_tags as spt', function($join){
@@ -14758,12 +14763,32 @@ class AdminReportsController extends Controller
                                     and (admin.role_id != 1 or admin.id is null)
                                 )');
             })
+
+
+            ->leftJoin('shipment_scanning_journeys as ssj_last_location', function ($join) {
+                $join->on('ssj_last_location.shipment_id', '=', 'journey.shipment_id')
+                     ->whereRaw('ssj_last_location.id = (
+                                    select max(id) 
+                                    from shipment_scanning_journeys 
+                                    where shipment_scanning_journeys.shipment_id = journey.shipment_id
+                                )');
+            })
+            ->when(\DB::raw('ssj_last_location.user_type = 1'), function ($join) {
+                $join->leftJoin('admins as adm', function ($join) {
+                    $join->on('adm.id', '=', 'ssj_last_location.admin_id')
+                         ->where('adm.role_id', '<>', 1);
+                });
+            })
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_last_location', 'ssjal_last_location.shipment_scanning_journey_id', '=', 'ssj_last_location.id')
+            ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
+            ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
+
+
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
             ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
             ->select($select)
             ->groupBy('shipments.id');
-            
 
         $type = $request->get('search_types');
 
@@ -14972,7 +14997,21 @@ class AdminReportsController extends Controller
                 } else {
                     return $shipments->stt_kam_name;
                 }
-            });
+
+            })->editColumn('ca_scanning_last_location_name', function ($shipment) {
+                if($shipment->scanned_by_user_type == 5){
+                    $rider = Rider::find($shipment->scanned_by_id);
+                    if(isset($rider->area)){
+                        return $rider->area->name;
+                    }else{
+                        return '-';
+                    }
+                }else if(isset($shipment->ca_scanning_last_location_name)){
+                    return $shipment->ca_scanning_last_location_name;
+                }else{
+                    return '-';
+                }
+            });;
       
 
         //return $datatable->make(true);
@@ -15050,6 +15089,23 @@ class AdminReportsController extends Controller
                 }
 
 
+                
+                if (isset($rowArray['ca_scanning_last_location_name'])) {
+                    if($rowArray['scanned_by_user_type'] == 5){
+                        $rider = Rider::find($rowArray['scanned_by_id']);
+                        if(isset($rider->area)){
+                            $rowArray['ca_scanning_last_location_name'] =  $rider->area->name;
+                        }else{
+                            $rowArray['ca_scanning_last_location_name'] = '-';
+                        }
+                    }else if(isset($rowArray['ca_scanning_last_location_name'])){
+                        $rowArray['ca_scanning_last_location_name'];
+                    }else{
+                        $rowArray['ca_scanning_last_location_name'] = '-';
+                    }
+                }
+             
+                
                 $filteredArray = [];
 
                 // Iterate over $fieldsToRetrieve to maintain sequence
