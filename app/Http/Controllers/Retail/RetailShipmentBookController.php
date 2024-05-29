@@ -66,7 +66,7 @@ class RetailShipmentBookController extends Controller
 //        $this->middleware('Permission');
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $business_category_id, $length, $breadth, $height) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $business_category_id, $length, $breadth, $height, $parcelAmoutInShipment) {
 
         $shipment = new Shipment();
 
@@ -106,6 +106,8 @@ class RetailShipmentBookController extends Controller
         $shipment->pieces = $pieces;
         $shipment->business_category_id = $business_category_id;
         $shipment->shipment_type = 2;
+
+        $shipment->parcel_value = $parcelAmoutInShipment;
 
         $shipment->save();
 
@@ -347,8 +349,17 @@ class RetailShipmentBookController extends Controller
         $pieces_quantity = $request->input('pieces');
         $business_category_id = $request->input('business_category');
 
+        $parcelAmount = $request->input('parcel_amount');
+        $parcelAmount = trim($parcelAmount);
+        $parcelAmount = str_replace(',', '', $parcelAmount);
+        $parcelAmoutInShipment = (float)$parcelAmount;
 
-        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
+        $quantity = $request->input('quantity');
+        $quantity = trim($quantity);
+        $quantity = str_replace(',', '', $quantity);
+        $quantityForShipmentItem = (int)$quantity;
+
+        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height, $parcelAmoutInShipment);
 
         if($request->input('business_category') == 2) {
             $international_shipment_booking = new InternationalShipment();
@@ -363,7 +374,8 @@ class RetailShipmentBookController extends Controller
 
         $item_description = NULL;
 
-        $item_quantity = 1;
+        // $item_quantity = 1;
+        $item_quantity = $quantityForShipmentItem;
 
         if ($request->input('insurance_offered') == 1) {
             $price = str_replace(',', '', $request->input('insurance_amount'));
@@ -489,15 +501,6 @@ class RetailShipmentBookController extends Controller
             $cat = $center_n_franchise = null;
             $cat_id = $center_n_franchise = null;
         }
-
-        $parcelAmount = $request->input('parcel_amount');
-        $parcelAmount = trim($parcelAmount);
-        $parcelAmount = str_replace(',', '', $parcelAmount);
-
-        $quantity = $request->input('quantity');
-        $quantity = trim($quantity);
-        $quantity = str_replace(',', '', $quantity);
-
 
         $retail_shipment = new RetailShipment();
         $retail_shipment->shipment_id = $shipment_id;
