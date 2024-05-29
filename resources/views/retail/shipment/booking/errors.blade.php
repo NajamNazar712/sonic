@@ -53,7 +53,8 @@
                                         <th>Special Instruction</th>
                                         <th>Admin Discount</th>
                                         <th>Admin Discount Type</th>
-                                        <th>Parcel Amount</th>
+                                        <th>Parcel Value</th>
+                                        <th>Quantity</th>
                                         <th></th>
                                     </tr>
                                     </thead>

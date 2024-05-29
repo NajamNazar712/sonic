@@ -2086,12 +2086,12 @@ class RetailShipmentBookController extends Controller
                 }
 
                 if (!isset($row['parcel_amount']) || $row['parcel_amount'] == null){
-                    $errors[$row_id]['parcel_amount'] = 'Parcel Amount is required';
+                    $errors[$row_id]['parcel_amount'] = 'Parcel Value is required';
                 }
                 $rows[$key]['parcel_amount'] = $row['parcel_amount'];
 
                 if (!isset($row['quantity']) || $row['quantity'] == null){
-                    $errors[$row_id]['quantity'] = 'Parcel Amount is required';
+                    $errors[$row_id]['quantity'] = 'Quantity is required';
                 }
                 $rows[$key]['quantity'] = $row['quantity'];
 
