@@ -1926,7 +1926,7 @@ class RetailShipmentBookController extends Controller
             'special_instruction' => 'Special Instruction',
             'admin_discount' => 'Admin Discount',
             'admin_discount_type' => 'Admin Discount Type',
-            'parcel_amount' => 'Parcel Amount',
+            'parcel_amount' => 'Parcel Value',
             'quantity' => 'Quantity',
         ];
 
