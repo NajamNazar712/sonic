@@ -14415,15 +14415,20 @@ class AdminDashboardController extends Controller
         }
     }
 
-    public static function addManagementHubUser($admin_ids, $city_id){
-        foreach($admin_ids as $admin_id){
-            $admin_hub_exist = AdminHub::where('admin_id', $admin_id)->where('hub_id', $city_id)->first();
-            if (!$admin_hub_exist) {
-                $admin_hub = new AdminHub();
-                $admin_hub->admin_id = $admin_id;
-                $admin_hub->hub_id = $city_id;
-                $admin_hub->save();
+    public static function addManagementHubUser($admin_ids, $city_id) {
+        if (count($admin_ids) > 0) {
+            $data = [];
+            foreach ($admin_ids as $admin_id) {
+                $admin_hub_exist = AdminHub::where('admin_id', $admin_id)->where('hub_id', $city_id)->first();
+                if(!$admin_hub_exist){
+                    $data[] = [
+                        'admin_id' => $admin_id,
+                        'hub_id' => $city_id
+                    ];
+                }
             }
+            AdminHub::insert($data);
         }
     }
+    
 }
