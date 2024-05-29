@@ -197,7 +197,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $business_category_id = $this->booking['business_category_id'];
 
         $parcelAmountInShipment = (float)$this->booking['parcel_amount'];
-        $quantityForShipmentItem = (int)$this->booking['parcel_amount'];
+        $quantityForShipmentItem = (int)$this->booking['quantity'];
 
         $shipment_id = RetailShipmentBookController::book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height, $parcelAmountInShipment);
 
