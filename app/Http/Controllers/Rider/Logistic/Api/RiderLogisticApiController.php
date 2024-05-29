@@ -432,17 +432,16 @@ class RiderLogisticApiController extends Controller
 
                             $shipper->shipper_shipping_modes=$shipper_shipping_modes;
 
+                            $shipper_detail = [
+                                'shipper'        =>   $shipper,
+                                'pickup_address_list' => $pickup_address_list
+                            ];
+    
+    
+                           return response()->json(['status'=>0,'shipper_detail'=> $shipper_detail]);
+    
                         }
-                      
-
-                        $shipper_detail = [
-                            'shipper'        =>   $shipper,
-                            'pickup_address_list' => $pickup_address_list
-                        ];
-
-
-                    return response()->json(['status'=>0,'shipper_detail'=> $shipper_detail]);
-
+                        
                 }
                 return response()->json(['status'=>1,'error'=>'Shipper ID not found!']);
         }
