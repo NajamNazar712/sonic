@@ -274,20 +274,46 @@ class BaseRateRivisionController extends Controller
             {
                 foreach($baseRateRevision->shippersWithRateChange as $shipperWithRateChange)
                 {
-                    // dd($shipperWithRateChange->shipper_id);
 
                     $change = $shipperWithRateChange->rate_change_percent;
 
                     $shipper = User::where('id',$shipperWithRateChange->shipper_id)->select('account_type_id','corporate_rate_type_id')->first();
-                    dd($shipper);
+
                     if($shipper->account_type_id == 1 && $shipper->corporate_rate_type_id == null)
                     {
-                        WeightCharge::where('user_id',$shipperWithRateChange->shipper_id)
-                        ->update([
-                            'local_or_6hr' => DB::raw('local_or_6hr * ')
-                        ]);
+                    // WeightCharge::where('user_id', $shipperWithRateChange->shipper_id)
+                    //     ->update([
+                    //         'local_or_6hr' => DB::raw('local_or_6hr * (1 + ' . ($change / 100) . ')'),
+                    //         'national_charges_class_0' => DB::raw('national_charges_class_0 * (1 + ' . ($change / 100) . ')'),
+                    //         'national_charges_class_1' => DB::raw('national_charges_class_1 * (1 + ' . ($change / 100) . ')'),
+                    //         'national_charges_class_2' => DB::raw('national_charges_class_2 * (1 + ' . ($change / 100) . ')'),
+                    //         'national_charges_class_3' => DB::raw('national_charges_class_3 * (1 + ' . ($change / 100) . ')'),
+                    //     ]);
+
+                    //Update Weight Charges
+                    $weightCharges = WeightCharge::where('user_id',$shipperWithRateChange->shipper_id)->get(['local_or_6hr','national_charges_class_0','national_charges_class_1','national_charges_class_2','national_charges_class_3']);
+
+                    foreach($weightCharges as $weightCharge)
+                    {
+                        $weightCharge->local_or_6hr = $weightCharge->local_or_6hr * (1 + ($change / 100));
+                        $weightCharge->national_charges_class_0 = $weightCharge->national_charges_class_0 * (1 + ($change / 100));
+                        if($weightCharge->national_charges_class_1)
+                        {
+                            $weightCharge->national_charges_class_1 = (intval(rtrim($weightCharge->national_charges_class_1, '%')) + $change).'%';
+                        }
+                        if($weightCharge->national_charges_class_2)
+                        {
+                            $weightCharge->national_charges_class_2 = (intval(rtrim($weightCharge->national_charges_class_2, '%')) + $change).'%';
+                        }
+                        if($weightCharge->national_charges_class_3)
+                        {
+                            $weightCharge->national_charges_class_3 = $weightCharge->national_charges_class_3 * (1 + ($change / 100));
+                        }
+                        $weightCharge->save();
                     }
-                    elseif()
+
+                    }
+                    // elseif()
                 }
             }
         // }
