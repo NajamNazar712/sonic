@@ -211,11 +211,13 @@ class BaseRateRivisionController extends Controller
                 <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">';
-            
-            if (session('role_id') == 1 || in_array(503, session('permissions')))
-            {
-                $dropdown .= $approve;
-                $dropdown .= $reject;
+            if($revision->approval1_status != 2 && $revision->approval1_status != 3){
+                // dd($revision->approval1_status);
+                if (session('role_id') == 1 || in_array(503, session('permissions')))
+                {
+                    $dropdown .= $approve;
+                    $dropdown .= $reject;
+                }
             }
                 
 
