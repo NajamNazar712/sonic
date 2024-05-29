@@ -57,10 +57,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/login', 'Auth\LoginController@showLoginForm')->name('login');
     
     //Wordpress Register Via Leads (Trax.pk)
-    Route::get('/register/{id}/{token}', 'Auth\LoginController@showLeadWordPressLoginForm')->name('signup');
-    Route::get('/register/wordpress', 'Shippers\ShipperDashboardController@wordpressLeadRegistration')->name('wordpress.register');
-    Route::post('/register/wordpress/salesPerson', 'Shippers\ShipperDashboardController@sales_person')->name('wordpress.salesPerson');
-    Route::post('/register/wordpress/get_sub_segment', 'Shippers\ShipperDashboardController@get_sub_segment')->name('wordpress.get_sub_segment');
+    Route::get('/wp_register/{id}/{token}', 'Auth\LoginController@showLeadWordPressLoginForm')->name('signup');
+    Route::get('/wp_register/wordpress', 'Shippers\ShipperDashboardController@wordpressLeadRegistration')->name('wordpress.register');
+    Route::post('/wp_register/wordpress/salesPerson', 'Shippers\ShipperDashboardController@sales_person')->name('wordpress.salesPerson');
+    Route::post('/wp_register/wordpress/get_sub_segment', 'Shippers\ShipperDashboardController@get_sub_segment')->name('wordpress.get_sub_segment');
     Route::get('/address1', 'Shippers\ShipperDashboardController@wordpressAddressView')->name('wordpress.new.address');
     Route::get('/bank1', 'Shippers\ShipperDashboardController@wordpressBankView')->name('wordpress.new.bank');
 
