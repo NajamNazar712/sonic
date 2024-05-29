@@ -8523,7 +8523,7 @@ class NotificationsController extends Controller
                         ->first();
 
                     if (strpos($sale_person_body, '[person_of_contact]') !== FALSE) {
-                        if(count($sale_person) > 0){
+                        if ($sale_person) { 
                             $sale_person_body = str_replace('[person_of_contact]', $sale_person->name, $sale_person_body);
                         }
                     }
