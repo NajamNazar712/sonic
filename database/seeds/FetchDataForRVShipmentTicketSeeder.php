@@ -67,7 +67,7 @@ class FetchDataForRVShipmentTicketSeeder extends Seeder
 
         //Update All Shipments to disabled_shipper = 1 based on global_settings whose shippers are disabled
         $globalSettings = GlobalSettings::where('type','rv_disable_shippers_only_shippers')
-        ->get(['setting_value','type','text'])->first();
+        ->get(['text'])->first();
         
         if($globalSettings)
         {
