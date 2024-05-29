@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use Carbon\Carbon;
 use App\Http\Models\Rider;
+use App\UserLostShipmentHub;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
 use Illuminate\Validation\Rule;
@@ -58,22 +59,28 @@ class LostShipmentsController extends Controller
         $service_type = BookingType::all();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', [2, 5, 8, 9, 10, 12, 19, 20, 34, 38, 39, 40, 41, 42])->select('id', 'name')->get();
 
-        $shipments = Shipment::leftJoin('shipments_journey', function ($join) {
-            $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                ->where('shipments_journey.id', '=',
-                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+        $responsible_hubs = UserLostShipmentHub::where('admin_id', session('id'))->get()->pluck('hub_id')->toArray();
+        $admin_responsible_hubs = implode(',', $responsible_hubs);
+
+        $shipments = Shipment::join('shipments_journey', function ($join) use ($responsible_hubs, $admin_responsible_hubs) {
+            if (session('role_id') != 1 && count($responsible_hubs) > 0) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                ->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id AND shipments_journey.city_id IN ($admin_responsible_hubs))"));
+            } else {
+                $join->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)"));
+            }
         })
         ->where('shipments.shipper_status_id', 18);
         
+        // COUNT(*) as total,
         $shipmentsCounts = $shipments
             ->selectRaw('
-                COUNT(*) as total,
                 SUM(IF(shipments_journey.verification = 1, 1, 0)) as approved,
                 SUM(IF(shipments_journey.verification = 0, 1, 0)) as pending
             ')
             ->first();
         
-        $lost_shipments = $shipmentsCounts->total;
+        // $lost_shipments = $shipmentsCounts->total;
         // $total_of_approved_shipments = $shipmentsCounts->approved;
         $total_of_pending_shipments = $shipmentsCounts->pending;
         // $total_of_rejected_shipments = LostShipmentStatusCount::sum('rejection_count');
@@ -85,6 +92,7 @@ class LostShipmentsController extends Controller
 
         $total_of_rejected_shipments = LostShipmentStatusCount::where('updated_at','>=', $thirtyOneDays)->sum('rejection_count');
         $total_approval = LostShipmentStatusCount::where('updated_at','>=', $thirtyOneDays)->sum('approval_count');
+        $lost_shipments = $total_of_pending_shipments + $total_of_rejected_shipments + $total_approval;
 
         return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons,'lost_shipments'=>$lost_shipments, 'total_of_approved_shipments'=>$total_approval, 'total_of_pending_shipments'=>$total_of_pending_shipments, 'total_of_rejected_shipments'=> $total_of_rejected_shipments, 'today' => $today, 'thirtyday' => $thirtyDays]);
         
@@ -125,6 +133,9 @@ class LostShipmentsController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),108);
         }
+            $responsible_hubs = UserLostShipmentHub::where('admin_id', session('id'))->get()->pluck('hub_id')->toArray();
+            $admin_responsible_hubs = implode(',', $responsible_hubs);
+
             $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
                 ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
                 ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -133,11 +144,16 @@ class LostShipmentsController extends Controller
                 ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
                 ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
                 ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-                ->leftJoin('shipments_journey', function ($join) {
-                    $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                        ->where('shipments_journey.id', '=',
-                            DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                ->join('shipments_journey', function ($join) use ($responsible_hubs, $admin_responsible_hubs) {
+                    if (session('role_id') != 1 && count($responsible_hubs) > 0) {
+                        $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                        ->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id AND shipments_journey.city_id IN ($admin_responsible_hubs))"));
+                    } else {
+                        $join->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)"));
+                    }
                 })
+                ->join('cities as ci', 'shipments_journey.city_id', '=', 'ci.id')
+                ->join('zones as zo', 'zo.id', '=', 'ci.zone_id')
                 ->leftJoin('admins as ad', 'ad.id', '=', 'shipments_journey.admin_id')
                 ->leftJoin('shipments_journey as sj', function ($join) {
                     $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -150,7 +166,7 @@ class LostShipmentsController extends Controller
                 ->leftJoin('lost_shipment_status_counts as lssc_new', 'lssc_new.shipment_id', '=', 'shipments.id')
 
 //                ->leftJoin('shipment_payment_status as sps', 'sps.id', '=', 'shipments.payment_status_id')
-                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference','ad.name as marked_by', 'lsr.shipment_id as responsible_person_shipment','shipments_journey.updated_at as marked_at','lssc.approval_count as approval','lssc.cleared as cleared','lssc.shipment_id as shipment_cleared', 'shipments_journey.verification as verification', 'lssc_new.shipment_id as null_shipment')
+                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference','ad.name as marked_by', 'lsr.shipment_id as responsible_person_shipment','shipments_journey.updated_at as marked_at','lssc.approval_count as approval','lssc.cleared as cleared','lssc.shipment_id as shipment_cleared', 'shipments_journey.verification as verification', 'lssc_new.shipment_id as null_shipment', 'ci.name as last_hub_name', 'zo.name as last_zone_name')
 //                ->whereRaw('IF (shipments.payment_status_id != NULL, (shipments.payment_status_id > 1), TRUE)')
                 ->where('shipments.shipper_status_id', 18)->groupBy('shipments.id');
 
@@ -167,9 +183,9 @@ class LostShipmentsController extends Controller
 //                    $sub_query->where('shipments.payment_status_id', '>', 1);
 //                });
 
-            if (session('role_id') != 1) {
-                $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
-            }
+            // if (session('role_id') != 1 && !in_array($admin->role_id, [3, 8, 134])) {
+            //     $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+            // }
 
             if(session('role_id') != 1){
                 $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
@@ -188,6 +204,13 @@ class LostShipmentsController extends Controller
                 $shipments;
             }
 
+            if ($request->get('search_total_lost_shipments') === "1") {
+                $shipments;
+            }   
+            
+            if ($tracking_numbers = $request->get('tracking_numbers')) {
+                $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+            }
             // if ($request->get('search_total_lost_approved_shipments') === "2") {
             //     $shipments->where('shipments_journey.verification', 1);
             // }
@@ -196,6 +219,14 @@ class LostShipmentsController extends Controller
                 $shipments->where('shipments_journey.verification', 0);
             }
 
+            if (isset($request->search_lost_status) && $request->search_lost_status == '0') {
+                $shipments->where('shipments_journey.verification', 0);
+            }
+
+            if (isset($request->search_lost_status) && $request->search_lost_status == '1') {
+                $shipments->where('shipments_journey.verification', 1);
+            }
+            
             if ($request->get('search_from') && $request->get('search_to')) {
                 $from = $request->get('search_from');
                 $to = $request->get('search_to');
@@ -403,7 +434,11 @@ class LostShipmentsController extends Controller
                         $query->whereRaw('false');
                     }
                 })
+
+                
                 ->make(true);
+              
+                
     }
     public function shipment_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
 
@@ -526,7 +561,7 @@ class LostShipmentsController extends Controller
     public function get_shipment_info(Request $request)
     {
             $shipment_status_for_bags = array(3,21,26,32,49);
-            $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
+            $status_array = array(1, 5, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 50, 51, 56, 60, 61);
             $tracking_number = $request->tracking_number;
             if ($tracking_number != '') {
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', $status_array);
@@ -956,11 +991,16 @@ class LostShipmentsController extends Controller
     public function lost_responsible_list(Request $request){
         $shipment_id = $request->shipment_id;
         $details = [];
-        $latest_lost_responsible_shipments = LostShipmentResponsible::whereIn('id', function($query) use ($shipment_id) {
+        $latest_lost_responsible_shipments = LostShipmentResponsible::whereIn('id', function($query) use ($shipment_id, $request) {
             $query->selectRaw('MAX(id)')
                   ->from('lost_shipment_responsibles')
-                  ->where('shipment_id', $shipment_id)
-                  ->groupBy('user_id');
+                  ->where('shipment_id', $shipment_id) ;
+        
+            if(isset($request->updated_at)){
+                $query->whereBetween('updated_at', [date('Y-m-d H:i:s', strtotime($request->updated_at)), date('Y-m-d H:i:s', strtotime($request->updated_at) + 10)]);
+            }
+        
+            $query->groupBy('user_id');
         })->get();
         
         foreach($latest_lost_responsible_shipments as $key => $lost_responsible_shipment){
@@ -970,7 +1010,7 @@ class LostShipmentsController extends Controller
                 $details[$key]['name'] = $admin->name;
                 $details[$key]['type'] = $admin->employee->employee_type->name;
                 $details[$key]['status'] = $admin->employee->employee_status->name;
-                $details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->created_at)->format('Y-m-d H:i:s');
+                $details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->updated_at)->format('Y-m-d H:i:s');
 
 
             }else{
@@ -979,7 +1019,7 @@ class LostShipmentsController extends Controller
                 $details[$key]['name'] = $rider->name;
                 $details[$key]['type'] = $rider->employee->employee_type->name;
                 $details[$key]['status'] = $rider->employee->employee_status->name;
-                $details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->created_at)->format('Y-m-d H:i:s');
+                $details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->updated_at)->format('Y-m-d H:i:s');
             }
         }
 
@@ -989,20 +1029,29 @@ class LostShipmentsController extends Controller
     public function lost_data(Request $request)
     {
         $details = [
-            'total' => 0,
+            // 'total' => 0,
             'total_of_approved_shipments' => 0,
             'total_of_pending_shipments' => 0,
         ];
 
-        $shipments = Shipment::leftJoin('shipments_journey', function ($join) {
-            $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                ->where('shipments_journey.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
-        })
-            ->where('shipments.shipper_status_id', 18)->whereBetween('shipments_journey.updated_at',[$request->from_date, $request->to_date]);
+        $responsible_hubs = UserLostShipmentHub::where('admin_id', session('id'))->get()->pluck('hub_id')->toArray();
+        $admin_responsible_hubs = implode(',', $responsible_hubs);
 
+
+        $shipments = Shipment::join('shipments_journey', function ($join) use ($responsible_hubs, $admin_responsible_hubs) {
+            if (session('role_id') != 1 && count($responsible_hubs) > 0) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                ->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id AND shipments_journey.city_id IN ($admin_responsible_hubs))"));
+            } else {
+                $join->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)"));
+            }
+        })
+        ->where('shipments.shipper_status_id', 18)
+        ->whereBetween('shipments_journey.updated_at', [$request->from_date, $request->to_date]);
+    
+            // COUNT(*) as total,
         $shipmentsCounts = $shipments
             ->selectRaw('
-                COUNT(*) as total,
                 SUM(IF(shipments_journey.verification = 1, 1, 0)) as approved,
                 SUM(IF(shipments_journey.verification = 0, 1, 0)) as pending
             ')
@@ -1012,7 +1061,7 @@ class LostShipmentsController extends Controller
         $total_rejections = LostShipmentStatusCount::whereBetween('updated_at', [$request->from_date, $request->to_date])->sum('rejection_count');
         $total_approval = LostShipmentStatusCount::whereBetween('updated_at', [$request->from_date, $request->to_date])->sum('approval_count');
           
-        $details['total'] = $shipmentsCounts->total;
+        // $details['total'] = $shipmentsCounts->total;
         $details['total_of_approved_shipments'] = $total_approval;
         $details['total_of_pending_shipments'] = $shipmentsCounts->pending;
         $details['total_rejections'] = $total_rejections;
