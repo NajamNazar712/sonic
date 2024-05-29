@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Settings\Shippers;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\BaseRateRevision;
@@ -22,6 +23,8 @@ class BaseRateRivisionController extends Controller
 
     public function index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 796);
+
         $baseRateTypes = BaseRateType::all();
 
         return view('admin.settings.shippers.base_rate_revision.index',['baseRateTypes' => $baseRateTypes]);
@@ -156,9 +159,9 @@ class BaseRateRivisionController extends Controller
 
     public function base_rate_revisions_list(Request $request)
     {
-        // if ($request->get('excel') && $request->get('excel') == true) {
-        //     ActivityTrailController::createActivityTrailLog(Auth::id(), 247);
-        // }
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 797);
+        }
 
         $baseRateRevisions = BaseRateRevision::withCount('shippersWithRateChange')
         ->with([
@@ -263,7 +266,14 @@ class BaseRateRivisionController extends Controller
         $baseRateRevision->approval2_status = $status;
         $baseRateRevision->approval2_at = now();
         $baseRateRevision->approval2_by_admin_id = Auth::id();
-        $baseRateRevision->save();
+        if(!$baseRateRevision->save())
+        {
+            if($baseRateRevision->rate_type_id == 1)// Base Rate (Weight charges)
+            {
+
+            }
+        }
+
         return redirect()->back()->with([($status == 2 ? 'success' : 'error') => 'Base Rate Revision '.($status == 2 ? 'Approved' : 'Rejected')]);
     }
 
