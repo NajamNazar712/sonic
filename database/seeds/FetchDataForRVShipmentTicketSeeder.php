@@ -21,7 +21,7 @@ class FetchDataForRVShipmentTicketSeeder extends Seeder
             ->where('shipments_journey.id','=',
             DB::connection('reports_2')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
         })
-        ->whereIn('shipments.shipper_status_id', [12,66,52])
+        ->whereIn('shipments.shipper_status_id', [12,66])
         ->groupBy('shipments.id', 'shipments.shipper_status_id', 'shipments_journey.status_reason_id', 'shipments.user_id', 'shipments.updated_at')
         ->select(
             'shipments.id', 
