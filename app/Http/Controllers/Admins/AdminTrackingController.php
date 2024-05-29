@@ -1166,14 +1166,14 @@ class AdminTrackingController extends Controller
 
                             $item_details['product_type'] = $item->product->product_name;
                             $item_details['description'] = $item->description;
-                            // $item_details['quantity'] = $item->quantity;
+                            $item_details['quantity'] = $item->quantity;
 
-                            $item_details['quantity'] = '';
-                            if ($retail_shipment){
-                                $item_details['quantity'] = $retail_shipment_quantity;
-                            } else {
-                                $item_details['quantity'] = $item->quantity;
-                            }
+                            // $item_details['quantity'] = '';
+                            // if ($retail_shipment){
+                            //     $item_details['quantity'] = $retail_shipment_quantity;
+                            // } else {
+                            //     $item_details['quantity'] = $item->quantity;
+                            // }
                             
                             
 
@@ -1228,14 +1228,14 @@ class AdminTrackingController extends Controller
                             }
                         }
 
-                        // $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
+                        $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
 
-                        $details['order_information']['parcel_value'] = '';
-                        if ($retail_shipment){
-                            $details['order_information']['parcel_value'] = $retail_shipement_parcel_amount;
-                        } else {
-                            $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
-                        }
+                        // $details['order_information']['parcel_value'] = '';
+                        // if ($retail_shipment){
+                        //     $details['order_information']['parcel_value'] = $retail_shipement_parcel_amount;
+                        // } else {
+                        //     $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
+                        // }
 
 
                         $details['order_information']['account_type_id'] = $shipment->user->account_type_id;
