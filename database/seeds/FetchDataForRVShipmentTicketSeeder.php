@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Models\Admin\GlobalSettings;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -63,6 +64,20 @@ class FetchDataForRVShipmentTicketSeeder extends Seeder
             }
 
         });
+
+        //Update All Shipments to disabled_shipper = 1 based on global_settings whose shippers are disabled
+        $globalSettings = GlobalSettings::where('type','rv_disable_shippers_only_shippers')
+        ->get(['setting_value','type','text'])->first();
+        
+        if($globalSettings)
+        {
+            $shipperIds = explode(',', $globalSettings->text);
+            DB::table('rv_shipment_tickets')
+            ->whereIn('shipment_user_id', $shipperIds)
+            ->update(['disabled_shipper' => 1]);
+        }
+
+      
         
     }
 }
