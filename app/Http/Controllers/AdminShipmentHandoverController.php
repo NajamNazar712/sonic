@@ -308,21 +308,19 @@ class AdminShipmentHandoverController extends Controller
 
         ->leftjoin('admins as a', function ($join) {
             $join->on('a.id',   '=', 'handovers.created_by')
-            ->where('a.role_id', '!=' , 1)
-            ->orWhereNull('a.role_id');
+            ->where('a.role_id', '!=' , 1);
           })
 
           ->leftjoin('admins as ad', function ($join) {
             $join->on('ad.id',   '=', 'handovers.received_by')
-            ->where('ad.role_id', '!=' ,1)
-            ->orWhereNull('ad.role_id');
+            ->where('ad.role_id', '!=' ,1);
           })
       
         ->join('handover_statuses as hs','hs.id','=','handovers.status_id')
         ->join('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->join('handover_responsibilities as hor','hor.id','=','handovers.to')
         ->join('handover_shipments as hss','hss.handover_id','=','handovers.id')
-        ->leftjoin('shipments as s','s.id','=','hss.shipment_id')
+        ->join('shipments as s','s.id','=','hss.shipment_id')
         ->leftjoin('city_areas as c_from', function ($join) {
             $join->on('c_from.id', '=', 'hr.city_area_id');
 //                ->where('c_from.default', 1);
@@ -384,7 +382,7 @@ class AdminShipmentHandoverController extends Controller
       ])
       ->whereBetween('handovers.created_at', [$from,$to])
       ->orderBy('handovers.id', 'DESC')
-      ->groupBy('hss.handover_id');
+      ->groupBy('handovers.id');
 
 
         $datatable = Datatables::of($handover_list)
