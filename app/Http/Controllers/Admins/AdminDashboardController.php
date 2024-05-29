@@ -11013,16 +11013,8 @@ class AdminDashboardController extends Controller
                     }
 
                     $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
-                    foreach($admin_ids as $admin_id){
-                        $admin_hub_exist = AdminHub::where('admin_id', $admin_id)->where('hub_id', $id)->first();
-                        if (!$admin_hub_exist) {
-                            $admin_hub = new AdminHub();
-                            $admin_hub->admin_id = $admin_id;
-                            $admin_hub->hub_id = $id;
-                            $admin_hub->save();
+                    self::addManagementHubUser($admin_ids, $id);
 
-                        }
-                    }
                 
                     return redirect()->back()->with('success', 'Hub/city updated successfully');
                 }
@@ -11221,16 +11213,8 @@ class AdminDashboardController extends Controller
             }
 
             $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
-            foreach($admin_ids as $admin_id){
-                $admin_hub_exist = AdminHub::where('admin_id', $admin_id)->where('hub_id', $city->id)->first();
-                if (!$admin_hub_exist) {
-                    $admin_hub = new AdminHub();
-                    $admin_hub->admin_id = $admin_id;
-                    $admin_hub->hub_id = $city->id;
-                    $admin_hub->save();
+            self::addManagementHubUser($admin_ids, $city->id);
 
-                }
-            }
             return redirect()->back()->with('success', 'Hub city added successfully');
         }
     }
@@ -14428,6 +14412,18 @@ class AdminDashboardController extends Controller
             return response()->json(['intercept_shipper' => $intercept_shipper]);
         }else {
             return response()->json(['intercept_shipper' => null]);
+        }
+    }
+
+    public static function addManagementHubUser($admin_ids, $city_id){
+        foreach($admin_ids as $admin_id){
+            $admin_hub_exist = AdminHub::where('admin_id', $admin_id)->where('hub_id', $city_id)->first();
+            if (!$admin_hub_exist) {
+                $admin_hub = new AdminHub();
+                $admin_hub->admin_id = $admin_id;
+                $admin_hub->hub_id = $city_id;
+                $admin_hub->save();
+            }
         }
     }
 }
