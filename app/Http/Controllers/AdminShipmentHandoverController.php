@@ -304,20 +304,8 @@ class AdminShipmentHandoverController extends Controller
            $to = date('Y-m-d 23:59:59',strtotime($date));
         }
         $handover_list = Handover::join('cities as c','c.id','=','handovers.hub')
-       
-
-        ->leftjoin('admins as a', function ($join) {
-            $join->on('a.id',   '=', 'handovers.created_by')
-            ->where('a.role_id', '!=' , 1)
-            ->orWhereNull('a.role_id');
-          })
-
-          ->leftjoin('admins as ad', function ($join) {
-            $join->on('ad.id',   '=', 'handovers.received_by')
-            ->where('ad.role_id', '!=' ,1)
-            ->orWhereNull('ad.role_id');
-          })
-      
+        ->join('admins as a', 'a.id', '=', 'handovers.created_by')
+        ->leftjoin('admins as ad', 'ad.id', '=', 'handovers.received_by')
         ->join('handover_statuses as hs','hs.id','=','handovers.status_id')
         ->join('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->join('handover_responsibilities as hor','hor.id','=','handovers.to')
@@ -332,47 +320,49 @@ class AdminShipmentHandoverController extends Controller
 //                ->where('c_to.default', 1);
         })
 
-        ->leftjoin('handover_shipments_journeys as hsj_f', function ($join) {
-          $join->on('hsj_f.handover_id', '=', 'handovers.id')
-              ->where(
-                  'hsj_f.id',
-                  '=',
-                  DB::connection('reports')->raw('(select max(id) from handover_shipments_journeys where handover_shipments_journeys.handover_id = handovers.id and status = 1)')
-              );
-        })
-        ->leftjoin('handover_shipments_journeys as hsj_r', function ($join) {
-          $join->on('hsj_r.handover_id', '=', 'handovers.id')
-              ->where(
-                  'hsj_r.id',
-                  '=',
-                  DB::connection('reports')->raw('(select max(id) from handover_shipments_journeys where handover_shipments_journeys.handover_id = handovers.id and status = 2)')
-              );
-        })
+      //   ->leftjoin('handover_shipments_journeys as hsj_f', function ($join) {
+      //     $join->on('hsj_f.handover_id', '=', 'handovers.id')
+      //         ->where(
+      //             'hsj_f.id',
+      //             '=',
+      //             DB::connection('reports')->raw('(select max(id) from handover_shipments_journeys where handover_shipments_journeys.handover_id = handovers.id and status = 1)')
+      //         );
+      //   })
+      //   ->leftjoin('handover_shipments_journeys as hsj_r', function ($join) {
+      //     $join->on('hsj_r.handover_id', '=', 'handovers.id')
+      //         ->where(
+      //             'hsj_r.id',
+      //             '=',
+      //             DB::connection('reports')->raw('(select max(id) from handover_shipments_journeys where handover_shipments_journeys.handover_id = handovers.id and status = 2)')
+      //         );
+      //   })
 
-      ->leftJoin('shipment_scanning_journeys as ssj_hss_f', function ($join) {
-          $join->on('ssj_hss_f.shipment_id', '=', 'hsj_f.shipment_id')
-               ->where('ssj_hss_f.screen_location_id', '=', 26)
-               ->whereRaw('ssj_hss_f.id = (
-                select max(id) 
-                from shipment_scanning_journeys 
-                where shipment_scanning_journeys.updated_at <= hsj_f.updated_at 
-                AND shipment_scanning_journeys.shipment_id = hsj_f.shipment_id
-            )');
-        })
-      ->leftJoin('shipment_scanning_journeys as ssj_hss_r', function ($join) {
-          $join->on('ssj_hss_r.shipment_id', '=', 'hsj_r.shipment_id')
-               ->where('ssj_hss_r.screen_location_id', '=', 27)
-               ->whereRaw('ssj_hss_r.id = (
-                select max(id) 
-                from shipment_scanning_journeys 
-                where shipment_scanning_journeys.updated_at <= hsj_r.updated_at 
-                AND shipment_scanning_journeys.shipment_id = hsj_r.shipment_id
-            )');
-      })
-      ->leftJoin('shipment_scanning_journey_area_logs as ssj_f', 'ssj_f.shipment_scanning_journey_id', '=', 'ssj_hss_f.id')
-      ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
-      ->leftJoin('city_areas as caf', 'caf.id', '=', 'ssj_f.area_id')
-      ->leftJoin('city_areas as car', 'car.id', '=', 'ssj_r.area_id')
+      // ->leftJoin('shipment_scanning_journeys as ssj_hss_f', function ($join) {
+      //     $join->on('ssj_hss_f.shipment_id', '=', 'hsj_f.shipment_id')
+      //          ->where('ssj_hss_f.screen_location_id', '=', 26)
+      //          ->whereRaw('(a.role_id != 1 or a.id is null)')
+      //          ->whereRaw('ssj_hss_f.id = (
+      //           select max(id) 
+      //           from shipment_scanning_journeys 
+      //           where shipment_scanning_journeys.updated_at <= hsj_f.updated_at 
+      //       )');
+      //   })
+      // ->leftJoin('shipment_scanning_journeys as ssj_hss_r', function ($join) {
+      //     $join->on('ssj_hss_r.shipment_id', '=', 'hsj_r.shipment_id')
+      //          ->where('ssj_hss_r.screen_location_id', '=', 27)
+      //          ->whereRaw('(ad.role_id != 1 or ad.id is null)')
+      //          ->whereRaw('ssj_hss_r.id = (
+      //           select max(id) 
+      //           from shipment_scanning_journeys 
+      //           where shipment_scanning_journeys.updated_at <= hsj_r.updated_at
+      //       )');
+            
+      // })
+      // ->leftJoin('shipment_scanning_journey_area_logs as ssj_f', 'ssj_f.shipment_scanning_journey_id', '=', 'ssj_hss_f.id')
+      // ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
+
+      // ->leftJoin('city_areas as caf', 'caf.id', '=', 'ssj_f.area_id')
+      // ->leftJoin('city_areas as car', 'car.id', '=', 'ssj_r.area_id')
 
         ->select(['handovers.id as handover_id','a.name as created_by','a.id as created_by_id','ad.name as received_by','ad.id as received_by_id',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
@@ -380,7 +370,8 @@ class AdminShipmentHandoverController extends Controller
         'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name',
         'handovers.from_dept_area_desg as from_dept_area_desg','handovers.to_dept_area_desg as to_dept_area_desg','handovers.received_at','handovers.created_at',
         DB::raw('(select shipments - received_shipments from handovers where handovers.id= hss.handover_id ) as remaining'),
-        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area', 'ssj_f.location_status as forward_location_status','ssj_r.location_status as received_location_status','caf.name as forwarded_area_name', 'car.name as received_area_name'
+        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area'
+       
       ])
       ->whereBetween('handovers.created_at', [$from,$to])
       ->orderBy('handovers.id', 'DESC')
