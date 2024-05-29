@@ -7315,11 +7315,13 @@ class GlobalSettingsController extends Controller
         $check_tagging = AutoTagTerritory::where('admin_id', $request->agent_id);
 
         if (!$check_tagging->exists()) {
-            $auto_tagging = new AutoTagTerritory;
-            $auto_tagging->admin_id = $request->agent_id;
-            $auto_tagging->territory_id = $request->territory_id;
-            $auto_tagging->save();
-
+            $territory_ids = $request->territory_id;
+            foreach($territory_ids as $territory_id){
+                $auto_tagging = new AutoTagTerritory;
+                $auto_tagging->admin_id = $request->agent_id;
+                $auto_tagging->territory_id = $territory_id;
+                $auto_tagging->save();
+            }
             return redirect()->back()->with('success', 'Sales Person\'s Territory Added!');
         } else {
             return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');

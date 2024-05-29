@@ -41,36 +41,43 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Tag Territory</h4>
                 </div>
+
+
                 <form method="post" id="agent_assign" action="{{route('admin.settings.auto_tag_territories.submit')}}">
                     @csrf
+                    <div class="modal-body">
+                        <div class="form-group" id="city_select">
+                            <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                            </select>
+                        </div>
+                        <div class="form-group" id="territory_select">
+                            <select name="territory_id[]" id="territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" id="agent_select">
+                            <select name="agent_id" id="agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
+                                @foreach($agents as $agent)
+                                    <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                <div class="modal-body">
-                    <div class="form-group" id="city_select">
-                        <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
-                        </select>
+                        <div class="form-check d-none" id="lead_agent_div">
+                            <label class="form-check-label mr-1" for="is_lead_agent" style="margin: 0px 5px 0px 0px;">Lead User</label>
+                            <input type="checkbox" name="is_lead_agent" id="is_lead_agent">
+                        </div>
+
+                        <div class="form-group mt-2 d-none" id="remaining_territory_select_div">
+                            <select name="territory_id[]" id="remaining_territory_id" class="form-control select2" multiple="multiple">
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group" id="territory_select">
-                        <select name="territory_id" id="territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
-                        </select>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="assign_agentSubmit">Tag</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                     </div>
-                    
-                    <div class="form-group" id="agent_select">
-                        <select name="agent_id" id="agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
-                            @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="is_lead_agent">Lead User</label>
-                        <input type="checkbox" name="is_lead_agent" id="is_lead_agent">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Tag</button>
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                </div>
-            </form>
+                </form>
 
             </div>
         </div>
@@ -159,7 +166,6 @@
             });
             $('#territory_select').css('display','none');
             $('#agent_select').css('display','none');
-            $('#is_lead_agent').css('display','none');
 
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
@@ -187,16 +193,20 @@
 
                     $('#territory_select').css('display','block');
                     $('#agent_select').css('display','block');
-                    $('#is_lead_agent').css('display','block');
+                    $('#lead_agent_div').removeClass('d-none');
+                    $('#lead_agent_div').addClass('d-flex');
 
                     $('#territory_id').children().remove()
 
-                        var territory_obj  = [];
-                        territory_obj.length = 0
+                    var territory_obj  = [];
+                    var remaining_territory_obj  = [];
+                    territory_obj.length = 0
+                    remaining_territory_obj.length = 0
 
                     $.map({!! $territories !!}, function (obj) {
                             if(id == obj.city_id){
                                 territory_obj.push({id: obj.id, text: obj.name});
+                                remaining_territory_obj.push({id: obj.id, text: obj.name});
                             }
                     });
 
@@ -208,8 +218,46 @@
                             data:territory_obj
                     });
 
-                });
+                    $('#is_lead_agent').unbind('change').change(function() {
+                        if ($(this).is(':checked')) {
+                            var selectedTerritoryId = $('#territory_id').val();
+                            var filteredTerritories = remaining_territory_obj.filter(function(item) {
+                                return item.id != selectedTerritoryId;
+                            });
 
+                            $('#remaining_territory_select_div').removeClass('d-none');
+                            $('#remaining_territory_id').empty().prepend('<option></option>').select2({
+                                width: '100%',
+                                placeholder: "Select Territory",
+                                allowClear: true,
+                                dropdownParent: $('#agent_assign'),
+                                data: filteredTerritories
+                            });
+                        } else {
+                            $('#remaining_territory_select_div').addClass('d-none');
+                            $('#remaining_territory_id').val(null).trigger('change');
+                            $('#remaining_territory_id').empty();
+                        }
+                    });
+
+                    $('#territory_id').unbind('change').change(function() {
+                        if ($('#is_lead_agent').is(':checked')) {
+                            var selectedTerritoryId = $(this).val();
+                            var filteredTerritories = remaining_territory_obj.filter(function(item) {
+                                return item.id != selectedTerritoryId;
+                            });
+
+                            $('#remaining_territory_id').empty().prepend('<option selected></option>').select2({
+                                width: '100%',
+                                placeholder: "Select Territory",
+                                allowClear: true,
+                                dropdownParent: $('#agent_assign'),
+                                data: filteredTerritories
+                            });
+                        }
+                    }); 
+
+                });
 
             $('#edit_agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
@@ -217,7 +265,7 @@
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
-           
+
             $('#edit_city_id').select2({
                 width:'100%',
                 allowClear:true,
@@ -267,8 +315,6 @@
                                 dropdownParent:$('#agent_edit'),
                                 data:territory_obj
                             });
-                        
-                        
                     });
 
 
