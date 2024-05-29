@@ -9,6 +9,13 @@
 ==========================================================================================*/
 
 // Wizard tabs with numbers setup
+
+function getLastPartOfUrl() {
+    var urlParts = window.location.href.split('/');
+    return urlParts[urlParts.length - 1];
+}
+
+
 $(".number-tab-steps").steps({
     headerTag: "h6",
     bodyTag: "fieldset",
@@ -171,11 +178,7 @@ $(".steps-validation").steps({
         return form.valid();
     },
     onStepChanged: function (event, currentIndex, priorIndex) {
-        function getLastPartOfUrl() {
-            var urlParts = window.location.href.split('/');
-            return urlParts[urlParts.length - 1];
-        }
-
+     
         if(currentIndex === 4 && getLastPartOfUrl() == "wordpress"){
             var newLi = $('<li class="clearfix"><button id="customQuotationBtn" class="btn btn-primary">Request For Custom Qoutes</button></li>');
             $('.actions ul').append(newLi);
@@ -202,7 +205,7 @@ $(".steps-validation").steps({
     onFinished: function (event, currentIndex)
     {
 
-        if ($('input[name="on_main_switch"]').is(':checked') || $('input[name="ol_main_switch"]').is(':checked') || $('input[name="detain_main_switch"]').is(':checked') || $('input[name="sameday_main_switch"]').is(':checked')) {
+        if ($('input[name="on_main_switch"]').is(':checked') || $('input[name="ol_main_switch"]').is(':checked') || $('input[name="detain_main_switch"]').is(':checked') || $('input[name="sameday_main_switch"]').is(':checked') || getLastPartOfUrl() != "wordpress") {
             $('#registership').submit();
         }else{
             toastr.error('Select Any One Rate', 'Error!', {
