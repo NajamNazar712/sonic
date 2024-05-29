@@ -7251,7 +7251,8 @@ class GlobalSettingsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 518);
 
         $agents = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')
-            ->select(['admins.id', 'admins.name'])
+            ->leftjoin('auto_tag_territories as att', 'admins.id', 'att.admin_id')
+            ->select(['admins.id', 'admins.name', 'att.is_lead_user'])
             ->where('admins.status', 1)->where('ar.department_id', 7)->get();
 
         $territories = Territory::where('territory_status', 1)->get();
@@ -7266,7 +7267,15 @@ class GlobalSettingsController extends Controller
         $roles = AutoTagTerritory::join('admins as ad', 'ad.id', '=', 'auto_tag_territories.admin_id')
             ->leftjoin('territories as t', 't.id', 'auto_tag_territories.territory_id')
             ->leftjoin('cities as c', 'c.id', 't.city_id')
-            ->select('auto_tag_territories.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'auto_tag_territories.status');
+            ->groupBy('auto_tag_territories.admin_id')
+            // ->select('auto_tag_territories.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'auto_tag_territories.status');
+            ->select('auto_tag_territories.id', 
+                'ad.name as agent_name', 
+                'c.name as city_name', 
+                't.name as territory_name', 
+                'auto_tag_territories.status', 
+                DB::raw('GROUP_CONCAT(territories.name) as territory_names')
+            );
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
@@ -7316,10 +7325,18 @@ class GlobalSettingsController extends Controller
 
         if (!$check_tagging->exists()) {
             $territory_ids = $request->territory_id;
+            $is_lead_user = null;
+            if ($request->is_lead_user == 'on') {
+                $is_lead_user = 1;
+            } else {
+                $is_lead_user = 0;
+            }
+
             foreach($territory_ids as $territory_id){
                 $auto_tagging = new AutoTagTerritory;
                 $auto_tagging->admin_id = $request->agent_id;
                 $auto_tagging->territory_id = $territory_id;
+                $auto_tagging->is_lead_user = $is_lead_user;
                 $auto_tagging->save();
             }
             return redirect()->back()->with('success', 'Sales Person\'s Territory Added!');

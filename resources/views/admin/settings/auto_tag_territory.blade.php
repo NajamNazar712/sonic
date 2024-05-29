@@ -25,6 +25,7 @@
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Territory</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Other territories</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -64,8 +65,8 @@
                         </div>
 
                         <div class="form-check d-none" id="lead_agent_div">
-                            <label class="form-check-label mr-1" for="is_lead_agent" style="margin: 0px 5px 0px 0px;">Lead User</label>
-                            <input type="checkbox" name="is_lead_agent" id="is_lead_agent">
+                            <label class="form-check-label mr-1" for="is_lead_user" style="margin: 0px 5px 0px 0px;">Lead User</label>
+                            <input type="checkbox" name="is_lead_user" id="is_lead_user">
                         </div>
 
                         <div class="form-group mt-2 d-none" id="remaining_territory_select_div">
@@ -93,7 +94,7 @@
                 </div>
                 <form method="post" id="agent_edit" action="{{route('admin.settings.auto_tag_territories.update')}}" novalidate="novalidate">
                     @csrf
-
+                
                 <div class="modal-body">
                     <input type="hidden" name="auto_tagging_id" id="auto_tagging_id">
                     
@@ -123,7 +124,20 @@
                             @endforeach
                         </select>
                     </div>
+
+                    <div class="form-group" id="edit_lead_agent_div">
+                        @foreach ($agents as $agent)
+                            <div class="form-check">
+                                <input type="checkbox" name="is_lead_user[]" id="edit_is_lead_user_{{ $agent->id }}" value="{{ $agent->id }}" @if($agent->is_lead_user) checked @endif>
+                                <label class="form-check-label mr-1" for="edit_is_lead_user_{{ $agent->id }}" style="margin: 0px 5px 0px 0px;">{{ $agent->name }} (Lead User)</label>
+                            </div>
+                        @endforeach
+                    </div>
                     
+                    <div class="form-group mt-2 d-none" id="edit_remaining_territory_select_div">
+                        <select name="territory_id[]" id="remaining_territory_id" class="form-control select2" multiple="multiple">
+                        </select>
+                    </div>
                     
                 </div>
                 <div class="modal-footer">
@@ -218,7 +232,7 @@
                             data:territory_obj
                     });
 
-                    $('#is_lead_agent').unbind('change').change(function() {
+                    $('#is_lead_user').unbind('change').change(function() {
                         if ($(this).is(':checked')) {
                             var selectedTerritoryId = $('#territory_id').val();
                             var filteredTerritories = remaining_territory_obj.filter(function(item) {
@@ -241,7 +255,7 @@
                     });
 
                     $('#territory_id').unbind('change').change(function() {
-                        if ($('#is_lead_agent').is(':checked')) {
+                        if ($('#is_lead_user').is(':checked')) {
                             var selectedTerritoryId = $(this).val();
                             var filteredTerritories = remaining_territory_obj.filter(function(item) {
                                 return item.id != selectedTerritoryId;
@@ -352,6 +366,7 @@
                     {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
                     {data: 'territory_name', name: 't.name', class: 'align-middle territory_name'},
                     {data: 'status', name: 'auto_tag_territories.status', class: 'align-middle status'},
+                    {data: 'territory_names', name: 'territory_names', class: 'align-middle territory_names'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
