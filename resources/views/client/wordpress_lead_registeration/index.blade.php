@@ -2802,8 +2802,7 @@
    
 @endsection
 @section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
 
     <style type="text/css">
         #generation_date_root .picker__holder {
