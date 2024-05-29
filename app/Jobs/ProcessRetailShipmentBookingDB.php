@@ -196,8 +196,10 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $pieces_quantity = $this->booking['pieces'];
         $business_category_id = $this->booking['business_category_id'];
 
+        $parcelAmountInShipment = (float)$this->booking['parcel_amount'];
+        $quantityForShipmentItem = (int)$this->booking['parcel_amount'];
 
-        $shipment_id = RetailShipmentBookController::book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
+        $shipment_id = RetailShipmentBookController::book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height, $parcelAmountInShipment);
 
         $tracking_number = RetailShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
@@ -205,8 +207,8 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
 
         $item_description = NULL;
 
-        $item_quantity = 1;
-
+        // $item_quantity = 1;
+        $item_quantity = $quantityForShipmentItem;
 
 
         RetailShipmentBookController::add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
