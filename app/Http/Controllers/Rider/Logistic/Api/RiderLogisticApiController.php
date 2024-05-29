@@ -403,19 +403,37 @@ class RiderLogisticApiController extends Controller
                 $hub_id = $request->rider_hub;
                 $shipper_id = $request->shipper_id;
                 $pickup_address_list='';
-                if(isset($request->shipper_id))
+                $shipper_list=[];
+                if(isset($shipper_id))
                 {
                     $shipper = User::join('trax_parent_products as pp','pp.segment_id','=','users.segment_id')
-                        ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','pp.id AS trax_parent_product_id','users.account_type_id')
+                        ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','pp.id AS trax_parent_product_id','users.account_type_id','users.corporate_rate_type_id')
                         ->where('users.status',3)->where('pp.status',1)
                         ->where('users.id', $shipper_id);
                         if($shipper->exists())
                         {
-                            $shipper = $shipper->get();
+
+                            $shipper=$shipper->first();
+                            if($shipper->account_type_id==2)
+                            {
+                                if($shipper->corporate_rate_type_id!=3)
+                                {
+                                    $shipper_shipping_modes = CorporateRateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('shipping_mode_id')->get();
+                                } else{
+                                    $shipper_shipping_modes = CorporateDefaultRateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('shipping_mode_id')->get();
+                                }
+                            } else if($shipper->account_type_id==1){
+                                $shipper_shipping_modes = RateStatus::where('user_id', $shipper->shipper_id)->where('status', 1)->select('shipping_mode_id')->get();
+                            }
+                        
+                            // $shipper = $shipper->get();
                             $pickup_address_list = UserShippingInfo::select('id as pickup_address_id', 'pickup_address', 'poc as contact_person', 'phone as contact_number', 'email as contact_email', 'user_id as shipper_id')
                                 ->where('user_id',$shipper_id)->where('city_id',$hub_id)->get();
 
+                            $shipper->shipper_shipping_modes=$shipper_shipping_modes;
+
                         }
+                      
 
                         $shipper_detail = [
                             'shipper'        =>   $shipper,
