@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admins\Settings\Shippers;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\WeightCharge;
 use App\Models\Admin\BaseRateRevision;
 use App\Models\Admin\BaseRateType;
 use Illuminate\Support\Facades\Auth;
@@ -263,16 +265,32 @@ class BaseRateRivisionController extends Controller
     public function approval2_update($baseRateRevisionId, $status)
     {
         $baseRateRevision = BaseRateRevision::find($baseRateRevisionId);
-        $baseRateRevision->approval2_status = $status;
-        $baseRateRevision->approval2_at = now();
-        $baseRateRevision->approval2_by_admin_id = Auth::id();
-        if(!$baseRateRevision->save())
-        {
+        // $baseRateRevision->approval2_status = $status;
+        // $baseRateRevision->approval2_at = now();
+        // $baseRateRevision->approval2_by_admin_id = Auth::id();
+        // if(!$baseRateRevision->save())
+        // {
             if($baseRateRevision->rate_type_id == 1)// Base Rate (Weight charges)
             {
+                foreach($baseRateRevision->shippersWithRateChange as $shipperWithRateChange)
+                {
+                    // dd($shipperWithRateChange->shipper_id);
 
+                    $change = $shipperWithRateChange->rate_change_percent;
+
+                    $shipper = User::where('id',$shipperWithRateChange->shipper_id)->select('account_type_id','corporate_rate_type_id')->first();
+                    dd($shipper);
+                    if($shipper->account_type_id == 1 && $shipper->corporate_rate_type_id == null)
+                    {
+                        WeightCharge::where('user_id',$shipperWithRateChange->shipper_id)
+                        ->update([
+                            'local_or_6hr' => DB::raw('local_or_6hr * ')
+                        ]);
+                    }
+                    elseif()
+                }
             }
-        }
+        // }
 
         return redirect()->back()->with([($status == 2 ? 'success' : 'error') => 'Base Rate Revision '.($status == 2 ? 'Approved' : 'Rejected')]);
     }
