@@ -207,36 +207,8 @@
                 scrollX: true,
                 scrollY: '500px',
                 buttons: [
-                    // @if (session('role_id') == 1 || in_array(503, session('permissions')))
-
-                    //     {
-                    //         text: '<i class="la la-plus"></i> Add Driver',
-                    //         className: 'btn btn-primary add_driver',
-                    //         enabled: true,
-                    //         action: function(e, dt, node, config) {
-                    //             $('#AddDriverModal').modal('show');
-
-                    //         }
-                    //     }, {
-                    //         text: '<i class="la la-plus"></i> Add Vendor',
-                    //         className: 'btn btn-primary add_vendor',
-                    //         enabled: true,
-                    //         action: function(e, dt, node, config) {
-                    //             $('#AddVendorModal').modal('show');
-
-                    //         }
-                    //     }, {
-                    //         text: '<i class="la la-plus"></i> Add Fleet',
-                    //         className: 'btn btn-primary add_fleet',
-                    //         enabled: true,
-                    //         action: function(e, dt, node, config) {
-                    //             $('#AddFleetModal').modal('show');
-
-                    //         }
-                    //     },
-                    // @endif 
                     {
-                        text: '<i class="la la-file-excel-o"></i> Import',
+                        text: '<i class="la la-file-excel-o"></i> Upload File',
                         className: 'btn btn-primary',
                         action: function(e, dt, node, config) {
                             $('.upload_shippers_form_div').toggle();

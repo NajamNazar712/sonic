@@ -202,28 +202,46 @@ class BaseRateRivisionController extends Controller
             return $revision->shippers_with_rate_change_count;
         })
         ->addColumn('action', function ($revision) {
-            //Status = 2  => Approve
-            //Status = 3  => Reject
-            $approve = '<a href="'.route('admin.settings.shippers.base_rate_revisions.approval1_update',[$revision->id,2]).'" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Approve</div></div></a>';
-            $reject = '<a href="'.route('admin.settings.shippers.base_rate_revisions.approval1_update',[$revision->id,3]).'" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Reject</div></div></a>';
-
-            $dropdown = '
-                <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">';
-            if($revision->approval1_status != 2 && $revision->approval1_status != 3){
-                // dd($revision->approval1_status);
-                if (session('role_id') == 1 || in_array(503, session('permissions')))
-                {
-                    $dropdown .= $approve;
-                    $dropdown .= $reject;
+            // Check if dropdown should be shown based on approval statuses and user role
+            $showDropdown = false;
+            $actions = '';
+        
+            // Define approval links
+            $approveLink = function ($route, $icon, $text) {
+                return '<a href="' . $route . '" class="dropdown-item status">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2"><i class="ft-' . $icon . '"></i></div>
+                                <div class="col-9 offset-1">' . $text . '</div>
+                            </div>
+                        </a>';
+            };
+        
+            // Approval 1
+            if ($revision->approval1_status == 1) {
+                if (in_array(session('role_id'), [1, 4])) { // Super Admin or Sales Head
+                    $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval1_update', [$revision->id, 2]), 'check', 'Approve');
+                    $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval1_update', [$revision->id, 3]), 'x', 'Reject');
+                    $showDropdown = true;
                 }
             }
-                
-
-    
-            $dropdown .= '</div></div>';
-            return $dropdown;
+            // Approval 2
+            elseif ($revision->approval1_status == 2 && $revision->approval2_status == 1) {
+                if (in_array(session('role_id'), [1, 2])) { // Super Admin or Finance Head
+                    $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval2_update', [$revision->id, 2]), 'check', 'Approve');
+                    $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval2_update', [$revision->id, 3]), 'x', 'Reject');
+                    $showDropdown = true;
+                }
+            }
+        
+            // Return the dropdown if actions are available
+            if ($showDropdown) {
+                return '<div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">' . $actions . '</div>
+                        </div>';
+            }
+        
+            return '';
         });
 
         return $datatable->make(true);
