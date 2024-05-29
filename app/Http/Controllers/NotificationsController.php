@@ -8525,21 +8525,21 @@ class NotificationsController extends Controller
                     if (strpos($sale_person_body, '[person_of_contact]') !== FALSE) {
                         if ($sale_person) { 
                             $sale_person_body = str_replace('[person_of_contact]', $sale_person->name, $sale_person_body);
+                            $to = $sale_person->email;
+                            self::email($subject, $sale_person_body, $to);
+        
+                            $finance_admin = AdminDepartment::where('id', 4)->first();
+                            $finance_admin = $finance_admin->department_head;
+        
+                            if (strpos($finance_body, '[person_of_contact]') !== FALSE) {
+                                $finance_body = str_replace('[person_of_contact]', $finance_admin['name'], $finance_body);
+                            }
+        
+                            $to = $finance_admin['email'];
+                            self::email($subject, $finance_body, $to);
                         }
                     }
 
-                    $to = $sale_person->email;
-                    self::email($subject, $sale_person_body, $to);
-
-                    $finance_admin = AdminDepartment::where('id', 4)->first();
-                    $finance_admin = $finance_admin->department_head;
-
-                    if (strpos($finance_body, '[person_of_contact]') !== FALSE) {
-                        $finance_body = str_replace('[person_of_contact]', $finance_admin['name'], $finance_body);
-                    }
-
-                    $to = $finance_admin['email'];
-                    self::email($subject, $finance_body, $to);
                 } else if ($id == 150) {
                     $shipment_ids = $reference_1_id;
                     $table = '<div><table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Customer Name</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Destination</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Remarks</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Collection Amount</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Updated By</strong></th></tr></thead><tbody>';

@@ -13,11 +13,7 @@
   <script src="{{asset('app-assets/js/core/app.js')}}" type="text/javascript"></script>
   <!-- END MODERN JS-->
 
-  <script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-switch.min.js')}}" type="text/javascript"></script>
-  <script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}" type="text/javascript"></script>
-  <script src="{{asset('app-assets/vendors/js/forms/toggle/switchery.min.js')}}" type="text/javascript"></script>
-  <script src="{{asset('app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js')}}" type="text/javascript"></script>
-  <script src="{{asset('app-assets/js/scripts/forms/switch.js')}}" type="text/javascript"></script>
+
   
 @if (isset($ticker) || isset($shipper_return_note_ticker))
   <script src="{{asset('app-assets/vendors/js/marquee3000/marquee3k.js')}}" type="text/javascript"></script>

@@ -2871,6 +2871,12 @@
 <!-- BEGIN PAGE LEVEL JS-->
 <script src="{{asset('app-assets/js/scripts/forms/form-login-register.js')}}"></script>
 
+<script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-switch.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/toggle/switchery.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/js/scripts/forms/switch.js')}}" type="text/javascript"></script>
+
 <script>
     //$('.pickadate').pickadate();
     $(document).ready(function() {
