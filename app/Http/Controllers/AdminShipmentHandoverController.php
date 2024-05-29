@@ -380,7 +380,7 @@ class AdminShipmentHandoverController extends Controller
         'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name',
         'handovers.from_dept_area_desg as from_dept_area_desg','handovers.to_dept_area_desg as to_dept_area_desg','handovers.received_at','handovers.created_at',
         DB::raw('(select shipments - received_shipments from handovers where handovers.id= hss.handover_id ) as remaining'),
-        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area'
+        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area', 'ssj_f.location_status as forward_location_status','ssj_r.location_status as received_location_status','caf.name as forwarded_area_name', 'car.name as received_area_name'
       ])
       ->whereBetween('handovers.created_at', [$from,$to])
       ->orderBy('handovers.id', 'DESC')
