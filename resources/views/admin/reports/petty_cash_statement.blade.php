@@ -97,6 +97,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Statement No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
                         <th class="border-primary border-darken-1">Statement Created At</th>
@@ -309,6 +310,7 @@
                             head.push('Status');
                             head.push('Statement No.');
                             head.push('Hub');
+                            head.push('Zone');
                             head.push('Tracking Number');
                             head.push('Statement Reference No.');
                             head.push('Statement Created At');
@@ -343,6 +345,7 @@
                                 row.push(values.status);
                                 row.push(values.statement_id);
                                 row.push(values.hub_name);
+                                row.push(values.zone_name);
                                 row.push(values.tracking_number);
                                 row.push(values.statement_reference_no);
                                 row.push(values.created_at);
@@ -416,6 +419,7 @@
                     {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
                     {data: 'statement_link', name: 'pcs.id', class: 'align-middle statement_link'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
+                    {data: 'zone_name', name: 'zone.name', class: 'align-middle zone_name'},
                     {data: 'petty_cash_statement_link', name: 'shipments.tracking_number', class: 'align-middle petty_cash_statement_link'},
                     {data: 'statement_reference_no', name: 'pcs.reference_no', class: 'align-middle statement_reference_no'},
                     {data: 'created_at', name: 'pcs.created_at', class: 'align-middle created_at'},

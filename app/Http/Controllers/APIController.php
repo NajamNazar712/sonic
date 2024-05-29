@@ -3117,9 +3117,10 @@ class APIController extends Controller
             'item_description' => ['required', 'between:0,500'],
             'item_quantity' => ['required', 'integer', 'digits_between:1,10', 'between:1,10000'],
             'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
-            'order_id' => ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
-                $query->where('user_id', $user_id);
-            })],
+            // 'order_id' => ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+            //     $query->where('user_id', $user_id);
+            // })],
+            'order_id' => ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'tracking_number')],
             'reference_number' => ['nullable', 'filled', 'between:0,100'],
         ];
 
@@ -3131,19 +3132,40 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $service_type_id = 1;
-            $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
-            if ($shipment_pre_book->exists()) {
-                $shipment_pre_book = $shipment_pre_book->first();
-                $length = strlen($shipment_pre_book->prefix);
-                $check_order_id = str_split($request->input('order_id'), $length);
-                if ($shipment_pre_book->prefix != $check_order_id[0]) {
-                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
-                } else {
-                    if (!array_key_exists(1, $check_order_id)) {
-                        return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            // $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
+            // if ($shipment_pre_book->exists()) {
+            //     $shipment_pre_book = $shipment_pre_book->first();
+            //     $length = strlen($shipment_pre_book->prefix);
+            //     $check_order_id = str_split($request->input('order_id'), $length);
+            //     if ($shipment_pre_book->prefix != $check_order_id[0]) {
+            //         return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            //     } else {
+            //         if (!array_key_exists(1, $check_order_id)) {
+            //             return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            //         }
+            //     }
+            // }
+            
+            $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id)->get();
+            if (!$shipment_pre_book->isEmpty()) {
+                $prefixes = $shipment_pre_book->pluck('prefix')->toArray();
+                $order_id = $request->input('order_id');
+                $is_valid_order_id = false;
+        
+                foreach ($prefixes as $prefix) {
+                    $length = strlen($prefix);
+                    $check_order_id_prefix = substr($order_id, 0, $length);
+                    if ($prefix == $check_order_id_prefix) {
+                        $is_valid_order_id = true;
+                        break;
                     }
                 }
-            } else {
+        
+                if (!$is_valid_order_id) {
+                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                }
+            }
+            else {
                 $shipment_pre_book = null;
             }
             $warehouse = GulAhmedPickupAddress::where('warehouse_id', ($request->input('warehouse_id')))->first();
