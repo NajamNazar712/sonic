@@ -88,7 +88,7 @@ class AdminTrackingController extends Controller
     public function index(Request $request)
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 271);
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
@@ -792,7 +792,7 @@ class AdminTrackingController extends Controller
     public function cx_quick_tracking_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 272);
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::where('id','!=',3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
