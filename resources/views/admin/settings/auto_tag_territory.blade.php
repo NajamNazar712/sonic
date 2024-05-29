@@ -61,6 +61,10 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="is_lead_agent">Lead User</label>
+                        <input type="checkbox" name="is_lead_agent" id="is_lead_agent">
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" id="assign_agentSubmit">Tag</button>
@@ -154,8 +158,9 @@
                 
             });
             $('#territory_select').css('display','none');
-                    $('#agent_select').css('display','none');
-           
+            $('#agent_select').css('display','none');
+            $('#is_lead_agent').css('display','none');
+
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Sales Person",
@@ -182,6 +187,7 @@
 
                     $('#territory_select').css('display','block');
                     $('#agent_select').css('display','block');
+                    $('#is_lead_agent').css('display','block');
 
                     $('#territory_id').children().remove()
 
