@@ -49,6 +49,10 @@ class ShipmentScanningJourneyController extends Controller
         $employee = ($via == 'rider') ? Rider::find($auth_id) : Admin::find($auth_id);
         $latestShipmentScanningId = ShipmentScanningJourney::latest('id')->first()->id;
 
+        if(!$employee){
+            $employee = Rider::find($auth_id);
+        }
+        
         $addScanningHistoryAreaLog = new ShipmentScanningJourneyAreaLog([
             'shipment_id' => $shipment_id,
             'shipment_scanning_journey_id' => $latestShipmentScanningId,
@@ -59,7 +63,6 @@ class ShipmentScanningJourneyController extends Controller
             'location_status' => 0,
             'status' => 0,
         ]);
-        
 
         $addScanningHistoryAreaLog->save();
         ShipmentReportingAreaStatusJob::dispatch($latestShipmentScanningId);
