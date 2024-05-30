@@ -1411,6 +1411,8 @@ class AdminDashboardController extends Controller
                 $sale_person_tag->user_id = $shipper_id;
                 $sale_person_tag->save();
 
+          
+
                 $shipper_zone_id = $user->city->zone_id; 
                 $zone = Zone::where('status', 1)->where('id', $shipper_zone_id)->first();
 
@@ -1434,6 +1436,11 @@ class AdminDashboardController extends Controller
             $sale_person_tag->admin_id = $tag_id;
             $sale_person_tag->user_id = $shipper_id;
             $sale_person_tag->save();
+
+            $admin_hub = new Adminhub();
+            $admin_hub->admin_id = $tag_id;
+            $admin_hub->hub_id = $shipper_hub_id;
+            $admin_hub->save();
 
             $shipper_zone_id = $user->city->zone_id; 
             $zone = Zone::where('status', 1)->where('id', $shipper_zone_id)->first();
