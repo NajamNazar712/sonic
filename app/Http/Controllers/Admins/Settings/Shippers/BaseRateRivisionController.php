@@ -262,82 +262,73 @@ class BaseRateRivisionController extends Controller
     public function approval2_update($baseRateRevisionId, $status)
     {
         $baseRateRevision = BaseRateRevision::find($baseRateRevisionId);
-        // $baseRateRevision->approval2_status = $status;
-        // $baseRateRevision->approval2_at = now();
-        // $baseRateRevision->approval2_by_admin_id = Auth::id();
-        // if(!$baseRateRevision->save())
-        // {
-        if ($baseRateRevision->rate_type_id == 1) // Base Rate (Weight charges)
-        {
-            foreach ($baseRateRevision->shippersWithRateChange as $shipperWithRateChange) {
+        $baseRateRevision->approval2_status = $status;
+        $baseRateRevision->approval2_at = now();
+        $baseRateRevision->approval2_by_admin_id = Auth::id();
+        if ($baseRateRevision->save()) {
+            if ($baseRateRevision->rate_type_id == 1) // Base Rate (Weight charges)
+            {
+                foreach ($baseRateRevision->shippersWithRateChange as $shipperWithRateChange) {
 
-                $change = $shipperWithRateChange->rate_change_percent;
-                $shipperId = $shipperWithRateChange->shipper_id;
+                    $change = $shipperWithRateChange->rate_change_percent;
+                    $shipperId = $shipperWithRateChange->shipper_id;
 
-                $shipper = User::where('id', $shipperId)->select('account_type_id', 'corporate_rate_type_id')->first();
+                    $shipper = User::where('id', $shipperId)->select('account_type_id', 'corporate_rate_type_id')->first();
 
-                if ($shipper->account_type_id == 1 && $shipper->corporate_rate_type_id == null) {
-                    // WeightCharge::where('user_id', $shipperWithRateChange->shipper_id)
-                    //     ->update([
-                    //         'local_or_6hr' => DB::raw('local_or_6hr * (1 + ' . ($change / 100) . ')'),
-                    //         'national_charges_class_0' => DB::raw('national_charges_class_0 * (1 + ' . ($change / 100) . ')'),
-                    //         'national_charges_class_1' => DB::raw('national_charges_class_1 * (1 + ' . ($change / 100) . ')'),
-                    //         'national_charges_class_2' => DB::raw('national_charges_class_2 * (1 + ' . ($change / 100) . ')'),
-                    //         'national_charges_class_3' => DB::raw('national_charges_class_3 * (1 + ' . ($change / 100) . ')'),
-                    //     ]);
+                    if ($shipper->account_type_id == 1 && $shipper->corporate_rate_type_id == null) {
 
-                    //Update Weight Charges
-                    $weightCharges = WeightCharge::where('user_id', $shipperId)->get(['local_or_6hr', 'national_charges_class_0', 'national_charges_class_1', 'national_charges_class_2', 'national_charges_class_3']);
+                        //Update Weight Charges
+                        $weightCharges = WeightCharge::where('user_id', $shipperId)->get();
 
-                    // dd($shipperId,$weightCharges);
+                        foreach ($weightCharges as $weightCharge) {
 
-                    foreach ($weightCharges as $weightCharge) {
-                        dump('old values: ', $weightCharge->toArray());
-                        $weightCharge->local_or_6hr = $weightCharge->local_or_6hr * (1 + ($change / 100));
-                        $weightCharge->national_charges_class_0 = $weightCharge->national_charges_class_0 * (1 + ($change / 100));
-                        // dd('shipperId: '.$shipperId,'new value: '.$weightCharge->national_charges_class_0,'change: '.$change);
-                        dump('change: ' . $change);
+                            $weightCharge->local_or_6hr = $weightCharge->local_or_6hr * (1 + ($change / 100));
+                            $weightCharge->national_charges_class_0 = $weightCharge->national_charges_class_0 * (1 + ($change / 100));
 
-                        if ($weightCharge->national_charges_class_1) {
-                            if (strpos($weightCharge->national_charges_class_1, '%') !== false) {
-                                // If it's a percentage string
-                                $numericValue = intval(rtrim($weightCharge->national_charges_class_1, '%'));
-                                $updatedValue = $numericValue * (1 + ($change / 100));
-                                $weightCharge->national_charges_class_1 = $updatedValue . '%';
-                            } else {
-                                // If it's a plain number
-                                $weightCharge->national_charges_class_1 = $weightCharge->national_charges_class_1 * (1 + ($change / 100));
+                            if ($weightCharge->national_charges_class_1) {
+                                if (strpos($weightCharge->national_charges_class_1, '%') !== false) {
+                                    // If it's a percentage string
+                                    $numericValue = intval(rtrim($weightCharge->national_charges_class_1, '%'));
+                                    $updatedValue = $numericValue + intval($change);
+                                    $weightCharge->national_charges_class_1 = $updatedValue . '%';
+                                } else {
+                                    // If it's a plain number
+                                    $weightCharge->national_charges_class_1 = $weightCharge->national_charges_class_1 * (1 + ($change / 100));
+                                }
                             }
-                        }
 
-                        if ($weightCharge->national_charges_class_2) {
-                            if (strpos($weightCharge->national_charges_class_2, '%') !== false) {
-                                // If it's a percentage string
-                                $numericValue = intval(rtrim($weightCharge->national_charges_class_2, '%'));
-                                $updatedValue = $numericValue * (1 + ($change / 100));
-                                $weightCharge->national_charges_class_2 = $updatedValue . '%';
-                            } else {
-                                // If it's a plain number
-                                $weightCharge->national_charges_class_2 = $weightCharge->national_charges_class_2 * (1 + ($change / 100));
+                            if ($weightCharge->national_charges_class_2) {
+                                if (strpos($weightCharge->national_charges_class_2, '%') !== false) {
+                                    // If it's a percentage string
+                                    $numericValue = intval(rtrim($weightCharge->national_charges_class_2, '%'));
+                                    $updatedValue = $numericValue + intval($change);
+                                    $weightCharge->national_charges_class_2 = $updatedValue . '%';
+                                } else {
+                                    // If it's a plain number
+                                    $weightCharge->national_charges_class_2 = $weightCharge->national_charges_class_2 * (1 + ($change / 100));
+                                }
                             }
-                        }
 
-                        if ($weightCharge->national_charges_class_2) {
-                            $weightCharge->national_charges_class_2 = (intval(rtrim($weightCharge->national_charges_class_2, '%')) + $change) . '%';
-                        }
-                        if ($weightCharge->national_charges_class_3) {
-                            $weightCharge->national_charges_class_3 = $weightCharge->national_charges_class_3 * (1 + ($change / 100));
-                        }
+                            if ($weightCharge->national_charges_class_3) {
+                                if (strpos($weightCharge->national_charges_class_3, '%') !== false) {
+                                    // If it's a percentage string
+                                    $numericValue = intval(rtrim($weightCharge->national_charges_class_3, '%'));
+                                    $updatedValue = $numericValue + intval($change);
+                                    $weightCharge->national_charges_class_3 = $updatedValue . '%';
+                                } else {
+                                    // If it's a plain number
+                                    $weightCharge->national_charges_class_3 = $weightCharge->national_charges_class_3 * (1 + ($change / 100));
+                                }
+                            }
 
-                        dd('shipperId: ' . $shipperId, 'new values: ', $weightCharge->toArray());
-
-                        $weightCharge->save();
+                            $weightCharge->save();
+                        }
                     }
                 }
-                // elseif()
             }
+        } else {
+            return redirect()->back()->with('error', 'Something went wrong');
         }
-        // }
 
         return redirect()->back()->with([($status == 2 ? 'success' : 'error') => 'Base Rate Revision ' . ($status == 2 ? 'Approved' : 'Rejected')]);
     }
