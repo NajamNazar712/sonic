@@ -15,7 +15,7 @@ class AddScreenLocationIdColumnInShipmentPositions extends Migration
     {
         Schema::table('shipment_positions', function (Blueprint $table) {
             $table->unsignedBigInteger('screen_location_id')->after('screen_location');
-            $table->unsignedBigInteger('scanned_by_id')->after('scanned_by');
+            $table->unsignedBigInteger('scanned_by_id')->after('scanned_by')->index();
             $table->unsignedBigInteger('scanned_by_user_type')->after('scanned_by_id');
         });
     }
