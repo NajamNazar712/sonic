@@ -953,8 +953,6 @@ class AdminTrackingController extends Controller
                 $shipment = $shipment->first();
 
                 $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
-                $retail_shipement_parcel_amount = $retail_shipment->parcel_amount;
-                $retail_shipment_quantity = $retail_shipment->quantity;
 
                 $star_user_id = $shipment->user_id;
 
