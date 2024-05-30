@@ -1452,7 +1452,6 @@ class AdminTrackingController extends Controller
 
                                 }
                             }
-
                             $shipment_scanning_query = ShipmentScanningJourney::select(
                                 'ssjal.location_status',
                                 'shipment_scanning_journeys.latitude',
@@ -1475,7 +1474,6 @@ class AdminTrackingController extends Controller
                                 $shipment_scanning_query->Where('shipment_scanning_journeys.admin_id', $journey->rider_id);
                             }
 
-                            
                             if(isset($journey->admin['role_id']) && $journey->admin['role_id'] != 1 || isset($journey->rider_id)){
                                 switch ($journey->shipper_status_id) {
                                     case 2:
