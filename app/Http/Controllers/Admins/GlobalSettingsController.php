@@ -7266,16 +7266,24 @@ class GlobalSettingsController extends Controller
 
         $roles = AutoTagTerritory::join('admins as ad', 'ad.id', '=', 'auto_tag_territories.admin_id')
             ->leftjoin('territories as t', 't.id', 'auto_tag_territories.territory_id')
-            ->leftjoin('cities as c', 'c.id', 't.city_id')
-            ->groupBy('auto_tag_territories.admin_id')
-            // ->select('auto_tag_territories.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'auto_tag_territories.status');
-            ->select('auto_tag_territories.id', 
-                'ad.name as agent_name', 
-                'c.name as city_name', 
-                't.name as territory_name', 
-                'auto_tag_territories.status', 
-                DB::raw('GROUP_CONCAT(territories.name) as territory_names')
-            );
+            ->leftjoin('cities as c', 'c.id', 't.city_id');
+        
+        // $roles->select('auto_tag_territories.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'auto_tag_territories.status');
+        $roles->select(
+            'auto_tag_territories.id',
+            'ad.name as agent_name',
+            'c.name as city_name',
+            'auto_tag_territories.status',
+            't.name as territory_name', 
+            DB::raw("
+                CASE 
+                    WHEN LENGTH(SUBSTRING_INDEX(GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ', '), ',', 2)) = LENGTH(GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ', '))
+                    THEN '-'
+                    ELSE TRIM(BOTH ', ' FROM SUBSTRING_INDEX(GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ', '), ',', -(LENGTH(SUBSTRING_INDEX(GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ', '), ',', 2)) - LENGTH(SUBSTRING_INDEX(GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ', '), ',', 1)))))
+                END as territory_names")
+        );
+        
+        $roles->groupBy('auto_tag_territories.admin_id');
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
