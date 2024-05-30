@@ -53,6 +53,7 @@ use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipperContact;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Territory;
@@ -142,6 +143,7 @@ use App\Http\Models\Rates\HistoryPackagingCharge;
 use App\Http\Models\Rates\PendingInsuranceCharge;
 use App\Http\Models\Rates\PendingPackagingCharge;
 use App\Http\Models\Admin\ShipementReceiveDetails;
+use App\Http\Models\Admin\ShipperInterceptExclude;
 use App\Http\Models\Admin\StandardInsuranceCharge;
 use App\Http\Models\Admin\StandardPackagingCharge;
 use App\Http\Models\InternationalUsersInformation;
@@ -184,9 +186,9 @@ use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
+
 use App\Http\Models\Commission\SalesCommissionExternalUser;
 use App\Http\Models\Operataions\OperationForecastShipments;
-
 use App\Http\Models\Shipper\SubstituteUserModulePermission;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Operataions\OperationForecastWeightRange;
@@ -199,7 +201,6 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Http\Models\Admin\ShipperInterceptExclude;
 
 class AdminDashboardController extends Controller
 {
@@ -1382,81 +1383,90 @@ class AdminDashboardController extends Controller
 
     public function tagSubmit(Request $request)
     {
-        $tag_id = $request->admin_id;
-        $shipper_id = $request->shipper_id;
-        $user = User::find($shipper_id);
-        $shipper_hub_id = $user->city->hub_id;
-        $sale_persons = array();
-        $old_sale_person = '';
-        $new_sale_person = '';
-        $admin_hub_condition_check = AdminHub::where('admin_id', $tag_id)->where('hub_id', $shipper_hub_id)->exists();
-        if ($admin_hub_condition_check) {
-            if (!SalePersonTag::where(['admin_id' => $tag_id, 'user_id' => $shipper_id, 'status' => 0])->exists()) {
-                $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
-                if ($old_sale_person) {
-                    $old_sale_person = $old_sale_person->sales_person;
-                    $old_sale_person_date = $old_sale_person->created_at;
-                } else {    
-                    $old_sale_person = null;
-                    $old_sale_person_date = null;
+        try{
+            $tag_id = $request->admin_id;
+            $shipper_id = $request->shipper_id;
+            $user = User::find($shipper_id);
+            $shipper_hub_id = $user->city->hub_id;
+            $sale_persons = array();
+            $old_sale_person = '';
+            $new_sale_person = '';
+            $admin_hub_condition_check = AdminHub::where('admin_id', $tag_id)->where('hub_id', $shipper_hub_id)->exists();
+            if ($admin_hub_condition_check) {
+                if (!SalePersonTag::where(['admin_id' => $tag_id, 'user_id' => $shipper_id, 'status' => 0])->exists()) {
+                    $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
+                    if ($old_sale_person) {
+                        $old_sale_person = $old_sale_person->sales_person;
+                        $old_sale_person_date = $old_sale_person->created_at;
+                    } else {    
+                        $old_sale_person = null;
+                        $old_sale_person_date = null;
+                    }
+                    $new_sale_person = Admin::find($tag_id);
+                    $shipper_data = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->get();
+                    if ($shipper_data->count() > 0) {
+                        SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->update(['status' => 1]);
+                    }
+                    $shipper = User::find($shipper_id);
+                    $sale_person_tag = new SalePersonTag();
+                    $sale_person_tag->admin_id = $tag_id;
+                    $sale_person_tag->user_id = $shipper_id;
+                    $sale_person_tag->save();
+    
+              
+    
+                    $shipper_zone_id = $user->city->zone_id; 
+                    $zone = Zone::where('status', 1)->where('id', $shipper_zone_id)->first();
+    
+                    $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date ,'zone' => $zone];
+    
+                    NotificationsController::send(81, $sale_persons, Auth::id());
+                    NotificationsController::send(119, $sale_persons, Auth::id());
+    
+    
+                } else {
+                    dd(1);
+                    return ['status' => 0, 'error' => "Shipper is already tagged to  Sales Person!"];
                 }
-                $new_sale_person = Admin::find($tag_id);
-                $shipper_data = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->get();
-                if ($shipper_data->count() > 0) {
-                    SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->update(['status' => 1]);
-                }
-                $shipper = User::find($shipper_id);
+    
+                return ['status' => 1, 'success' => "Shipper is tagged to Sales Person!"];
+            } else if (!$admin_hub_condition_check) {
+    
+                $old_sale_person_date = null;
+                $old_sale_person = null;
+    
                 $sale_person_tag = new SalePersonTag();
                 $sale_person_tag->admin_id = $tag_id;
                 $sale_person_tag->user_id = $shipper_id;
                 $sale_person_tag->save();
-
-          
-
+    
+                $admin_hub = new Adminhub();
+                $admin_hub->admin_id = $tag_id;
+                $admin_hub->hub_id = $shipper_hub_id;
+                $admin_hub->save();
+    
                 $shipper_zone_id = $user->city->zone_id; 
                 $zone = Zone::where('status', 1)->where('id', $shipper_zone_id)->first();
-
+    
+                $new_sale_person = Admin::find($tag_id);
+    
                 $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date ,'zone' => $zone];
-
+    
                 NotificationsController::send(81, $sale_persons, Auth::id());
                 NotificationsController::send(119, $sale_persons, Auth::id());
 
+                return ['status' => 1, 'success' => "Shipper is tagged to Sales Person!"];
 
-            } else {
-                return ['status' => 0, 'error' => "Shipper is already tagged to  Sales Person!"];
+    
+            }else{
+                return ['status' => 0, 'error' => "Shipper is not tagged to Sales Person!"];
             }
-
-            return ['status' => 1, 'success' => "Shipper is tagged to Sales Person!"];
-        } else if (!$admin_hub_condition_check) {
-
-            $old_sale_person_date = null;
-            $old_sale_person = null;
-
-            $sale_person_tag = new SalePersonTag();
-            $sale_person_tag->admin_id = $tag_id;
-            $sale_person_tag->user_id = $shipper_id;
-            $sale_person_tag->save();
-
-            $admin_hub = new Adminhub();
-            $admin_hub->admin_id = $tag_id;
-            $admin_hub->hub_id = $shipper_hub_id;
-            $admin_hub->save();
-
-            $shipper_zone_id = $user->city->zone_id; 
-            $zone = Zone::where('status', 1)->where('id', $shipper_zone_id)->first();
-
-            $new_sale_person = Admin::find($tag_id);
-
-            $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date ,'zone' => $zone];
-
-            NotificationsController::send(81, $sale_persons, Auth::id());
-            NotificationsController::send(119, $sale_persons, Auth::id());
-
-        }else{
-            return ['status' => 0, 'error' => "Shipper is not tagged to Sales Person!"];
-
+    
+        }catch (Exception $e) {
+            Log::error('Error tagging shipper to sales person: ' . $e->getMessage());
+            return ['status' => 0, 'error' => 'An error occurred while tagging the shipper to sales person.'];
         }
-
+    
     }
 
     public function tagSubmitBulk(Request $request)
