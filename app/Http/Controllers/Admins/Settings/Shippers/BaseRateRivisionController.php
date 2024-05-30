@@ -186,7 +186,10 @@ class BaseRateRivisionController extends Controller
                 return $revision->rateType->name;
             })
             ->addColumn('file_view', function ($revision) {
-                return $revision->id;
+                $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle" data-toggle="modal" data-target="#shipperModal" data-revision-id="' . $revision->id . '">
+                <i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span>
+                </button>';
+                return $btn;
             })
             ->addColumn('added_by_admin', function ($revision) {
                 return $revision->addedByAdmin->name;
@@ -277,27 +280,27 @@ class BaseRateRivisionController extends Controller
 
         if ($baseRateRevision->save()) {
 
-            if($baseRateRevision->approval2_status == 2) //If approved
+            if ($baseRateRevision->approval2_status == 2) //If approved
             {
                 if ($baseRateRevision->rate_type_id == 1) // Base Rate (Weight charges)
                 {
                     foreach ($baseRateRevision->shippersWithRateChange as $shipperWithRateChange) {
-    
+
                         $change = $shipperWithRateChange->rate_change_percent;
                         $shipperId = $shipperWithRateChange->shipper_id;
-    
+
                         $shipper = User::where('id', $shipperId)->select('account_type_id', 'corporate_rate_type_id')->first();
-    
+
                         if ($shipper->account_type_id == 1) {
-    
+
                             //Update Weight Charges
                             $weightCharges = WeightCharge::where('user_id', $shipperId)->get();
-    
+
                             foreach ($weightCharges as $weightCharge) {
-    
+
                                 $weightCharge->local_or_6hr = $this->clampToZero($weightCharge->local_or_6hr * (1 + ($change / 100)));
                                 $weightCharge->national_charges_class_0 = $this->clampToZero($weightCharge->national_charges_class_0 * (1 + ($change / 100)));
-    
+
                                 if ($weightCharge->national_charges_class_1) {
                                     if (strpos($weightCharge->national_charges_class_1, '%') !== false) {
                                         // If it's a percentage string
@@ -309,7 +312,7 @@ class BaseRateRivisionController extends Controller
                                         $weightCharge->national_charges_class_1 = $this->clampToZero($weightCharge->national_charges_class_1 * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 if ($weightCharge->national_charges_class_2) {
                                     if (strpos($weightCharge->national_charges_class_2, '%') !== false) {
                                         // If it's a percentage string
@@ -321,7 +324,7 @@ class BaseRateRivisionController extends Controller
                                         $weightCharge->national_charges_class_2 = $this->clampToZero($weightCharge->national_charges_class_2 * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 if ($weightCharge->national_charges_class_3) {
                                     if (strpos($weightCharge->national_charges_class_3, '%') !== false) {
                                         // If it's a percentage string
@@ -333,18 +336,18 @@ class BaseRateRivisionController extends Controller
                                         $weightCharge->national_charges_class_3 = $this->clampToZero($weightCharge->national_charges_class_3 * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 $weightCharge->save();
                             }
                         } elseif ($shipper->account_type_id == 2 && $shipper->corporate_rate_type_id == 2) {
-    
+
                             //Update Corporate Weight Charges Zone Wise
                             $corporateWeightChargeZoneWises = CorporateWeightChargeZoneWise::where('user_id', $shipperId)->get();
-    
+
                             foreach ($corporateWeightChargeZoneWises as $corporateWeightChargeZoneWise) {
-    
+
                                 $corporateWeightChargeZoneWise->local = $this->clampToZero($corporateWeightChargeZoneWise->local * (1 + ($change / 100)));
-    
+
                                 if ($corporateWeightChargeZoneWise->same_zone) {
                                     if (strpos($corporateWeightChargeZoneWise->same_zone, '%') !== false) {
                                         // If it's a percentage string
@@ -356,7 +359,7 @@ class BaseRateRivisionController extends Controller
                                         $corporateWeightChargeZoneWise->same_zone = $this->clampToZero($corporateWeightChargeZoneWise->same_zone * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 if ($corporateWeightChargeZoneWise->different_zone) {
                                     if (strpos($corporateWeightChargeZoneWise->different_zone, '%') !== false) {
                                         // If it's a percentage string
@@ -368,19 +371,19 @@ class BaseRateRivisionController extends Controller
                                         $corporateWeightChargeZoneWise->different_zone = $corporateWeightChargeZoneWise->different_zone * (1 + ($change / 100));
                                     }
                                 }
-    
+
                                 $corporateWeightChargeZoneWise->save();
                             }
                         } elseif ($shipper->account_type_id == 2 && $shipper->corporate_rate_type_id == 3) {
-    
+
                             //Update Corporate Default Weight Charges
                             $corporateDefaultWeightCharges = CorporateDefaultWeightCharge::where('user_id', $shipperId)->get();
-    
+
                             foreach ($corporateDefaultWeightCharges as $corporateDefaultWeightCharge) {
-    
+
                                 $corporateDefaultWeightCharge->local_or_6hr = $this->clampToZero($corporateDefaultWeightCharge->local_or_6hr * (1 + ($change / 100)));
                                 $corporateDefaultWeightCharge->national_charges_class_0 = $this->clampToZero($corporateDefaultWeightCharge->national_charges_class_0 * (1 + ($change / 100)));
-    
+
                                 if ($corporateDefaultWeightCharge->national_charges_class_1) {
                                     if (strpos($corporateDefaultWeightCharge->national_charges_class_1, '%') !== false) {
                                         // If it's a percentage string
@@ -392,7 +395,7 @@ class BaseRateRivisionController extends Controller
                                         $corporateDefaultWeightCharge->national_charges_class_1 = $this->clampToZero($corporateDefaultWeightCharge->national_charges_class_1 * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 if ($corporateDefaultWeightCharge->national_charges_class_2) {
                                     if (strpos($corporateDefaultWeightCharge->national_charges_class_2, '%') !== false) {
                                         // If it's a percentage string
@@ -404,7 +407,7 @@ class BaseRateRivisionController extends Controller
                                         $corporateDefaultWeightCharge->national_charges_class_2 = $this->clampToZero($corporateDefaultWeightCharge->national_charges_class_2 * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 if ($corporateDefaultWeightCharge->national_charges_class_3) {
                                     if (strpos($corporateDefaultWeightCharge->national_charges_class_3, '%') !== false) {
                                         // If it's a percentage string
@@ -416,19 +419,19 @@ class BaseRateRivisionController extends Controller
                                         $corporateDefaultWeightCharge->national_charges_class_3 = $this->clampToZero($corporateDefaultWeightCharge->national_charges_class_3 * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 $corporateDefaultWeightCharge->save();
                             }
                         } elseif ($shipper->account_type_id == 2 && $shipper->corporate_rate_type_id == 1) {
-    
+
                             //Update Corporate Weight Charges
                             $corporateWeightCharges = CorporateWeightCharge::where('user_id', $shipperId)->get();
-    
+
                             foreach ($corporateWeightCharges as $corporateWeightCharge) {
-    
+
                                 $corporateWeightCharge->local_or_6hr = $this->clampToZero($corporateWeightCharge->local_or_6hr * (1 + ($change / 100)));
                                 $corporateWeightCharge->national_charges_class_0 = $this->clampToZero($corporateWeightCharge->national_charges_class_0 * (1 + ($change / 100)));
-    
+
                                 if ($corporateWeightCharge->national_charges_class_1) {
                                     if (strpos($corporateWeightCharge->national_charges_class_1, '%') !== false) {
                                         // If it's a percentage string
@@ -440,7 +443,7 @@ class BaseRateRivisionController extends Controller
                                         $corporateWeightCharge->national_charges_class_1 = $this->clampToZero($corporateWeightCharge->national_charges_class_1 * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 if ($corporateWeightCharge->national_charges_class_2) {
                                     if (strpos($corporateWeightCharge->national_charges_class_2, '%') !== false) {
                                         // If it's a percentage string
@@ -452,7 +455,7 @@ class BaseRateRivisionController extends Controller
                                         $corporateWeightCharge->national_charges_class_2 = $this->clampToZero($corporateWeightCharge->national_charges_class_2 * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 if ($corporateWeightCharge->national_charges_class_3) {
                                     if (strpos($corporateWeightCharge->national_charges_class_3, '%') !== false) {
                                         // If it's a percentage string
@@ -464,7 +467,7 @@ class BaseRateRivisionController extends Controller
                                         $corporateWeightCharge->national_charges_class_3 = $this->clampToZero($corporateWeightCharge->national_charges_class_3 * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 $corporateWeightCharge->save();
                             }
                         }
@@ -472,49 +475,49 @@ class BaseRateRivisionController extends Controller
                 } elseif ($baseRateRevision->rate_type_id == 2) // Fuel Surcharges
                 {
                     foreach ($baseRateRevision->shippersWithRateChange as $shipperWithRateChange) {
-    
+
                         $change = $shipperWithRateChange->rate_change_percent;
                         $shipperId = $shipperWithRateChange->shipper_id;
-    
+
                         $shipper = User::where('id', $shipperId)->select('account_type_id', 'corporate_rate_type_id')->first();
-    
+
                         if ($shipper->account_type_id == 1) {
-    
+
                             //Update Fuel Surcharge
                             $fuelSurcharges = FuelSurcharge::where('user_id', $shipperId)->get();
-    
+
                             foreach ($fuelSurcharges as $fuelSurcharge) {
-    
+
                                 if ($fuelSurcharge->fuel_surcharge) {
                                     $fuelSurcharge->fuel_surcharge = $this->clampToZero($fuelSurcharge->fuel_surcharge * (1 + ($change / 100)));
                                 }
-    
+
                                 $fuelSurcharge->save();
                             }
                         } elseif ($shipper->account_type_id == 2 && ($shipper->corporate_rate_type_id == 2 || $shipper->corporate_rate_type_id == 1)) {
-    
+
                             //Update Corporate Fuel Surcharges
                             $corporateFuelSurcharges = CorporateFuelSurcharge::where('user_id', $shipperId)->get();
-    
+
                             foreach ($corporateFuelSurcharges as $corporateFuelSurcharge) {
-    
+
                                 if ($corporateFuelSurcharge->fuel_surcharge) {
                                     $corporateFuelSurcharge->fuel_surcharge = $this->clampToZero($corporateFuelSurcharge->fuel_surcharge * (1 + ($change / 100)));
                                 }
-    
+
                                 $corporateFuelSurcharge->save();
                             }
                         } elseif ($shipper->account_type_id == 2 && $shipper->corporate_rate_type_id == 3) {
-    
+
                             //Update Corporate Default Fuel Surcharges
                             $CorporateDefaultFuelSurcharges = CorporateDefaultFuelSurcharge::where('user_id', $shipperId)->get();
-    
+
                             foreach ($CorporateDefaultFuelSurcharges as $CorporateDefaultFuelSurcharge) {
-    
+
                                 if ($CorporateDefaultFuelSurcharge->fuel_surcharge) {
                                     $CorporateDefaultFuelSurcharge->fuel_surcharge = $this->clampToZero($CorporateDefaultFuelSurcharge->fuel_surcharge * (1 + ($change / 100)));
                                 }
-    
+
                                 $CorporateDefaultFuelSurcharge->save();
                             }
                         }
@@ -522,19 +525,19 @@ class BaseRateRivisionController extends Controller
                 } elseif ($baseRateRevision->rate_type_id == 3) //Cash Handling Charges
                 {
                     foreach ($baseRateRevision->shippersWithRateChange as $shipperWithRateChange) {
-    
+
                         $change = $shipperWithRateChange->rate_change_percent;
                         $shipperId = $shipperWithRateChange->shipper_id;
-    
+
                         $shipper = User::where('id', $shipperId)->select('account_type_id', 'corporate_rate_type_id')->first();
-    
+
                         if ($shipper->account_type_id == 1) {
-    
+
                             //Update Cash Handling Charges
                             $cashHandlingCharges = CashHandlingCharge::where('user_id', $shipperId)->get();
-    
+
                             foreach ($cashHandlingCharges as $cashHandlingCharge) {
-    
+
                                 if ($cashHandlingCharge->charges) {
                                     if (strpos($cashHandlingCharge->charges, '%') !== false) {
                                         // If it's a percentage string
@@ -546,16 +549,16 @@ class BaseRateRivisionController extends Controller
                                         $cashHandlingCharge->charges = $this->clampToZero($cashHandlingCharge->charges * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 $cashHandlingCharge->save();
                             }
                         } elseif ($shipper->account_type_id == 2 && ($shipper->corporate_rate_type_id == 2 || $shipper->corporate_rate_type_id == 1)) {
-    
+
                             //Update Corporate Cash Handling Charges
                             $corporateCashHandlingCharges = CorporateCashHandlingCharge::where('user_id', $shipperId)->get();
-    
+
                             foreach ($corporateCashHandlingCharges as $corporateCashHandlingCharge) {
-    
+
                                 if ($corporateCashHandlingCharge->charges) {
                                     if (strpos($corporateCashHandlingCharge->charges, '%') !== false) {
                                         // If it's a percentage string
@@ -567,16 +570,16 @@ class BaseRateRivisionController extends Controller
                                         $corporateCashHandlingCharge->charges = $this->clampToZero($corporateCashHandlingCharge->charges * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 $corporateCashHandlingCharge->save();
                             }
                         } elseif ($shipper->account_type_id == 2 && $shipper->corporate_rate_type_id == 3) {
-    
+
                             //Update Corporate Default Cash Handling Charges
                             $CorporateDefaultCashHandlingCharges = CorporateDefaultCashHandlingCharge::where('user_id', $shipperId)->get();
-    
+
                             foreach ($CorporateDefaultCashHandlingCharges as $CorporateDefaultCashHandlingCharge) {
-    
+
                                 if ($CorporateDefaultCashHandlingCharge->charges) {
                                     if (strpos($CorporateDefaultCashHandlingCharge->charges, '%') !== false) {
                                         // If it's a percentage string
@@ -588,14 +591,13 @@ class BaseRateRivisionController extends Controller
                                         $CorporateDefaultCashHandlingCharge->charges = $this->clampToZero($CorporateDefaultCashHandlingCharge->charges * (1 + ($change / 100)));
                                     }
                                 }
-    
+
                                 $CorporateDefaultCashHandlingCharge->save();
                             }
                         }
                     }
                 }
             }
-
         } else {
             return redirect()->back()->with('error', 'Something went wrong');
         }

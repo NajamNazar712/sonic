@@ -378,6 +378,67 @@
             //     }
             // });
 
+            // call_history_modal datatable function
+            $('#datatable').on('click', 'tr td.remarks button', function() {
+                    var shipment_id = table.row($(this).parents('tr')).data().shId;
+
+                    $('#call_history_modal .modal-body').html('');
+                    $('#call_history_modal').modal('show');
+
+                    $.ajax({
+                            url: '{!! route('admin.return.call_status_history') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'shipment_id': shipment_id
+                            }
+                        })
+                        .done(function(response) {
+                            if (response) {
+                                var modalBody = $('#call_history_modal .modal-body');
+                                modalBody.html('');
+                                
+                                var tableHtml =
+                                    '<table id="call_history_table" class="table-striped table-bordered" style="width:100%">';
+                                tableHtml +=
+                                    '<thead class="text-center"><tr><th class="p-1">Calling Date</th><th>Calling Time</th><th>Call Finding</th><th>Call Finding Reason</th><th>Remarks</th><th>Call To</th><th>Status</th><th>User</th></tr></thead>';
+                                    tableHtml += '<tbody class="text-center">';
+                                $.each(response.data, function(index, value) {
+                                    var updated_at = value.data.updated_at;
+                                    var trimmedDateTime = updated_at.substring(0, 10);
+                                    var trimmedTime = updated_at.substring(11, 19);
+                                    var call_finding_id = 'Unresponsive';
+                                    var call_finding_reason_id = value.data.rv_call_finding.name;
+                                    
+                                    var remarks = value.data.remarks;
+                                    if (remarks == null) {
+                                        remarks = '-';
+                                    }
+                                    var current_shipment_status = value.data.shipment.status_shipper.name;
+                                    var updated_by = value.user_name;
+
+                                    var call_to_id = value.data.call_to_id;
+                                    if (call_to_id == 1) {
+                                        call_to_id = 'Consignee'
+                                    } else {
+                                        call_to_id = 'Shipper'
+                                    }
+
+                                    tableHtml += 
+                                    '<tr><td class="p-1">' + trimmedDateTime +
+                                    '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + call_finding_reason_id +
+                                    '</td><td>' + remarks + '</td><td>' + call_to_id + '</td><td>' + current_shipment_status +
+                                    '</td><td>' + updated_by + '</td></tr>';
+                                });
+
+                                tableHtml += '</tbody></table>';
+
+                                modalBody.append(tableHtml);
+
+                                $('#call_history_modal').modal('show');
+                            }
+                        });
+                });
 
 
             $('#datatable tbody').on('click', 'tr td.action button.status', function() {
