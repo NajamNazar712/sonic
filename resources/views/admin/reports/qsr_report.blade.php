@@ -676,7 +676,7 @@
                     // {data: 'location_status', name: 'ssjal.location_status', as:'location_status', class: 'align-middle location_status',text:'Location Status',value:'location_status',download:true},
                     
                     {data: 'last_location_screen_location_name', name: 'shipment_scanning_screen_locations.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name',text:'Last Location Screen Location Name',value:'last_location_screen_location_name',download:true},
-                    {data: 'ca_scanning_last_location_name', name: 'ca_scanning_last_location_name.name', as:'ca_scanning_last_location_name', class: 'align-middle ca_scanning_last_location_name',text:'Last Location Area',value:'ca_scanning_last_location_name',download:true},
+                    {data: 'ca_scanning_last_location_name', name: 'ca_scanning_last_location_name.name', as:'ca_scanning_last_location_name', class: 'align-middle ca_scanning_last_location_name',text:'Sub Hub',value:'ca_scanning_last_location_name',download:true},
                     {data: 'last_location_updated_at', name: 'ssjal_last_location.updated_at', as:'last_location_updated_at', class: 'align-middle last_location_updated_at',text:'Last Location Updated At',value:'last_location_updated_at',download:true},
 
                     {data: 'reason', name: 'ssr.name', as:'reason', class: 'align-middle reason',text:'Reason',value:'reason',download:true},
