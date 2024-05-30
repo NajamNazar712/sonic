@@ -25,19 +25,22 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //
         $shipmentId = [
-            28820237479799,20920037694361,   22320037715553,   22320037723186,   22320037724207,   20220037734144,   22320037762871,   22320037827644, 20220037904253,   20220037938091,   20220037942886,20213537771724, 28820237479799];
+            20243837860447];
         echo count($shipmentId);
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
 
             foreach ($shipmentId as $shipment) {
 
-                if ($shipment->shipper_status_id === 5) {
+                // if ($shipment->shipper_status_id === 5) {
                     // $shipment->created_at = $shipment->updated_at;
-                    $shipment->shipper_status_id = 14;
-                    $shipment->consignee_status_id = 14;
+                    $shipment->shipper_status_id = 12;
+                    $shipment->consignee_status_id = 12;
                     $shipment->save();
-                }
+                // }
+                $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
+                ShipmentsJourneyController::add($shipment->id, 12, 12, NULL, NULL, NULL, 346, $deliveryNoteId->delivery_note_id, NULL, 1, NULL, null);
+                return true;
                 if (in_array($shipment->shipper_status_id, [13, 14])) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
                     $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
