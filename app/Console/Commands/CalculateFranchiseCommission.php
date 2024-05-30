@@ -160,13 +160,13 @@ class CalculateFranchiseCommission extends Command
 
         $baseQuery = RetailShipment::query()
         ->leftJoin('retail_users', 'retail_shipments.retail_user_id', '=', 'retail_users.id')
-        ->leftJoin('retail_franchises', 'retail_users.category_id', '=', 'retail_franchises.id')
+        ->leftJoin('retail_trax_centers', 'retail_users.name', '=', 'retail_trax_centers.name')
         ->leftJoin('retail_franchise_product_percentages', function($join) {
-            $join->on('retail_franchises.id', '=', 'retail_franchise_product_percentages.franchise_id')
+            $join->on('retail_trax_centers.id', '=', 'retail_franchise_product_percentages.franchise_id')
                 ->on('retail_shipments.shipping_mode', '=', 'retail_franchise_product_percentages.retail_shipping_mode_id');
         })
         ->leftJoin('retail_franchise_charges', function($join) {
-            $join->on('retail_franchises.id', '=', 'retail_franchise_charges.franchise_id');
+            $join->on('retail_trax_centers.id', '=', 'retail_franchise_charges.franchise_id');
         })
         ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id')
         ->leftJoin('retail_user_product_percentages', 'retail_shipments.retail_user_id', '=', 'retail_user_product_percentages.retail_user_id');
@@ -179,7 +179,7 @@ class CalculateFranchiseCommission extends Command
             'retail_shipments.*',
             'retail_shipments.created_at as shipment_month',
             'retail_users.*',
-            'retail_franchises.code',
+            'retail_trax_centers.code',
             'retail_franchise_product_percentages.product_percentage',
             'retail_franchise_charges.franchise_gst',
             'retail_franchise_charges.franchise_withholding',
