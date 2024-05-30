@@ -258,8 +258,9 @@ class DeliveryController extends Controller
                                     select max(id) 
                                     from shipment_scanning_journeys 
                                     where shipment_scanning_journeys.shipment_id = journey.shipment_id
-                                )');
-            })
+                                    and shipment_scanning_journeys.screen_location_id not in (9, 18)
+                    )');
+            })        
             ->when(\DB::raw('ssj_last_location.user_type = 1'), function ($join) {
                 $join->leftJoin('admins as adm', function ($join) {
                     $join->on('adm.id', '=', 'ssj_last_location.admin_id')
@@ -416,6 +417,8 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
+
+            
             ->filterColumn('shipping_mode', function ($query, $keyword) {
 
                 if ($keyword != '') {
@@ -444,6 +447,14 @@ class DeliveryController extends Controller
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
                     $query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+
+            ->filterColumn('last_location_screen_location_name', function ($query, $keyword) {
+                if ($keyword != '') {
+                    $query->where('last_screen_location.name', 'like', '%' . $keyword . '%');
                 } else {
                     $query->whereRaw('false');
                 }
@@ -7393,6 +7404,11 @@ class DeliveryController extends Controller
                     return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
                 }             
+            })
+            ->addColumn('total_weight', function($deliveries){
+                $shipments = DeliveryNoteShipment::where('delivery_note_id',$deliveries->delivery_note)->pluck('shipment_id')->toArray();
+                $total_weight = Shipment::whereIn('id',$shipments)->sum('actual_weight');
+                return $total_weight;
             })
             ->editColumn('fintech_amount_percent', function ($deliveries) {
                 $dncc_amount = $deliveries->amount;

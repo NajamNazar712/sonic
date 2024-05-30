@@ -32,7 +32,7 @@ class ShipperPickupController extends Controller
 
         $permission = session('permissions');
 
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $row = array();
         if(session('user_type') !== 1){
             foreach($case_nature as $nature) {

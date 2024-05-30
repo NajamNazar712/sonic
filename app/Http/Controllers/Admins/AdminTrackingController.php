@@ -88,7 +88,7 @@ class AdminTrackingController extends Controller
     public function index(Request $request)
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 271);
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
@@ -792,7 +792,7 @@ class AdminTrackingController extends Controller
     public function cx_quick_tracking_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 272);
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::where('id','!=',3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
@@ -949,9 +949,12 @@ class AdminTrackingController extends Controller
         foreach ($tracking_numbers as $tracking_number) {
             $details = array();
             $shipment = Shipment::where('tracking_number', $tracking_number);
-
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
+
+                $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
+                $retail_shipement_parcel_amount = $retail_shipment->parcel_amount;
+                $retail_shipment_quantity = $retail_shipment->quantity;
 
                 $star_user_id = $shipment->user_id;
 
@@ -965,7 +968,6 @@ class AdminTrackingController extends Controller
                 {
                     $details['star_shipper'] = 0;
                 }
-
 
 
                 if ($shipment->user->blacklist == 0) {
@@ -1166,6 +1168,15 @@ class AdminTrackingController extends Controller
                             $item_details['description'] = $item->description;
                             $item_details['quantity'] = $item->quantity;
 
+                            // $item_details['quantity'] = '';
+                            // if ($retail_shipment){
+                            //     $item_details['quantity'] = $retail_shipment_quantity;
+                            // } else {
+                            //     $item_details['quantity'] = $item->quantity;
+                            // }
+                            
+                            
+
                             $details['order_information']['items'][] = $item_details;
                         }
 
@@ -1218,6 +1229,14 @@ class AdminTrackingController extends Controller
                         }
 
                         $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
+
+                        // $details['order_information']['parcel_value'] = '';
+                        // if ($retail_shipment){
+                        //     $details['order_information']['parcel_value'] = $retail_shipement_parcel_amount;
+                        // } else {
+                        //     $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
+                        // }
+
 
                         $details['order_information']['account_type_id'] = $shipment->user->account_type_id;
 
