@@ -1511,10 +1511,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\UserManagementController@user_index')->name('index');
             Route::post('rejoin', 'Admins\UserManagementController@rejoin')->name('rejoin');
             Route::get('list', 'Admins\UserManagementController@user_list')->name('list');
+            
             Route::get('email', 'Admins\UserManagementController@user_email')->name('email');
             Route::get('trax_id', 'Admins\UserManagementController@user_trax_id')->name('trax_id');
             Route::post('status', 'Admins\UserManagementController@user_status')->name('status');
             Route::post('assign_hubs', 'Admins\UserManagementController@user_assign_hub')->name('assign_hubs');
+            Route::post('add_management_users', 'Admins\UserManagementController@add_management_users')->name('add_management_users');
 
             Route::get('validate_phone', 'Admins\UserManagementController@validate_phone')->name('validate_phone');
             Route::prefix('add')->name('add.')->group(function () {
@@ -1777,6 +1779,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('excel_store', 'Admins\AdminFinanceController@retail_done_payments_excel_store')->name('excel_store');
                 Route::get('retail_generate_report_to_email', 'Admins\AdminFinanceController@retail_done_payments_generate_report_to_email')->name('retail_generate_report_to_email');
             });
+        });
+
+        Route::prefix('tracking_number_wise_dncc_info')->name('tracking_number_wise_dncc_info.')->group(function () {
+                Route::get('', 'Admins\AdminFinanceController@tracking_number_wise_dncc_info_index')->name('index');
+                Route::get('list', 'Admins\AdminFinanceController@tracking_number_wise_dncc_info_list')->name('list');
         });
     });
 
@@ -3900,6 +3907,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('designation_logs', 'Admins\AdminHumanResourseController@designation_change_logs')->name('designation_logs');
             Route::post('employee_log', 'Admins\AdminHumanResourseController@employee_log')->name('employee_log');
             Route::post('get_area', 'Admins\AdminHumanResourseController@get_area')->name('get_area');
+
             Route::prefix('staff')->name('staff.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');

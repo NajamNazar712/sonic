@@ -460,6 +460,9 @@ class Permission
             'finance.retail.done_payments.index' => 455,
             'finance.retail.done_payments.list' => 455,
 
+            'finance.tracking_number_wise_dncc_info.index' => 984,
+            'finance.tracking_number_wise_dncc_info.list' => 984,
+
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
             'petty_cash.statements.list' => 146,
