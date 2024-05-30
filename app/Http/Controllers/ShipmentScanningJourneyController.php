@@ -52,11 +52,11 @@ class ShipmentScanningJourneyController extends Controller
         if(!$employee){
             $employee = Rider::find($auth_id);
         }
-        
+
         $addScanningHistoryAreaLog = new ShipmentScanningJourneyAreaLog([
             'shipment_id' => $shipment_id,
             'shipment_scanning_journey_id' => $latestShipmentScanningId,
-            'hub_id' => ($via == 'rider') ? $employee->city_id : $employee->default_hub_id,
+            'hub_id' => isset($employee->default_hub_id) ? $employee->default_hub_id : $employee->city_id,            
             'area_id' => optional($employee)->area_id,
             'admin_id' => ($via == 'rider') ? null : $auth_id, 
             'rider_id' => ($via == 'rider') ? $auth_id : null, 
