@@ -35,7 +35,7 @@
                     </div>
                     <div class="col-3 mb-1">
                         <fieldset class="form-group">
-                            <select name="search_origin_hub" id="search_origin_hub" class="form-control select2">
+                            <select name="search_origin_hub" id="search_origin_hub" class="form-control select2" multiple="multiple">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach
@@ -137,7 +137,10 @@
                             <th class="border-primary border-darken-1">Weight Diffrence (Shipper Rate Range vs Arrival Rate Range)</th>
                             <th class="border-primary border-darken-1">Charges as per shipper weight</th>
                             <th class="border-primary border-darken-1">Charges as per arrival weight</th>
-                            <th class="border-primary border-darken-1">Charges Diffrence (Shipper Rate Range vs Arrival Rate Range)</th>
+                            <th class="border-primary border-darken-1">Charges Diffrence (Booking vs Arrival Weight)</th>
+                            <th class="border-primary border-darken-1">Charges as per shipper booking weight range (Roundup)</th>
+                            <th class="border-primary border-darken-1">Charges as per arrival weight range (Roundup)</th>
+                            <th class="border-primary border-darken-1">Charges Difference (Shipper Rate Range vs Arrival Rate Range)</th>
                             <th class="border-primary border-darken-1">Weighted As</th> 
                             <th class="border-primary border-darken-1">Weight Recorded As</th>
                         </tr>
@@ -209,7 +212,7 @@
                 width: '100%',
                 placeholder: 'Select Shipper',
             });
-            $('#search_form #search_origin_hub').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_form #search_origin_hub').prepend('<option value=""></option>').select2({
                 width: '100%',
                 placeholder: 'Origin Hub',
             });
@@ -315,7 +318,10 @@
                             head.push('Weight Diffrence (Shipper Rate Range vs Arrival Rate Range');
                             head.push('Charges as per shipper weight');
                             head.push('Charges as per arrival weight');
-                            head.push('Charges Diffrence (Shipper Rate Range vs Arrival Rate Range)');
+                            head.push('Charges Diffrence (Booking vs Arrival Weight)');
+                            head.push('Charges as per shipper booking weight range (Roundup)');
+                            head.push('Charges as per arrival weight range (Roundup)');
+                            head.push('Charges Difference (Shipper Rate Range vs Arrival Rate Range)');
                             head.push('Weighted As');
                             head.push('Weight Recorded As');
 
@@ -343,6 +349,9 @@
                                 row.push(values.shipper_weight_charges);
                                 row.push(values.arrival_weight_charges);
                                 row.push(values.charges_diff);
+                                row.push(values.shipper_range_weight_charges);
+                                row.push(values.arrival_range_weight_charges);
+                                row.push(values.weight_range_charges_diff);
                                 row.push(values.weighted_as);
                                 row.push(values.weight_type_name)
                                 body.push(row);
@@ -413,6 +422,9 @@
                     { data:'shipper_weight_charges' ,name: 'sw.shipper_weight_charges', class: 'align-middle text-center shipper_weight_charges', orderable: false, searchable: false},
                     { data:'arrival_weight_charges' ,name: 'shipments.arrival_weight_charges', class: 'align-middle text-center arrival_weight_charges', orderable: false, searchable: false},
                     { data:'charges_diff' ,name: 'charges_diff', class: 'align-middle text-center charges_diff', orderable: false, searchable: false},
+                    { data:'shipper_range_weight_charges' ,name: 'sw.shipper_range_weight_charges', class: 'align-middle text-center shipper_range_weight_charges', orderable: false, searchable: false},
+                    { data:'arrival_range_weight_charges' ,name: 'sw.arrival_range_weight_charges', class: 'align-middle text-center arrival_range_weight_charges', orderable: false, searchable: false},
+                    { data:'weight_range_charges_diff' ,name: 'weight_range_charges_diff', class: 'align-middle text-center weight_range_charges_diff', orderable: false, searchable: false},
                     { data:'weighted_as' ,name: 'weighted_as', class: 'align-middle text-center weighted_as', orderable: false, searchable: false},
                     { data:'weight_type_name' ,name: 'weight_type', class: 'align-middle text-center weight_type', orderable: false, searchable: false},
                 ],

@@ -502,6 +502,7 @@
     <script>
         $(document).ready(function() {
 
+         
             $('#requested_from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -1207,8 +1208,10 @@
                 }
             });
 
-    
-
+            
+            var total_payable_amt=0;
+            var shipper_cap = @json($shipper_cap);
+            var shipper_limit=parseFloat(shipper_cap.setting_value).toFixed(2);
             //Make Payment Modal Datatable
             var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
                 dom: '<"pull-right"B>tr',
@@ -1229,7 +1232,7 @@
                     className: 'select_all',
                     action: function(e) {
                         e.preventDefault();
-
+                      
                         make_payments_table.rows().nodes().each(function(index) {
                             var row = make_payments_table.row(index);
 
@@ -1241,7 +1244,21 @@
 
                                 calculation(parent);
                             }
+                           
                         });
+
+                      shipper_limit = parseFloat(shipper_limit).toFixed(2);
+                      shipper_limit = parseFloat(shipper_limit);
+                      total_payable_amt = total_payable_amt.toFixed(2);
+
+                        if(total_payable_amt > shipper_limit)
+                        {
+                            scan_sound(2);
+                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                            $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                        }
+                        
                     }
                 }, {
                     extend: 'selectNone',
@@ -1752,9 +1769,10 @@
 
             var payable_list = [];
             let shipperTotal = {};
-
+       
             // Make Payments Modal Calculation
             function calculation(parent) {
+                total_payable_amt=0;
                 var id = parseInt(parent.attr('id'));
                 var payable = parent.children('td.payable').html();
                 var shipper_id = parent.children('td.shipper_id').html();
@@ -1775,7 +1793,7 @@
                     // payable_list.push(parseFloat(payable),shipper_id); //adding payable in to array payable_list 
                     payable_list.push({ payable, shipper_id }); //adding payable in to array payable_list 
                     // console.log(payable_list);
-                    calculateShipperTotal();
+                    calculateShipperTotal(parent);
 
                     var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector
                     .val()) : 0) + ((parent.children('td.amount').html() != '') ? parseInt(parent.children(
@@ -1825,6 +1843,7 @@
 
                 //Row UnSelected
                 else {
+                   
                     selected_rows_shipments.splice(index, 1);
 
                     // console.log("when unselect", shipperTotal);
@@ -1838,7 +1857,7 @@
                     payable_list.splice(index, 1);
                     // Recalculate shipperTotal after removing the entry
                     shipperTotal = {}; // Reset shipperTotal object
-                    calculateShipperTotal();
+                    calculateShipperTotal(parent);
                     // console.log("when unselect and after calculate shipper total", shipperTotal);
 
                     var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector
@@ -1860,8 +1879,9 @@
                         0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children(
                             'td.payable').html().replace(/,/g, '')) : 0);
                 }
-
+               
                 if (selected_rows_shipments.length > 0) {
+                   
                     total_amount_selector.val(parseInt(total_amount));
                     total_charges_selector.val(parseFloat(total_charges).toFixed(2));
                     total_gst_selector.val(parseFloat(total_gst).toFixed(2));
@@ -1876,7 +1896,9 @@
                     //if total payable is grate than 0 it enable make and export bank order button
                     if($('#make_payments #make_payments_form .total_payable').val() > 0){
                             const isAnyNegative = Object.values(shipperTotal).some(total => total < 0);
+                            // console.log(x); 
                             // Disable make and export bank order button if any shipper's total payable is negative
+                           
                             if (isAnyNegative) {
                                 $('#make_payments #make_payments_form button.make').prop('disabled', true);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
@@ -1884,6 +1906,8 @@
                                 $('#make_payments #make_payments_form button.make').prop('disabled', false);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
                             }
+                            total_payable_amt+=total_payable;
+                            // console.log(total_payable_amt);
                     }
                     else{
                         $('#make_payments #make_payments_form button.make').prop('disabled', true);
@@ -1891,6 +1915,7 @@
                     }
 
                 } else {
+                  
                     total_amount_selector.val(0);
                     total_charges_selector.val(0);
                     total_gst_selector.val(0);
@@ -1907,24 +1932,47 @@
             }
 
             // Function to calculate shipper totals and disable buttons if any shipper's total payable is negative
+         
+            // var shipper_cap = @json($shipper_cap);
+            // var shipper_limit=parseFloat(shipper_cap.setting_value).toFixed(2);
+            // var total_payable_amt=0;
             function calculateShipperTotal() {
+                
+                // console.log("oknhai");
                 shipperTotal = {}; // Reset shipperTotal object
+                // total_payable_amt = 0; // Reset total_payable_amt
+                
                 payable_list.forEach(entry => {
                     const shipperId = entry.shipper_id;
                     const payable = parseFloat(entry.payable.replace(/,/g, ''));
-                    if (shipperTotal[shipperId]) {
-                        shipperTotal[shipperId] += payable;
-                    } else {
-                        shipperTotal[shipperId] = payable;
-                    }
+                        // total_payable_amt +=payable;
+                        if (shipperTotal[shipperId]) {
+                            shipperTotal[shipperId] += payable;
+                        } else {
+                            shipperTotal[shipperId] = payable;
+                        }
                 });
+               
+                // if(total_payable_amt > shipper_limit)
+                // {
+                //     // alert("nikal ba");
+                //     calculation(tr);
+                //      var tr_index=$(tr).index();
+                //       setTimeout(() => {
+                //           $("#make_payments #make_payments_datatable tbody tr").eq(tr_index).removeClass('selected bg-primary bg-lighten-5 primary');
+                //       }, 150);
+                      
+                // }
+              
+
             }
 
             $('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
-
+                
                 var parent = $(this).parent('tr');
                 var selected_id = $(this).parent('tr').attr('id');
                 var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
+               
                 if (con_id) {
                     var count = 0;
                     make_payments_table.rows().nodes().each(function(index) {
@@ -1953,9 +2001,25 @@
                         }
 
                     });
+                    
+                    if(total_payable_amt > shipper_limit)
+                     {
+                         scan_sound(2);
+                         toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                         $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                         $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                    }
 
                 } else {
+                    
                     calculation(parent);
+                     if(total_payable_amt > shipper_limit)
+                     {
+                         scan_sound(2);
+                         toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                         $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                         $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                    }
                 }
 
             });
@@ -2015,9 +2079,14 @@
                                     dangerMode: true
                                 }).then(function(confirm) {
                                     if (confirm) {
-                                        $('#make_payments #make_payments_form button').remove();
-
-                                        form.submit();
+                                        if(total_payable_amt > shipper_limit)
+                                        {
+                                            scan_sound(2);
+                                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }else{
+                                            $('#make_payments #make_payments_form button').remove();
+                                            form.submit();
+                                        }
                                     }
                                 });
                             } else if (data.duplicate_shipments) {
@@ -2054,9 +2123,14 @@
                                     dangerMode: true
                                 }).then(function(confirm) {
                                     if (confirm) {
-                                        $('#make_payments #make_payments_form button').remove();
-
-                                        form.submit();
+                                        if(total_payable_amt > shipper_limit)
+                                        {
+                                            scan_sound(2);
+                                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }else{
+                                            $('#make_payments #make_payments_form button').remove();
+                                            form.submit();
+                                        }
                                     }
                                 });
                             } else if (data.over_payments) {
@@ -2094,9 +2168,14 @@
                                     dangerMode: true
                                 }).then(function(confirm) {
                                     if (confirm) {
-                                        $('#make_payments #make_payments_form button').remove();
-
-                                        form.submit();
+                                       if(total_payable_amt > shipper_limit)
+                                        {
+                                            scan_sound(2);
+                                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }else{
+                                            $('#make_payments #make_payments_form button').remove();
+                                            form.submit();
+                                        }
                                     }
                                 });
                             } else {
@@ -2122,9 +2201,15 @@
                                     dangerMode: true
                                 }).then(function(confirm) {
                                     if (confirm) {
-                                        $('#make_payments #make_payments_form button').remove();
-
-                                        form.submit();
+                                       
+                                        if(total_payable_amt > shipper_limit)
+                                        {
+                                            scan_sound(2);
+                                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }else{
+                                            $('#make_payments #make_payments_form button').remove();
+                                            form.submit();
+                                        }
                                     }
                                 });
                             }
@@ -2190,8 +2275,13 @@
                             }).then(function(confirm) {
                                 if (confirm) {
                                     $('#make_payments #make_payments_form button').remove();
-
-                                    form.submit();
+                                    if(total_payable_amt > shipper_limit)
+                                    {
+                                        scan_sound(2);
+                                        toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }else{
+                                        form.submit();
+                                    }
                                 }
                             });
                         }

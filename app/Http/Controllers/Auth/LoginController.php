@@ -29,6 +29,7 @@ use App\Http\Models\NpsShipperRatting;
 use App\Http\Models\NpsShipperSkipSurvey;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\Http\Models\Admin\BackgroundImage;
+use App\Http\Models\Admin\Settings\GeneralSetting;
 
 
 class LoginController extends Controller
@@ -272,10 +273,15 @@ class LoginController extends Controller
 
             $shipper_user_id = $user->user_id;
         }
-        $shipment_pre_book = ShipmentPrebook::where('user_id', $shipper_user_id);
-        if($shipment_pre_book->exists()){
-            $shipment_pre_book = $shipment_pre_book->first();
-            session(['prefix' => $shipment_pre_book->prefix]);
+        // $shipment_pre_book = ShipmentPrebook::where('user_id', $shipper_user_id);
+        // if($shipment_pre_book->exists()){
+        //     $shipment_pre_book = $shipment_pre_book->first();
+        //     session(['prefix' => $shipment_pre_book->prefix]);
+        // }
+        $shipment_pre_book = ShipmentPrebook::where('user_id', $shipper_user_id)->get();
+        if($shipment_pre_book->isNotEmpty()){
+            $shipment_pre_book = $shipment_pre_book->pluck('prefix')->toArray();
+            session(['prefix' => $shipment_pre_book]);
         }
         session(['packaging_charges_check' => $packaging_charges_check]);
 
@@ -377,6 +383,13 @@ class LoginController extends Controller
         }
 
         session(['mms_shippers' => $mms_shippers]);
+        $mms_excel_booking_shippers = array();
+        $setting = GeneralSetting::where('type', 'mms_excel_booking_setting')->select('description')->first();
+        if ($setting) {
+            $mms_excel_booking_shippers = array_map('intval',explode(',' , $setting->description));
+          
+        }
+        session(['mms_excel_booking_shippers' => $mms_excel_booking_shippers]);
 
         return redirect()->route('cod.welcome');
     }

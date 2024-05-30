@@ -18,7 +18,7 @@ class Admin extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'phone_number', 'cnic', 'role_id', 'password', 'updated_by', 'status' ,'first_login' , 'dummy_pin'
+        'name', 'email', 'phone_number', 'cnic', 'role_id', 'password', 'updated_by', 'status', 'first_login', 'dummy_pin'
     ];
 
     /**
@@ -42,18 +42,22 @@ class Admin extends Authenticatable
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
 
-    public function role() {
+    public function role()
+    {
         return $this->belongsTo('App\Http\Models\Admin\AdminRole', 'role_id', 'id');
     }
 
-    public function city() {
-        return $this->belongsTo('App\Http\Models\City', 'default_hub_id', 'hub_id')->where('hub',1);
+    public function city()
+    {
+        return $this->belongsTo('App\Http\Models\City', 'default_hub_id', 'hub_id')->where('hub', 1);
     }
 
-    public function hubs() {
+    public function hubs()
+    {
         return $this->hasMany('App\Http\Models\Admin\AdminHub', 'admin_id', 'id');
     }
-    public function tagged_shippers(){
+    public function tagged_shippers()
+    {
         return $this->hasMany('App\Http\Models\Admin\SalePersonTag');
     }
 
@@ -62,14 +66,17 @@ class Admin extends Authenticatable
         return $this->belongsTo(EmployeeDesignation::class, 'designation_id', 'id');
     }
 
-    public function employee(){
-        return $this->belongsTo(Employee::class,'trax_id','trax_id');
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'trax_id', 'trax_id');
     }
 
     public function area()
     {
         return $this->belongsTo('App\Http\Models\CityArea', 'area_id', 'id');
     }
+    public function responsible_city() {
+        return $this->belongsTo('App\Http\Models\City', 'default_hub_id', 'hub_id');
+    }
+
 }
-
-

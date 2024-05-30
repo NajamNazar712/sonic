@@ -18,7 +18,16 @@
                             @foreach($blacklist_found_categories as $category)
                                 <div class="alert" style="color:white; background-color: {{$category['color'] }}">{{ $category['message']  }}</div>
                             @endforeach
-                            <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.corporate_excel_store') }}" novalidate="novalidate">
+                            @if(isset($type) && $type == 'mms')
+                                @php
+                                    $routeUrl = route('cod.shipment.book.corporate_excel_mms.store');
+                                @endphp
+                            @else
+                                @php
+                                    $routeUrl = route('cod.shipment.book.corporate_excel_store');
+                                @endphp
+                            @endif
+                            <form id="booking_form" class="form-horizontal" method="POST" action="{{ $routeUrl }}" novalidate="novalidate">
                                 {{ csrf_field() }}
                                 <input type="hidden" name="excel_blacklist" value="1">
                                 <div class="table-responsive">

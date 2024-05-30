@@ -12,4 +12,14 @@ class Handover extends Model
     public function handover_note_shipments() {
         return $this->hasMany('App\Http\Models\Handover\HandoverShipments');
     }
+
+    public function to_admin()
+    {
+        return $this->belongsTo('App\Http\Models\Admin\Admin','to','id');
+    }
+
+    public function from_admin()
+    {
+        return $this->belongsTo('App\Http\Models\Admin\Admin','from','id');
+    }
 }

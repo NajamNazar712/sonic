@@ -46,6 +46,11 @@
                                     {!! session('bag_not_exist_error') !!}
                                 </div>
                             @endif
+                            @if(session('went_wrong_html'))
+                                <div class="alert alert-danger">
+                                    {!! session('went_wrong_html') !!}
+                                </div>
+                            @endif
                             <form id="add_bag_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                                 <div id="camera_scan" class="d-none">
                                     <div id="camera_view" class="camera_view"></div>
@@ -76,6 +81,7 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Bag Number</th>
                                     <th class="border-primary border-darken-1">Manifest ID</th>
+                                    <th class="border-primary border-darken-1">Bag Type</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Last Junction</th>
@@ -134,6 +140,7 @@
                     {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {name: 'bag_number', class: 'align-middle bag_number', orderable: false, searchable: false},
                     {name: 'manifest_id', class: 'align-middle manifest_id', orderable: false, searchable: false},
+                    {name: 'bag_type', class: 'align-middle bag_type', orderable: false, searchable: false},
                     {name: 'origin', class: 'align-middle origin', orderable: false, searchable: false},
                     {name: 'destination', class: 'align-middle destination', orderable: false, searchable: false},
                     {name: 'last_junction', class: 'align-middle last_junction', orderable: false, searchable: false},
@@ -143,7 +150,13 @@
                     {name: 'misroute', class: 'misroute', orderable: false,searchable: false, visible: false}
                 ],
                 rowCallback: function(row, data, index) {
+
                     if(data[misroute_id] == 1)
+                    {
+                        $(row).addClass('alert-danger');
+                    }
+
+                    if(data[10] == 1) // if bag without manifest
                     {
                         $(row).addClass('alert-danger');
                     }
@@ -190,7 +203,7 @@
                                     if (index === -1) {
                                         $action = "<button class='btn btn-danger btn-icon btn-sm remove_bag'><i class='la la-close'></i></button>";
                                         var rowNo = table.rows().count();
-                                        table.row.add([rowNo + 1,data.details.bag_number,data.details.manifest_id,data.details.origin,data.details.destination,data.details.last_junction,data.details.actual_weight,data.details.shipping_mode,$action,data.details.misroute]).node().id = data.details.bag_id;
+                                        table.row.add([rowNo + 1,data.details.bag_number,data.details.manifest_id,data.details.bag_type,data.details.origin,data.details.destination,data.details.last_junction,data.details.actual_weight,data.details.shipping_mode,$action,data.details.misroute,data.details.without_manifest]).node().id = data.details.bag_id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);

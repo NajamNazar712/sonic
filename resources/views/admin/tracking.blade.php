@@ -635,6 +635,10 @@
         </div>
     </div>
     </div>
+
+    <div class="modal fade text-left addLostResponsibleModal" data-backdrop="static" tabindex="-1" role="dialog">        
+
+    </div>
 @endsection
 
 @section('css')
@@ -765,7 +769,17 @@
                                 });
                                 $('#update_call_status_modal').modal('hide');
                                 window.reaload();
-                            } else {
+                            }
+                            else if(response.custom_check == 1) {
+                                swal({
+                                    title: 'Something Went Wrong!',
+                                    text: response.message,
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            } 
+                            else {
                                 swal({
                                     title: 'Something Went Wrong!',
                                     text: 'Please Update Status Again',
@@ -801,7 +815,7 @@
 
             $("#sub_status_call_finding").change(function() {
                 var selectedValue = $(this).val();
-                if (selectedValue === '32') {
+                if (selectedValue === '1') {
                     $('.custom_remark_container').removeClass('d-none');
                     $('#custom_remark').attr('data-rule-required', true);
                     $('#custom_remark').attr('data-msg-required', 'Other Remarks is required');
@@ -1224,10 +1238,12 @@
                                         '>Re-Attempt</button>';
                                 @endif
                                 @if (session('role_id') == 1 || in_array(245, session('permissions')))
-                                    shipment +=
-                                        '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' +
-                                        id + ' data-tracking=' + details.tracking_history[0].status_id +
-                                        '>Intercept</button>';
+                                    if (details.tracking_history && details.tracking_history.length > 0) {
+                                        shipment +=
+                                            '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' +
+                                            id + ' data-tracking=' + details.tracking_history[0].status_id +
+                                            '>Intercept</button>';
+                                    }
                                 @endif
                                 if (details.dws_image != null) {
                                     shipment +=
@@ -1574,8 +1590,7 @@
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<h4><u>Tracking History</u></h4>';
                                 shipment += '<div class="border table-responsive">';
-                                shipment +=
-                                    '<table class="table table-sm table-borderless datatable tracking_history">';
+                                shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
                                 shipment += '<tr role="row">';
                                 shipment += '<th><strong>Date / Time</strong></th>';
@@ -1585,6 +1600,7 @@
                                 shipment += '<th><strong>Remarks</strong></th>';
                                 shipment += '<th><strong>User</strong></th>';
                                 shipment += '<th><strong>City</strong></th>';
+                                shipment += '<th><strong>Location</strong></th>'
                                 shipment += '<th><strong>Received/Refused By</strong></th>';
                                 shipment += '<th><strong>IP Address</strong></th>';
                                 shipment += '<th><strong>Rider</strong></th>';
@@ -1592,15 +1608,29 @@
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
                                 $.each(details.tracking_history, function (index, history) {
+                                    var googleMapsUrl = '';
+                                    if (history.area_log && history.area_log.latitude && history.area_log.longitude) {
+                                        googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
+                                    }
                                     var formattedDateTime = moment(history.date_time).format('YYYY-MM-DD HH:mm:ss');
+                                    console.log(history.responsible);
                                     shipment += '<tr>';
                                     shipment += '<td>' + formattedDateTime + '</td>';
                                     shipment += '<td>' + history.status + '</td>';
-                                    shipment += '<td>' + (history.image_audio_location !== undefined ? history.image_audio_location : '-') + '</td>'; 
+                                    shipment += '<td>' + 
+                                    (history.image_audio_location !== undefined ? history.image_audio_location : '-') + '|' + 
+                                    (history.responsible && history.responsible.length > 0 ? 
+                                        '<button class="btn btn-sm btn-outline-info align-middle responsible_person_shipment" data-shipment-id="' + id + '" data-journey_updated_at="' + history.responsible[0].journey_updated_at + '">' + 'Responsibles (' + history.responsible.length + ') </button>' :
+                                        '-'
+                                    ) +
+                                    '</td>';
+
+                              
                                     shipment += '<td>' + (history.status_reason || '') + '</td>';
                                     shipment += '<td>' + history.remarks + '</td>';
                                     shipment += '<td>' + history.user + '</td>';
                                     shipment += '<td>' + history.city + '</td>';
+                                    shipment += '<td>' + (history.area_log ? history.area_log.location_status + ' | (' + history.area_log.area + ') | <a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>' : '') + '</td>';
                                     shipment += '<td>' + history.received_or_refused_by + '</td>';
                                     shipment += '<td>' + history.ip + '</td>';
                                     shipment += '<td>' + history.rider + '</td>';
@@ -1647,7 +1677,7 @@
                                     shipment += '</div>';
                                 }
 
-                                if ('pickup_history' in details) {
+                                if ('pickup_history_v2' in details) {
                                     shipment += '<div class="col-12 mt-2">';
                                     shipment += '<h4><u>Pickup History (V2)</u></h4>';
                                     shipment += '<div class="border table-responsive">';
@@ -1664,7 +1694,39 @@
                                     shipment += '</thead>';
                                     shipment += '<tbody>';
 
-                                    $.each(details.pickup_history, function(index, history) {
+                                    $.each(details.pickup_history_v2, function(index, history) {
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.status + '</td>';
+                                        shipment += '<td>' + history.reason + '</td>';
+                                        shipment += '<td>' + history.user + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                } else if ('pickup_history_v3' in details)
+                                {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Pickup History (V3)</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+
+                                    shipment +=
+                                        '<table class="table table-sm table-borderless datatable pickup_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>Reason</strong></th>';
+                                    shipment += '<th><strong>User</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+                                    $.each(details.pickup_history_v3, function(index, history) {
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.date_time + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
@@ -1719,6 +1781,8 @@
                                     shipment += '<tr role="row">';
                                     shipment += '<th><strong>Handover Id</strong></th>';
                                     shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>Location</strong></th>';
+
                                     shipment += '<th><strong>Date / Time</strong></th>';
 
                                     shipment += '</tr>';
@@ -1726,10 +1790,15 @@
                                     shipment += '<tbody>';
 
                                     $.each(details.handover_history, function (index, history) {
-
+                                        var googleMapsUrl = '';
+                                    if (history.area_log && history.area_log.latitude && history.area_log.longitude) {
+                                        googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
+                                    }
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.handover_id + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
+                                        shipment += '<td>' + (history.area_log ? history.area_log.location_status + ' | (' + history.area_log.area + ') | <a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>' : '') + '</td>';
+
                                         shipment += '<td>' + history.created_at + '</td>';
 
                                         shipment += '</tr>';
@@ -3386,7 +3455,74 @@
 
         });
 
-            
+        $(document).on('click', '.responsible_person_shipment', function() {
+            var shipment_id = $(this).attr('data-shipment-id');
+            var updated_at = $(this).attr('data-journey_updated_at');
+
+            console.log(updated_at);
+
+            // Make an AJAX request
+            $.ajax({
+                url:  '{{ route('admin.delivery.lost.lost_responsible_list') }}',
+                type: 'GET', 
+                data: { 
+                    'shipment_id': shipment_id, 
+                    'updated_at' : updated_at 
+                }, 
+                success: function(response) {
+                    var modalContent =  
+                        '<div class="modal-dialog modal-xl" role="document">' +
+                        '<div class="modal-content">' +
+                        '<div class="modal-header bg-primary white">' +
+                        '<h4 class="modal-title white">Add Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                        '</button>' +
+                        '</div>' +
+                        '<div class="modal-body text-center">' +
+                        '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
+                        '<table class="table table-bordered datatable" id="addLostResponsibleTable">' +
+                        '<thead>' +
+                        '<tr role="row" class="bg-primary white">' +
+                        '<th class="border-primary border-darken-1">S. No.</th>' +
+                        '<th class="border-primary border-darken-1">Employee ID</th>' +
+                        '<th class="border-primary border-darken-1">Employee Name</th>' +
+                        '<th class="border-primary border-darken-1">Employee Type</th>' +
+                        '<th class="border-primary border-darken-1">Employee Status</th>' +
+                        '<th class="border-primary border-darken-1">Marked At</th>' +
+
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody>'; 
+
+                        $.each(response.details, function(index, item) {
+                            var employee = item;
+                                modalContent += '<tr>';
+                                modalContent += '<td>' + (index + 1) + '</td>'; 
+                                modalContent += '<td>' + (employee.trax_id ? employee.trax_id : '') + '</td>'; 
+                                modalContent += '<td>' + employee.name + '</td>'; 
+                                modalContent += '<td>' + employee.type + '</td>'; 
+                                modalContent += '<td>' + employee.status + '</td>';
+                                modalContent += '<td>' + employee.marked_at + '</td>'; 
+                                modalContent += '</tr>';                            
+                        });
+
+
+                    modalContent += '</tbody>' + // End of tbody
+                        '</table>' +
+                       
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                    $('.addLostResponsibleModal').html('');
+                    $('.addLostResponsibleModal').append(modalContent);
+                    $('.addLostResponsibleModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors if any
+                }
+            });
+        });
 
 	</script>
 @endsection

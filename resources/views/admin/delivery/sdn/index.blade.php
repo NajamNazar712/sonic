@@ -600,6 +600,26 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="sdn_action_log" data-backdrop="static" role="dialog"
+            aria-labelledby="sdn_action_log" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="sdn_action_log_title">SDN <span></span></h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -850,63 +870,63 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                    {
-                        text: 'Mark Closed',
-                        className: 'btn btn-primary closed',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to Mark as Closed!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        $.ajax({
-                                            url:"{{route('admin.delivery.sdn.bulk_closed')}}",
-                                            method:'POST',
-                                            data:{
-                                                'sdn_ids':selected_rowsx,
-                                                '_token':'{{ csrf_token() }}'
-                                            }
-                                        }).done(function (data) {
-                                            if (data.status == 1) {
-                                                            toastr.success(data.success, 'Success!', {
-                                                                positionClass: 'toast-bottom-center',
-                                                                containerId: 'toast-bottom-center'
-                                                            });
-                                                        } else {
-                                                            toastr.error(data.error, 'Error!', {
-                                                                positionClass: 'toast-top-center',
-                                                                containerId: 'toast-top-center'
-                                                            });
-                                                        }
-                                                        selected_rowsx = [];
+                    // {
+                    //     text: 'Mark Closed',
+                    //     className: 'btn btn-primary closed',
+                    //     enabled: false,
+                    //     action: function (e, dt, node, config) {
+                    //         swal({
+                    //                 title: 'Are You Sure?',
+                    //                 text: 'Select Yes to Mark as Closed!',
+                    //                 icon: 'warning',
+                    //                 buttons: {
+                    //                     cancel: {
+                    //                         text: 'No',
+                    //                         value: null,
+                    //                         visible: true,
+                    //                         closeModal: true,
+                    //                     },
+                    //                     confirm: {
+                    //                         text: 'Yes',
+                    //                         value: true,
+                    //                         visible: true,
+                    //                         closeModal: true
+                    //                     }
+                    //                 },
+                    //                 closeOnClickOutside: false,
+                    //                 closeOnEsc: false,
+                    //                 dangerMode: true
+                    //             }).then(function (confirm) {
+                    //                 if (confirm) {
+                    //                     $.ajax({
+                    //                         url:"{{route('admin.delivery.sdn.bulk_closed')}}",
+                    //                         method:'POST',
+                    //                         data:{
+                    //                             'sdn_ids':selected_rowsx,
+                    //                             '_token':'{{ csrf_token() }}'
+                    //                         }
+                    //                     }).done(function (data) {
+                    //                         if (data.status == 1) {
+                    //                                         toastr.success(data.success, 'Success!', {
+                    //                                             positionClass: 'toast-bottom-center',
+                    //                                             containerId: 'toast-bottom-center'
+                    //                                         });
+                    //                                     } else {
+                    //                                         toastr.error(data.error, 'Error!', {
+                    //                                             positionClass: 'toast-top-center',
+                    //                                             containerId: 'toast-top-center'
+                    //                                         });
+                    //                                     }
+                    //                                     selected_rowsx = [];
 
-                                                        table.rows().deselect();
-                                                        table.draw(true);
-                                                        table.button('.closed').disable();
-                                        });
-                                    }
-                                });
-                        }
-                    },
+                    //                                     table.rows().deselect();
+                    //                                     table.draw(true);
+                    //                                     table.button('.closed').disable();
+                    //                     });
+                    //                 }
+                    //             });
+                    //     }
+                    // },
 
                     //--------------------------------------
 
@@ -1531,7 +1551,6 @@
                 else {
                     selected_rowsx.splice(index, 1);
                 }
-                console.log(selected_rowsx);
 
 
                 if (selected_rowsx.length > 0) {
@@ -2732,6 +2751,58 @@
                             html += '</tbody></table></div></div>';
                             $('#status_logs_modal .modal-body').html(html);
                         }
+                        else{
+                            toastr.error(data.message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
+            });
+
+            $('#datatable tbody').on('click', 'tr td button.view_sdn_action_log', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('admin.delivery.sdn.sdn_actions') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'sdn_id': id
+                    }
+                })
+                    .done(function (data) {
+                        if (data.status == 1) {
+                            $('#sdn_action_log .modal-body').html('');
+                            $('#sdn_action_log').modal('show');
+                            $('#sdn_action_log_title span').text(data.sdn_id);
+                                var html = '<div class="row">' +
+                                            '<div class="col-12">' +
+                                            '<table class="table table-sm table-bordered border">' +
+                                            '<thead>' +
+                                            '<tr>' +
+                                            '<th class="color primary text-center">Action</th>' +
+                                            '<th class="color primary">Updated By</th>' +
+                                            '<th class="color primary">Updated At</th>' +
+                                            '</tr>' +
+                                            '</thead>' +
+                                            '<tbody>';
+                            if (data.logs) {
+                                $.each(data.logs, function (index, value) {
+                                    html += '<tr>' +
+                                            '<td>' + value.status + '</td>' +
+                                            '<td>' + value.updated_by + '</td>' +
+                                            '<td>' + value.date + '</td>' +
+                                            '</tr>';
+                                });
+                            }
+                            html += '</tbody>' + 
+                                    '</table>' + 
+                                    '</div>' + 
+                                    '</div>';
+                            $('#sdn_action_log .modal-body').html(html);
+                        }
+
                         else{
                             toastr.error(data.message, 'Error!', {
                                 positionClass: 'toast-top-center',

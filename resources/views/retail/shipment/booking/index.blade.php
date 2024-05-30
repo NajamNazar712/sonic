@@ -127,6 +127,15 @@
                                             <input type="text" name="order_id" id="order_id" class="form-control" placeholder="Order ID">
                                         </div>
                                     </div>
+                                    {{-- <div class="form-group col-6 previous-names">
+                                        <select name="previous_name" id="previous_name" class="select2 form-control">
+                                        </select>
+                                    </div> --}}
+
+                                    <div class="form-group col-6">
+                                        <a href="javascript:void(0);" id="auto_fetch_shipper" class="btn btn-sm btn-outline-success sm" disabled="disabled">Auto Fetch</a>
+                                    </div>
+
                                     <div class="form-group col-6">
                                         <input type="text" name="shipper_name" id="shipper_name" class="form-control shipper_name" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">
                                     </div>
@@ -172,6 +181,15 @@
                                         <div class="row">
                                             <div class="form-group col-6">
                                                 <input type="text" name="packaging_amount" id="packaging_amount" class="form-control rounded-right amount" placeholder="Packaging Amount">
+                                            </div>
+
+                                            <div class="form-group col-6">
+                                                <input type="text" name="parcel_amount" id="parcel_amount" class="form-control rounded-right" placeholder="Parcel Value*" data-rule-required="true" data-msg-required="Parcel Value is required">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-6">
+                                                <input type="text" name="quantity" id="quantity" class="form-control rounded-right" placeholder="Quantity*" data-rule-required="true" data-msg-required="Quantity is required">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -429,6 +447,37 @@
    </div>
 </div>
 
+<div class="modal fade text-left" id="AutoFetchShipper" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AutoFetchShipper"
+    aria-hidden="true">
+   <div class="modal-dialog modal-lg" role="document">
+       <div class="modal-content">
+           <div class="modal-header bg-primary white">
+               <h4 class="modal-title white">Shipper Details</h4>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <form id="auto_fetch_shipper_form" class="form-horizontal" novalidate="novalidate">
+               @csrf
+               <div class="modal-body">
+                   <div class="row justify-content-center">
+                    {{-- <div class="col-12 form-group">
+                        <h3 class="text-danger text-center" id="black_listed_employee">Employee is Blacklisted</h3>
+                    </div> --}}
+                       <div class="col-12 form-group">
+                            <table class="table" id="shipper_table">
+                                <div id="no_info_div" class="d-none">
+                                    <span id="no_info_text"></span>
+                                </div>
+                            </table>
+                       </div>
+                   </div>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
+
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -618,7 +667,6 @@
                 placeholder:"Select Shipment Category*"
             }).bind('change',function(){
                 var id = parseInt($(this).val());
-                console.log(id);
                 var shipping_mode = parseInt($("#shipping_mode").val());
                 if(id == 2)
                 {
@@ -912,9 +960,9 @@
                             var cod = data.cod;
                             if(data.status == 1){
                                 $('#shipper_phone_no').val(data.details.shipper_phone_no);
-                                $('#shipper_name').val(data.details.shipper_name);
+                                /*$('#shipper_name').val(data.details.shipper_name);
                                 $('#shipper_cnic').val(data.details.shipper_cnic);
-                                $('#shipper_address').val(data.details.shipper_address);
+                                $('#shipper_address').val(data.details.shipper_address);*/
                                 $('#iban_no').val(data.details.iban);
                                 $('#account_no').val(data.details.account_number);
                                 $('#bank').val(data.details.bank_id).trigger('change');
@@ -963,17 +1011,14 @@
 
             var toggleValue = false;
             $('#admin_discount_type').change( function () {
-                console.log('clicked');
                 toggleValue = !toggleValue;
                 if(toggleValue)
                 {
                    $('#admin_discount_type1').val("1");
-                   console.log(toggleValue);
                 }
                 else
                 {
                     $('#admin_discount_type1').val("0");
-                    console.log(toggleValue);
                 }
             });
 
@@ -1313,7 +1358,6 @@
                 width:'100%',
                 placeholder:"Select City*"
             }).bind('change', function() {
-                console.log($(this).val());
                 if ($(this).val() === 'other') {
                     $('#other_city_domestics').removeClass('d-none');
                 }
@@ -1325,7 +1369,6 @@
                 width:'100%',
                 placeholder:"Select City*"
             }).bind('change', function() {
-                console.log($(this).val());
 
                 if ($(this).val() === 'other') {
                     $('#other_cities_internationals').removeClass('d-none');
@@ -1427,7 +1470,6 @@
                             }else{
                                 $('#black_listed_employee').removeClass('d-none');
                             }
-                            console.log(data);
                             $('#AutoFetchConsignee').modal('show');
                             var html = '';
                             $.each(data.consignee, function (index, details) {
@@ -1456,6 +1498,176 @@
                 $('#consignee_table').html('');   
 
             });
+
+            $('#auto_fetch_shipper').on('click', function(){
+                if($('input[name="shipper_phone_no"]').val().match(/\d/g) != null){
+					var length = $('input[name="shipper_phone_no"]').val().match(/\d/g).length;
+				}
+				else{
+					var length = 0;
+				}
+				if(length == 11){
+					$.ajax({
+                    url: '{!! route('retail.shipment.book.previous_names_verify') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'phone_number': $('input[name="shipper_phone_no"]').val(),
+                        
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status == 0){
+                            toastr.error(data.message, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                            });
+                        }
+                        else if (data.data.length < 1){
+                            $('#AutoFetchShipper').modal('show');
+                            $("#no_info_div").removeClass('d-none');
+                            $("#no_info_div").addClass('text-center font-medium-2');
+                            $("#no_info_text").text('No information found')
+                        }
+                        else{
+                            // if(data.blacklist == 0){
+                            //     $('#black_listed_employee').addClass('d-none');
+                            // }else{
+                            //     $('#black_listed_employee').removeClass('d-none');
+                            // }
+                            $("#no_info_div").addClass('d-none');
+                            $('#AutoFetchShipper').modal('show');
+                            var html = '';
+                            $.each(data.data, function (index, details) {
+                                    html +='<tr><td><a href="javascript:void(0)" class="btn btn-outline-success btn-sm shipper_auto_fetch_btn"><i class="ft-check"></i></a></td>';
+                                    html +='<td>'+details.shipper_name+'</td>';
+                                    html +='<td>'+details.shipper_address+'</td>';
+                                    html +='<td>'+details.shipper_cnic+'</td></tr>';
+                                });
+                                $('#shipper_table').html(html);   
+                                $('.shipper_auto_fetch_btn  ').on('click', function(){
+                                    var name = $(this).parent().next().html();
+                                    var address = $(this).parent().next().next().html();
+                                    var shipper_cnic = $(this).parent().next().next().next().html();
+
+                                    $('#shipper_name').val(name);
+                                    $('#shipper_address').val(address);
+                                    $('#shipper_cnic').val(shipper_cnic);
+                                    $('#AutoFetchShipper').modal('hide');
+
+                                });
+                        }
+                    });
+				}
+                
+            });
+
+            $('#AutoFetchShipper').on('hidden.bs.modal', function () {
+                $('#shipper_table').html('');   
+            });
+
+            $('#previous_name').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Previous Name",
+                allowClear:true
+            });
+
+            $('#shipper_phone_no').keyup(function () {
+                var phone_number = $(this).val();
+                var cleaned_phone_number = phone_number.replace(/[-_]/g, '');
+                if (cleaned_phone_number.length !== 11)
+                {
+                    $('#previous_name').empty();
+                    $('#shipper_cnic').val('');
+                    $('#shipper_address').val('');
+                    $('#shipper_name').val('');
+                }
+
+                if (cleaned_phone_number.length === 11)
+                {
+                    $.ajax({
+                        url: '{!! route('retail.shipment.book.previous_names_verify') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'phone_number': phone_number
+                        },
+                    })
+                        .done(function (data) {
+                            if (data.status === 1) {
+                                var previousNames = data.data;
+                                $('#previous_name').empty();
+                                $('#previous_name').append('<option value="" selected="selected">Select Previous Name</option>');
+                                previousNames.forEach(function (data) {
+                                    $('#previous_name').append('<option value="' + data.id + '" data-value="'+ data.shipper_cnic+'" data-value1="'+ data.shipper_address+'" data-value2="'+ data.shipper_name+'">' + data.shipper_name + '</option>');
+                                });
+
+                                $('#previous_name').trigger('change');
+                                $('#shipper_cnic').val('');
+                                $('#shipper_address').val('');
+                                $('#shipper_name').val('');
+                            }
+                        });
+                }
+            });
+
+            $('#previous_name').on('change', function() {
+
+                var selectedOption  = $('#previous_name option:selected');
+                var selectedValue = selectedOption.val();
+                var cnic = selectedOption.data('value');
+                var address = selectedOption.data('value1');
+                var name = selectedOption.data('value2');
+
+                $('#shipper_cnic').val(cnic);
+                $('#shipper_address').val(address);
+                $('#shipper_name').val(name);
+
+            });
+
+            $('[name="book_and_print"]').on('click', function () {
+                var ibanNoValue = $('#iban_no').val();
+                var accountNoValue = $('#account_no').val();
+                var bankValue = $('#bank').val();
+                var chequeImageValue = $('#cheque_image').val();
+
+                if (ibanNoValue === '' || accountNoValue === '' || bankValue === '' || chequeImageValue === '') {
+                    if (ibanNoValue === '') {
+                        $('#iban_no').addClass('required');
+                    } else {
+                        $('#iban_no').removeClass('required');
+                    }
+
+                    if (accountNoValue === '') {
+                        $('#account_no').addClass('required');
+                    } else {
+                        $('#account_no').removeClass('required');
+                    }
+
+                    if (bankValue === '') {
+                        $('#bank').addClass('required');
+                    } else {
+                        $('#bank').removeClass('required');
+                    }
+
+                    if (chequeImageValue === '') {
+                        $('#cheque_image').addClass('required');
+                    } else {
+                        $('#cheque_image').removeClass('required');
+                    }
+                }
+            });
+
+            $('#parcel_amount').on('input', function() {
+                var parcel_amount = $(this).val();
+                $(this).val(parcel_amount.replace(/[^0-9]/g, ''));
+            });
+
+            $('#quantity').on('input', function() {
+                var quantity = $(this).val();
+                $(this).val(quantity.replace(/[^0-9]/g, ''));
+            });
+
         });
     </script>
 @endsection

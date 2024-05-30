@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Agent;
 
+use App\RvAgentCallHistory;
 use Exception;
 use Carbon\Carbon;
 use App\RvShipmentAgent;
@@ -58,12 +59,12 @@ class ReturnV2Controller extends Controller
         // $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
         $fake_status_remarks = RvFakeStatus::get();
         $sub_status_return = RvAssignAgentSubStatus::where('rv_assign_agent_status_id', 1)->where('is_active', 1)->pluck('id')->toArray();
-        $agent_total_tickets = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', '!=', '')->whereBetween('updated_at', [$startOfDay, $endOfDay])->get();
-        $unresponsive_count = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 6)->whereBetween('updated_at', [$startOfDay, $endOfDay])->count();
-        $reattempt_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 2)->whereBetween('updated_at', [$startOfDay, $endOfDay])->count();
-        $intercept_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->whereIn('rv_assign_agent_status_id', [3,4])->whereBetween('updated_at', [$startOfDay, $endOfDay])->count();
-        $hold_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 5)->whereBetween('updated_at', [$startOfDay, $endOfDay])->count();
-        $refused_on_call = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->whereIn('rv_assign_agent_status_id', [1,8])->whereIn('rv_assign_agent_sub_status_id', $sub_status_return)->whereBetween('updated_at', [$startOfDay, $endOfDay])->count();
+        $agent_total_tickets = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('updated_by_id', '=', Auth::id())->where('rv_assign_agent_status_id', '!=', '')->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+        $unresponsive_count = RvAgentCallHistory::where('updated_by_id', '=', Auth::id())->whereIn('call_finding_id', [1,28,29,30,31,32])->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+        $reattempt_count = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('updated_by_id', '=', Auth::id())->where('rv_assign_agent_status_id', 2)->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+        $intercept_count = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('updated_by_id', '=', Auth::id())->whereIn('rv_assign_agent_status_id', [3,4])->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+        $hold_count = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('updated_by_id', '=', Auth::id())->where('rv_assign_agent_status_id', 5)->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+        $refused_on_call = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('updated_by_id', '=', Auth::id())->whereIn('rv_assign_agent_status_id', [1,8])->whereNotNull('rv_assign_agent_sub_status_id')->whereIn('rv_assign_agent_sub_status_id', $sub_status_return)->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
 
         return view('agent.return_v2.index')->with(['hold_count'=>$hold_count,'intercept_count'=>$intercept_count,'user' => $user, 'shipment_statuses' => null, 'fake_status_remarks' => $fake_status_remarks, 'agent_total_tickets' => $agent_total_tickets, 'unresponsive_count' => $unresponsive_count, 'reattempt_count' => $reattempt_count, 'refused_on_call' => $refused_on_call]);
     }
@@ -92,7 +93,7 @@ class ReturnV2Controller extends Controller
         $employee_attendance = EmployeeAttendance::where('employee_id', $admin->employee_id)->where('attendance_date', date('Y-m-d'));
 
         if ($employee_attendance->exists()) {
-            $employee_attendance->update(['clock_in' => date('H:i:s')]);
+            $employee_attendance->update(['clock_in' => date('H:i:s'), 'clock_out' => null]);
         } else {
             $employee_attendance = new EmployeeAttendance();
             $employee_attendance->employee_id = $admin->employee_id;
@@ -111,15 +112,12 @@ class ReturnV2Controller extends Controller
     // Description:
     public function get_ticket(Request $request)
     {
-
-        $sorted_agents = RvAgentAssignHub::where('agent_id', $request->auth_id)->orderBy('priority', 'ASC')->get();
-
+        // $agent_sorted_hubs = RvAgentAssignHub::where('agent_id', $request->auth_id)->orderBy('priority', 'ASC')->select('city_id')->get();
         $admin = Admin::where('id', Auth::id());
 
         if ($admin->exists()) {
             $admin = $admin->first();
 
-           
             $employee = Employee::where('phone_number', $admin->phone_number)->where('staff_category_id', 3)->where('status_id', '!=', 2);
 
             $shipment = [];
@@ -128,22 +126,69 @@ class ReturnV2Controller extends Controller
                 $employee = $employee->first();
                 $shift_exist = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id', 2)->first();
                 if ($shift_exist) {
-                    // $shift_exist =  EmployeeShift::where('id', $employee->shift_id)->first();
                     $start_time = Carbon::parse($shift_exist->start_time);
                     $end_time = Carbon::parse($shift_exist->end_time);
                     if ($current_time->between($start_time, $end_time)) {
-                        // Assuming $sorted_agents is an array containing agents with their city_id
 
                         $agent_id = Auth::id();
 
                         if(session('latitude') != null){
                             $this->mark_attendance($admin);
                         }
-
-                    $shipment = $this->included_shippers($sorted_agents, $agent_id);
-
+                        //$assigned_shipments by admin
+                        $assigned_shipment = RvShipmentAssignAgent::join('shipments as s', 'rv_shipment_assign_agents.shipment_id', '=', 's.id')
+                        ->whereRaw('NOT EXISTS (
+                            SELECT sj.id
+                            FROM shipments_journey AS sj
+                            WHERE sj.status_reason_id IN (12, 27, 35)
+                            AND sj.shipment_id = s.id
+                            AND sj.id = (
+                                SELECT MAX(id)
+                                FROM shipments_journey
+                                WHERE shipment_id = s.id
+                            )
+                        )')
+                        ->whereIn('s.shipper_status_id', [12,66,52])
+                        ->where('agent_id', $agent_id)
+                        ->where('rv_state_id', 1)
+                        ->where('rv_assign_agent_status_id', null)
+                        ->where('rv_assign_agent_sub_status_id', null)
+                        ->where('assigned_to_type_id', '!=', 0)
+                        ->where('assigned_by', '!=', 0)
+                        ->first();
                         
+                        // If no shipment is assigned and shipment status is (12,66,52) and no reasons id 12, 27, 35 on shipment journey, find an unassigned one
+                        if (!$assigned_shipment) {
+                            $already_assigned_shipment = RvShipmentAssignAgent::join('shipments as s', 'rv_shipment_assign_agents.shipment_id', '=', 's.id')
+                            ->whereRaw('NOT EXISTS (
+                                SELECT sj.id
+                                FROM shipments_journey AS sj
+                                WHERE sj.status_reason_id IN (12, 27, 35)
+                                AND sj.shipment_id = s.id
+                                AND sj.id = (
+                                    SELECT MAX(id)
+                                    FROM shipments_journey
+                                    WHERE shipment_id = s.id
+                                )
+                            )')
+                            ->where('agent_id', $agent_id)
+                            ->where('rv_state_id', 1)
+                            ->whereIn('s.shipper_status_id', [12,66,52])
+                            ->whereNull('rv_assign_agent_status_id')
+                            ->whereNull('rv_assign_agent_sub_status_id')
+                            ->first();
+
+                            // If no shipment is already assigned, assign a new one
+                            if (!$already_assigned_shipment) {
+                                $shipment = $this->included_shippers($agent_id);
+                            } else {
+                                $shipment = $already_assigned_shipment->shipment_id;
+                            }
+                        } else {
+                            $shipment = $assigned_shipment->shipment_id;
+                        }
                         if ($shipment) {
+                            $shipment = Shipment::find($shipment->id ?? $shipment);
                             try {
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
@@ -159,26 +204,26 @@ class ReturnV2Controller extends Controller
                                         ->where('shipments.id',$shipment->id)->first();
 
                                 foreach ($product_infos as $product_info) {
-
                                     $detail_product = [
                                         'product_name' => $product_info->product->product_name,
                                         'description' => $product_info->description,
                                         'quantity' => $product_info->quantity,
                                         'order_id' => $product_info->shipment->order_id
                                     ];
-
                                     $detail_product_infos[] = $detail_product;
                                 }
 
-                                $rider_info = RiderDelivery::where('shipment_id', $shipment->id)->latest()->first();
-
-                                if (isset($rider_info)) {
-                                    $rider_details['reason'] = ShipmentStatusReason::where('id', $rider_info->rider_status_reason_id)->first();
-                                    $rider_details['reason'] = $rider_details['reason']['name'] ? $rider_details['reason']['name'] : '-';
-                                    $rider_details['attempted_time'] = (isset($rider_info->created_at)) ? ($rider_info->created_at)->format('Y/m/d H:i:s') : '-';
-                                    $rider_details['remarks'] = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                                // $rider_info = RiderDelivery::where('shipment_id', $shipment->id)->latest()->first();
+                                $latest_shipments_journey = ShipmentsJourney::where('shipper_status_id', 12)
+                                ->where('shipment_id', $shipment->id)
+                                ->latest()
+                                ->first();
+                                if (isset($latest_shipments_journey)) {
+                                    $rider_details['reason'] =ShipmentStatusReason::where('id', $latest_shipments_journey->status_reason_id)->first();
+                                    $rider_details['reason'] = $rider_details['reason'] ? $rider_details['reason']['name'] : '-';
+                                    $rider_details['attempted_time'] = (isset($latest_shipments_journey->created_at)) ? ($latest_shipments_journey->created_at)->format('Y/m/d H:i:s') : '-';
+                                    $rider_details['remarks'] = $latest_shipments_journey;
                                     $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
-
                                 } else {
                                     $rider_details['reason'] = '-';
                                     $rider_details['attempted_time'] = '-';
@@ -186,7 +231,6 @@ class ReturnV2Controller extends Controller
                                 }
 
                                 $call_history = $this->get_call_status_history($request , $shipment->id);
-
                                 $image_location = [];
 
                                 $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->first();
@@ -196,7 +240,6 @@ class ReturnV2Controller extends Controller
                                         if ($exists) {
                                             $image_location['image'] = asset(Storage::url($rider_delivery->picture_path));
                                         } else {
-                                            // $image_location['image'] = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
                                             $image_location['image'] = '-----';
                                         }
                                     }
@@ -205,11 +248,9 @@ class ReturnV2Controller extends Controller
                                         if ($exists) {
                                             $image_location['audio'] = asset(Storage::url($rider_delivery->audio_path));
                                         } else {
-                                            // $image_location['audio'] = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(5));
                                             $image_location['audio'] = '-----';
                                         }
                                     }
-
                                     if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
                                         $image_location['location'] = $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude;
                                     }
@@ -250,7 +291,7 @@ class ReturnV2Controller extends Controller
                         }
 
                         else{
-                            return response()->json(['status' => 5, 'errors' => 'No zone assigned or shipment not found']);
+                            return response()->json(['status' => 5, 'errors' => 'No shipment found or Shipper is disabled']);
                         }
 
                     } else {
@@ -291,7 +332,7 @@ class ReturnV2Controller extends Controller
             'is_fake_status' => 'required',
             'rv_fake_status_id' => 'required_if:is_fake_status, 1',
             'remarks' => Rule::requiredIf(function () use ($request) {
-                return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 19 || $request->rv_assign_agent_status_id == 5;
+                return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 1 || $request->rv_assign_agent_status_id == 5;
             }), //if unresponsive and other is selected remark is required
         ];
 
@@ -301,7 +342,6 @@ class ReturnV2Controller extends Controller
             'is_fake_status' => $request->input('is_fake_status'),
             'rv_fake_status_id' => $request->input('rv_fake_status_id') ?? null,
             'remarks' => $request->input('remarks') ?? null,
-
         ];
 
         $validate = Validator::make($data, $validations);
@@ -311,7 +351,6 @@ class ReturnV2Controller extends Controller
         } 
         else 
         {
-            // $current_time = Carbon::now();
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->latest()->first();
             if($shipment_assign_agent){
                 $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at', date('Y-m-d'))->first();
@@ -321,7 +360,6 @@ class ReturnV2Controller extends Controller
                 $employee_shift = EmployeeShift::where('id', $employee->shift_id)->first();
     
                 // Check Employee Shift Time
-                // if ($current_time->between(Carbon::parse($employee_shift['start_time']), Carbon::parse($employee_shift['end_time']))) {
                     try{
                         DB::beginTransaction();
                             //if agent already exists on same date update row
@@ -373,18 +411,8 @@ class ReturnV2Controller extends Controller
                                 if($shipment_assign_agents){
                                     $shipment_assign_agent = $shipment_assign_agents;
                                 }
-                                // else{
-                                    //     $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->latest()->first();
-                                    // }
-                                    // $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
-                                    // dd(2,$shipment_assign_agent);
-                                // $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
-                                // die();
-                                // if($rv_shipment_assign_agent_details != true){
-                                //     // DB::rollBack();
-                                //     return response()->json(['status' => 3, 'errors' => 'Shipment Details not updated']);
-                                // } 
                                 else {
+                                    $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->latest()->first();
                                     // this function is updating rv_shipment_assign_agents table columns like increment total_shipments, actual_productivity, already_updated, updated_type_id, rv_state_id
                                     $add_shipment_agent = $this->add_shipment_agent($request, $shipment_assign_agent);
                                     if($add_shipment_agent != true){
@@ -410,12 +438,6 @@ class ReturnV2Controller extends Controller
                         DB::rollBack();
                         return response()->json(['status' => 3, 'errors' => 'Something Went Wrong', 'info'=> $th->getMessage()]);
                     }
-                // }
-                // else 
-                // {
-                //     Auth::logout();
-                //     return response()->json(['status' => 2, 'success' => 'Successfully logout']);
-                // }
             }
             else{
                 return response()->json(['status' => 3, 'errors' => 'This Shipment is Unassigned']);
