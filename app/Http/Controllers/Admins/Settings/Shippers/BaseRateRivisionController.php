@@ -29,7 +29,7 @@ class BaseRateRivisionController extends Controller
 
         $baseRateTypes = BaseRateType::all();
 
-        return view('admin.settings.shippers.base_rate_revision.index',['baseRateTypes' => $baseRateTypes]);
+        return view('admin.settings.shippers.base_rate_revision.index', ['baseRateTypes' => $baseRateTypes]);
     }
 
     public function add_bulk_shipper_rate_adjustment_store(Request $request)
@@ -50,7 +50,7 @@ class BaseRateRivisionController extends Controller
 
         $rules = [
             'shipper_id' => ['required', 'integer', 'exists:users,id'],
-            'percentage' => ['required', 'Numeric','not_in:0','min:-1000','max:1000']
+            'percentage' => ['required', 'Numeric', 'not_in:0', 'min:-1000', 'max:1000']
         ];
 
         $fields = [0 => 'shipper_id', 1 => 'percentage'];
@@ -100,9 +100,10 @@ class BaseRateRivisionController extends Controller
             }
 
             //Validation for Duplicate Entries
-            $duplicateValidation = Validator::make($rows,
-            ['*.shipper_id' => 'required|distinct'],
-            ['*.shipper_id.distinct' => 'Duplicate Account Numbers Found!']
+            $duplicateValidation = Validator::make(
+                $rows,
+                ['*.shipper_id' => 'required|distinct'],
+                ['*.shipper_id.distinct' => 'Duplicate Account Numbers Found!']
             );
 
             if ($duplicateValidation->fails()) {
@@ -127,7 +128,7 @@ class BaseRateRivisionController extends Controller
                 return redirect()->back()->withErrors($errors);
             } else {
 
-                $data= [];
+                $data = [];
                 $rate_adjustment_type_id = $rateAdjustmentTypeId;
                 $baseRateRevision = BaseRateRevision::create([
                     'rate_type_id' => $rate_adjustment_type_id,
@@ -144,17 +145,13 @@ class BaseRateRivisionController extends Controller
                         'shipper_id' => $shipper_id,
                         'rate_change_percent' => $rateAdjustmentPercentage
                     ];
-
                 }
 
                 $baseRateRevision->shippersWithRateChange()->createMany($data);
-                
-                }
-
-                return redirect()->back()->with(['success' => count($rows) . ' Revision'.(count($rows) > 1 ? 's' : '').' Added']);
             }
 
-         else {
+            return redirect()->back()->with(['success' => count($rows) . ' Revision' . (count($rows) > 1 ? 's' : '') . ' Added']);
+        } else {
             return redirect()->back()->with('error', 'Invalid Tracking Numbers');
         }
     }
@@ -166,88 +163,88 @@ class BaseRateRivisionController extends Controller
         }
 
         $baseRateRevisions = BaseRateRevision::withCount('shippersWithRateChange')
-        ->with([
-            'rateType:id,name',
-            'addedByAdmin:id,name',
-            'approved1ByAdmin:id,name',
-            'approval1Status:id,name',
-            'approved2ByAdmin:id,name',
-            'approval2Status:id,name',
-        ]);
+            ->with([
+                'rateType:id,name',
+                'addedByAdmin:id,name',
+                'approved1ByAdmin:id,name',
+                'approval1Status:id,name',
+                'approved2ByAdmin:id,name',
+                'approval2Status:id,name',
+            ]);
 
         $datatable = Datatables::of($baseRateRevisions)
-        ->addColumn('rate_type', function ($revision) {
-            return $revision->rateType->name;
-        })
-        ->addColumn('file_view', function ($revision) {
-            return $revision->id;
-        })
-        ->addColumn('added_by_admin', function ($revision) {
-            return $revision->addedByAdmin->name;
-        })
-        ->addColumn('approved1_by_admin', function ($revision) {
-            return $revision->approved1ByAdmin ? $revision->approved1ByAdmin->name : '-';
-        })
-        ->addColumn('approval1_status', function ($revision) {
-            return $revision->approval1Status->name;
-        })
-        ->editColumn('approval1_at', function ($revision) {
-            return $revision->approval1_at ?? '-';
-        })
-        ->addColumn('approved2_by_admin', function ($revision) {
-            return $revision->approved2ByAdmin ? $revision->approved2ByAdmin->name : '-';
-        })
-        ->editColumn('approval2_at', function ($revision) {
-            return $revision->approval2_at ?? '-';
-        })
-        ->addColumn('approval2_status', function ($revision) {
-            return $revision->approval2Status->name;
-        })
-        ->addColumn('shippers_count', function ($revision) {
-            return $revision->shippers_with_rate_change_count;
-        })
-        ->addColumn('action', function ($revision) {
-            // Check if dropdown should be shown based on approval statuses and user role
-            $showDropdown = false;
-            $actions = '';
-        
-            // Define approval links
-            $approveLink = function ($route, $icon, $text) {
-                return '<a href="' . $route . '" class="dropdown-item status">
+            ->addColumn('rate_type', function ($revision) {
+                return $revision->rateType->name;
+            })
+            ->addColumn('file_view', function ($revision) {
+                return $revision->id;
+            })
+            ->addColumn('added_by_admin', function ($revision) {
+                return $revision->addedByAdmin->name;
+            })
+            ->addColumn('approved1_by_admin', function ($revision) {
+                return $revision->approved1ByAdmin ? $revision->approved1ByAdmin->name : '-';
+            })
+            ->addColumn('approval1_status', function ($revision) {
+                return $revision->approval1Status->name;
+            })
+            ->editColumn('approval1_at', function ($revision) {
+                return $revision->approval1_at ?? '-';
+            })
+            ->addColumn('approved2_by_admin', function ($revision) {
+                return $revision->approved2ByAdmin ? $revision->approved2ByAdmin->name : '-';
+            })
+            ->editColumn('approval2_at', function ($revision) {
+                return $revision->approval2_at ?? '-';
+            })
+            ->addColumn('approval2_status', function ($revision) {
+                return $revision->approval2Status->name;
+            })
+            ->addColumn('shippers_count', function ($revision) {
+                return $revision->shippers_with_rate_change_count;
+            })
+            ->addColumn('action', function ($revision) {
+                // Check if dropdown should be shown based on approval statuses and user role
+                $showDropdown = false;
+                $actions = '';
+
+                // Define approval links
+                $approveLink = function ($route, $icon, $text) {
+                    return '<a href="' . $route . '" class="dropdown-item status">
                             <div class="row no-gutters align-items-center">
                                 <div class="col-2"><i class="ft-' . $icon . '"></i></div>
                                 <div class="col-9 offset-1">' . $text . '</div>
                             </div>
                         </a>';
-            };
-        
-            // Approval 1
-            if ($revision->approval1_status == 1) {
-                if (in_array(session('role_id'), [1, 4])) { // Super Admin or Sales Head
-                    $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval1_update', [$revision->id, 2]), 'check', 'Approve');
-                    $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval1_update', [$revision->id, 3]), 'x', 'Reject');
-                    $showDropdown = true;
+                };
+
+                // Approval 1
+                if ($revision->approval1_status == 1) {
+                    if (in_array(session('role_id'), [1, 4])) { // Super Admin or Sales Head
+                        $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval1_update', [$revision->id, 2]), 'check', 'Approve');
+                        $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval1_update', [$revision->id, 3]), 'x', 'Reject');
+                        $showDropdown = true;
+                    }
                 }
-            }
-            // Approval 2
-            elseif ($revision->approval1_status == 2 && $revision->approval2_status == 1) {
-                if (in_array(session('role_id'), [1, 2])) { // Super Admin or Finance Head
-                    $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval2_update', [$revision->id, 2]), 'check', 'Approve');
-                    $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval2_update', [$revision->id, 3]), 'x', 'Reject');
-                    $showDropdown = true;
+                // Approval 2
+                elseif ($revision->approval1_status == 2 && $revision->approval2_status == 1) {
+                    if (in_array(session('role_id'), [1, 2])) { // Super Admin or Finance Head
+                        $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval2_update', [$revision->id, 2]), 'check', 'Approve');
+                        $actions .= $approveLink(route('admin.settings.shippers.base_rate_revisions.approval2_update', [$revision->id, 3]), 'x', 'Reject');
+                        $showDropdown = true;
+                    }
                 }
-            }
-        
-            // Return the dropdown if actions are available
-            if ($showDropdown) {
-                return '<div class="btn-group">
+
+                // Return the dropdown if actions are available
+                if ($showDropdown) {
+                    return '<div class="btn-group">
                             <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                             <div class="dropdown-menu dropdown-menu-sm">' . $actions . '</div>
                         </div>';
-            }
-        
-            return '';
-        });
+                }
+
+                return '';
+            });
 
         return $datatable->make(true);
     }
@@ -259,7 +256,7 @@ class BaseRateRivisionController extends Controller
         $baseRateRevision->approval1_at = now();
         $baseRateRevision->approval1_by_admin_id = Auth::id();
         $baseRateRevision->save();
-        return redirect()->back()->with([($status == 2 ? 'success' : 'error') => 'Base Rate Revision '.($status == 2 ? 'Approved' : 'Rejected')]);
+        return redirect()->back()->with([($status == 2 ? 'success' : 'error') => 'Base Rate Revision ' . ($status == 2 ? 'Approved' : 'Rejected')]);
     }
 
     public function approval2_update($baseRateRevisionId, $status)
@@ -270,17 +267,16 @@ class BaseRateRivisionController extends Controller
         // $baseRateRevision->approval2_by_admin_id = Auth::id();
         // if(!$baseRateRevision->save())
         // {
-            if($baseRateRevision->rate_type_id == 1)// Base Rate (Weight charges)
-            {
-                foreach($baseRateRevision->shippersWithRateChange as $shipperWithRateChange)
-                {
+        if ($baseRateRevision->rate_type_id == 1) // Base Rate (Weight charges)
+        {
+            foreach ($baseRateRevision->shippersWithRateChange as $shipperWithRateChange) {
 
-                    $change = $shipperWithRateChange->rate_change_percent;
+                $change = $shipperWithRateChange->rate_change_percent;
+                $shipperId = $shipperWithRateChange->shipper_id;
 
-                    $shipper = User::where('id',$shipperWithRateChange->shipper_id)->select('account_type_id','corporate_rate_type_id')->first();
+                $shipper = User::where('id', $shipperId)->select('account_type_id', 'corporate_rate_type_id')->first();
 
-                    if($shipper->account_type_id == 1 && $shipper->corporate_rate_type_id == null)
-                    {
+                if ($shipper->account_type_id == 1 && $shipper->corporate_rate_type_id == null) {
                     // WeightCharge::where('user_id', $shipperWithRateChange->shipper_id)
                     //     ->update([
                     //         'local_or_6hr' => DB::raw('local_or_6hr * (1 + ' . ($change / 100) . ')'),
@@ -291,34 +287,58 @@ class BaseRateRivisionController extends Controller
                     //     ]);
 
                     //Update Weight Charges
-                    $weightCharges = WeightCharge::where('user_id',$shipperWithRateChange->shipper_id)->get(['local_or_6hr','national_charges_class_0','national_charges_class_1','national_charges_class_2','national_charges_class_3']);
+                    $weightCharges = WeightCharge::where('user_id', $shipperId)->get(['local_or_6hr', 'national_charges_class_0', 'national_charges_class_1', 'national_charges_class_2', 'national_charges_class_3']);
 
-                    foreach($weightCharges as $weightCharge)
-                    {
+                    // dd($shipperId,$weightCharges);
+
+                    foreach ($weightCharges as $weightCharge) {
+                        dump('old values: ', $weightCharge->toArray());
                         $weightCharge->local_or_6hr = $weightCharge->local_or_6hr * (1 + ($change / 100));
                         $weightCharge->national_charges_class_0 = $weightCharge->national_charges_class_0 * (1 + ($change / 100));
-                        if($weightCharge->national_charges_class_1)
-                        {
-                            $weightCharge->national_charges_class_1 = (intval(rtrim($weightCharge->national_charges_class_1, '%')) + $change).'%';
+                        // dd('shipperId: '.$shipperId,'new value: '.$weightCharge->national_charges_class_0,'change: '.$change);
+                        dump('change: ' . $change);
+
+                        if ($weightCharge->national_charges_class_1) {
+                            if (strpos($weightCharge->national_charges_class_1, '%') !== false) {
+                                // If it's a percentage string
+                                $numericValue = intval(rtrim($weightCharge->national_charges_class_1, '%'));
+                                $updatedValue = $numericValue * (1 + ($change / 100));
+                                $weightCharge->national_charges_class_1 = $updatedValue . '%';
+                            } else {
+                                // If it's a plain number
+                                $weightCharge->national_charges_class_1 = $weightCharge->national_charges_class_1 * (1 + ($change / 100));
+                            }
                         }
-                        if($weightCharge->national_charges_class_2)
-                        {
-                            $weightCharge->national_charges_class_2 = (intval(rtrim($weightCharge->national_charges_class_2, '%')) + $change).'%';
+
+                        if ($weightCharge->national_charges_class_2) {
+                            if (strpos($weightCharge->national_charges_class_2, '%') !== false) {
+                                // If it's a percentage string
+                                $numericValue = intval(rtrim($weightCharge->national_charges_class_2, '%'));
+                                $updatedValue = $numericValue * (1 + ($change / 100));
+                                $weightCharge->national_charges_class_2 = $updatedValue . '%';
+                            } else {
+                                // If it's a plain number
+                                $weightCharge->national_charges_class_2 = $weightCharge->national_charges_class_2 * (1 + ($change / 100));
+                            }
                         }
-                        if($weightCharge->national_charges_class_3)
-                        {
+
+                        if ($weightCharge->national_charges_class_2) {
+                            $weightCharge->national_charges_class_2 = (intval(rtrim($weightCharge->national_charges_class_2, '%')) + $change) . '%';
+                        }
+                        if ($weightCharge->national_charges_class_3) {
                             $weightCharge->national_charges_class_3 = $weightCharge->national_charges_class_3 * (1 + ($change / 100));
                         }
+
+                        dd('shipperId: ' . $shipperId, 'new values: ', $weightCharge->toArray());
+
                         $weightCharge->save();
                     }
-
-                    }
-                    // elseif()
                 }
+                // elseif()
             }
+        }
         // }
 
-        return redirect()->back()->with([($status == 2 ? 'success' : 'error') => 'Base Rate Revision '.($status == 2 ? 'Approved' : 'Rejected')]);
+        return redirect()->back()->with([($status == 2 ? 'success' : 'error') => 'Base Rate Revision ' . ($status == 2 ? 'Approved' : 'Rejected')]);
     }
-
 }
