@@ -1240,7 +1240,7 @@ class AdminTrackingController extends Controller
                         }
                         foreach ($shipment->shipment_journey as $journey) {
                             $journey_details = array();
-                            $journey_details['image_audio_location'] = '';
+                            // $journey_details['image_audio_location'] = '';
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             $journey_details['status'] = $journey->shipment_status_shipper->name;
                             $journey_details['shipper_status_id'] = $journey->shipment_status_shipper->id;
@@ -1251,26 +1251,26 @@ class AdminTrackingController extends Controller
                                     if ($rider_delivery->picture_path != null) {
                                         $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
                                         if ($exists) {
-                                            $journey_details['image_audio_location'] = '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                            // $journey_details['image_audio_location'] = '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
                                         }else {
-                                            $image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
-                                            $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $image . '" target="_blank"><i class="la la-lg la-image"></i></button>';
+                                            // $image = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
+                                            // $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $image . '" target="_blank"><i class="la la-lg la-image"></i></button>';
                                         }
                                     }
                                     if ($rider_delivery->audio_path != null) {
                                         $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
                                         if ($exists) {
-                                            $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->audio_path)) . '"><i class="la la-file-sound-o"></i></button>';
+                                            // $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->audio_path)) . '"><i class="la la-file-sound-o"></i></button>';
                                         } else {
-                                            $sound = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(5));
-                                            $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $sound . '" target="_blank"><i class="la la-file-sound-o"></i></button>';
+                                            // $sound = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(5));
+                                            // $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $sound . '" target="_blank"><i class="la la-file-sound-o"></i></button>';
                                         }
                                     }
                                     if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
-                                        $journey_details['image_audio_location'] .= '| <a type="button" class="btn btn-sm btn-outline-info align-middle location p-0" href="https://www.google.com/maps/search/?api=1&query=' . $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude . '" target="_blank"><i class="la la-map-marker"></i></a></div>';
+                                        // $journey_details['image_audio_location'] .= '| <a type="button" class="btn btn-sm btn-outline-info align-middle location p-0" href="https://www.google.com/maps/search/?api=1&query=' . $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude . '" target="_blank"><i class="la la-map-marker"></i></a></div>';
                                     }
                                 } else {
-                                    $journey_details['image_audio_location'] = '-';
+                                    // $journey_details['image_audio_location'] = '-';
                                 }
                             }
                             else if (in_array($journey->shipment_status_shipper->id, [47, 24, 48, 60, 25, 31, 38])) {
@@ -1280,31 +1280,31 @@ class AdminTrackingController extends Controller
                                     if ($rider_return_deliveries->picture_path != null) {
                                         $exists = Storage::disk('public')->exists($rider_return_deliveries->picture_path);
                                         if ($exists) {
-                                            $journey_details['image_audio_location'] = '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_return_deliveries->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                            // $journey_details['image_audio_location'] = '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_return_deliveries->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
                                         }
                                         else {
-                                            $image = Storage::disk('s3')->temporaryUrl($rider_return_deliveries->picture_path, now()->addMinutes(5));
-                                            $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $image . '" target="_blank"><i class="la la-lg la-image"></i></button>';
+                                            // $image = Storage::disk('s3')->temporaryUrl($rider_return_deliveries->picture_path, now()->addMinutes(5));
+                                            // $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $image . '" target="_blank"><i class="la la-lg la-image"></i></button>';
                                         }
                                     }
                                     if ($rider_return_deliveries->audio_path != null) {
                                         $exists = Storage::disk('public')->exists($rider_return_deliveries->audio_path);
                                         if ($exists) {
-                                            $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_return_deliveries->audio_path)) . '"><i class="la la-file-sound-o"></i></button>';
+                                            // $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_return_deliveries->audio_path)) . '"><i class="la la-file-sound-o"></i></button>';
                                         } else {
-                                            $sound = Storage::disk('s3')->temporaryUrl($rider_return_deliveries->audio_path, now()->addMinutes(5));
-                                            $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $sound . '" target="_blank"><i class="la la-file-sound-o"></i></button>';
+                                            // $sound = Storage::disk('s3')->temporaryUrl($rider_return_deliveries->audio_path, now()->addMinutes(5));
+                                            // $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $sound . '" target="_blank"><i class="la la-file-sound-o"></i></button>';
                                         }
                                     }
                                     if ($rider_return_deliveries->actual_location_latitude != null && $rider_return_deliveries->actual_location_longitude != null) {
 
-                                        $journey_details['image_audio_location'] .= '| <a type="button" class="btn btn-sm btn-outline-info align-middle location p-0" href="https://www.google.com/maps/search/?api=1&query=' . $rider_return_deliveries->actual_location_latitude . ',' . $rider_return_deliveries->actual_location_longitude . '" target="_blank"><i class="la la-map-marker"></i></a></div>';
+                                        // $journey_details['image_audio_location'] .= '| <a type="button" class="btn btn-sm btn-outline-info align-middle location p-0" href="https://www.google.com/maps/search/?api=1&query=' . $rider_return_deliveries->actual_location_latitude . ',' . $rider_return_deliveries->actual_location_longitude . '" target="_blank"><i class="la la-map-marker"></i></a></div>';
                                     }
                                 } else {
-                                    $journey_details['image_audio_location'] = '-';
+                                    // $journey_details['image_audio_location'] = '-';
                                 }
                             } else {
-                                $journey_details['image_audio_location'] = '-';
+                                // $journey_details['image_audio_location'] = '-';
                             }
 
                             $journey_details['status_id'] = $journey->shipper_status_id;
@@ -1431,7 +1431,7 @@ class AdminTrackingController extends Controller
                                 $replacement_image = ShipmentReplacementParcelImage::where('shipment_id',$journey->shipment_id);
                                 if($replacement_image->exists()){
                                     $replacement_image = $replacement_image->first();
-                                    $journey_details['image_audio_location'] = '<button class="btn btn-sm btn-outline-info align-middle replacement_booked_image" data-link="' . asset(Storage::url($replacement_image->picture_path)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                    // $journey_details['image_audio_location'] = '<button class="btn btn-sm btn-outline-info align-middle replacement_booked_image" data-link="' . asset(Storage::url($replacement_image->picture_path)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
                                 }
                             }
                             if(in_array($journey->shipper_status_id, [30])){
@@ -1440,7 +1440,7 @@ class AdminTrackingController extends Controller
                                     $replacement_image2 = $replacement_image2->first();
                                     if($replacement_image2->replacement_image != null){
 
-                                        $journey_details['image_audio_location'] = '<button class="btn btn-sm btn-outline-info align-middle replacement_collected_image" data-link="' . asset(Storage::url($replacement_image2->replacement_image)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                        // $journey_details['image_audio_location'] = '<button class="btn btn-sm btn-outline-info align-middle replacement_collected_image" data-link="' . asset(Storage::url($replacement_image2->replacement_image)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
                                     }
 
                                 }
@@ -1448,7 +1448,7 @@ class AdminTrackingController extends Controller
                             if($journey->shipper_status_id == 12){
                                 $rc_app = RiderDelivery::where('shipment_id',$journey->shipment_id)->where('delivery_note_id', $journey->reference_1_id)->where('rider_status_id', 12)->where('rider_status_reason_id', 8)->where('otp_entered', 1);
                                 if($rc_app->exists()){
-                                    $journey_details['image_audio_location'] .= '<i class="la la-check-square primary"></i>';
+                                    // $journey_details['image_audio_location'] .= '<i class="la la-check-square primary"></i>';
 
                                 }
                             }
@@ -1458,14 +1458,21 @@ class AdminTrackingController extends Controller
                                 'shipment_scanning_journeys.longitude',
                                 'ssjal.area_id',
                                 'shipment_scanning_journeys.created_at',
-                                'ssjal.hub_id'
+                                'ssjal.hub_id as hub_id_scanning',
+                                'ssjal.shipment_scanning_journey_id as shipment_scanning_journey_id',
+                                'sj.city_id as city_id_scanning'
+
                             )
                             ->join('shipments_journey as sj', function($join) use ($journey) {
                                 $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
                                     ->where('sj.id', '=', $journey->id);
                             })
-                            ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                            ->join('shipment_scanning_journey_area_logs as ssjal', function($join) use ($journey) {
+                                $join->on('ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                                     ->where('ssjal.hub_id', '=', $journey->city_id);
+                            })
                             ->where('shipment_scanning_journeys.updated_at', '<=', $journey->updated_at);
+
 
                             if(isset($journey->admin['role_id']) && $journey->admin['role_id'] != 1 || isset($journey->rider_id)){
                                 switch ($journey->shipper_status_id) {
