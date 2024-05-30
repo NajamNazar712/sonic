@@ -7251,15 +7251,13 @@ class GlobalSettingsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 518);
 
         $agents = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')
-            ->leftjoin('auto_tag_territories as att', 'admins.id', 'att.admin_id')
-            ->select(['admins.id', 'admins.name', 'att.is_lead_user'])
+            ->select(['admins.id', 'admins.name'])
             ->where('admins.status', 1)->where('ar.department_id', 7)->get();
 
         $territories = Territory::where('territory_status', 1)->get();
         $cities = City::where('status', 1)->get();
         return view('admin.settings.auto_tag_territory', compact('agents', 'territories', 'cities'));
     }
-
 
     public function auto_tag_territories_list(Request $request)
     {
@@ -7375,28 +7373,56 @@ class GlobalSettingsController extends Controller
         $territory_id = $auto_tagging->territory_id;
         $city_id = Territory::find($territory_id)->city_id;
         $auto_tagging_id = $auto_tagging->id;
-
-        return response()->json(['status' => 1, 'agent_id' => $agent_id, 'city_id' => $city_id, 'auto_tagging_id' => $auto_tagging_id, 'territory_id' => $territory_id]);
+        $is_lead_user = null;
+        if ($auto_tagging->is_lead_user == null || $auto_tagging->is_lead_user == 0){
+            $is_lead_user = 0;
+        } else {
+            $is_lead_user = 1;
+        }
+        return response()->json(['status' => 1, 'agent_id' => $agent_id, 'city_id' => $city_id, 'auto_tagging_id' => $auto_tagging_id, 'territory_id' => $territory_id, 'is_lead_user' => $is_lead_user]);
     }
+
+    // public function auto_tag_territories_update(Request $request)
+    // {
+    //     $auto_tagging = AutoTagTerritory::find($request->auto_tagging_id);
+    //     if ($request->agent_id == $auto_tagging->admin_id) {
+    //         $auto_tagging->territory_id = $request->territory_id;
+    //         $auto_tagging->save();
+    //         return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
+    //     } else {
+    //         $check_tagging = AutoTagTerritory::where('admin_id', $request->agent_id);
+    //         if (!$check_tagging->exists()) {
+    //             $auto_tagging->admin_id = $request->agent_id;
+    //             $auto_tagging->territory_id = $request->territory_id;
+    //             $auto_tagging->save();
+    //             return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
+    //         } else {
+    //             return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');
+    //         }
+    //     }
+    // }
 
     public function auto_tag_territories_update(Request $request)
     {
         $auto_tagging = AutoTagTerritory::find($request->auto_tagging_id);
-        if ($request->agent_id == $auto_tagging->admin_id) {
-            $auto_tagging->territory_id = $request->territory_id;
-            $auto_tagging->save();
-            return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
-        } else {
-            $check_tagging = AutoTagTerritory::where('admin_id', $request->agent_id);
-            if (!$check_tagging->exists()) {
-                $auto_tagging->admin_id = $request->agent_id;
-                $auto_tagging->territory_id = $request->territory_id;
+        $territory_ids = $request->territory_id;
+        foreach ($territory_ids as $territory_id) {
+            if ($request->agent_id == $auto_tagging->admin_id) {
+                $auto_tagging->territory_id = $territory_id;
                 $auto_tagging->save();
-                return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
             } else {
-                return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');
+                $check_tagging = AutoTagTerritory::where('admin_id', $request->agent_id)->where('territory_id', $territory_id);
+                if (!$check_tagging->exists()) {
+                    $auto_tagging = new AutoTagTerritory();
+                    $auto_tagging->admin_id = $request->agent_id;
+                    $auto_tagging->territory_id = $territory_id;
+                    $auto_tagging->save();
+                } else {
+                    return redirect()->back()->with('error', 'Sales Person\'s Territory already exists');
+                }
             }
         }
+        return redirect()->back()->with('success', 'Sales Person\'s Territories Updated!');
     }
 
     public function referral()
