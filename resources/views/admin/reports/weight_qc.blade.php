@@ -35,7 +35,7 @@
                     </div>
                     <div class="col-3 mb-1">
                         <fieldset class="form-group">
-                            <select name="search_origin_hub" id="search_origin_hub" class="form-control select2">
+                            <select name="search_origin_hub" id="search_origin_hub" class="form-control select2" multiple="multiple">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach

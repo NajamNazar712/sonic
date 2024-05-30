@@ -53,6 +53,7 @@ use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipperContact;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Territory;
@@ -10439,7 +10440,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as h', 'h.id', '=', 'st.ref')
             ->leftjoin('block_disable_reason_users as bdru', 'bdru.id', '=', 'users.blacklist_reason_1')
 
-            ->select(['users.id', 'users.name', 'users.disable_at as disable_at', 'cities.name as city', 'users.poc', 'users.blacklist_reason as remarks', 'ad.name as admin_tag_id', 'a.name as poc_tagged', 'd.name as kam', 'h.name as ref', 'bdru.name as reason'])->where('blacklist', 1);
+            ->select(['users.id', 'users.name', 'users.disable_at as disable_at', 'cities.name as city', 'users.poc', 'users.blacklist_reason as remarks', 'ad.name as admin_tag_id', 'a.name as poc_tagged', 'd.name as kam', 'h.name as ref', 'bdru.name as reason', 'users.activated_at', 'users.blocked_at'])->where('blacklist', 1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -11010,6 +11011,19 @@ class AdminDashboardController extends Controller
                             $osa_charges->save();
                         }
                     }
+
+                    $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
+                    foreach($admin_ids as $admin_id){
+                        $admin_hub_exist = AdminHub::where('admin_id', $admin_id)->where('hub_id', $id)->first();
+                        if (!$admin_hub_exist) {
+                            $admin_hub = new AdminHub();
+                            $admin_hub->admin_id = $admin_id;
+                            $admin_hub->hub_id = $id;
+                            $admin_hub->save();
+
+                        }
+                    }
+                
                     return redirect()->back()->with('success', 'Hub/city updated successfully');
                 }
             } else {
@@ -11203,6 +11217,18 @@ class AdminDashboardController extends Controller
                     $osa_charges->osa_rate = $request->osa_rate[$key];
                     $osa_charges->admin_id = Auth::id();
                     $osa_charges->save();
+                }
+            }
+
+            $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
+            foreach($admin_ids as $admin_id){
+                $admin_hub_exist = AdminHub::where('admin_id', $admin_id)->where('hub_id', $city->id)->first();
+                if (!$admin_hub_exist) {
+                    $admin_hub = new AdminHub();
+                    $admin_hub->admin_id = $admin_id;
+                    $admin_hub->hub_id = $city->id;
+                    $admin_hub->save();
+
                 }
             }
             return redirect()->back()->with('success', 'Hub city added successfully');
