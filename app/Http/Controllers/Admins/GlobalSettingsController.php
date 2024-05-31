@@ -7261,12 +7261,12 @@ class GlobalSettingsController extends Controller
 
     public function auto_tag_territories_list(Request $request)
     {
-
         $roles = AutoTagTerritory::join('admins as ad', 'ad.id', '=', 'auto_tag_territories.admin_id')
             ->leftjoin('territories as t', 't.id', 'auto_tag_territories.territory_id')
             ->leftjoin('cities as c', 'c.id', 't.city_id');
-        
+
         // $roles->select('auto_tag_territories.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'auto_tag_territories.status');
+
         $roles->select(
             'auto_tag_territories.id',
             'ad.name as agent_name',
@@ -7274,14 +7274,25 @@ class GlobalSettingsController extends Controller
             'auto_tag_territories.status',
             't.name as territory_name', 
             DB::raw("
-                CASE 
-                    WHEN LENGTH(SUBSTRING_INDEX(GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ', '), ',', 2)) = LENGTH(GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ', '))
-                    THEN '-'
-                    ELSE TRIM(BOTH ', ' FROM SUBSTRING_INDEX(GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ', '), ',', -(LENGTH(SUBSTRING_INDEX(GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ', '), ',', 2)) - LENGTH(SUBSTRING_INDEX(GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ', '), ',', 1)))))
-                END as territory_names")
-        );
-        
-        $roles->groupBy('auto_tag_territories.admin_id');
+                IF(
+                    (
+                        SELECT COUNT(t2.id)
+                        FROM territories AS t2
+                        JOIN auto_tag_territories AS att2 ON t2.id = att2.territory_id
+                        WHERE t2.id != t.id
+                        AND att2.admin_id = auto_tag_territories.admin_id
+                    ) > 0,
+                    (
+                        SELECT GROUP_CONCAT(t2.name ORDER BY t2.id SEPARATOR ', ')
+                        FROM territories AS t2
+                        JOIN auto_tag_territories AS att2 ON t2.id = att2.territory_id
+                        WHERE t2.id != t.id
+                        AND att2.admin_id = auto_tag_territories.admin_id
+                    ),
+                    '-'
+                ) as territory_names")
+        )
+        ->groupBy('auto_tag_territories.admin_id');
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
@@ -7406,24 +7417,25 @@ class GlobalSettingsController extends Controller
     {
         $auto_tagging = AutoTagTerritory::find($request->auto_tagging_id);
         $territory_ids = $request->territory_id;
+        // $existing_territory_ids = $auto_tagging->territory()->pluck('id')->toArray();
+        $is_lead_user = $request->has('is_lead_user') ? 1 : 0;
+    
+        // Delete existing records
+        AutoTagTerritory::where('admin_id', $request->agent_id)->delete();
+    
+        // Insert new records
         foreach ($territory_ids as $territory_id) {
-            if ($request->agent_id == $auto_tagging->admin_id) {
-                $auto_tagging->territory_id = $territory_id;
-                $auto_tagging->save();
-            } else {
-                $check_tagging = AutoTagTerritory::where('admin_id', $request->agent_id)->where('territory_id', $territory_id);
-                if (!$check_tagging->exists()) {
-                    $auto_tagging = new AutoTagTerritory();
-                    $auto_tagging->admin_id = $request->agent_id;
-                    $auto_tagging->territory_id = $territory_id;
-                    $auto_tagging->save();
-                } else {
-                    return redirect()->back()->with('error', 'Sales Person\'s Territory already exists');
-                }
-            }
+            $auto_tagging = new AutoTagTerritory();
+            $auto_tagging->admin_id = $request->agent_id;
+            $auto_tagging->territory_id = $territory_id;
+            $auto_tagging->is_lead_user = $is_lead_user;
+            $auto_tagging->save();
         }
+    
         return redirect()->back()->with('success', 'Sales Person\'s Territories Updated!');
     }
+    
+    
 
     public function referral()
     {
