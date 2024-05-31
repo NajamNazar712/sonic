@@ -230,7 +230,7 @@
                 buttons: [
                     {
                         text: '<i class="la la-file-excel-o"></i> Upload File',
-                        className: 'btn btn-primary',
+                        className: 'btn btn-secondary',
                         action: function(e, dt, node, config) {
                             $('.upload_shippers_form_div').toggle();
                         }
@@ -406,14 +406,16 @@
                                 var tableHtml =
                                     '<table id="shippersWithRateChangeTable" class="table-striped table-bordered" style="width:100%">';
                                 tableHtml +=
-                                    '<thead class="text-center"><tr><th class="p-1">Shipper Id</th><th>Rate Change (%)</th></tr></thead>';
+                                    '<thead class="text-center"><tr><th class="p-1">Shipper Id</th><th class="p-1">Shipper Name</th><th>Rate Change (%)</th></tr></thead>';
                                     tableHtml += '<tbody class="text-center">';
                                 $.each(response.data, function(index, value) {
                                     var shipperId = value.shipper_id;
+                                    var shipperName = value.shipper.name;
                                     var rateChangePercent = value.rate_change_percent;
                                     
                                     tableHtml += 
                                     '<tr><td class="p-1">' + shipperId +
+                                    '</td><td class="p-1">' + shipperName +
                                     '</td><td>' + rateChangePercent + '</td></tr>';
                                 });
 

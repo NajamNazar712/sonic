@@ -266,7 +266,7 @@ class BaseRateRivisionController extends Controller
 
     public function shippersWithRates($baseRateRevisionId)
     {
-        $baseRateRevision = BaseRateRevision::with('shippersWithRateChange:id,base_rate_revision_id,shipper_id,rate_change_percent')->find($baseRateRevisionId);
+        $baseRateRevision = BaseRateRevision::with('shippersWithRateChange.shipper:id,name')->find($baseRateRevisionId);
         $shippers = $baseRateRevision->shippersWithRateChange;
         return response()->json([
             'data' => $shippers
