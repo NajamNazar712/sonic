@@ -15,14 +15,38 @@
 				<div class="card">
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
-							@include('admin.inc.messages')
+							{{-- @include('admin.inc.messages') --}}
+							@if(count($errors) > 0)
+								@foreach($errors->all() as $error)
+									<div class="alert alert-danger">
+										{{$error}}
+									</div>
+								@endforeach
+							@endif
+						
+							@if(session('success'))
+								<div class="alert alert-success">
+									{!! session('success') !!}
+								</div>
+							@endif
+							
+							@if(session('error'))
+								<div class="alert alert-danger">
+									{{session('error')}}
+								</div>
+							@endif
+							@if(session('info'))
+								<div class="alert alert-warning">
+									{{session('info')}}
+								</div>
+							@endif
 
 							<form id="shipment_weight_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.change_shipment_weight.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 								{{ csrf_field() }}
 
 								<div class="row align-items-center justify-content-center">
 									<div class="col-2">
-										<h3 class="heading"><strong>For Bulk Shipment</strong></h3>
+										<h3 class="heading" data-toggle="tooltip" data-placement="top" title data-original-title="For update weight only."><strong>For Bulk Shipment (update)</strong></h3>
 									</div>
 									<div class="col-4">
 										<div class="form-group">
@@ -39,6 +63,33 @@
 									<div class="col-2">
 										<div class="form-group">
 											<a href="{{ asset('file/Change Shipment Weight Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+										</div>
+									</div>
+								</div>
+							</form>
+
+							<form id="view_shipment_weight_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.change_shipment_weight.view_excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
+								{{ csrf_field() }}
+
+								<div class="row align-items-center justify-content-center">
+									<div class="col-2">
+										<h3 class="heading" data-toggle="tooltip" data-placement="bottom" title data-original-title="For view estimated shipment charges only."><strong>For Bulk Shipment (view)</strong></h3>
+									</div>
+									<div class="col-4">
+										<div class="form-group">
+											<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+										</div>
+									</div>
+
+									<div class="col-1">
+										<div class="form-group">
+											<button type="submit" name="upload" class="btn btn-primary">Upload</button>
+										</div>
+									</div>
+
+									<div class="col-2">
+										<div class="form-group">
+											<a href="{{ asset('file/Bulk Shipment Weight Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
 										</div>
 									</div>
 								</div>
@@ -325,6 +376,31 @@
 			});
 
 			$('#shipment_weight_excel_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				normalizer: function(value) {
+					return $.trim(value);
+				},
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					$(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+					swal({
+						title: 'Please Wait!',
+						text: 'Your Payment(s) are being updated!',
+						icon: 'info',
+						buttons: false,
+						closeOnClickOutside: false,
+						closeOnEsc: false
+					});
+
+					form.submit();
+				}
+			});
+
+			$('#view_shipment_weight_excel_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
 				normalizer: function(value) {

@@ -64,6 +64,7 @@ class AdminCargoController extends Controller
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
         $shipping_mode = ShippingMode::all();
+        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities,'zones' => $zones , 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments, 'areas'=> $areas]);
         return view('admin.cargo.pending')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'shipping_mode'=>$shipping_mode]);
     }
 

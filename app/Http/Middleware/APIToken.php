@@ -8,7 +8,7 @@ use Closure;
 
 class APIToken
 {
-    public $blockIps = ['170.187.230.212'];
+
     /**
      * Handle an incoming request.
      *
@@ -18,12 +18,6 @@ class APIToken
      */
     public function handle($request, Closure $next)
     {
-        if (in_array($request->ip(), $this->blockIps)) {
-            return response()->json([
-                'message' => "You don't have permission to access this website."
-            ], 401);
-        }
-
         $api_token = $request->header('Authorization');
 
         if($api_token) {

@@ -10,6 +10,11 @@
         resize: none;
     }
 </style>
+@php 
+if (isset($main_category[2]) && $type == 1) {
+    unset($main_category[2]);
+}
+@endphp
 {{--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMo9kqvMhqVAe_GCXZXOfzfAZ_oeBapkQ&callback=initMap" type="text/javascript"></script>--}}
 <form action="{{route('admin.management.riders.edit',['id'=>$rider_id])}}" method="post" class="mt-2" id="editRiderForm" novalidate="novalidate">
     @csrf
@@ -31,7 +36,7 @@
         <div class="col">
             <fieldset class="form-group">
                 <select name="city_id" id="city_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                    {{--<option value="{{$rider->city->id}}" selected>{{$rider->city->name}}</option>--}}
+                    <option value="{{$rider->city->id}}" selected>{{$rider->city->name}}</option>
                     @foreach($cities as $city)
                         <option value="{{$city->id}}">{{$city->name}}</option>
                     @endforeach
@@ -107,7 +112,17 @@
                     </select>
                 </fieldset>
             </div>
-            
+            <div class="col" id="rider_hub_add">
+                <fieldset class="form-group">
+                    @if ($hubs)
+                    <select name="hubs[]" id="hub_ids" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required" multiple="multiple">
+                        @foreach($hubs as $hub)
+                            <option value="{{$hub->id}}">{{$hub->name}}</option>
+                        @endforeach
+                    </select>
+                    @endif
+                </fieldset>
+            </div>
             <div class="col" id="incentive_amount_div">
                 <fieldset class="form-group">
                     <input type="text" name="incentive_amount" id="incentive_amount_input" class="form-control decimal" value="{{$rider->incentive_amount}}" maxlength="6" placeholder="Enter Incentive Amount" data-rule-required="true" data-msg-required="Incentive Amount is required">
@@ -184,6 +199,16 @@
                 </div>
             </div>
         </div>
+        <div class='row d-none' id="allow_delivered_row"> 
+            <div class="col text-center">
+                <label class="font-medium-2 font-weight-bold block">This rider will mark delivered status?</label>
+                <div class="form-group">
+                    <label for="allow_delivered_status" class="font-medium-2 text-bold-600 mr-1">No</label>
+                    <input type="checkbox" name="allow_delivered_status" id="allow_delivered_status" class="checkbox allow_delivered_status" data-size="sm" data-switchery="true" {{ ($rider->allow_delivered_status == 1)? 'checked':'' }}>
+                    <label for="allow_delivered_status" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Update Rider</button>
@@ -200,7 +225,15 @@
         // var switchery = new Switchery(elem);
         @if($type == 1)
         var edit_ccd_elem = document.querySelector('.edit_ccd_rider_checkbox');
+        $('#rider_hub_add').addClass('d-none')
         var edit_ccd_switchery = new Switchery(edit_ccd_elem);
+        @endif
+
+        var allow_elem = document.querySelector('.allow_delivered_status');
+        var allow_switchery = new Switchery(allow_elem);
+        $('#rider_hub_add').addClass('d-none');
+        @if($rider->operation_rider_id == 2)
+            $('#allow_delivered_row').removeClass('d-none');
         @endif
 
         @if($rider->incentive_amount == null)
@@ -217,12 +250,12 @@
             dropdownParent: $("#editRiderForm")
         }).bind('change', function () {
                 var id = parseInt($(this).val());
-                console.log(id);
                 if(id == 1){
                     $('#incentive_amount_div').removeClass('d-none');
                 }else{
                     $('#incentive_amount_div').addClass('d-none');
                 }
+                ((id == 3) ? $('#rider_hub_add').removeClass('d-none') : $('#rider_hub_add').addClass('d-none'));
             });
         @if($rider->rider_main_category_id != null)
         var main_category_id = {{$rider->rider_main_category_id}};
@@ -304,13 +337,39 @@
             dropdownParent: $("#editRiderForm")
         });
         @endif
-
+        @if($rider->rider_main_category_id == 3 && !empty($hubIds->hubs))
+                $('#hub_ids').val([{!! $hubIds->hubs !!}]).select2({ width:'100%',
+                    placeholder:"Select Hubs",
+                    allowClear:true,
+                    dropdownParent:$('#editRiderForm')}).trigger('change');
+        @else
+            $('#hub_ids').select2({
+                width:'100%',
+                placeholder:"Select Hubs",
+                allowClear:true,
+                dropdownParent:$('#editRiderForm')
+            });
+         @endif
         @if($rider->operation_rider_id != Null)
-        $('#operation_rider_id').val({!! $rider->operation_rider_id !!}).trigger('change');
+        $('#operation_rider_id').val({!! $rider->operation_rider_id !!}).trigger('change').bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id == 2){
+                    $('#allow_delivered_row').removeClass('d-none');
+                }else{
+                    $('#allow_delivered_row').addClass('d-none');
+                }
+        });
         @else
         $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Functional Category',
             dropdownParent: $("#editRiderForm")
+        }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id == 2){
+                    $('#allow_delivered_row').removeClass('d-none');
+                }else{
+                    $('#allow_delivered_row').addClass('d-none');
+                }
         });
         @endif
 

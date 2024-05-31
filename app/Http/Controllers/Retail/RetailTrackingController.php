@@ -118,12 +118,13 @@ class RetailTrackingController extends Controller
                             $details['pickup']['email'] = $pickup->email;
                             $details['pickup']['origin'] = $pickup->city->name;
                             $details['pickup']['address'] = $pickup->pickup_address;
-
                             $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
                             if($retail_shipment){
                                 $retail_user_id = $retail_shipment->retail_user_id;
                                 $retail_admin_id = $retail_shipment->admin_id;
                                 $retail_rider_id = $retail_shipment->rider_id;
+                                $parcelAmount = $retail_shipment->parcel_amount;
+                                $retailShipmentQuantity = $retail_shipment->quantity;
                                 if($retail_user_id){
                                     $retail_user = RetailUser::find($retail_user_id);
                                     if($retail_user->category == 1){
@@ -156,10 +157,10 @@ class RetailTrackingController extends Controller
 
                                 }
 
-
                                 $shipper = RetailShipperInfo::find($retail_shipment->shipper_account_no);
 
-                                $details['shipper']['name'] = $shipper->shipper_name;
+                                $shipment_name_verification = \DB::table('retail_shipments')->where('shipment_id', $retail_shipment->shipment_id)->first();
+                                $details['shipper']['name'] = $shipment_name_verification->shipper_name;
                                 $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                                 $details['shipper']['phone_number_1'] = $shipper->shipper_phone_no;
                                 $details['shipper']['sales_person'] = $sales_person_name;
@@ -229,6 +230,10 @@ class RetailTrackingController extends Controller
                             $details['order_information']['instructions'] = $shipment->special_instructions;
                             $details['order_information']['pieces'] = $shipment->pieces;
                             $details['order_information']['business_category'] = $shipment->business_category->name;
+
+                            $details['order_information']['parcel_value'] = $parcelAmount;
+                            $details['order_information']['quantity'] = $retailShipmentQuantity;
+
                             foreach ($shipment->shipment_journey as $journey) {
                                 $journey_details = array();
 

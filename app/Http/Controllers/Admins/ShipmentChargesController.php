@@ -65,6 +65,7 @@ use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Http\Models\ShipmentsWeightType;
+use App\Http\Models\ShipmentServicesCharges;
 
 
 class ShipmentChargesController extends Controller
@@ -909,6 +910,24 @@ class ShipmentChargesController extends Controller
                 $shipments_weight_type->range_down_shipper_weight =  $shipper_weight_charges ? ($result_shipper_weight['range_down'] ? $result_shipper_weight['range_down'] : $result_shipper_weight['chargeable_weight'] ) : ($result['range_down'] ? $result['range_down'] : $result['chargeable_weight']);
                 $shipments_weight_type->shipper_weight_charges = $shipper_weight_charges ? $result_shipper_weight['weight_charges'] : $result['weight_charges'];
                 $shipments_weight_type->save();
+                if($shipments_weight_type->range_down_shipper_weight == $shipment->estimated_weight) {
+                    $shipments_weight_type->shipper_range_weight_charges = $shipments_weight_type->shipper_weight_charges;
+                }else{
+                    $shiper_range_charges = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipments_weight_type->range_down_shipper_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+
+                    $shipments_weight_type->shipper_range_weight_charges = $shiper_range_charges['weight_charges'];
+                }
+                $shipments_weight_type->save();
+                if($shipments_weight_type->range_down_arrival_weight == $shipment->actual_weight ) {
+                    $shipments_weight_type->arrival_range_weight_charges = $shipment->weight_charges;
+                } else if($shipments_weight_type->range_down_arrival_weight ==                   $shipments_weight_type->range_down_shipper_weight) {
+                    $shipments_weight_type->arrival_range_weight_charges = $shipments_weight_type->shipper_range_weight_charges;
+                }else{
+                    $arrival_range_charges = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipments_weight_type->range_down_arrival_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+
+                    $shipments_weight_type->arrival_range_weight_charges = $arrival_range_charges['weight_charges'];
+                }
+                $shipments_weight_type->save();
             }
         }
     }
@@ -1522,8 +1541,10 @@ class ShipmentChargesController extends Controller
         }
     }
 
-    static public function replacement($id) {
-        $shipment = Shipment::find($id);
+    static public function replacement($id,$shipment = array()) {
+        if(empty($shipment)) {
+            $shipment = Shipment::find($id);
+        }
         if($shipment->business_category_id == 2){
             return false;
         }
@@ -1945,8 +1966,10 @@ class ShipmentChargesController extends Controller
         }
     }
 
-    static public function try_and_buy($id) {
-        $shipment = Shipment::find($id);
+    static public function try_and_buy($id,$shipment = array()) {
+        if(empty($shipment)) {
+            $shipment = Shipment::find($id);
+        }
         if($shipment->business_category_id == 2){
             return false;
         }
@@ -2648,6 +2671,78 @@ class ShipmentChargesController extends Controller
             $credit_user = $credit_user->first();
             $credit_user->limit_usage = $credit_user->limit_usage + $amount;
             $credit_user->save();
+        }
+    }
+    static public function reverse_pickup($id) {
+        $shipment = Shipment::find($id);
+        if($shipment->business_category_id == 2){
+            return false;
+        }
+        $account_type_id = $shipment->user->account_type_id;
+        $rate_type_id =  $shipment->user->corporate_rate_type_id;
+        if ($account_type_id == 1) {
+            $booking_type_charge = BookingTypeCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+        }
+        else {
+            if($rate_type_id != 3){
+                $booking_type_charge = CorporateBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            }
+            else{
+                $booking_type_charge = CorporateDefaultBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            }
+        }
+
+        if ($booking_type_charge->exists()) {
+            $booking_type_charge = $booking_type_charge->first();
+
+            $today = Carbon::today();
+
+            if ($account_type_id == 1) {
+                $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+            }
+            else {
+                if($rate_type_id != 3){
+                    $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                }
+                else{
+                    $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                }
+            }
+
+            if ($discount_charge->exists()) {
+                $discount_charge = $discount_charge->first();
+
+                $discount = $discount_charge->weight;
+            }
+            else {
+                $discount = 0;
+            }
+
+            $reverse_pickup_multiplier = ($booking_type_charge->reverse_pickup_charges / 100);
+
+            $charges = ($shipment->weight_charges * $reverse_pickup_multiplier);
+
+            if (strpos($discount, '%') !== FALSE) {
+                $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+            }
+            else {
+                $discount = floatval($discount);
+            }
+
+            $service_charges = ShipmentServicesCharges::where('shipment_id', $id);
+            if($service_charges->exists()){
+                $service_charges = $service_charges->first();
+            }else{
+                $service_charges = new ShipmentServicesCharges;
+            }
+            if ($charges < $discount) {
+                $service_charges->reverse_pickup_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+            }
+            else {
+                $service_charges->reverse_pickup_charges = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+            }
+            $service_charges->shipment_id = $id;
+            $service_charges->save();
         }
     }
 }
