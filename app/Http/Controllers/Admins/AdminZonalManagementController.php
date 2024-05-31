@@ -17,7 +17,7 @@ use Auth;
 
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
-
+use DB;
 class AdminZonalManagementController extends Controller
 {
     public function __construct() {
@@ -134,6 +134,7 @@ class AdminZonalManagementController extends Controller
     public function update_index($id) {
         $zone_cities_gst = array();
         $cities = City::where(['status' => 1, 'business_category_id' => 1, 'zone_id' => $id])->get();
+        $all_cities = City::where(['status' => 1, 'business_category_id' => 1])->get();
         $zone = Zone::find($id);
         $zone_class_cities = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 1])->pluck('class', 'city_id');
         $zone_class_cities_cor = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 2])->pluck('class', 'city_id');
@@ -154,8 +155,8 @@ class AdminZonalManagementController extends Controller
         }
 
 //        dump($zone_cities_gst,$zone_cities_gst_count);
-
-        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor,'zone_cities_gst' => $zone_cities_gst,'zone_cities_gst_count' => $zone_cities_gst_count,'zone_id' => $id]);
+        $classification = DB::table('zone_classification')->select(['id','name'])->get();
+        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor,'zone_cities_gst' => $zone_cities_gst,'zone_cities_gst_count' => $zone_cities_gst_count,'zone_id' => $id, 'all_cities' =>$all_cities, 'classifications' =>$classification]);
     }
 
     public function update_store(Request $request, $id) {
@@ -350,5 +351,27 @@ class AdminZonalManagementController extends Controller
         //dump($zoneCityGstCollection->toArray());
 
         return response()->json(['status' => 1, 'success' => 'Zone cities GST updated !']);
+    }
+
+    public function add_cities(Request $request)
+    {
+        $data = $request->table_data;
+
+        foreach($data as $d) 
+        {
+            $record = ZoneClassCity::where(['zone_id' => $request->zone_id , 'city_id' => $d->zone_city_id, 'zone_classification_id' => $d->city_classification_id]);
+            if($record->doesntExist()) {
+
+                $new = new ZoneClassCity;
+                $new->zone_id = $request->zone_id;
+                $new->city_id =  $d->zone_city_id;
+                $new->class = $d->city_class_id;
+                $new->zone_classification_id = $d->city_classification_id;
+                $new->save();
+            }
+        }
+
+        return response()->json(['status' => 1, 'success' => 'Records added successfully..!']);
+        
     }
 }

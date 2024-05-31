@@ -21,7 +21,7 @@
 								{{ csrf_field() }}
 
 								<div class="row">
-									<div class="col-4">
+									<div class="col-3">
 										<div class="form-group">
 											<label>Name</label>
 											{{-- <input type="text" name="name" class="form-control subject" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" value="{{ $zone->name }}"> --}}
@@ -30,26 +30,32 @@
 										</div>
 									</div>
 
-									<div class="col-4">
+									<div class="col-3">
 										<div class="form-group">
 											<label>GST</label>
 											<input type="text" name="gst" class="form-control gst" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required"value="{{ $zone->gst }}">
 										</div>
 									</div>
 									<div class="col-2">
-										<div class="form-group mt-3">
+										<div class="form-group mt-3" style="text-align: center">
 											<label for="" class="">Individual City GST</label>
 											<input type="checkbox" id="individual_city_gst" name="individual_city_gst" class="switchery"
 												   data-size="sm" data-switchery="true">
 											<input id="individual_city_gst_bit" value="0" name="individual_city_gst_bit" hidden>
 										</div>
 									</div>
-									<div class="col-2">
-										<div class="form-group mt-2">
+									<div class="col-1">
+										<div class="form-group mt-2" style="text-align: right">
 											<label  id="add_cities" class="btn btn-primary"
-													 data-size="sm"> Add Cities</label>
+													 data-size="sm"> Add Cities GST</label>
 										</div>
 									</div>
+									<div class="col-1">
+										<div class="form-group mt-2">
+											<label  id="add_cities_in_zone" class="btn btn-primary"
+													 data-size="sm"> Add Cities</label>
+										</div>
+									</div> 
 
 									<div class="col-12" style="text-align: center">
 										<h3 class="form-section mb-2">City Class Categorization</h3>
@@ -229,6 +235,83 @@
 								</div>
 							</div>
 							{{--city wise gst end--}}
+
+							<div class="modal fade" id="add_cities_modal" role="dialog" aria-labelledby="add_cities_modal" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="add_cities_modal_title">Add Cities</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body">
+											<div class="container">
+												<div class="row">
+													<div class="col-md-4">
+														<select name="add_zone_cities" class="select2" id="add_zone_cities"
+																data-rule-required="true" data-msg-required="City is required">
+															@foreach($all_cities as $all_city)
+																<option value="{{ $all_city->id }}">{{ $all_city->name }}</option>
+															@endforeach
+														</select>
+													</div>
+													<div class="col-md-3">
+														<select name="city_zone_class" class="select2" id="city_zone_class"
+																data-rule-required="true" data-msg-required="Zone Class is required">
+															
+																<option value="0">Class A</option>
+																<option value="1">Class B</option>
+																<option value="2">Class C</option>
+																<option value="3" selected>Class D</option>
+														</select>
+													</div>
+													<div class="col-md-3">
+														<select name="city_zone_classification" class="select2" id="city_zone_classification"
+																data-rule-required="true" data-msg-required="Zone Classification is required">
+															@foreach($classifications as $classification)
+																<option value="{{ $classification->id }}">{{ $classification->name }}</option>
+															@endforeach
+														</select>
+													</div>
+													<div class="col-md-2">
+														<input type="button" class="btn btn-md btn-primary " id="add_city_row" value="Add Row" />
+													</div>
+												</div>
+												<div class="row mt-2">
+													<table id="city_table" class="table order-list">
+														<thead>
+														<tr>
+															<td>City</td>
+															<td>Zone Class</td>
+															<td>Zone Classification</td>
+															<td>Actions</td>														
+														</tr>
+														</thead>
+														<tbody>
+														
+														</tbody>
+														<tfoot>
+														<tr>
+															<td colspan="5" style="text-align: center;">
+																<button id="update_all_cities" class="btn btn-primary">Save</button>
+															</td>
+														</tr>
+														<tr>
+														</tr>
+														</tfoot>
+													</table>
+												</div>
+											</div>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
 						</div>
 					</div>
 				</div>
@@ -312,6 +395,19 @@
 				width: '100%',
 				placeholder: 'Select City*'
 			});
+			$('#add_zone_cities').prepend('<option value="" selected="selected"></option>').select2({
+				width: '100%',
+				placeholder: 'Select City*'
+			});
+			$('#city_zone_class').select2({
+				width: '100%',
+				placeholder: 'Select Zone Class*'
+			});
+			$('#city_zone_classification').prepend('<option value="" selected="selected"></option>').select2({
+				width: '100%',
+				placeholder: 'Select Zone Classification*'
+			});
+			
 
 			var toggleValue = false;
 			let cities_gst_count = {{$zone_cities_gst_count}};
@@ -398,7 +494,7 @@
 					return;
 				}
 
-				$("table.order-list tbody tr").each(function () {
+				$("#myTable tbody tr").each(function () {
 					var row = {};
 					row.zone_name = $(this).find('input[name="zone_id[]"]').val();
 					row.zone_id = $(this).find('input[name="zone_id_hidden[]"]').val();
@@ -431,11 +527,11 @@
 
 				cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
 				newRow.append(cols);
-				$("table.order-list").append(newRow);
+				$("#myTable.order-list").append(newRow);
 				counter++;
 			});
 
-			$("table.order-list").on("click", ".ibtnDel", function (event) {
+			$("#myTable.order-list").on("click", ".ibtnDel", function (event) {
 				$(this).closest("tr").remove();
 				counter -= 1
 			});
@@ -443,7 +539,7 @@
 			$("#update_all_gst").on("click", function() {
 				var tableData = [];
 				var hasEmptyGst = true;
-				$("table.order-list tbody tr").each(function () {
+				$("#myTable tbody tr").each(function () {
 					var row = {};
 					row.zone_name = $(this).find('input[name="zone_id[]"]').val();
 					row.zone_id = $(this).find('input[name="zone_id_hidden[]"]').val();
@@ -483,6 +579,116 @@
 					});
 				}
 			});
+
+			//add cities modal part start
+			$('#add_cities_in_zone').on('click', function () {
+				$('#add_cities_modal').modal('show');
+			})
+
+			$("#add_city_row").on("click", function () {
+				var tableData = [];
+				var city_data = [];
+				var classification = [];
+				var zone_id = {{ $zone_id }};
+				var add_zone_cities = $("#add_zone_cities").val();
+				var add_zone_cities_text = $("#add_zone_cities option:selected").text();
+				var city_zone_classification = $("#city_zone_classification").val();
+				var city_zone_classification_text = $("#city_zone_classification option:selected").text();
+				var city_zone_class = $("#city_zone_class").val();
+				var city_zone_class_text = $("#city_zone_class option:selected").text();
+
+				if (add_zone_cities === '' || city_zone_classification === '') {
+					toastr.error('Select City and zone classification !', 'Error!', {
+						positionClass: 'toast-top-center',
+						containerId: 'toast-top-center'
+					});
+					return;
+				}
+
+				$("#city_table tbody tr").each(function () {
+					var row = {};
+					row.zone_city_name = $(this).find('input[name="add_zone_cities[]"]').val();
+					row.zone_city_id = $(this).find('input[name="add_zone_cities_hidden[]"]').val();
+					row.city_class_name = $(this).find('input[name="city_zone_class[]"]').val();
+					row.city_class_id = $(this).find('input[name="city_zone_class_hidden[]"]').val();
+					row.city_classification_name = $(this).find('input[name="city_zone_classification[]"]').val();
+					row.city_classification_id = $(this).find('input[name="city_zone_classification_hidden[]"]').val();
+					tableData.push(row);
+					city_data.push(row.zone_city_id);
+					classification.push(row.city_classification_id);
+				});
+
+				//now check duplicate entries
+				if ($.inArray(add_zone_cities, city_data) !== -1 && $.inArray(city_zone_classification, classification) !== -1 ) {
+					toastr.error('Data already exists with same city and zone classification..!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					return;
+				}
+				//now check duplicate entries end
+
+				var newRow = $("<tr>");
+				var cols = "";
+
+				cols += '<td><input type="text" class="form-control" value="' + add_zone_cities_text + '" name="add_zone_cities[]" readonly/>'+
+						'<input type="hidden" class="form-control" value="' + add_zone_cities + '" name="add_zone_cities_hidden[]" readonly/>' +
+						'</td>';
+				
+				cols += '<td><input type="text" class="form-control" value="' + city_zone_class_text + '" name="city_zone_class[]" readonly/>'+
+						'<input type="hidden" class="form-control" value="' + city_zone_class + '" name="city_zone_class_hidden[]" readonly/>' +
+						'</td>';
+				cols += '<td><input type="text" class="form-control" value="' + city_zone_classification_text + '" name="city_zone_classification[]" readonly/>'+
+						'<input type="hidden" class="form-control" value="' + city_zone_classification + '" name="city_zone_classification_hidden[]" readonly/>' +
+						'</td>';
+
+				cols += '<td><input type="button" class="row_delete btn btn-md btn-danger "  value="Delete"></td>';
+				newRow.append(cols);
+				$("#city_table.order-list").append(newRow);
+				$('#add_zone_cities').val('').trigger('change.select2');
+				$('#city_zone_classification ').val('').trigger('change.select2');
+				
+			});
+			$("#city_table.order-list").on("click", ".row_delete", function (event) {
+				$(this).closest("tr").remove();
+			});
+			$('#add_cities_modal').on('hide.bs.modal', function (e) {
+				$('#add_zone_cities').val('').trigger('change.select2');
+				$('#city_zone_classification ').val('').trigger('change.select2');
+				$('#city_table tbody').empty();
+			});
+			
+
+			$("#update_all_cities").on("click", function() {
+				var tableData = [];
+				$("#city_table tbody tr").each(function () {
+					var row = {};
+					row.zone_city_name = $(this).find('input[name="add_zone_cities[]"]').val();
+					row.zone_city_id = $(this).find('input[name="add_zone_cities_hidden[]"]').val();
+					row.city_class_name = $(this).find('input[name="city_zone_class[]"]').val();
+					row.city_class_id = $(this).find('input[name="city_zone_class_hidden[]"]').val();
+					row.city_classification_name = $(this).find('input[name="city_zone_classification[]"]').val();
+					row.city_classification_id = $(this).find('input[name="city_zone_classification_hidden[]"]').val();
+					tableData.push(row);
+				});
+
+				$.ajax({
+					url: '{!! route('admin.management.zonal.add_cities') !!}',
+					method: 'POST',
+					data: {
+						table_data: tableData,
+						'zone_id':{{ $zone_id }},
+						'_token': '{{ csrf_token() }}'
+					},
+				}).done(function (data) {
+					if (data.status == 1) {
+						toastr.success(data.success, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+					}
+					else{
+						toastr.error(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+					}
+				});
+				
+			});
+
+			//add cities modal part end
 		});
 	</script>
 @endsection

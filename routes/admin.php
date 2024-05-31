@@ -419,6 +419,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('check_zone_name/{id?}', 'Admins\AdminZonalManagementController@check_zone_name')->name('check_zone_name');
 
             Route::post('update_zone_cities_gst', 'Admins\AdminZonalManagementController@update_zone_cities_gst')->name('update_zone_cities_gst');
+            Route::post('add_cities','Admins\AdminZonalManagementController@add_cities')->name('add_cities');
         });
 
         Route::prefix('territory')->name('territory.')->group(function () {
