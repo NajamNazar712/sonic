@@ -70,6 +70,27 @@
         </div>
     </div>
 
+    {{-- call history log modal --}}
+    <div class="modal fade" id="shipperModal" role="dialog" aria-labelledby="shipperModal_title"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <h4 class="modal-title font-weight-bold">Shippers With Rate Changes <span class="text-muted" id="rate_type_modal_heading"></span></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+
+            </div>
+            <div class="modal-body text-center">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('css')
@@ -365,110 +386,45 @@
                 }
             });
 
-            // $("#editFleet").on("show.bs.modal", function(e) {
-            //     var $invoker = $(e.relatedTarget);
-            //     var action = $invoker.attr('rel');
-            //     var id = $(e.relatedTarget).data('target-id');
+            // shipperModal datatable function
+            $('#datatable').on('click', '.fileViewButton', function() {
+                    var baseRateRevisionId = table.row($(this).parents('tr')).data().id;
+                    var rateType = table.row($(this).parents('tr')).data().rate_type;
 
-
-            //     if (action == 'edit_fleet') {
-            //         $.get("/admin/settings/fleet/" + id + "/edit/form", function(data) {
-            //             $("#editFleetDiv").html(data);
-            //         });
-            //     }
-            // });
-
-            // call_history_modal datatable function
-            $('#datatable').on('click', 'tr td.remarks button', function() {
-                    var shipment_id = table.row($(this).parents('tr')).data().shId;
-
-                    $('#call_history_modal .modal-body').html('');
-                    $('#call_history_modal').modal('show');
+                    $('#shipperModal .modal-body').html('');
+                    $('#shipperModal').modal('show');
+                    $('#rate_type_modal_heading').html('('+rateType+')');
 
                     $.ajax({
-                            url: '{!! route('admin.return.call_status_history') !!}',
-                            method: 'POST',
-                            data: {
-                                '_token': '{{ csrf_token() }}',
-                                'shipment_id': shipment_id
-                            }
+                            url: '{{ route('admin.settings.shippers.base_rate_revisions.shippers_with_rates', ':id') }}'.replace(':id', baseRateRevisionId),
                         })
                         .done(function(response) {
                             if (response) {
-                                var modalBody = $('#call_history_modal .modal-body');
+                                var modalBody = $('#shipperModal .modal-body');
                                 modalBody.html('');
                                 
                                 var tableHtml =
-                                    '<table id="call_history_table" class="table-striped table-bordered" style="width:100%">';
+                                    '<table id="shippersWithRateChangeTable" class="table-striped table-bordered" style="width:100%">';
                                 tableHtml +=
-                                    '<thead class="text-center"><tr><th class="p-1">Calling Date</th><th>Calling Time</th><th>Call Finding</th><th>Call Finding Reason</th><th>Remarks</th><th>Call To</th><th>Status</th><th>User</th></tr></thead>';
+                                    '<thead class="text-center"><tr><th class="p-1">Shipper Id</th><th>Rate Change (%)</th></tr></thead>';
                                     tableHtml += '<tbody class="text-center">';
                                 $.each(response.data, function(index, value) {
-                                    var updated_at = value.data.updated_at;
-                                    var trimmedDateTime = updated_at.substring(0, 10);
-                                    var trimmedTime = updated_at.substring(11, 19);
-                                    var call_finding_id = 'Unresponsive';
-                                    var call_finding_reason_id = value.data.rv_call_finding.name;
+                                    var shipperId = value.shipper_id;
+                                    var rateChangePercent = value.rate_change_percent;
                                     
-                                    var remarks = value.data.remarks;
-                                    if (remarks == null) {
-                                        remarks = '-';
-                                    }
-                                    var current_shipment_status = value.data.shipment.status_shipper.name;
-                                    var updated_by = value.user_name;
-
-                                    var call_to_id = value.data.call_to_id;
-                                    if (call_to_id == 1) {
-                                        call_to_id = 'Consignee'
-                                    } else {
-                                        call_to_id = 'Shipper'
-                                    }
-
                                     tableHtml += 
-                                    '<tr><td class="p-1">' + trimmedDateTime +
-                                    '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + call_finding_reason_id +
-                                    '</td><td>' + remarks + '</td><td>' + call_to_id + '</td><td>' + current_shipment_status +
-                                    '</td><td>' + updated_by + '</td></tr>';
+                                    '<tr><td class="p-1">' + shipperId +
+                                    '</td><td>' + rateChangePercent + '</td></tr>';
                                 });
 
                                 tableHtml += '</tbody></table>';
 
                                 modalBody.append(tableHtml);
 
-                                $('#call_history_modal').modal('show');
+                                $('#shipperModal').modal('show');
                             }
-                        });
-                });
-
-
-            $('#datatable tbody').on('click', 'tr td.action button.status', function() {
-
-                var id = table.row($(this).parents('tr')).data().id;
-
-
-                if ($(this).hasClass('status')) {
-                    // $.ajax({
-                    //     url: '{!! route('admin.settings.fleet.enable_disable') !!}',
-                    //     method: 'POST',
-                    //     data: {
-                    //         'id': id,
-                    //         '_token': '{{ csrf_token() }}'
-                    //     }
-                    // }).done(function(data) {
-                    //     if (data.status) {
-
-                    //         table.draw(true);
-                    //         toastr.success(data.success, 'Success!', {
-                    //             positionClass: 'toast-bottom-center',
-                    //             containerId: 'toast-bottom-center'
-                    //         });
-
-                    //     }
-                    // });
-
-                }
+                    });
             });
-
 
         });
     </script>

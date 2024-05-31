@@ -186,10 +186,13 @@ class BaseRateRivisionController extends Controller
                 return $revision->rateType->name;
             })
             ->addColumn('file_view', function ($revision) {
-                $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle" data-toggle="modal" data-target="#shipperModal" data-revision-id="' . $revision->id . '">
+                $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle fileViewButton" data-revision-id="' . $revision->id . '">
                 <i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span>
                 </button>';
                 return $btn;
+            })
+            ->editColumn('created_at', function ($revision) {
+                return $revision->created_at->format('Y-m-d');
             })
             ->addColumn('added_by_admin', function ($revision) {
                 return $revision->addedByAdmin->name;
@@ -201,13 +204,13 @@ class BaseRateRivisionController extends Controller
                 return $revision->approval1Status->name;
             })
             ->editColumn('approval1_at', function ($revision) {
-                return $revision->approval1_at ?? '-';
+                return $revision->approval1_at ? $revision->approval1_at->format('Y-m-d') : '-';
             })
             ->addColumn('approved2_by_admin', function ($revision) {
                 return $revision->approved2ByAdmin ? $revision->approved2ByAdmin->name : '-';
             })
             ->editColumn('approval2_at', function ($revision) {
-                return $revision->approval2_at ?? '-';
+                return $revision->approval2_at ? $revision->approval2_at->format('Y-m-d') : '-';
             })
             ->addColumn('approval2_status', function ($revision) {
                 return $revision->approval2Status->name;
@@ -259,6 +262,15 @@ class BaseRateRivisionController extends Controller
             });
 
         return $datatable->make(true);
+    }
+
+    public function shippersWithRates($baseRateRevisionId)
+    {
+        $baseRateRevision = BaseRateRevision::with('shippersWithRateChange:id,base_rate_revision_id,shipper_id,rate_change_percent')->find($baseRateRevisionId);
+        $shippers = $baseRateRevision->shippersWithRateChange;
+        return response()->json([
+            'data' => $shippers
+        ]);
     }
 
     public function approval1_update($baseRateRevisionId, $status)
