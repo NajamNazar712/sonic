@@ -25,22 +25,19 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //
         $shipmentId = [
-            223341037760958, 15943836918768, 223341037595467, 284341037695791, 20243837734109, 202341037766004, 22343837772069, 144341037809808, 22343837819459, 202341037819652, 223341037836147, 22343837836916, 202341037853105, 22343837857875, 202341037873630, 20243837860447, 202341037873676, 22343837918493, 158341037922245, 267341037927479, 14434103792988, 22343837995086, 20243837804104, 20243837866360, 315341037882642, 202341037903970, 20243837920799, 14443837954305, 20243837965909, 20243837970484, 20243837971310, 22343837996740, 22343838004705];
+            22320237038014, 20220237102406, 20220236983707, 14420236933953, 22320237018247, 20220237015815, 28320237014677, 152991347909, 152991329141, 22320237218974, 27120237269407, 22320237370054, 14420237392497];
         echo count($shipmentId);
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
 
             foreach ($shipmentId as $shipment) {
 
-                // if ($shipment->shipper_status_id === 5) {
+                if ($shipment->shipper_status_id === 5) {
                     // $shipment->created_at = $shipment->updated_at;
-                    $shipment->shipper_status_id = 12;
-                    $shipment->consignee_status_id = 12;
+                    $shipment->shipper_status_id = 14;
+                    $shipment->consignee_status_id = 14;
                     $shipment->save();
-                // }
-                $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
-                ShipmentsJourneyController::add($shipment->id, 12, 12, NULL, NULL, NULL, 346, $deliveryNoteId->delivery_note_id, NULL, 1, NULL, null);
-                return true;
+                }
                 if (in_array($shipment->shipper_status_id, [13, 14])) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
                     $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
