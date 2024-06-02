@@ -352,10 +352,19 @@ class AdminLogisticBookingController extends Controller
             $booking_pieces = TraxBookingPiece::select('trax_booking_pieces.piece_cn_number','trax_booking_pieces.booking_id','r.name as rider_name','r.id as rider_id')
                 ->join('riders as r','r.id','trax_booking_pieces.scan_rider_id')
                 ->where('trax_booking_pieces.booking_id',$booking_id)->get();
+
             $shippers=User::select('id','name')->where('id',$logistic_booking->shipper_id)->where('status',3)->get();
-            $product=TraxProduct::select('id','product_name')->where('id',$logistic_booking->product_id)->where('status',1)->get();
+
+            $trax_shipper_detail=TraxShipperDetail::where('user_id',$logistic_booking->shipper_id)->where('status',1)->first();
+
+            $products=TraxProduct::select('id','product_name')->where('parent_id',$trax_shipper_detail->trax_parent_product_id)->where('status',1)->get();
+
+            $services=TraxService::all();
+
             $trax_stations=TraxStation::select('id','name')->where('status',1)->get();
+
             $pickup_addresses=UserShippingInfo::select('id','pickup_address','poc','phone','email')->where('user_id',$logistic_booking->shipper_id)->get();
+
             $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id);
             $booking_img_url=null;
             if ($booking_img->exists())
@@ -365,7 +374,7 @@ class AdminLogisticBookingController extends Controller
             }
 
             return view('admin.logistic.edit_logistic_book')
-                ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shippers'=>$shippers,'product'=>$product,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'riders'=>$riders]);
+                ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shippers'=>$shippers,'products'=>$products,'services'=>$services,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'riders'=>$riders]);
         }
         return  redirect()->back()->with('error','Booking not found!');
 
@@ -380,10 +389,8 @@ class AdminLogisticBookingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
-    {
+        public function update(Request $request) {
         $admin_id = session('id');
-
         Validator::extend('item_insurance_required_if_handling', function ($attribute, $value, $parameters, $validator) {
             $specialHandlingId = $validator->getData()['special_handling_id'];
 
@@ -468,14 +475,16 @@ class AdminLogisticBookingController extends Controller
                     $logistic_booking->updated_by = $admin_id;
                     $logistic_booking->save();
 
-                    $shipment=Shipment::where('tracking_number',$request->cn_number)
-                        ->where('consignee_status_id', 1)
-                        ->where('shipper_status_id', 1);
+                    $shipment=Shipment::where('tracking_number',$request->cn_number);
+//                        ->where('consignee_status_id', 1)
+//                        ->where('shipper_status_id', 1);
 
                     if($shipment->exists())
                     {
                         $shipment=$shipment->first();
-                        $shipment->estimated_weight=$booking_weight;
+                        if($shipment->consignee_status_id==1 || $shipment->shipper_status_id==1){
+                            $shipment->estimated_weight=$booking_weight;
+                        }
                         $shipment->consignee_name=$request->consignee_name;
                         $shipment->consignee_address=$request->consignee_address;
                         $shipment->consignee_phone_number_1=$request->consignee_phone_number_1;
@@ -563,7 +572,10 @@ class AdminLogisticBookingController extends Controller
 //                        }
 //                    }
 
-                $batch_booking_detail=TraxBookingBatchDetail::where('status_id',1)
+                // check if booking update through the batch than status update of booking
+                if(isset($request->batch_id) && $request->batch_id>0)
+                {
+                    $batch_booking_detail=TraxBookingBatchDetail::where('status_id',1)
                         ->where('batch_id',$request->batch_id)
                         ->where('booking_id',$request->booking_id);
                     if($batch_booking_detail->exists())
@@ -579,8 +591,14 @@ class AdminLogisticBookingController extends Controller
                             $booking_batch->save();
                         }
                     }
-                DB::commit();
-                return  redirect()->back()->with('success','Logistic booking updated successfully');
+
+                    DB::commit();
+
+                    return redirect()->route('admin.logistic.batch.batch_bookings', ['batch_id' => $request->batch_id])
+                        ->with('success', 'Logistic booking updated successfully');
+                }
+
+                return redirect()->route('admin.logistic.index')->with('success', 'Logistic booking updated successfully');
 
 
             } catch (\Exception $exception) {

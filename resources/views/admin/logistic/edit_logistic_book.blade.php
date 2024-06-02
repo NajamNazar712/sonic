@@ -69,8 +69,8 @@
                                                         <div class="form-group">
                                                             <label>Product</label>
                                                             <select class="select select2 mb-1" id="product_select" name="product_id">
-                                                                @foreach($product as $single_prodcut)
-                                                                    <option value="{{ $single_prodcut->id }}">{{ $single_prodcut->product_name }}</option>
+                                                                @foreach($products as $product)
+                                                                    <option value="{{ $product->id }}">{{ $product->product_name }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -79,6 +79,9 @@
                                                         <div class="form-group">
                                                             <label>Service</label>
                                                             <select class="select select2 mb-1" id="service_select" name="service_id">
+                                                                @foreach($services as $service)
+                                                                    <option value="{{ $service->id }}">{{ $service->service_name }}</option>
+                                                                @endforeach
                                                             </select>
                                                         </div>
                                                     </div>
@@ -115,7 +118,7 @@
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="form-group">
-                                                            <label>Weight Bkg (KG)</label>
+                                                            <label>Booking Weight (KG)</label>
                                                             <input type="text" name="booking_weight" class="form-control" value="{{$logistic_booking->total_booking_weight}}" >
                                                         </div>
                                                     </div>
@@ -673,7 +676,7 @@
         
 
         {{--var shippers =@json($shippers);--}}
-            var bookings = @json($logistic_booking);
+        var bookings = @json($logistic_booking);
 
 
 
@@ -765,40 +768,43 @@
         $('#product_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
            width: '100%',
            placeholder: 'Select Product'
-        }).bind('change',function(){
-            var product_id = parseInt($(this).val());
-            $.ajax({
-                url: '{{ route('admin.logistic.product_services') }}',
-                method: 'POST',
-                data: {
-                    'product_id': product_id,
-                    '_token': '{{ csrf_token() }}'
-                }
-            }).done(function(data){
-                if(data.status==0){
-                 
-                    $.each(data.services,function(key,value) {
-                                var service = new Option(value.service_name, value.id, false, false);
-                                $('#service_select').append(service).trigger('change');
-                    });
-                    $('#service_select').select2({
-                                placeholder: 'Select Service',
-                                width: '100%',
-                    }).val(bookings.service_id).trigger('change');
-                }else{
-                    toastr.error('No Serivce found!', 'Error!', {
-                         positionClass: 'toast-top-center',
-                         containerId: 'toast-top-center'
-                   });
-                }
-            });
-
         }).val(bookings.product_id).trigger('change');
 
         $('#service_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
-           width: '100%',
-           placeholder: 'Select Service'
-        });
+            width: '100%',
+            placeholder: 'Select Service'
+        }).val(bookings.product_id).trigger('change');
+        {{--.bind('change',function(){--}}
+        {{--    var product_id = parseInt($(this).val());--}}
+        {{--    $.ajax({--}}
+        {{--        url: '{{ route('admin.logistic.product_services') }}',--}}
+        {{--        method: 'POST',--}}
+        {{--        data: {--}}
+        {{--            'product_id': product_id,--}}
+        {{--            '_token': '{{ csrf_token() }}'--}}
+        {{--        }--}}
+        {{--    }).done(function(data){--}}
+        {{--        if(data.status==0){--}}
+        {{--         --}}
+        {{--            $.each(data.services,function(key,value) {--}}
+        {{--                        var service = new Option(value.service_name, value.id, false, false);--}}
+        {{--                        $('#service_select').append(service).trigger('change');--}}
+        {{--            });--}}
+        {{--            $('#service_select').select2({--}}
+        {{--                        placeholder: 'Select Service',--}}
+        {{--                        width: '100%',--}}
+        {{--            }).val(bookings.service_id).trigger('change');--}}
+        {{--        }else{--}}
+        {{--            toastr.error('No Serivce found!', 'Error!', {--}}
+        {{--                 positionClass: 'toast-top-center',--}}
+        {{--                 containerId: 'toast-top-center'--}}
+        {{--           });--}}
+        {{--        }--}}
+        {{--    });--}}
+
+        {{--}).val(bookings.product_id).trigger('change');--}}
+
+
 
 
         $('#pickup_datepicker').pickadate({
