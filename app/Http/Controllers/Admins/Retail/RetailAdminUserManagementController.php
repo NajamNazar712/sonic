@@ -530,7 +530,8 @@ class RetailAdminUserManagementController extends Controller
     }
 
     public function franchise_commission_view(){
-        $franchises = RetailUser::where('category', 1)->get();
+        // $franchises = RetailUser::where('category', 1)->get();
+        $franchises = RetailFranchise::get();
         return view('admin.retail.commission.franchise_wise', [
             'franchises' => $franchises
         ]);
@@ -809,7 +810,8 @@ class RetailAdminUserManagementController extends Controller
     {
         $month = $request->month;
         $franchise = $request->franchise;
-        $franchise_users = RetailUser::where('id', $franchise)->pluck('category_id')->toArray();
+        // $franchise_users = RetailUser::where('id', $franchise)->pluck('category_id')->toArray();
+        $franchise_users = RetailFranchise::where('id', $franchise)->pluck('id')->toArray();
         $retail_franchise_commission = RetailFranchiseCommission::query()
             ->select(
                 'retail_franchise_commissions.*', 
