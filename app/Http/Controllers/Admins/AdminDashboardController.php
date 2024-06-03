@@ -9433,39 +9433,6 @@ class AdminDashboardController extends Controller
                     return $users->ref;
                 }
             })
-            ->editColumn('kam', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
-                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
-                
-                if (isset($shipper, $sales_tiers)) {
-                    $sales_commission_users = DB::table('sales_commission_users')
-                        ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-                        ->get();
-                
-                    if ($sales_commission_users->isNotEmpty()) {
-                        $array = [];
-                        foreach ($sales_commission_users as $sales_commission_user) {
-                            $type = $sales_commission_user->user_type;
-                            $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-                            if ($admins) {
-                                $array[] = $admins->name;
-                            } else {
-                                return '-';
-                            }
-                        }
-                        $old_kam = explode(', ', $users->kam);
-                        $new_array = array_unique(array_merge($array, $old_kam));
-                        $new_array = implode(', ', $new_array);
-                        
-                        $array = implode(', ', $array);
-                        return $array;
-                    } else {
-                        return $users->kam;
-                    }
-                } else {
-                    return $users->kam;
-                }
-            })
             ->filterColumn('r.name', function ($query, $keyword) {
                 $query->where('r.name', $keyword)
                 ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
@@ -10068,38 +10035,6 @@ class AdminDashboardController extends Controller
                 }
 
             })
-            
-            ->editColumn('kam', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
-                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
-                
-                if (isset($shipper, $sales_tiers)) {
-                    $sales_commission_users = DB::table('sales_commission_users')
-                    ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-                    ->get();
-
-                    if ($sales_commission_users->isNotEmpty()) {
-                        $array = [];
-                        foreach ($sales_commission_users as $sales_commission_user) {
-                            $type = $sales_commission_user->user_type;
-                            $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-                            if ($admins) {
-                                $array[] = $admins->name;
-                            } else {
-                                return '-';
-                            }
-                        }
-                        $array = implode(', ', $array);
-                        return $array;
-                    } else {
-                        return $users->kam;
-                    }
-                } else {
-                    return $users->kam;
-                }
-
-            })
-
 
             ->filterColumn('r.name', function ($query, $keyword) {
                 $query->where('r.name', $keyword)
