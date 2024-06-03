@@ -3616,7 +3616,35 @@
             $('input[name="request_custom_quotations"]').val('1');
         });
 
+        
+        function disableFinishButton() {
+            $('#customQuotationBtn').css({
+                'pointer-events': 'none',
+                'opacity': '0.5'
+            }).prop('disabled', true);
+        }
 
+
+        function enableFinishButton() {
+            $('#customQuotationBtn').css({
+                'pointer-events': '',
+                'opacity': ''
+            }).prop('disabled', false).addClass('enabled');
+        }
+
+        
+        var onmainswitch1 = document.querySelector('.switchery.on-main-switch');
+        var olmainswitch1 = document.querySelector('.switchery.ol-main-switch');
+        var detaimmainswitch1 = document.querySelector('.switchery.detain-main-switch');
+        var samedaymainswitch1 = document.querySelector('.switchery.sameday-main-switch');
+
+        $('#on_main_switch, #ol_main_switch, #detain_main_switch, #sameday_main_switch').on('change', function () {
+            if (onmainswitch1.checked === true || olmainswitch1.checked === true || detaimmainswitch1.checked === true || samedaymainswitch1.checked === true ) {
+                disableFinishButton();
+            }else{
+                enableFinishButton();
+            }
+        });
     });
 
 

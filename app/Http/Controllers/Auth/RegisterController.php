@@ -42,6 +42,7 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
@@ -712,10 +713,15 @@ class RegisterController extends Controller
                             $html .= '<p>No bank information found.</p>';
                         }
 
-            $html .= 'To finish signing up, simply click below to verify your email address.</p>  <div align="center" style="overflow: hidden; display: flex; justify-content:space-around;">
-                            <a href="'.$route.'" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Verify Your Account</a>
-                        </div>
-                    </div>
+                        if (!isset($newUser->on_board_status)) {
+                            $html .= '<p>To finish signing up, simply click below to verify your email address.</p>
+                            <div align="center" style="overflow: hidden; display: flex; justify-content: space-around;">
+                                <a href="' . $route . '" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Verify Your Account</a>
+                            </div>';
+                        }
+
+
+                    $html.= '</div>
                         <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>
                     </div>';
             $body = $html;
