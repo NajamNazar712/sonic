@@ -726,10 +726,13 @@ class RetailAdminUserManagementController extends Controller
 
         $grouped_commissions = $retail_commissions->groupBy('franchise_id');
         foreach ($grouped_commissions as $franchise_id => $commissions) {
-            $franchise_name = RetailFranchise::find($franchise_id)->name;
+            $franchise_code = $commissions->pluck("franchise_code");
+            // $franchise_name = RetailFranchise::where($franchise_id)->name;
+            $franchise_name = RetailFranchise::whereIn('code', $franchise_code)->first();
+            $name = $franchise_name->name;
             $commission = $commissions->first();
             $html .= '<tr>';
-            $html .= '<td><strong></strong>'. $franchise_name .'</td>';
+            $html .= '<td><strong></strong>'. $name .'</td>';
             $html .= '<td><strong></strong>'. $commission->franchise_code .'</td>';
             $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
             $html .= '</tr>';
