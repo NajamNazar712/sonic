@@ -261,7 +261,7 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'origin_hub', name: 'ohc.name', class: 'align-middle origin_hub'},
-                    {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
+                    {data: 'zone_name', name: 'zone_name', class: 'align-middle zone_name'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false,searchable: false},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
