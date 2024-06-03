@@ -14,7 +14,7 @@ class AddQuantityToRetailShipmentsTable extends Migration
     public function up()
     {
         Schema::table('retail_shipments', function (Blueprint $table) {
-            $table->string('quantity')->nullable();
+            $table->integer('quantity')->nullable();
         });
     }
 
