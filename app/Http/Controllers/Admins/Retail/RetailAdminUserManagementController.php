@@ -726,7 +726,7 @@ class RetailAdminUserManagementController extends Controller
 
         $grouped_commissions = $retail_commissions->groupBy('franchise_id');
         foreach ($grouped_commissions as $franchise_id => $commissions) {
-            $franchise_name = RetailUser::find($franchise_id)->name;
+            $franchise_name = RetailFranchise::find($franchise_id)->name;
             $commission = $commissions->first();
             $html .= '<tr>';
             $html .= '<td><strong></strong>'. $franchise_name .'</td>';
@@ -768,7 +768,7 @@ class RetailAdminUserManagementController extends Controller
         $html .= '<tbody>';
         
         foreach ($retail_commissions as $commission) {
-            $franchise_name = RetailFranchise::find($commission->franchise_id)->name;
+            $franchise_name = RetailUser::find($commission->franchise_id)->name;
             $retail_shipping_modes = RetailShippingMode::where('id', $commission->retail_shipping_mode_id)->pluck('name')->toArray();
             $retail_shipping_mode = implode(', ', $retail_shipping_modes);
 
