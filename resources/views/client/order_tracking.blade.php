@@ -379,7 +379,8 @@
 
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Name</strong></td>';
-                                shipment += '<td>' + details.shipper.name + '</td>';
+                                // shipment += '<td>' + details.shipper.name + '</td>';
+                                shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
                                 shipment += '<td><strong>Account No.</strong></td>';
                                 shipment += '<td>' + details.shipper.account_number + '</td>';
                                 shipment += '<td><strong>City</strong></td>';
@@ -420,8 +421,15 @@
                                 shipment += '<td><strong>Person of Contact</strong></td>';
                                 shipment += '<td>' + details.pickup.person_of_contact + '</td>';
                                 shipment += '<td><strong>Vendor</strong></td>';
-                                if (details.pickup.vendor) {
-                                    shipment += '<td>' + details.pickup.vendor + '</td>';
+                                // if (details.pickup.vendor) {
+                                //     shipment += '<td>' + details.pickup.vendor + '</td>';
+                                // }
+                                // else{
+                                //     shipment += '<td></td>'
+                                // }
+                                shipment += '<td><strong>Brand Name</strong></td>';
+                                if (details.pickup.pickup_brand_name) {
+                                    shipment += '<td>' + details.pickup.pickup_brand_name + '</td>';
                                 }
                                 else{
                                     shipment += '<td></td>'

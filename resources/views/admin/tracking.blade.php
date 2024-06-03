@@ -1347,7 +1347,8 @@
                                         ' <span class="border-2 border-red red pl-1 pr-1 high_alert_popup" data-toggle="modal" data-target="#HighAlertModal" style="cursor:pointer;">Highalert</span></td>';
                                     $('#HighAlertModal h4.high_alert_text').text(details.high_alert);
                                 } else {
-                                    shipment += '<td>' + details.shipper.name + '</td>';
+                                    // shipment += '<td>' + details.shipper.name + '</td>';
+                                    shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
                                 }
                                 shipment += '<td><strong>Account No.</strong></td>';
                                 shipment += '<td>' + details.shipper.account_number + '</td>';
@@ -1430,9 +1431,15 @@
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Person of Contact</strong></td>';
                                 shipment += '<td>' + details.pickup.person_of_contact + '</td>';
-                                shipment += '<td><strong>Vendor</strong></td>';
-                                if (details.pickup.vendor) {
-                                    shipment += '<td>' + details.pickup.vendor + '</td>';
+                                // shipment += '<td><strong>Vendor</strong></td>';
+                                // if (details.pickup.vendor) {
+                                //     shipment += '<td>' + details.pickup.vendor + '</td>';
+                                // } else {
+                                //     shipment += '<td></td>'
+                                // }
+                                shipment += '<td><strong>Brand Name</strong></td>';
+                                if (details.pickup.pickup_brand_name) {
+                                    shipment += '<td>' + details.pickup.pickup_brand_name + '</td>';
                                 } else {
                                     shipment += '<td></td>'
                                 }
