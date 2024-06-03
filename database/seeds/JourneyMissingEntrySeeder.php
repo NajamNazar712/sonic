@@ -25,7 +25,7 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //
         $shipmentId = [
-            22322337249080, 22322335324741, 17422335807643];
+            22320237864492];
         echo count($shipmentId);
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
@@ -38,7 +38,7 @@ class JourneyMissingEntrySeeder extends Seeder
                     $shipment->consignee_status_id = 14;
                     $shipment->save();
                 }
-                if (in_array($shipment->shipper_status_id, [13, 14, 18,55])) {
+                if (in_array($shipment->shipper_status_id, [13, 14])) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
                     $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
                     $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
