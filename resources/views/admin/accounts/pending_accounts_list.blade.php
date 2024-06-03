@@ -747,7 +747,15 @@
             $('#user_commission').attr('disabled', true)
         } else {
             $('#user_commission').val('');
-            $('#user_commission').attr('disabled', false)
+            if($('#sales_tier_select').val() == 3){
+                $('#user_commission').attr('disabled', true)
+                $('#user_commission').val('0');
+            }
+            else
+            {
+                $('#user_commission').attr('disabled', false)
+                $('#user_commission').val('');
+            }
         }
         var index = $.inArray(id, selected_users);
         if (index !== -1) {
@@ -777,6 +785,17 @@
             $('#user_select').attr('disabled', false);
         } else {
             $('#external_person_name').attr('disabled', false);
+        }
+
+        if($(this).val() == 3)
+        {
+            $('#user_commission').attr('disabled', true);
+            $('#user_commission').val('0');
+        }
+        else
+        {
+            $('#user_commission').attr('disabled', false);
+            $('#user_commission').val('');
         }
 
     });
