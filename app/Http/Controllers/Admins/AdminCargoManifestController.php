@@ -377,12 +377,14 @@ class AdminCargoManifestController extends Controller
 
             ->leftjoin('cities as olddc', 'olddc.id', '=', 'mh.old_consignee_city_id')
             ->leftjoin('cities as olddhc', 'olddc.hub_id', '=', 'olddhc.id')
+            ->leftjoin('zones as olddhcz', 'olddhc.zone_id', '=', 'olddhcz.id')
             ->leftjoin('intercept_re_book_request_histories as irbrh', function ($join) {
                 $join->on('irbrh.shipment_id', '=', 'shipments.id')
                     ->on('shipments.shipper_status_id', '=', DB::raw(55));
             })
             ->leftjoin('cities as olddci', 'olddci.id', '=', 'irbrh.old_consignee_city_id')
             ->leftjoin('cities as olddhci', 'olddci.hub_id', '=', 'olddhci.id')
+            ->leftjoin('zones as olddhciz', 'olddhci.zone_id', '=', 'olddhciz.id')
             ->join('cities as dc', function ($join) {
                 $join->on('shipments.consignee_city_id', '=', 'dc.id')
                     ->where(function ($query) {
@@ -420,13 +422,14 @@ class AdminCargoManifestController extends Controller
                     });
             })
             ->join('cities as dhc', 'dc.hub_id', '=', 'dhc.id')
+            ->join('zones as dest_zone', 'dhc.zone_id', '=', 'dest_zone.id')
             ->leftjoin('crm_requests as crm', function ($join) {
                 $join->on('crm.shipment_id', '=', 'shipments.id')
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
             ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id')
-            ->select('z.name as zone_name', 'shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub', 'shipments.consignee_address', 'dc.id as destination_city_id', 'sts.status as star_status', 'rcz.name as return_zone_name')
+            ->select('z.name as zone_name', 'shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub', 'shipments.consignee_address', 'dc.id as destination_city_id', 'sts.status as star_status', 'rcz.name as return_zone_name', 'dest_zone.name as dest_zone', 'olddhcz.name as old_destination_hub_zone','olddhciz.name as old_destination_intercept_hub_zone')
             ->whereNotIn('shipments.id', $on_hold_shipments);
 
         if (session('role_id') != 1) {
@@ -567,17 +570,28 @@ class AdminCargoManifestController extends Controller
                 }
             })
             ->editColumn('zone_name', function ($shipments) {
-                if ($shipments->shipper_status_id == 20) {
-                    if ($shipments->return_address_id != NULL) {
-                        return $shipments->return_zone_name;
-                    } else {
-                        return $shipments->zone_name;
-                    }
-                }else{
+                if (in_array($shipments->shipper_status_id, [20, 30, 37])) {
+                    return $shipments->dest_zone;
+                } else if ($shipments->shipper_status_id == 49) {
+                    return $shipments->old_destination_hub_zone;
+                } else if ($shipments->shipper_status_id == 55) {
+                    return $shipments->old_destination_intercept_hub_zone;
+                } else {
                     return $shipments->zone_name;
                 }
-                
             })
+            // ->editColumn('zone_name', function ($shipments) {
+            //     if ($shipments->shipper_status_id == 20) {
+            //         if ($shipments->return_address_id != NULL) {
+            //             return $shipments->return_zone_name;
+            //         } else {
+            //             return $shipments->zone_name;
+            //         }
+            //     }else{
+            //         return $shipments->zone_name;
+            //     }
+                
+            // })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
                     return $shipment->shipper . ' (' . $shipment->poc . ')';
