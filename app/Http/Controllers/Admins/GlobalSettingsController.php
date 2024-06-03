@@ -7390,7 +7390,21 @@ class GlobalSettingsController extends Controller
         } else {
             $is_lead_user = 1;
         }
-        return response()->json(['status' => 1, 'agent_id' => $agent_id, 'city_id' => $city_id, 'auto_tagging_id' => $auto_tagging_id, 'territory_id' => $territory_id, 'is_lead_user' => $is_lead_user]);
+
+        $all_territories = AutoTagTerritory::where('admin_id', $agent_id)->pluck('territory_id');
+        $total_terr = Territory::where('id', '!=', $all_territories[0])->pluck('id');
+        $other_territory_ids = AutoTagTerritory::where('admin_id', $agent_id)
+            ->whereIn('territory_id', $total_terr)->pluck('territory_id');
+        $other_territory_names = Territory::whereIn('id', $other_territory_ids)->get(); 
+        return response()->json([
+            'status' => 1, 
+            'agent_id' => $agent_id, 
+            'city_id' => $city_id,
+            'auto_tagging_id' => $auto_tagging_id,
+            'territory_id' => $territory_id,
+            'is_lead_user' => $is_lead_user,
+            'other_territory_names' => $other_territory_names
+        ]);
     }
 
     // public function auto_tag_territories_update(Request $request)

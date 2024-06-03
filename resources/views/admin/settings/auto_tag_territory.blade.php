@@ -125,7 +125,7 @@
                             <input type="checkbox" name="is_lead_user" id="edit_is_lead_user">
                         </div>
 
-                        <div class="form-group mt-2 d-none" id="edit_remaining_territory_select_div">
+                        <div class="form-group mt-2" id="edit_remaining_territory_select_div">
                             <select name="territory_id[]" id="edit_remaining_territory_id" class="form-control select2" multiple="multiple">
                             </select>
                         </div>
@@ -276,91 +276,86 @@
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
+
             $('#edit_territory_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Territory",
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
-                
-                
-                    var city_obj = [];
-                    city_obj.length = 0
 
-                $.map({!! $cities !!}, function (obj, index) {
-                    
-                    city_obj.push({id: obj.id, text: obj.name});
-                });    
-                $('#edit_city_id').select2({
-                        width:'100%',
-                        allowClear:true,
-                        dropdownParent:$('#agent_edit'),
-                        data:city_obj
-                    }).bind('change', function() {
-                
-                        var id = parseInt($(this).val());
-                            $('#edit_territory_select').css('display','block');
-                            $('#edit_territory_id').children().remove();
-                            var territory_obj = [];
-                            var edit_remaining_territory_obj  = [];
-                            territory_obj.length = 0
-                            edit_remaining_territory_obj.length = 0
+            $('#edit_remaining_territory_id').prepend('<option selected></option>').select2({
+                width:'100%',
+                placeholder:"Other Territory",
+                allowClear:true,
+                dropdownParent:$('#agent_edit')
+            });
+            
+            var city_obj = [];
+            city_obj.length = 0
+            $.map({!! $cities !!}, function (obj, index) {
+                city_obj.push({id: obj.id, text: obj.name});
+            });    
 
-                        $.map({!! $territories !!}, function (obj) {
-                            if(id == obj.city_id){
-                                territory_obj.push({id: obj.id, text: obj.name});
-                                edit_remaining_territory_obj.push({id: obj.id, text: obj.name});
-                            }
+            $('#edit_city_id').select2({
+                    width:'100%',
+                    allowClear:true,
+                    dropdownParent:$('#agent_edit'),
+                    data:city_obj
+                }).bind('change', function() {
+                var id = parseInt($(this).val());
+                    $('#edit_territory_select').css('display','block');
+                    $('#edit_territory_id').children().remove();
+                    $('#edit_remaining_territory_id').children().remove();
+                    var territory_obj = [];
+                    var edit_remaining_territory_obj  = [];
+                    territory_obj.length = 0
+                    edit_remaining_territory_obj.length = 0
+
+                $.map({!! $territories !!}, function (obj) {
+                    if(id == obj.city_id){
+                        territory_obj.push({id: obj.id, text: obj.name});
+                    } else {
+                        edit_remaining_territory_obj.push({id: obj.id, text: obj.name});
+                    }
+                });
+
+                $('#edit_territory_id').prepend('<option selected></option>').select2({
+                    width:'100%',
+                    placeholder:"Select Territory",
+                    allowClear:true,
+                    dropdownParent:$('#agent_edit'),
+                    data:territory_obj
+                }); 
+
+                $('#edit_remaining_territory_id').select2({
+                    width:'100%',
+                    placeholder:"Other Territory",
+                    allowClear:true,
+                    dropdownParent:$('#agent_edit'),
+                    data:edit_remaining_territory_obj
+                }); 
+
+                $('#edit_is_lead_user').unbind('change').change(function() {
+                    if ($(this).is(':checked')) {
+                        var selectedTerritoryId = $('#edit_territory_id').val();
+                        var filteredTerritories = edit_remaining_territory_obj  .filter(function(item) {
+                            return item.id != selectedTerritoryId;
                         });
 
-                        $('#edit_territory_id').prepend('<option selected></option>').select2({
-                            width:'100%',
-                            placeholder:"Select Territory",
-                            allowClear:true,
-                            dropdownParent:$('#agent_edit'),
-                            data:territory_obj
+                        $('#edit_remaining_territory_select_div').removeClass('d-none');
+                        $('#edit_remaining_territory_id').select2({
+                            width: '100%',
+                            placeholder: "Other Territory",
+                            allowClear: true,
+                            dropdownParent: $('#agent_edit'),
+                            data: filteredTerritories
                         });
-
-                        $('#edit_is_lead_user').unbind('change').change(function() {
-                            if ($(this).is(':checked')) {
-                                var selectedTerritoryId = $('#edit_territory_id').val();
-                                var filteredTerritories = edit_remaining_territory_obj  .filter(function(item) {
-                                    return item.id != selectedTerritoryId;
-                                });
-
-                                $('#edit_remaining_territory_select_div').removeClass('d-none');
-                                $('#edit_remaining_territory_id').empty().prepend('<option></option>').select2({
-                                    width: '100%',
-                                    placeholder: "Select Territory",
-                                    allowClear: true,
-                                    dropdownParent: $('#agent_edit'),
-                                    data: filteredTerritories
-                                });
-                            } else {
-                                $('#edit_remaining_territory_select_div').addClass('d-none');
-                                $('#edit_remaining_territory_id').val(null).trigger('change');
-                                $('#edit_remaining_territory_id').empty();
-                            }
-                        });
-
-                        $('#edit_territory_id').unbind('change').change(function() {
-                            if ($('#edit_is_lead_user').is(':checked')) {
-                                var selectedTerritoryId = $(this).val();
-                                var filteredTerritories = edit_remaining_territory_obj.filter(function(item) {
-                                    return item.id != selectedTerritoryId;
-                                });
-                                $('#edit_remaining_territory_id').empty().prepend('<option selected></option>').select2({
-                                    width: '100%',
-                                    placeholder: "Select Territory",
-                                    allowClear: true,
-                                    dropdownParent: $('#agent_edit'),
-                                    data: filteredTerritories
-                                });
-                            }
-                        });
-
-                    });
-
+                    } else {
+                        $('#edit_remaining_territory_select_div').addClass('d-none');
+                    }
+                });
+            });
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -459,7 +454,6 @@
             });
 
             
-            
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $.ajax({
@@ -476,18 +470,20 @@
                     $('#edit_agent_id').val(data.agent_id).change();
                     $('#edit_city_id').val(data.city_id).change();
                     $('#edit_territory_id').val(data.territory_id).change();
-
                     if (data.is_lead_user == 0) {
                         $('#edit_is_lead_user').prop('checked', false);
-                        $('edit_lead_agent_div').addClass('d-none');
-                    } else {
+                        $('#edit_remaining_territory_select_div').addClass('d-none');
+                    } else if (data.is_lead_user == 1) {
                         $('#edit_is_lead_user').prop('checked', true);
-                        $('edit_lead_agent_div').removeClass('d-none');
+                        $('#edit_remaining_territory_select_div').removeClass('d-none');
                     }
-
+                    if (data.other_territory_names && data.other_territory_names.length > 0) {
+                        data.other_territory_names.forEach(function(territory) {
+                            $('#edit_remaining_territory_id').append('<option value="' + territory.id + '" selected>' + territory.name + '</option>');
+                        });
+                    }
                     $('#EditAgentModal').modal('show');
                 })
-                
             });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.delete', function() {
