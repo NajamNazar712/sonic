@@ -56,12 +56,35 @@
 													 data-size="sm"> Add Cities</label>
 										</div>
 									</div> 
+									
+									<div class="col-3">
+										<fieldset class="form-group">
+											<label>Search Cities by Zone</label>
+											<select name="search_cities_via_zone" id="search_cities_via_zone" class="form-control select2" >
+											@foreach($zones as $z)
+												<option value="{{$z->id}}">{{$z->name}}</option>
+											@endforeach
+											</select>
+										</fieldset>
+									</div>
+									<div class="col-1">
+										<div class="form-group" style="text-align: right; margin-top: 28px">
+											<label  id="search_cities" class="btn btn-primary"
+													 data-size="sm">Search</label>
+										</div>
+									</div>
+									<div class="col-1">
+										<div class="form-group" style="text-align: left; margin-top: 28px">
+											<a href=""><label  id="reset_button" class="btn btn-primary"
+													 data-size="sm">Reset</label></a>
+										</div>
+									</div>
 
 									<div class="col-12" style="text-align: center">
 										<h3 class="form-section mb-2">City Class Categorization</h3>
 									</div>
 
-									<div class="col-12 col-lg-6">
+									<div id="rush-same-day-container" class="col-12 col-lg-6">
 										<h3 class="form-section mb-2">Rush/Same-day</h3>
 
 										@foreach($cities as $city)
@@ -99,7 +122,7 @@
 										@endforeach
 									</div>
 
-									<div class="col-12 col-lg-6 mt-2 mt-lg-0">
+									<div id="saver-plus-swift-container" class="col-12 col-lg-6 mt-2 mt-lg-0">
 										<h3 class="form-section mb-2">Saver Plus/Swift</h3>
 
 										@foreach($cities as $city)
@@ -139,7 +162,7 @@
 
 									<div class="col-12">
 										<div class="form-group text-center">
-											<button type="submit" class="btn btn-primary">Update</button>
+											<button type="submit" id="update_button" class="btn btn-primary">Update</button>
 										</div>
 									</div>
 								</div>
@@ -407,7 +430,12 @@
 				width: '100%',
 				placeholder: 'Select Zone Classification*'
 			});
-			
+
+			$('#search_cities_via_zone').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Zone",
+                allowClear:true,
+            });
 
 			var toggleValue = false;
 			let cities_gst_count = {{$zone_cities_gst_count}};
@@ -581,6 +609,16 @@
 			});
 
 			//add cities modal part start
+
+			function checkTableRows() {
+                var rowCount = $('#city_table tbody tr').length;
+                if (rowCount > 0) {
+                    $('#update_all_cities').prop('disabled', false);
+                } else {
+                    $('#update_all_cities').prop('disabled', true);
+                }
+            }
+			checkTableRows();
 			$('#add_cities_in_zone').on('click', function () {
 				$('#add_cities_modal').modal('show');
 			})
@@ -642,17 +680,20 @@
 				cols += '<td><input type="button" class="row_delete btn btn-md btn-danger "  value="Delete"></td>';
 				newRow.append(cols);
 				$("#city_table.order-list").append(newRow);
+				checkTableRows();
 				$('#add_zone_cities').val('').trigger('change.select2');
 				$('#city_zone_classification ').val('').trigger('change.select2');
 				
 			});
 			$("#city_table.order-list").on("click", ".row_delete", function (event) {
 				$(this).closest("tr").remove();
+				checkTableRows();
 			});
 			$('#add_cities_modal').on('hide.bs.modal', function (e) {
 				$('#add_zone_cities').val('').trigger('change.select2');
 				$('#city_zone_classification ').val('').trigger('change.select2');
 				$('#city_table tbody').empty();
+				checkTableRows();
 			});
 			
 
@@ -679,16 +720,127 @@
 					},
 				}).done(function (data) {
 					if (data.status == 1) {
-						toastr.success(data.success, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						$('#add_cities_modal').modal('hide');
+						toastr.success(data.success, 'Notice!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 					}
 					else{
-						toastr.error(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						$('#add_cities_modal').modal('hide');
+						toastr.error(data.error, 'Notice!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 					}
 				});
 				
 			});
 
 			//add cities modal part end
+
+			//search cities by zone code
+			$('#search_cities').on("click", function() {
+				var search_cities = $("#search_cities_via_zone").val();
+
+				if(search_cities) {
+					$.ajax({
+						url: '{!! route('admin.management.zonal.search_cities') !!}',
+						method: 'POST',
+						data: {
+							searchable_zone: search_cities,
+							'zone_id':{{ $zone_id }},
+							'_token': '{{ csrf_token() }}'
+						},
+					}).done(function (data) {
+						$('#rush-same-day-container').empty().append('<h3 class="form-section mb-2">Rush/Same-day</h3>');
+						$('#saver-plus-swift-container').empty().append('<h3 class="form-section mb-2">Saver Plus/Swift</h3>');
+						data.cities_class_1.forEach(function(city) {
+							var rushHtml = `
+								<div class="form-group">
+									<div class="row align-items-center justify-content-between">
+										<div class="col">
+											<label class="mb-0 mr-1">${city.name}</label>
+										</div>
+										<div class="col text-right">
+											<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+												
+												<input type="radio" id="city_class_${city.city_id}" class="city_class" name="city_class[${city.city_id}]" value="0" data-rule-required="true" data-msg-required="Class is required" ${city.class == 0 ? 'checked="checked"' : ''}>
+												<label for="city_class_${city.city_id}">Class A</label>
+											</fieldset>
+											<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+												<input type="radio" id="city_class_${city.city_id}" class="city_class" name="city_class[${city.city_id}]" value="1" data-rule-required="true" data-msg-required="Class is required" ${city.class == 1 ? 'checked="checked"' : ''}>
+												<label for="city_class_${city.city_id}">Class B</label>
+											</fieldset>
+											<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+												<input type="radio" id="city_class_${city.city_id}" class="city_class" name="city_class[${city.city_id}]" value="2" data-rule-required="true" data-msg-required="Class is required" ${city.class == 2 ? 'checked="checked"' : ''}>
+												<label for="city_class_${city.city_id}">Class C</label>
+											</fieldset>
+											<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+												<input type="radio" id="city_class_${city.city_id}" class="city_class" name="city_class[${city.city_id}]" value="3" data-rule-required="true" data-msg-required="Class is required" ${city.class == 3 ? 'checked="checked"' : ''}>
+												<label for="city_class_${city.city_id}">Class D</label>
+											</fieldset>
+										</div>
+									</div>
+								</div>
+								<hr/>
+							`;
+							$('#rush-same-day-container').append(rushHtml);
+						});
+						data.cities_class_2.forEach(function(city) { 
+							var saverHtml = `
+								<div class="form-group">
+									<div class="row align-items-center justify-content-between">
+										<div class="col">
+											<label class="mb-0 mr-1">${city.name}</label>
+										</div>
+										<div class="col text-right">
+											<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+												<input type="radio" id="city_class_${city.city_id}" class="city_class" name="city_class_cor[${city.city_id}]" value="0" data-rule-required="true" data-msg-required="Class is required" ${city.class == 0 ? 'checked="checked"' : ''}>
+												<label for="city_class_${city.city_id}">Class A</label>
+											</fieldset>
+											<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+												<input type="radio" id="city_class_${city.city_id}" class="city_class" name="city_class_cor[${city.city_id}]" value="1" data-rule-required="true" data-msg-required="Class is required" ${city.class == 1 ? 'checked="checked"' : ''}>
+												<label for="city_class_${city.city_id}">Class B</label>
+											</fieldset>
+											<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+												<input type="radio" id="city_class_${city.city_id}" class="city_class" name="city_class_cor[${city.city_id}]" value="2" data-rule-required="true" data-msg-required="Class is required" ${city.class == 2 ? 'checked="checked"' : ''}>
+												<label for="city_class_${city.city_id}">Class C</label>
+											</fieldset>
+											<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+												<input type="radio" id="city_class_${city.city_id}" class="city_class" name="city_class_cor[${city.city_id}]" value="3" data-rule-required="true" data-msg-required="Class is required" ${city.class == 3 ? 'checked="checked"' : ''}>
+												<label for="city_class_${city.city_id}">Class D</label>
+											</fieldset>
+										</div>
+									</div>
+								</div>
+								<hr/>
+							`;
+							$('#saver-plus-swift-container').append(saverHtml);
+						});
+
+						if (data.cities_class_1.length == 0 && data.cities_class_2.length == 0) {
+							$('#update_button').prop('disabled', true);
+						} else {
+							$('#update_button').prop('disabled', false);
+						}
+
+						$('#rush-same-day-container .city_class, #saver-plus-swift-container .city_class').each(function() {
+							var checkbox = $(this);
+							var label = checkbox.next();
+							var text = label.text();
+
+							label.remove();
+
+							checkbox.iCheck({
+								radioClass: 'iradio_line pt-1 pb-1',
+								checkedClass: 'checked bg-success',
+								uncheckedClass: 'bg-danger',
+								insert: '<div class="icheck_line-icon"></div>' + text
+							});
+						});
+
+					});
+				} else{
+					toastr.error('Please select zone to search!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					
+				}
+				
+			});
 		});
 	</script>
 @endsection
