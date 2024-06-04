@@ -14,8 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Http\Models\ServiceList;
-use App\Jobs\LeadApiGeneratEmailNotification;
-use  App\Http\Models\City; 
+use  App\Http\Models\City;
 
 class LeadAPIController extends Controller
 {
@@ -44,12 +43,14 @@ class LeadAPIController extends Controller
 
     public function index(Request $request)
     {
+        $rider_id=$request->rider_id;
         $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
             ->join('service_list as sl', 'sl.id', '=', 'leads.service_id')
             // ->join('lead_references as lr', 'lr.id', '=', 'leads.reference_id')
             // ->join('territories as t', 't.id', '=', 'leads.territory_id')
             // ->join('area_territories as at', 'at.id', '=', 'leads.territory_area_id')
             ->join('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
+            ->where('reference_person_id',$rider_id)
             ->select('leads.id as id', 'leads.contact_person', 'sl.name as service_name', 'sl.id as service_id', 'ls.name as status', 'ls.id as status_id')->orderByDesc('id');
 
         if ($leads->exists()) {
