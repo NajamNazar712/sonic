@@ -11084,7 +11084,7 @@ class NotificationsController extends Controller
                                 $subject = str_replace('[Company Name]', $lead->company_name, $subject);
                             }
                             self::email($subject, $body, $lead->email_address); // Send email with $body
-                        })
+                        }
                     }                    
                 } else if ($id == 231){
                     $subject = $notification->subject;
