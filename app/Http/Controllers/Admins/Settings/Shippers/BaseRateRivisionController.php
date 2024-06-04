@@ -161,7 +161,7 @@ class BaseRateRivisionController extends Controller
 
             return redirect()->back()->with(['success' => count($rows) . ' Revision' . (count($rows) > 1 ? 's' : '') . ' Added']);
         } else {
-            return redirect()->back()->with('error', 'Invalid Tracking Numbers');
+            return redirect()->back()->with('error', 'Invalid Account Numbers');
         }
     }
 
