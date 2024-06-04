@@ -51,6 +51,7 @@ class Permission
             'accounts.restrict_order_id.info' => 619,
             'accounts.restrict_order_id.submit' => 619,
             'accounts.kam_bulk_tagging.index' => 991,
+            'accounts.kam_bulk_tagging.update' => 991,
 
             'corporate.reimbursement_setting.index' => 598,
             'corporate.reimbursement_setting.store' => 598,
