@@ -1423,7 +1423,6 @@ class AdminDashboardController extends Controller
                     NotificationsController::send(81, $sale_persons, Auth::id());
                     NotificationsController::send(119, $sale_persons, Auth::id());
     
-    
                 } else {
                     return ['status' => 0, 'error' => "Shipper is already tagged to  Sales Person!"];
                 }
@@ -9024,7 +9023,10 @@ class AdminDashboardController extends Controller
         //Sales Commissison End
 
         if(!$request->has('wordpress_account')){
-            NotificationsController::send(38, $id);
+            $user =  User::find($id);
+            if(!isset($user->on_board_status)){
+                NotificationsController::send(38, $id);
+            }
             return redirect(route('admin.accounts.pending'))->with('success', 'All Rates are added');
         }
     }
