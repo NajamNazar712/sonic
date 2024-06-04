@@ -54,6 +54,8 @@ use Validator;
 use Illuminate\Validation\Rule;
 use DNS2D;
 use App\Http\Models\RetailRequestCity;
+use App\Http\Models\RetailUserCommission;
+use App\Http\Models\RetailFranchiseCommission;
 
 class RetailShipmentBookController extends Controller
 {
@@ -2327,5 +2329,331 @@ class RetailShipmentBookController extends Controller
         {
             return response()->json(['status' => 0, 'error' => 'Not found: ', 'data' => $retail_shipper]);
         }
+    }
+
+    public function retail_commission_index()
+    {
+        return view('retail.retail_commission.index');
+    }
+
+    public function retail_commission_list(Request $request)
+    {
+        $results = null;
+        $month = $request->month;
+        $user = auth()->user();
+        $retail_user_commission = RetailUserCommission::where('franchise_id', $user->id)->first();
+
+        $retail_franchise_code = RetailFranchise::pluck('code');
+        $franchise_commission = RetailFranchiseCommission::whereIn('franchise_code', $retail_franchise_code)->first(); 
+
+        if ($retail_user_commission && $user->id == $retail_user_commission->franchise_id){
+            $retail_user_commission = RetailUserCommission::query()
+                ->select(
+                    'retail_user_commissions.*', 
+                    'retail_users.name as franchise_name',
+                    'retail_users.phone_no as phone_no',
+                    'retail_shipping_modes.name as shipping_mode_name',
+                    DB::raw('DATE_FORMAT(CONCAT("2022-", retail_user_commissions.month, "-01"), "%M") as month_name')
+                )
+                ->where('retail_user_commissions.month', $month)
+                ->where('retail_user_commissions.franchise_id', $user->id)
+                ->leftJoin('retail_users', 'retail_users.id', '=', 'retail_user_commissions.franchise_id')
+                ->leftJoin('retail_shipping_modes', 'retail_shipping_modes.id', '=', 'retail_user_commissions.retail_shipping_mode_id');
+            $results = $retail_user_commission->get();
+
+            return response()->json([
+                'data' => $results,
+            ]);
+        }
+        elseif ($franchise_commission->franchise_code == $user->store->code)
+        {
+            $retail_franchise_commission = RetailFranchiseCommission::query()
+                ->select(
+                    'retail_franchise_commissions.*', 
+                    'retail_franchises.name as franchise_name',
+                    'retail_shipping_modes.name as shipping_mode_name',
+                    DB::raw('DATE_FORMAT(CONCAT("2022-", retail_franchise_commissions.month, "-01"), "%M") as month_name')
+                )
+                ->where('retail_franchise_commissions.month', $month)
+                ->where('retail_franchise_commissions.franchise_code', $user->store->code)
+                ->leftJoin('retail_franchises', 'retail_franchises.id', '=', 'retail_franchise_commissions.franchise_id')
+                ->leftJoin('retail_shipping_modes', 'retail_shipping_modes.id', '=', 'retail_franchise_commissions.retail_shipping_mode_id');
+            $results = $retail_franchise_commission->get();
+            return response()->json([
+                'data' => $results,
+            ]);
+        }   
+    }
+
+    public function user_commission_invoice_print(Request $request)
+    {
+        $trax_user = $request->trax_users;
+        $data = explode(', ', $trax_user);
+        $retail_commissions = RetailUserCommission::whereIn('id', $data)->get();
+
+        $html = '';
+        $html .= '<!doctype html>';
+        $html .= '<html lang="en">';
+        $html .= '<head>';
+        $html .= '<meta charset="utf-8">';
+        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">';
+        $html .= '<title>Invoice</title>';
+        
+        $html .= '<style>';
+        $html .= file_get_contents(public_path('app-assets/css/bootstrap.min.css'));
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}';
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{margin-top: 1rem; margin-bottom: 1rem;}.summary_header .header{width: 10%;}.summary_header .heading{width: 15%;}.summary_footer .footer{width: 75%;}';
+        $html .= '</style>';
+        
+        $html .= '</head>';
+        $html .= '<body>';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+
+
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div class="row align-items-start justify-content-between summary">';
+        $html .= '<div class="col-6">';
+        $html .= '<table class="table table-sm table-bordered border">';
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td class="color primary" colspan="3"><strong>Franchise Details</strong></td>';
+        $html .= '</tr>';
+
+        // table set
+        $html .= '<tr>';
+        $html .= '<td class="color secondary"><strong></strong>Trax User Name</td>';
+        $html .= '<td class="color secondary"><strong></strong>Franchise Code</td>';
+        $html .= '<td class="color secondary"><strong></strong>Month</td>';
+        $html .= '</tr>';
+        // table set
+
+        $grouped_commissions = $retail_commissions->groupBy('franchise_id');
+
+        foreach ($grouped_commissions as $franchise_id => $commissions) {
+            $franchise_name = RetailUser::find($franchise_id)->name;
+            $commission = $commissions->first();
+            $html .= '<tr>';
+            $html .= '<td><strong></strong>'. $franchise_name .'</td>';
+            $html .= '<td><strong></strong>'. $commission->franchise_code .'</td>';
+            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '<div class="row align-items-start justify-content-between summary">';
+        $html .= '<div class="col-12">';
+        $html .= '<table class="table table-sm table-bordered border">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th class="color primary">Franchise Name</th>';
+        $html .= '<th class="color primary">Franchise Code</th>';
+        $html .= '<th class="color primary">Month</th>';
+        $html .= '<th class="color primary">Retail Shipping Mode</th>';
+        $html .= '<th class="color primary">Number of Shipments</th>';
+        $html .= '<th class="color primary">Total Charges Without GST</th>';
+        $html .= '<th class="color primary">Product Percentage</th>';
+        $html .= '<th class="color primary">Commission</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody>';
+        
+        foreach ($retail_commissions as $commission) {
+            $franchise_name = RetailUser::find($commission->franchise_id)->name;
+            $retail_shipping_modes = RetailShippingMode::where('id', $commission->retail_shipping_mode_id)->pluck('name')->toArray();
+            $retail_shipping_mode = implode(', ', $retail_shipping_modes);
+
+            $html .= '<tr>';
+            $html .= '<td>' . $franchise_name . '</td>';
+            $html .= '<td>' . $commission->franchise_code . '</td>';
+            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
+            $html .= '<td>' . $retail_shipping_mode . '</td>';
+            $html .= '<td>' . $commission->number_of_shipments . '</td>';
+            $html .= '<td>' . $commission->total_charges_without_gst . '</td>';
+            $html .= '<td>' . $commission->product_percentage . '</td>';
+            $html .= '<td>' . $commission->commission . '</td>';
+            $html .= '</tr>';
+        }   
+        
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        $html .= '<div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
+
+        $html .= '</div>';
+        $html .= '</div>';
+        
+        $html .= '</body>';
+        $html .= '</html>';
+        return $html;
+    }
+
+    public function franchise_commission_invoice_print(Request $request)
+    {
+        $trax_user = $request->trax_users;
+        $data = explode(', ', $trax_user);
+        $retail_commissions = RetailFranchiseCommission::whereIn('id', $data)->get();
+
+        $html = '';
+        $html .= '<!doctype html>';
+        $html .= '<html lang="en">';
+        $html .= '<head>';
+        $html .= '<meta charset="utf-8">';
+        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">';
+        $html .= '<title>Invoice</title>';
+        
+        $html .= '<style>';
+        $html .= file_get_contents(public_path('app-assets/css/bootstrap.min.css'));
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}';
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{margin-top: 1rem; margin-bottom: 1rem;}.summary_header .header{width: 10%;}.summary_header .heading{width: 15%;}.summary_footer .footer{width: 75%;}';
+        $html .= '</style>';
+        
+        $html .= '</head>';
+        $html .= '<body>';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+
+
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $html .= '<div class="row align-items-start justify-content-between summary">';
+        $html .= '<div class="col-6">';
+        $html .= '<table class="table table-sm table-bordered border">';
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td class="color primary" colspan="3"><strong>Franchise Details</strong></td>';
+        $html .= '</tr>';
+
+        // table set
+        $html .= '<tr>';
+        $html .= '<td class="color secondary"><strong></strong>Franchise Name</td>';
+        $html .= '<td class="color secondary"><strong></strong>Franchise Code</td>';
+        $html .= '<td class="color secondary"><strong></strong>Month</td>';
+        $html .= '</tr>';
+        // table set
+
+        $grouped_commissions = $retail_commissions->groupBy('franchise_id');
+        foreach ($grouped_commissions as $franchise_id => $commissions) {
+            $franchise_code = $commissions->pluck("franchise_code");
+            // $franchise_name = RetailFranchise::where($franchise_id)->name;
+            $franchise_name = RetailFranchise::whereIn('code', $franchise_code)->first();
+            $name = $franchise_name->name;
+            $commission = $commissions->first();
+            $html .= '<tr>';
+            $html .= '<td><strong></strong>'. $name .'</td>';
+            $html .= '<td><strong></strong>'. $commission->franchise_code .'</td>';
+            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        $html .= '<div class="row align-items-start justify-content-between summary">';
+        $html .= '<div class="col-12">';
+        $html .= '<table class="table table-sm table-bordered border">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th class="color primary">Franchise User</th>';
+        $html .= '<th class="color primary">Franchise Code</th>';
+        $html .= '<th class="color primary">Month</th>';
+        $html .= '<th class="color primary">Retail Shipping Mode</th>';
+        $html .= '<th class="color primary">Number of Shipments</th>';
+        $html .= '<th class="color primary">Total Charges Without GST</th>';
+        $html .= '<th class="color primary">Product Percentage</th>';
+        $html .= '<th class="color primary">Commission</th>';
+        $html .= '<th class="color primary">GST %</th>';
+        $html .= '<th class="color primary">GST Amount</th>';
+        $html .= '<th class="color primary">Total Commission</th>';
+        $html .= '<th class="color primary">Withholding %</th>';
+        $html .= '<th class="color primary">Franchise withholding Amount</th>';
+        $html .= '<th class="color primary">Charges minus withholding</th>';
+        $html .= '<th class="color primary">Deduction %</th>';
+        $html .= '<th class="color primary">Franchise deduction amount</th>';
+        $html .= '<th class="color primary">Net Commission</th>';
+
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody>';
+        
+        foreach ($retail_commissions as $commission) {
+            $franchise_name = RetailUser::find($commission->franchise_id)->name;
+            $retail_shipping_modes = RetailShippingMode::where('id', $commission->retail_shipping_mode_id)->pluck('name')->toArray();
+            $retail_shipping_mode = implode(', ', $retail_shipping_modes);
+
+            $html .= '<tr>';
+            $html .= '<td>' . $franchise_name . '</td>';
+            $html .= '<td>' . $commission->franchise_code . '</td>';
+            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
+            $html .= '<td>' . $retail_shipping_mode . '</td>';
+            $html .= '<td>' . $commission->number_of_shipments . '</td>';
+            $html .= '<td>' . $commission->total_charges_without_gst . '</td>';
+            $html .= '<td>' . $commission->product_percentage . '</td>';
+            $html .= '<td>' . $commission->commission . '</td>';
+            $html .= '<td>' . $commission->gst_percentage . '</td>';
+            $html .= '<td>' . $commission->total_charges_with_gst . '</td>';
+            $html .= '<td>' . $commission->franchise_gst_amount . '</td>';
+            $html .= '<td>' . $commission->franchise_withholding_percentage . '</td>';
+            $html .= '<td>' . $commission->franchise_withholding_amount . '</td>';
+            $html .= '<td>' . $commission->charges_without_withholding . '</td>';
+            $html .= '<td>' . $commission->deduction_percentage . '</td>';
+            $html .= '<td>' . $commission->deduction_amount . '</td>';
+            $html .= '<td>' . $commission->net_commission . '</td>';
+            $html .= '</tr>';
+        }   
+        
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        $html .= '<div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
+
+        $html .= '</div>';
+        $html .= '</div>';
+        
+        $html .= '</body>';
+        $html .= '</html>';
+        return $html;
     }
 }
