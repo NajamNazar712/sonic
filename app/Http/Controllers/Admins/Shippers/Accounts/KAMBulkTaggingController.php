@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Shippers\Accounts;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
@@ -23,12 +24,17 @@ class KAMBulkTaggingController extends Controller
 
     public function index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 798);
+        
         return view('admin.accounts.kam_bulk_tagging');
     }
 
 
     public function update(Request $request)
     {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 799);
+
         $de_tag = $request->input('tag') == 'on';
 
         $names = [
