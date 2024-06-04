@@ -75,36 +75,40 @@ class WebsiteLead extends Command
         if($response->status == 0){
             $leads = $response->leads;
             foreach ($leads as $key => $lead) {
-
+                
                 if($lead->data){
-
+                    
                     $city = City::where('name', $lead->data->city_name[0])->first();
                     if($city){
                         $city_id = $city->id;
-                     
+                        
                     }
                     else{
+                        self::old_api_request_delete($base_uri, [$lead->id]);
                         continue;
                     }
-
+                    
                     $services = ServiceList::where('name', $lead->data->service_name[0])->first();
                     if($services){
                         $service_id = $services->id;
                     }
                     else{
+                        self::old_api_request_delete($base_uri, [$lead->id]);
                         continue;
                     }
-
+                    
                     $reference = LeadReference::where('name', $lead->data->reference_name[0])->first();
                     if($reference){
                         $reference_id = $reference->id;
                     }
                     else{
+                        self::old_api_request_delete($base_uri, [$lead->id]);
                         continue;
                     }
 
-                    $token = Str::random(8);
 
+                    $token = Str::random(8);
+                    
                     $new_lead = new Lead();
                     $new_lead->contact_person = $lead->data->contact_person;
                     $new_lead->city_id = $city_id;
@@ -132,31 +136,30 @@ class WebsiteLead extends Command
                     $leads_added[] = $new_lead->id;
                     $token_added[$key] = $token;
                     $old_leads[] = $lead->id;
-
-
-                    
+                                 
                 }
             }
         }
 
+
         if(count($old_leads) > 0){
-            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
-            $client->delete('leads', [
-                'form_params' => [
-                    "token" => 'TraxOnlinePvtLtdAYWD',
-                    "ids" => $old_leads
-                    ]
-                ]);
-            }
-            
-            if(count($old_leads) > 0){
-                NotificationsController::send(203, $leads_added, Carbon::today());
-                NotificationsController::send(230, $leads_added, $token_added);    
-            }
-
-
+            self::old_api_request_delete($base_uri, $old_leads);
+            NotificationsController::send(203, $leads_added, Carbon::today());
+            NotificationsController::send(230, $leads_added, $token_added);                
+        }
 
         Log::channel('cronJobLog')->info('s ' .'website:leads Running');
 
+    }
+
+
+    public function old_api_request_delete($base_uri, $old_leads){
+        $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+        $client->delete('leads', [
+            'form_params' => [
+                "token" => 'TraxOnlinePvtLtdAYWD',
+                "ids" => $old_leads
+            ]
+        ]);
     }
 }
