@@ -13,33 +13,36 @@
     
                     <div class="card-content">
                         <div class="card-body card-dashboard">
-                            <div class="row upload_shippers_form_div px-1">
-                                <form id="upload_shippers_form" class="form-horizontal w-100 p-2" method="POST" action="#" novalidate="novalidate" enctype="multipart/form-data">
+                            <div class="row px-1">
+                                <form id="upload_shippers_form" class="form-horizontal w-100 p-2" method="POST" action="{{ route('admin.accounts.kam_bulk_tagging.update') }}" novalidate="novalidate" enctype="multipart/form-data">
                                     @csrf
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-6 ml-5">
                                             <div class="form-group">
-                                                <input type="file" name="shippers" class="w-100 border-primary rounded" style="padding: 6px" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                <label class="mr-2 font-medium-4"><b>Tag </b></label>
+                                                <input type="checkbox" name="tag" class="switchery" data-size="md" data-switchery="true">
+                                                <label class="ml-2 font-medium-4"><b>De-Tag </b></label>
                                             </div>
                                         </div>
-                                        <div class="col-md-2">
-                                            <div class="form-group">
-                                                <select class="form-control" name="adjustment_type" id="adjustment_types" data-rule-required="true" data-msg-required="Adjustment Type is required">
-                                                    <option disabled selected>Select Rate Type</option>
-                                                    {{-- @foreach ($baseRateTypes as $baseRateType)
-                                                    <option value="{{$baseRateType->id}}">{{$baseRateType->name}}</option>
-                                                    @endforeach --}}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="form-group">
-                                                <button type="submit" class="btn btn-primary mb-2">Upload</button>
-                                            </div>
+                                        <div class="col-md-3">
                                         </div>
                                         <div class="col-md-2 justify-content-end">
                                             <div class="form-group text-right">
-                                                <a href="{{ asset('file/Base Rate Revisions Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Download Template</a>
+                                                <a href="{{ asset('file/KAM Bulk Tagging Template.xlsx') }}" class="btn btn-secondary btn-block"><i class="la la-download"></i> Download Template</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <input type="file" name="shippers" class="border-primary rounded" style="padding: 6px" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3 text-center">
+                                            <div class="form-group">
+                                                <button type="submit" class="btn btn-primary mb-2">Submit</button>
                                             </div>
                                         </div>
                                     </div>
