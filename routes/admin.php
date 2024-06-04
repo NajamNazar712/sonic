@@ -2510,6 +2510,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('settings')->name('settings.')->group(function () {
 
+        Route::prefix('show_vendor')->name('show_vendor.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@show_vendors')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@store_vendors')->name('store');
+            // Route::post('udpate', 'Admins\GlobalSettingsController@delivery_revert_access_update')->name('update');
+        });
+
         Route::prefix('delivery_revert_access')->name('delivery_revert_access.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@delivery_revert_access_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@delivery_revert_access_store')->name('store');

@@ -9608,4 +9608,34 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with('success', 'Admins have been assigned!');
     }
+
+    public function show_vendors()
+    {
+        $shippers = User::where('status', 3)->get();
+        $users = GlobalSettings::where('setting_value', 0)->where('type', 'brand_and_vendor_rights')->first();
+        return view('admin.settings.brand_and_vendor.index')->with(['users' => $users, 'shippers' => $shippers]);
+    }
+
+    public function store_vendors(Request $request)
+    {
+        if ($request->has('users')) {
+            $users = implode(',', $request->users);
+        } else {
+            $users = null;
+        }
+        $settings = GlobalSettings::where('setting_value', 0)->where('type', 'brand_and_vendor_rights')->first();
+        if ($settings) {
+            // Update the existing global setting
+            $settings->text = $users;
+            $settings->save();
+        } else {
+            $settings = new GlobalSettings();
+            $settings->type = 'brand_and_vendor_rights';
+            $settings->setting_value = 0;
+            $settings->text = $users;
+            $settings->save();
+        }
+
+        return redirect()->back()->with('success', 'Shippers have been assigned rights!');
+    }
 }
