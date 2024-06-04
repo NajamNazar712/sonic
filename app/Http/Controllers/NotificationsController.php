@@ -11064,7 +11064,7 @@ class NotificationsController extends Controller
                     
                     foreach ($lead_ids as $key => $lead_id) {
                         $lead = Lead::find($lead_id);
-                        if(isset($tokens[$key]){
+                        if(isset($tokens[$key])){
                             $route = route('cod.signup', ['id' => $lead->id, 'token' => $tokens[$key]]);
                             $link = '<a href="' . $route . '">Click here to sign up</a>';
                         
