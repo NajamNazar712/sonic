@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Admins\Shippers\Accounts;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Validator;
+
 
 class KAMBulkTaggingController extends Controller
 {
@@ -27,23 +31,23 @@ class KAMBulkTaggingController extends Controller
         $rateAdjustmentTypeId = $request->adjustment_type;
         $adminId = Auth::id();
         $names = [
-            'shipper_id' => 'Account Number',
-            'percentage' => 'Percentage'
+            'trax_id' => 'Trax ID',
+            'shipper_id' => 'Account ID'
         ];
         $messages = [
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be a Numeric Value.',
         ];
         $rules = [
-            'shipper_id' => ['required', 'integer', 'exists:users,id'],
-            'percentage' => ['required', 'Numeric', 'not_in:0', 'min:-1000', 'max:1000']
+            'trax_id' => ['required', 'integer', 'exists:admins,trax_id'],
+            'shipper_id' => ['required', 'integer', 'exists:users,id']
         ];
-        $fields = [0 => 'shipper_id', 1 => 'percentage'];
-        if ($file = $request->file('shippers')) {
+        $fields = [0 => 'trax_id', 1 => 'shipper_id'];
+        if ($file = $request->file('ids')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
-            $header = ['Account Number (Shipper Id)', 'Percentage'];
+            $header = ['Trax ID', 'Account ID'];
         }
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
@@ -97,12 +101,12 @@ class KAMBulkTaggingController extends Controller
             } else {
                 $data = [];
                 $rate_adjustment_type_id = $rateAdjustmentTypeId;
-                $baseRateRevision = BaseRateRevision::create([
-                    'rate_type_id' => $rate_adjustment_type_id,
-                    'added_by_admin_id' => $adminId,
-                    'approval1_status' => 1,
-                    'approval2_status' => 1
-                ]);
+                // $baseRateRevision = BaseRateRevision::create([
+                //     'rate_type_id' => $rate_adjustment_type_id,
+                //     'added_by_admin_id' => $adminId,
+                //     'approval1_status' => 1,
+                //     'approval2_status' => 1
+                // ]);
                 foreach ($rows as $key => $row) {
                     $shipper_id = (int)$row['shipper_id'];
                     $rateAdjustmentPercentage = floatval($row['percentage']);
@@ -115,7 +119,7 @@ class KAMBulkTaggingController extends Controller
             }
             return redirect()->back()->with(['success' => count($rows) . ' Revision' . (count($rows) > 1 ? 's' : '') . ' Added']);
         } else {
-            return redirect()->back()->with('error', 'Invalid Tracking Numbers');
+            return redirect()->back()->with('error', 'Invalid Trax Ids / Account Numbers');
         }
     }
 }
