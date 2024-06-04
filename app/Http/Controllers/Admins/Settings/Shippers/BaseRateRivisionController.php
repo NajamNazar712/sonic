@@ -179,7 +179,8 @@ class BaseRateRivisionController extends Controller
                 'approval1Status:id,name',
                 'approved2ByAdmin:id,name',
                 'approval2Status:id,name',
-            ]);
+            ])
+            ->orderBy('id','desc');
 
         $datatable = Datatables::of($baseRateRevisions)
             ->addColumn('rate_type', function ($revision) {
@@ -192,7 +193,7 @@ class BaseRateRivisionController extends Controller
                 return $btn;
             })
             ->editColumn('created_at', function ($revision) {
-                return $revision->created_at->format('Y-m-d');
+                return $revision->created_at->format('Y-m-d H:i:s');
             })
             ->addColumn('added_by_admin', function ($revision) {
                 return $revision->addedByAdmin->name;
@@ -204,13 +205,13 @@ class BaseRateRivisionController extends Controller
                 return $revision->approval1Status->name;
             })
             ->editColumn('approval1_at', function ($revision) {
-                return $revision->approval1_at ? $revision->approval1_at->format('Y-m-d') : '-';
+                return $revision->approval1_at ? $revision->approval1_at->format('Y-m-d H:i:s') : '-';
             })
             ->addColumn('approved2_by_admin', function ($revision) {
                 return $revision->approved2ByAdmin ? $revision->approved2ByAdmin->name : '-';
             })
             ->editColumn('approval2_at', function ($revision) {
-                return $revision->approval2_at ? $revision->approval2_at->format('Y-m-d') : '-';
+                return $revision->approval2_at ? $revision->approval2_at->format('Y-m-d H:i:s') : '-';
             })
             ->addColumn('approval2_status', function ($revision) {
                 return $revision->approval2Status->name;
@@ -377,10 +378,10 @@ class BaseRateRivisionController extends Controller
                                         // If it's a percentage string
                                         $numericValue = intval(rtrim($corporateWeightChargeZoneWise->different_zone, '%'));
                                         $updatedValue = $numericValue + intval($change);
-                                        $corporateWeightChargeZoneWise->different_zone = $updatedValue . '%';
+                                        $corporateWeightChargeZoneWise->different_zone = $this->clampToZero($updatedValue) . '%';
                                     } else {
                                         // If it's a plain number
-                                        $corporateWeightChargeZoneWise->different_zone = $corporateWeightChargeZoneWise->different_zone * (1 + ($change / 100));
+                                        $corporateWeightChargeZoneWise->different_zone = $this->clampToZero($corporateWeightChargeZoneWise->different_zone * (1 + ($change / 100)));
                                     }
                                 }
 
