@@ -1475,14 +1475,22 @@ class AdminTrackingController extends Controller
                                 'shipment_scanning_journeys.longitude',
                                 'ssjal.area_id',
                                 'shipment_scanning_journeys.created_at',
-                                'ssjal.hub_id'
+                                'ssjal.hub_id as hub_id_scanning',
+                                'ssjal.shipment_scanning_journey_id as shipment_scanning_journey_id',
+                                'sj.city_id as city_id_scanning'
+
                             )
                             ->join('shipments_journey as sj', function($join) use ($journey) {
                                 $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
                                     ->where('sj.id', '=', $journey->id);
                             })
-                            ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                            ->join('shipment_scanning_journey_area_logs as ssjal', function($join) use ($journey) {
+                                $join->on('ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                                     ->where('ssjal.hub_id', '=', $journey->city_id);
+                            })
                             ->where('shipment_scanning_journeys.updated_at', '<=', $journey->updated_at);
+
+
                             if(isset($journey->admin['role_id']) && $journey->admin['role_id'] != 1 || isset($journey->rider_id)){
                                 switch ($journey->shipper_status_id) {
                                     case 2:
