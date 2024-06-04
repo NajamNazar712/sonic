@@ -65,7 +65,18 @@
 @endsection
 
 @section('js')
-
+<script src="{{ asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js') }}" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#upload_shippers_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+        });
+    });
+</script>
 
 @endsection
 
