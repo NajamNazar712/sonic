@@ -127,6 +127,36 @@
                             dom: '<"d-inline-block"l><"pull-right"B>tipr',
                             buttons: [
                                 {
+                                    extend: 'selectAll',
+                                    text: 'Select All',
+                                    className: 'select_all',
+                                    action : function(e) {
+                                        e.preventDefault();
+                                        dataTable.rows().nodes().each(function(index) {
+                                            var row = dataTable.row(index);
+                                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                                row.select();
+                                                id = parseInt(row.id());
+                                            }
+                                        });
+                                    }
+                                },
+
+                                {
+                                    text: 'Select None',
+                                    className: 'btn btn-secondary unselect_all disabled',
+                                    action : function(e) {
+                                        e.preventDefault();
+                                        dataTable.rows().nodes().each(function(index) {
+                                            var row = dataTable.row(index);
+                                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                                row.deselect();
+                                            }
+                                        });
+                                    }
+                                },
+
+                                {
                                     text: 'Print Invoice',
                                     className: 'btn btn-primary print_invoice',
                                     action: function () {
@@ -191,6 +221,14 @@
                             ],
                             scrollX: true,
                             scrollY: true,
+                        });
+                        dataTable.on('select.dt deselect.dt', function() {
+                            var $unselectButton = $('.unselect_all');
+                            if (dataTable.rows('.selected').count() > 0) {
+                                $unselectButton.removeClass('disabled');
+                            } else {
+                                $unselectButton.addClass('disabled');
+                            }
                         });
                     }
                 }
