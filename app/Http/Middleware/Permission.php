@@ -50,6 +50,7 @@ class Permission
             'accounts.receiving_sheet.index' => 364,
             'accounts.restrict_order_id.info' => 619,
             'accounts.restrict_order_id.submit' => 619,
+            'accounts.kam_bulk_tagging.index' => 991,
 
             'corporate.reimbursement_setting.index' => 598,
             'corporate.reimbursement_setting.store' => 598,

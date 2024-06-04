@@ -218,6 +218,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('report/list', 'Admins\AdminDashboardController@survey_report_list')->name('report.list');
             Route::get('report/submitresponse', 'Admins\AdminDashboardController@submitresponse_report')->name('report.submitresponse');
         });
+
+        Route::prefix('kam_bulk_tagging')->name('kam_bulk_tagging.')->group(function () {
+            Route::get('', 'Admins\Shippers\Accounts\KAMBulkTaggingController@index')->name('index');
+            Route::post('update', 'Admins\Shippers\Accounts\KAMBulkTaggingController@update')->name('update');
+        });
     });
 
     Route::prefix('daily_visit')->name('daily_visit.')->group(function () {

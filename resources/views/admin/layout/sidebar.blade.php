@@ -32,7 +32,7 @@
                         Leads</a></li>
             @endif
             @if (session('role_id') == 1 ||
-                    count(array_intersect([5, 11, 15, 242, 76, 79, 217, 315, 428, 470, 762, 767, 791], session('permissions'))) !==
+                    count(array_intersect([5, 11, 15, 242, 76, 79, 217, 315, 428, 470, 762, 767, 791, 991], session('permissions'))) !==
                         0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.vertical_nav.main"><i
                                 class="la la-users"></i>Shippers</span></a>
@@ -42,7 +42,7 @@
                                     href="{{ route('admin.shipment.receiving_sheet.index') }}">Receiving Sheets</a></li>
                         @endif
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([5, 11, 15, 242, 428, 470, 762, 767], session('permissions'))) !== 0)
+                                count(array_intersect([5, 11, 15, 242, 428, 470, 762, 767, 991], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Accounts</span></a>
                                 <ul class="menu-content">
@@ -93,6 +93,10 @@
                                                 @endif
                                             </ul>
                                         </li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(991, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.accounts.kam_bulk_tagging.index') }}">KAM Bulk Tagging & De-Tagging</a></li>
                                     @endif
 
                                 </ul>
