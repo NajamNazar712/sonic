@@ -626,9 +626,9 @@ class ShipperDashboardController extends Controller
              $connection = 'mysql';
          }
 
-
-        $shipments = Shipment::
-            leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
+        $connection = 'mysql';
+        $shipments = DB::connection($connection)->table('shipments')
+            ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -686,7 +686,7 @@ class ShipperDashboardController extends Controller
         }
 
 
-        Log::channel('cronJobLog')->info('s ' .$shipments->toSql() .'shipments.created_at '. $from. ' and '.$to.' users ' .session('user_id'));
+        //Log::channel('cronJobLog')->info('s ' .$shipments->toSql() .'shipments.created_at '. $from. ' and '.$to.' users ' .session('user_id'));
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
