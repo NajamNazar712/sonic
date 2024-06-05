@@ -1082,7 +1082,7 @@
                                 row.push(values.sale_person);
                                 row.push(values.sale_person_updated_at);
                                 row.push(values.sale_person_tagged_aging);
-                                row.push(values.reference_person+' - '+values.rider_id);
+                                row.push(values.reference_person);
                                 row.push(values.status);
                                 row.push(values.reason_id);
                                 row.push(values.call_status);
@@ -1258,9 +1258,11 @@
                         class: 'align-middle sale_person_updated_at'
                     },
                     {data: 'sale_person_tagged_aging', name: 'sale_person_tagged_aging', class: 'align-middle sale_person_tagged_aging', orderable: false, searchable: false},
-                    {data: 'reference_person', name: 'rp.name', class: 'align-middle sale_person',render: function(data,type,row){
-                        return row.reference_person +' - '+ row.rider_id;
-                    }},
+                    // {data: 'reference_person', name: 'rp.name', class: 'align-middle sale_person',render: function(data,type,row){
+                    //     return row.reference_person +' - '+ row.rider_id;
+                    // }},
+                    {data: 'reference_person', name: 'reference_person', class: 'align-middle reference_person', orderable: false},
+
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason_id', name: 'leads.reason', class: 'align-middle reason_id'},
                     {data: 'call_status', name: 'leads.call_status', class: 'align-middle call_status'},
