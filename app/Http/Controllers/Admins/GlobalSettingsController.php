@@ -7407,26 +7407,6 @@ class GlobalSettingsController extends Controller
         ]);
     }
 
-    // public function auto_tag_territories_update(Request $request)
-    // {
-    //     $auto_tagging = AutoTagTerritory::find($request->auto_tagging_id);
-    //     if ($request->agent_id == $auto_tagging->admin_id) {
-    //         $auto_tagging->territory_id = $request->territory_id;
-    //         $auto_tagging->save();
-    //         return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
-    //     } else {
-    //         $check_tagging = AutoTagTerritory::where('admin_id', $request->agent_id);
-    //         if (!$check_tagging->exists()) {
-    //             $auto_tagging->admin_id = $request->agent_id;
-    //             $auto_tagging->territory_id = $request->territory_id;
-    //             $auto_tagging->save();
-    //             return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
-    //         } else {
-    //             return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');
-    //         }
-    //     }
-    // }
-
     public function auto_tag_territories_update(Request $request)
     {
         $auto_tagging = AutoTagTerritory::find($request->auto_tagging_id);
@@ -7434,22 +7414,27 @@ class GlobalSettingsController extends Controller
         $first_territory = AutoTagTerritory::where('admin_id', $request->agent_id)->first();
         $is_lead_user = $request->has('is_lead_user') ? 1 : 0;
     
-        // Delete existing records
-        AutoTagTerritory::where('admin_id', $request->agent_id)->delete();
-    
-        // Insert new records
-        foreach ($territory_ids as $territory_id) {
-            $auto_tagging = new AutoTagTerritory();
-            $auto_tagging->admin_id = $request->agent_id;
-            $auto_tagging->territory_id = $territory_id;
-            $auto_tagging->is_lead_user = $is_lead_user;
-            $auto_tagging->save();
+        if (!$is_lead_user) {
+            if ($first_territory) {
+                AutoTagTerritory::where('admin_id', $request->agent_id)
+                    ->where('territory_id', '!=', $first_territory->territory_id)
+                    ->delete();
+                $first_territory->is_lead_user = $is_lead_user;
+                $first_territory->save();
+            }
+        } else {
+            AutoTagTerritory::where('admin_id', $request->agent_id)->delete();
+            // Insert new records
+            foreach ($territory_ids as $territory_id) {
+                $auto_tagging = new AutoTagTerritory();
+                $auto_tagging->admin_id = $request->agent_id;
+                $auto_tagging->territory_id = $territory_id;
+                $auto_tagging->is_lead_user = $is_lead_user;
+                $auto_tagging->save();
+            }
         }
-    
         return redirect()->back()->with('success', 'Sales Person\'s Territories Updated!');
     }
-    
-    
 
     public function referral()
     {
