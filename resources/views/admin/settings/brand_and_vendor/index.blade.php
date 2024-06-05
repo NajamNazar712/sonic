@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Delivery Revert Access')
+@section('title', 'Brand and Vendor Name Setting')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Brand and Vendor
+                    Brand and Vendor Name Setting
                 </h1>
 
                 <div class="card">
