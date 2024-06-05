@@ -13,7 +13,7 @@ class logistic_booking_batch_setting_seeder extends Seeder
     {
         $time_stamp =\Carbon\Carbon::now();
         DB::table('general_settings')->insert(array(
-            array('type'=>'booking_batch_length','setting_value'=>3,'description'=>'Logistic Booking Batches','created_at'=>$time_stamp,'updated_at'=>$time_stamp),
+            array('type'=>'booking_batch_length','setting_value'=>10,'description'=>'Logistic Booking Batches','created_at'=>$time_stamp,'updated_at'=>$time_stamp),
         ));
 
     }

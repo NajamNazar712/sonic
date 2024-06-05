@@ -12,13 +12,14 @@ class CreateActivityTrailAndPermissionForLogisticShipperTagging extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 979, 'name' => 'Logistic Booking - View', 'module_id' => 34 ),
-            array('id' => 980, 'name' => 'Logistic Booking - Edit', 'module_id' => 34 ),
+            array('id' => 973, 'name' => 'Logistic Shipper Tagging - View', 'module_id' => 34 ),
+            array('id' => 974, 'name' => 'Logistic Shipper Tagging - Add', 'module_id' => 34 ),
+            array('id' => 975, 'name' => 'Logistic Shipper Tagging - Edit', 'module_id' => 34 ),
         ));
 
         DB::table('activity_trail_actions')->insert(array(
-            array('id' => 783, 'screen_name' => 'Logistic Booking', 'action' => 'View'),
-            array('id' => 784, 'screen_name' => 'Logistic Booking', 'action' => 'Excel'),
+            array('id' => 779, 'screen_name' => 'Logistic Shipper Tagging', 'action' => 'View'),
+            array('id' => 780, 'screen_name' => 'Logistic Shipper Tagging', 'action' => 'Excel'),
         ));
     }
 }

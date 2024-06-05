@@ -24,7 +24,6 @@ class CreateActivityTrailAndPermissionForLogisticBatch extends Seeder
             array('id' => 782, 'screen_name' => 'Logistic Batch', 'action' => 'Excel'),
             array('id' => 793, 'screen_name' => 'Logistic Batch Bookings', 'action' => 'View'),
             array('id' => 794, 'screen_name' => 'Logistic Batch Bookings', 'action' => 'Excel'),
-
         ));
     }
 }
