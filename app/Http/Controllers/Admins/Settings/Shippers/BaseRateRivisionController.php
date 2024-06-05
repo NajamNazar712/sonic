@@ -17,6 +17,7 @@ use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\WeightCharge;
 use App\Models\Admin\BaseRateRevision;
+use App\Models\Admin\BaseRateRevisionApprovalStatus;
 use App\Models\Admin\BaseRateType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,8 +38,9 @@ class BaseRateRivisionController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 796);
 
         $baseRateTypes = BaseRateType::all();
+        $baseRateRevisionApprovalStatuses = BaseRateRevisionApprovalStatus::all();
 
-        return view('admin.settings.shippers.base_rate_revision.index', ['baseRateTypes' => $baseRateTypes]);
+        return view('admin.settings.shippers.base_rate_revision.index', ['baseRateTypes' => $baseRateTypes, 'baseRateRevisionApprovalStatuses' => $baseRateRevisionApprovalStatuses]);
     }
 
     public function add_bulk_shipper_rate_adjustment_store(Request $request)
@@ -184,7 +186,7 @@ class BaseRateRivisionController extends Controller
             // dd($baseRateRevisions->get());
 
         $datatable = Datatables::of($baseRateRevisions)
-            ->addColumn('rate_type', function ($revision) {
+            ->addColumn('rate_type_id', function ($revision) {
                 return $revision->rateType->name;
             })
             ->addColumn('file_view', function ($revision) {

@@ -204,7 +204,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.shippers_with_rate_change_count);
-                                row.push(values.rate_type);
+                                row.push(values.rate_type_id);
                                 row.push(values.created_at);
                                 row.push(values.added_by_admin);
                                 row.push(values.approved1_by_admin);
@@ -278,14 +278,12 @@
                         data: 'shippers_with_rate_change_count',
                         name: 'shippers_with_rate_change_count',
                         class: 'align-middle text-center shippers_with_rate_change_count',
-                        searchable: false
                     },
                     {
-                        data: 'rate_type',
-                        name: 'rate_type',
-                        class: 'align-middle text-center rate_type',
+                        data: 'rate_type_id',
+                        name: 'rate_type_id',
+                        class: 'align-middle text-center rate_type_id',
                         orderable: false,
-                        searchable: false
                     },
                     {
                         data: 'file_view',
@@ -299,7 +297,6 @@
                         name: 'created_at',
                         class: 'align-middle text-center created_at',
                         orderable: false,
-                        searchable: false
                     },
                     {
                         searchable: false,
@@ -307,49 +304,42 @@
                         name: 'added_by_admin',
                         class: 'align-middle text-center added_by_admin',
                         orderable: false,
-                        searchable: false
                     },
                     {
                         data: 'approved1_by_admin',
                         name: 'approved1_by_admin',
                         class: 'align-middle text-center approved1_by_admin',
                         orderable: false,
-                        searchable: false
                     },
                     {
                         data: 'approval1_at',
                         name: 'approval1_at',
                         class: 'align-middle text-center approval1_at',
                         orderable: false,
-                        searchable: false
                     },
                     {
                         data: 'approval1_status',
                         name: 'approval1_status',
                         class: 'align-middle text-center approval1_status',
                         orderable: false,
-                        searchable: false
                     },
                     {
                         data: 'approved2_by_admin',
                         name: 'approved2_by_admin',
                         class: 'align-middle text-center approved2_by_admin',
                         orderable: false,
-                        searchable: false
                     },
                     {
                         data: 'approval2_at',
                         name: 'approval2_at',
                         class: 'align-middle text-center approval2_at',
                         orderable: false,
-                        searchable: false
                     },
                     {
                         data: 'approval2_status',
                         name: 'approval2_status',
                         class: 'align-middle text-center approval2_status',
                         orderable: false,
-                        searchable: false
                     },
                     {
                         data: 'action',
@@ -374,16 +364,74 @@
                         '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon =
                         '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status_select =
-                        '<select name="status_select" id="status_select" class="status_select form-control">' +
-                        '<option value="1">Enabled</option>' +
-                        '<option value="0">Disabled</option>' +
-                        '</select>';
+
+                    var approvalStatuses =
+                        '<select name="approvalStatuses" class="select2 form-control approvalStatuses"></select>';
+
+                    var baseRateTypeStatuses =
+                        '<select name="base_rate_type_status" id="base_rate_type_status" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
+
+                        if($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.file_view'))
+                        {
+                            $(td).appendTo($(search));
+                        }
+                        else if ($(header).is('.rate_type_id')) {
+                            $(baseRateTypeStatuses).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
+                        }
+                        else if ($(header).is('.approval1_status') || $(header).is('.approval2_status')) {
+                            $(approvalStatuses).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
+                        }
+                        else
+                        {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+    
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+
                     });
+
+                    //For Approval Statuses
+                    var data = $.map({!! $baseRateRevisionApprovalStatuses !!}, function(obj) {
+                            obj.id = obj.id;
+                            obj.text = obj.name;
+                            return obj;
+                        });
+
+                    $(".approvalStatuses").prepend('<option value="" selected></option>').select2({
+                            data: data,
+                            placeholder: "Select Status",
+                            width: '100%',
+                            containerCssClass: 'select-xs',
+                            dropdownCssClass: 'form-control-sm p-0'
+                        });
+
+                    //for Base Rate Type Status
+                    var baseRateTypes = $.map({!! $baseRateTypes !!}, function(obj) {
+                            obj.id = obj.id;
+                            obj.text = obj.name;
+                            return obj;
+                        });
+
+                    $("#base_rate_type_status").prepend('<option value="" selected></option>').select2({
+                            data: baseRateTypes,
+                            placeholder: "Select Rate Type",
+                            width: '100%',
+                            containerCssClass: 'select-xs',
+                            dropdownCssClass: 'form-control-sm p-0'
+                        });
+                    
                     this.api().table().columns.adjust();
                 }
             });
@@ -391,7 +439,7 @@
             // shipperModal datatable function
             $('#datatable').on('click', '.fileViewButton', function() {
                     var baseRateRevisionId = table.row($(this).parents('tr')).data().id;
-                    var rateType = table.row($(this).parents('tr')).data().rate_type;
+                    var rateType = table.row($(this).parents('tr')).data().rate_type_id;
 
                     $('#shipperModal .modal-body').html('');
                     $('#shipperModal').modal('show');
