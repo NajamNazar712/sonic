@@ -15,15 +15,15 @@ class CreateTraxBookingPiecesTable extends Migration
     {
         Schema::create('trax_booking_pieces', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('booking_id');
+            $table->integer('booking_id')->index();
             $table->bigInteger('piece_cn_number');
 //            $table->integer('from_pieces')->nullable();
 //            $table->integer('to_pieces')->nullable();
-            $table->integer('scan_rider_id')->nullable();
+            $table->integer('scan_rider_id')->nullable()->index();
             $table->integer('quantity')->nullable();
             $table->tinyInteger('user_type')->nullable(); // 1 - Admin, 2 - Rider, 0 -> shipper
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->integer('created_by')->nullable()->index();
+            $table->integer('updated_by')->nullable()->index();
             $table->integer('status')->default(1);
             $table->timestamps();
         });

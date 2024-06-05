@@ -20,10 +20,10 @@ class CreateTraxBookingBatchesTable extends Migration
             $table->integer('complete_bookings')->default(0);
             $table->integer('pending_bookings')->default(0);
             $table->date('batch_date')->index();
-            $table->integer('status_id')->default(1);
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
-            $table->integer('assign_by')->nullable();
+            $table->integer('status_id')->default(1)->index();
+            $table->integer('created_by')->nullable()->index();
+            $table->integer('updated_by')->nullable()->index();
+            $table->integer('assign_by')->nullable()->index();
             $table->softDeletes();
             $table->timestamps();
         });

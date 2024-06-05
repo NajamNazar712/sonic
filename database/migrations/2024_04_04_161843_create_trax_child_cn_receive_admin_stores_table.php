@@ -20,10 +20,10 @@ class CreateTraxChildCnReceiveAdminStoresTable extends Migration
             $table->bigInteger('cn_from');
             $table->bigInteger('cn_to');
             $table->integer('quantity')->nullable();
-            $table->date('receive_date');
+            $table->date('receive_date')->index();
             $table->smallInteger('status')->default(1);
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->integer('created_by')->nullable()->index();
+            $table->integer('updated_by')->nullable()->index();
             $table->softDeletes();
             $table->timestamps();
         });

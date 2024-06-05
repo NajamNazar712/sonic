@@ -15,14 +15,14 @@ class CreateTraxBookingBatchDetailsTable extends Migration
     {
         Schema::create('trax_booking_batch_details', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('batch_id');
-            $table->integer('booking_id');
-            $table->integer('user_id')->nullable();
-            $table->integer('status_id')->default(1);
+            $table->integer('batch_id')->index();
+            $table->integer('booking_id')->index();
+            $table->integer('user_id')->nullable()->index();
+            $table->integer('status_id')->default(1)->index();
             $table->timestamp('start_time')->nullable();
             $table->timestamp('end_time')->nullable();
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->integer('created_by')->nullable()->index();
+            $table->integer('updated_by')->nullable()->index();
             $table->softDeletes();
             $table->timestamps();
         });

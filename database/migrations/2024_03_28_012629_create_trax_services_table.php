@@ -17,11 +17,11 @@ class CreateTraxServicesTable extends Migration
             $table->increments('id');
             $table->string('service_code')->nullable();
             $table->string('service_name')->nullable();
-            $table->integer('product_id');
-            $table->integer('shipping_mode_id')->nullable();
+            $table->integer('product_id')->index();
+            $table->integer('shipping_mode_id')->nullable()->index();
             $table->integer('status')->default(1);
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->integer('created_by')->nullable()->index();
+            $table->integer('updated_by')->nullable()->index();
             $table->softDeletes();
             $table->timestamps();
         });

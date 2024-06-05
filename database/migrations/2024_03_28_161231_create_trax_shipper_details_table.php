@@ -15,16 +15,16 @@ class CreateTraxShipperDetailsTable extends Migration
     {
         Schema::create('trax_shipper_details', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
+            $table->integer('user_id')->index();
 //            $table->integer('trax_product_id');
-            $table->integer('trax_parent_product_id')->nullable();
-            $table->integer('trax_service_id')->nullable();
-            $table->integer('rider_id')->nullable();
-            $table->integer('route_id')->nullable();
+            $table->integer('trax_parent_product_id')->nullable()->index();
+            $table->integer('trax_service_id')->nullable()->index();
+            $table->integer('rider_id')->nullable()->index();
+            $table->integer('route_id')->nullable()->index();
             $table->integer('piece_setting_id')->nullable();
             $table->integer('status')->default(1);
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->integer('created_by')->nullable()->index();
+            $table->integer('updated_by')->nullable()->index();
             $table->softDeletes();
             $table->timestamps();
         });

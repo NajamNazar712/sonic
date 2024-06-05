@@ -17,15 +17,15 @@ class CreateTraxCnIssueAreaStoresTable extends Migration
             $table->increments('id');
             $table->string('company_code')->nullable();
             $table->string('area_code')->nullable();
-            $table->integer('product_id')->nullable();
+            $table->integer('product_id')->index()->nullable();
             $table->bigInteger('cn_from');
             $table->bigInteger('cn_to');
             $table->integer('quantity')->nullable();
             $table->smallInteger('item_type')->nullable();
             $table->smallInteger('status')->default(1);
             $table->date('issue_date');
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->integer('created_by')->index()->nullable();
+            $table->integer('updated_by')->index()->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

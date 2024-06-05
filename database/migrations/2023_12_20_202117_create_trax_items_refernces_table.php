@@ -15,7 +15,7 @@ class CreateTraxItemsReferncesTable extends Migration
     {
         Schema::create('trax_item_refernces', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('booking_id')->nullable();
+            $table->integer('booking_id')->index()->nullable();
             $table->string('item_code')->nullable();
             $table->decimal('width')->nullable();
             $table->decimal('height')->nullable();
@@ -23,8 +23,8 @@ class CreateTraxItemsReferncesTable extends Migration
             $table->decimal('weight')->nullable();
             $table->integer('no_piece')->nullable();
             $table->tinyInteger('user_type')->nullable(); // 1 - Admin, 2 - Rider, 0 -> shipper
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->integer('created_by')->index()->nullable();
+            $table->integer('updated_by')->index()->nullable();
             $table->timestamps();
         });
     }

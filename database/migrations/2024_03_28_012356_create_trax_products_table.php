@@ -17,11 +17,11 @@ class CreateTraxProductsTable extends Migration
             $table->increments('id');
             $table->string('product_code')->nullable();
             $table->string('product_name');
-            $table->integer('parent_id');
-            $table->integer('sub_segment_id')->nullable();
+            $table->integer('parent_id')->index();
+            $table->integer('sub_segment_id')->nullable()->index();
             $table->integer('status')->default(1);
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->integer('created_by')->nullable()->index();
+            $table->integer('updated_by')->nullable()->index();
             $table->softDeletes();
             $table->timestamps();
         });

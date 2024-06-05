@@ -15,12 +15,12 @@ class CreateTraxRiderChildCnDetailsTable extends Migration
     {
         Schema::create('trax_rider_child_cn_details', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('child_cn_issue_id')->nullable();
+            $table->integer('child_cn_issue_id')->nullable()->index();
             $table->integer('cn_number')->nullable();
             $table->tinyInteger('is_used')->default(0);
             $table->tinyInteger('is_hold')->default(0);
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->integer('created_by')->nullable()->index();
+            $table->integer('updated_by')->nullable()->index();
             $table->softDeletes();
             $table->timestamps();
         });
