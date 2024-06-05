@@ -267,7 +267,11 @@ class DeliveryController extends Controller
                          ->where('adm.role_id', '<>', 1);
                 });
             })
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_last_location', 'ssjal_last_location.shipment_scanning_journey_id', '=', 'ssj_last_location.id')
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_last_location', function($join){
+                $join->on('ssjal_last_location.shipment_scanning_journey_id', '=', 'ssj_last_location.id')
+                     ->where('ssjal_last_location.hub_id', '=', DB::raw('journey.city_id'))
+                     ->where('ssjal_last_location.shipment_id', '=', DB::raw('journey.shipment_id'));
+            })                 
             ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
             ->select(
