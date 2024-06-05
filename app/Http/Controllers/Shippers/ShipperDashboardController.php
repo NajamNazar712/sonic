@@ -677,6 +677,15 @@ class ShipperDashboardController extends Controller
             $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+
+        if ($phone_number = $request->get('phone_number')) {
+            $shipments->where('shipments.consignee_phone_number_1', $phone_number);
+        }
+
+
         Log::channel('cronJobLog')->info('s ' .$shipments->toSql());
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
@@ -804,13 +813,6 @@ class ShipperDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             });
-            if ($tracking_numbers = $request->get('tracking_numbers')) {
-                $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-            }
-
-            if ($phone_number = $request->get('phone_number')) {
-                $datatable->where('shipments.consignee_phone_number_1', $phone_number);
-            }
 
             return $datatable->make(true);
     }
