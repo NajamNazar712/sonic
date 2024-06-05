@@ -13869,7 +13869,7 @@ class AdminReportsController extends Controller
         $from = '';
         $to = '';
 
-        $from = Carbon::parse($search_date)->subMonths(6)->setTime(21, 00, 00)->toDateTimeString();
+        $from = Carbon::parse($search_date)->subMonths(8)->setTime(21, 00, 00)->toDateTimeString();
         $to = Carbon::parse($search_date)->setTime(8, 59, 59)->toDateTimeString();
 
         $regions = DB::connection('reports_2')->table('regions')->select('id','name')->get();
@@ -13901,13 +13901,13 @@ class AdminReportsController extends Controller
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
         $re_attempt_and_intercept_status = array(52,55);
 
-        $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subMonths(6)->setTime(21, 00, 00);  //last 6 month
+        $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subMonths(8)->setTime(21, 00, 00);  //last 6 month
         $re_attempt_and_intercept_endDate = Carbon::parse($search_date)->subDay(1)->setTime(20, 59, 59);
 
-        $other_pending_status_startDate = Carbon::parse($search_date)->subMonths(6)->setTime(9, 00, 00); // last 6 month
+        $other_pending_status_startDate = Carbon::parse($search_date)->subMonths(8)->setTime(9, 00, 00); // last 6 month
         $other_pending_status_endDate = Carbon::parse($search_date)->setTime(8, 59, 59);
 
-        $other_statuses_startDate = Carbon::parse($search_date)->subMonths(6)->startOfDay()->toDateTimeString(); // last 6 month
+        $other_statuses_startDate = Carbon::parse($search_date)->subMonths(8)->startOfDay()->toDateTimeString(); // last 6 month
         $other_statuses_endDate = Carbon::parse($search_date)->subDay(1)->endOfDay()->toDateTimeString();
 
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
@@ -13951,7 +13951,8 @@ class AdminReportsController extends Controller
                 
                 $data = [];
                 $data['zone'] = $zone->name;
-                $data['ready_for_delivery'] = 0;
+                $data['ready_for_delivery_before_ofd'] = 0;
+                $data['ready_for_delivery_after_ofd'] = 0;
                 $data['out_for_delivery'] = 0;
                 $data['out_for_delivery_percentage'] = 0;
                 $data['delivery_note'] = 0;
@@ -13982,11 +13983,11 @@ class AdminReportsController extends Controller
 
                         if(in_array($shipment_data->consignee_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate,$re_attempt_and_intercept_endDate))
                         {
-                            $data['ready_for_delivery'] += 1;
+                            $data['ready_for_delivery_before_ofd'] += 1;
                         }
                         else if(in_array($shipment_data->consignee_status_id,$pending_status) && $created_date->between($other_pending_status_startDate,$other_pending_status_endDate))
                         {
-                            $data['ready_for_delivery'] += 1;
+                            $data['ready_for_delivery_before_ofd'] += 1;
                         }
 
                     }
@@ -14006,12 +14007,13 @@ class AdminReportsController extends Controller
                         // $remaining_cash_after_lost = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->whereIn('cash_collection_status',[2,3])->sum('received_cod_amount');
 
                         $data['out_for_delivery'] = $rds_value->ofd_shipments;
-                        $data['out_for_delivery_percentage'] = $data['ready_for_delivery'] ? round(($data['out_for_delivery'] / $data['ready_for_delivery']) * 100,2) : 0;
                         $data['delivery_note'] = $rds_value->dn_no_count;
                         $data['pending_deliveries'] = $rds_value->ofd_shipments - $rds_value->delivered_shipments;
                         $data['pending_deliveries_percentage'] =round(($data['pending_deliveries'] / $rds_value->ofd_shipments) * 100,2) ?? 0;
                         $data['delivered'] = $rds_value->delivered_shipments;
                         $data['delivered_percentage'] = round(($rds_value->delivered_shipments / $rds_value->ofd_shipments) * 100,2);
+                        $data['ready_for_delivery_after_ofd'] = $data['ready_for_delivery_before_ofd'] + $rds_value->ofd_shipments;
+                        $data['out_for_delivery_percentage'] = $data['ready_for_delivery_after_ofd'] ? round(($data['out_for_delivery'] / $data['ready_for_delivery_after_ofd']) * 100,2) : 0;
 
                         $data['delivered_cod_amount'] = $total_cod_received_amount ?? 0;
                         $data['cod_submitted_via_konnect'] = $hbl_connect_amount;

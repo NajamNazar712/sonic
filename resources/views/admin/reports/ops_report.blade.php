@@ -214,7 +214,7 @@
                                     $.each(region, function(zone_index, z) {
                                         html += '<tr>';
                                             html += '<td> ' + z.zone + ' </td>';
-                                            html += '<td> ' + z.ready_for_delivery + ' </td>';
+                                            html += '<td> ' + z.ready_for_delivery_after_ofd + ' </td>';
                                             html += '<td> ' + z.out_for_delivery + ' </td>';
                                             html += '<td> ' + z.out_for_delivery_percentage + ' </td>';
                                             html += '<td> ' + z.delivery_note + ' </td>';
