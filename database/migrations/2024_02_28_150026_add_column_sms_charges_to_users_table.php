@@ -14,7 +14,6 @@ class AddColumnSmsChargesToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->tinyInteger('sms_charges_type_id')->nullable()->default(NULL);
             $table->double('sms_charges')->nullable()->default(NULL);
             $table->boolean('sms_charges_status')->default(0);
         });
@@ -28,7 +27,6 @@ class AddColumnSmsChargesToUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('sms_charges_type_id');
             $table->dropColumn('sms_charges');
             $table->dropColumn('sms_charges_status');
         });

@@ -71,7 +71,7 @@
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
                                         {{-- <th class="border-primary border-darken-1">ESO Tagged</th> --}}
-                                        <th class="border-primary border-darken-1">SMS Charges Type</th>
+                                        <th class="border-primary border-darken-1">SMS charges per shipment</th>
                                         <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
@@ -1116,7 +1116,7 @@
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
                         // head.push('ESO Tagged');
-                        head.push('SMS Charges Type');
+                        head.push('SMS charges per shipment');
                         head.push('Rate Status');
                         head.push('Rates Status Remarks');
                         head.push('Rates Added By');
@@ -1162,7 +1162,7 @@
                             row.push(values.kam);
                             row.push(values.ref+' - ' + values.rider_id);
                             // row.push(values.eso);
-                            row.push(values.sms_charges_type_id);
+                            row.push(values.sms_charges);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);
                             row.push(values.rates_added_by);
@@ -1640,7 +1640,7 @@
                         return row.ref +' - '+ row.rider_id;
                 }},
                 // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
-                {data: 'sms_charges_type_id', name: 'users.sms_charges_type_id', class: 'align-middle sms_charges_type_id'},
+                {data: 'sms_charges', name: 'users.sms_charges', class: 'align-middle sms_charges'},
                 {data: 'rate_status', name: 'users.rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
@@ -1695,11 +1695,6 @@
                     '<option value="2">Approved</option>' +
                     '<option value="3">Rejected</option>' +
                     '</select>';
-                var sms_charges_select = '<select name="sms_charges_select" id="sms_charges_select" class="select2 form-control">' +
-                    '<option value="0">None</option>' +
-                    '<option value="1">Fixed</option>' +
-                    '<option value="2">Per SMS</option>' +
-                    '</select>';
                 var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
                 var payment_cycle_select =
                         '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
@@ -1737,13 +1732,7 @@
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                    }else if($(header).is('.sms_charges_type_id')){
-                        $(sms_charges_select).appendTo($(search))
-                            .on( 'change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            } ).wrap(td);
-                    }
-                    else {
+                    } else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
                         }).wrap(td).after(icon);

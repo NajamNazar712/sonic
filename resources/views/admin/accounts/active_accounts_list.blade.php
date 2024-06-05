@@ -75,7 +75,7 @@
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
                                         {{-- <th class="border-primary border-darken-1">ESO Tagged</th> --}}
-                                        <th class="border-primary border-darken-1">SMS Charges Type</th>
+                                        <th class="border-primary border-darken-1">SMS charges per shipment</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
                                         <th class="border-primary border-darken-1">Rate Added At</th>
@@ -1084,7 +1084,7 @@ function checkboxStatus() {
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
                         // head.push('ESO Tagged');
-                        head.push('SMS Charges Type');
+                        head.push('SMS charges per shipment');
                         head.push('Request Date');
                         head.push('Rates Added By');
                         head.push('Rates Added At');
@@ -1138,7 +1138,7 @@ function checkboxStatus() {
                             row.push(values.kam);
                             row.push(values.ref);
                             // row.push(values.eso);
-                            row.push(values.sms_charges_type_id);
+                            row.push(values.sms_charges);
                             row.push(values.created_at);
                             row.push(values.added_by);
                             row.push(values.rates_added_at);
@@ -1758,7 +1758,7 @@ function checkboxStatus() {
                 {data: 'tagged_poc', name: 'poc.name', class: 'align-middle tagged_poc'},
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
-                {data: 'sms_charges_type_id', name: 'users.sms_charges_type_id', class: 'align-middle sms_charges_type_id'},
+                {data: 'sms_charges', name: 'users.sms_charges', class: 'align-middle sms_charges'},
                 // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
@@ -1820,11 +1820,6 @@ function checkboxStatus() {
                     '<option value="2">Approved</option>' +
                     '<option value="3">Rejected</option>' +
                     '</select>';
-                var sms_charges_select = '<select name="sms_charges_select" id="sms_charges_select" class="select2 form-control">' +
-                    '<option value="0">None</option>' +
-                    '<option value="1">Fixed</option>' +
-                    '<option value="2">Per SMS</option>' +
-                    '</select>';
                 var intl_drop_select = '<select name="intl_rate_status_select" id="intl_rate_status_select" class="select2 form-control">' +
                     '<option value="1">Approved</option>' +
                     '<option value="2">Requested</option>' +
@@ -1872,13 +1867,7 @@ function checkboxStatus() {
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                    }else if($(header).is('.sms_charges_type_id')){
-                        $(sms_charges_select).appendTo($(search))
-                            .on( 'change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            } ).wrap(td);
-                    }
-                    else {
+                    } else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
                         }).wrap(td).after(icon);
