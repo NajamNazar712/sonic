@@ -106,6 +106,7 @@ use App\Http\Models\Segment;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
@@ -675,6 +676,8 @@ class ShipperDashboardController extends Controller
             $to = $request->get('booking_to_date');
             $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
+
+        Log::channel('cronJobLog')->info('s ' .$shipments->toSql());
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
