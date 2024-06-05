@@ -598,11 +598,21 @@
                                 shipment += '<td><strong>Name</strong></td>';
                                 // shipment += '<td>' + details.shipper.name + '</td>';
 
-                                if ($.inArray(details.shipper.id, details.shipper.assigned))
-                                {
-                                    shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
-                                } 
-                                else {
+                                var user_id = details.shipper.id;
+                                var global_settings_userId = details.shipper.assigned;
+                                if (user_id && global_settings_userId && global_settings_userId.length > 0) {
+                                    var userIdArray = global_settings_userId[0].split(',');
+
+                                    var isMatch = userIdArray.some(function(userIdString) {
+                                        return userIdString === user_id.toString();
+                                    });
+
+                                    if (isMatch) {
+                                        shipment += '<td>' + details.shipper.name + '</td>';
+                                    } else {
+                                        shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
+                                    }
+                                } else {
                                     shipment += '<td>' + details.shipper.name + '</td>';
                                 }
 
@@ -645,18 +655,18 @@
                                 shipment += '<td><strong>Person of Contact</strong></td>';
                                 shipment += '<td>' + details.pickup.person_of_contact + '</td>';
 
-                                if ($.inArray(details.shipper.id, details.shipper.assigned))
-                                {
-                                    shipment += '<td><strong>Brand Name</strong></td>';
-                                    if (details.pickup.pickup_brand_name) {
-                                        shipment += '<td>' + details.pickup.pickup_brand_name + '</td>';
-                                    } else {
-                                        shipment += '<td></td>'
-                                    }
-                                } else {
+                                if (isMatch){
                                     shipment += '<td><strong>Vendor</strong></td>';
                                     if (details.pickup.vendor) {
                                         shipment += '<td>' + details.pickup.vendor + '</td>';
+                                    } else {
+                                        shipment += '<td></td>'
+                                    }
+                                } 
+                                else {
+                                    shipment += '<td><strong>Brand Name</strong></td>';
+                                    if (details.pickup.pickup_brand_name) {
+                                        shipment += '<td>' + details.pickup.pickup_brand_name + '</td>';
                                     } else {
                                         shipment += '<td></td>'
                                     }
