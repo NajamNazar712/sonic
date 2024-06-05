@@ -29,7 +29,7 @@ class PermissionsAndActivityTrailKAMBulkTaggingSeeder extends Seeder
 
 
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Shippers > Accounts > KAM Bulk Tagging', 'url'=>'accounts.kam_bulk_tagging.index', 'permission_id' => 991),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Shippers > Accounts > KAM Bulk Tagging', 'url'=>'admin.accounts.kam_bulk_tagging.index', 'permission_id' => 991),
         ));
     }
 }
