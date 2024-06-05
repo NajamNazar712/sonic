@@ -120,7 +120,7 @@ class ReturnV2Controller extends Controller
 
             if($admin->agent_caller_type == null)
             {
-                return response()->json(['status' => 7, 'error' => 'Contact Your Admin']);
+                return response()->json(['status' => 7, 'error' => 'Contact Your Admin For Assigning Agent Type!']);
             }
 
             $employee = Employee::where('phone_number', $admin->phone_number)->where('staff_category_id', 3)->where('status_id', '!=', 2);
