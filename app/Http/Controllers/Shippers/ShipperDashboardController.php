@@ -627,8 +627,8 @@ class ShipperDashboardController extends Controller
          }
 
 
-        $shipments = DB::connection($connection)->table('shipments')
-            ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
+        $shipments = Shipment::
+            leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
