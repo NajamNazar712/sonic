@@ -3813,10 +3813,18 @@ class AdminCargoManifestController extends Controller
                     }
                     $details = array();
 
+                    $bag_return_type = '';
+                    if ($bag->type == 1){
+                        $bag_return_type = "Normal";
+                    } elseif ($bag->type == 2) {
+                        $bag_return_type = "Return";
+                    }
+
                     $details['misroute'] = $misroute;
                     $details['bag_id'] = $bag->id;
                     $details['bag_number'] = $request->bag_number;
                     $details['manifest_id'] = str_pad($cargo_bag->id, 6, '0', STR_PAD_LEFT);
+                    $details['bag_type'] = $bag_return_type;
                     $details['origin'] = $cargo_bag->origin_hub->name;
                     $details['destination'] = $cargo_bag->destination_hub->name;
                     $details['last_junction'] = $last_junction;
@@ -3861,10 +3869,18 @@ class AdminCargoManifestController extends Controller
 
                     $details = array();
 
+                    $bag_return_type = '';
+                    if ($bag->type == 1){
+                        $bag_return_type = "Normal";
+                    } elseif ($bag->type == 2) {
+                        $bag_return_type = "Return";
+                    }
+
                     $details['misroute'] = $misroute;
                     $details['bag_id'] = $bag->id;
                     $details['bag_number'] = $request->bag_number;
                     $details['manifest_id'] = 'Without Manifest';
+                    $details['bag_type'] = $bag_return_type;
                     $details['origin'] = $bag_origin . ' (Without Manifest)';
                     $details['destination'] = $bag_dest . ' (Without Manifest)';
                     $details['last_junction'] = $last_junction;

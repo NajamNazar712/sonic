@@ -9889,7 +9889,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('riders as scun_r', 'scun_r.id', '=', 'scu.user_id')
             ->leftjoin('admins as p', 'p.id', '=', 'st.poc')
             ->leftjoin('admins as k', 'k.id', '=', 'st.kam')
-            ->leftjoin('admins as r', 'r.id', '=', 'st.ref')
+            ->leftjoin('riders as r', 'r.id', '=', 'st.ref')
             ->leftjoin('admins as e', 'e.id', '=', 'st.eso')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')

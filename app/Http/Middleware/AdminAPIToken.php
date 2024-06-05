@@ -25,42 +25,36 @@ class AdminAPIToken
 
             if ($admin->exists()) {
                 $admin = $admin->first();
-//dd($admin);
+                //dd($admin);
                 if ($admin->status) {
 
-                    $employee = Employee::where('trax_id',$admin->trax_id)->whereNotNull('trax_id');
-                    if($employee->exists())
-                    {
+                    $employee = Employee::where('trax_id', $admin->trax_id)->whereNotNull('trax_id');
+                    if ($employee->exists()) {
 
                         $employee = $employee->first();
                         $admin_hubs = AdminHub::where('admin_id', $admin->id)->pluck('hub_id')->toArray();
-                        $request->request->add(['admin_id' => $admin->id,'admin_role_id'=>$admin->role_id,'trax_id'=>$admin->trax_id,'admin_employee' => $employee->id, 'admin_hubs' => $admin_hubs]);
+                        $request->request->add(['admin_id' => $admin->id, 'admin_role_id' => $admin->role_id, 'trax_id' => $admin->trax_id, 'admin_employee' => $employee->id, 'admin_hubs' => $admin_hubs]);
                         return $next($request);
-                    } else{
+                    } else {
                         return response()->json([
                             'status' => 1,
                             'message' => 'Employee Not Found.'
                         ]);
                     }
+                } else {
 
-
-                }
-                else {
-                    
                     return response()->json([
                         'status' => 2,
                         'message' => 'Your Account is not Activate.'
                     ]);
                 }
-            }
-            else {
+            } else {
                 return response()->json([
                     'status' => 1,
                     'message' => 'Invalid API Token (Authorization).'
                 ]);
             }
-        }
-        else {
+        } else {
             return response()->json([
                 'status' => 1,
                 'message' => 'API Token (Authorization) is Missing.'
