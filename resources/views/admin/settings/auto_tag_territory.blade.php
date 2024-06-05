@@ -169,6 +169,21 @@
                 $('#territory_id').val('').trigger('change.select2');
                 
             });
+
+            function toggleLeadUserCheckbox() {
+                var disableLeadUser = !$('#agent_id').val() || !$('#city_id').val() || !$('#territory_id').val();
+                $('#is_lead_user').prop('disabled', disableLeadUser);
+            }
+
+            $('#AssignAgentModal').on('show.bs.modal', function() {
+                toggleLeadUserCheckbox();
+            });
+
+            $('#agent_id, #city_id, #territory_id').change(function() {
+                toggleLeadUserCheckbox();
+            });
+
+
             $('#territory_select').css('display','none');
             $('#agent_select').css('display','none');
 
@@ -245,13 +260,12 @@
                         }
                     });
 
-                    $('#territory_id').unbind('change').change(function() {
+                    $('#territory_id').change(function() {
                         if ($('#is_lead_user').is(':checked')) {
                             var selectedTerritoryId = $(this).val();
                             var filteredTerritories = remaining_territory_obj.filter(function(item) {
                                 return item.id != selectedTerritoryId;
                             });
-
                             $('#remaining_territory_id').empty().prepend('<option selected></option>').select2({
                                 width: '100%',
                                 placeholder: "Select Territory",

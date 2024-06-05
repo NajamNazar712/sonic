@@ -7431,7 +7431,7 @@ class GlobalSettingsController extends Controller
     {
         $auto_tagging = AutoTagTerritory::find($request->auto_tagging_id);
         $territory_ids = $request->territory_id;
-        // $existing_territory_ids = $auto_tagging->territory()->pluck('id')->toArray();
+        $first_territory = AutoTagTerritory::where('admin_id', $request->agent_id)->first();
         $is_lead_user = $request->has('is_lead_user') ? 1 : 0;
     
         // Delete existing records
