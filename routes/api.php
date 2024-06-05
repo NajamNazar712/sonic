@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 */
 
 
-Route::name('api.')->group(function () {
+    Route::name('api.')->group(function () {
 
 
     Route::post('shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
@@ -364,6 +364,7 @@ Route::name('api.')->group(function () {
                 });
             });
 
+            //logistic api endpoints
             Route::prefix('v1')->name('v1.')->group(function (){
 
                 Route::prefix('logistic')->name('logistic.')->group(function (){
@@ -377,7 +378,7 @@ Route::name('api.')->group(function () {
 
         });
 
-        });
+
     });
 
     Route::prefix('admin')->name('admin.')->group(function () {
