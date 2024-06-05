@@ -2,30 +2,32 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\ModulePermission;
-use App\Http\Models\EmployeeShift;
-use App\Http\Models\HR\Employee;
-use App\Http\Models\HR\EmployeeBloodGroup;
-use App\Http\Models\HR\EmployeeDesignation;
-use App\Http\Models\ReportingLocation;
-use App\Http\Models\Rider;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\City;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AdminHub;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\AdminRoleModulePermission;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\Module;
-
-use Illuminate\Support\Facades\Auth;
-use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use App\Http\Models\City;
+use App\Http\Models\Rider;
+use App\UserLostShipmentHub;
+use Illuminate\Http\Request;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\HR\Employee;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\Admin\Module;
+use App\Http\Models\EmployeeShift;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Models\BusinessCategory;
+use App\Http\Models\ReportingLocation;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\HR\EmployeeBloodGroup;
+
+use App\Http\Models\Admin\ModulePermission;
+use App\Http\Models\HR\EmployeeDesignation;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\AdminRoleModulePermission;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Controllers\Admins\AdminHumanResourseController;
 
 class UserManagementController extends Controller
 {
@@ -98,7 +100,7 @@ class UserManagementController extends Controller
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'admins.trax_id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'emp.blood_group')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','ed.name as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person');
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','ed.name as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person','admins.management_user as management_user');
 
         if (!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
@@ -109,7 +111,17 @@ class UserManagementController extends Controller
         if ($search_roles = $request->get('search_roles')) {
             $admin_roles = $users->whereIn('ar.id', $search_roles);
         }
+        if ($request->get('filter_management_users') == '1') {
+            $users->where('admins.management_user', 1);
+        }
         $datatables = Datatables::of($users)
+            ->setRowAttr([
+                'class' => function ($users) {
+                    if ($users->management_user == 1) {
+                        return "is_management_user";
+                    }
+                },
+            ])
             ->editColumn('role', function ($user) {
                 return $user->role . ' - ' . $user->department;
             })
@@ -133,6 +145,8 @@ class UserManagementController extends Controller
 
                     $rejoin_button = '<button type="button" class="dropdown-item rejoin" data-target-id="' . $user->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Rejoin Admin</div></button>';
 
+                    $lost_hub_user_shipment_button = '<button type="button" class="dropdown-item lost_hub_user_shipment" data-target-id="' . $user->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">User Lost Shipment Hub</div></button>';
+
                     $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -155,6 +169,9 @@ class UserManagementController extends Controller
                         $dropdown .= $phone_edit_button;
                     }
 
+                    if (session('role_id') == 1 || in_array(979, session('permissions'))) {
+                        $dropdown .= $lost_hub_user_shipment_button;
+                    }
 
                     if (session('role_id') == 1 || in_array(620, session('permissions'))) {
                         if ($user->status == 0 && $user->first_inactive == 1) {
@@ -1175,7 +1192,39 @@ class UserManagementController extends Controller
 
     }
 
+    public function lost_hub_user_shipment(Request $request){
 
+        UserLostShipmentHub::where('admin_id', $request->admin_id)->delete();
+        foreach ($request->select_lost_hub_user_shipment as $user_hub) {
+            UserLostShipmentHub::create([
+                'admin_id' => $request->admin_id,
+                'hub_id' => $user_hub,
+            ]);
+        }
 
+        return redirect()->back()->with(['success' => 'Hub has been updated!']);
+    }
+
+    public function get_lost_hub_user_shipment(Request $request) {
+        $userLostShipments = UserLostShipmentHub::where('admin_id', $request->admin_id)->get()->pluck('hub_id')->toArray();
+        return response()->json(['success' => true, 'data' => $userLostShipments]);
+    }
+    
+    public function add_management_users(Request $request)
+    {
+        $admins = $request->userIDS;
+
+        foreach($admins as $admin){
+            $admin = Admin::where('id', $admin);
+            if($admin->exists()){
+                $admin = $admin->first();
+                $admin->management_user = 1;
+                $admin->save();    
+            }
+        }
+
+        return response()->json(['status' => 1, 'success' => 'Added Successfully!']);
+
+    }
 
 }

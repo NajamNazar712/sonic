@@ -50,6 +50,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\CargoManifest\IssueSackBagOrigin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Yajra\Datatables\Datatables;
 use SnappyPDF;
 
@@ -3785,10 +3786,18 @@ class AdminCargoManifestController extends Controller
                     }
                     $details = array();
 
+                    $bag_return_type = '';
+                    if ($bag->type == 1){
+                        $bag_return_type = "Normal";
+                    } elseif ($bag->type == 2) {
+                        $bag_return_type = "Return";
+                    }
+
                     $details['misroute'] = $misroute;
                     $details['bag_id'] = $bag->id;
                     $details['bag_number'] = $request->bag_number;
                     $details['manifest_id'] = str_pad($cargo_bag->id, 6, '0', STR_PAD_LEFT);
+                    $details['bag_type'] = $bag_return_type;
                     $details['origin'] = $cargo_bag->origin_hub->name;
                     $details['destination'] = $cargo_bag->destination_hub->name;
                     $details['last_junction'] = $last_junction;
@@ -3833,10 +3842,18 @@ class AdminCargoManifestController extends Controller
 
                     $details = array();
 
+                    $bag_return_type = '';
+                    if ($bag->type == 1){
+                        $bag_return_type = "Normal";
+                    } elseif ($bag->type == 2) {
+                        $bag_return_type = "Return";
+                    }
+
                     $details['misroute'] = $misroute;
                     $details['bag_id'] = $bag->id;
                     $details['bag_number'] = $request->bag_number;
                     $details['manifest_id'] = 'Without Manifest';
+                    $details['bag_type'] = $bag_return_type;
                     $details['origin'] = $bag_origin . ' (Without Manifest)';
                     $details['destination'] = $bag_dest . ' (Without Manifest)';
                     $details['last_junction'] = $last_junction;
@@ -5885,8 +5902,10 @@ class AdminCargoManifestController extends Controller
         //        return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html]);
 
         // new code without restriction
+        Log::channel('cronJobLog')->info('cargo:check_start');
         try {
             DB::beginTransaction();
+            Log::channel('cronJobLog')->info('cargo:check_1');
 
         $shipment_status_array = [3, 11,21, 26, 32, 49,68];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
@@ -5903,23 +5922,27 @@ class AdminCargoManifestController extends Controller
         // dd($request->all(),session('hubs'),\auth()->id(),$admin_default_hubs);
         //todo : open box-work
         if (count($open_box_ids) > 0) {
-
-                foreach ($shipment_ids as $index => $shipment) {
+                $shipment_details = ShipmentDetail::whereIn('shipment_id', $shipment_ids)->where('is_open', '=', 0)->get()->keyBy('shipment_id');
+                $shipment_detail_success_ids = [];
+                $shipment_data_success_ids = [];
+                foreach ($shipment_ids as $shipment) {
                     if (in_array($shipment, $open_box_ids)) {
-
-                        $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
+                        $shipment_detail = $shipment_details->get($shipment);
                         if ($shipment_detail) {
-                            $shipment_detail->is_open = 1;
-                            $shipment_detail->save();
+                            $shipment_detail_success_ids[] = $shipment_detail->id;
                         }
-
-                        $shipment_data = Shipment::find($shipment);
-                        $shipment_data->open_box = 1;
-                        $shipment_data->save();
-
+                        $shipment_data_success_ids[] = $shipment;
                         ShipmentOpenBoxJourneyController::add($shipment, 2, Auth::id());
                     }
                 }
+                if (!empty($shipment_detail_success_ids)) {
+                    ShipmentDetail::whereIn('id', $shipment_detail_success_ids)->update(['is_open' => 1]);
+                }
+
+                if (!empty($shipment_data_success_ids)) {
+                    Shipment::whereIn('id', $shipment_data_success_ids)->update(['open_box' => 1]);
+                }
+                Log::channel('cronJobLog')->info('cargo:check_2');
             }
             //todo : open box-work end
 
@@ -6194,6 +6217,7 @@ class AdminCargoManifestController extends Controller
                     }
                     //check previous bag received shipments end
                 }
+                Log::channel('cronJobLog')->info('cargo:check_3');
             }
             else {
                 foreach ($shipment_ids as $shipment_id) {
@@ -6413,6 +6437,7 @@ class AdminCargoManifestController extends Controller
                         }
                     }
                 }
+                Log::channel('cronJobLog')->info('cargo:check_4');
             }
 
             // received and short received
@@ -6462,12 +6487,12 @@ class AdminCargoManifestController extends Controller
                  $all_bag_ids = $all_bag_ids . ', ' .$bag->seal_number;
              }*/
             }
-
+            Log::channel('cronJobLog')->info('cargo:check_5');
             foreach ($bag_ids as $bag_id) {
-                $manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id); // if shipment in bag but bag not in manifest
-                if ($manifest_bag->exists()) {
+                $manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first();
+                if (!empty($manifest_bag)) {
                     $bag = CargoManifestBag::find($bag_id);
-                    $manifest_id = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first()->cargo_manifest_id; //
+                    $manifest_id = $manifest_bag->cargo_manifest_id; //
                     $manifest = CargoManifest::find($manifest_id); //
                     $manifest->received_bags = ManifestBag::where('cargo_manifest_id', $manifest_id)->where('status', 1)->count(); //
                     $short_received_bags = ManifestBag::where('cargo_manifest_id', $manifest_id)->where('status', 0)->count(); //
@@ -6483,7 +6508,7 @@ class AdminCargoManifestController extends Controller
                 }
             }
             // received and short received end
-
+            Log::channel('cronJobLog')->info('cargo:check_6');
             $bag_shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id', $bag_ids)->where('status', 0);
             if ($bag_shipments->exists()) {
                 $shipment_ids = $bag_shipments->pluck('shipment_id')->toArray();
@@ -6494,7 +6519,7 @@ class AdminCargoManifestController extends Controller
                     }
                 }
             }
-
+            Log::channel('cronJobLog')->info('cargo:check_7');
             //remove misrouted shipment ids from $short_received_shipments_array
             $exclude_from_short_received = Shipment::whereIn('tracking_number',$short_received_shipments_array)->whereIn('shipper_status_id',[11,68])->pluck('tracking_number')->toArray();
             $short_received_shipments_array = array_diff($short_received_shipments_array, $exclude_from_short_received);
@@ -6512,7 +6537,7 @@ class AdminCargoManifestController extends Controller
                 }
                 $sr_html .= "</ul>";
             }
-
+            Log::channel('cronJobLog')->info('cargo:check_8');
             if (count($shipments_already_marked_received_array) > 0) {
                 $already_received_shipments_html = "Following Shipments(s) are already marked as received or processed .<br><ul>";
                 foreach ($shipments_already_marked_received_array as $v) {
@@ -6520,7 +6545,7 @@ class AdminCargoManifestController extends Controller
                 }
                 $already_received_shipments_html .= "</ul>";
             }
-
+            Log::channel('cronJobLog')->info('cargo:check_9');
             if (count($shipment_ids_array) > 0) {
                 $received_html = "Following Shipments(s) are marked as received. .<br><ul>";
                 foreach ($shipment_ids_array as $v) {
@@ -6528,7 +6553,7 @@ class AdminCargoManifestController extends Controller
                 }
                 $received_html .= "</ul>";
             }
-
+            Log::channel('cronJobLog')->info('cargo:check_10');
             if (count($shipment_ids_array_misrouted) > 0) {
                 $misrouted_html = "Following Shipments(s) are marked as misrouted.<br><ul>";
                 foreach ($shipment_ids_array_misrouted as $m) {
@@ -6536,12 +6561,14 @@ class AdminCargoManifestController extends Controller
                 }
                 $misrouted_html .= "</ul>";
             }
-
+            Log::channel('cronJobLog')->info('cargo:check_11');
             DB::commit();
+            Log::channel('cronJobLog')->info('cargo:completed');
             //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
             return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html]);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::channel('cronJobLog')->error('cargo:failed'.json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
             return back()->with(['went_wrong' => 'Something Went Wrong']);
     }}
 

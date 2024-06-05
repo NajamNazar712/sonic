@@ -87,4 +87,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo('App\Http\Models\SaleTierTag','id','user_id');
     }
+
+    public function blacklist_reason()
+    {
+        return $this->belongsTo('App\BlockDisableReasonUser','blacklist_reason_1', 'id');
+    }
 }

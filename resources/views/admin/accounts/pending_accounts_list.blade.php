@@ -162,7 +162,7 @@
     </div>
 
     <div class="modal fade" id="duplicate_modal" data-backdrop="static" role="dialog" aria-labelledby="duplicate_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="bookings_modal_title">Duplicate Data</h4>
@@ -1065,8 +1065,6 @@
 								var sub_segment = data.sub_segments;
 
                                 $.each(data.sub_segments, function (index, sub_segment) {
-									console.log(index);	
-									console.log(sub_segment);	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -1094,7 +1092,6 @@
                     };
                 }
 
-                console.log(params);
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.accounts.pending.ajax') }}',
                     type: "POST",
@@ -1163,7 +1160,7 @@
                             row.push(values.admin_tag_id);
                             row.push(values.tagged_poc);
                             row.push(values.kam);
-                            row.push(values.ref);
+                            row.push(values.ref+' - ' + values.rider_id);
                             // row.push(values.eso);
                             row.push(values.sms_charges_type_id);
                             row.push(values.rate_status);
@@ -1221,7 +1218,6 @@
                         //    if(selected_rows != ''){
                               
                         //         $('#SegmentTagModal').modal('show');
-                        //         // console.log(selected_rows);
                         //         $('#segmentTagSubmit1').on('click',function () {
                         //             var assign = parseInt($('#saletag1').val());
                         //             swal({
@@ -1371,7 +1367,6 @@
                            if(selected_rows != ''){
                               
                                 $('#SalesTagModal1').modal('show');
-                                // console.log(selected_rows);
                                 $('#salesTagSubmit1').on('click',function () {
                                     var assign = parseInt($('#saletag1').val());
                                     swal({
@@ -1641,7 +1636,9 @@
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
                 {data: 'tagged_poc', name: 'p.name', class: 'align-middle tagged_poc'},
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
-                {data: 'ref', name: 'r.name', class: 'align-middle ref'},
+                {data: 'ref', name: 'r.name', class: 'align-middle ref',render:function(data,type,row){
+                        return row.ref +' - '+ row.rider_id;
+                }},
                 // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
                 {data: 'sms_charges_type_id', name: 'users.sms_charges_type_id', class: 'align-middle sms_charges_type_id'},
                 {data: 'rate_status', name: 'users.rate_status', class: 'align-middle rate_status'},
@@ -1963,7 +1960,6 @@
                 closeOnEsc: false,
                 dangerMode: true
             }).then((value) => {
-                console.log(value);
                 if (value) {
                     if (value === '') {
                         swal("You have not entered any remarks!", {
@@ -2135,11 +2131,78 @@
                     }
                 })
                     .done(function(data) {
-                        if(data.status){
+                        if (data.status) {
                             $('#duplicate_modal').modal('show');
-                            var html = '<table class="table table-bordered"><tr><td><strong>Phone</strong></td><td>'+ data.info.phone +'</td></tr><tr><td><strong>CNIC</strong></td><td>'+ data.info.cnic +'</td></tr><tr><td><strong>IBAN</strong></td><td>'+ data.info.iban +'</td></tr><tr><td><strong>Name</strong></td><td>'+ data.info.name +'</td></tr>';
+
+                            var baseURL = "{{ url('admin/accounts') }}";
+                            var html = '<table class="table table-bordered">';
+                            html += '<thead>';
+                            html += '<tr>' +
+                                '<th><strong>User Information</strong></th>' +
+                                '<th><strong>User Values</strong></th>' +
+                                '<th><strong>Duplicate Ids</strong></th>' +
+                                '</tr>';
+                            html += '</thead>';
+                            html += '<tbody>';
+
+                            html += '<tr>' +
+                                '<td><strong>Phone</strong></td>' +
+                                '<td>' + data.info.phone + '</td>' +
+                                '<td>' + (data.info.shared_phone ?
+                                    generateLinks(data.info.shared_phone.split(','), baseURL, 'phone') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '<tr>' +
+                                '<td><strong>CNIC</strong></td>' +
+                                '<td>' + data.info.cnic + '</td>' +
+                                '<td>' + (data.info.shared_cnic ?
+                                    generateLinks(data.info.shared_cnic.split(','), baseURL, 'cnic') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '<tr>' +
+                                '<td><strong>IBAN</strong></td>' +
+                                '<td>' + data.info.iban + '</td>' +
+                                '<td>' + (data.info.shared_iban ?
+                                    generateLinks(data.info.shared_iban.split(','), baseURL, 'iban') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '<tr>' +
+                                '<td><strong>Name</strong></td>' +
+                                '<td>' + data.info.name + '</td>' +
+                                '<td>' + (data.info.shared_name ?
+                                    generateLinks(data.info.shared_name.split(','), baseURL, 'name') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '<tr>' +
+                                '<td><strong>NTN</strong></td>' +
+                                '<td>' + (data.info.ntn && data.info.shared_ntn_no.length ? data.info.ntn : '') + '</td>' +
+                                '<td>' + (data.info.shared_ntn_no ?
+                                    generateLinks(data.info.shared_ntn_no.split(','), baseURL, 'ntn') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '<tr>' +
+                                '<td><strong>Email</strong></td>' +
+                                '<td>' + (data.info.shared_email && data.info.shared_email.includes(data.info.email) ?
+                                    data.info.email : '') + '</td>' +
+                                '<td>' + (data.info.shared_email && data.info.shared_email !== '' && !data.info.shared_email.includes(data.info.email) ?
+                                    generateLinks(data.info.shared_email.split(','), baseURL, 'email') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '</tbody>';
+                            html += '</table>';
+
+                            function generateLinks(ids, baseURL, type) {
+                                var links = [];
+                                for (var i = 0; i < ids.length; i++) {
+                                    var url = baseURL + '/' + ids[i].trim() + '/view';
+                                    links.push('<a href="' + url + '" target="_blank">' + ids[i].trim() + '</a>');
+                                }
+                                return links.join(', ');
+                            }
+
                             $('#duplicate_modal .modal-body').html(html);
                         }
+
 
                     });
             }

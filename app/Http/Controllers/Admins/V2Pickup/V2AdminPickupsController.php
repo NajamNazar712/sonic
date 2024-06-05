@@ -745,7 +745,6 @@ class V2AdminPickupsController extends Controller
         $id = $request->shipment_id;
         $data = V2PickupRequest::find($id);
         $data->reminder_status = 1;
-        $data->reminder_status = 1;
         $data->save();
         return ['status' => 1, 'success' => "Reminder successfully Set"];
     }
@@ -1217,6 +1216,9 @@ class V2AdminPickupsController extends Controller
                             ShipmentChargesController::walkin_weight($shipment_id);
                         } else {
                             ShipmentChargesController::weight($shipment_id);
+                            if($shipment->booking_type_id == 5){
+                                ShipmentChargesController::reverse_pickup($shipment_id);
+                            }
                             if ($shipment->business_category_id == 1) {
                                 ShipmentChargesController::cash_handling($shipment_id);
                                 ShipmentChargesController::insurance($shipment_id);
@@ -1593,6 +1595,9 @@ class V2AdminPickupsController extends Controller
                             ShipmentChargesController::walkin_weight($shipment_id);
                         } else {
                             ShipmentChargesController::weight($shipment_id);
+                            if($shipment->booking_type_id == 5){
+                                ShipmentChargesController::reverse_pickup($shipment_id);
+                            }
                             if ($shipment->business_category_id == 1) {
                                 ShipmentChargesController::cash_handling($shipment_id);
                                 ShipmentChargesController::insurance($shipment_id);
@@ -1627,7 +1632,7 @@ class V2AdminPickupsController extends Controller
                     }
                 }
             } else {
-                unset($shipment_ids[$key]);
+                unset($shipments[$key]);
             }
         }
 
@@ -2538,6 +2543,9 @@ class V2AdminPickupsController extends Controller
                             ShipmentChargesController::walkin_weight($shipment_id);
                         } else {
                             ShipmentChargesController::weight($shipment_id);
+                            if($shipment->booking_type_id == 5){
+                                ShipmentChargesController::reverse_pickup($shipment_id);
+                            }
                             if ($shipment->business_category_id == 1) {
                                 ShipmentChargesController::cash_handling($shipment_id);
                                 ShipmentChargesController::insurance($shipment_id);

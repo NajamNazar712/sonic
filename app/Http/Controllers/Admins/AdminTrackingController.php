@@ -16,6 +16,7 @@ use Illuminate\Validation\Rule;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\StarShipper;
+use App\LostShipmentResponsible;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\RiderDelivery;
@@ -33,6 +34,7 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\Commission\SalesTier;
 use App\Http\Models\ShipmentStatusReason;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Models\Admin\MasterCargo\Bag;
@@ -75,7 +77,6 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
-use App\Http\Models\Commission\SalesTier;
 
 class AdminTrackingController extends Controller
 {
@@ -87,7 +88,7 @@ class AdminTrackingController extends Controller
     public function index(Request $request)
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 271);
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
@@ -791,7 +792,7 @@ class AdminTrackingController extends Controller
     public function cx_quick_tracking_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 272);
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::where('id','!=',3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
@@ -948,9 +949,10 @@ class AdminTrackingController extends Controller
         foreach ($tracking_numbers as $tracking_number) {
             $details = array();
             $shipment = Shipment::where('tracking_number', $tracking_number);
-
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
+
+                $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
 
                 $star_user_id = $shipment->user_id;
 
@@ -964,7 +966,6 @@ class AdminTrackingController extends Controller
                 {
                     $details['star_shipper'] = 0;
                 }
-
 
 
                 if ($shipment->user->blacklist == 0) {
@@ -1165,6 +1166,15 @@ class AdminTrackingController extends Controller
                             $item_details['description'] = $item->description;
                             $item_details['quantity'] = $item->quantity;
 
+                            // $item_details['quantity'] = '';
+                            // if ($retail_shipment){
+                            //     $item_details['quantity'] = $retail_shipment_quantity;
+                            // } else {
+                            //     $item_details['quantity'] = $item->quantity;
+                            // }
+                            
+                            
+
                             $details['order_information']['items'][] = $item_details;
                         }
 
@@ -1217,6 +1227,14 @@ class AdminTrackingController extends Controller
                         }
 
                         $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
+
+                        // $details['order_information']['parcel_value'] = '';
+                        // if ($retail_shipment){
+                        //     $details['order_information']['parcel_value'] = $retail_shipement_parcel_amount;
+                        // } else {
+                        //     $details['order_information']['parcel_value'] = number_format($shipment->parcel_value);
+                        // }
+
 
                         $details['order_information']['account_type_id'] = $shipment->user->account_type_id;
 
@@ -1452,23 +1470,27 @@ class AdminTrackingController extends Controller
                                 }
                             }
                             $shipment_scanning_query = ShipmentScanningJourney::select(
-                                'shipment_scanning_journeys.id',
-                                'ssjal.shipment_id',
                                 'ssjal.location_status',
                                 'shipment_scanning_journeys.latitude',
                                 'shipment_scanning_journeys.longitude',
                                 'ssjal.area_id',
-                                'ssjal.admin_id',
                                 'shipment_scanning_journeys.created_at',
-                                'ssjal.hub_id',
-                                'sj.shipper_status_id'
+                                'ssjal.hub_id as hub_id_scanning',
+                                'ssjal.shipment_scanning_journey_id as shipment_scanning_journey_id',
+                                'sj.city_id as city_id_scanning'
+
                             )
                             ->join('shipments_journey as sj', function($join) use ($journey) {
                                 $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
                                     ->where('sj.id', '=', $journey->id);
                             })
-                            ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                            ->join('shipment_scanning_journey_area_logs as ssjal', function($join) use ($journey) {
+                                $join->on('ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                                     ->where('ssjal.hub_id', '=', $journey->city_id);
+                            })
                             ->where('shipment_scanning_journeys.updated_at', '<=', $journey->updated_at);
+
+
                             if(isset($journey->admin['role_id']) && $journey->admin['role_id'] != 1 || isset($journey->rider_id)){
                                 switch ($journey->shipper_status_id) {
                                     case 2:
@@ -1542,7 +1564,33 @@ class AdminTrackingController extends Controller
                             $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
                             
+                            if($journey->shipper_status_id == 18){
+                                $shipment_id = $journey->shipment_id;
+                                $latest_lost_responsible_shipments = LostShipmentResponsible::whereIn('id', function($query) use ($shipment_id, $journey) {
+                                    $query->selectRaw('MAX(id)')
+                                        ->from('lost_shipment_responsibles')
+                                        ->where('shipment_id', $shipment_id)
+                                        ->whereBetween('updated_at', [date('Y-m-d H:i:s', strtotime($journey->updated_at)), date('Y-m-d H:i:s', strtotime($journey->updated_at) + 10)])
+                                        ->groupBy('user_id');
+                                })->get();
+
+                                
+                                foreach($latest_lost_responsible_shipments as $key => $lost_responsible_shipment){
+                                    if($lost_responsible_shipment->user_type == 1){
+                                        $admin = Admin::find($lost_responsible_shipment->user_id);
+                                        $journey_details['responsible'][$key]['journey_updated_at'] = Carbon::parse($journey->updated_at)->format('Y-m-d H:i:s');
+
+                                    }else{
+                                        $rider = Rider::find($lost_responsible_shipment->user_id);
+                                        $journey_details['responsible'][$key]['journey_updated_at'] = Carbon::parse($journey->updated_at)->format('Y-m-d H:i:s');
+                                    }
+                                }
+                            }else{
+                                $journey_details['responsible'] = [];
+                            }
+                            
                             $details['tracking_history'][] = $journey_details;
+                            
                         }
                         
                         $shipment_payment_journey = $shipment->shipment_payment_journey;
@@ -1615,7 +1663,7 @@ class AdminTrackingController extends Controller
                                    
                             }
                         } 
-                        //shipment_pickup_journey_v3 get direct table for temporary untile use both pms use v2 and v3
+                        // shipment_pickup_journey_v3 get direct table for temporary untile use both pms use v2 and v3
                         $shipment_pickup_journey_v3 = DB::table('shipments_v3_pickup_journeys')->where('shipment_id',$shipment->id);
                         if($shipment_pickup_journey_v3->exists())
                         {
@@ -1709,12 +1757,55 @@ class AdminTrackingController extends Controller
 
                         $handover_shipment_journey = $shipment->handover_shipments_journeys;
                         
-                        
                         if ($handover_shipment_journey) {
                             foreach ($handover_shipment_journey as $journey) {
+                                $admin_created_by = null;
+                                $admin_received_by = null;
+
+                                if($journey->status == 1){
+                                    $handover_created_by = Handover::find($journey->handover_id)->created_by;
+                                    $admin_created_by = Admin::find($handover_created_by);
+                                }else{
+                                    $handover_received_by = Handover::find($journey->handover_id)->received_by;
+                                    $admin_received_by = Admin::find($handover_received_by);
+                                }
+                                
+                                if((isset($admin_created_by->role_id) && $admin_created_by->role_id != 1) || (isset($admin_received_by->role_id) && $admin_received_by->role_id != 1)){
+                                    $shipment_scanning_query = ShipmentScanningJourney::select(
+                                        'ssjal.location_status',
+                                        'shipment_scanning_journeys.latitude',
+                                        'shipment_scanning_journeys.longitude',
+                                        'ssjal.area_id',
+                                        'shipment_scanning_journeys.created_at',
+                                        'ssjal.hub_id'
+                                    )
+                                    ->join('handover_shipments_journeys as hsj', 'hsj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                                    ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                                    ->join('handovers', 'hsj.handover_id', '=', 'handovers.id') // added this join
+                                    ->where('shipment_scanning_journeys.updated_at', '<=', $journey->updated_at)
+                                    ->where('hsj.handover_id', '=', $journey->handover_id);
+    
+                                    switch ($journey->status) {
+                                        case 1:
+                                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 26)->latest()->first();
+                                            break;
+                                        case 2:
+                                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 27)->latest()->first();
+                                            break;
+                         
+                                        default:
+                                            $scanning_data = null;
+                                            break;
+                                    }
+                                }else{
+                                     $scanning_data = null;
+                                }
+
+                                
                                 $journey_details = array();
                                 $journey_details['handover_id'] = $journey->handover_id;
                                 $journey_details['status'] = $journey->my_status->name;
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
                                 $journey_details['created_at'] = Carbon::parse($journey->created_at)->toDateTimeString();
                                 $details['handover_history'][] = $journey_details;
                             }
@@ -2248,11 +2339,16 @@ class AdminTrackingController extends Controller
                                     if($last_scanned_location->admin_id == null && $last_scanned_location->user_id == null){
                                         $last_scanned_location_flag = false;
                                         $screen_location = '-';
+                                        $screen_location_id = null;
                                         $scanned_by = '-';
                                         $city = '-';
+                                        $scanned_by_id = null;
+                                        $scanned_by_user_type = '-';
                                     }
                                     else {
                                         $screen_location = $last_scanned_location->screen_location->name;
+                                        $screen_location_id = $last_scanned_location->screen_location->id;
+
                                         if ($last_scanned_location->user_type == 1) {
                                             $account_type = 'Admin';
                                             $admin = Admin::find($last_scanned_location->admin_id);
@@ -2261,9 +2357,14 @@ class AdminTrackingController extends Controller
                                                 ($c) ? $city = $c['name'] : $city = '-';
                                                 $scanned_by = $admin->name;
                                                 $scanned_by = $scanned_by . ' (' . $account_type . ')';
+                                                $scanned_by_id = $admin->id;
+                                                $scanned_by_user_type = 1;
+
                                             }
                                             else {
                                                 $scanned_by = '-';
+                                                $scanned_by_user_type = '-';
+                                                $scanned_by_id = null;
                                                 $city = '-';
                                             }
                                         } else if ($last_scanned_location->user_type == 2) {
@@ -2273,8 +2374,12 @@ class AdminTrackingController extends Controller
                                                 $scanned_by = $user->name;
                                                 $city = $user->city->name;
                                                 $scanned_by = $scanned_by . ' (' . $account_type . ')';
+                                                $scanned_by_id = $user->id;
+                                                $scanned_by_user_type = 2;
                                             }
                                             else {
+                                                $scanned_by_id = null;
+                                                $scanned_by_user_type = '-';
                                                 $scanned_by = '-';
                                                 $city = '-';
                                             }
@@ -2285,8 +2390,12 @@ class AdminTrackingController extends Controller
                                                 $scanned_by = $sub_user->name;
                                                 $city = $sub_user->shipper->city->name;
                                                 $scanned_by = $scanned_by . ' (' . $account_type . ')';
+                                                $scanned_by_id = $sub_user->id;
+                                                $scanned_by_user_type = 3;
                                             }
                                             else {
+                                                $scanned_by_id = null;
+                                                $scanned_by_user_type = '-';
                                                 $scanned_by = '-';
                                                 $city = '-';
                                             }
@@ -2298,8 +2407,12 @@ class AdminTrackingController extends Controller
                                                 ($c) ? $city = $c['name'] : $city = '-';
                                                 $scanned_by = $retail_admin->name;
                                                 $scanned_by = $scanned_by . ' (' . $account_type . ')';
+                                                $scanned_by_id = $retail_admin->id;
+                                                $scanned_by_user_type = 4;
                                             }
                                             else {
+                                                $scanned_by_id = null;
+                                                $scanned_by_user_type = '-';
                                                 $scanned_by = '-';
                                                 $city = '-';
                                             }
@@ -2311,13 +2424,19 @@ class AdminTrackingController extends Controller
                                                 ($c) ? $city = $c['name'] : $city = '-';
                                                 $scanned_by = $rider->name;
                                                 $scanned_by = $scanned_by . ' (' . $account_type . ')';
+                                                $scanned_by_id = $rider->id;
+                                                $scanned_by_user_type = 5;
                                             }
                                             else {
                                                 $scanned_by = '-';
+                                                $scanned_by_id = null;
+                                                $scanned_by_user_type = '-';                                                
                                                 $city = '-';
                                             }
                                         } else {
                                             $scanned_by = '-';
+                                            $scanned_by_id = '-';
+                                            $scanned_by_user_type = '-';
                                             $city = '-';
                                         }
                                     }
@@ -2325,7 +2444,10 @@ class AdminTrackingController extends Controller
                                 else {
                                     $last_scanned_location_flag = false;
                                     $screen_location = '-';
+                                    $screen_location_id = '-';
                                     $scanned_by = '-';
+                                    $scanned_by_id = null;
+                                    $scanned_by_user_type = '-';
                                     $city = '-';
                                 }
 
@@ -2404,8 +2526,11 @@ class AdminTrackingController extends Controller
                                 $shipment_position->status_at = $last_shipment_journey->created_at ? Carbon::parse($last_shipment_journey->created_at)->format('Y-m-d H:i:s') : '-';
                                 $shipment_position->status_by = $shipment_journey_status_by;
                                 $shipment_position->screen_location = $screen_location;
+                                $shipment_position->screen_location_id = $screen_location_id;
                                 $shipment_position->city = $city;
                                 $shipment_position->scanned_by = $scanned_by;
+                                $shipment_position->scanned_by_id = $scanned_by_id;
+                                $shipment_position->scanned_by_user_type = $scanned_by_user_type;
                                 $shipment_position->scanned_at = $last_scanned_location_flag ? Carbon::parse($last_scanned_location->created_at)->format('Y-m-d H:i:s') : '-';
                                 $shipment_position->handover_note = $handover_note;
                                 $shipment_position->handover_created_by = $handover_created_by;
@@ -2473,28 +2598,31 @@ class AdminTrackingController extends Controller
                     DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)')
                 );
         })
-        ->leftjoin('admins as admin', 'admin.id', '=', 'journey.admin_id')
-        ->leftJoin('shipment_status_screen_locations as sssl', 'sssl.shipment_status_id', '=', 'journey.shipper_status_id')
+        ->leftJoin('scanned_user_types as sp', 'shipment_positions.scanned_by_user_type', '=', 'sp.id')
         ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
             $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
                  ->whereRaw('ssj.id = (
                                 select max(id) 
                                 from shipment_scanning_journeys 
                                 where shipment_scanning_journeys.shipment_id = journey.shipment_id
-                                and shipment_scanning_journeys.screen_location_id IN (
-                                    select screen_location_id 
-                                    from shipment_status_screen_locations 
-                                    where shipment_status_id = journey.shipper_status_id
-                                )
-                                    and (admin.role_id != 1 or admin.id is null)
+                                and shipment_scanning_journeys.screen_location_id = shipment_positions.screen_location_id
                             )');
         })
+        ->when(\DB::raw('sp.id = 1'), function ($join) {
+            $join->leftJoin('admins as adm', function ($join) {
+                $join->on('adm.id', '=', 'shipment_positions.scanned_by_id')
+                     ->where('adm.role_id', '<>', 1);
+            });
+        })
+        
+        
         ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
-        ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')        
+        ->leftJoin('admins as new_admin', 'new_admin.id', '=', 'ssj.admin_id')        
+        ->leftJoin('city_areas as ca_scanning', 'new_admin.area_id', '=', 'ca_scanning.id')        
         ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at', 'shipment_positions.handover_note', 'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'shipment_positions.last_action','u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id','sjl.shipment_id as journey_latest_id',
         'sjl.updated_at as journey_latest_updated_at',
-        'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id','ssjal.location_status as location_status','ca_scanning.name as scanning_city_area_name'
-
+        'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id','ssjal.location_status as location_status','ca_scanning.name as scanning_city_area_name',
+        's.consignee_address', 's.actual_weight','shipment_positions.scanned_by_user_type as scanned_by_user_type','shipment_positions.scanned_by_id as scanned_by_id'
         ])
         ->where('tracked_by', Auth::id())->groupBy('shipment_positions.shipment_id');
 
@@ -2562,6 +2690,19 @@ class AdminTrackingController extends Controller
             ->editColumn('location_status', function ($shipment) {
                 if(isset($shipment->location_status)){
                     return $shipment->location_status == 1 ? 'On-site' : 'Off-site';
+                }else{
+                    return '-';
+                }
+            })->editColumn('scanning_city_area_name', function ($shipment) {
+                if(!isset($shipment->scanning_city_area_name) && $shipment->scanned_by_user_type == 5){
+                    $rider = Rider::find($shipment->scanned_by_id);
+                    if(isset($rider->area)){
+                        return $rider->area->name;
+                    }else{
+                        return '-';
+                    }
+                }else if(isset($shipment->scanning_city_area_name)){
+                    return $shipment->scanning_city_area_name;
                 }else{
                     return '-';
                 }
