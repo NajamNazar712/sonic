@@ -53,6 +53,8 @@
                                         <th>Special Instruction</th>
                                         <th>Admin Discount</th>
                                         <th>Admin Discount Type</th>
+                                        <th>Parcel Value</th>
+                                        <th>Quantity</th>
                                         <th></th>
                                     </tr>
                                     </thead>
@@ -236,6 +238,47 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][admin_discount_type]', $ro['admin_discount_type'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
+
+                                            @if(isset($errors[$no]['parcel_amount']))
+                                                <td>
+                                                    {!! Form::text('form[' . $no . '][parcel_amount]', null, [
+                                                        'class' => 'form-control is-invalid parcel_amount',
+                                                        'id' => 'parcel_amount',
+                                                        'style' => 'width:auto',
+                                                        'placeholder' => ''
+                                                    ]) !!}
+                                                    <font color="red">{{$errors[$no]['parcel_amount']}}</font>
+                                                </td>
+                                            @else
+                                                <td>
+                                                    {!! Form::text('form[' . $no . '][parcel_amount]', $ro['parcel_amount'], [
+                                                        'class' => 'form-control',
+                                                        'style' => 'width:144px',
+                                                        'readonly' => 'readonly'
+                                                    ]) !!}
+                                                </td>
+                                            @endif
+
+                                            @if(isset($errors[$no]['quantity']))
+                                                <td>
+                                                    {!! Form::text('form[' . $no . '][quantity]', null, [
+                                                        'class' => 'form-control is-invalid quantity',
+                                                        'id' => 'quantity',
+                                                        'style' => 'width:auto',
+                                                        'placeholder' => ''
+                                                    ]) !!}
+                                                    <font color="red">{{$errors[$no]['quantity']}}</font>
+                                                </td>
+                                            @else
+                                                <td>
+                                                    {!! Form::text('form[' . $no . '][quantity]', $ro['quantity'], [
+                                                        'class' => 'form-control',
+                                                        'style' => 'width:144px',
+                                                        'readonly' => 'readonly'
+                                                    ]) !!}
+                                                </td>
+                                            @endif
+
                                             <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                         </tr>
                                     @endforeach
