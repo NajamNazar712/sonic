@@ -203,7 +203,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.shippers_count);
+                                row.push(values.shippers_with_rate_change_count);
                                 row.push(values.rate_type);
                                 row.push(values.created_at);
                                 row.push(values.added_by_admin);
@@ -275,10 +275,9 @@
                         }
                     },
                     {
-                        data: 'shippers_count',
-                        name: 'shippers_count',
-                        class: 'align-middle text-center shippers_count',
-                        orderable: false,
+                        data: 'shippers_with_rate_change_count',
+                        name: 'shippers_with_rate_change_count',
+                        class: 'align-middle text-center shippers_with_rate_change_count',
                         searchable: false
                     },
                     {
@@ -289,7 +288,6 @@
                         searchable: false
                     },
                     {
-                        searchable: false,
                         data: 'file_view',
                         name: 'file_view',
                         class: 'align-middle text-center file_view',

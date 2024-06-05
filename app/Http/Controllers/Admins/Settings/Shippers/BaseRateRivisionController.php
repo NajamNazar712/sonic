@@ -181,6 +181,7 @@ class BaseRateRivisionController extends Controller
                 'approval2Status:id,name',
             ])
             ->orderBy('id','desc');
+            // dd($baseRateRevisions->get());
 
         $datatable = Datatables::of($baseRateRevisions)
             ->addColumn('rate_type', function ($revision) {
@@ -215,9 +216,6 @@ class BaseRateRivisionController extends Controller
             })
             ->addColumn('approval2_status', function ($revision) {
                 return $revision->approval2Status->name;
-            })
-            ->addColumn('shippers_count', function ($revision) {
-                return $revision->shippers_with_rate_change_count;
             })
             ->addColumn('action', function ($revision) {
                 // Check if dropdown should be shown based on approval statuses and user role
