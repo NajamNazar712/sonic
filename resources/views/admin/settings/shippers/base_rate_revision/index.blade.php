@@ -23,7 +23,7 @@
                             </div>
                             <div class="col-md-2">
                                 <div class="form-group">
-                                    <select class="form-control" name="adjustment_type" id="adjustment_types" data-rule-required="true" data-msg-required="Adjustment Type is required">
+                                    <select class="form-control" name="adjustment_type" id="adjustment_types" data-rule-required="true" data-msg-required="Rate Type is required">
                                         <option disabled selected>Select Rate Type</option>
                                         @foreach ($baseRateTypes as $baseRateType)
                                         <option value="{{$baseRateType->id}}">{{$baseRateType->name}}</option>
@@ -39,7 +39,7 @@
 
                             <div class="col-md-2 justify-content-end">
                                 <div class="form-group text-right">
-                                    <a href="{{ asset('file/Base Rate Revisions Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Download Template</a>
+                                    <a href="{{ asset('file/Base Rate Revisions Template.xlsx') }}" class="btn btn-primary btn-block"><i class="la la-download"></i> Download Template</a>
                                 </div>
                             </div>
                         </div>
@@ -145,6 +145,10 @@
             width: auto !important;
             text-align: left;
         }
+
+        .danger-text {
+            color: red; /* Error message text color */
+        }
     </style>
 @endsection
 
@@ -164,7 +168,7 @@
         $(document).ready(function() {
 
             $('#upload_shippers_form').validate({
-				errorClass: 'danger',
+				errorClass: 'danger-text',
 				successClass: 'success',
 				errorPlacement: function(error, element) {
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
