@@ -686,7 +686,7 @@ class ShipperDashboardController extends Controller
         }
 
 
-        Log::channel('cronJobLog')->info('s ' .$shipments->toSql());
+        Log::channel('cronJobLog')->info('s ' .$shipments->toSql() .'shipments.created_at '. $from. ' and '.$to.' users ' .session('user_id'));
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
