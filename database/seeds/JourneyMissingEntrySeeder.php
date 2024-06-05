@@ -3,6 +3,7 @@
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\ConsigneeUser;
 use App\Http\Models\PendingPayment;
@@ -25,7 +26,7 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //
         $shipmentId = [
-            144341037929881, 15943836918768];
+            25115237937988, 20220237750374, 25128337770178, 22320237805667];
         echo count($shipmentId);
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
@@ -38,6 +39,7 @@ class JourneyMissingEntrySeeder extends Seeder
                     $shipment->consignee_status_id = 14;
                     $shipment->save();
                 }
+
                 if (in_array($shipment->shipper_status_id, [13, 14])) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
                     $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
@@ -95,8 +97,8 @@ class JourneyMissingEntrySeeder extends Seeder
                 $shipment_journey->verification = $verification;
                 $shipment_journey->created_at = $deliveryNoteId->updated_at;
                 $shipment_journey->updated_at = $deliveryNoteId->updated_at;
-                $shipment_journey->shipper_status_id = 12;
-                $shipment_journey->consignee_status_id = 12;
+                $shipment_journey->shipper_status_id = $status_id;
+                $shipment_journey->consignee_status_id = $status_id;
                 $shipment_journey->status_reason_id = null;
                 $shipment_journey->remarks =  null;
                 $shipment_journey->user_id = null;
