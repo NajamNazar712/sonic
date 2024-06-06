@@ -296,12 +296,10 @@
                         data: 'created_at',
                         name: 'created_at',
                         class: 'align-middle text-center created_at',
-                        orderable: false,
                     },
                     {
-                        searchable: false,
                         data: 'added_by_admin',
-                        name: 'added_by_admin',
+                        name: 'addedByAdmin.name',
                         class: 'align-middle text-center added_by_admin',
                         orderable: false,
                     },

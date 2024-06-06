@@ -201,6 +201,11 @@ class BaseRateRivisionController extends Controller
             ->addColumn('added_by_admin', function ($revision) {
                 return $revision->addedByAdmin->name;
             })
+            ->filterColumn('addedByAdmin.name', function ($query, $keyword) {
+                $query->whereHas('addedByAdmin', function ($query) use ($keyword) {
+                    $query->where('name', 'like', "%{$keyword}%");
+                });
+            })
             ->addColumn('approved1_by_admin', function ($revision) {
                 return $revision->approved1ByAdmin ? $revision->approved1ByAdmin->name : '-';
             })
