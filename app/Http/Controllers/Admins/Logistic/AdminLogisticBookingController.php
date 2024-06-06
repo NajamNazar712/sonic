@@ -379,8 +379,7 @@ class AdminLogisticBookingController extends Controller
                 return view('admin.logistic.edit_logistic_book')
                     ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shippers'=>$shippers,'products'=>$products,'services'=>$services,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'riders'=>$riders]);
             } catch (\Exception $th){
-                dd($th->getMessage());
-//                Log::channel('code_test_log')->error('logistic-bookingcheck'.json_encode($th->getMessage()));
+                Log::channel('code_test_log')->error('logistic-booking'.json_encode($th->getMessage()));
             }
         }
         return  redirect()->back()->with('error','Booking not found!');
