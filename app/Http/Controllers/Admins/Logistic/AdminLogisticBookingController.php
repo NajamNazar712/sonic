@@ -29,6 +29,7 @@ use App\Http\Models\SubCategorySegment;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -341,40 +342,44 @@ class AdminLogisticBookingController extends Controller
         $logistic_booking = TraxLogisticBooking::where('id',$booking_id);
         if($logistic_booking->exists())
         {
-            $payment_modes=PaymentMode::all();
-            $riders=Rider::where('status',1)->get();
-            $special_handlings = TraxSpecialHandlingList::where('status',1)->get();
+            try {
+                $payment_modes=PaymentMode::all();
+                $riders=Rider::where('status',1)->get();
+                $special_handlings = TraxSpecialHandlingList::where('status',1)->get();
 
-            //get booking data
-            $logistic_booking = $logistic_booking->first();
-            $item_insurance = TraxItemInsurance::where('booking_id',$booking_id)->first();
-            $item_references = TraxItemRefernce::where('booking_id',$booking_id)->get();
-            $booking_pieces = TraxBookingPiece::select('trax_booking_pieces.piece_cn_number','trax_booking_pieces.booking_id','r.name as rider_name','r.id as rider_id')
-                ->join('riders as r','r.id','trax_booking_pieces.scan_rider_id')
-                ->where('trax_booking_pieces.booking_id',$booking_id)->get();
+                //get booking data
+                $logistic_booking = $logistic_booking->first();
+                $item_insurance = TraxItemInsurance::where('booking_id',$booking_id)->first();
+                $item_references = TraxItemRefernce::where('booking_id',$booking_id)->get();
+                $booking_pieces = TraxBookingPiece::select('trax_booking_pieces.piece_cn_number','trax_booking_pieces.booking_id','r.name as rider_name','r.id as rider_id')
+                    ->join('riders as r','r.id','trax_booking_pieces.scan_rider_id')
+                    ->where('trax_booking_pieces.booking_id',$booking_id)->get();
 
-            $shippers=User::select('id','name')->where('id',$logistic_booking->shipper_id)->where('status',3)->get();
+                $shippers=User::select('id','name')->where('id',$logistic_booking->shipper_id)->where('status',3)->get();
 
-            $trax_shipper_detail=TraxShipperDetail::where('user_id',$logistic_booking->shipper_id)->where('status',1)->first();
+                $trax_shipper_detail=TraxShipperDetail::where('user_id',$logistic_booking->shipper_id)->where('status',1)->first();
 
-            $products=TraxProduct::select('id','product_name')->where('parent_id',$trax_shipper_detail->trax_parent_product_id)->where('status',1)->get();
+                $products=TraxProduct::select('id','product_name')->where('parent_id',$trax_shipper_detail->trax_parent_product_id)->where('status',1)->get();
 
-            $services=TraxService::all();
+                $services=TraxService::all();
 
-            $trax_stations=TraxStation::select('id','name')->where('status',1)->get();
+                $trax_stations=TraxStation::select('id','name')->where('status',1)->get();
 
-            $pickup_addresses=UserShippingInfo::select('id','pickup_address','poc','phone','email')->where('user_id',$logistic_booking->shipper_id)->get();
+                $pickup_addresses=UserShippingInfo::select('id','pickup_address','poc','phone','email')->where('user_id',$logistic_booking->shipper_id)->get();
 
-            $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id);
-            $booking_img_url=null;
-            if ($booking_img->exists())
-            {
-                $booking_img = $booking_img->first();
-                $booking_img_url =  Storage::url('logistic_bookings/'. $booking_img->image_name);
+                $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id);
+                $booking_img_url=null;
+                if ($booking_img->exists())
+                {
+                    $booking_img = $booking_img->first();
+                    $booking_img_url =  Storage::url('logistic_bookings/'. $booking_img->image_name);
+                }
+
+                return view('admin.logistic.edit_logistic_book')
+                    ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shippers'=>$shippers,'products'=>$products,'services'=>$services,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'riders'=>$riders]);
+            } catch (\Throwable $th){
+                Log::channel('code_test_log')->error('logistic-bookingcheck'.json_encode($th->getMessage()));
             }
-
-            return view('admin.logistic.edit_logistic_book')
-                ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shippers'=>$shippers,'products'=>$products,'services'=>$services,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'riders'=>$riders]);
         }
         return  redirect()->back()->with('error','Booking not found!');
 
