@@ -14,6 +14,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\Admin\AdminRole;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\RvFakeStatus;
 use App\Http\Models\Admin\StatusRemark;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -1361,6 +1362,7 @@ trait RvTrait
                 ->where('is_completed',0)
                 ->orderBy('updated_at','ASC')
                 ->get(['id','shipment_id']);
+        
 
         return $shipments;                
     }
@@ -2259,5 +2261,24 @@ trait RvTrait
             // For example:
             throw new Exception("Delivery note shipment not found for shipment ID: {$shipmentId}");
         }
+    }
+
+    function fakeStatusMarkedDeliveries($data)
+    {
+    
+        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $data->shipment_id)->latest('delivery_note_id')->first();
+        if($delivery_note_shipment){
+            $fakeStatusRemark = RvFakeStatus::find($data->rv_fake_status_id);
+            $delivery_note_shipment->fake_status = 1;
+            $delivery_note_shipment->admin_id = Auth::id();
+            $delivery_note_shipment->remarks = $fakeStatusRemark->name;
+            $delivery_note_shipment->fake_status_updated_at = Carbon::now();
+            $delivery_note_shipment->save();
+            // <ShipmentScanningJourneyController::add($data->shipment_id, 6, 1, Auth::id(), NULL, NULL, NULL, NULL, session('latitude'), session('longitude'), NULL);
+            return true;
+        }else{
+            return false;
+        }
+
     }
 }
