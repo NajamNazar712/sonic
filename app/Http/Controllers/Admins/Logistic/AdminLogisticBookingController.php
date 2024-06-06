@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Logistic\TraxBookingBatchDetail;
 use App\Http\Models\Admin\Logistic\TraxBookingPiece;
 use App\Http\Models\Admin\Logistic\TraxItemInsurance;
 use App\Http\Models\Admin\Logistic\TraxLogisticBookingImages;
+use App\Http\Models\Admin\Logistic\TraxParentProduct;
 use App\Http\Models\Admin\Logistic\TraxProduct;
 use App\Http\Models\Admin\Logistic\TraxService;
 use App\Http\Models\Admin\Logistic\TraxShipperDetail;
@@ -356,11 +357,23 @@ class AdminLogisticBookingController extends Controller
                     ->join('riders as r','r.id','trax_booking_pieces.scan_rider_id')
                     ->where('trax_booking_pieces.booking_id',$booking_id)->get();
 
+                $trax_parent_product_id=0;
                 $shippers=User::select('id','name')->where('id',$logistic_booking->shipper_id)->where('status',3)->get();
 
-                $trax_shipper_detail=TraxShipperDetail::where('user_id',$logistic_booking->shipper_id)->where('status',1)->first();
+                $trax_shipper_detail=TraxShipperDetail::where('user_id',$logistic_booking->shipper_id)->where('status',1);
+                if($trax_shipper_detail->exists())
+                {
+                    $trax_parent_product_id=$trax_shipper_detail->first()->trax_parent_product_id;
+                } else {
+                    $segment_id=User::where('id',$logistic_booking->shipper_id)->first()->segment_id;
+                    $parent_product=TraxParentProduct::where('segment_id',$segment_id);
+                    if($parent_product->exists())
+                    {
+                        $trax_parent_product_id=$parent_product->first()->id;
+                    }
+                }
 
-                $products=TraxProduct::select('id','product_name')->where('parent_id',$trax_shipper_detail->trax_parent_product_id)->where('status',1)->get();
+                $products=TraxProduct::select('id','product_name')->where('parent_id',$trax_parent_product_id)->where('status',1)->get();
 
                 $services=TraxService::all();
 
