@@ -83,7 +83,7 @@ class AdminLogisticBookingController extends Controller
 
         if (session('role_id') != 1)
         {
-            $logistic_bookings = $logistic_bookings->whereIn('trax_logistic_bookings.origin_id',[$hub_ids]);
+            $logistic_bookings = $logistic_bookings->whereIn('trax_logistic_bookings.origin_id',$hub_ids);
         }
         $datatables = Datatables::of($logistic_bookings)
             ->addColumn('action',function ($logistic_bookings){
@@ -150,7 +150,7 @@ class AdminLogisticBookingController extends Controller
 
         if (session('role_id') != 1)
         {
-            $logistic_bookings = $logistic_bookings->whereIn('bb.city_id',[$hub_ids]);
+            $logistic_bookings = $logistic_bookings->whereIn('bb.city_id',$hub_ids);
         }
 
         $datatables = Datatables::of($logistic_bookings)

@@ -72,7 +72,7 @@ class AdminLogisticSetupController extends Controller
 
         if(session('role_id') != 1)
         {
-            $trax_shipper_detail = $trax_shipper_detail->whereIn('u.city_id',[$hub_ids]);
+            $trax_shipper_detail = $trax_shipper_detail->whereIn('u.city_id',$hub_ids);
         }
         $datatables = Datatables::of($trax_shipper_detail)
             ->addColumn('action',function ($trax_shipper_detail){
