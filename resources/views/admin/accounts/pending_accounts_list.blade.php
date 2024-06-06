@@ -756,6 +756,12 @@
                 $('#user_commission').attr('disabled', false)
                 $('#user_commission').val('');
             }
+
+            if($('#user_select').val() != '')
+            {
+                $('#commission_add_button').attr('disabled', false);
+            }
+            
         }
         var index = $.inArray(id, selected_users);
         if (index !== -1) {
@@ -925,6 +931,20 @@
                     if(is_kam == 'KAM'){
                         kam_count+=1;
                     }
+
+                    if(tier_id == 3)
+                    {
+                        if($('#user_select').val() == '')
+                        {
+                            var error = 'Please select user!';
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                                });
+                                return 0;
+                        }
+                    }
+
                     add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
                     $('#sales_tier_select').val(null).trigger('change');
                     $('#user_select').val(null).trigger('change');
