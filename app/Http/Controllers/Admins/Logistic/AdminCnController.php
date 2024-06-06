@@ -140,7 +140,7 @@ class AdminCnController extends Controller
         }
         $hub_ids= session('hubs');
         $trax_cn_receive_admin_stores = TraxCnReceiveAdminStore::Join('trax_products as s','trax_cn_receive_admin_stores.product_id','=','s.id')
-            ->Join('cities as c','c.id','=','trax_cn_receive_admin_stores.area_code')
+            ->Join('trax_stations as c','c.id','=','trax_cn_receive_admin_stores.area_code')
             ->SELECT('trax_cn_receive_admin_stores.id','trax_cn_receive_admin_stores.receive_date','trax_cn_receive_admin_stores.company_code','trax_cn_receive_admin_stores.area_code','c.name as area_name','trax_cn_receive_admin_stores.product_id','s.product_name as segment_name','trax_cn_receive_admin_stores.cn_from','trax_cn_receive_admin_stores.cn_to','trax_cn_receive_admin_stores.quantity')
             ->where('trax_cn_receive_admin_stores.status',1)
             ->orderByDesc('trax_cn_receive_admin_stores.id');
