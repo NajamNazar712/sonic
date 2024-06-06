@@ -628,6 +628,60 @@
 
                                         </div>
 
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="on_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="on_zero_cod_record" value="">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" disabled data-rule-min="0" data-rule-max="100" class="form-control" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="" name="on_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="on_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="on_return_discount_record" value="">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" disabled  data-rule-min="0" data-rule-max="100" class="form-control" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="" name="on_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -1187,6 +1241,62 @@
                                                 </fieldset>
                                             </div>
 
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="ol_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="ol_zero_cod_record" value="">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input data-rule-min="0" disabled data-rule-max="100" type="number"  class="form-control" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="" name="ol_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="ol_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="ol_return_discount_record" value="">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input  data-rule-min="0" data-rule-max="100" type="number"  class="form-control" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="" disabled name="ol_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="" >
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
 
                                         </div>
 
@@ -1755,6 +1865,62 @@
 
                                         </div>
 
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="detain_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="detain_zero_cod_record" value="">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input  data-rule-min="0" data-rule-max="100" type="number" disabled  class="form-control" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="" name="detain_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="detain_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="detain_return_discount_record" value="">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input  data-rule-min="0" data-rule-max="100" type="number"  class="form-control" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="" disabled name="detain_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="" >
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -2288,6 +2454,62 @@
                                                               </span>
                                                         </div>
                                                         <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_return_rate" disabled>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="sameday_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="sameday_zero_cod_record" value="">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input data-rule-min="0" data-rule-max="100" type="number"  class="form-control" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="" disabled name="sameday_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="" >
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="sameday_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="sameday_return_discount_record" value="">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input  data-rule-min="0" data-rule-max="100" type="number"  class="form-control" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="" disabled name="sameday_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="" >
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -3103,6 +3325,25 @@
 
             }
         };
+
+        $(document).on('change', '.switchery.ZeroCodDiscountCharges', function() {
+            var zeroCodInputDiv = $(this).closest('.row').next('.zero-cod-input-div');
+            var inputField = zeroCodInputDiv.find('input[type="number"]');
+            if ($(this).is(':checked')) {
+                inputField.removeAttr('disabled');
+            } else {
+                inputField.attr('disabled', 'disabled');
+            }
+        });
+        $(document).on('change', '.switchery.ReturnDiscountCharges', function() {
+            var ReturnDiscountInput = $(this).closest('.row').next('.return-discount-charges-input-div');
+            var inputField = ReturnDiscountInput.find('input[type="number"]');
+            if ($(this).is(':checked')) {
+                inputField.removeAttr('disabled');
+            } else {
+                inputField.attr('disabled', 'disabled');
+            }
+        });
 
         //Overland
         //var weightAdditionOverland = document.querySelector('.switchery.weightAdditionOverland0');
