@@ -34,7 +34,8 @@
 
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
-                                            <a href="{{ asset('file/Trax Book Retail Shipment Template.xlsx?v=1') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                            {{-- <a href="{{ asset('file/Trax Book Retail Shipment Template.xlsx?v=1') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a> --}}
+                                            <a href="{{ asset('file/Trax Book Retail Shipment Template New.xlsx?v=1') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                         </div>
                                     </div>
                                 </div>

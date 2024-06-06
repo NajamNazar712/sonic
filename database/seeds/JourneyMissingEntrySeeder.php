@@ -25,7 +25,7 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //
         $shipmentId = [
-            22322337249080, 22322335324741, 17422335807643];
+            144341037929881, 15943836918768];
         echo count($shipmentId);
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
@@ -38,7 +38,7 @@ class JourneyMissingEntrySeeder extends Seeder
                     $shipment->consignee_status_id = 14;
                     $shipment->save();
                 }
-                if (in_array($shipment->shipper_status_id, [13, 14, 18,55])) {
+                if (in_array($shipment->shipper_status_id, [13, 14])) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
                     $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
                     $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
@@ -95,14 +95,14 @@ class JourneyMissingEntrySeeder extends Seeder
                 $shipment_journey->verification = $verification;
                 $shipment_journey->created_at = $deliveryNoteId->updated_at;
                 $shipment_journey->updated_at = $deliveryNoteId->updated_at;
-                $shipment_journey->shipper_status_id = $status_id;
-                $shipment_journey->consignee_status_id = $status_id;
+                $shipment_journey->shipper_status_id = 12;
+                $shipment_journey->consignee_status_id = 12;
                 $shipment_journey->status_reason_id = null;
                 $shipment_journey->remarks =  null;
                 $shipment_journey->user_id = null;
                 $shipment_journey->admin_id = 346;
                 $shipment_journey->rider_id = null;
-                $shipment_journey->reference_1_id = $deliveryNoteId->delivery_note_id;
+                $shipment_journey->reference_1_id = 2141237;
                 $shipment_journey->reference_2_id = null;
                 $shipment_journey->received_or_refused_by = null;
                 $shipment_journey->relation = null;
