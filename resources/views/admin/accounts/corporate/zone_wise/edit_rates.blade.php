@@ -1027,6 +1027,85 @@
 
                                         </div>
 
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+                                            @php
+                                                $zero_cod_check = '';
+                                                $zero_cod_input = '';
+
+                                                if((isset($switches[1][0]) && $switches[1][0]->zero_cod_discount == 1)){
+
+                                                   $zero_cod_check = 'checked';
+                                                   $zero_cod_input = '';
+                                                 }else{
+                                                   $zero_cod_check = '';
+                                                   $zero_cod_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="on_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" {{$zero_cod_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="on_zero_cod_record" value="{{ (isset($zero_cod_discount[1][0]) && $zero_cod_discount[1][0]->id != '')? $zero_cod_discount[1][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" class="form-control @if(isset($e_zero_cod_discount[1][0]) && isset($zero_cod_discount[1][0]) && $e_zero_cod_discount[1][0]->cod_discount_per != $zero_cod_discount[1][0]->cod_discount_per) changed @elseif(!isset($e_zero_cod_discount[1][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_zero_cod_discount[1][0]) && isset($zero_cod_discount[1][0]) && $e_zero_cod_discount[1][0]->cod_discount_per != $zero_cod_discount[1][0]->cod_discount_per) {{$e_zero_cod_discount[1][0]->cod_discount_per}} @endif" name="on_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($zero_cod_discount[1][0]) && $zero_cod_discount[1][0]->cod_discount_per != '')? $zero_cod_discount[1][0]->cod_discount_per : ''}}" {{$zero_cod_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+                                            @php
+                                                $return_discount_check = '';
+                                                $return_discount_input = '';
+
+                                                if((isset($switches[1][0]) && $switches[1][0]->return_discount == 1)){
+                                                   $return_discount_check = 'checked';
+                                                   $return_discount_input = '';
+                                                 }else{
+                                                   $return_discount_check = '';
+                                                   $return_discount_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="on_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" {{$return_discount_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="on_return_discount_record" value="{{ (isset($return_discount_charges[1][0]) && $return_discount_charges[1][0]->id != '')? $return_discount_charges[1][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" type="number" data-rule-min="0" data-rule-max="100" class="form-control @if(isset($e_return_discount_charges[1][0]) && isset($return_discount_charges[1][0]) && $e_return_discount_charges[1][0]->return_discount_per != $return_discount_charges[1][0]->return_discount_per) changed @elseif(!isset($e_return_discount_charges[1][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_return_discount_charges[1][0]) && isset($return_discount_charges[1][0]) && $e_return_discount_charges[1][0]->return_discount_per != $return_discount_charges[1][0]->return_discount_per) {{$e_return_discount_charges[1][0]->return_discount_per}} @endif" name="on_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($return_discount_charges[1][0]) && $return_discount_charges[1][0]->return_discount_per != '')? $return_discount_charges[1][0]->return_discount_per : ''}}" {{$return_discount_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -1938,6 +2017,85 @@
                                                 </fieldset>
                                             </div>
 
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+                                            @php
+                                                $zero_cod_check = '';
+                                                $zero_cod_input = '';
+
+                                                if((isset($switches[2][0]) && $switches[2][0]->zero_cod_discount == 1)){
+
+                                                   $zero_cod_check = 'checked';
+                                                   $zero_cod_input = '';
+                                                 }else{
+                                                   $zero_cod_check = '';
+                                                   $zero_cod_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="ol_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" {{$zero_cod_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="ol_zero_cod_record" value="{{ (isset($zero_cod_discount[2][0]) && $zero_cod_discount[2][0]->id != '')? $zero_cod_discount[2][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_zero_cod_discount[2][0]) && isset($zero_cod_discount[2][0]) && $e_zero_cod_discount[2][0]->cod_discount_per != $zero_cod_discount[2][0]->cod_discount_per) changed @elseif(!isset($e_zero_cod_discount[2][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_zero_cod_discount[2][0]) && isset($zero_cod_discount[2][0]) && $e_zero_cod_discount[2][0]->cod_discount_per != $zero_cod_discount[2][0]->cod_discount_per) {{$e_zero_cod_discount[2][0]->cod_discount_per}} @endif" name="ol_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($zero_cod_discount[2][0]) && $zero_cod_discount[2][0]->cod_discount_per != '')? $zero_cod_discount[2][0]->cod_discount_per : ''}}" {{$zero_cod_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+                                            @php
+                                                $return_discount_check = '';
+                                                $return_discount_input = '';
+
+                                                if((isset($switches[2][0]) && $switches[2][0]->return_discount == 1)){
+                                                   $return_discount_check = 'checked';
+                                                   $return_discount_input = '';
+                                                 }else{
+                                                   $return_discount_check = '';
+                                                   $return_discount_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="ol_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" {{$return_discount_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="ol_return_discount_record" value="{{ (isset($return_discount_charges[2][0]) && $return_discount_charges[2][0]->id != '')? $return_discount_charges[2][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_return_discount_charges[2][0]) && isset($return_discount_charges[2][0]) && $e_return_discount_charges[2][0]->return_discount_per != $return_discount_charges[2][0]->return_discount_per) changed @elseif(!isset($e_return_discount_charges[2][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_return_discount_charges[2][0]) && isset($return_discount_charges[2][0]) && $e_return_discount_charges[2][0]->return_discount_per != $return_discount_charges[2][0]->return_discount_per) {{$e_return_discount_charges[2][0]->return_discount_per}} @endif" name="ol_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($return_discount_charges[2][0]) && $return_discount_charges[2][0]->return_discount_per != '')? $return_discount_charges[2][0]->return_discount_per : ''}}" {{$return_discount_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
 
                                         </div>
 
@@ -2868,6 +3026,85 @@
                                             </div>
                                         </div>
 
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+                                            @php
+                                                $zero_cod_check = '';
+                                                $zero_cod_input = '';
+
+                                                if((isset($switches[3][0]) && $switches[3][0]->zero_cod_discount == 1)){
+
+                                                   $zero_cod_check = 'checked';
+                                                   $zero_cod_input = '';
+                                                 }else{
+                                                   $zero_cod_check = '';
+                                                   $zero_cod_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="detain_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" {{$zero_cod_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="detain_zero_cod_record" value="{{ (isset($zero_cod_discount[3][0]) && $zero_cod_discount[3][0]->id != '')? $zero_cod_discount[3][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_zero_cod_discount[3][0]) && isset($zero_cod_discount[3][0]) && $e_zero_cod_discount[3][0]->cod_discount_per != $zero_cod_discount[3][0]->cod_discount_per) changed @elseif(!isset($e_zero_cod_discount[3][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_zero_cod_discount[3][0]) && isset($zero_cod_discount[3][0]) && $e_zero_cod_discount[3][0]->cod_discount_per != $zero_cod_discount[3][0]->cod_discount_per) {{$e_zero_cod_discount[3][0]->cod_discount_per}} @endif" name="detain_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($zero_cod_discount[3][0]) && $zero_cod_discount[3][0]->cod_discount_per != '')? $zero_cod_discount[3][0]->cod_discount_per : ''}}" {{$zero_cod_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+                                            @php
+                                                $return_discount_check = '';
+                                                $return_discount_input = '';
+
+                                                if((isset($switches[3][0]) && $switches[3][0]->return_discount == 1)){
+                                                   $return_discount_check = 'checked';
+                                                   $return_discount_input = '';
+                                                 }else{
+                                                   $return_discount_check = '';
+                                                   $return_discount_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="detain_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" {{$return_discount_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="detain_return_discount_record" value="{{ (isset($return_discount_charges[3][0]) && $return_discount_charges[3][0]->id != '')? $return_discount_charges[3][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_return_discount_charges[3][0]) && isset($return_discount_charges[3][0]) && $e_return_discount_charges[3][0]->return_discount_per != $return_discount_charges[3][0]->return_discount_per) changed @elseif(!isset($e_return_discount_charges[3][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_return_discount_charges[3][0]) && isset($return_discount_charges[3][0]) && $e_return_discount_charges[3][0]->return_discount_per != $return_discount_charges[3][0]->return_discount_per) {{$e_return_discount_charges[3][0]->return_discount_per}} @endif" name="detain_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($return_discount_charges[3][0]) && $return_discount_charges[3][0]->return_discount_per != '')? $return_discount_charges[3][0]->return_discount_per : ''}}" {{$return_discount_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -3750,6 +3987,85 @@
                                                               </span>
                                                         </div>
                                                         <input type="text"  class="form-control @if(isset($e_discountCharges[4][0]) && $e_same_discount_return_sw != $same_discount_return_sw) changed @elseif(!isset($e_discountCharges[4][0]) && $existing == 1) new @endif dec-percent sameday-discount-inp" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_discountCharges[4][0]) && $e_same_discount_return_sw != $same_discount_return_sw) {{$e_same_discount_return_sw}} @endif" data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_return_rate" value="{{$same_discount_return_sw}}" {{$same_discount_return_disable}}>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+                                            @php
+                                                $zero_cod_check = '';
+                                                $zero_cod_input = '';
+
+                                                if((isset($switches[4][0]) && $switches[4][0]->zero_cod_discount == 1)){
+
+                                                   $zero_cod_check = 'checked';
+                                                   $zero_cod_input = '';
+                                                 }else{
+                                                   $zero_cod_check = '';
+                                                   $zero_cod_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="sameday_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" {{$zero_cod_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="sameday_zero_cod_record" value="{{ (isset($zero_cod_discount[4][0]) && $zero_cod_discount[4][0]->id != '')? $zero_cod_discount[4][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_zero_cod_discount[4][0]) && isset($zero_cod_discount[4][0]) && $e_zero_cod_discount[4][0]->cod_discount_per != $zero_cod_discount[4][0]->cod_discount_per) changed @elseif(!isset($e_zero_cod_discount[4][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_zero_cod_discount[4][0]) && isset($zero_cod_discount[4][0]) && $e_zero_cod_discount[4][0]->cod_discount_per != $zero_cod_discount[4][0]->cod_discount_per) {{$e_zero_cod_discount[4][0]->cod_discount_per}} @endif" name="sameday_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($zero_cod_discount[4][0]) && $zero_cod_discount[4][0]->cod_discount_per != '')? $zero_cod_discount[4][0]->cod_discount_per : ''}}" {{$zero_cod_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+                                            @php
+                                                $return_discount_check = '';
+                                                $return_discount_input = '';
+
+                                                if((isset($switches[4][0]) && $switches[4][0]->return_discount == 1)){
+                                                   $return_discount_check = 'checked';
+                                                   $return_discount_input = '';
+                                                 }else{
+                                                   $return_discount_check = '';
+                                                   $return_discount_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="sameday_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" {{$return_discount_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="sameday_return_discount_record" value="{{ (isset($return_discount_charges[4][0]) && $return_discount_charges[4][0]->id != '')? $return_discount_charges[4][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_return_discount_charges[4][0]) && isset($return_discount_charges[4][0]) && $e_return_discount_charges[4][0]->return_discount_per != $return_discount_charges[4][0]->return_discount_per) changed @elseif(!isset($e_return_discount_charges[4][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_return_discount_charges[4][0]) && isset($return_discount_charges[4][0]) && $e_return_discount_charges[4][0]->return_discount_per != $return_discount_charges[4][0]->return_discount_per) {{$e_return_discount_charges[4][0]->return_discount_per}} @endif" name="sameday_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($return_discount_charges[4][0]) && $return_discount_charges[4][0]->return_discount_per != '')? $return_discount_charges[4][0]->return_discount_per : ''}}" {{$return_discount_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -5394,6 +5710,25 @@
 
             }
         };
+
+        $(document).on('change', '.switchery.ZeroCodDiscountCharges', function() {
+            var zeroCodInputDiv = $(this).closest('.row').next('.zero-cod-input-div');
+            var inputField = zeroCodInputDiv.find('input[type="number"]');
+            if ($(this).is(':checked')) {
+                inputField.removeAttr('disabled');
+            } else {
+                inputField.attr('disabled', 'disabled');
+            }
+        });
+        $(document).on('change', '.switchery.ReturnDiscountCharges', function() {
+            var ReturnDiscountInput = $(this).closest('.row').next('.return-discount-charges-input-div');
+            var inputField = ReturnDiscountInput.find('input[type="number"]');
+            if ($(this).is(':checked')) {
+                inputField.removeAttr('disabled');
+            } else {
+                inputField.attr('disabled', 'disabled');
+            }
+        });
         // packagingChargesSwitch.onchange = function () {
         //     if(packagingChargesSwitch.checked === true){
         //         $('#packaging_material_charges_div').slideDown('slow');
