@@ -123,6 +123,8 @@ class RetailTrackingController extends Controller
                                 $retail_user_id = $retail_shipment->retail_user_id;
                                 $retail_admin_id = $retail_shipment->admin_id;
                                 $retail_rider_id = $retail_shipment->rider_id;
+                                $parcelAmount = $retail_shipment->parcel_amount;
+                                $retailShipmentQuantity = $retail_shipment->quantity;
                                 if($retail_user_id){
                                     $retail_user = RetailUser::find($retail_user_id);
                                     if($retail_user->category == 1){
@@ -228,6 +230,10 @@ class RetailTrackingController extends Controller
                             $details['order_information']['instructions'] = $shipment->special_instructions;
                             $details['order_information']['pieces'] = $shipment->pieces;
                             $details['order_information']['business_category'] = $shipment->business_category->name;
+
+                            $details['order_information']['parcel_value'] = $parcelAmount;
+                            $details['order_information']['quantity'] = $retailShipmentQuantity;
+
                             foreach ($shipment->shipment_journey as $journey) {
                                 $journey_details = array();
 
