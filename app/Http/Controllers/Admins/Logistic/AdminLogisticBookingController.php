@@ -340,6 +340,9 @@ class AdminLogisticBookingController extends Controller
             return redirect()->back()->with(['error'=>'Booking id invalid']);
         }
         $logistic_booking = TraxLogisticBooking::where('id',$booking_id);
+        Log::channel('code_test_log')->error('logistic-bookingcheck'.json_encode($logistic_booking->exists()));
+        exit();
+
         if($logistic_booking->exists())
         {
             try {
