@@ -107,29 +107,30 @@
                                     </div>
             
                                     <div class="input-group mb-2">
-                                        <input type="text" name="franchise_gst" id="commission_percentage" class="form-control commission_percentage" placeholder="GST Commission"  value="" max="100" data-rule-required="true" data-msg-required="GST Commission is required">
+                                        <input type="text" name="franchise_gst" id="commission_percentage" class="form-control commission_percentage" placeholder="GST"  value="" max="100" data-rule-required="true" data-msg-required="GST is required">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
                                     </div>
             
-                                    <div class="input-group mb-2">
+                                    {{-- <div class="input-group mb-2">
                                         <input type="text" name="franchise_withholding" id="withholding_tax_percentage" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-rule-required="true" data-msg-required="Withholding Tax is required">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
-                                    </div>
+                                    </div> --}}
             
-                                    <div class="input-group mb-2">
+                                    {{-- <div class="input-group mb-2">
                                         <input type="text" name="franchise_deduction" id="deduction_percentage" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
 
                                 <div class="col-6">
-                                    <div class="row">
+                                    <h2>Commission</h2>
+                                    <div class="row mt-2">
                                         <div class="col-5">
                                             <div class="form-group">
                                                 <select name="retail_shipping_mode_id[]" id="retail_shipping_mode_id" class="select2 form-control retail_shipping_mode_id" data-rule-required="true" data-msg-required="Please choose a Product">
@@ -143,7 +144,7 @@
                                         <div class="col-5">
                                             <div class="form-group">
                                                 <div class="input-group mb-2">
-                                                    <input type="text" name="product_percentage[]" id="product_percentage" class="form-control product_percentage" placeholder="Product"  value="" max="100">
+                                                    <input type="text" name="product_percentage[]" id="product_percentage" class="form-control product_percentage" placeholder="Commission"  value="" max="100">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text" id="basic-addon2">%</span>
                                                     </div>
@@ -164,7 +165,7 @@
                                                 <thead>
                                                     <tr>
                                                         <th>Selected Option</th>
-                                                        <th>Product Percentage</th>
+                                                        <th>Commission Percentage</th>
                                                         <th>Action</th>
                                                     </tr>
                                                 </thead>
@@ -175,22 +176,22 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="attachment_1">Attachment 1</label>
-                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
+                                        <label for="attachment_1">Franchise Agreement</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_2">Attachment 2</label>
-                                        <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf">
+                                        <label for="attachment_2">Cheque Images</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept=".doc,.docx,.pdf">
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_3">Attachment 3</label>
+                                        <label for="attachment_3">Locaiton Pictures</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf">
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="attachment_4">Attachment 4</label>
+                                        <label for="attachment_4">Miscellaneous</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_4" id="attachment_4" accept="image/*,.doc,.docx,.pdf">
                                     </div>
 
@@ -261,28 +262,30 @@
                                 </div>
 
                                 <div class="input-group mb-2">
-                                    <input type="text" name="franchise_gst" id="commission_percentage_edit" class="form-control commission_percentage" placeholder="GST Commission"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="GST Commission">
+                                    <input type="text" name="franchise_gst" id="commission_percentage_edit" class="form-control commission_percentage" placeholder="GST"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="GST">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>
                                 </div>
 
-                                <div class="input-group mb-2">
+                                {{-- <div class="input-group mb-2">
                                     <input type="text" name="franchise_withholding" id="withholding_tax_percentage_edit" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Withholding Tax">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>
-                                </div>
+                                </div> --}}
 
-                                <div class="input-group mb-2">
+                                {{-- <div class="input-group mb-2">
                                     <input type="text" name="franchise_deduction" id="deduction_percentage_edit" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Deduction">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
+
                             <div class="col-6">
-                                <div class="row">
+                                <h2>Commission</h2>
+                                <div class="row mt-2">
                                     <div class="col-5">
                                         <div class="form-group">
                                             <select name="retail_shipping_mode_id[]" id="retail_shipping_mode_id_edit" class="select2 form-control retail_shipping_mode_id_edit" data-rule-required="true" data-msg-required="Please choose a shipping mode">
@@ -296,7 +299,7 @@
                                     <div class="col-5">
                                         <div class="form-group">
                                             <div class="input-group mb-2">
-                                                <input type="text" name="product_percentage[]" id="product_percentage_edit" class="form-control product_percentage_edit" placeholder="Product"  value="" max="100">
+                                                <input type="text" name="product_percentage[]" id="product_percentage_edit" class="form-control product_percentage_edit" placeholder="Commission"  value="" max="100">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text" id="basic-addon2">%</span>
                                                 </div>
@@ -315,7 +318,7 @@
                                             <thead>
                                                 <tr>
                                                     <th>Selected Option</th>
-                                                    <th>Product Percentage</th>
+                                                    <th>Commission Percentage</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -325,25 +328,25 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="attachment_1">Attachment 1</label>
-                                    <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf">
+                                    <label for="attachment_1">Franchise Agreement</label>
+                                    <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf">
                                     <a id="attachment_1_filename" target="_blank"></a>
                                 </div>
         
                                 <div class="form-group">
-                                    <label for="attachment_2">Attachment 2</label>
-                                    <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf">
+                                    <label for="attachment_2">Cheque Images</label>
+                                    <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept=".doc,.docx,.pdf">
                                     <a id="attachment_2_filename" target="_blank"></a>
                                 </div>
         
                                 <div class="form-group">
-                                    <label for="attachment_3">Attachment 3</label>
+                                    <label for="attachment_3">Locaiton Pictures</label>
                                     <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf">
                                     <a id="attachment_3_filename" target="_blank"></a>
                                 </div>
         
                                 <div class="form-group">
-                                    <label for="attachment_4">Attachment 4</label>
+                                    <label for="attachment_4">Miscellaneous</label>
                                     <input class="form-control form-control-sm" type="file" name="attachment_4" id="attachment_4" accept="image/*,.doc,.docx,.pdf">
                                     <a id="attachment_4_filename" target="_blank"></a>
                                 </div>
@@ -665,8 +668,8 @@
                     data: { franchise_id: id },
                     success: function (response) {
                         $('#commission_percentage_edit').val(response.data.franchise_gst);
-                        $('#withholding_tax_percentage_edit').val(response.data.franchise_withholding);
-                        $('#deduction_percentage_edit').val(response.data.franchise_deduction);
+                        // $('#withholding_tax_percentage_edit').val(response.data.franchise_withholding);
+                        // $('#deduction_percentage_edit').val(response.data.franchise_deduction);
                     }
                 });
 

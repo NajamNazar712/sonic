@@ -139,22 +139,22 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="attachment_1">Attachment 1</label>
-                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
+                                        <label for="attachment_1">Agreement File</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_2">Attachment 2</label>
+                                        <label for="attachment_2">Landlord CNIC front picture</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf">
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_3">Attachment 3</label>
+                                        <label for="attachment_3">Landlord CNIC back picture</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf">
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_4">Attachment 4</label>
+                                        <label for="attachment_4">Location pictures</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_4" id="attachment_4" accept="image/*,.doc,.docx,.pdf">
                                     </div>
             
@@ -269,25 +269,25 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="attachment_1">Attachment 1</label>
-                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1_edit" accept="image/*,.doc,.docx,.pdf">
+                                        <label for="attachment_1">Agreement File</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1_edit" accept=".doc,.docx,.pdf">
                                         <a id="attachment_1_filename" target="_blank"></a>
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_2">Attachment 2</label>
+                                        <label for="attachment_2">Landlord CNIC front picture</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2_edit" accept="image/*,.doc,.docx,.pdf">
                                         <a id="attachment_2_filename" target="_blank"></a>
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_3">Attachment 3</label>
+                                        <label for="attachment_3">Landlord CNIC back picture</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3_edit" accept="image/*,.doc,.docx,.pdf">
                                         <a id="attachment_3_filename" target="_blank"></a>
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_4">Attachment 4</label>
+                                        <label for="attachment_4">Location pictures</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_4" id="attachment_4_edit" accept="image/*,.doc,.docx,.pdf">
                                         <a id="attachment_4_filename" target="_blank"></a>
                                     </div>

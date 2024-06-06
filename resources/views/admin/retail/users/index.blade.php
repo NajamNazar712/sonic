@@ -132,108 +132,110 @@
                                 </div>
                                 
                                 <div class="col">
-                                    <div class="form-group">
-                                        <select name="marital_status" id="marital_status" class="select2 form-control">
-                                            <option value="" selected disabled>Select Marital Status</option>
-                                            <option value="1">Single</option>
-                                            <option value="2">Marital</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group marital_details d-none">
+                                    <div id="for_trax_users" class="">
                                         <div class="form-group">
-                                            <input type="text" name="family_member_name[]" id="spouse_name" class="form-control" placeholder="Spouse Name">
+                                            <select name="marital_status" id="marital_status" class="select2 form-control">
+                                                <option value="" selected disabled>Select Marital Status</option>
+                                                <option value="1">Single</option>
+                                                <option value="2">Marital</option>
+                                            </select>
                                         </div>
-                                        <div class="form-group">
-                                            <input type="date" name="family_member_name[]" id="spouse_dob" class="form-control" placeholder="Spouse DOB">
+    
+                                        <div class="form-group marital_details d-none">
+                                            <div class="form-group">
+                                                <input type="text" name="family_member_name[]" id="spouse_name" class="form-control" placeholder="Spouse Name">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="date" name="family_member_name[]" id="spouse_dob" class="form-control" placeholder="Spouse DOB">
+                                            </div>
+                                            <h4 class="">Children</h4>
+                                            <div class="row">
+    
+                                                <div class="col-9" id="child_input_container">
+                                                    <div class="child-template d-none">
+                                                        <div class="form-group row">
+                                                            <div class="col-9">
+                                                                <input type="text" class="form-control child_input" placeholder="Child">
+                                                            </div>
+                                                            <div class="col-3">
+                                                                <button type="button" class="btn btn-danger" id="remove_child_column_btn">
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button type="button" class="btn btn-primary" id="add_child_column_btn">
+                                                        Add
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <h4 class="">Children</h4>
+    
+                                        <h4 class="">Commission</h4>
                                         <div class="row">
-
-                                            <div class="col-9" id="child_input_container">
-                                                <div class="child-template d-none">
-                                                    <div class="form-group row">
-                                                        <div class="col-9">
-                                                            <input type="text" class="form-control child_input" placeholder="Child">
-                                                        </div>
-                                                        <div class="col-3">
-                                                            <button type="button" class="btn btn-danger" id="remove_child_column_btn">
-                                                                Remove
-                                                            </button>
+                                            <div class="col-5">
+                                                <div class="form-group">
+                                                    <select name="retail_shipping_mode_id[]" id="retail_shipping_mode_id" class="select2 form-control retail_shipping_mode_id" data-rule-required="true" data-msg-required="Please choose a Product">
+                                                        @foreach($shipping_modes as $shipping_mode)
+                                                            <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+    
+                                            <div class="col-5">
+                                                <div class="form-group">
+                                                    <div class="input-group mb-2">
+                                                        <input type="text" name="product_percentage[]" id="product_percentage" class="form-control product_percentage" placeholder="Product"  value="" max="100">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text" id="basic-addon2">%</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-3">
-                                                <button type="button" class="btn btn-primary" id="add_child_column_btn">
-                                                    Add
-                                                </button>
+    
+                                            <div class="col-2">
+                                                <input type="button" class="btn btn-primary" id="retail_product_add_btn" value="Add">
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <h4 class="">Commission</h4>
-                                    <div class="row">
-                                        <div class="col-5">
-                                            <div class="form-group">
-                                                <select name="retail_shipping_mode_id[]" id="retail_shipping_mode_id" class="select2 form-control retail_shipping_mode_id" data-rule-required="true" data-msg-required="Please choose a Product">
-                                                    @foreach($shipping_modes as $shipping_mode)
-                                                        <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
-                                                    @endforeach
-                                                </select>
+                                        <span id="error_message" class="text-danger"></span>
+    
+                                        <div class="row" id="tableRow" style="display: none;">
+                                            <div class="col">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Selected Option</th>
+                                                            <th>Product Percentage</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tableBody">
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                        </div>
-
-                                        <div class="col-5">
-                                            <div class="form-group">
-                                                <div class="input-group mb-2">
-                                                    <input type="text" name="product_percentage[]" id="product_percentage" class="form-control product_percentage" placeholder="Product"  value="" max="100">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text" id="basic-addon2">%</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-2">
-                                            <input type="button" class="btn btn-primary" id="retail_product_add_btn" value="Add">
-                                        </div>
-                                    </div>
-                                    <span id="error_message" class="text-danger"></span>
-
-                                    <div class="row" id="tableRow" style="display: none;">
-                                        <div class="col">
-                                            <table class="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Selected Option</th>
-                                                        <th>Product Percentage</th>
-                                                        <th>Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="tableBody">
-                                                </tbody>
-                                            </table>
                                         </div>
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="attachment_1">Attachment 1</label>
-                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
+                                        <label for="attachment_1">Franchise Agreement Form</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_2">Attachment 2</label>
+                                        <label for="attachment_2">CNIC front image</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf">
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_3">Attachment 3</label>
+                                        <label for="attachment_3">CNIC back image</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf">
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_4">Attachment 4</label>
+                                        <label for="attachment_4">Profile picture</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_4" id="attachment_4" accept="image/*,.doc,.docx,.pdf">
                                     </div>
             
@@ -717,6 +719,8 @@
                 var category = $(this).val();
                 if (category == 1) {
                     $('#trax_id').addClass("d-none");
+                    $('#salary').addClass("d-none");
+                    $('#for_trax_users').addClass("d-none");
                 } else {
                     $('#trax_id').removeClass("d-none");
                     $('#trax_id').on('input', function(event) {
@@ -724,6 +728,8 @@
                             return value.replace(/\D/g, '');
                         });
                     });
+                    $('#salary').removeClass("d-none");
+                    $('#for_trax_users').removeClass("d-none");
                 }
             });
         });
