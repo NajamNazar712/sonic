@@ -3791,6 +3791,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('info', 'Admins\LeadManagementController@info')->name('info');
         Route::post('edit', 'Admins\LeadManagementController@edit')->name('edit');
         Route::post('add', 'Admins\LeadManagementController@add')->name('add');
+        Route::get('edit_service_list', 'Admins\LeadManagementController@edit_service_list')->name('edit_service_list');
     });
 
     Route::prefix('pam_leads')->name('pam_leads.')->group(function () {

@@ -644,6 +644,15 @@
                                 <div class="form-group">
                                     <input type="text" class="form-control" name="company" id="edit_company" placeholder="Company*" data-rule-required="true"  data-msg-required="Company Name is required">
                                 </div>
+
+                                <div class="form-group mb-4">
+                                    <select name="service_id" id="edit_service" class="form-control select2" data-rule-required="true"  data-msg-required="Service is required">
+                                        @foreach($services as $service)
+                                            <option value="{{ $service->id }}"> {{ $service->name }} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
@@ -655,13 +664,9 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="modal-footer">
                             <div class="form-group ml-1">
                                 <button type="submit" class="btn btn-primary width-200" value="Add">Edit</button>
                                 <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
-
-                            </div>
                         </div>
                     </form>
 
@@ -2026,6 +2031,11 @@
                 width: '100%'
             });
 
+            $("#edit_service").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Service",
+                width: '100%'
+            });
+
             $("#add_territory").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Territory*",
                 width: '100%'
@@ -2127,6 +2137,27 @@
                 form_errors.find('.error').removeClass('error');
             });
 
+            $('#edit_lead_modal').on('show.bs.modal', function() {
+                var editLeadId = $('#edit_lead_id').val();
+                $.ajax({
+                    url: '{{ route('admin.leads.edit_service_list') }}',
+                    data: {
+                        'edit_lead_id': editLeadId,
+                    }
+                }).done(function(data) {
+                    if (data) {
+                        var serviceId = data.service_name.id;
+                        var serviceName = data.service_name.name;
+                        if ($('#edit_service option[value="' + serviceId + '"]').length == 0) {
+                            $('#edit_service').append('<option value="' + serviceId + '" selected>' + serviceName + '</option>');
+                        }
+                        $('#edit_service').select2({
+                            placeholder: "Select Service",
+                            width: '100%'
+                        });
+                    }
+                });
+            });
 
             var lead_table = $('#lead_info_table').DataTable({
                 dom: 'ltipr',
@@ -2189,6 +2220,7 @@
                             $('#edit_lead_form #edit_company').val(details.company);
                             $('#edit_lead_form #edit_territory').trigger('change');
                             $('#edit_lead_form #edit_reference_id').val(details.reference_id).trigger('change');
+                            $('#edit_lead_form #edit_service').val(details.service_id);
                             $('#edit_lead_form #edit_area').trigger('change');
                             $('#edit_lead_modal').modal('show');
 
