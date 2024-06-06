@@ -144,10 +144,13 @@ class AdminCnController extends Controller
             ->SELECT('trax_cn_receive_admin_stores.id','trax_cn_receive_admin_stores.receive_date','trax_cn_receive_admin_stores.company_code','trax_cn_receive_admin_stores.area_code','c.name as area_name','trax_cn_receive_admin_stores.product_id','s.product_name as segment_name','trax_cn_receive_admin_stores.cn_from','trax_cn_receive_admin_stores.cn_to','trax_cn_receive_admin_stores.quantity')
             ->where('trax_cn_receive_admin_stores.status',1)
             ->orderByDesc('trax_cn_receive_admin_stores.id');
+
         if (session('role_id') != 1)
         {
             $trax_cn_receive_admin_stores = $trax_cn_receive_admin_stores->whereIn('trax_cn_receive_admin_stores.area_code',[$hub_ids]);
         }
+        $trax_cn_receive_admin_stores->toSql();
+        dd($trax_cn_receive_admin_stores,$hub_ids);
 
         $datatables = Datatables::of($trax_cn_receive_admin_stores)
             ->addColumn('action',function ($trax_cn_receive_admin_stores){
