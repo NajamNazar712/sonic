@@ -167,7 +167,9 @@
                 $('#agent_id').val('').trigger('change.select2');
                 $('#city_id').val('').trigger('change.select2');
                 $('#territory_id').val('').trigger('change.select2');
-                
+                $('#is_lead_user').prop('checked', false);
+                $('remaining_territory_id').val('').trigger('change.select2');
+                $('#remaining_territory_select_div').addClass('d-none');
             });
 
             function toggleLeadUserCheckbox() {
@@ -183,6 +185,24 @@
                 toggleLeadUserCheckbox();
             });
 
+
+            function toggleLeadUserCheckboxEdit() {
+                var disableLeadUser = !$('#edit_agent_id').val() || !$('#edit_city_id').val() || !$('#edit_territory_id').val();
+                $('#edit_is_lead_user').prop('disabled', disableLeadUser);
+                if (disableLeadUser == true){
+                    $('#edit_remaining_territory_select_div').addClass('d-none');
+                } else if(disableLeadUser == false) {
+                    $('#edit_remaining_territory_select_div').removeClass('d-none');
+                }
+            }
+
+            $('#AssignAgentModal').on('show.bs.modal', function() {
+                toggleLeadUserCheckboxEdit();
+            });
+
+            $('#edit_agent_id, #edit_city_id, #edit_territory_id').change(function() {
+                toggleLeadUserCheckboxEdit();
+            });
 
             $('#territory_select').css('display','none');
             $('#agent_select').css('display','none');
@@ -350,6 +370,21 @@
                     data:edit_remaining_territory_obj
                 }); 
 
+                $('#EditAgentModal').on('show.bs.modal', function(){
+                    var selectedTerritoryIdModal = $('#edit_territory_id').val();
+                    var filteredTerritoriesModal = edit_remaining_territory_obj  .filter(function(item) {
+                        return item.id != selectedTerritoryIdModal;
+                    });
+                    $('#edit_remaining_territory_select_div').removeClass('d-none');
+                    $('#edit_remaining_territory_id').select2({
+                        width: '100%',
+                        placeholder: "Other Territory",
+                        allowClear: true,
+                        dropdownParent: $('#agent_edit'),
+                        data: filteredTerritoriesModal
+                    });
+                });
+
                 $('#edit_is_lead_user').unbind('change').change(function() {
                     if ($(this).is(':checked')) {
                         var selectedTerritoryId = $('#edit_territory_id').val();
@@ -467,7 +502,6 @@
                 }
             });
 
-            
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $.ajax({
@@ -491,6 +525,7 @@
                         $('#edit_is_lead_user').prop('checked', true);
                         $('#edit_remaining_territory_select_div').removeClass('d-none');
                     }
+                    $('#edit_remaining_territory_id').empty();  
                     if (data.other_territory_names && data.other_territory_names.length > 0) {
                         data.other_territory_names.forEach(function(territory) {
                             $('#edit_remaining_territory_id').append('<option value="' + territory.id + '" selected>' + territory.name + '</option>');
@@ -539,50 +574,51 @@
                                         });
                             });
 
+
+                
+                
                 
             });
+
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                                         $.ajax({
-                                            url:'{!! route("admin.settings.auto_tag_territories.enable_disable") !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'id': id,
-                                                '_token': '{{ csrf_token() }}'
-                                            }
-                                        }).done(function (data) {
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                            table.draw();
-                                        });
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_tag_territories.enable_disable") !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    toastr.success(data.success, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    table.draw();
+                });
+            });
 
+            $( "#agent_assign" ).validate({
+                    errorClass:"danger",
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function(form) {
+                        form.submit();    
+                    }
                 
             });
 
+            $( "#agent_edit" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    form.submit();    
+                }
             
-            $( "#agent_assign" ).validate({
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    form.submit();    
-                }
-                
-                });
-
-                $( "#agent_edit" ).validate({
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    form.submit();    
-                }
-                
-                });
+            });
         });
     </script>
 @endsection

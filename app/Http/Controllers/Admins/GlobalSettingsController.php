@@ -7292,6 +7292,7 @@ class GlobalSettingsController extends Controller
                     '-'
                 ) as territory_names")
         )
+        ->orderBy('auto_tag_territories.created_at', 'desc')
         ->groupBy('auto_tag_territories.admin_id');
 
         $datatables = Datatables::of($roles)
@@ -7364,17 +7365,38 @@ class GlobalSettingsController extends Controller
 
     public function auto_tag_territories_enable_disable(Request $request)
     {
+        $button_disable = null;
         $auto_tagging = AutoTagTerritory::find($request->id);
-        if ($auto_tagging->status == 1) {
-            $auto_tagging->status = 0;
-            $auto_tagging->save();
-            return redirect()->back()->with('success', 'Sales Person\'s Territory Disabled!');
+        if (!$auto_tagging) {
+            return redirect()->back()->with('error', 'Territory not found!');
+        }
+        $admin_user = $auto_tagging->admin_id;
+        $all_territories = AutoTagTerritory::where('admin_id', $admin_user)->get();
+        $status_enabled = 0;
+        $status_disabled = 0;
+
+        foreach ($all_territories as $territory) {
+            if ($territory->status == 1) {
+                $territory->status = 0;
+                $status_disabled++;
+                $button_disable = 0;
+            } else {
+                $territory->status = 1;
+                $status_enabled++;
+                $button_disable = 1;
+            }
+            $territory->save();
+        }
+
+        if ($status_disabled > 0 && $status_enabled == 0) {
+            return redirect()->back()->with('success', 'Sales Person\'s Territory Disabled!')->with('button_disable', $button_disable);
+        } elseif ($status_enabled > 0 && $status_disabled == 0) {
+            return redirect()->back()->with('success', 'Sales Person\'s Territory Enabled!')->with('button_disable', $button_disable);
         } else {
-            $auto_tagging->status = 1;
-            $auto_tagging->save();
-            return redirect()->back()->with('success', 'Sales Person\'s Territory Enabled!');
+            return redirect()->back()->with('success', 'Sales Person\'s Territories Updated!')->with('button_disable', $button_disable);
         }
     }
+
 
     public function auto_tag_territories_data(Request $request)
     {
@@ -7395,7 +7417,7 @@ class GlobalSettingsController extends Controller
         $total_terr = Territory::where('id', '!=', $all_territories[0])->pluck('id');
         $other_territory_ids = AutoTagTerritory::where('admin_id', $agent_id)
             ->whereIn('territory_id', $total_terr)->pluck('territory_id');
-        $other_territory_names = Territory::whereIn('id', $other_territory_ids)->get(); 
+        $other_territory_names = Territory::whereIn('id', $other_territory_ids)->get();
         return response()->json([
             'status' => 1, 
             'agent_id' => $agent_id, 
@@ -7410,6 +7432,10 @@ class GlobalSettingsController extends Controller
     public function auto_tag_territories_update(Request $request)
     {
         $auto_tagging = AutoTagTerritory::find($request->auto_tagging_id);
+        if ($auto_tagging->status == 0) {
+            return redirect()->back()->with('error', 'Sales Person\'s account is disabled!');
+        }
+
         $territory_ids = $request->territory_id;
         $first_territory = AutoTagTerritory::where('admin_id', $request->agent_id)->first();
         $is_lead_user = $request->has('is_lead_user') ? 1 : 0;
