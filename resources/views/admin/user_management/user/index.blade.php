@@ -92,9 +92,9 @@
 								<div class="col-4">
 									<fieldset class="form-group">
 										<select name="search_roles[]" id="search_roles" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-											@foreach($roles as $role)
+											{{-- @foreach($roles as $role)
 												<option value="{{$role->id}}">{{$role->name}} - {{$role->department->name}}</option>
-											@endforeach
+											@endforeach --}}
 										</select>
 									</fieldset>
 								</div>
@@ -103,7 +103,37 @@
 								</div>
 							</div>
 
+							<div class="row">
+                                <div class="col-md-8"></div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="heading-elements">
+                                                <ul class="list-inline mb-0">
+                                                    <li class="primary border-primary round"><a
+                                                                data-action="collapse">Legend
+                                                            <i class="ft-minus"></i></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="card-content collapse">
+                                            <div class="card-body p-1">
+                                                <h4 class=" info">Legend</h4>
+                                                <input type="hidden" id="legend_filter">
 
+                                                <table class="table mb-0">
+                                                    <tbody>
+                                                    <tr style="background-color: yellow; color:#010a10;" class="legends">
+                                                        <td class="align-middle" id="filter_management_users_btn">Management Users</td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
@@ -178,6 +208,14 @@
         #deSelectAllBtn {
 
             margin-bottom: 10px
+        }
+
+		.legends{
+            cursor:pointer;
+        }
+        
+        .is_management_user{
+            background-color: yellow;
         }
     </style>
 
@@ -308,6 +346,62 @@
 
 						}
 					},
+
+					{
+                        text: '<i class="la la-disable"></i> Management Users',
+                        className: 'btn btn-primary management_users',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if (selected_rows.length > 0) { 
+                                swal({
+                                    title: 'Management Users',
+                                    text: 'Are you sure you want to add management users?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: 'Cancel',
+                                        confirm: 'Yes, Add it'
+                                    },
+                                }).then((willDisable) => {
+                                    if (willDisable) {
+                                        $.ajax({
+                                            type: 'POST',
+											url: '{{ route('admin.user_management.users.add_management_users') }}',
+
+                                            data: {
+                                                userIDS: selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            },
+                                            success: function(res) {
+                                                if (res.status == '1') {
+                                                    swal('Added Successfully!', {
+                                                        icon: 'success',
+                                                    });
+
+										
+												table.rows().deselect();
+												selected_rows = [];
+												table.draw();
+
+                                                }else{
+                                                    swal(res.status, {
+                                                        icon: 'warning',
+                                                    });
+
+													table.clear().draw();
+                                                }
+                                            }, 
+                                            error: function(xhr, status, error) {
+                                                swal(status.status, {
+                                                    icon: 'warning',
+                                                })                                                
+                                            }
+                                        });
+                                      
+                                    } 
+                                });
+                            }
+                        }
+                    },
 					{
 						extend: 'selectAll',
 						text: 'Select All',
@@ -330,6 +424,8 @@
 									}
 
 									table.button('.assign').enable();
+									table.button('.management_users').enable();
+
 								}
 							});
 						}
@@ -355,6 +451,7 @@
 									}
 
 									if (selected_rows.length == 0) {
+										table.button('.management_users').disable();
 										table.button('.assign').disable();
 									}
 								}
@@ -393,6 +490,7 @@
 					url: '{{ route('admin.user_management.users.list') }}',
 					data: function (d) {
 						d.search_roles = $('#search_roles').val();
+						d.filter_management_users = $('#filter_management_users_btn').val();
 				}
 				},
 				rowId: 'id',
@@ -672,9 +770,14 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.assign').enable();
+					table.button('.management_users').enable();
+
+					
                 }
                 else {
                     table.button('.assign').disable();
+					table.button('.management_users').disable();
+
                 }
 			});
 			
@@ -705,70 +808,12 @@
 					}
 				}
 			});
+			$("#filter_management_users_btn").on('click',function (){
+                $("#filter_management_users_btn").val(1);
+                table.draw();
+            });
+			
 
-			$(document).on('click', '.lost_hub_user_shipment', function() {
-				var id = $(this).data('target-id');
-				$('#admin_id').val(id);
-
-				$.ajax({
-					url: '{!! route('admin.user_management.users.get_lost_hub_user_shipment') !!}',
-					method: 'GET',
-					data: {
-						admin_id: id
-					},
-					success: function(response) {
-						$('#select_lost_hub_user_shipment').val(null);
-						$(response.data).each(function(index, item) {
-							$('#select_lost_hub_user_shipment option[value="' + item + '"]').prop('selected', true);
-						});
-
-						$('#select_lost_hub_user_shipment').trigger('change');
-					},
-					error: function(xhr, status, error) {
-						console.error('Error:', error);
-					}
-				});
-
-				$('#lost_hub_user_shipment').modal('show');
-			});
-
-
-
-			$('#lost_hub_user_shipment').on('hidden.bs.modal', function (e) {
-				$('#admin_id ').val('');
-				$('#select_lost_hub_user_shipment').val([]).trigger('change');
-			});
-
-
-			$("#lost_hub_user_shipment_form").validate({
-
-				errorClass: "danger",
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
-				},
-				submitHandler: function(form) {
-					var lost_hub_shipment = $('#select_lost_hub_user_shipment').val();
-					if (lost_hub_shipment.length > 0) {
-
-						$(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-						swal({
-							title: 'Please Wait!',
-							text: 'Multiple Hub has been assigned!',
-							icon: 'info',
-							buttons: false,
-							closeOnClickOutside: false,
-							closeOnEsc: false
-						});
-						form.submit();
-
-					} else {
-						$('#assign_hubs_msg_error_1').removeClass('d-none');
-						console.log(1);
-					}
-						
-				}
-			});
 		});
 	</script>
 @endsection

@@ -4257,6 +4257,7 @@ class AdminReportsController extends Controller
         $petty = DB::connection('reports')->table('petty_cash_statement_details')->join('petty_cash_statements as pcs', 'pcs.id', '=', 'petty_cash_statement_details.petty_cash_statement_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 'petty_cash_statement_details.city_id')
             ->leftjoin('cities as h', 'h.id', '=', 'pcs.hub_id')
+            ->leftjoin('zones as z', 'z.id', '=', 'pcs.zone_id')
             ->leftjoin('admins as employee', 'employee.id', '=', 'petty_cash_statement_details.employee_id')
             ->leftjoin('station_deposit_notes as sdn', 'sdn.id', '=', 'pcs.sdn_id')
             ->join('admins as cb', 'cb.id', '=', 'pcs.created_by')
@@ -4266,7 +4267,7 @@ class AdminReportsController extends Controller
             ->leftjoin('petty_cash_account_titles as pct', 'pct.id', '=', 'petty_cash_statement_details.account_title_id')
             ->leftjoin('shipments', 'shipments.id', '=', 'pcs.shipment_id')
             ->leftjoin('admins as chb', 'chb.id', '=', 'pcs.checked_by')
-            ->select('pcs.id as statement_id', 'pcs.id as statement_link', 'dc.name as entry_city', 'petty_cash_statement_details.date as entry_date', 'pcs.date as p_entry_date', 'pch.name as account_head', 'pct.name as account_title', 'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no as entry_reference_no', 'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.reference_no as statement_reference_no', 'h.name as hub_name', 'cb.name as created_by', 'pcs.created_at', 'petty_cash_statement_details.station_amount', 'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'shipments.tracking_number', 'pcs.checked_at', 'chb.name as checked_by', 'employee.trax_id as employee_id', 'petty_cash_statement_details.employee_name', 'petty_cash_statement_details.employee_designation', 'sdn.id as sdn_id', 'sdn.dncc_count', 'petty_cash_statement_details.dncc_id as delivery_note', 'petty_cash_statement_details.delivered_shipments as delivered_shipments', 'dn.received_cod_amount as delivery_note_amount');
+            ->select('pcs.id as statement_id', 'pcs.id as statement_link', 'dc.name as entry_city', 'petty_cash_statement_details.date as entry_date', 'pcs.date as p_entry_date', 'pch.name as account_head', 'pct.name as account_title', 'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no as entry_reference_no', 'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.reference_no as statement_reference_no', 'h.name as hub_name', 'z.name as zone_name', 'cb.name as created_by', 'pcs.created_at', 'petty_cash_statement_details.station_amount', 'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'shipments.tracking_number', 'pcs.checked_at', 'chb.name as checked_by', 'employee.trax_id as employee_id', 'petty_cash_statement_details.employee_name', 'petty_cash_statement_details.employee_designation', 'sdn.id as sdn_id', 'sdn.dncc_count', 'petty_cash_statement_details.dncc_id as delivery_note', 'petty_cash_statement_details.delivered_shipments as delivered_shipments', 'dn.received_cod_amount as delivery_note_amount');
         //            ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
@@ -4277,7 +4278,6 @@ class AdminReportsController extends Controller
                     ->orWhereIn('pcs.hub_id', session('hubs'));
             });
         }
-
         $petty = Datatables::of($petty)
             ->editColumn('statement_link', function ($petty) {
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
@@ -10290,7 +10290,8 @@ class AdminReportsController extends Controller
             $datatable->where('shipments.user_id', $user);
         }
         if ($hub = $request->get('search_origin_hub')) {
-            $datatable->where('oc.hub_id', $hub);
+            // $datatable->where('oc.hub_id', $hub);
+            $datatable->whereIn('oc.hub_id', $hub);
         }
         if ($hub = $request->get('search_destination_hub')) {
             $datatable->where('dc.hub_id', $hub);
