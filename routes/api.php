@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 */
 
 
-Route::name('api.')->group(function () {
+    Route::name('api.')->group(function () {
 
 
     Route::post('shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
@@ -364,7 +364,21 @@ Route::name('api.')->group(function () {
                 });
             });
 
+            //logistic api endpoints
+            Route::prefix('v1')->name('v1.')->group(function (){
+
+                Route::prefix('logistic')->name('logistic.')->group(function (){
+                    Route::get('data','Rider\Logistic\Api\RiderLogisticApiController@logistic_data')->name('data');
+                    Route::post('store','Rider\Logistic\Api\RiderLogisticApiController@logistic_booking_store')->name('store');
+                    Route::post('shipper','Rider\Logistic\Api\RiderLogisticApiController@get_shipper_detail')->name('shipper');
+                    Route::post('store_image', 'Rider\Logistic\Api\RiderLogisticApiController@store_image')->name('store_image');
+                });
+
+            });
+
         });
+
+
     });
 
     Route::prefix('admin')->name('admin.')->group(function () {
