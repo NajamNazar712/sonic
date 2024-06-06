@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use function foo\func;
@@ -466,8 +467,9 @@ class AdminCnController extends Controller
 
 
 
-        } catch (\Exception $exception){
+        } catch (\Throwable $th){
             DB::rollBack();
+            Log::channel('code_test_log')->error('cn-failed'.json_encode($th->getMessage()));
             return redirect()->back()->with('error','Failed CN issue to rider');
         }
     }
