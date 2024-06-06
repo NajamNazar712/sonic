@@ -788,6 +788,13 @@ class Permission
             'crm.dashboard.index' => 869,
             'crm.dashboard.list' => 869,
 
+            'settings.shippers.base_rate_revisions.index' => 990,
+            'settings.shippers.base_rate_revisions.list' => 990,
+            'settings.shippers.base_rate_revisions.bulk_store' => 990,
+            'settings.shippers.base_rate_revisions.approval1_update' => 990,
+            'settings.shippers.base_rate_revisions.approval2_update' => 990,
+            'settings.shippers.base_rate_revisions.shippers_with_rates' => 990,
+
             'settings.shippers.status_webhook.index' => 646,
             'settings.shippers.status_webhook.list' => 646,
             'settings.shippers.status_webhook.edit' => 646,

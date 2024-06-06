@@ -2527,6 +2527,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('shippers')->name('shippers.')->group(function () {
+
+            Route::prefix('base_rate_revisions')->name('base_rate_revisions.')->group(function () {
+                Route::get('', 'Admins\Settings\Shippers\BaseRateRivisionController@index')->name('index');
+                Route::get('list', 'Admins\Settings\Shippers\BaseRateRivisionController@base_rate_revisions_list')->name('list');
+                Route::post('store', 'Admins\Settings\Shippers\BaseRateRivisionController@add_bulk_shipper_rate_adjustment_store')->name('bulk_store');
+                Route::get('{base_rate_revision_id}/approval1_update/{action}','Admins\Settings\Shippers\BaseRateRivisionController@approval1_update')->name('approval1_update');
+                Route::get('{base_rate_revision_id}/approval2_update/{action}','Admins\Settings\Shippers\BaseRateRivisionController@approval2_update')->name('approval2_update');
+                Route::get('shippers_with_rates/{base_rate_revision_id}', 'Admins\Settings\Shippers\BaseRateRivisionController@shippersWithRates')->name('shippers_with_rates');
+            });
+
             Route::prefix('status_webhook')->name('status_webhook.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@status_webhook_index')->name('index');
                 Route::get('list', 'Admins\GlobalSettingsController@status_webhook_list')->name('list');

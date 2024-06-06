@@ -1787,7 +1787,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 388, 375, 377, 378, 379, 380, 387, 384, 385, 394, 417, 418, 425, 438, 443, 447, 462, 477, 488, 491, 494, 498, 499, 526, 544, 558, 565, 580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674, 682, 683, 689, 697, 701, 708, 710, 714, 716, 747, 761, 788, 820, 826, 836, 846, 861, 887, 904, 889, 910,932,938,942,978], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 388, 375, 377, 378, 379, 380, 387, 384, 385, 394, 417, 418, 425, 438, 443, 447, 462, 477, 488, 491, 494, 498, 499, 526, 544, 558, 565, 580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674, 682, 683, 689, 697, 701, 708, 710, 714, 716, 747, 761, 788, 820, 826, 836, 846, 861, 887, 904, 889, 910,932,938,942,978,990], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
@@ -1796,6 +1796,11 @@
                             <li class=" nav-item"><a href="#"><span class="menu-title">Shippers</span></a>
                                 <ul class="menu-content">
                                     
+                                    @if (session('role_id') == 1 || in_array(990, session('permissions')))
+                                            <li><a class="menu-item"
+                                                    href="{{ route('admin.settings.shippers.base_rate_revisions.index') }}">Base Rate Revision</a></li>
+                                    @endif
+
                                     @if (session('role_id') == 1 || in_array(942, session('permissions')))
                                             <li><a class="menu-item"
                                                     href="{{ route('admin.settings.shipper_cap.index') }}">Shipper Cap</a></li>
