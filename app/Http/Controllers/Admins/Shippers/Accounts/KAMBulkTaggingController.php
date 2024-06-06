@@ -127,6 +127,6 @@ class KAMBulkTaggingController extends Controller
                 );
             }
         }
-        return redirect()->back()->with(['success' => count($rows) . ' Taggings updated successfully']);
+        return redirect()->back()->with(['success' => count($rows) . ($de_tag ? ' De-' : ' ') .'Taggings updated successfully']);
     }
 }
