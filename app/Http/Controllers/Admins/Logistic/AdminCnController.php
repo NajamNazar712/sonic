@@ -149,8 +149,8 @@ class AdminCnController extends Controller
         {
             $trax_cn_receive_admin_stores = $trax_cn_receive_admin_stores->whereIn('trax_cn_receive_admin_stores.area_code',[$hub_ids]);
         }
-        $trax_cn_receive_admin_stores->get();
-        dd($trax_cn_receive_admin_stores,$hub_ids);
+//        $trax_cn_receive_admin_stores->get();
+        dd( $trax_cn_receive_admin_stores->get());
 
         $datatables = Datatables::of($trax_cn_receive_admin_stores)
             ->addColumn('action',function ($trax_cn_receive_admin_stores){
