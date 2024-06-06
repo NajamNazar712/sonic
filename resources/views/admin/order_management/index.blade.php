@@ -930,7 +930,11 @@
                                 $('#requested_shipments').html(html_rows);
                             }
                             else{
-                                $('#AddFeedbackModal').modal('show');
+                                //$('#AddFeedbackModal').modal('show');
+                                toastr.error('Select at least one shipment!', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
                             }
                         }
                     },

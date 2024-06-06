@@ -182,6 +182,15 @@
                                             <div class="form-group col-6">
                                                 <input type="text" name="packaging_amount" id="packaging_amount" class="form-control rounded-right amount" placeholder="Packaging Amount">
                                             </div>
+
+                                            <div class="form-group col-6">
+                                                <input type="text" name="parcel_amount" id="parcel_amount" class="form-control rounded-right" placeholder="Parcel Value*" data-rule-required="true" data-msg-required="Parcel Value is required">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-6">
+                                                <input type="text" name="quantity" id="quantity" class="form-control rounded-right" placeholder="Quantity*" data-rule-required="true" data-msg-required="Quantity is required">
+                                            </div>
                                         </div>
                                         <div class="row">
                                             <div class="form-group col-6 d-none" id="trax_box_div">
@@ -1521,7 +1530,6 @@
                             $("#no_info_text").text('No information found')
                         }
                         else{
-                            // console.log(data.data.length);
                             // if(data.blacklist == 0){
                             //     $('#black_listed_employee').addClass('d-none');
                             // }else{
@@ -1648,6 +1656,16 @@
                         $('#cheque_image').removeClass('required');
                     }
                 }
+            });
+
+            $('#parcel_amount').on('input', function() {
+                var parcel_amount = $(this).val();
+                $(this).val(parcel_amount.replace(/[^0-9]/g, ''));
+            });
+
+            $('#quantity').on('input', function() {
+                var quantity = $(this).val();
+                $(this).val(quantity.replace(/[^0-9]/g, ''));
             });
 
         });
