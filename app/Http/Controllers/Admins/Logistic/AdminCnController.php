@@ -466,7 +466,7 @@ class AdminCnController extends Controller
 
 
 
-        } catch (\Throwable $th){
+        } catch (\Exception $exception){
             DB::rollBack();
             return redirect()->back()->with('error','Failed CN issue to rider');
         }
