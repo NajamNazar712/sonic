@@ -28,6 +28,7 @@ use App\Http\Models\Admin\Lead\LeadNotification;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Models\Admin\Lead\LeadCallStatusLog;
+use App\Http\Models\ServiceList;
 
 class LeadManagementController extends Controller
 {
@@ -818,6 +819,7 @@ class LeadManagementController extends Controller
             $details['email_address'] = $lead->email_address;
             $details['brand'] = $lead->brand;
             $details['company'] = $lead->company;
+            $details['service_id'] = $lead->service_id;
 
             return response()->json(['status' => 0, 'details' => $details]);
         } else {
@@ -825,8 +827,16 @@ class LeadManagementController extends Controller
         }
     }
 
-    public function edit(Request $request)
-    {
+    public function edit_service_list(Request $request){
+        $lead_service = Lead::where('id', $request->edit_lead_id)->first();
+        $service_id = $lead_service->service_id;
+        $service_name = ServiceList::where('id', $service_id)->first();
+        return response()->json([
+            'service_name' => $service_name
+        ]);
+    }
+
+    public function edit(Request $request){
 
         $lead_id = $request->edit_lead_id;
         if ($lead_id) {
@@ -841,6 +851,7 @@ class LeadManagementController extends Controller
                 $lead->company = $request->company;
                 $lead->reference_id = $request->edit_reference_id;
                 $lead->status_id = 15;
+                $lead->service_id = $request->service_id;
                 $lead->save();
 
                 LeadTaggingController::auto_tagging($lead->id, Auth::id());
