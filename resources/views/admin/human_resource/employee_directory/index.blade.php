@@ -1818,7 +1818,7 @@
             });
 
             $("#filter_line_manager_btn").on('click',function (){
-                $("#filter_line_manager").val(1);
+                $("#filter_line_manager_btn").val(1);
                 table.draw();
             });
 

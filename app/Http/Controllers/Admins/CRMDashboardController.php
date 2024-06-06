@@ -48,7 +48,7 @@ class CRMDashboardController extends Controller
 
     public function crm_dashboard_index(){
         // ActivityTrailController::createActivityTrailLog(Auth::id(),312);
-        $case_natures = CrmRequestCaseNature::select('id', 'name')->get();
+        $case_natures = CrmRequestCaseNature::where('id', '!=', 3)->select('id', 'name')->get();
         $case_nature_types = CrmRequestCaseNatureType::select('id', 'type')->get();
         $crm_request_statuses = CrmRequestStatus::whereNotIn('id',[5])->select('id', 'name')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();

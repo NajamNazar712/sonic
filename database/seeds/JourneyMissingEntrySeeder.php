@@ -24,8 +24,9 @@ class JourneyMissingEntrySeeder extends Seeder
     public function run()
     {
         //
-        $shipmentId = [777374426522,777374433304,28328837310837,20228837170629,20228837000426,20217436991659,223138636941286,28328836838756
-        ];
+        $shipmentId = [
+            22322337249080, 22322335324741, 17422335807643];
+        echo count($shipmentId);
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
 
@@ -37,9 +38,9 @@ class JourneyMissingEntrySeeder extends Seeder
                     $shipment->consignee_status_id = 14;
                     $shipment->save();
                 }
-                if ($shipment->shipper_status_id === 14) {
+                if (in_array($shipment->shipper_status_id, [13, 14, 18,55])) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
-                    $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->first();
+                    $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
                     $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
                     $zone = Zone::find($shipment->pickup_address->city->zone_id);
                     if ($zone->gst == '0.16') {
@@ -72,8 +73,8 @@ class JourneyMissingEntrySeeder extends Seeder
                     }
                     $pending_payment_shipment = new PendingPaymentShipment();
                     $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-                    $pending_payment_shipment->created_at = $shipment->created_at;
-                    $pending_payment_shipment->updated_at = $shipment->created_at;
+                    $pending_payment_shipment->created_at = $deliveryNoteId->updated_at;
+                    $pending_payment_shipment->updated_at = $deliveryNoteId->updated_at;
                     $pending_payment_shipment->shipment_id = $shipment->id;
                     $pending_payment_shipment->type = 0;
                     $pending_payment_shipment->amount = $shipment->amount;
@@ -89,17 +90,17 @@ class JourneyMissingEntrySeeder extends Seeder
                 }
                 $verification = 1;
                 $shipment_journey = new ShipmentsJourney();
-
+                $status_id = (!in_array($shipment->shipper_status_id, [14]) ? '14' : $shipment->shipper_status_id);
                 $shipment_journey->shipment_id = $shipment->id;
                 $shipment_journey->verification = $verification;
-                $shipment_journey->created_at = $shipment->updated_at;
-                $shipment_journey->updated_at = $shipment->updated_at;
-                $shipment_journey->shipper_status_id = $shipment->shipper_status_id;
-                $shipment_journey->consignee_status_id = $shipment->consignee_status_id;
+                $shipment_journey->created_at = $deliveryNoteId->updated_at;
+                $shipment_journey->updated_at = $deliveryNoteId->updated_at;
+                $shipment_journey->shipper_status_id = $status_id;
+                $shipment_journey->consignee_status_id = $status_id;
                 $shipment_journey->status_reason_id = null;
                 $shipment_journey->remarks =  null;
-                $shipment_journey->user_id = $shipment->user_id;
-                $shipment_journey->admin_id = null;
+                $shipment_journey->user_id = null;
+                $shipment_journey->admin_id = 346;
                 $shipment_journey->rider_id = null;
                 $shipment_journey->reference_1_id = $deliveryNoteId->delivery_note_id;
                 $shipment_journey->reference_2_id = null;
