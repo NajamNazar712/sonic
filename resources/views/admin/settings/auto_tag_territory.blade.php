@@ -70,6 +70,7 @@
                         <div class="form-group mt-2 d-none" id="remaining_territory_select_div">
                             <select name="territory_id[]" id="remaining_territory_id" class="form-control select2" multiple="multiple">
                             </select>
+                            <span class="text-danger d-none" id="remaining_territory_error">Assign at least 1 territory</span>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -128,6 +129,7 @@
                         <div class="form-group mt-2" id="edit_remaining_territory_select_div">
                             <select name="territory_id[]" id="edit_remaining_territory_id" class="form-control select2" multiple="multiple">
                             </select>
+                            <span class="text-danger d-none" id="edit_remaining_territory_error">Assign at least 1 territory</span>
                         </div>
                         
                     </div>
@@ -184,7 +186,6 @@
             $('#agent_id, #city_id, #territory_id').change(function() {
                 toggleLeadUserCheckbox();
             });
-
 
             function toggleLeadUserCheckboxEdit() {
                 var disableLeadUser = !$('#edit_agent_id').val() || !$('#edit_city_id').val() || !$('#edit_territory_id').val();
@@ -598,16 +599,45 @@
                 });
             });
 
-            $( "#agent_assign" ).validate({
-                    errorClass:"danger",
-                    errorPlacement: function(error, element) {
-                        error.addClass('w-100').appendTo(element.parent('.form-group'));
-                    },
-                    submitHandler: function(form) {
-                        form.submit();    
-                    }
+            // $( "#agent_assign" ).validate({
+            //         errorClass:"danger",
+            //         errorPlacement: function(error, element) {
+            //             error.addClass('w-100').appendTo(element.parent('.form-group'));
+            //         },
+            //         submitHandler: function(form) {
+            //             form.submit();    
+            //         }
                 
+            // });
+
+
+            $( "#agent_assign" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $('#assign_agentSubmit').on('click', function() {
+                        if ($('#is_lead_user').is(':checked') && $('#remaining_territory_id').val() == ''){
+                            $('#remaining_territory_error').removeClass('d-none');
+                        } else {
+                            $('#remaining_territory_error').addClass('d-none');
+                            form.submit();
+                        }
+                    });    
+                }
             });
+
+            // $( "#agent_edit" ).validate({
+            //     errorClass:"danger",
+            //     errorPlacement: function(error, element) {
+            //         error.addClass('w-100').appendTo(element.parent('.form-group'));
+            //     },
+            //     submitHandler: function(form) {
+            //         form.submit();    
+            //     }
+            
+            // });
 
             $( "#agent_edit" ).validate({
                 errorClass:"danger",
@@ -615,10 +645,19 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    form.submit();    
+                    $('#edit_agentSubmit').on('click', function() {
+                        if ($('#edit_is_lead_user').is(':checked') && $('#edit_remaining_territory_id').val() == ''){
+                            $('#edit_remaining_territory_error').removeClass('d-none');
+                        } else {
+                            $('#edit_remaining_territory_error').addClass('d-none');
+                            form.submit();
+                        }
+                    });  
                 }
             
             });
+
+            // assign_agentSubmit
         });
     </script>
 @endsection
