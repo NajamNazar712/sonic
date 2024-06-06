@@ -337,7 +337,6 @@ class ReturnV2Controller extends Controller
     //2  reattempt, 3 intercept, 5 on hold
     public function submit_ticket(Request $request)
     {
-        
         $validations = [
             'rv_assign_agent_status_id' => 'required',
             'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3, 8',
@@ -366,7 +365,7 @@ class ReturnV2Controller extends Controller
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->latest()->first();
             if($shipment_assign_agent){
                 $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at', date('Y-m-d'))->first();
-                $admin_agent = Admin::where('id', Auth::id())->first();
+                $admin_agent = Admin::where('id', Auth::id())->first();       
                 $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
                 // $employee = Employee::where('phone_number', $request->phone_number)->first();
                 // $employee_shift = EmployeeShift::where('id', $employee->shift_id)->first();
@@ -374,7 +373,10 @@ class ReturnV2Controller extends Controller
                 // Check Employee Shift Time
                     try{
                         DB::beginTransaction();
-                            //if agent already exists on same date update row
+                    //if agent already exists on same date update row
+                        if ($request->is_fake_status > 0) {
+                            $this->fakeStatusMarkedDeliveries($request);
+                        }
                         if ($assign_agent) 
                         {
                             $update_shipment_status = $this->update_shipment_status($request); //updating status of shipment
