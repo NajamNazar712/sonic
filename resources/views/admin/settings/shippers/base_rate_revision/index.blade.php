@@ -262,7 +262,7 @@
                 ajax: '{{ route('admin.settings.shippers.base_rate_revisions.list') }}',
                 rowId: 'id',
                 order: [
-                    [1, 'desc']
+                    [4, 'desc']
                 ],
                 columns: [{
                         orderable: false,
@@ -313,7 +313,6 @@
                         data: 'approval1_at',
                         name: 'approval1_at',
                         class: 'align-middle text-center approval1_at',
-                        orderable: false,
                     },
                     {
                         data: 'approval1_status',
@@ -331,7 +330,6 @@
                         data: 'approval2_at',
                         name: 'approval2_at',
                         class: 'align-middle text-center approval2_at',
-                        orderable: false,
                     },
                     {
                         data: 'approval2_status',
@@ -373,7 +371,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.file_view'))
+                        if($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.file_view') || $(header).is('.shippers_with_rate_change_count'))
                         {
                             $(td).appendTo($(search));
                         }

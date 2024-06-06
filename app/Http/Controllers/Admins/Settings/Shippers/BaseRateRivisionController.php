@@ -173,21 +173,26 @@ class BaseRateRivisionController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 797);
         }
 
-        $baseRateRevisions = BaseRateRevision::withCount('shippersWithRateChange')
-            ->with([
-                'rateType:id,name',
-                'addedByAdmin:id,name',
-                'approved1ByAdmin:id,name',
-                'approval1Status:id,name',
-                'approved2ByAdmin:id,name',
-                'approval2Status:id,name',
-            ])
-            ->orderBy('id','desc');
-            // dd($baseRateRevisions->get());
+        $baseRateRevisions = BaseRateRevision::leftJoin('base_rate_types', 'base_rate_revisions.rate_type_id', '=', 'base_rate_types.id')
+            ->leftJoin('admins as added_by_admin', 'base_rate_revisions.added_by_admin_id', '=', 'added_by_admin.id')
+            ->leftJoin('admins as approved1_by_admin', 'base_rate_revisions.approval1_by_admin_id', '=', 'approved1_by_admin.id')
+            ->leftJoin('base_rate_revision_approval_statuses as approval1_status', 'base_rate_revisions.approval1_status', '=', 'approval1_status.id')
+            ->leftJoin('admins as approved2_by_admin', 'base_rate_revisions.approval2_by_admin_id', '=', 'approved2_by_admin.id')
+            ->leftJoin('base_rate_revision_approval_statuses as approval2_status', 'base_rate_revisions.approval2_status', '=', 'approval2_status.id')
+            ->select(
+                'base_rate_revisions.*',
+                'base_rate_types.name as rate_type_name',
+                'added_by_admin.name as added_by_admin_name',
+                'approved1_by_admin.name as approved1_by_admin_name',
+                'approval1_status.name as approval1_status_name',
+                'approved2_by_admin.name as approved2_by_admin_name',
+                'approval2_status.name as approval2_status_name',
+                DB::raw('(SELECT COUNT(*) FROM base_rate_revision_shippers WHERE base_rate_revision_shippers.base_rate_revision_id = base_rate_revisions.id) as shippers_with_rate_change_count')
+            );
 
         $datatable = Datatables::of($baseRateRevisions)
             ->addColumn('rate_type_id', function ($revision) {
-                return $revision->rateType->name;
+                return $revision->rate_type_name;
             })
             ->addColumn('file_view', function ($revision) {
                 $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle fileViewButton" data-revision-id="' . $revision->id . '">
@@ -202,27 +207,31 @@ class BaseRateRivisionController extends Controller
                 return $revision->addedByAdmin->name;
             })
             ->filterColumn('addedByAdmin.name', function ($query, $keyword) {
-                $query->whereHas('addedByAdmin', function ($query) use ($keyword) {
-                    $query->where('name', 'like', "%{$keyword}%");
-                });
+                $query->where('added_by_admin.name', 'like', "%{$keyword}%");
             })
             ->addColumn('approved1_by_admin', function ($revision) {
-                return $revision->approved1ByAdmin ? $revision->approved1ByAdmin->name : '-';
+                return $revision->approved1_by_admin_name ? $revision->approved1_by_admin_name : '-';
+            })
+            ->filterColumn('approved1_by_admin', function ($query, $keyword) {
+                $query->where('approved1_by_admin.name', 'like', "%{$keyword}%");
             })
             ->addColumn('approval1_status', function ($revision) {
-                return $revision->approval1Status->name;
+                return $revision->approval1_status_name;
             })
             ->editColumn('approval1_at', function ($revision) {
                 return $revision->approval1_at ? $revision->approval1_at->format('Y-m-d H:i:s') : '-';
             })
             ->addColumn('approved2_by_admin', function ($revision) {
-                return $revision->approved2ByAdmin ? $revision->approved2ByAdmin->name : '-';
+                return $revision->approved2_by_admin_name ? $revision->approved2_by_admin_name : '-';
+            })
+            ->filterColumn('approved2_by_admin', function ($query, $keyword) {
+                $query->where('approved2_by_admin.name', 'like', "%{$keyword}%");
             })
             ->editColumn('approval2_at', function ($revision) {
                 return $revision->approval2_at ? $revision->approval2_at->format('Y-m-d H:i:s') : '-';
             })
             ->addColumn('approval2_status', function ($revision) {
-                return $revision->approval2Status->name;
+                return $revision->approval2_status_name;
             })
             ->addColumn('action', function ($revision) {
                 // Check if dropdown should be shown based on approval statuses and user role
