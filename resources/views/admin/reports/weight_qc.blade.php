@@ -212,7 +212,7 @@
                 width: '100%',
                 placeholder: 'Select Shipper',
             });
-            $('#search_form #search_origin_hub').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_form #search_origin_hub').prepend('<option value=""></option>').select2({
                 width: '100%',
                 placeholder: 'Origin Hub',
             });

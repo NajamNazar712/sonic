@@ -44,7 +44,7 @@ class LeadManagementController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 4);
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
         $statuses = LeadStatus::all();
-        $lead_statuses = LeadStatus::whereNotIn('id', [1,12,14,4,10,5,7])->get();
+        $lead_statuses = LeadStatus::whereNotIn('id', [1, 12, 14, 4, 10, 5, 7])->get();
         $services = DB::table('service_list')->get();
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(58)->startOfDay();
@@ -55,7 +55,7 @@ class LeadManagementController extends Controller
         $leads['in_process_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date', [$thirtyDays, $today]);
         $leads['dead_leads'] = Lead::whereIn('status_id', [3, 4, 10, 11, 13])->whereBetween('requested_date', [$thirtyDays, $today]);
         $leads['accounts_activated'] = Lead::where('status_id', 12)->whereBetween('requested_date', [$thirtyDays, $today]);
-        $leads['dormant'] = Lead::where('status_id', 14)->whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['dormant'] = Lead::where('status_id', 14)->whereBetween('requested_date', [$thirtyDays, $today]);
 
         if (session('role_id') != 1) {
             $leads['total'] = $leads['total']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
@@ -169,13 +169,13 @@ class LeadManagementController extends Controller
             ->leftjoin('territories as t', 't.id', '=', 'leads.territory_id')
             ->leftjoin('area_territories as at', 'at.id', '=', 'leads.territory_area_id')
             ->leftjoin('admins as sp', 'sp.id', '=', 'leads.sale_person_id')
-            ->leftjoin('admins as rp', 'rp.id', '=', 'leads.reference_person_id')
+            ->leftjoin('riders as rp', 'rp.id', '=', 'leads.reference_person_id')
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('lead_references as lr', 'lr.id', '=', 'leads.reference_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id','leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status');
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status','leads.expected_shipments as expected_shipments');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -230,7 +230,7 @@ class LeadManagementController extends Controller
                 if ($days == 0) {
                     return "-";
                 } else {
-                    return $days.' d';
+                    return $days . ' d';
                 }
             })
             ->addColumn('sale_person_tagged_aging', function ($lead) {
@@ -238,7 +238,7 @@ class LeadManagementController extends Controller
                 if ($days == 0) {
                     return "-";
                 } else {
-                    return $days.'  d';
+                    return $days . '  d';
                 }
             })
             ->editColumn('reason_id', function ($lead) {
@@ -266,21 +266,21 @@ class LeadManagementController extends Controller
                 if (session('role_id') == 1 || in_array(420, session('permissions'))) {
                     $dropdown .= '<button type="button"  class="dropdown-item forward_lead" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Forward Lead</div></button>';
                 }
-//                $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
+                //                $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.leads.view_remarks', ['id' => $lead->lead_id]) . '\')" type="button" class="dropdown-item view_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Remarks</div></button>';
 
                 if ((session('role_id') == 1 || in_array(870, session('permissions'))) && $lead->call_status == 'no') {
-                    $dropdown .= '<button type="button"  class="dropdown-item call_status" data-id = '.$lead->lead_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make A Call</div></button>';
-
-                }if((session('role_id') == 1 || in_array(871, session('permissions'))) && $lead->call_status == 'yes'){
-                    $dropdown .= '<button type="button"  class="dropdown-item call_status"  data-id = '.$lead->lead_id.' ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">End A Call</div></button>';
+                    $dropdown .= '<button type="button"  class="dropdown-item call_status" data-id = ' . $lead->lead_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make A Call</div></button>';
+                }
+                if ((session('role_id') == 1 || in_array(871, session('permissions'))) && $lead->call_status == 'yes') {
+                    $dropdown .= '<button type="button"  class="dropdown-item call_status"  data-id = ' . $lead->lead_id . ' ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">End A Call</div></button>';
                 }
 
-                if ((session('role_id') == 1 || (in_array(696, session('permissions')) && (!in_array($lead->status_id ,[9, 12]))))) {
+                if ((session('role_id') == 1 || (in_array(696, session('permissions')) && (!in_array($lead->status_id, [9, 12]))))) {
                     $dropdown .= '<button type="button"  class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 }
 
-                
+
 
                 return $dropdown;
             })->make(true);
@@ -300,7 +300,7 @@ class LeadManagementController extends Controller
 
         $leads = PamLead::leftjoin('cities as o', 'o.id', '=', 'pam_leads.origin_id')
             ->leftjoin('cities as d', 'd.id', '=', 'pam_leads.destination_id')
-            ->select(['pam_leads.created_at as lead_created_at','pam_leads.id as id', 'pam_leads.lead_id as lead_id', 'pam_leads.name as name', 'pam_leads.phone as phone', 'pam_leads.location_type as category', 'pam_leads.case_type as case', 'pam_leads.video_link as video_link', 'pam_leads.images as images', 'o.name as origin', 'd.name as destination', DB::raw('(select count(id) from pam_lead_items as pli where pli.lead_id = pam_leads.id) as item_count')]);
+            ->select(['pam_leads.created_at as lead_created_at', 'pam_leads.id as id', 'pam_leads.lead_id as lead_id', 'pam_leads.name as name', 'pam_leads.phone as phone', 'pam_leads.location_type as category', 'pam_leads.case_type as case', 'pam_leads.video_link as video_link', 'pam_leads.images as images', 'o.name as origin', 'd.name as destination', DB::raw('(select count(id) from pam_lead_items as pli where pli.lead_id = pam_leads.id) as item_count')]);
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('o.hub_id', session('hubs'));
@@ -334,13 +334,11 @@ class LeadManagementController extends Controller
                 if ($lead->images != null) {
                     $images = explode('|', $lead->images);
                     $html = "";
-                    foreach ($images as $image)
-                    {
+                    foreach ($images as $image) {
                         $exists = Storage::disk('public')->exists($image);
                         if ($exists) {
                             $route = Storage::disk('public')->url($image);
-                        }
-                        else{
+                        } else {
                             $route = Storage::disk('s3')->temporaryUrl($image, now()->addMinutes(5));
                         }
                         $html .= '<a target="_blank" class="btn btn-sm btn-outline-info align-middle" href="' . $route . '"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View Image</span></a><br>';
@@ -555,19 +553,18 @@ class LeadManagementController extends Controller
                 $lead->updated_by = Auth::id();
                 $lead->save();
 
-                if($lead->sale_person_id != NULL){
+                if ($lead->sale_person_id != NULL) {
                     if ($status == 9) {
                         NotificationsController::send(113, $lead);
                     } elseif ($status == 2) {
                         LeadTaggingController::notification_unresponsive($lead->id);
                     }
                 }
-                if($status == 11)
-                {
+                if ($status == 11) {
                     $detail = array();
                     $detail['name'] = $lead->contact_person;
                     $detail['contact_number'] = $lead->phone_number;
-                    $reason = LeadReason::where('id',$lead->reason)->select('name')->first();
+                    $reason = LeadReason::where('id', $lead->reason)->select('name')->first();
                     $detail['reason'] = $reason->name;
                     NotificationsController::send(181, $detail);
                 }
@@ -611,7 +608,7 @@ class LeadManagementController extends Controller
                     $lead->reason = $reason;
                     $lead->updated_by = Auth::id();
                     $lead->save();
-                    if($lead->sale_person_id != NULL){
+                    if ($lead->sale_person_id != NULL) {
                         if ($status == 9) {
                             NotificationsController::send(113, $lead);
                         } elseif ($status == 2) {
@@ -619,20 +616,18 @@ class LeadManagementController extends Controller
                         }
                     }
 
-                    if($status == 11)
-                    {
+                    if ($status == 11) {
                         $detail = array();
                         $detail['name'] = $lead->contact_person;
                         $detail['contact_number'] = $lead->phone_number;
-                        $reason1 = LeadReason::where('id',$lead->reason)->select('name')->first();
+                        $reason1 = LeadReason::where('id', $lead->reason)->select('name')->first();
                         $detail['reason'] = $reason1->name;
                         NotificationsController::send(181, $detail);
                     }
-
                 } else {
                     return response()->json(['status' => 0, 'error' => 'Lead not found!']);
                 }
-//
+                //
 
             }
             return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
@@ -707,7 +702,6 @@ class LeadManagementController extends Controller
         } else {
             return redirect()->back()->with('error', 'Lead not found!');
         }
-
     }
 
     public function tag_sale_person_forward_lead(Request $request)
@@ -775,45 +769,47 @@ class LeadManagementController extends Controller
         return view('admin.leads.attachment_view')->with(['url' => $url]);
     }
 
-    public function lead_reasons(Request $request){
+    public function lead_reasons(Request $request)
+    {
         $lead_reason = LeadReason::join('lead_status_reasons as lsr', 'lsr.reason_id', 'lead_reasons.id')
             ->select('lead_reasons.id as id', 'lead_reasons.name as name')
             ->where('lsr.status_id', $request->status_id);
-        if($lead_reason->exists()) {
+        if ($lead_reason->exists()) {
             $lead_reason = $lead_reason->get();
             return response()->json(['status' => 1, 'lead_reasons' => $lead_reason]);
-        }else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Reason not found!']);
         }
     }
 
-    public function info(Request $request){
+    public function info(Request $request)
+    {
         $lead_id = $request->lead_id;
 
         $lead = Lead::find($lead_id);
-        if($lead_id){
+        if ($lead_id) {
             $details = array();
             $details['city'] = '';
             $details['city_id'] = NULL;
             $details['territory'] = '';
             $details['area'] = '';
-            if($lead->city_id){
+            if ($lead->city_id) {
                 $details['city'] = $lead->city->name;
                 $details['city_id'] = $lead->city_id;
             }
 
-            if($lead->territory_id){
+            if ($lead->territory_id) {
                 $details['territory'] = Territory::find($lead->territory_id)->name;
                 $details['territory_id'] = $lead->territory_id;
             }
-            if($lead->territory_area_id){
+            if ($lead->territory_area_id) {
                 $details['area'] = AreaTerritory::find($lead->territory_area_id)->name;
                 $details['area_id'] = $lead->territory_area_id;
             }
 
             $details['reference'] = '';
             $details['reference_id'] = '';
-            if($lead->reference_id){
+            if ($lead->reference_id) {
                 $details['reference'] = LeadReference::find($lead->reference_id)->name;
                 $details['reference_id'] = $lead->reference_id;
             }
@@ -826,9 +822,8 @@ class LeadManagementController extends Controller
             $details['service_id'] = $lead->service_id;
 
             return response()->json(['status' => 0, 'details' => $details]);
-        }
-        else{
-           return response()->json(['status' => 1, 'error' => 'Invalid Lead ID!']);
+        } else {
+            return response()->json(['status' => 1, 'error' => 'Invalid Lead ID!']);
         }
     }
 
@@ -844,9 +839,9 @@ class LeadManagementController extends Controller
     public function edit(Request $request){
 
         $lead_id = $request->edit_lead_id;
-        if($lead_id){
+        if ($lead_id) {
             $lead = Lead::find($lead_id);
-            if($lead){
+            if ($lead) {
                 $lead->city_id = $request->city_id;
                 $lead->territory_id = $request->territory_id;
                 $lead->territory_area_id = $request->territory_area_id;
@@ -859,7 +854,7 @@ class LeadManagementController extends Controller
                 $lead->service_id = $request->service_id;
                 $lead->save();
 
-                LeadTaggingController::auto_tagging($lead->id,Auth::id());
+                LeadTaggingController::auto_tagging($lead->id, Auth::id());
                 return redirect()->back()->with('success', 'Lead Edited successfully!');
             }
             return redirect()->back()->with('error', 'Lead not found!');
@@ -867,7 +862,8 @@ class LeadManagementController extends Controller
         return redirect()->back()->with('error', 'Something went wrong!');
     }
 
-    public function add(Request $request){
+    public function add(Request $request)
+    {
 
         try {
 
@@ -883,12 +879,12 @@ class LeadManagementController extends Controller
             $new_lead->territory_area_id = $request->territory_area_id;
             $new_lead->brand = $request->brand;
             $new_lead->company = $request->company;
+            $new_lead->expected_shipments = $request->expected_shipments;
             $new_lead->status_id = 1;
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
 
             return redirect()->back()->with('success', 'Lead added successfully');
-
         } catch (Exception $e) {
 
             return $e->getMessage();
@@ -897,64 +893,61 @@ class LeadManagementController extends Controller
 
     public function call_status_change(Request $request)
     {
-            $validations = [
-                'id' => 'required',
-            ];
+        $validations = [
+            'id' => 'required',
+        ];
 
-            $validate = Validator::make($request->all(), $validations);
+        $validate = Validator::make($request->all(), $validations);
 
-            if ($validate->fails()) {
-                return response()->json(['status' => 0, 'errors' => $validate->errors()]);
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'errors' => $validate->errors()]);
+        } else {
+            $id = $request->id;
+            $lead = Lead::find($id);
+
+
+            $lead_status  = LeadStatus::where('id', $lead->status_id);
+
+
+            if ($lead_status->exists()) {
+                $lead_status = $lead->status->name;
             } else {
-                $id = $request->id;
-                $lead = Lead::find($id);
-
-
-                $lead_status  = LeadStatus::where('id', $lead->status_id);
-
-
-                if($lead_status->exists()){
-                    $lead_status = $lead->status->name;
-                }else{
-                    $lead_status = '-';
-                }
-
-                if($lead->call_status == 'no')
-                {
-                    $lead->call_status = 'yes';
-
-                    $log = new LeadCallStatusLog();
-
-                    $log->lead_id = $lead->id;
-                    $log->admin = Auth::id();
-                    $log->ip = $request->ip();
-                    $log->lead_status  = $lead_status;
-                    $log->call_status = 'yes';
-                    $log->created_at = Carbon::now();
-
-                    $lead->save();
-                    $log->save();
-
-                    return response()->json(['status' => 1]);
-                }else{
-                    $log = new LeadCallStatusLog();
-
-                    $lead->call_status = 'no';
-
-                    $log->lead_id = $lead->id;
-                    $log->admin = Auth::id();
-                    $log->ip = $request->ip();
-                    $log->lead_status  = $lead_status;
-                    $log->call_status = 'no';
-                    $log->created_at = Carbon::now();
-
-                    $lead->save();
-                    $log->save();
-                
-                    return response()->json(['status' => 1]);
-
-                }
-            
+                $lead_status = '-';
             }
+
+            if ($lead->call_status == 'no') {
+                $lead->call_status = 'yes';
+
+                $log = new LeadCallStatusLog();
+
+                $log->lead_id = $lead->id;
+                $log->admin = Auth::id();
+                $log->ip = $request->ip();
+                $log->lead_status  = $lead_status;
+                $log->call_status = 'yes';
+                $log->created_at = Carbon::now();
+
+                $lead->save();
+                $log->save();
+
+                return response()->json(['status' => 1]);
+            } else {
+                $log = new LeadCallStatusLog();
+
+                $lead->call_status = 'no';
+
+                $log->lead_id = $lead->id;
+                $log->admin = Auth::id();
+                $log->ip = $request->ip();
+                $log->lead_status  = $lead_status;
+                $log->call_status = 'no';
+                $log->created_at = Carbon::now();
+
+                $lead->save();
+                $log->save();
+
+                return response()->json(['status' => 1]);
+            }
+        }
     }
 }
