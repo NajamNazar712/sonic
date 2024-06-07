@@ -13876,28 +13876,24 @@ class AdminReportsController extends Controller
         $ops_data = [];
 
         $shipment_journey_min_id =  DB::connection('reports')->table('shipments_journey')->where('created_at' , '>=' , $from)->orderBy('id','asc')->pluck('id')->first();
+
         $shipments = DB::connection('reports_2')->table('shipments')
-            ->leftJoin('shipments_journey as sj', function ($join) use ($shipment_journey_min_id) {
-                if($shipment_journey_min_id)
-                {
-                    $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sj.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52,55, 5,20,14,12) and verification = 1 and  shipments_journey.id >= '.$shipment_journey_min_id.')')
-                    );
-                }
-                else{
-                    $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sj.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52,55, 5,20,14,12) and verification = 1)')
-                    );
-                }
-                
-            })
-            ->whereBetween('sj.created_at', [$from, $to])->get();
+        ->leftJoin('shipments_journey as sj', function ($join) use ($shipment_journey_min_id) {
+            if($shipment_journey_min_id) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52, 55, 5, 20, 14, 12) and verification = 1 and shipments_journey.id >= '.$shipment_journey_min_id.')'));
+            } else {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52, 55, 5, 20, 14, 12) and verification = 1)'));
+            }
+        })
+        ->leftJoin('shipments_journey as sjs', function ($join) {
+            $join->on('sjs.shipment_id', '=', 'shipments.id')
+                ->where('sjs.id', '=', DB::connection('reports')->raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and verification = 1 order by id desc limit 1 offset 1)'));
+        })
+        ->whereBetween('sj.created_at', [$from, $to])
+        ->select('shipments.*', 'sj.*', 'sjs.shipper_status_id as second_last_shipper_id')
+        ->get();
 
 
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
@@ -13982,7 +13978,10 @@ class AdminReportsController extends Controller
                     {
                         $created_date = Carbon::parse($shipment_data->created_at);
 
-                        if(in_array($shipment_data->consignee_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate,$re_attempt_and_intercept_endDate))
+                        if(in_array($shipment_data->consignee_status_id,$pending_status) && $created_date->between($other_pending_status_startDate,$other_pending_status_endDate) && ($shipment_data->second_last_shipper_id == 20)){
+                            $data['ready_for_delivery'] += 0;
+                        }
+                        else if(in_array($shipment_data->consignee_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate,$re_attempt_and_intercept_endDate))
                         {
                             $data['ready_for_delivery'] += 1;
                         }
