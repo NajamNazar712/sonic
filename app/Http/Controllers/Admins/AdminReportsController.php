@@ -13901,7 +13901,7 @@ class AdminReportsController extends Controller
 
             
 
-        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 15, 49, 59);
+        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
         $re_attempt_and_intercept_status = array(13 ,55);
 
         $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subMonths(8)->setTime(21, 00, 00);  //last 6 month
