@@ -97,8 +97,8 @@ class JourneyMissingEntrySeeder extends Seeder
                 $status_id = (!in_array($shipment->shipper_status_id, [14]) ? '14' : $shipment->shipper_status_id);
                 $shipment_journey->shipment_id = $shipment->id;
                 $shipment_journey->verification = $verification;
-                $shipment_journey->created_at = $deliveryNoteId->updated_at;
-                $shipment_journey->updated_at = $deliveryNoteId->updated_at;
+                $shipment_journey->created_at = $deliveryNoteId->updated_at ?? $shipmentId->updated_at;
+                $shipment_journey->updated_at = $deliveryNoteId->updated_at ?? $shipmentId->updated_at;
                 $shipment_journey->shipper_status_id = 22;
                 $shipment_journey->consignee_status_id = 22;
                 $shipment_journey->status_reason_id = null;
