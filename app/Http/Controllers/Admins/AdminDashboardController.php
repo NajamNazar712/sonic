@@ -2,6 +2,16 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\CorporateShipmentReturnDiscountCharges;
+use App\CorporateZeroCodDiscountCharges;
+use App\HistoryShipmentReturnDiscountCharges;
+use App\HistoryZeroCodDiscountCharges;
+use App\PendingCorporateShipmentReturnDiscountCharges;
+use App\PendingCorporateZeroCodDiscountCharges;
+use App\PendingShipmentReturnDiscountCharges;
+use App\PendingZeroCodDiscountCharges;
+use App\ShipmentReturnDiscountCharges;
+use App\ZeroCodDiscountCharges;
 use Exception;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -201,9 +211,9 @@ use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\Http\Models\Admin\ShipperInterceptExclude;
-
+use App\Http\Traits\RateReusableTrait;
 class AdminDashboardController extends Controller
-{
+{   use RateReusableTrait;
 
     public function __construct()
     {   $this->middleware('auth:admin');
@@ -1788,6 +1798,9 @@ class AdminDashboardController extends Controller
             $rate_destination_hubs = RateDestinationHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount_weight_rates = DiscountWeightCharge::all()->where('user_id',$id)->groupBy(['shipping_mode_id','destination_id']);
 
+            $zero_cod_discount = ZeroCodDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $return_discount_charges = ShipmentReturnDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+
         } else {
             $tomorrow = Carbon::parse($date)->addDay(1);
 
@@ -1822,6 +1835,8 @@ class AdminDashboardController extends Controller
             $rate_origin_hubs = HistoryRateOriginHub::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             $rate_destination_hubs = HistoryRateDestinationHub::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             $discount_weight_rates = HistoryDiscountWeightCharge::all()->where('user_id',$id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy(['shipping_mode_id','destination_id']);
+            $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $return_discount_charges = HistoryShipmentReturnDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
         }
 
 
@@ -1915,13 +1930,13 @@ class AdminDashboardController extends Controller
         if (session('department_id') == 7) {
             if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
                 // return view('admin.accounts.view_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
-                return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
             } else {
                 return view('admin.access_denied');
             }
         } else {
-            // return view('admin.accounts.view_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
-            return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+            // return view('admin.accounts.view_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
+            return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
         }
     }
 
@@ -2063,6 +2078,9 @@ class AdminDashboardController extends Controller
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
             $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at', 'desc')->get();
+            $zero_cod_discount = ZeroCodDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $return_discount_charges = ShipmentReturnDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+
             $packaging_sizes = array();
             if (count($packaging_material_types) > 0) {
 
@@ -2142,12 +2160,12 @@ class AdminDashboardController extends Controller
             }
             if (session('department_id') == 7) {
                 if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
-                    return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                    return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
                 } else {
                     return view('admin.access_denied');
                 }
             } else {
-                return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
             }
 
         } elseif (($user['rate_status'] >= 1) && ($user['status'] == 3)) {
@@ -2176,6 +2194,9 @@ class AdminDashboardController extends Controller
 
             $e_rate_status = $user['rate_status'];
             $e_packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
+
+            $e_zero_cod_discount = ZeroCodDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $e_return_discount_charges = ShipmentReturnDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
             $e_packaging_charges = array();
             if (count($e_packaging) > 0) {
@@ -2209,6 +2230,8 @@ class AdminDashboardController extends Controller
             $storage_types = WmsStorageType::all()->where('status', 1);
             $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at', 'desc')->get();
+            $zero_cod_discount = PendingZeroCodDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $return_discount_charges = PendingShipmentReturnDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
             
             $packaging_charges = array();
@@ -2287,12 +2310,12 @@ class AdminDashboardController extends Controller
             $existing = 1;
             if (session('department_id') == 7) {
                 if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
-                    return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                    return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges,'e_zero_cod_discount'=>$e_zero_cod_discount,'e_return_discount_charges'=>$e_return_discount_charges]);
                 } else {
                     return view('admin.access_denied');
                 }
             } else {
-                return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges,'e_zero_cod_discount'=>$e_zero_cod_discount,'e_return_discount_charges'=>$e_return_discount_charges]);
             }
         } else {
             return redirect(route('admin.accounts.pending'));
@@ -2521,7 +2544,19 @@ class AdminDashboardController extends Controller
                 'discount_on_destination.required_if' => 'Rush Destination Field is required if discount weight (destination-wise) toggle is on',
                 'discount_ol_destination.required_if' => 'Saver Plus Destination Field is required if discount weight (destination-wise) toggle is on',
                 'discount_d_destination.required_if' => 'Detain Destination Field is required if discount weight (destination-wise) toggle is on',
-                'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on'
+                'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on',
+
+                'on_cod_discount_per' => 'Zero Cod Discount percentage is required',
+                'on_return_discount_per' => 'Return Discount percentage is required',
+
+                'ol_cod_discount_per' => 'Zero Cod Discount percentage is required',
+                'ol_return_discount_per' => 'Return Discount percentage is required',
+
+                'detain_cod_discount_per' => 'Zero Cod Discount percentage is required',
+                'detain_return_discount_per' => 'Return Discount percentage is required',
+
+                'sameday_cod_discount_per' => 'Zero Cod Discount percentage is required',
+                'sameday_return_discount_per' => 'Return Discount percentage is required',
 
             ];
 
@@ -2566,6 +2601,9 @@ class AdminDashboardController extends Controller
                     'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on',
 
                     'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on',
+
+                    'on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
+                    'on_return_discount_per' => 'required_if:on_return_discount_switch,==,on',
                 ];
             }
             //overland
@@ -2604,6 +2642,8 @@ class AdminDashboardController extends Controller
                     'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
 
                     'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on',
+                    'ol_cod_discount_per' => 'required_if:ol_zero_cod_switch,==,on',
+                    'ol_return_discount_per' => 'required_if:ol_return_discount_switch,==,on',
                 ];
             }
             //overland
@@ -2642,6 +2682,8 @@ class AdminDashboardController extends Controller
                     'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
 
                     'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on',
+                    'detain_cod_discount_per' => 'required_if:detain_zero_cod_switch,==,on',
+                    'detain_return_discount_per' => 'required_if:detain_return_discount_switch,==,on',
                 ];
             }
             //sameday
@@ -2677,6 +2719,8 @@ class AdminDashboardController extends Controller
                     'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
 
                     'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on',
+                    'sameday_cod_discount_per' => 'required_if:sameday_zero_cod_switch,==,on',
+                    'sameday_return_discount_per' => 'required_if:sameday_return_discount_switch,==,on',
                 ];
             }
 
@@ -2712,7 +2756,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => ($request->has('on_cash_handling_switch')) ? 1 : 0,
                         'insurance_charges' => ($request->has('on_insurance_charges_switch')) ? 1 : 0,
                         'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
-                        'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0
+                        'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
+                        'zero_cod_discount' => ($request->has('on_zero_cod_switch')) ? 1 : 0,
+                        'return_discount' => ($request->has('on_return_discount_switch')) ? 1 : 0,
                     ]);
             } else {
                 RateStatus::create([
@@ -2722,7 +2768,9 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('on_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('on_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
+                    'zero_cod_discount' => ($request->has('on_zero_cod_switch')) ? 1 : 0,
+                    'return_discount' => ($request->has('on_return_discount_switch')) ? 1 : 0,
                 ]);
             }
             if ($request->ol_rate_record != null) {
@@ -2734,7 +2782,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => ($request->has('ol_cash_handling_switch')) ? 1 : 0,
                         'insurance_charges' => ($request->has('ol_insurance_charges_switch')) ? 1 : 0,
                         'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
-                        'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0
+                        'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
+                        'zero_cod_discount' => ($request->has('ol_zero_cod_switch')) ? 1 : 0,
+                        'return_discount' => ($request->has('ol_return_discount_switch')) ? 1 : 0,
                     ]);
             } else {
                 RateStatus::create([
@@ -2744,7 +2794,9 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('ol_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('ol_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
+                    'zero_cod_discount' => ($request->has('ol_zero_cod_switch')) ? 1 : 0,
+                    'return_discount' => ($request->has('ol_return_discount_switch')) ? 1 : 0,
                 ]);
             }
             if ($request->det_rate_record != null) {
@@ -2756,7 +2808,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => ($request->has('detain_cash_handling_switch')) ? 1 : 0,
                         'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
                         'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
-                        'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0
+                        'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
+                        'zero_cod_discount' => ($request->has('detain_zero_cod_switch')) ? 1 : 0,
+                        'return_discount' => ($request->has('detain_return_discount_switch')) ? 1 : 0,
                     ]);
             } else {
                 RateStatus::create([
@@ -2766,7 +2820,9 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('detain_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
+                    'zero_cod_discount' => ($request->has('detain_zero_cod_switch')) ? 1 : 0,
+                    'return_discount' => ($request->has('detain_return_discount_switch')) ? 1 : 0,
                 ]);
             }
             if ($request->same_rate_record != null) {
@@ -2778,7 +2834,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => ($request->has('sameday_cash_handling_switch')) ? 1 : 0,
                         'insurance_charges' => ($request->has('sameday_insurance_charges_switch')) ? 1 : 0,
                         'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
-                        'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0
+                        'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
+                        'zero_cod_discount' => ($request->has('sameday_zero_cod_switch')) ? 1 : 0,
+                        'return_discount' => ($request->has('sameday_return_discount_switch')) ? 1 : 0,
                     ]);
             } else {
                 RateStatus::create([
@@ -2788,7 +2846,9 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('sameday_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('sameday_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
+                    'zero_cod_discount' => ($request->has('sameday_zero_cod_switch')) ? 1 : 0,
+                    'return_discount' => ($request->has('sameday_return_discount_switch')) ? 1 : 0,
                 ]);
             }
 
@@ -4096,6 +4156,9 @@ class AdminDashboardController extends Controller
                     DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
             }
+
+            self::discounted_cod_and_return($request,$id,2,'default');
+
             if ($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on') {
                 $wms_user_info = WmsUserInformation::where('user_id', $id);
                 if ($wms_user_info->exists()) {
@@ -4525,7 +4588,19 @@ class AdminDashboardController extends Controller
                 'discount_on_destination.required_if' => 'Rush Destination Field is required if discount weight (destination-wise) toggle is on',
                 'discount_ol_destination.required_if' => 'Saver Plus Destination Field is required if discount weight (destination-wise) toggle is on',
                 'discount_d_destination.required_if' => 'Detain Destination Field is required if discount weight (destination-wise) toggle is on',
-                'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on'
+                'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on',
+
+                'on_cod_discount_per' => 'Zero Cod Discount percentage is required',
+                'on_return_discount_per' => 'Return Discount percentage is required',
+
+                'ol_cod_discount_per' => 'Zero Cod Discount percentage is required',
+                'ol_return_discount_per' => 'Return Discount percentage is required',
+
+                'detain_cod_discount_per' => 'Zero Cod Discount percentage is required',
+                'detain_return_discount_per' => 'Return Discount percentage is required',
+
+                'sameday_cod_discount_per' => 'Zero Cod Discount percentage is required',
+                'sameday_return_discount_per' => 'Return Discount percentage is required',
 
             ];
 
@@ -4570,6 +4645,9 @@ class AdminDashboardController extends Controller
                     'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on',
 
                     'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on',
+
+                    'on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
+                    'on_return_discount_per' => 'required_if:on_return_discount_switch,==,on',
                 ];
             }
             //overland
@@ -4608,6 +4686,8 @@ class AdminDashboardController extends Controller
                     'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
 
                     'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on',
+                    'ol_cod_discount_per' => 'required_if:ol_zero_cod_switch,==,on',
+                    'ol_return_discount_per' => 'required_if:ol_return_discount_switch,==,on',
                 ];
             }
             //overland
@@ -4646,6 +4726,8 @@ class AdminDashboardController extends Controller
                     'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
 
                     'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on',
+                    'detain_cod_discount_per' => 'required_if:detain_zero_cod_switch,==,on',
+                    'detain_return_discount_per' => 'required_if:detain_return_discount_switch,==,on',
                 ];
             }
             //sameday
@@ -4681,6 +4763,8 @@ class AdminDashboardController extends Controller
                     'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
 
                     'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on',
+                    'sameday_cod_discount_per' => 'required_if:sameday_zero_cod_switch,==,on',
+                    'sameday_return_discount_per' => 'required_if:sameday_return_discount_switch,==,on',
                 ];
             }
 
@@ -4740,7 +4824,7 @@ class AdminDashboardController extends Controller
             PendingDiscountWeightCharge::where('user_id', $id)->delete();
             PendingRateOriginHub::where('user_id', $id)->delete();
             PendingRateDestinationHub::where('user_id', $id)->delete();
-
+            self::discounted_cod_and_return($request,$id,1,'default','delete');
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $ONRateAlready = PendingRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
@@ -4753,7 +4837,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => ($request->has('on_cash_handling_switch')) ? 1 : 0,
                         'insurance_charges' => ($request->has('on_insurance_charges_switch')) ? 1 : 0,
                         'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
-                        'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0
+                        'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
+                        'zero_cod_discount' => ($request->has('on_zero_cod_switch')) ? 1 : 0,
+                        'return_discount' => ($request->has('on_return_discount_switch')) ? 1 : 0,
 
                     ]);
 
@@ -4981,7 +5067,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => ($request->has('ol_cash_handling_switch')) ? 1 : 0,
                         'insurance_charges' => ($request->has('ol_insurance_charges_switch')) ? 1 : 0,
                         'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
-                        'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0
+                        'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
+                        'zero_cod_discount' => ($request->has('ol_zero_cod_switch')) ? 1 : 0,
+                        'return_discount' => ($request->has('ol_return_discount_switch')) ? 1 : 0,
 
                     ]);
 
@@ -5208,7 +5296,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => ($request->has('detain_cash_handling_switch')) ? 1 : 0,
                         'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
                         'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
-                        'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0
+                        'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
+                        'zero_cod_discount' => ($request->has('detain_zero_cod_switch')) ? 1 : 0,
+                        'return_discount' => ($request->has('detain_return_discount_switch')) ? 1 : 0,
 
                     ]);
 
@@ -5436,7 +5526,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => ($request->has('sameday_cash_handling_switch')) ? 1 : 0,
                         'insurance_charges' => ($request->has('sameday_insurance_charges_switch')) ? 1 : 0,
                         'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
-                        'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0
+                        'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
+                        'zero_cod_discount' => ($request->has('sameday_zero_cod_switch')) ? 1 : 0,
+                        'return_discount' => ($request->has('sameday_return_discount_switch')) ? 1 : 0,
                     ]);
 
                     if ($request->has('sameday_origin_hubs')) {
@@ -5650,6 +5742,8 @@ class AdminDashboardController extends Controller
                 }
             }
 
+            self::discounted_cod_and_return($request,$id,1,'default');
+
             WmsPendingUserInformation::where('user_id', $id)->delete();
             WmsPendingPerProductCharge::where('user_id', $id)->delete();
             WmsPendingPerSquareFootCharge::where('user_id', $id)->delete();
@@ -5744,7 +5838,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => $switches['cash_handling_charges'],
                         'insurance_charges' => $switches['insurance_charges'],
                         'return_charges' => $switches['return_charges'],
-                        'fuel_charges' => $switches['fuel_charges']
+                        'fuel_charges' => $switches['fuel_charges'],
+                        'zero_cod_discount' => $switches['zero_cod_discount'],
+                        'return_discount' => $switches['return_discount'],
                     ]);
                 }
                 if ($switches = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->first()) {
@@ -5755,7 +5851,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => $switches['cash_handling_charges'],
                         'insurance_charges' => $switches['insurance_charges'],
                         'return_charges' => $switches['return_charges'],
-                        'fuel_charges' => $switches['fuel_charges']
+                        'fuel_charges' => $switches['fuel_charges'],
+                        'zero_cod_discount' => $switches['zero_cod_discount'],
+                        'return_discount' => $switches['return_discount'],
                     ]);
                 }
                 if ($switches = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->first()) {
@@ -5766,7 +5864,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => $switches['cash_handling_charges'],
                         'insurance_charges' => $switches['insurance_charges'],
                         'return_charges' => $switches['return_charges'],
-                        'fuel_charges' => $switches['fuel_charges']
+                        'fuel_charges' => $switches['fuel_charges'],
+                        'zero_cod_discount' => $switches['zero_cod_discount'],
+                        'return_discount' => $switches['return_discount'],
                     ]);
                 }
                 if ($switches = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->first()) {
@@ -5777,7 +5877,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => $switches['cash_handling_charges'],
                         'insurance_charges' => $switches['insurance_charges'],
                         'return_charges' => $switches['return_charges'],
-                        'fuel_charges' => $switches['fuel_charges']
+                        'fuel_charges' => $switches['fuel_charges'],
+                        'zero_cod_discount' => $switches['zero_cod_discount'],
+                        'return_discount' => $switches['return_discount'],
                     ]);
                 }
                 if ($weights = WeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
@@ -6238,6 +6340,8 @@ class AdminDashboardController extends Controller
                     }
                 }
 
+                self::discounted_cod_and_return($request,$id,0,'default','fetch_and_dump');
+
                 $s = RateStatus::where(['user_id' => $id])->first();
                 RateHistory::create([
                     'user_id' => $id,
@@ -6322,6 +6426,8 @@ class AdminDashboardController extends Controller
                 RateOriginHub::where('user_id', $id)->delete();
                 RateDestinationHub::where('user_id', $id)->delete();
 
+                self::discounted_cod_and_return($request,$id,2,'default','delete');
+
                 if ($pending_rate_origin_hubs = PendingRateOriginHub::where('user_id', $id)->get()) {
                     foreach ($pending_rate_origin_hubs as $pending_rate_origin_hub) {
                         $rate_origin_hub = new RateOriginHub();
@@ -6348,7 +6454,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => $pendingswitchs['cash_handling_charges'],
                         'insurance_charges' => $pendingswitchs['insurance_charges'],
                         'return_charges' => $pendingswitchs['return_charges'],
-                        'fuel_charges' => $pendingswitchs['fuel_charges']
+                        'fuel_charges' => $pendingswitchs['fuel_charges'],
+                        'zero_cod_discount' => $pendingswitchs['zero_cod_discount'],
+                        'return_discount' => $pendingswitchs['return_discount'],
                     ]);
                 }
                 if ($pendingswitchs = PendingRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->first()) {
@@ -6359,7 +6467,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => $pendingswitchs['cash_handling_charges'],
                         'insurance_charges' => $pendingswitchs['insurance_charges'],
                         'return_charges' => $pendingswitchs['return_charges'],
-                        'fuel_charges' => $pendingswitchs['fuel_charges']
+                        'fuel_charges' => $pendingswitchs['fuel_charges'],
+                        'zero_cod_discount' => $pendingswitchs['zero_cod_discount'],
+                        'return_discount' => $pendingswitchs['return_discount'],
                     ]);
                 }
                 if ($pendingswitchs = PendingRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->first()) {
@@ -6370,7 +6480,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => $pendingswitchs['cash_handling_charges'],
                         'insurance_charges' => $pendingswitchs['insurance_charges'],
                         'return_charges' => $pendingswitchs['return_charges'],
-                        'fuel_charges' => $pendingswitchs['fuel_charges']
+                        'fuel_charges' => $pendingswitchs['fuel_charges'],
+                        'zero_cod_discount' => $pendingswitchs['zero_cod_discount'],
+                        'return_discount' => $pendingswitchs['return_discount'],
                     ]);
                 }
                 if ($pendingswitchs = PendingRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->first()) {
@@ -6381,7 +6493,9 @@ class AdminDashboardController extends Controller
                         'cash_handling_charges' => $pendingswitchs['cash_handling_charges'],
                         'insurance_charges' => $pendingswitchs['insurance_charges'],
                         'return_charges' => $pendingswitchs['return_charges'],
-                        'fuel_charges' => $pendingswitchs['fuel_charges']
+                        'fuel_charges' => $pendingswitchs['fuel_charges'],
+                        'zero_cod_discount' => $pendingswitchs['zero_cod_discount'],
+                        'return_discount' => $pendingswitchs['return_discount'],
                     ]);
                 }
                 if ($pendingweights = PendingWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
@@ -6756,6 +6870,7 @@ class AdminDashboardController extends Controller
                 }
 
 
+
                 if ($pending_discount_weights = PendingDiscountWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($pending_discount_weights as $discount) {
                         DiscountWeightCharge::create([
@@ -6812,6 +6927,8 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
+
+                self::discounted_cod_and_return($request,$id,3,'default','fetch_and_dump');
 
                 if ($wms_user_info = WmsPendingUserInformation::where('user_id', $id)->first()) {
                     $wms_user_information = new WmsUserInformation();
@@ -6886,6 +7003,8 @@ class AdminDashboardController extends Controller
                 PendingDiscountWeightCharge::where('user_id',$id)->delete();
                 PendingRateOriginHub::where('user_id', $id)->delete();
                 PendingRateDestinationHub::where('user_id', $id)->delete();
+                self::discounted_cod_and_return($request,$id,1,'default','delete');
+
                 User::where('id', $id)->update(['rate_status' => 0, 'agreement_signed' => 1, 'rates_authorized_by' => Auth::id(), 'rates_approved_at' => Carbon::now()]);
                 if ($request->has('rate_remarks') && $request->rate_remarks != null) {
                     $rate_remark = new RateRemark();
@@ -7230,7 +7349,19 @@ class AdminDashboardController extends Controller
             'discount_on_destination.required_if' => 'Rush Destination Field is required if discount weight (destination-wise) toggle is on',
             'discount_ol_destination.required_if' => 'Saver Plus Destination Field is required if discount weight (destination-wise) toggle is on',
             'discount_d_destination.required_if' => 'Detain Destination Field is required if discount weight (destination-wise) toggle is on',
-            'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on'
+            'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on',
+
+            'on_cod_discount_per' => 'Zero Cod Discount percentage is required',
+            'on_return_discount_per' => 'Return Discount percentage is required',
+
+            'ol_cod_discount_per' => 'Zero Cod Discount percentage is required',
+            'ol_return_discount_per' => 'Return Discount percentage is required',
+
+            'detain_cod_discount_per' => 'Zero Cod Discount percentage is required',
+            'detain_return_discount_per' => 'Return Discount percentage is required',
+
+            'sameday_cod_discount_per' => 'Zero Cod Discount percentage is required',
+            'sameday_return_discount_per' => 'Return Discount percentage is required',
 
         ];
         $validations = array();
@@ -7275,6 +7406,8 @@ class AdminDashboardController extends Controller
                 'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on',
                 'overnight_open_box'=>'required_if:on_open_box_switch,==,on',
                 'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on',
+                'on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
+                'on_return_discount_per' => 'required_if:on_return_discount_switch,==,on',
             ];
         }
         //overland
@@ -7313,6 +7446,8 @@ class AdminDashboardController extends Controller
                 'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
                 'overland_open_box'=>'required_if:ol_open_box_switch,==,on',
                 'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on',
+                'ol_cod_discount_per' => 'required_if:ol_zero_cod_switch,==,on',
+                'ol_return_discount_per' => 'required_if:ol_return_discount_switch,==,on',
             ];
         }
         //overland
@@ -7351,6 +7486,8 @@ class AdminDashboardController extends Controller
                 'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
                 'detain_open_box'=>'required_if:detain_open_box_switch,==,on',
                 'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on',
+                'detain_cod_discount_per' => 'required_if:detain_zero_cod_switch,==,on',
+                'detain_return_discount_per' => 'required_if:detain_return_discount_switch,==,on',
             ];
         }
         //sameday
@@ -7386,6 +7523,8 @@ class AdminDashboardController extends Controller
                 'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
                 'sd_open_box'=>'required_if:sd_open_box_switch,==,on',
                 'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on',
+                'sameday_cod_discount_per' => 'required_if:sameday_zero_cod_switch,==,on',
+                'sameday_return_discount_per' => 'required_if:sameday_return_discount_switch,==,on',
             ];
         }
 
@@ -7449,7 +7588,9 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('on_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('on_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
+                    'zero_cod_discount' => ($request->has('on_zero_cod_switch')) ? 1 : 0,
+                    'return_discount' => ($request->has('on_return_discount_switch')) ? 1 : 0,
                 ]);
                 $wa_switch = array();
                 $wa_spkg = array();
@@ -7680,7 +7821,9 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('ol_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('ol_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
+                    'zero_cod_discount' => ($request->has('ol_zero_cod_switch')) ? 1 : 0,
+                    'return_discount' => ($request->has('ol_return_discount_switch')) ? 1 : 0,
                 ]);
                 $wa_switch_overland = array();
                 $wa_spkg_overland = array();
@@ -7912,7 +8055,9 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('detain_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
+                    'zero_cod_discount' => ($request->has('detain_zero_cod_switch')) ? 1 : 0,
+                    'return_discount' => ($request->has('detain_return_discount_switch')) ? 1 : 0,
                 ]);
                 $wa_switch_detain = array();
                 $wa_spkg_detain = array();
@@ -8143,7 +8288,9 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('sameday_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('sameday_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
-                    'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0
+                    'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
+                    'zero_cod_discount' => ($request->has('sameday_zero_cod_switch')) ? 1 : 0,
+                    'return_discount' => ($request->has('sameday_return_discount_switch')) ? 1 : 0,
                 ]);
                 $wa_switch_sameday = array();
                 $wa_spkg_sameday = array();
@@ -8336,6 +8483,8 @@ class AdminDashboardController extends Controller
             }
 
         }
+
+        self::discounted_cod_and_return($request,$id,2,'default');
 
         $warehouse_charges = 0;
         if ($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on') {
