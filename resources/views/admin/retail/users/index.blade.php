@@ -56,7 +56,7 @@
                             <div class="row">
                                 <div class="col">
                                     <div class="form-group">
-                                        <select name="store" id="store" class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
+                                        <select name="store" id="store" class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required" onchange="showForm()">
                                             <option value="1">Franchise</option>
                                             <option value="2">Trax Center</option>
                                         </select>
@@ -115,7 +115,7 @@
                                             <span class="la la-calendar-o"></span>
                                         </span>
                                         </div>
-                                        <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement Start date">
+                                        <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Joining date" required>
                                     </div>
 
                                     <div class="form-group">
@@ -220,8 +220,8 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="attachment_1">Franchise Agreement Form</label>
-                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
+                                        <label for="attachment_1" id="attachment_1_label">Upload Employee Form</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf" data-rule-required="true" data-msg-required="Employee Form is required">
                                     </div>
             
                                     <div class="form-group">
@@ -746,5 +746,26 @@
                 });
             }
         });
+
+        function showForm() {
+            var selectedValue = document.getElementById("store").value;
+            var attachment_1_label = document.getElementById("attachment_1_label");
+
+            var selectedValue = document.getElementById("store").value;
+            var dateInput = document.getElementById("delivery_date_from");
+
+            if (selectedValue == 1) {
+                attachment_1_label.textContent = "Franchise Agreement Form";
+                dateInput.placeholder = "Agreement Start date";
+                // dateInput.removeAttribute('required');
+                dateInput.setAttribute('data-msg-required', "Franchise Agreement Form is required");
+            } else if (selectedValue == 2) {
+                attachment_1_label.textContent = "Upload Employee Form";
+                dateInput.placeholder = "Joining date";
+                dateInput.setAttribute('required', true);
+                dateInput.setAttribute('data-msg-required', "Employee Form is required");
+            }
+        }
+
     </script>
 @endsection

@@ -235,8 +235,10 @@
         var franchise_account = @json($retail_user->category);
         if (franchise_account == 1) {
             $('#edit_for_trax_user').addClass('d-none');
+            $('#edit_user_form #delivery_date_from').attr('placeholder', 'Agreement Start date');
         } else if (franchise_account != 1) { 
             $('#edit_for_trax_user').removeClass('d-none');
+            $('#edit_user_form #delivery_date_from').attr('placeholder', 'Joining date');
         }
 
         $('#edit_eye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
