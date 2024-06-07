@@ -174,27 +174,6 @@
                 $('#remaining_territory_select_div').addClass('d-none');
             });
 
-            function toggleLeadUserCheckbox() {
-                var disableLeadUser = !$('#agent_id').val() || !$('#city_id').val() || !$('#territory_id').val();
-                // $('#is_lead_user').prop('disabled', disableLeadUser);
-                $('#is_lead_user').prop('checked', !disableLeadUser);
-
-
-                if($('#is_lead_user').is(':checked')){
-                    $('#remaining_territory_select_div').removeClass('d-none');
-                } else {
-                    $('#remaining_territory_select_div').addClass('d-none');
-                }
-            }
-
-            $('#AssignAgentModal').on('show.bs.modal', function() {
-                toggleLeadUserCheckbox();
-            });
-
-            $('#agent_id, #city_id, #territory_id').change(function() {
-                toggleLeadUserCheckbox();
-            });
-
             $('#territory_select').css('display','none');
             $('#agent_select').css('display','none');
 
@@ -521,6 +500,7 @@
                             $('#edit_remaining_territory_select_div').removeClass('d-none');
                         });
                     }
+
                     $('#edit_remaining_territory_id').empty();  
                     if (data.other_territory_names && data.other_territory_names.length > 0) {
                         data.other_territory_names.forEach(function(territory) {
@@ -531,49 +511,45 @@
                 })
             });
 
+            
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.delete', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 swal({
-                                text: 'Are you sure, you want to Delete?',
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function(confirm) {
-                                         $.ajax({
-                                            url:'{!! route("admin.settings.auto_tagging.delete") !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'id': id,
-                                                '_token': '{{ csrf_token() }}'
-                                            }
-                                        }).done(function (data) {
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                            table.draw();
-                                        });
-                            });
-
-
-                
-                
-                
+                    text: 'Are you sure, you want to Delete?',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    $.ajax({
+                        url:'{!! route("admin.settings.auto_tagging.delete") !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-bottom-center',
+                            containerId: 'toast-bottom-center'
+                        });
+                        table.draw();
+                    });
+                });
             });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function() {
@@ -594,6 +570,49 @@
                 });
             });
 
+            $('#edit_agent_id').on('change', function(){
+                if ($('#edit_agent_id').val() == ''){
+                    $('#edit_is_lead_user').prop('checked', false);
+                    $('#edit_lead_agent_div').removeClass('d-flex');
+                    $('#edit_lead_agent_div').addClass('d-none');
+                    $('#edit_remaining_territory_select_div').addClass('d-none');
+                } else if ($('#edit_agent_id').val() != ''){
+                    $('#edit_is_lead_user').prop('checked', true);
+                    $('#edit_lead_agent_div').removeClass('d-none');
+                    $('#edit_remaining_territory_select_div').removeClass('d-none');
+                    $('#edit_lead_agent_div').addClass('d-flex');
+                }
+            });
+
+            $('#EditAgentModal').on('show.bs.modal', function(){
+                $('#edit_territory_id-error').addClass('d-none');
+                $('#edit_agent_id-error').addClass('d-none');
+            });
+
+            $('#AssignAgentModal').on('show.bs.modal', function(){
+                $('#territory_id-error').addClass('d-none');
+                $('#agent_id-error').addClass('d-none');
+            });
+
+            function toggleLeadUserCheckbox() {
+                var disableLeadUser = !$('#agent_id').val() || !$('#city_id').val() || !$('#territory_id').val();
+                // $('#is_lead_user').prop('disabled', disableLeadUser);
+                $('#is_lead_user').prop('checked', !disableLeadUser);
+                if($('#is_lead_user').is(':checked')){
+                    $('#remaining_territory_select_div').removeClass('d-none');
+                } else {
+                    $('#remaining_territory_select_div').addClass('d-none');
+                }
+            }
+
+            $('#AssignAgentModal').on('show.bs.modal', function() {
+                toggleLeadUserCheckbox();
+            });
+
+            $('#agent_id, #city_id, #territory_id').change(function() {
+                toggleLeadUserCheckbox();
+            });
+
             // $( "#agent_assign" ).validate({
             //         errorClass:"danger",
             //         errorPlacement: function(error, element) {
@@ -602,7 +621,6 @@
             //         submitHandler: function(form) {
             //             form.submit();    
             //         }
-                
             // });
 
 
