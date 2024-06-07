@@ -176,7 +176,15 @@
 
             function toggleLeadUserCheckbox() {
                 var disableLeadUser = !$('#agent_id').val() || !$('#city_id').val() || !$('#territory_id').val();
-                $('#is_lead_user').prop('disabled', disableLeadUser);
+                // $('#is_lead_user').prop('disabled', disableLeadUser);
+                $('#is_lead_user').prop('checked', !disableLeadUser);
+
+
+                if($('#is_lead_user').is(':checked')){
+                    $('#remaining_territory_select_div').removeClass('d-none');
+                } else {
+                    $('#remaining_territory_select_div').addClass('d-none');
+                }
             }
 
             $('#AssignAgentModal').on('show.bs.modal', function() {
@@ -185,24 +193,6 @@
 
             $('#agent_id, #city_id, #territory_id').change(function() {
                 toggleLeadUserCheckbox();
-            });
-
-            function toggleLeadUserCheckboxEdit() {
-                var disableLeadUser = !$('#edit_agent_id').val() || !$('#edit_city_id').val() || !$('#edit_territory_id').val();
-                $('#edit_is_lead_user').prop('disabled', disableLeadUser);
-                if (disableLeadUser == true){
-                    $('#edit_remaining_territory_select_div').addClass('d-none');
-                } else if(disableLeadUser == false) {
-                    $('#edit_remaining_territory_select_div').removeClass('d-none');
-                }
-            }
-
-            $('#AssignAgentModal').on('show.bs.modal', function() {
-                toggleLeadUserCheckboxEdit();
-            });
-
-            $('#edit_agent_id, #edit_city_id, #edit_territory_id').change(function() {
-                toggleLeadUserCheckboxEdit();
             });
 
             $('#territory_select').css('display','none');
@@ -520,11 +510,16 @@
                     $('#edit_city_id').val(data.city_id).change();
                     $('#edit_territory_id').val(data.territory_id).change();
                     if (data.is_lead_user == 0) {
-                        $('#edit_is_lead_user').prop('checked', false);
-                        $('#edit_remaining_territory_select_div').addClass('d-none');
-                    } else if (data.is_lead_user == 1) {
-                        $('#edit_is_lead_user').prop('checked', true);
-                        $('#edit_remaining_territory_select_div').removeClass('d-none');
+                        $('#EditAgentModal').on('show.bs.modal', function(){
+                            $('#edit_is_lead_user').prop('checked', false);
+                            $('#edit_remaining_territory_select_div').addClass('d-none');
+                        });
+                    } 
+                    else if (data.is_lead_user == 1) {
+                        $('#EditAgentModal').on('show.bs.modal', function(){
+                            $('#edit_is_lead_user').prop('checked', true);
+                            $('#edit_remaining_territory_select_div').removeClass('d-none');
+                        });
                     }
                     $('#edit_remaining_territory_id').empty();  
                     if (data.other_territory_names && data.other_territory_names.length > 0) {
@@ -656,8 +651,6 @@
                 }
             
             });
-
-            // assign_agentSubmit
         });
     </script>
 @endsection
