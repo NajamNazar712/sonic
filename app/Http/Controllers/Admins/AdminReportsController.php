@@ -13884,7 +13884,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'sj.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 14, 13, 15, 49, 59 ,55) and verification = 1 and  shipments_journey.id >= '.$shipment_journey_min_id.')')
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52,55, 5,20,14,12) and verification = 1 and  shipments_journey.id >= '.$shipment_journey_min_id.')')
                     );
                 }
                 else{
@@ -13892,26 +13892,25 @@ class AdminReportsController extends Controller
                     ->where(
                         'sj.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 14, 13, 15, 49, 59 ,55) and verification = 1)')
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52,55, 5,20,14,12) and verification = 1)')
                     );
                 }
                 
             })
             ->whereBetween('sj.created_at', [$from, $to])->get();
 
-            
 
-        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 15, 49, 59);
-        $re_attempt_and_intercept_status = array(13 ,55);
+        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
+        $re_attempt_and_intercept_status = array(13, 55);
 
         $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subMonths(8)->setTime(21, 00, 00);  //last 6 month
-        $re_attempt_and_intercept_endDate = Carbon::parse($search_date)->subDay(1)->setTime(20, 59, 59);
+        $re_attempt_and_intercept_endDate = Carbon::parse($search_date)->subDay(1)->setTime(19, 59, 59);
 
         $other_pending_status_startDate = Carbon::parse($search_date)->subMonths(8)->setTime(9, 00, 00); // last 6 month
         $other_pending_status_endDate = Carbon::parse($search_date)->setTime(8, 59, 59);
 
-        $other_statuses_startDate = Carbon::parse($search_date)->subDay(1)->startOfDay()->toDateTimeString(); // last 6 month
-        $other_statuses_endDate = Carbon::parse($search_date)->subDay(1)->endOfDay()->toDateTimeString();
+        $other_statuses_startDate = Carbon::parse($search_date)->startOfDay()->toDateTimeString(); // last 6 month
+        $other_statuses_endDate = Carbon::parse($search_date)->endOfDay()->toDateTimeString();
 
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
@@ -13979,21 +13978,17 @@ class AdminReportsController extends Controller
 
                 foreach ($shipments as $shipment_key => $shipment_data) {
                     
-                    
                     if(in_array($shipment_data->consignee_city_id,$zone_cities))
                     {
                         $created_date = Carbon::parse($shipment_data->created_at);
-                        if(!in_array($shipment_data->shipper_status_id, [14, 36])){
 
-                            if(in_array($shipment_data->shipper_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate,$re_attempt_and_intercept_endDate))
-                            {
-                                $data['ready_for_delivery'] += 1;
-                            }
-                            else if(in_array($shipment_data->shipper_status_id,$pending_status) && $created_date->between($other_pending_status_startDate,$other_pending_status_endDate))
-                            {
-                                $data['ready_for_delivery'] += 1;
-                            }
-
+                        if(in_array($shipment_data->consignee_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate,$re_attempt_and_intercept_endDate))
+                        {
+                            $data['ready_for_delivery'] += 1;
+                        }
+                        else if(in_array($shipment_data->consignee_status_id,$pending_status) && $created_date->between($other_pending_status_startDate,$other_pending_status_endDate))
+                        {
+                            $data['ready_for_delivery'] += 1;
                         }
 
                     }
@@ -14002,7 +13997,6 @@ class AdminReportsController extends Controller
                 foreach ($route_distribution_summary as $rds_key => $rds_value) {
                     if($rds_value->zone_id == $zone->id)
                     {
-                        
                         $dn_ids = explode(',', $rds_value->dn_ids);
 
                         // $total_cod_received_amount = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->sum('received_cod_amount');
