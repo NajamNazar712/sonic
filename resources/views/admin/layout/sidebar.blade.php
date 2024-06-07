@@ -2766,10 +2766,17 @@
                                                             Center</a></li>
                                                 @endif
                                                 @if (session('role_id') == 1 || in_array(585, session('permissions')))
-                                                    <li class=" nav-item"><a
-                                                            href="{{ route('admin.retail.international.rates.index') }}"><span
-                                                                class="menu-title">Retail Rate Upload</span></a> </li>
+                                                    <li class=" nav-item">
+                                                        <a href="{{ route('admin.retail.international.rates.index') }}">
+                                                            <span class="menu-title">Retail International Rate Upload</span>
+                                                        </a> 
+                                                    </li>
                                                 @endif
+                                                    <li class=" nav-item">
+                                                        <a href="{{ route('admin.retail.international.rates.index') }}">
+                                                            <span class="menu-title">Retail International Rate Upload</span>
+                                                        </a> 
+                                                    </li>
 
                                             </ul>
                                         </li>
