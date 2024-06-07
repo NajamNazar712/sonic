@@ -7,7 +7,16 @@
         <div class="row">
             <div class="col">
                 <div class="form-group">
-                    <select name="store" id="edit_store"  class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
+                    @if ($retail_user->category==1)
+                        <h4>Franchise</h4>
+
+                        {{-- allows updating franchise user accounts --}}
+                        <input type="hidden" name="store" value="1">
+
+                    @else
+                        <h4>Trax Center</h4>
+                    @endif
+                    {{-- <select name="store" id="edit_store" class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
                         @if ($retail_user->category==1)
                             <option value="1" selected>Franchise</option>
                             <option value="2" >Trax Center</option>
@@ -15,7 +24,7 @@
                             <option value="1">Franchise</option>
                             <option value="2" selected>Trax Center</option>
                         @endif
-                    </select>
+                    </select> --}}
                 </div>
 
                 <div class="form-group" id="franchise_div">
@@ -54,7 +63,7 @@
                     <input type="text" name="phone_number" id="edit_phone_number" value="{{$retail_user->phone_no}}" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                 </div>
                 <div class="form-group position-relative">
-                    <input type="password" class="form-control" id="edit_password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters" autocomplete="nope">
+                    <input type="password" class="form-control" id="edit_password" placeholder="Password" value="" name="password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters" autocomplete="nope">
                     <div class="form-control-position" id="edit_eye">
                         <i class="la la-eye success"></i>
                     </div>
@@ -83,6 +92,8 @@
                     <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement Start date">
                 </div>
 
+                {{-- @dump() --}}
+
                 <div class="form-group">
                     <input type="number" name="salary" id="salary" class="form-control" placeholder="Salary" value="{{ count($retail_user_salary) > 0 ? $retail_user_salary[0] : '' }}">
                 </div>
@@ -97,7 +108,6 @@
             </div>
 
             <div class="col">
-
                 <div id="edit_for_trax_user" class="">
                     <div class="form-group">
                         <select name="marital_status" id="marital_status_edit" class="select2 form-control">
@@ -137,6 +147,7 @@
                     </div>
                     
                     <div class="col">
+                        <h2>Commission</h2>
                         <div class="row">
                             <div class="col-5">
                                 <div class="form-group">
@@ -151,7 +162,7 @@
                             <div class="col-5">
                                 <div class="form-group">
                                     <div class="input-group mb-2">
-                                        <input type="text" name="product_percentage[]" id="product_percentage_edit" class="form-control product_percentage_edit" placeholder="Product"  value="" max="100">
+                                        <input type="text" name="product_percentage[]" id="product_percentage_edit" class="form-control product_percentage_edit" placeholder="Commission"  value="" max="100">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
@@ -182,7 +193,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="attachment_1">Franchise Agreement Form</label>
+                    <label for="attachment_1">Agreement Details</label>
                     <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf">
                     <a id="attachment_1_filename" target="_blank"></a>
                 </div>
@@ -221,14 +232,12 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-
-        $(document).on('show.bs.modal', function () {
-            var edit_store = $('#edit_store').val();
-            alert(edit_store);
-            $('#edit_for_trax_user').addClass("d-none");
-        });
-
-
+        var franchise_account = @json($retail_user->category);
+        if (franchise_account == 1) {
+            $('#edit_for_trax_user').addClass('d-none');
+        } else if (franchise_account != 1) { 
+            $('#edit_for_trax_user').removeClass('d-none');
+        }
 
         $('#edit_eye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
             $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
@@ -299,6 +308,13 @@
                 }
             });
 
+        var agreement_start_date = {!! $jsonAgreementStartDate ?? 'null' !!};
+
+        if (agreement_start_date) {
+            $('#edit_user_form #delivery_date_from').val(agreement_start_date);
+        } else {
+            $('#edit_user_form #delivery_date_from').val('');
+        }
         $('#edit_user_form #delivery_date_from').pickadate({
             firstDay: 1,
             clear: '',

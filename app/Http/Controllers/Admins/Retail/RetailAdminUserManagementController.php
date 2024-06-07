@@ -1118,17 +1118,21 @@ class RetailAdminUserManagementController extends Controller
     {
         $retail_user_family_names = [];
         $retail_user_salary = [];
+        $agreement_start_date = null;
         $retail_user = RetailUser::find($id);
         $retail_user_id = $retail_user->id;
         $trax_centers = RetailTraxCenter::where('status', 1)->get();
         $franchises = RetailFranchise::where('status', 1)->get();
         $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
         $retail_user_family_names_query = RetailUserFamilyInformation::where('retail_user_id', $retail_user_id);
+
         if ($retail_user_family_names_query->exists()) {
             $retail_user_family_names_query = $retail_user_family_names_query->get();
             $retail_user_family_names = $retail_user_family_names_query->pluck('family_member_name')->toArray();
             $retail_user_salary = $retail_user_family_names_query->pluck('salary')->toArray();
+            $agreement_start_date = $retail_user_family_names_query->first()->agreement_start_date;
         }
+        $jsonAgreementStartDate = $agreement_start_date ? json_encode($agreement_start_date) : null;
         return view('admin.retail.users.edit')->with([
             'retail_user' => $retail_user, 
             'trax_centers' => $trax_centers, 
@@ -1137,8 +1141,8 @@ class RetailAdminUserManagementController extends Controller
             'retail_user_id' => $retail_user_id, 
             'retail_user_family_names' => $retail_user_family_names,
             'retail_user_salary' => $retail_user_salary,
+            'jsonAgreementStartDate' => $jsonAgreementStartDate
         ]);
-
     }
 
     public function user_list(Request $request)
@@ -1367,7 +1371,7 @@ class RetailAdminUserManagementController extends Controller
                 } elseif ($key == 2) {
                     $family_member_type = 1; // Spouse
                 } elseif ($key == 3) {
-                    $family_member_type = 5; // Assuming this is for a specific family member type
+                    $family_member_type = 5; // Spouse DOB
                 } else {
                     $family_member_type = 2; // Children
                 }
