@@ -308,13 +308,15 @@
                     data:city_obj
                 }).bind('change', function() {
                 var id = parseInt($(this).val());
-                    $('#edit_territory_select').css('display','block');
-                    $('#edit_territory_id').children().remove();
-                    $('#edit_remaining_territory_id').children().remove();
-                    var territory_obj = [];
-                    var edit_remaining_territory_obj  = [];
-                    territory_obj.length = 0
-                    edit_remaining_territory_obj.length = 0
+                $('#edit_territory_select').css('display','block');
+                $('#edit_territory_id').children().remove();
+                $('#edit_remaining_territory_id').children().remove();
+                var territory_obj = [];
+                var edit_remaining_territory_obj  = [];
+                territory_obj.length = 0
+                edit_remaining_territory_obj.length = 0
+
+                var selectedAgentId = $('#edit_agent_id').val();
 
                 $.map({!! $territories !!}, function (obj) {
                     if(id == obj.city_id){
@@ -488,6 +490,7 @@
                     $('#edit_agent_id').val(data.agent_id).change();
                     $('#edit_city_id').val(data.city_id).change();
                     $('#edit_territory_id').val(data.territory_id).change();
+
                     if (data.is_lead_user == 0) {
                         $('#EditAgentModal').on('show.bs.modal', function(){
                             $('#edit_is_lead_user').prop('checked', false);
@@ -501,12 +504,30 @@
                         });
                     }
 
-                    $('#edit_remaining_territory_id').empty();  
+                    $('#edit_remaining_territory_id').empty();
                     if (data.other_territory_names && data.other_territory_names.length > 0) {
                         data.other_territory_names.forEach(function(territory) {
                             $('#edit_remaining_territory_id').append('<option value="' + territory.id + '" selected>' + territory.name + '</option>');
                         });
                     }
+
+                    $('#edit_agent_id').on('change', function() {
+                        var selectedAgentId = $(this).val();
+                        console.log(selectedAgentId);
+                        if (selectedAgentId != data.agent_id) {
+                            $('#edit_is_lead_user').prop('checked', false);
+                            $('#edit_remaining_territory_id').empty();
+                            $('#edit_remaining_territory_select_div').addClass('d-none');
+                        } else{
+                            $('#edit_remaining_territory_id').empty();
+                            if (data.other_territory_names && data.other_territory_names.length > 0) {
+                                data.other_territory_names.forEach(function(territory) {
+                                    $('#edit_remaining_territory_id').append('<option value="' + territory.id + '" selected>' + territory.name + '</option>');
+                                });
+                            }
+                        }
+                    });
+
                     $('#EditAgentModal').modal('show');
                 })
             });
