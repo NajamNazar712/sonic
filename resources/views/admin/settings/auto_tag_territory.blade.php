@@ -592,6 +592,7 @@
             $('#AssignAgentModal').on('show.bs.modal', function(){
                 $('#territory_id-error').addClass('d-none');
                 $('#agent_id-error').addClass('d-none');
+                $('#remaining_territory_error').addClass('d-none');
             });
 
             function toggleLeadUserCheckbox() {
@@ -622,7 +623,6 @@
             //             form.submit();    
             //         }
             // });
-
 
             $( "#agent_assign" ).validate({
                 errorClass:"danger",
