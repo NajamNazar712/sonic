@@ -113,7 +113,7 @@ class JourneyMissingEntrySeeder extends Seeder
                 $shipment_journey->relation = null;
                 $shipment_journey->cnic = null;
                 $shipment_journey->save();
-                dd($shipment_journey);
+
                 if ($shipment->shipper_status_id != 1) {
                     ShipmentStatusWebhookController::webhook_subscription($shipment->id, $shipment->shipper_status_id, null);
                 }
