@@ -13887,12 +13887,8 @@ class AdminReportsController extends Controller
                     ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52, 55, 5, 20, 14, 12) and verification = 1)'));
             }
         })
-        ->leftJoin('shipments_journey as sjs', function ($join) {
-            $join->on('sjs.shipment_id', '=', 'shipments.id')
-                ->where('sjs.id', '=', DB::connection('reports')->raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and verification = 1 order by id desc limit 1 offset 1)'));
-        })
-        ->whereBetween('sj.created_at', [$from, $to])
-        ->select('shipments.*', 'sj.*', 'sjs.shipper_status_id as second_last_shipper_id')
+               ->whereBetween('sj.created_at', [$from, $to])
+            //    ->where('sj.shipment_id', 2)
         ->get();
 
 
@@ -13941,6 +13937,8 @@ class AdminReportsController extends Controller
             'delivery_notes.id as delivery_note','c.zone_id')
             ->groupBy('c.zone_id')->whereBetween('delivery_notes.created_at', [$other_statuses_startDate, $other_statuses_endDate])->get();
 
+            $flag = true;
+
         foreach ($regions as $region_key => $region) {
 
             $zones = DB::connection('reports_2')->table('zone_regions')->join('zones as z', 'z.id', 'zone_regions.zone_id')->where('zone_regions.region_id',$region->id)->where('z.status',1)->where('z.business_category_id',1)->select('z.id','z.name')->get();
@@ -13978,16 +13976,23 @@ class AdminReportsController extends Controller
                     {
                         $created_date = Carbon::parse($shipment_data->created_at);
 
-                        if(in_array($shipment_data->consignee_status_id,$pending_status) && $created_date->between($other_pending_status_startDate,$other_pending_status_endDate) && ($shipment_data->second_last_shipper_id == 20)){
-                            $data['ready_for_delivery'] += 0;
+                        if (in_array($shipment_data->consignee_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate, $re_attempt_and_intercept_endDate) == false)
+                        {
+                            $flag = false;
+                        }else{
+                            $flag = true;
                         }
-                        else if(in_array($shipment_data->consignee_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate,$re_attempt_and_intercept_endDate))
+
+                        if(in_array($shipment_data->consignee_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate,$re_attempt_and_intercept_endDate))
                         {
                             $data['ready_for_delivery'] += 1;
                         }
+                        
                         else if(in_array($shipment_data->consignee_status_id,$pending_status) && $created_date->between($other_pending_status_startDate,$other_pending_status_endDate))
                         {
-                            $data['ready_for_delivery'] += 1;
+                            if($flag){
+                                $data['ready_for_delivery'] += 1;
+                            }
                         }
 
                     }
