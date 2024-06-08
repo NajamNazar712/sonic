@@ -76,11 +76,11 @@ class AdminLogisticBookingController extends Controller
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
             ->leftjoin('riders as r','r.id','=','trax_logistic_bookings.rider_id')
             ->leftjoin('user_shipping_infos as usi','usi.id','=','trax_logistic_bookings.shipper_address_id')
-            ->leftjoin('segments as s','s.id','=','trax_logistic_bookings.product_id')
-            ->leftjoin('sub_category_segments as sb','sb.id','=','trax_logistic_bookings.service_id')
+            ->leftjoin('trax_products as p','p.id','=','trax_logistic_bookings.product_id')
+            ->leftjoin('trax_services as sb','sb.id','=','trax_logistic_bookings.service_id')
             ->leftjoin('cities as oc','oc.id','trax_logistic_bookings.origin_id')
             ->leftjoin('cities as dc','dc.id','trax_logistic_bookings.destination_id')
-            ->select('trax_logistic_bookings.id','trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','s.name as product_name','trax_logistic_bookings.service_id','sb.name as service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address','r.name as rider_name')
+            ->select('trax_logistic_bookings.id','trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','p.product_name','trax_logistic_bookings.service_id','sb.service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address','r.name as rider_name')
             ->orderByDesc('trax_logistic_bookings.id');
 
         if (session('role_id') != 1)
@@ -145,7 +145,11 @@ class AdminLogisticBookingController extends Controller
             ->leftjoin('trax_services as s','s.id','=','trax_logistic_bookings.service_id')
             ->leftjoin('trax_stations as oc','oc.id','trax_logistic_bookings.origin_id')
             ->leftjoin('trax_stations as dc','dc.id','trax_logistic_bookings.destination_id')
-            ->select('trax_logistic_bookings.id','bb.status_id','trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','p.product_name','trax_logistic_bookings.service_id','s.service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address','r.name as rider_name')
+            ->leftjoin('trax_booking_batch_details as bbd','bbd.batch_id','bb.id')
+            ->leftjoin('trax_logistic_bookings as tlb', 'tlb.id', '=', 'bbd.booking_id')
+            ->leftjoin('trax_booking_statuses as bs','bs.id','bbd.status_id')
+
+            ->select('trax_logistic_bookings.id','bb.status_id','trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','p.product_name','trax_logistic_bookings.service_id','s.service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address','r.name as rider_name','bs.name as status_name')
             ->where('bd.batch_id',$request->batch_id)
             ->orderByDesc('trax_logistic_bookings.id');
 
@@ -457,21 +461,24 @@ class AdminLogisticBookingController extends Controller
             return redirect()->back()->withErrors($validate)->withInput();
         }
 
-        $logistic_booking= TraxLogisticBooking::find($request->booking_id);
+        $logistic_booking= TraxLogisticBooking::where('id',$request->booking_id);
         if($logistic_booking->exists())
         {
-            $booking_weight=0;
-            if($request->total_volumetric_weight >= $request->total_dense_weight)
-            {
-                $booking_weight= $request->total_volumetric_weight;
 
-            } else{
-                $booking_weight= $request->total_dense_weight;
-            }
+//            $booking_weight=0;
+//            if($request->total_volumetric_weight >= $request->total_dense_weight)
+//            {
+//                $booking_weight= $request->total_volumetric_weight;
+//
+//            } else{
+//                $booking_weight= $request->total_dense_weight;
+//            }
 
 
             try {
                      DB::beginTransaction();
+                    $logistic_booking=$logistic_booking->first();
+
                     $logistic_booking->cn_number=$request->cn_number;
                     $logistic_booking->rider_id=$request->rider_id;
                     $logistic_booking->booking_date=$request->booking_date;
@@ -480,7 +487,7 @@ class AdminLogisticBookingController extends Controller
                     $logistic_booking->service_id=$request->service_id;
                     $logistic_booking->origin_id=$request->origin_id;
                     $logistic_booking->destination_id=$request->destination_id;
-                    $logistic_booking->total_booking_weight=$booking_weight;
+                    $logistic_booking->total_booking_weight=$request->booking_weight;
                     $logistic_booking->total_dense_weight=$request->dense_weight;
                     $logistic_booking->total_volumetric_weight=$request->volumetric_weight;
                     $logistic_booking->shipper_address_id=$request->shipper_address_id;
@@ -495,15 +502,15 @@ class AdminLogisticBookingController extends Controller
                     $logistic_booking->save();
 
                     $shipment=Shipment::where('tracking_number',$request->cn_number);
-//                        ->where('consignee_status_id', 1)
-//                        ->where('shipper_status_id', 1);
 
                     if($shipment->exists())
                     {
                         $shipment=$shipment->first();
-                        if($shipment->consignee_status_id==1 || $shipment->shipper_status_id==1){
-                            $shipment->estimated_weight=$booking_weight;
-                        }
+//                        if($shipment->consignee_status_id==1 || $shipment->shipper_status_id==1){
+//                            $shipment->estimated_weight=$booking_weight;
+//                        }
+                        //atif sir said shipment weight update regardless booking is arrived or not
+                        $shipment->estimated_weight=$request->booking_weight;
                         $shipment->consignee_name=$request->consignee_name;
                         $shipment->consignee_address=$request->consignee_address;
                         $shipment->consignee_phone_number_1=$request->consignee_phone_number_1;
@@ -616,7 +623,7 @@ class AdminLogisticBookingController extends Controller
                     return redirect()->route('admin.logistic.batch.batch_bookings', ['batch_id' => $request->batch_id])
                         ->with('success', 'Logistic booking updated successfully');
                 }
-
+                DB::commit();
                 return redirect()->route('admin.logistic.index')->with('success', 'Logistic booking updated successfully');
 
 
