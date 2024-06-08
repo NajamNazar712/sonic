@@ -1693,7 +1693,7 @@ class ShipperDashboardController extends Controller
         $id = session('user_id');
         
         $user = User::find($id);
-        $sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->get();
+        $sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->get();
         if(session('account_type') == 1){
             $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $weight = WeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');

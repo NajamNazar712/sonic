@@ -58,27 +58,6 @@
                                             </div>
                                         </div>
                                         <div class="row mt-2">
-                                            <div class="col-12">
-                                                <p class="font-weight-bold">How do you charge with shipper?</p>
-                                            </div>
-                                        </div>
-                                        <div class="row mt-2">
-                                            <div class="col-1">
-                                                <input type="hidden" id="sms_type" name="smsPostType" value="1">
-                                                <fieldset class="radio-inline ml-1">
-                                                    <input type="radio" name="sms-radio" class="icheck cradio" id="fixed-radio" rel="fixed" checked>
-                                                    <label for="fixed-sms">Fixed</label>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-2">
-                                                <fieldset class="radio-inline ml-2">
-                                                    <input type="radio" name="sms-radio" class="icheck cradio" id="persms-radio" rel="persms">
-                                                    <label for="per-sms">Per SMS</label>
-                                                </fieldset>
-
-                                            </div>
-                                        </div>
-                                        <div class="row mt-2">
                                                 <div class="col-md-3 text-center">
                                                     <fieldset>
                                                         <div class="input-group form-group">
@@ -4435,14 +4414,6 @@
                 $('#packaging_invoice').val('on');
             }else{
                 $('#packaging_invoice').val('off');
-            }
-        });
-        $("input[type='radio'][name='sms-radio']").on('change', function(event){
-            var rtype = $(this).attr('rel');
-            if(rtype == 'fixed'){
-                $('#sms_type').val(1);
-            }else if(rtype == 'persms'){
-                $('#sms_type').val(2);
             }
         });
     </script>

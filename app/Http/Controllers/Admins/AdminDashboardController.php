@@ -1789,7 +1789,7 @@ class AdminDashboardController extends Controller
             $rate_origin_hubs = RateOriginHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = RateDestinationHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount_weight_rates = DiscountWeightCharge::all()->where('user_id',$id)->groupBy(['shipping_mode_id','destination_id']);
-            $sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->get();
+            $sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->get();
 
         } else {
             $tomorrow = Carbon::parse($date)->addDay(1);
@@ -2045,7 +2045,7 @@ class AdminDashboardController extends Controller
 
         if ((($user['rate_status'] >= 0) && ($user['status'] == 1 || $user['status'] == 5)) || (($user['rate_status'] == 0) && $user['status'] == 3)) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->first();
+            $sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->first();
             $weight = WeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $bookingType = BookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = CashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -2160,7 +2160,7 @@ class AdminDashboardController extends Controller
 //        var_dump(empty($switches));exit();
             $e_weight = WeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        $cash = '';
-            $e_sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->first();
+            $e_sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->first();
             $e_bookingType = BookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_cash = CashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_insurance = InsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -2719,14 +2719,12 @@ class AdminDashboardController extends Controller
 
             if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => $request->smsPostType,
                     'sms_charges' => $request->sms_charges,
                     'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                 ]);
             }
             else{
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => null,
                     'sms_charges' => null,
                     'sms_charges_status' =>  0,
                 ]);
@@ -4791,7 +4789,6 @@ class AdminDashboardController extends Controller
                 if ($smsRate->isEmpty()) {
                     PendingSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $request->smsPostType,
                         'sms_charges' => $request->sms_charges,
                         'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                     ]);
@@ -5791,10 +5788,9 @@ class AdminDashboardController extends Controller
                         $history_rate_destination_hub->save();
                     }
                 }
-                if($current_sms = User::where('id', $id)->whereNotNull('sms_charges_type_id')->first()){
+                if($current_sms = User::where('id', $id)->where('sms_charges_status', 1)->first()){
                     HistorySmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $current_sms['sms_charges_type_id'],
                         'sms_charges' => $current_sms['sms_charges'],
                         'sms_charges_status' => $current_sms['sms_charges_status']
                         
@@ -6374,7 +6370,6 @@ class AdminDashboardController extends Controller
                 WmsLabellingCharge::where('user_id', $id)->delete();
 
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => null,
                     'sms_charges'=> null,
                     'sms_charges_status'=> 0,
                 ]);
@@ -6412,7 +6407,6 @@ class AdminDashboardController extends Controller
                 }
                 if($pending_sms = PendingSmsCharges::where('user_id', $id)->first()){
                     User::where('id', $id)->update([
-                        'sms_charges_type_id' => $pending_sms->sms_charges_type_id,
                         'sms_charges'=> $pending_sms->sms_charges,
                         'sms_charges_status'=> $pending_sms->sms_charges_status,
                     ]);
@@ -7500,7 +7494,6 @@ class AdminDashboardController extends Controller
 
         if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
             User::where('id', $id)->update([
-                'sms_charges_type_id' => $request->smsPostType,
                 'sms_charges' => $request->sms_charges,
                 'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
             ]);

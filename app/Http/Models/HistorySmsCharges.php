@@ -8,6 +8,6 @@ class HistorySmsCharges extends Model
 {
     protected $fillable = [
         'user_id',
-        'sms_charges_type_id' , 'sms_charges','sms_charges_status'
+        'sms_charges','sms_charges_status'
     ];
 }

@@ -134,35 +134,13 @@
                                             </div>
                                         </div>
                                         <div class="row mt-2">
-                                            <div class="col-12">
-                                                <p class="font-weight-bold">How do you charge with shipper?</p>
-                                            </div>
-                                        </div>
-                                        <div class="row mt-2">
-                                            <div class="col-1">
-                                                <input type="hidden" id="sms_type" name="smsPostType" value="{{ ((isset($sms_charge['sms_charges']) && isset($sms_charge['sms_charges_type_id'])) ?  $sms_charge->sms_charges_type_id : '') }}">
-                                                <fieldset class="radio-inline ml-1">
-                                                    <input type="radio" name="sms-radio" class="icheck cradio" id="fixed-radio" rel="fixed" {{ ((isset($sms_charge['sms_charges_type_id']) && $sms_charge->sms_charges_type_id == 1) ? 'checked' : '') }} >
-                                                    <label for="fixed-sms">Fixed</label>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-2">
-                                                <fieldset class="radio-inline ml-2">
-                                                    <input type="radio" name="sms-radio" class="icheck cradio" id="persms-radio" rel="persms" {{ ((isset($sms_charge['sms_charges_type_id']) && $sms_charge->sms_charges_type_id == 2) ? 'checked' : '') }}>
-                                                    <label for="per-sms">Per SMS</label>
-                                                </fieldset>
-
-                                            </div>
-                                        </div>
-                                        <div class="row mt-2">
                                                 <div class="col-md-3 text-center">
                                                     <fieldset>
                                                         <div class="input-group form-group">
                                                             <div class="input-group-prepend">
                                                                 <span class="input-group-text">SMS Charges</span>
                                                             </div>
-                                                            <input type="text" class="form-control @if(isset($e_sms_charge['sms_charges']) && ($sms_charge['sms_charges']) && $e_sms_charge->sms_charges != $sms_charge->sms_charges) changed @elseif(!isset($e_sms_charge['sms_charges']) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_sms_charge['sms_charges_type_id']) && isset($sms_charge['sms_charges_type_id']) && $e_sms_charge->sms_charges_type_id !=$sms_charge->sms_charges_type_id) {{($e_sms_charge->sms_charges_type_id == 1) ? 'Fixed' : 'Per SMS'}} 
-                                                            @endif @if(isset($e_sms_charge['sms_charges']) && isset($sms_charge['sms_charges']) && $e_sms_charge->sms_charges !=$sms_charge->sms_charges) {{$e_sms_charge->sms_charges}} @endif" data-rule-required="true" data-msg-required="This field is required" data-rule-range="[0.01,100000]" data-msg-range="Charges needs to be from 0.01 to 100000" name="sms_charges" value="{{ (isset($sms_charge['sms_charges']) && $sms_charge->sms_charges != '')? $sms_charge->sms_charges : ''}}">
+                                                            <input type="text" class="form-control @if(isset($e_sms_charge['sms_charges']) && ($sms_charge['sms_charges']) && $e_sms_charge->sms_charges != $sms_charge->sms_charges) changed @elseif(!isset($e_sms_charge['sms_charges']) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_sms_charge['sms_charges']) && isset($sms_charge['sms_charges']) && $e_sms_charge->sms_charges !=$sms_charge->sms_charges) {{$e_sms_charge->sms_charges}} @endif" data-rule-required="true" data-msg-required="This field is required" data-rule-range="[0.01,100000]" data-msg-range="Charges needs to be from 0.01 to 100000" name="sms_charges" value="{{ (isset($sms_charge['sms_charges']) && $sms_charge->sms_charges != '')? $sms_charge->sms_charges : ''}}">
                                                             <div class="input-group-append">
                                                                 <span class="input-group-text">PKR</span>
                                                             </div>
@@ -6946,14 +6924,5 @@
                 $('#packaging_invoice').val('off');
             }
         });
-        $("input[type='radio'][name='sms-radio']").on('change', function(event){
-            var rtype = $(this).attr('rel');
-            if(rtype == 'fixed'){
-                $('#sms_type').val(1);
-            }else if(rtype == 'persms'){
-                $('#sms_type').val(2);
-            }
-        });
-
     </script>
 @endsection

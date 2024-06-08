@@ -16,7 +16,6 @@ class CreatePendingCorporateDefaultSmsChargesTable extends Migration
         Schema::create('pending_corporate_default_sms_charges', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->index();
-            $table->tinyInteger('sms_charges_type_id')->index();
             $table->double('sms_charges');
             $table->boolean('sms_charges_status');
             $table->timestamps();

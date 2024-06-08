@@ -791,18 +791,10 @@ class AdminCorporateAccountsController extends Controller
         }
         if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
             User::where('id', $id)->update([
-                'sms_charges_type_id' => $request->smsPostType,
                 'sms_charges' => $request->sms_charges,
                 'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
             ]);
         }
-        // else{
-        //     User::where('id', $id)->update([
-        //         'sms_charges_type_id' => null,
-        //         'sms_charges' => null,
-        //         'sms_charges_status' =>  0,
-        //     ]);
-        // }
         if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
             if ($request->has('on_default') && $request->on_default == 'on') {
                 $default_shipping_mode = User::where('id', $id)->update([
@@ -1876,7 +1868,7 @@ class AdminCorporateAccountsController extends Controller
             $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = CorporateCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = CorporateInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->first();
+            $sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->first();
             $fuel = CorporateFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount = CorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
@@ -2027,7 +2019,7 @@ class AdminCorporateAccountsController extends Controller
                 $e_weight = CorporateWeightChargeZoneWise::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $e_return = CorporateReturnChargeZoneWise::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             }
-            $e_sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->first();
+            $e_sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->first();
             $e_bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_cash = CorporateCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_insurance = CorporateInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -2802,14 +2794,12 @@ class AdminCorporateAccountsController extends Controller
             }
             if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => $request->smsPostType,
                     'sms_charges' => $request->sms_charges,
                     'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                 ]);
             }
             else{
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => null,
                     'sms_charges' => null,
                     'sms_charges_status' =>  0,
                 ]);
@@ -5132,7 +5122,6 @@ class AdminCorporateAccountsController extends Controller
                 if ($smsRate->isEmpty()) {
                     PendingCorporateSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $request->smsPostType,
                         'sms_charges' => $request->sms_charges,
                         'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                     ]);
@@ -6200,10 +6189,9 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                if($current_sms = User::where('id', $id)->whereNotNull('sms_charges_type_id')->first()){
+                if($current_sms = User::where('id', $id)->where('sms_charges_status', 1)->first()){
                     HistoryCorporateSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $current_sms['sms_charges_type_id'],
                         'sms_charges' => $current_sms['sms_charges'],
                         'sms_charges_status' => $current_sms['sms_charges_status']
                         
@@ -6787,7 +6775,6 @@ class AdminCorporateAccountsController extends Controller
                 WmsPackingCharge::where('user_id', $id)->delete();
                 WmsLabellingCharge::where('user_id', $id)->delete();
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => null,
                     'sms_charges'=> null,
                     'sms_charges_status'=> 0,
                 ]);
@@ -6869,7 +6856,6 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pending_sms = PendingCorporateSmsCharges::where('user_id', $id)->first()){
                     User::where('id', $id)->update([
-                        'sms_charges_type_id' => $pending_sms->sms_charges_type_id,
                         'sms_charges'=> $pending_sms->sms_charges,
                         'sms_charges_status'=> $pending_sms->sms_charges_status,
                     ]);
@@ -8107,7 +8093,6 @@ class AdminCorporateAccountsController extends Controller
                 if ($smsRate->isEmpty()) {
                     PendingCorporateSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $request->smsPostType,
                         'sms_charges' => $request->sms_charges,
                         'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                     ]);
@@ -9176,10 +9161,9 @@ class AdminCorporateAccountsController extends Controller
                             'fuel_charges' => $switches['fuel_charges']
                         ]);
                     }
-                    if($current_sms = User::where('id', $id)->whereNotNull('sms_charges_type_id')->first()){
+                    if($current_sms = User::where('id', $id)->where('sms_charges_status', 1)->first()){
                         HistoryCorporateDefaultSmsCharges::create([
                             'user_id' => $id,
-                            'sms_charges_type_id' => $current_sms['sms_charges_type_id'],
                             'sms_charges' => $current_sms['sms_charges'],
                             'sms_charges_status' => $current_sms['sms_charges_status']
                             
@@ -9677,7 +9661,6 @@ class AdminCorporateAccountsController extends Controller
 //                    PackagingCharge::where('user_id', $id)->delete();
                     //PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
                     User::where('id', $id)->update([
-                        'sms_charges_type_id' => null,
                         'sms_charges'=> null,
                         'sms_charges_status'=> 0,
                     ]);
@@ -9707,7 +9690,6 @@ class AdminCorporateAccountsController extends Controller
                     }
                     if($pending_sms = PendingCorporateSmsCharges::where('user_id', $id)->first()){
                         User::where('id', $id)->update([
-                            'sms_charges_type_id' => $pending_sms->sms_charges_type_id,
                             'sms_charges'=> $pending_sms->sms_charges,
                             'sms_charges_status'=> $pending_sms->sms_charges_status,
                         ]);
@@ -10282,10 +10264,9 @@ class AdminCorporateAccountsController extends Controller
                             $history_rate_destination_hub->save();
                         }
                     }
-                    if($current_sms = User::where('id', $id)->whereNotNull('sms_charges_type_id')->first()){
+                    if($current_sms = User::where('id', $id)->where('sms_charges_status', 1)->first()){
                         HistoryCorporateSmsCharges::create([
                             'user_id' => $id,
-                            'sms_charges_type_id' => $current_sms['sms_charges_type_id'],
                             'sms_charges' => $current_sms['sms_charges'],
                             'sms_charges_status' => $current_sms['sms_charges_status']
                             
@@ -10825,7 +10806,6 @@ class AdminCorporateAccountsController extends Controller
                     }
 
                     User::where('id', $id)->update([
-                        'sms_charges_type_id' => null,
                         'sms_charges'=> null,
                         'sms_charges_status'=> 0,
                     ]);
@@ -10908,7 +10888,6 @@ class AdminCorporateAccountsController extends Controller
                     }
                     if($pending_sms = PendingCorporateSmsCharges::where('user_id', $id)->first()){
                         User::where('id', $id)->update([
-                            'sms_charges_type_id' => $pending_sms->sms_charges_type_id,
                             'sms_charges'=> $pending_sms->sms_charges,
                             'sms_charges_status'=> $pending_sms->sms_charges_status,
                         ]);
@@ -11758,7 +11737,7 @@ class AdminCorporateAccountsController extends Controller
 
             $rate_origin_hubs = CorporateRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = CorporateRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-            $sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->get();
+            $sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->get();
         }
         else{
             
@@ -12402,18 +12381,10 @@ class AdminCorporateAccountsController extends Controller
         }
         if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
             User::where('id', $id)->update([
-                'sms_charges_type_id' => $request->smsPostType,
                 'sms_charges' => $request->sms_charges,
                 'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
             ]);
         }
-        // else{
-        //     User::where('id', $id)->update([
-        //         'sms_charges_type_id' => null,
-        //         'sms_charges' => null,
-        //         'sms_charges_status' =>  0,
-        //     ]);
-        // }
 
         if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
             if ($request->has('on_default') && $request->on_default == 'on') {
@@ -13789,14 +13760,12 @@ class AdminCorporateAccountsController extends Controller
             }
             if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => $request->smsPostType,
                     'sms_charges' => $request->sms_charges,
                     'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                 ]);
             }
             else{
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => null,
                     'sms_charges' => null,
                     'sms_charges_status' =>  0,
                 ]);
@@ -16043,7 +16012,6 @@ class AdminCorporateAccountsController extends Controller
                 if ($smsRate->isEmpty()) {
                     PendingCorporateSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $request->smsPostType,
                         'sms_charges' => $request->sms_charges,
                         'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                     ]);
@@ -17069,10 +17037,9 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                if($current_sms = User::where('id', $id)->whereNotNull('sms_charges_type_id')->first()){
+                if($current_sms = User::where('id', $id)->where('sms_charges_status', 1)->first()){
                     HistoryCorporateSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $current_sms['sms_charges_type_id'],
                         'sms_charges' => $current_sms['sms_charges'],
                         'sms_charges_status' => $current_sms['sms_charges_status']
                         
@@ -17632,7 +17599,6 @@ class AdminCorporateAccountsController extends Controller
                 WmsPackingCharge::where('user_id', $id)->delete();
                 WmsLabellingCharge::where('user_id', $id)->delete();
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => null,
                     'sms_charges'=> null,
                     'sms_charges_status'=> 0,
                 ]);
@@ -17714,7 +17680,6 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pending_sms = PendingCorporateSmsCharges::where('user_id', $id)->first()){
                     User::where('id', $id)->update([
-                        'sms_charges_type_id' => $pending_sms->sms_charges_type_id,
                         'sms_charges'=> $pending_sms->sms_charges,
                         'sms_charges_status'=> $pending_sms->sms_charges_status,
                     ]);
@@ -18814,7 +18779,6 @@ class AdminCorporateAccountsController extends Controller
                 if ($smsRate->isEmpty()) {
                     PendingCorporateSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $request->smsPostType,
                         'sms_charges' => $request->sms_charges,
                         'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                     ]);
@@ -19830,10 +19794,9 @@ class AdminCorporateAccountsController extends Controller
                             'fuel_charges' => $switches['fuel_charges']
                         ]);
                     }
-                    if($current_sms = User::where('id', $id)->whereNotNull('sms_charges_type_id')->first()){
+                    if($current_sms = User::where('id', $id)->where('sms_charges_status', 1)->first()){
                         HistoryCorporateDefaultSmsCharges::create([
                             'user_id' => $id,
-                            'sms_charges_type_id' => $current_sms['sms_charges_type_id'],
                             'sms_charges' => $current_sms['sms_charges'],
                             'sms_charges_status' => $current_sms['sms_charges_status']
                             
@@ -20350,7 +20313,6 @@ class AdminCorporateAccountsController extends Controller
 //                    PackagingCharge::where('user_id', $id)->delete();
                     //PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
                     User::where('id', $id)->update([
-                        'sms_charges_type_id' => null,
                         'sms_charges'=> null,
                         'sms_charges_status'=> 0,
                     ]);
@@ -20381,7 +20343,6 @@ class AdminCorporateAccountsController extends Controller
                     }
                     if($pending_sms = PendingCorporateSmsCharges::where('user_id', $id)->first()){
                         User::where('id', $id)->update([
-                            'sms_charges_type_id' => $pending_sms->sms_charges_type_id,
                             'sms_charges'=> $pending_sms->sms_charges,
                             'sms_charges_status'=> $pending_sms->sms_charges_status,
                         ]);
@@ -20940,10 +20901,9 @@ class AdminCorporateAccountsController extends Controller
                             $history_rate_destination_hub->save();
                         }
                     }
-                    if($current_sms = User::where('id', $id)->whereNotNull('sms_charges_type_id')->first()){
+                    if($current_sms = User::where('id', $id)->where('sms_charges_status', 1)->first()){
                         HistoryCorporateSmsCharges::create([
                             'user_id' => $id,
-                            'sms_charges_type_id' => $current_sms['sms_charges_type_id'],
                             'sms_charges' => $current_sms['sms_charges'],
                             'sms_charges_status' => $current_sms['sms_charges_status']
                             
@@ -21496,7 +21456,6 @@ class AdminCorporateAccountsController extends Controller
                     CorporateRateOriginHub::where('user_id', $id)->delete();
                     CorporateRateDestinationHub::where('user_id', $id)->delete();
                     User::where('id', $id)->update([
-                        'sms_charges_type_id' => null,
                         'sms_charges'=> null,
                         'sms_charges_status'=> 0,
                     ]);
@@ -21563,7 +21522,6 @@ class AdminCorporateAccountsController extends Controller
                     }
                     if($pending_sms = PendingCorporateSmsCharges::where('user_id', $id)->first()){
                         User::where('id', $id)->update([
-                            'sms_charges_type_id' => $pending_sms->sms_charges_type_id,
                             'sms_charges'=> $pending_sms->sms_charges,
                             'sms_charges_status'=> $pending_sms->sms_charges_status,
                         ]);
@@ -22602,7 +22560,6 @@ class AdminCorporateAccountsController extends Controller
         }
         if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
             User::where('id', $id)->update([
-                'sms_charges_type_id' => $request->smsPostType,
                 'sms_charges' => $request->sms_charges,
                 'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
             ]);
@@ -23810,7 +23767,7 @@ class AdminCorporateAccountsController extends Controller
             $weight = CorporateDefaultWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount_weight_charges = CorporateDefaultDiscountWeightCharge::all()->where('user_id', $id)->groupBy(['shipping_mode_id','destination_id']);
             $bookingType = CorporateDefaultBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->first();
+            $sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->first();
             $cash = CorporateDefaultCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = CorporateDefaultInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $return = CorporateDefaultReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -23934,7 +23891,7 @@ class AdminCorporateAccountsController extends Controller
 //        $cash = '';
             $e_discount_weight_charges = CorporateDefaultDiscountWeightCharge::all()->where('user_id', $id)->groupBy(['shipping_mode_id','destination_id']);
             $e_bookingType = CorporateDefaultBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $e_sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->first();
+            $e_sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->first();
             $e_cash = CorporateDefaultCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_insurance = CorporateDefaultInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_return = CorporateDefaultReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -24620,14 +24577,12 @@ class AdminCorporateAccountsController extends Controller
 
             if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => $request->smsPostType,
                     'sms_charges' => $request->sms_charges,
                     'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                 ]);
             }
             else{
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => null,
                     'sms_charges' => null,
                     'sms_charges_status' =>  0,
                 ]);
@@ -26840,7 +26795,6 @@ class AdminCorporateAccountsController extends Controller
                 if ($smsRate->isEmpty()) {
                     PendingCorporateDefaultSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $request->smsPostType,
                         'sms_charges' => $request->sms_charges,
                         'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                     ]);
@@ -27868,10 +27822,9 @@ class AdminCorporateAccountsController extends Controller
                         $history_rate_destination_hub->save();
                     }
                 }
-                if($current_sms = User::where('id', $id)->whereNotNull('sms_charges_type_id')->first()){
+                if($current_sms = User::where('id', $id)->where('sms_charges_status', 1)->first()){
                     HistoryCorporateDefaultSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $current_sms['sms_charges_type_id'],
                         'sms_charges' => $current_sms['sms_charges'],
                         'sms_charges_status' => $current_sms['sms_charges_status']
                         
@@ -28469,7 +28422,6 @@ class AdminCorporateAccountsController extends Controller
                 CorporateDefaultRateOriginHub::where('user_id', $id)->delete();
                 CorporateDefaultRateDestinationHub::where('user_id', $id)->delete();
                 User::where('id', $id)->update([
-                    'sms_charges_type_id' => null,
                     'sms_charges'=> null,
                     'sms_charges_status'=> 0,
                 ]);
@@ -28494,7 +28446,6 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if($pending_sms = PendingCorporateDefaultSmsCharges::where('user_id', $id)->first()){
                     User::where('id', $id)->update([
-                        'sms_charges_type_id' => $pending_sms->sms_charges_type_id,
                         'sms_charges'=> $pending_sms->sms_charges,
                         'sms_charges_status'=> $pending_sms->sms_charges_status,
                     ]);
@@ -29604,7 +29555,6 @@ class AdminCorporateAccountsController extends Controller
                 if ($smsRate->isEmpty()) {
                     PendingCorporateDefaultSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $request->smsPostType,
                         'sms_charges' => $request->sms_charges,
                         'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                     ]);
@@ -30623,10 +30573,9 @@ class AdminCorporateAccountsController extends Controller
                    }
                }
             
-               if($current_sms = User::where('id', $id)->whereNotNull('sms_charges_type_id')->first()){
+               if($current_sms = User::where('id', $id)->where('sms_charges_status', 1)->first()){
                     HistoryCorporateSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $current_sms['sms_charges_type_id'],
                         'sms_charges' => $current_sms['sms_charges'],
                         'sms_charges_status' => $current_sms['sms_charges_status']
                         
@@ -31206,7 +31155,6 @@ class AdminCorporateAccountsController extends Controller
                CorporateRateOriginHub::where('user_id', $id)->delete();
                CorporateRateDestinationHub::where('user_id', $id)->delete();
                User::where('id', $id)->update([
-                    'sms_charges_type_id' => null,
                     'sms_charges'=> null,
                     'sms_charges_status'=> 0,
                 ]);
@@ -31231,7 +31179,6 @@ class AdminCorporateAccountsController extends Controller
                }
                if($pending_sms = PendingCorporateDefaultSmsCharges::where('user_id', $id)->first()){
                     User::where('id', $id)->update([
-                        'sms_charges_type_id' => $pending_sms->sms_charges_type_id,
                         'sms_charges'=> $pending_sms->sms_charges,
                         'sms_charges_status'=> $pending_sms->sms_charges_status,
                     ]);
@@ -32412,7 +32359,6 @@ class AdminCorporateAccountsController extends Controller
                 if ($smsRate->isEmpty()) {
                     PendingCorporateSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $request->smsPostType,
                         'sms_charges' => $request->sms_charges,
                         'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                     ]);
@@ -33862,7 +33808,6 @@ class AdminCorporateAccountsController extends Controller
                 if ($smsRate->isEmpty()) {
                     PendingCorporateSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $request->smsPostType,
                         'sms_charges' => $request->sms_charges,
                         'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                     ]);
@@ -35295,7 +35240,6 @@ class AdminCorporateAccountsController extends Controller
                 if ($smsRate->isEmpty()) {
                     PendingCorporateDefaultSmsCharges::create([
                         'user_id' => $id,
-                        'sms_charges_type_id' => $request->smsPostType,
                         'sms_charges' => $request->sms_charges,
                         'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
                     ]);
@@ -36419,7 +36363,7 @@ class AdminCorporateAccountsController extends Controller
         $bookingType = CorporateDefaultBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
         $switches = CorporateDefaultRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
         $discount = CorporateDefaultDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-        $sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->get();
+        $sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->get();
 //        $packaging = PackagingCharge::all()->where('user_id', $id);
 
         $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();

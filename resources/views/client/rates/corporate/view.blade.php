@@ -42,33 +42,7 @@
                                  aria-expanded="true">
                                 <div class="card-content">
                                     <div class="card-body">
-                                        <!-- <div class="row">
-                                            <div class="col-12">
-                                                <h4>Do you want to charge SMS?</h4>
-                                            </div>
-                                        </div>
-                                        <div class="row mt-2">
-                                            <div class="col-12">
-                                                <p class="font-weight-bold">How do you charge with shipper?</p>
-                                            </div>
-                                        </div> -->
                                         @foreach($sms_charges as $sms_charge)
-                                        <div class="row mt-2">
-                                            <div class="col-1">
-                                                <input type="hidden" id="sms_type" name="smsPostType" value="">
-                                                <fieldset class="radio-inline ml-1">
-                                                    <input type="radio" name="sms-radio_{{$sms_charge->id}}" class="icheck cradio" id="fixed-radio" rel="fixed" {{ ((isset($sms_charge->sms_charges_type_id) && $sms_charge->sms_charges_type_id == 1) ? 'checked' : '') }} disabled>
-                                                    <label for="fixed-sms">Fixed</label>
-                                                </fieldset>
-                                            </div>
-                                            <div class="col-2">
-                                                <fieldset class="radio-inline ml-2">
-                                                    <input type="radio" name="sms-radio_{{$sms_charge->id}}" class="icheck cradio" id="persms-radio" rel="persms" {{ ((isset($sms_charge->sms_charges_type_id) && $sms_charge->sms_charges_type_id == 2) ? 'checked' : '') }} disabled>
-                                                    <label for="per-sms">Per SMS</label>
-                                                </fieldset>
-
-                                            </div>
-                                        </div>
                                         <div class="row mt-2">
                                                 <div class="col-md-3 text-center">
                                                     <fieldset>

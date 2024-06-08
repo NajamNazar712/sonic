@@ -172,8 +172,6 @@
                                         {{--										<th class="border-primary border-darken-1">Packing Charges</th> --}}
                                         {{--										<th class="border-primary border-darken-1">Fintech Charges</th> --}}
                                         <th class="border-primary border-darken-1">Total Per SMS Charges</th>
-                                        <th class="border-primary border-darken-1">SMS Fixed Charges</th>
-                                        <th class="border-primary border-darken-1">Total Fixed SMS Charges</th>
                                         <th class="border-primary border-darken-1">Total Deductable</th>
                                         <th class="border-primary border-darken-1">Total Payable</th>
                                         <th class="border-primary border-darken-1">Bank</th>
@@ -357,7 +355,6 @@
                                                         <th class="border-primary border-darken-1">GST</th>
                                                         <th class="border-primary border-darken-1">WHT</th>
                                                         <th class="border-primary border-darken-1">SMS Charges</th>
-                                                        <th class="border-primary border-darken-1">SMS Fixed Charges</th>
                                                         <th class="border-primary border-darken-1">Fintech Charges</th>
                                                         <th class="border-primary border-darken-1">Packing Charges</th>
                                                         <th class="border-primary border-darken-1">Deductable</th>
@@ -671,8 +668,6 @@
                             head.push('Total GST');
                             head.push('Total WHT');
                             head.push('Total Per SMS Charges');
-                            head.push('SMS Fixed Charges');
-                            head.push('Total Fixed SMS Charges');
                             // head.push('Packing Charges');
                             head.push('Total Deductable');
                             head.push('Total Payable');
@@ -705,8 +700,6 @@
                                 row.push(values.total_gst);
                                 row.push(values.total_wht);
                                 row.push(values.total_sms_charges);
-                                row.push(values.ppc_sms_charge_flag);
-                                row.push(values.ppc_sms_fixed_charge);
                                 // row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
                                 row.push(values.total_payable);
@@ -1001,18 +994,6 @@
                         orderable: false
                     },
                     {
-                        data: 'ppc_sms_charge_flag',
-                        name: 'ppc.sms_fixed_charge_flag',
-                        class: 'align-middle text-center ppc_sms_charge_flag',
-                        orderable: false
-                    },
-                    {
-                        data: 'ppc_sms_fixed_charge',
-                        name: 'ppc.fixed_sms_charges',
-                        class: 'align-middle text-center ppc_sms_fixed_charge',
-                        orderable: false
-                    },
-                    {
                         data: 'total_deductable',
                         name: 'total_deductable',
                         class: 'align-middle text-center total_deductable',
@@ -1130,7 +1111,7 @@
                             '.total_adjustments') || $(header).is(
                                 '.return_shipments_average_aging') || $(header).is('.action') ||
                             $(header).is('.total_pending_shipments') || $(header).is(
-                                '.packaging_charges') || $(header).is('.total_wht') || $(header).is('.total_sms_charges') || $(header).is('.ppc_sms_charge_flag') || $(header).is('.ppc_sms_fixed_charge')) {
+                                '.packaging_charges') || $(header).is('.total_wht') || $(header).is('.total_sms_charges') ) {
                             $(td).appendTo($(search));
                         } else if ($(header).is('.bank')) {
                             $(bank_select).appendTo($(search))
@@ -1418,11 +1399,6 @@
                         class: 'align-middle sms_charges'
                     },
                     {
-                        data: 'sms_fixed_charge_flag',
-                        name: 'pending_payment_shipments.sms_fixed_charge_flag',
-                        class: 'align-middle sms_fixed_charge_flag'
-                    },
-                    {
                         data: 'fintech_charges',
                         name: 'fintech_charges',
                         class: 'align-middle fintech_charges'
@@ -1480,8 +1456,7 @@
                         var header = column.header();
 
                         if ($(header).is('.select') || $(header).is('.serial_number') || $(
-                                header).is('.aging') || $(
-                                header).is('.sms_fixed_charge_flag') ) {
+                                header).is('.aging') ) {
                             $(td).appendTo($(search));
                         } else if ($(header).is('.type')) {
                             $(drop_select).appendTo($(search))
@@ -1733,7 +1708,7 @@
                         })
                         .done(function(data) {
                             var details =
-                                '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">SMS Charges</th><th class="border-primary border-darken-1 align-middle text-center">Fixed SMS Charges Included?</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Packing Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
+                                '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">SMS Charges</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Packing Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
 
                             $.each(data, function(index, detail) {
                                 details += '<tr>';
@@ -1749,8 +1724,6 @@
                                     .gst + '</td>';
                                 details += '<td class="align-middle text-center">' + detail
                                     .sms_charges + '</td>';
-                                details += '<td class="align-middle text-center">' + detail
-                                    .fixed_flag + '</td>';
                                 details += '<td class="align-middle text-center">' + detail
                                     .fintech_charges + '</td>';
                                 details += '<td class="align-middle text-center">' + detail

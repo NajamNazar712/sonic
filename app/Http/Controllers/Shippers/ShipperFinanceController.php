@@ -334,7 +334,6 @@ class ShipperFinanceController extends Controller
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $done_payment = DonePayment::find($request->id);
-        $fixed_sms_charges = DonePaymentCalculation::where('done_payment_id', $request->id)->pluck('fixed_sms_charges')->first();
         $shipper = $done_payment->shipper;
 
         if ($done_payment->user_bank_info_id == null) {
@@ -521,13 +520,6 @@ class ShipperFinanceController extends Controller
             } else {
                 $type = 'Adjusted';
             }
-            if($done_payment_shipment->sms_fixed_charge_flag == 1){
-                $sms_fixed_charge_flag = 'Applicable';
-            }elseif($done_payment_shipment->sms_fixed_charge_flag == 2){
-                $sms_fixed_charge_flag = 'Already Charged';
-            }else{
-                $sms_fixed_charge_flag = 'Not Applicable';
-            }
 
             $item = $shipment->items->first();
 
@@ -556,7 +548,6 @@ class ShipperFinanceController extends Controller
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->sms_charges != 0) ? number_format($done_payment_shipment->sms_charges, 2) : '0') . '</td>
-                              <td>' . $sms_fixed_charge_flag . '</td>
                               <td>' . number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) . '</td>
                               <td>' . number_format($done_payment_shipment->payable, 2) . '</td>
                             </tr>
@@ -619,7 +610,6 @@ class ShipperFinanceController extends Controller
                                 <td class="color secondary"><strong>' . number_format($total_gst, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_wht, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_sms_charges, 2) . '</strong></td>
-                                <td class="color secondary"><strong></strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount - $total_payable, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_payable, 2) . '</strong></td>
                             </tr>
@@ -636,7 +626,7 @@ class ShipperFinanceController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Total Payable (PKR)</strong></td>
-                              <td>' . number_format(ROUND($total_payable - $done_payment->ibft_charges -  $fixed_sms_charges, 0, PHP_ROUND_HALF_DOWN), 2) . '</td>
+                              <td>' . number_format(ROUND($total_payable - $done_payment->ibft_charges, 0, PHP_ROUND_HALF_DOWN), 2) . '</td>
                             </tr>
                           </tbody>
                         </table>
@@ -665,7 +655,6 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>GST</strong></td>
                               <td class="color primary"><strong>WHT</strong></td>
                               <td class="color primary"><strong>SMS Charges</strong></td>
-                              <td class="color primary"><strong>Fixed SMS Charges</strong></td>
                               <td class="color primary"><strong>Net Retained Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Net Disbursement Amount (PKR)</strong></td>
                             </tr>
@@ -753,12 +742,8 @@ class ShipperFinanceController extends Controller
                                         <td>' . number_format($total_sms_charges, 2) . '</td>
                                     </tr>
                                     <tr>
-                                        <td class="color secondary"><strong>Fixed SMS Charges</strong></td>
-                                        <td>' . number_format($fixed_sms_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_sms_charges + $fixed_sms_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht), 2) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_sms_charges+ $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
@@ -1908,8 +1893,6 @@ class ShipperFinanceController extends Controller
             $total_gst += $invoice_shipment->gst;
             $total_invoice_amount += $invoice_shipment->invoice_amount;
         }
-        $total_fixed_sms_charges = $invoice->total_fixed_sms_charges;
-        $total_invoice_amount += $total_fixed_sms_charges;
 
         $html .= '
                     <table class="table table-sm table-bordered border">
@@ -1973,10 +1956,6 @@ class ShipperFinanceController extends Controller
                                 <tr>
                                   <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
                                   <td class="text-right">' . number_format($total_gst, 2) . '</td>
-                                </tr>
-                                <tr>
-                                  <td class="color secondary text-left"><strong>SMS Fixed Charges(PKR)</strong></td>
-                                  <td class="text-right">' . number_format($total_fixed_sms_charges, 2) . '</td>
                                 </tr>
                                 <tr>
                                   <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
@@ -2903,25 +2882,6 @@ class ShipperFinanceController extends Controller
 
                 $invoice_number_serial_number++;
             }
-            $html .= '
-            <div class="row justify-content-start mt-5 mr-1">
-                <div class="col-6">
-                    <h1><b><u>Fixed Charges</u></b></h1>
-                    <table class="table table-sm table-bordered border">
-                    <tbody>
-                        <tr>
-                        <td class="color secondary text-left"><strong>Fixed Charges</strong></td>
-                        <td class="text-center"><strong>SMS</strong></td>
-                        </tr>
-                        <tr>
-                        <td class="color secondary text-left"><strong>Amount</strong></td>
-                        <td class="text-center"><strong>'. $invoice->total_fixed_sms_charges .'</strong></td>
-                        </tr>
-                    </tbody>
-                    </table>
-                </div>
-            </div>
-            ';
         }
         else{
 
@@ -4694,9 +4654,6 @@ class ShipperFinanceController extends Controller
                 $total_invoice_amount += $invoice_shipment->invoice_amount;
             }
 
-            $total_fixed_sms_charges = $invoice->total_fixed_sms_charges;
-            $total_invoice_amount += $total_fixed_sms_charges;
-
             $html .= '
                     <table class="table table-sm table-bordered border">
                       <thead>
@@ -4759,10 +4716,6 @@ class ShipperFinanceController extends Controller
                                 <tr>
                                   <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
                                   <td class="text-right">' . number_format($total_gst, 2) . '</td>
-                                </tr>
-                                <tr>
-                                  <td class="color secondary text-left"><strong>SMS Fixed Charges(PKR)</strong></td>
-                                  <td class="text-right">' . number_format($total_fixed_sms_charges, 2) . '</td>
                                 </tr>
                                 <tr>
                                   <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
