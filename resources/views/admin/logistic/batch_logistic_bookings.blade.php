@@ -25,7 +25,7 @@
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Pickup Address</th>
                                     <th class="border-primary border-darken-1">Product</th>
-                                    <th class="border-primary border-darken-1">Service</th>
+                                    <th class="border-primary border-darken-1">Service/Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Booking Weight</th>
                                     <th class="border-primary border-darken-1">Total Pieces</th>
@@ -33,6 +33,7 @@
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Consignee Name</th>
                                     <th class="border-primary border-darken-1">Consignee Address</th>
+                                    <th class="border-primary border-darken-1">Booking Status</th>
                                     <th class="border-primary border-darken-1">Action</th>
 
                                 </tr>
@@ -314,6 +315,7 @@
                     {data: 'destination_name', name: 'dc.name', class: 'align-middle destination_name'},
                     {data: 'consignee_name', name: 'consignee_name', class: 'align-middle consignee_name'},
                     {data: 'consignee_address', name: 'consignee_address', class: 'align-middle consignee_address'},
+                    {data: 'status_name', name: 'status_name', class: 'align-middle status_name'},
                     {data: 'action', name: 'action', class: 'align-middle action'}
 
                 ],

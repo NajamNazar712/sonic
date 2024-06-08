@@ -25,7 +25,7 @@
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Pickup Address</th>
                                     <th class="border-primary border-darken-1">Product</th>
-                                    <th class="border-primary border-darken-1">Service</th>
+                                    <th class="border-primary border-darken-1">Service/Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Booking Weight</th>
                                     <th class="border-primary border-darken-1">Total Pieces</th>

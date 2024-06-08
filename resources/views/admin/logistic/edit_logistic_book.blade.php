@@ -582,18 +582,20 @@
                                             <div class="row mt-4">
                                                 <div class="col-md-12 text-center" style="border: 1px solid lightgrey; padding:7px;">
                                                     <button type="submit" name="book" id="add" class="btn btn-primary w-50" value="Book">Update Booking</button>
-{{--                                                    @if(isset($batch_id) && $batch_id!=0)--}}
+                                                    @if(isset($batch_id) && $batch_id!=0)
                                                         <a href="{{route('admin.logistic.batch.batch_bookings',['batch_id'=>$batch_id])}}" class="btn btn-danger">Skip Entry</a>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            @if(isset($batch_id) && $batch_id!=0)
+                                                <div class="row mt-4">
+                                                    <div class="col-md-12 text-center">
+                                                        <input type="hidden" name="batch_id" value="{{$batch_id}}">
+                                                        <button type="button" name="batch_release" id="batch_release" class="btn btn-primary w-50" value="Book">Release Batch</button>
+                                                    </div>
+                                                </div>
+                                            @endif
 
-{{--                                                    @endif--}}
-                                                </div>
-                                            </div>
-                                            <div class="row mt-4">
-                                                <div class="col-md-12 text-center">
-                                                    <input type="hidden" name="batch_id" value="{{$batch_id}}">
-                                                    <button type="button" name="batch_release" id="batch_release" class="btn btn-primary w-50" value="Book">Release Batch</button>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                     
