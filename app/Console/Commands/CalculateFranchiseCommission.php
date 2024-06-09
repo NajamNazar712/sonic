@@ -79,77 +79,82 @@ class CalculateFranchiseCommission extends Command
             'retail_franchise_charges.franchise_deduction',
             'retail_shipping_modes.name as shipping_mode_name',
         ])
-        ->get();
-        foreach ($shipments as $shipment) {
-            $shipmentCounts = $shipments->where('category_id', $shipment->category_id)
-            ->where('shipping_mode', $shipment->shipping_mode)
-            ->count();
-            $shipment->shipmentCounts = $shipmentCounts;
-            // Calculate commission percentage
-            if ($shipment->product_percentage !== null) {
-                $product_percentage = $shipment->product_percentage / 100;
-                $commission = $product_percentage * $shipment->total_charges_without_gst;
+        // ->get();
+        ->first();
 
-            } else {
-                $commission = '-';
-                $shipment->product_percentage = '-';
-            }
+        dd($shipments);
 
-            // Calculate GST
-            if ($shipment->franchise_gst !== null &&  $commission !== null) {
-                $franchise_gst = $shipment->franchise_gst / 100;
-                $gst = $commission * $franchise_gst;
-                $charges_with_gst = $gst + $commission; 
-            } else {
-                $gst = '-';
-                $charges_with_gst = '-';
-                $shipment->franchise_gst = '-';
-            }
+
+        // foreach ($shipments as $shipment) {
+        //     $shipmentCounts = $shipments->where('category_id', $shipment->category_id)
+        //     ->where('shipping_mode', $shipment->shipping_mode)
+        //     ->count();
+        //     $shipment->shipmentCounts = $shipmentCounts;
+        //     // Calculate commission percentage
+        //     if ($shipment->product_percentage !== null) {
+        //         $product_percentage = $shipment->product_percentage / 100;
+        //         $commission = $product_percentage * $shipment->total_charges_without_gst;
+
+        //     } else {
+        //         $commission = '-';
+        //         $shipment->product_percentage = '-';
+        //     }
+
+        //     // Calculate GST
+        //     if ($shipment->franchise_gst !== null &&  $commission !== null) {
+        //         $franchise_gst = $shipment->franchise_gst / 100;
+        //         $gst = $commission * $franchise_gst;
+        //         $charges_with_gst = $gst + $commission; 
+        //     } else {
+        //         $gst = '-';
+        //         $charges_with_gst = '-';
+        //         $shipment->franchise_gst = '-';
+        //     }
         
-            // Calculate withholding
-            if ($shipment->franchise_withholding !== null) {
-                $franchise_withholding_amount = $shipment->franchise_withholding;
-                $franchise_withholding = $shipment->franchise_withholding / 100;
-                $withholding = $charges_with_gst !== null ? $charges_with_gst * $franchise_withholding : null;
-                $charges_without_withholding = $charges_with_gst - $withholding;
-            } else {
-                $withholding = '-';
-                $charges_without_withholding = '-';
-                $shipment->franchise_withholding = '-';
-            }
+        //     // Calculate withholding
+        //     if ($shipment->franchise_withholding !== null) {
+        //         $franchise_withholding_amount = $shipment->franchise_withholding;
+        //         $franchise_withholding = $shipment->franchise_withholding / 100;
+        //         $withholding = $charges_with_gst !== null ? $charges_with_gst * $franchise_withholding : null;
+        //         $charges_without_withholding = $charges_with_gst - $withholding;
+        //     } else {
+        //         $withholding = '-';
+        //         $charges_without_withholding = '-';
+        //         $shipment->franchise_withholding = '-';
+        //     }
         
-            // Calculate deduction
-            if ($shipment->franchise_deduction !== null) {
-                $franchise_deduction_percentage = $shipment->franchise_deduction;
-                $franchise_deduction = $shipment->franchise_deduction / 100;
-                $deduction = $charges_without_withholding !== null ? $charges_without_withholding * $franchise_deduction : null;
-                $net_commission = $charges_without_withholding - $deduction;
-            } else {
-                $deduction = '-';
-                $net_commission = '-';
-                $shipment->franchise_deduction = '-';
-            }
+        //     // Calculate deduction
+        //     if ($shipment->franchise_deduction !== null) {
+        //         $franchise_deduction_percentage = $shipment->franchise_deduction;
+        //         $franchise_deduction = $shipment->franchise_deduction / 100;
+        //         $deduction = $charges_without_withholding !== null ? $charges_without_withholding * $franchise_deduction : null;
+        //         $net_commission = $charges_without_withholding - $deduction;
+        //     } else {
+        //         $deduction = '-';
+        //         $net_commission = '-';
+        //         $shipment->franchise_deduction = '-';
+        //     }
 
-            RetailFranchiseCommission::create([
-                'franchise_id' => $shipment->retail_user_id,
-                'month' => $month,
-                'retail_shipping_mode_id' => $shipment->shipping_mode,
-                'franchise_code' => $shipment->code,
-                'number_of_shipments' => $shipmentCounts,
-                'total_charges_without_gst' => $shipment->total_charges_without_gst,
-                'product_percentage' => $shipment->product_percentage,
-                'commission' => $commission,
-                'gst_percentage' => $shipment->franchise_gst,
-                'franchise_gst_amount' => $gst,
-                'total_charges_with_gst' => $charges_with_gst,
-                'franchise_withholding_percentage' => $shipment->franchise_withholding,
-                'franchise_withholding_amount' => $withholding,
-                'charges_without_withholding' => $charges_without_withholding,
-                'deduction_percentage' => $shipment->franchise_deduction,
-                'deduction_amount' => $deduction,
-                'net_commission' => $net_commission,
-            ]);
-        }
+        //     RetailFranchiseCommission::create([
+        //         'franchise_id' => $shipment->retail_user_id,
+        //         'month' => $month,
+        //         'retail_shipping_mode_id' => $shipment->shipping_mode,
+        //         'franchise_code' => $shipment->code,
+        //         'number_of_shipments' => $shipmentCounts,
+        //         'total_charges_without_gst' => $shipment->total_charges_without_gst,
+        //         'product_percentage' => $shipment->product_percentage,
+        //         'commission' => $commission,
+        //         'gst_percentage' => $shipment->franchise_gst,
+        //         'franchise_gst_amount' => $gst,
+        //         'total_charges_with_gst' => $charges_with_gst,
+        //         'franchise_withholding_percentage' => $shipment->franchise_withholding,
+        //         'franchise_withholding_amount' => $withholding,
+        //         'charges_without_withholding' => $charges_without_withholding,
+        //         'deduction_percentage' => $shipment->franchise_deduction,
+        //         'deduction_amount' => $deduction,
+        //         'net_commission' => $net_commission,
+        //     ]);
+        // }
     }
 
     private function user_commission_view()

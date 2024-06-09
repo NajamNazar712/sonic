@@ -711,95 +711,154 @@ class RetailAdminUserManagementController extends Controller
         $html .= '<div class="row align-items-start justify-content-between summary">';
         $html .= '<div class="col-6">';
         $html .= '<table class="table table-sm table-bordered border">';
+
+        // First Table
         $html .= '<tbody>';
         $html .= '<tr>';
-        $html .= '<td class="color primary" colspan="3"><strong>Franchise Details</strong></td>';
+        $html .= '<td class="">Franchise Name:</td>';
+        $html .= '<td><strong>Test Name</strong></td>';
         $html .= '</tr>';
 
-        // table set
         $html .= '<tr>';
-        $html .= '<td class="color secondary"><strong></strong>Franchise Name</td>';
-        $html .= '<td class="color secondary"><strong></strong>Franchise Code</td>';
-        $html .= '<td class="color secondary"><strong></strong>Month</td>';
+        $html .= '<td class="">Location Name:</td>';
         $html .= '</tr>';
-        // table set
 
-        $grouped_commissions = $retail_commissions->groupBy('franchise_id');
-        foreach ($grouped_commissions as $franchise_id => $commissions) {
-            $franchise_code = $commissions->pluck("franchise_code");
-            // $franchise_name = RetailFranchise::where($franchise_id)->name;
-            $franchise_name = RetailFranchise::whereIn('code', $franchise_code)->first();
-            $name = $franchise_name->name;
-            $commission = $commissions->first();
-            $html .= '<tr>';
-            $html .= '<td><strong></strong>'. $name .'</td>';
-            $html .= '<td><strong></strong>'. $commission->franchise_code .'</td>';
-            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
-            $html .= '</tr>';
-        }
+        $html .= '<tr>';
+        $html .= '<td class="">Address:</td>';
+        $html .= '</tr>';
 
+        $html .= '<tr>';
+        $html .= '<td class="">Code:</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td class="">CNIC:</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td class="">Phone #</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td class=""><strong>Payment Month:</strong></td>';
+        $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';
         $html .= '</div>';
 
+        // Second Table
         $html .= '<div class="row align-items-start justify-content-between summary">';
         $html .= '<div class="col-12">';
         $html .= '<table class="table table-sm table-bordered border">';
         $html .= '<thead>';
         $html .= '<tr>';
-        $html .= '<th class="color primary">Franchise User</th>';
-        $html .= '<th class="color primary">Franchise Code</th>';
-        $html .= '<th class="color primary">Month</th>';
-        $html .= '<th class="color primary">Retail Shipping Mode</th>';
-        $html .= '<th class="color primary">Number of Shipments</th>';
-        $html .= '<th class="color primary">Total Charges Without GST</th>';
-        $html .= '<th class="color primary">Product Percentage</th>';
+        $html .= '<th class="color primary">Product</th>';
+        $html .= '<th class="color primary">Approved Percentage</th>';
+        $html .= '<th class="color primary">Shipments</th>';
+        $html .= '<th class="color primary">Total Charges</th>';
+        $html .= '<th class="color primary">GST</th>';
+        $html .= '<th class="color primary">Weight Charges</th>';
         $html .= '<th class="color primary">Commission</th>';
-        $html .= '<th class="color primary">GST %</th>';
-        $html .= '<th class="color primary">GST Amount</th>';
-        $html .= '<th class="color primary">Total Commission</th>';
-        $html .= '<th class="color primary">Withholding %</th>';
-        $html .= '<th class="color primary">Franchise withholding Amount</th>';
-        $html .= '<th class="color primary">Charges minus withholding</th>';
-        $html .= '<th class="color primary">Deduction %</th>';
-        $html .= '<th class="color primary">Franchise deduction amount</th>';
-        $html .= '<th class="color primary">Net Commission</th>';
-
         $html .= '</tr>';
+
         $html .= '</thead>';
         $html .= '<tbody>';
-        
-        foreach ($retail_commissions as $commission) {
-            $franchise_name = RetailUser::find($commission->franchise_id)->name;
-            $retail_shipping_modes = RetailShippingMode::where('id', $commission->retail_shipping_mode_id)->pluck('name')->toArray();
-            $retail_shipping_mode = implode(', ', $retail_shipping_modes);
 
-            $html .= '<tr>';
-            $html .= '<td>' . $franchise_name . '</td>';
-            $html .= '<td>' . $commission->franchise_code . '</td>';
-            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
-            $html .= '<td>' . $retail_shipping_mode . '</td>';
-            $html .= '<td>' . $commission->number_of_shipments . '</td>';
-            $html .= '<td>' . $commission->total_charges_without_gst . '</td>';
-            $html .= '<td>' . $commission->product_percentage . '</td>';
-            $html .= '<td>' . $commission->commission . '</td>';
-            $html .= '<td>' . $commission->gst_percentage . '</td>';
-            $html .= '<td>' . $commission->total_charges_with_gst . '</td>';
-            $html .= '<td>' . $commission->franchise_gst_amount . '</td>';
-            $html .= '<td>' . $commission->franchise_withholding_percentage . '</td>';
-            $html .= '<td>' . $commission->franchise_withholding_amount . '</td>';
-            $html .= '<td>' . $commission->charges_without_withholding . '</td>';
-            $html .= '<td>' . $commission->deduction_percentage . '</td>';
-            $html .= '<td>' . $commission->deduction_amount . '</td>';
-            $html .= '<td>' . $commission->net_commission . '</td>';
-            $html .= '</tr>';
-        }   
-        
+        $html .= '<tr>';
+        $html .= '<td>Rush</td>';
+        $html .= '<td>20%</td>';
+        $html .= '<td>100</td>';
+        $html .= '<td>10,500</td>';
+        $html .= '<td>3,400</td>';
+        $html .= '<td>8,400</td>';
+        $html .= '<td>4,000</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td class="text-center" colspan="2">Total</td>';
+        $html .= '<td>Sum of all shipments</td>';
+        $html .= '<td>Sum of all total charges</td>';
+        $html .= '<td>Sum of all GST</td>';
+        $html .= '<td>Sum of all Weight Charges</td>';
+        $html .= '<td>Sum of all Commissions</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td class="text-center" colspan="6">Withholding Income Tax (percentage)</td>';
+        $html .= '<td>some %age</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
+        $html .= '<td>some %age</td>';
+        $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
 
-        $html .= '<div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
+
+        // Third table
+        $html .= '<div class="row align-items-start justify-content-between summary">';
+        $html .= '<div class="col-12">';
+        $html .= '<table class="table table-sm table-bordered border">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th class="color primary">Deposits</th>';
+        $html .= '<th class="color primary">Amount</th>';
+        $html .= '<th class="color primary">Bank Name</th>';
+        $html .= '<th class="color primary">Cheque #</th>';
+        $html .= '</tr>';
+
+        $html .= '</thead>';
+        $html .= '<tbody>';
+
+        $html .= '<tr>';
+        $html .= '<td>Security Deposit</td>';
+        $html .= '<td>25,000</td>';
+        $html .= '<td>Meezan Bank</td>';
+        $html .= '<td>C-0123456789</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td>License Fees</td>';
+        $html .= '<td>25,000</td>';
+        $html .= '<td>Meezan Bank</td>';
+        $html .= '<td>C-0123456789</td>';
+        $html .= '</tr>';
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+
+        // Fourth table
+        $html .= '<div class="row align-items-start justify-content-between summary">';
+        $html .= '<div class="col-3">';
+        $html .= '<table class="table table-sm table-bordered border">';
+
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
+        $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+
+
+
+        $html .= '<div class="mb-1">';
+        $html .= '<strong>Prepared By:</strong>';
+        $html .= '<div style="display: inline-block; width: 4rem;"><hr></div>';
+        $html .= '<strong>Checked By:</strong>';
+        $html .= '<div style="display: inline-block; width: 4rem;"><hr></div>';
+        $html .= '<strong>Retail Team</strong>';
+        $html .= '</div>';
+        
+
+        $html .= '<div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
 
         $html .= '</div>';
         $html .= '</div>';
