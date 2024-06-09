@@ -847,22 +847,40 @@ class RetailAdminUserManagementController extends Controller
         $html .= '</div>';
 
 
-
-
-        $html .= '<div class="mb-1">';
+        $html .= '<div class="col-3 d-flex justify-content-between">';
         $html .= '<strong>Prepared By:</strong>';
-        $html .= '<div style="display: inline-block; width: 4rem;"><hr></div>';
         $html .= '<strong>Checked By:</strong>';
-        $html .= '<div style="display: inline-block; width: 4rem;"><hr></div>';
-        $html .= '<strong>Retail Team</strong>';
         $html .= '</div>';
-        
+
+        $html .= '<div class="">';
+        $html .= '<div class="w-25"><strong><hr></strong></div>';
+        $html .= '</div>';
+
+        $html .= '<div class="mb-1 col-3 d-flex justify-content-between">';
+        $html .= '<strong>Retail Team</strong>';
+        $html .= '<strong>Finance Team</strong>';
+        $html .= '</div>';
+
+        $html .= '<div class="row align-items-start justify-content-between summary">';
+        $html .= '<div class="col-3">';
+
+        $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+        $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        $html .= '</div>';
+        $html .= '</div>';
 
         $html .= '<div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
 
         $html .= '</div>';
         $html .= '</div>';
-        
+
         $html .= '</body>';
         $html .= '</html>';
         return $html;

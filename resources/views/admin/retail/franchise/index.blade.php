@@ -113,12 +113,12 @@
                                         </div>
                                     </div>
             
-                                    {{-- <div class="input-group mb-2">
+                                    <div class="input-group mb-2">
                                         <input type="text" name="franchise_withholding" id="withholding_tax_percentage" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-rule-required="true" data-msg-required="Withholding Tax is required">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
-                                    </div> --}}
+                                    </div>
             
                                     {{-- <div class="input-group mb-2">
                                         <input type="text" name="franchise_deduction" id="deduction_percentage" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100">
