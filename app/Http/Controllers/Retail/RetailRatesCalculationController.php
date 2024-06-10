@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Retail;
 use App\Http\Controllers\Controller;
 use App\Http\Models\City;
 use App\Http\Models\InternationalDhlZone;
+use App\Http\Models\InternationalEconomyStandardRetailRate;
 use App\Http\Models\InternationalStandardRetailRates;
 use App\Http\Models\RetailStandardRates;
 use App\Http\Models\Zone;
@@ -188,49 +189,98 @@ class RetailRatesCalculationController extends Controller
                 $shipping_mode_id = 1;
             } else if ($shipping_mode_id == 9) {
                 $shipping_mode_id = 2;
+            } else if ($shipping_mode_id == 11) {
+                $shipping_mode_id = 11;
             } else {
                 $shipping_mode_id = 3;
             }
 
-            $weight_charge = InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
-            if ($weight_charge->exists()) {
-                $weight_charge = $weight_charge->first();
-                $consignee_city = City::find($destination_id);
-                $zone_id = $consignee_city->zone_id;
-                $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
-
-                if ($international_zone) {
-                    $zone = $international_zone->zone_name;
-                    $zone_id = 'zone_' . $zone;
-                    $charges = $weight_charge[$zone_id];
-
-                    $city = City::find($pickup_city_id);
-                    $zone_city_gst = ZoneCitiesGst::where('zone_id',$city->zone->id)->where('city_id',$city->id);
-                    if ($zone_city_gst->exists())
-                    {
-                        $zone_city_gst = $zone_city_gst->first();
-                        $gst = 1 + $zone_city_gst->gst;
+            if($shipping_mode_id == 11)
+            {
+                $weight_charge = InternationalEconomyStandardRetailRate::where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                if ($weight_charge->exists()) {
+                    $weight_charge = $weight_charge->first();
+                    $consignee_city = City::find($destination_id);
+                    $zone_id = $consignee_city->zone_id;
+                    $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
+    
+                    if ($international_zone) {
+                        $zone = $international_zone->zone_name;
+                        $zone_id = 'zone_' . $zone;
+                        $charges = $weight_charge[$zone_id];
+    
+                        $city = City::find($pickup_city_id);
+                        $zone_city_gst = ZoneCitiesGst::where('zone_id',$city->zone->id)->where('city_id',$city->id);
+                        if ($zone_city_gst->exists())
+                        {
+                            $zone_city_gst = $zone_city_gst->first();
+                            $gst = 1 + $zone_city_gst->gst;
+                        }
+                        else
+                        {
+                            $gst = 1 + $city->zone->gst;
+                        }
+                        // $gst_charges = round($charges * $gst,2);
+                        // $charges = round($charges - $gst_charges,2);
+    
+                        // $discount_amount = round($charges * $discount,2);
+                        // $charges_with_discount = round($charges - $discount_amount,2);
+                        // $packaging_and_insurance_charges = $insurance_amount + $packaging;
+                        // $total_charges = round($charges_with_discount + $gst_charges + $packaging_and_insurance_charges,0,PHP_ROUND_HALF_UP);
+    
+                        $charges_without_gst = round($charges / $gst, 2); //
+                        $gst_amount = round($charges - $charges_without_gst, 2);
+                        $discount_amount = ($discount > 0) ? round($charges_without_gst * $discount, 2) : 0;
+                        $charges_with_discount = round($charges_without_gst - $discount_amount, 2);
+                        $charges_with_discount_and_gst = $charges_with_discount + $gst_amount;
+                        $packaging_and_insurance_charges = $insurance_amount + $packaging;
+                        $total_charges = round($charges_with_discount_and_gst + $packaging_and_insurance_charges, 0, PHP_ROUND_HALF_UP);
+    
                     }
-                    else
-                    {
-                        $gst = 1 + $city->zone->gst;
+                }
+            }
+            else
+            {
+                $weight_charge = InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                if ($weight_charge->exists()) {
+                    $weight_charge = $weight_charge->first();
+                    $consignee_city = City::find($destination_id);
+                    $zone_id = $consignee_city->zone_id;
+                    $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
+    
+                    if ($international_zone) {
+                        $zone = $international_zone->zone_name;
+                        $zone_id = 'zone_' . $zone;
+                        $charges = $weight_charge[$zone_id];
+    
+                        $city = City::find($pickup_city_id);
+                        $zone_city_gst = ZoneCitiesGst::where('zone_id',$city->zone->id)->where('city_id',$city->id);
+                        if ($zone_city_gst->exists())
+                        {
+                            $zone_city_gst = $zone_city_gst->first();
+                            $gst = 1 + $zone_city_gst->gst;
+                        }
+                        else
+                        {
+                            $gst = 1 + $city->zone->gst;
+                        }
+                        // $gst_charges = round($charges * $gst,2);
+                        // $charges = round($charges - $gst_charges,2);
+    
+                        // $discount_amount = round($charges * $discount,2);
+                        // $charges_with_discount = round($charges - $discount_amount,2);
+                        // $packaging_and_insurance_charges = $insurance_amount + $packaging;
+                        // $total_charges = round($charges_with_discount + $gst_charges + $packaging_and_insurance_charges,0,PHP_ROUND_HALF_UP);
+    
+                        $charges_without_gst = round($charges / $gst, 2); //
+                        $gst_amount = round($charges - $charges_without_gst, 2);
+                        $discount_amount = ($discount > 0) ? round($charges_without_gst * $discount, 2) : 0;
+                        $charges_with_discount = round($charges_without_gst - $discount_amount, 2);
+                        $charges_with_discount_and_gst = $charges_with_discount + $gst_amount;
+                        $packaging_and_insurance_charges = $insurance_amount + $packaging;
+                        $total_charges = round($charges_with_discount_and_gst + $packaging_and_insurance_charges, 0, PHP_ROUND_HALF_UP);
+    
                     }
-                    // $gst_charges = round($charges * $gst,2);
-                    // $charges = round($charges - $gst_charges,2);
-
-                    // $discount_amount = round($charges * $discount,2);
-                    // $charges_with_discount = round($charges - $discount_amount,2);
-                    // $packaging_and_insurance_charges = $insurance_amount + $packaging;
-                    // $total_charges = round($charges_with_discount + $gst_charges + $packaging_and_insurance_charges,0,PHP_ROUND_HALF_UP);
-
-                    $charges_without_gst = round($charges / $gst, 2); //
-                    $gst_amount = round($charges - $charges_without_gst, 2);
-                    $discount_amount = ($discount > 0) ? round($charges_without_gst * $discount, 2) : 0;
-                    $charges_with_discount = round($charges_without_gst - $discount_amount, 2);
-                    $charges_with_discount_and_gst = $charges_with_discount + $gst_amount;
-                    $packaging_and_insurance_charges = $insurance_amount + $packaging;
-                    $total_charges = round($charges_with_discount_and_gst + $packaging_and_insurance_charges, 0, PHP_ROUND_HALF_UP);
-
                 }
             }
         }
