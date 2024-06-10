@@ -161,7 +161,7 @@ class AdminLogisticBookingController extends Controller
 
         $datatables = Datatables::of($logistic_bookings)
             ->addColumn('action',function ($logistic_bookings) use ($request){
-                if (session('role_id') == 1 || count(array_intersect([980], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([987], session('permissions'))) !== 0) {
                     $dropdown='';
 //                    if ($logistic_bookings->status_id==2)
 //                    {
