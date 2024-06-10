@@ -14,7 +14,7 @@ class AddNewRetailShippingModeForInternationalEconomySeeder extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('retail_shipping_modes')->insert(array(
-            array('id' => 11, 'name' => 'International-Economy', 'created_at' => $timestamp, 'updated_at' => $timestamp)
+            array('id' => 11, 'name' => 'International-Economy', 'business_category_id' => 2, 'created_at' => $timestamp, 'updated_at' => $timestamp)
         ));
     }
 }
