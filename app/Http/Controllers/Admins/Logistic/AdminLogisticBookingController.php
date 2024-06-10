@@ -145,10 +145,10 @@ class AdminLogisticBookingController extends Controller
             ->leftjoin('trax_services as s','s.id','=','trax_logistic_bookings.service_id')
             ->leftjoin('trax_stations as oc','oc.id','trax_logistic_bookings.origin_id')
             ->leftjoin('trax_stations as dc','dc.id','trax_logistic_bookings.destination_id')
-            ->leftjoin('trax_booking_batch_details as bbd','bbd.batch_id','bb.id')
-            ->leftjoin('trax_logistic_bookings as tlb', 'tlb.id', '=', 'bbd.booking_id')
-            ->leftjoin('trax_booking_statuses as bs','bs.id','bbd.status_id')
-
+            ->leftjoin('trax_booking_batch_details as bbd','bbd.booking_id','trax_logistic_bookings.id')
+            ->leftjoin('trax_booking_statuses as bs',function ($query){
+                $query->on('bs.id','bbd.status_id');
+            })
             ->select('trax_logistic_bookings.id','bb.status_id','trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','p.product_name','trax_logistic_bookings.service_id','s.service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address','r.name as rider_name','bs.name as status_name')
             ->where('bd.batch_id',$request->batch_id)
             ->orderByDesc('trax_logistic_bookings.id');
@@ -163,22 +163,22 @@ class AdminLogisticBookingController extends Controller
             ->addColumn('action',function ($logistic_bookings) use ($request){
                 if (session('role_id') == 1 || count(array_intersect([980], session('permissions'))) !== 0) {
                     $dropdown='';
-                    if ($logistic_bookings->status_id==2)
-                    {
+//                    if ($logistic_bookings->status_id==2)
+//                    {
                         $edit_button = '<a href="' . route("admin.logistic.edit", ["batch_id"=>$request->batch_id,"booking_id" => $logistic_bookings->id]) . '" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
 
-                    $dropdown = '
-                            <div class="btn-group">
-                              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                              <div class="dropdown-menu dropdown-menu-sm">
-                        ';
-                    $dropdown .= $edit_button;
-                    $dropdown .= '
-                              </div>
-                            </div>
-                       
-                         ';
-                    }
+                        $dropdown = '
+                                <div class="btn-group">
+                                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                                  <div class="dropdown-menu dropdown-menu-sm">
+                            ';
+                        $dropdown .= $edit_button;
+                        $dropdown .= '
+                                  </div>
+                                </div>
+                           
+                             ';
+//                    }
                     return $dropdown;
                 } else{
                     return '';
