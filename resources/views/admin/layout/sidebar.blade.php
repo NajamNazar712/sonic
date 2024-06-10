@@ -2773,8 +2773,8 @@
                                                     </li>
                                                 @endif
                                                     <li class=" nav-item">
-                                                        <a href="{{ route('admin.retail.international.rates.index') }}">
-                                                            <span class="menu-title">Retail International Rate Upload</span>
+                                                        <a href="{{ route('admin.retail.international.economy_rates.index') }}">
+                                                            <span class="menu-title">Retail International Economy Rate Upload</span>
                                                         </a> 
                                                     </li>
 
