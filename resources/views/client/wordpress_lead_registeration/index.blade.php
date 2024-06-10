@@ -47,7 +47,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="shipper_poc">
-                                            Person of Contact:
+                                            Contact Person Name:
                                             <span class="danger">*</span>
                                         </label>
                                         <input type="text" class="form-control required"
@@ -1050,7 +1050,7 @@
                                                                                 <input type="checkbox" id="OvernightSwitch{{$index}}"
                                                                                        class="switchery weightAdditionOvernight"
                                                                                        data-color="success" data-size="sm"
-                                                                                       name="on_wa_switch[{{$index}}]"
+                                                                                       name="on_wa_switch[{{$index}}]" readonly
                                                                                        @if($onweight->weight_addition == 1) checked @endif>
                                                                             </div>
                                                                         </div>
@@ -1173,7 +1173,7 @@
                                                                                     <label class="card-title mr-1">DWS Weight </label>
                                                                                     <input type="checkbox" name="on_dws" id="on_dws"
                                                                                            class="switchery on_dws" data-size="xs"
-                                                                                           data-switchery="true" checked>
+                                                                                           data-switchery="true" checked readonly>
                                                                                 </div>
                                                                             </fieldset>
                                                                         </div>
@@ -1201,7 +1201,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="on_cash_handling_switch"
                                                                                class="switchery cashChargesOvernight" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" readonly checked/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1271,7 +1271,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="on_insurance_charges_switch"
                                                                                class="switchery insuranceChargesOvernight"
-                                                                               data-color="success" data-size="sm"/>
+                                                                               data-color="success" data-size="sm" checked readonly/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1340,7 +1340,8 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="on_return_switch"
                                                                                class="switchery returnChargesOvernight" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" checked readonly
+                                                                               />
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1407,7 +1408,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="overnight_fuel_switch"
                                                                                class="switchery fuelSurchargeOvernight" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" checked readonly/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1523,7 +1524,7 @@
                                                                                 <input type="checkbox" id="OverlandSwitch{{$index}}"
                                                                                        class="switchery weightAdditionOverland"
                                                                                        data-color="success" data-size="sm"
-                                                                                       name="ol_wa_switch[{{$index}}]"
+                                                                                       name="ol_wa_switch[{{$index}}]" readonly
                                                                                        @if($olweight->weight_addition == 1) checked @endif>
                                                                             </div>
                                                                         </div>
@@ -1644,7 +1645,7 @@
                                                                                     <label class="card-title mr-1">DWS Weight </label>
                                                                                     <input type="checkbox" name="ol_dws" id="ol_dws"
                                                                                            class="switchery ol_dws" data-size="xs"
-                                                                                           data-switchery="true" checked>
+                                                                                           data-switchery="true" checked readonly>
                                                                                 </div>
                                                                             </fieldset>
                                                                         </div>
@@ -1672,7 +1673,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="ol_cash_handling_switch"
                                                                                class="switchery cashChargesOverland" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" readonly checked/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1743,7 +1744,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="ol_insurance_charges_switch"
                                                                                class="switchery insuranceChargesoverland"
-                                                                               data-color="success" data-size="sm"/>
+                                                                               data-color="success" data-size="sm" checked readonly/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1812,7 +1813,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="ol_return_switch"
                                                                                class="switchery returnChargesOverland" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" checked readonly/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1878,7 +1879,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="overland_fuel_switch"
                                                                                class="switchery fuelSurchargeOverland" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" checked readonly/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1993,7 +1994,7 @@
                                                                                 <input type="checkbox" id="DetainSwitch{{$index}}"
                                                                                        class="switchery weightAdditionDetain"
                                                                                        data-color="success" data-size="sm"
-                                                                                       name="detain_wa_switch[{{$index}}]"
+                                                                                       name="detain_wa_switch[{{$index}}]" readonly
                                                                                        @if($detweight->weight_addition == 1) checked @endif>
                                                                             </div>
                                                                         </div>
@@ -2112,7 +2113,7 @@
                                                                                     <label class="card-title mr-1">DWS Weight </label>
                                                                                     <input type="checkbox" name="detain_dws" id="detain_dws"
                                                                                            class="switchery detain_dws" data-size="xs"
-                                                                                           data-switchery="true" checked>
+                                                                                           data-switchery="true" checked readonly>
                                                                                 </div>
                                                                             </fieldset>
                                                                         </div>
@@ -2140,7 +2141,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="detain_cash_handling_switch"
                                                                                class="switchery cashChargesDetain" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" readonly checked/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -2211,7 +2212,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="detain_insurance_charges_switch"
                                                                                class="switchery insuranceChargesdetain" data-color="success"
-                                                                               data-size="sm"/>
+                                                                               data-size="sm" checked readonly/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -2280,7 +2281,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="detain_return_switch"
                                                                                class="switchery returnChargesDetain" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" checked readonly/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -2349,7 +2350,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="detain_fuel_switch"
                                                                                class="switchery fuelSurchargeDetain" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" checked readonly/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -2453,7 +2454,7 @@
                                                                             <div class="form-group " style="padding-top: 8px;">
                                                                                 <input type="checkbox" id="SamedaySwitch{{$index}}"
                                                                                        class="switchery weightAdditionSameday"
-                                                                                       data-color="success" data-size="sm"
+                                                                                       data-color="success" data-size="sm" readonly
                                                                                        name="sameday_wa_switch[{{$index}}]"/>
                                                                             </div>
                                                                         </div>
@@ -2545,7 +2546,7 @@
                                                                                     <label class="card-title mr-1">DWS Weight </label>
                                                                                     <input type="checkbox" name="sameday_dws"
                                                                                            id="sameday_dws" class="switchery sameday_dws"
-                                                                                           data-size="xs" data-switchery="true" checked>
+                                                                                           data-size="xs" data-switchery="true" checked readonly>
                                                                                 </div>
                                                                             </fieldset>
                                                                         </div>
@@ -2573,7 +2574,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="sameday_cash_handling_switch"
                                                                                class="switchery cashChargesSameday" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" readonly checked/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -2644,7 +2645,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="sameday_insurance_charges_switch"
                                                                                class="switchery insuranceChargessameday"
-                                                                               data-color="success" data-size="sm"/>
+                                                                               data-color="success" data-size="sm" checked readonly/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -2713,7 +2714,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="sameday_return_switch"
                                                                                class="switchery returnChargesSameday" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" checked readonly/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -2752,7 +2753,7 @@
                                                                     <div class="form-group ">
                                                                         <input type="checkbox" name="sameday_fuel_switch"
                                                                                class="switchery fuelSurchargeSameday" data-color="success"
-                                                                               data-size="sm" checked/>
+                                                                               data-size="sm" checked readonly/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -2925,7 +2926,7 @@
         }).bind('change', function() {
 
             if (this.value == 2) {
-                $('#billing_information_div').removeClass('d-none');
+                $('#billing_information_difAlv').removeClass('d-none');
                 $('#more_banks_btn_div').addClass('d-none');
             } else {
 

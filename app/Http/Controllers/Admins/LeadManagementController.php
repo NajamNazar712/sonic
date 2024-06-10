@@ -170,11 +170,14 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as sp', 'sp.id', '=', 'leads.sale_person_id')
             ->leftjoin('admins as rp', 'rp.id', '=', 'leads.reference_person_id')
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
+    
+            ->leftjoin('users as u', 'u.lead_id', '=', 'leads.id')
+
             ->leftjoin('lead_references as lr', 'lr.id', '=', 'leads.reference_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id','leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status');
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company_name as company', 'lsr.name as reason_id','leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status', 'u.brand_name as brand_name');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));

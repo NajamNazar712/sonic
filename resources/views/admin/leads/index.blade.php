@@ -1067,7 +1067,7 @@
                                 row.push(values.phone_number);
                                 row.push(values.email_address);
                                 row.push(values.service);
-                                row.push(values.brand);
+                                row.push(values.brand_name);
                                 row.push(values.company);
                                 row.push(values.lead_reference);
                                 row.push(values.requested_date);
@@ -1238,7 +1238,7 @@
                     {data: 'phone_number', name: 'leads.phone_number', class: 'align-middle phone_number'},
                     {data: 'email_address', name: 'leads.email_address', class: 'align-middle email_address'},
                     {data: 'service', name: 'leads.service_id', class: 'align-middle service'},
-                    {data: 'brand', name: 'leads.brand', class: 'align-middle brand'},
+                    {data: 'brand_name', name: 'u.brand_name', class: 'align-middle brand_name'},
                     {data: 'company', name: 'leads.company', class: 'align-middle company'},
                     {data: 'lead_reference', name: 'lr.name', class: 'align-middle lead_reference'},
                     {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
