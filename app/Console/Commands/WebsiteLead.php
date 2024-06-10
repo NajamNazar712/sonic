@@ -60,7 +60,7 @@ class WebsiteLead extends Command
         else{
             $base_uri = 'http://trax_website.test/wp-json/tl/v1/';
         }
-        $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60,'verify'=>false]);
+        $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
         $response = $client->post('leads', [
             'form_params' => [
                 "token" => 'TraxOnlinePvtLtdAYWD',
