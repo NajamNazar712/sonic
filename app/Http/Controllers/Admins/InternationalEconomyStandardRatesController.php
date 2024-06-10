@@ -19,7 +19,10 @@ class InternationalEconomyStandardRatesController extends Controller
         $this->middleware('Permission');
     }
 
-    public function index(){
+    public function index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 800);
+
         return view('admin.retail.international_economy_rates.index');
     }
 
@@ -27,14 +30,12 @@ class InternationalEconomyStandardRatesController extends Controller
     {
 
         $rates_list = InternationalEconomyStandardRetailRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
-        if ($request->shipping_mode_id == 1){
-            $rates_list = $rates_list->where('shipping_mode_id',1);
-        }
-        else if($request->shipping_mode_id == 2){
-            $rates_list = $rates_list->where('shipping_mode_id',2);
-        }
-        else{
-            $rates_list = $rates_list->where('shipping_mode_id',3);
+        if ($request->shipping_mode_id == 1) {
+            $rates_list = $rates_list->where('shipping_mode_id', 1);
+        } else if ($request->shipping_mode_id == 2) {
+            $rates_list = $rates_list->where('shipping_mode_id', 2);
+        } else {
+            $rates_list = $rates_list->where('shipping_mode_id', 3);
         }
 
         return Datatables::of($rates_list)->make(true);

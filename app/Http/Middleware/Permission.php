@@ -1244,6 +1244,8 @@ class Permission
             'retail.users.index' => 474,
             'retail.users.list' => 474,
 
+            'retail.international.economy_rates.index' => 992,
+            'retail.international.economy_rates.excel' => 992,
 
             'debriefing.supervisor.index' => 495,
             'debriefing.supervisor.list' => 495,
