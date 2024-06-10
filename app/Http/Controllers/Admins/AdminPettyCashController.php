@@ -185,9 +185,12 @@ class AdminPettyCashController extends Controller
     {
         $reference = $request->reference;
         if (PettyCashStatement::where('reference_no', $reference)->exists()) {
-            return "true";
+            return 'true';
         } else {
-            return "false";
+            if(PettyCashStatementDraft::where('reference_no', $reference)->exists() ) {
+                return 'true'; 
+            }
+            return 'false';
         }
     }
 
@@ -221,7 +224,7 @@ class AdminPettyCashController extends Controller
                 $petty_cash->hub_id = $request->select_statement_hub;
                 $petty_cash->reference_no = $request->reference_no;
                 $petty_cash->date = $request->select_statement_date_formatted;
-                $petty_cash->sdn_id = $request->select_statement_sdn;
+                $petty_cash->sdn_id = $request->select_statement_sdn ?? 0;
                 $petty_cash->origin_hub_id = Auth::user()->default_hub_id ?? 0;
                 $petty_cash->destination_hub_id = Admin::find($request->select_statement_station_manager)->default_hub_id ?? 0;
                 $petty_cash->station_manager_id = $request->select_statement_station_manager;
@@ -285,7 +288,7 @@ class AdminPettyCashController extends Controller
                 $petty_cash_draft->hub_id = $request->select_statement_hub;
                 $petty_cash_draft->reference_no = $request->reference_no;
                 $petty_cash_draft->date = $request->select_statement_date_formatted;
-                $petty_cash_draft->sdn_id = $request->select_statement_sdn;
+                $petty_cash_draft->sdn_id = $request->select_statement_sdn ?? 0;
                 $petty_cash_draft->origin_hub_id = Auth::user()->default_hub_id ?? 0;
                 $petty_cash_draft->destination_hub_id = Admin::find($request->select_statement_station_manager)->default_hub_id ?? 0;
                 $petty_cash_draft->station_manager_id = $request->select_statement_station_manager;
@@ -2038,7 +2041,7 @@ class AdminPettyCashController extends Controller
 
                     }
                     $petty_cash_draft->total_amount = $total_amount;
-                    $petty_cash_draft->sdn_id = $request->select_statement_sdn;
+                    $petty_cash_draft->sdn_id = $request->select_statement_sdn ?? 0;
                     $petty_cash_draft->zone_id = $request->select_statement_zone;
                     $petty_cash_draft->hub_id = $request->select_statement_hub;
                     $petty_cash_draft->date = $request->select_statement_date_formatted;
@@ -2052,7 +2055,7 @@ class AdminPettyCashController extends Controller
                     $petty_cash->hub_id =  $request->select_statement_hub;
                     $petty_cash->reference_no = $petty_cash_draft->reference_no;
                     $petty_cash->date = $request->select_statement_date_formatted;
-                    $petty_cash->sdn_id = $request->select_statement_sdn;
+                    $petty_cash->sdn_id = $request->select_statement_sdn ?? 0;
                     $petty_cash->origin_hub_id = Auth::user()->default_hub_id ?? 0;
                     $petty_cash->destination_hub_id = Admin::find($request->select_statement_station_manager)->default_hub_id ?? 0;
                     $petty_cash->station_manager_id = $request->select_statement_station_manager;
@@ -2461,19 +2464,24 @@ class AdminPettyCashController extends Controller
             $update_petty_cash = PettyCashStatement::where('id',$petty_detail->petty_cash_statement_id)
                 ->update(['total_amount'=>$existing_petty_cash->total_amount - $petty_detail->amount + $amount]);
 
-//            $data = response()->json([
-//                'status' => 1,
-//                'message' => 'Updated !!',
-//            ]);
+            $sdn_link = PettyCashStatement::where('id',$petty_detail->petty_cash_statement_id)->first();
+            $sdn_amount = StationDepositNote::where('id', $sdn_link->sdn_id)->first(); 
+            $sdn_amount->adjustment_amount = (int)$sdn_link->total_amount;
+            $sdn_amount->save();
+
+            //            $data = response()->json([
+            //                'status' => 1,
+            //                'message' => 'Updated !!',
+            //            ]);
             return redirect()->back()->with('success','Updated !');
         } else {
-//            $data = response()->json([
-//                'status' => 0,
-//                'message' => 'Petty Cash Details Not Found !!',
-//            ]);
+            //            $data = response()->json([
+            //                'status' => 0,
+            //                'message' => 'Petty Cash Details Not Found !!',
+            //            ]);
             return redirect()->back()->with('error','Petty Cash Details Not Found !!');
         }
-//        return $data;
+            //        return $data;
     }
 
     //todo : advance petty cash

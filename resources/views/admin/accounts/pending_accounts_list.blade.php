@@ -747,7 +747,21 @@
             $('#user_commission').attr('disabled', true)
         } else {
             $('#user_commission').val('');
-            $('#user_commission').attr('disabled', false)
+            if($('#sales_tier_select').val() == 3){
+                $('#user_commission').attr('disabled', true)
+                $('#user_commission').val('0');
+            }
+            else
+            {
+                $('#user_commission').attr('disabled', false)
+                $('#user_commission').val('');
+            }
+
+            if($('#user_select').val() != '')
+            {
+                $('#commission_add_button').attr('disabled', false);
+            }
+            
         }
         var index = $.inArray(id, selected_users);
         if (index !== -1) {
@@ -777,6 +791,17 @@
             $('#user_select').attr('disabled', false);
         } else {
             $('#external_person_name').attr('disabled', false);
+        }
+
+        if($(this).val() == 3)
+        {
+            $('#user_commission').attr('disabled', true);
+            $('#user_commission').val('0');
+        }
+        else
+        {
+            $('#user_commission').attr('disabled', false);
+            $('#user_commission').val('');
         }
 
     });
@@ -906,6 +931,20 @@
                     if(is_kam == 'KAM'){
                         kam_count+=1;
                     }
+
+                    if(tier_id == 3)
+                    {
+                        if($('#user_select').val() == '')
+                        {
+                            var error = 'Please select user!';
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                                });
+                                return 0;
+                        }
+                    }
+
                     add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
                     $('#sales_tier_select').val(null).trigger('change');
                     $('#user_select').val(null).trigger('change');
@@ -1158,7 +1197,7 @@
                             row.push(values.admin_tag_id);
                             row.push(values.tagged_poc);
                             row.push(values.kam);
-                            row.push(values.ref);
+                            row.push(values.ref+' - ' + values.rider_id);
                             // row.push(values.eso);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);
@@ -1633,7 +1672,9 @@
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
                 {data: 'tagged_poc', name: 'p.name', class: 'align-middle tagged_poc'},
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
-                {data: 'ref', name: 'r.name', class: 'align-middle ref'},
+                {data: 'ref', name: 'r.name', class: 'align-middle ref',render:function(data,type,row){
+                        return row.ref +' - '+ row.rider_id;
+                }},
                 // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
                 {data: 'rate_status', name: 'users.rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},

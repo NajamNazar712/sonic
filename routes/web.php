@@ -136,6 +136,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
             Route::post('check_consignee_return_ratio', 'Shippers\ShipperShipmentBookController@check_consignee_return_ratio')->name('check_consignee_return_ratio');
             Route::post('check_shipment_allowed_city', 'Shippers\ShipperShipmentBookController@check_shipment_allowed_city')->name('check_shipment_allowed_city');
+            Route::get('check_negative_payable', 'Shippers\ShipperShipmentBookController@check_negative_payable')->name('check_negative_payable');
 
 
             Route::prefix('excel')->name('excel_')->group(function () {

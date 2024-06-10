@@ -301,10 +301,15 @@ class LoginController extends Controller
 
             $shipper_user_id = $user->user_id;
         }
-        $shipment_pre_book = ShipmentPrebook::where('user_id', $shipper_user_id);
-        if($shipment_pre_book->exists()){
-            $shipment_pre_book = $shipment_pre_book->first();
-            session(['prefix' => $shipment_pre_book->prefix]);
+        // $shipment_pre_book = ShipmentPrebook::where('user_id', $shipper_user_id);
+        // if($shipment_pre_book->exists()){
+        //     $shipment_pre_book = $shipment_pre_book->first();
+        //     session(['prefix' => $shipment_pre_book->prefix]);
+        // }
+        $shipment_pre_book = ShipmentPrebook::where('user_id', $shipper_user_id)->get();
+        if($shipment_pre_book->isNotEmpty()){
+            $shipment_pre_book = $shipment_pre_book->pluck('prefix')->toArray();
+            session(['prefix' => $shipment_pre_book]);
         }
         session(['packaging_charges_check' => $packaging_charges_check]);
 

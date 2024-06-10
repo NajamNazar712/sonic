@@ -160,6 +160,7 @@ class DeliveryController extends Controller
         
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries (old)
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('sub_category_segments as scs', 'scs.id' , 'u.sub_segment_id')
 //        $shipments = DB::connection('reports')->table('shipments')
 //            ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -251,6 +252,28 @@ class DeliveryController extends Controller
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
                     );
             })
+            ->leftJoin('shipment_scanning_journeys as ssj_last_location', function ($join) {
+                $join->on('ssj_last_location.shipment_id', '=', 'journey.shipment_id')
+                     ->whereRaw('ssj_last_location.id = (
+                                    select max(id) 
+                                    from shipment_scanning_journeys 
+                                    where shipment_scanning_journeys.shipment_id = journey.shipment_id
+                                    and shipment_scanning_journeys.screen_location_id not in (9, 18)
+                    )');
+            })        
+            ->when(\DB::raw('ssj_last_location.user_type = 1'), function ($join) {
+                $join->leftJoin('admins as adm', function ($join) {
+                    $join->on('adm.id', '=', 'ssj_last_location.admin_id')
+                         ->where('adm.role_id', '<>', 1);
+                });
+            })
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_last_location', function($join){
+                $join->on('ssjal_last_location.shipment_scanning_journey_id', '=', 'ssj_last_location.id')
+                     ->where('ssjal_last_location.hub_id', '=', DB::raw('journey.city_id'))
+                     ->where('ssjal_last_location.shipment_id', '=', DB::raw('journey.shipment_id'));
+            })                 
+            ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
+            ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
             ->select(
                 'agent.name as agent',
                 'shipments.id as shId',
@@ -289,7 +312,13 @@ class DeliveryController extends Controller
                 'shipments.shipper_status_id as shipper_status_id',
                 'sjl.shipment_id as journey_latest_id',
                 'sjl.updated_at as journey_latest_updated_at',
-                'sjl.shipper_status_id as latest_shipper_status_id'
+                'sjl.shipper_status_id as latest_shipper_status_id',
+                'scs.name as sub_segment_name',
+                'ssjal_last_location.updated_at as last_location_updated_at',
+                'ca_scanning_last_location_name.name as ca_scanning_last_location_name',
+                'ssj_last_location.user_type as scanned_by_user_type',
+                'ssj_last_location.admin_id as scanned_by_id',
+                'last_screen_location.name as last_location_screen_location_name'
 
             )
 
@@ -392,6 +421,8 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
+
+            
             ->filterColumn('shipping_mode', function ($query, $keyword) {
 
                 if ($keyword != '') {
@@ -420,6 +451,14 @@ class DeliveryController extends Controller
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
                     $query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+
+            ->filterColumn('last_location_screen_location_name', function ($query, $keyword) {
+                if ($keyword != '') {
+                    $query->where('last_screen_location.name', 'like', '%' . $keyword . '%');
                 } else {
                     $query->whereRaw('false');
                 }
@@ -467,6 +506,19 @@ class DeliveryController extends Controller
                     return $dropdown;
                 } else {
                     return '';
+                }
+            })->editColumn('ca_scanning_last_location_name', function ($shipment) {
+                if($shipment->scanned_by_user_type == 5){
+                    $rider = Rider::find($shipment->scanned_by_id);
+                    if(isset($rider->area)){
+                        return $rider->area->name;
+                    }else{
+                        return '-';
+                    }
+                }else if(isset($shipment->ca_scanning_last_location_name)){
+                    return $shipment->ca_scanning_last_location_name;
+                }else{
+                    return '-';
                 }
             });
             
@@ -1418,6 +1470,10 @@ class DeliveryController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
+            })->addColumn('total_weight', function($result){
+                $shipments = DeliveryNoteShipment::where('delivery_note_id',$result->delivery_note)->pluck('shipment_id')->toArray();
+                $total_weight = Shipment::whereIn('id',$shipments)->sum('actual_weight');
+                return $total_weight;
             })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.delivery.receive.status', ['id' => $result->delivery_note]);
@@ -1771,6 +1827,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Item Qty</strong></td>
+                            <td class="color primary"><strong>Weight</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
                             <td class="color primary"><strong>Special Instructions</strong></td>
                             <td class="color primary"><strong>Open Shipment</strong></td>
@@ -1839,6 +1896,8 @@ class DeliveryController extends Controller
 
                 $shipment_details_row_start .= '
                     <td class="' . $class . '">' . $shipment->items->sum('quantity') . '</td>';
+                $shipment_details_row_start .= '
+                    <td class="' . $class . '">' . $shipment->actual_weight . '</td>';
 
                 if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
                     $shipment_details_row_start .= '
@@ -7349,6 +7408,11 @@ class DeliveryController extends Controller
                     return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
                 }             
+            })
+            ->addColumn('total_weight', function($deliveries){
+                $shipments = DeliveryNoteShipment::where('delivery_note_id',$deliveries->delivery_note)->pluck('shipment_id')->toArray();
+                $total_weight = Shipment::whereIn('id',$shipments)->sum('actual_weight');
+                return $total_weight;
             })
             ->editColumn('fintech_amount_percent', function ($deliveries) {
                 $dncc_amount = $deliveries->amount;

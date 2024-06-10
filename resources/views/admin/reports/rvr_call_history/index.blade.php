@@ -33,7 +33,7 @@
                                         </div>
                                     </div>
                                 {{-- Search by agent name --}}
-                                    <div class="col-4">
+                                    {{-- <div class="col-4">
                                         <div class="form-group">
                                             <select name="search_agent_name" id="search_agent_name" class="form-control select2">
                                                 @foreach($agents as $agent)
@@ -41,7 +41,7 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                    </div>
+                                    </div> --}}
 
                                     {{-- Search date from filter --}}
                                     <div class="col-4">
@@ -443,11 +443,11 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     extend: 'excelHtml5',
-                    title: 'RV Report',
+                    title: 'RVR Call Histories Report',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                     className: 'btn btn-primary datatable_excel_btn',
                     
-                },'reset'],
+                }],
                 scrollX: true, scrollY: '500px',
                 autoWidth: false,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],

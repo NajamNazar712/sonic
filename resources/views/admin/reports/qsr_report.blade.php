@@ -12,17 +12,8 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row mb-2 justify-content-center">
+                <div class="row mb-2 justify-content-start">
 
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
@@ -121,6 +112,33 @@
                         </select>
                     </div>
 
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_kam" id="search_kam" class="form-control select2">
+                                @foreach($kam_sales as $d)
+                                    <option value="{{ $d->id }}">{{ $d->name }}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_sale_person" id="search_sale_person" class="form-control select2">
+                                @foreach($kam_sales as $d)
+                                    <option value="{{ $d->id }}">{{ $d->name }}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-4">
+                        <select name="search_area" id="search_area" class="select2">
+                            @foreach($areas as $area)
+                                <option value="{{$area->id}}">{{$area->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -191,18 +209,25 @@
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Sales Person</th>
+                        <th class="border-primary border-darken-1">KAM</th>
                         <th class="border-primary border-darken-1">Sub Segment</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">First Attempt Date</th>
                         <th class="border-primary border-darken-1">Rider Picked Status Date</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Location Status Area</th>
-                        <th class="border-primary border-darken-1">Location Status</th>
+                        {{-- <th class="border-primary border-darken-1">Location Status Area</th>
+                        <th class="border-primary border-darken-1">Location Status</th> --}}
+
+                        <th class="border-primary border-darken-1">Last Location Screen Name</th>
+                        <th class="border-primary border-darken-1">Sub Hub</th>
+                        <th class="border-primary border-darken-1">Last Location Updated At</th>
+
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">History Status</th>
-                        <th class="border-primary border-darken-1">History Status Location</th>
+                        {{-- <th class="border-primary border-darken-1">History Status Location</th> --}}
                         <th class="border-primary border-darken-1">Cargo Status</th>
                         <th class="border-primary border-darken-1">Bag Seal Number</th>
                         <th class="border-primary border-darken-1">Bag Status</th>
@@ -302,11 +327,6 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
-                width:'100%',
-                allowClear:true
-            });
             $('#search_shippers').select2({
                 width:'100%',
                 placeholder:"Select Multiple Shippers",
@@ -358,6 +378,20 @@
             $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Search Service Type'
+            });
+            $('#search_kam').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Search KAM'
+            });
+            $('#search_sale_person').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Search Sales Person'
+            });
+            
+            $('#search_area').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Area',
+                width:'100%',
+                allowClear:true
             });
 
             $('#export').select2({
@@ -527,7 +561,6 @@
                                             excel: true,
                                             _token: $('meta[name="csrf-token"]').attr('content'),
                                             search_shipment_status: $('#search_shipment_status').val(),
-                                            search_shipper: $('#search_shipper').val(),
                                             sub_segment: $('#sub_segment_select').val(),
                                             search_shippers: $('#search_shippers').val(),
                                             search_origin: $('#search_origin').val(),
@@ -545,7 +578,9 @@
                                             selectedTexts: $('#export option:selected').map(function() {
                                                 return $(this).text()
                                             }).get(),
-                                            service_type_select: $('#service_type_select').val()
+                                            service_type_select: $('#service_type_select').val(),
+                                            search_kam: $('#search_kam').val(),
+                                            search_sale_person: $('#search_sale_person').val()
                                         },
                                         beforeSend: function() {
                                             swal({
@@ -598,7 +633,6 @@
                         },
                     data: function (d) {
                         d.search_shipment_status = $('#search_shipment_status').val();
-                        d.search_shipper = $('#search_shipper').val();
                         d.sub_segment = $('#sub_segment_select').val();
                         d.search_shippers = $('#search_shippers').val();
                         d.search_origin = $('#search_origin').val();
@@ -613,10 +647,14 @@
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
                         d.search_types = $('#search_types').val();
                         d.selectedValue = $('#export').val();
+                        d.search_area = $("#search_area").val();
+
                         d.selectedTexts = $('#export option:selected').map(function () {
                             return $(this).text()
                         }).get();
                         d.service_type_select = $('#service_type_select').val();
+                        d.search_kam = $('#search_kam').val();
+                        d.search_sale_person = $('#search_sale_person').val();
                     }
                 },
                 rowId: 'shId',
@@ -627,18 +665,25 @@
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id' ,text:'Order ID', value:'order_id',download:true},
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no', text:'Account No.', value:'account_no',download:true},
                     {data: 'shipper', name: 'u.name', as:'shipper', class: 'align-middle shipper', text:'Shipper',value:'shipper',download:true},
+                    {data: 'sales_person_name', name: 'sales_person.name', as:'sales_person_name', class: 'align-middle sales_person_name', text:'Sales Person',value:'sales_person_name',download:true},
+                    {data: 'kam', name: 'kam', as:'kam', class: 'align-middle kam', text:'KAM',value:'kam',download:true},
                     {data: 'sub_segment', name: 'scs.name', as:'sub_segment', class: 'align-middle sub_segment',text:'Sub Segment', value:'sub_segment',download:true},
                     {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name',text:'Consignee Name', value:'name',download:true},
                     {data: 'first_attempt_date', name: 'sjfa.created_at', as:'first_attempt_date', class: 'align-middle first_attempt_date',text:'First Attempt Date',value:'first_attempt_date',download:true},
                     {data: 'rider_picked_status_date', name: 'sjrp.created_at', as:'rider_picked_status_date', class: 'align-middle rider_picked_status_date',text:'Rider Picked Status Date',value:'rider_picked_status_date',download:true},
                     {data: 'status', name: 'ss.name', as:'status', class: 'align-middle status', text:'Status', value:'status',download:true},
-                    {data: 'scanning_city_area_name', name: 'ca_scanning.name', as:'scanning_city_area_name', class: 'align-middle scanning_city_area_name',text:'Location Status Area',value:'scanning_city_area_name',download:true},
-                    {data: 'location_status', name: 'ssjal.location_status', as:'location_status', class: 'align-middle location_status',text:'Location Status',value:'location_status',download:true},
+                    // {data: 'scanning_city_area_name', name: 'ca_scanning.name', as:'scanning_city_area_name', class: 'align-middle scanning_city_area_name',text:'Location Status Area',value:'scanning_city_area_name',download:true},
+                    // {data: 'location_status', name: 'ssjal.location_status', as:'location_status', class: 'align-middle location_status',text:'Location Status',value:'location_status',download:true},
+                    
+                    {data: 'last_location_screen_location_name', name: 'shipment_scanning_screen_locations.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name',text:'Last Location Screen Location Name',value:'last_location_screen_location_name',download:true},
+                    {data: 'ca_scanning_last_location_name', name: 'ca_scanning_last_location_name.name', as:'ca_scanning_last_location_name', class: 'align-middle ca_scanning_last_location_name',text:'Sub Hub',value:'ca_scanning_last_location_name',download:true},
+                    {data: 'last_location_updated_at', name: 'ssjal_last_location.updated_at', as:'last_location_updated_at', class: 'align-middle last_location_updated_at',text:'Last Location Updated At',value:'last_location_updated_at',download:true},
+
                     {data: 'reason', name: 'ssr.name', as:'reason', class: 'align-middle reason',text:'Reason',value:'reason',download:true},
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks',text:'Remarks',value:'remarks',download:true},
                     {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt',text:'Total Attempt',value:'total_attempt',download:true},
                     {data: 'history_status', name: 'hss.name', as:'history_status', class: 'align-middle history_status',text:'History Status',value:'history_status',download:true},
-                    {data: 'location_status_hss', name: 'ssjal_hss.location_status', as:'location_status_hss', class: 'align-middle location_status_hss',text:'History Location Status',value:'location_status_hss',download:true},
+                    // {data: 'location_status_hss', name: 'ssjal_hss.location_status', as:'location_status_hss', class: 'align-middle location_status_hss',text:'History Location Status',value:'location_status_hss',download:true},
                     {data: 'cargo_status', name: 'cargo_status.name', as:'cargo_status', class: 'align-middle history_status',text:'Cargo Status',value:'cargo_status',download:true},
                     {data: 'seal_number', name: 'cmb.seal_number', class: 'align-middle history_status',text:'Bag Seal Number',value:'seal_number',download:true},
                     {data: 'bag_status', name: 'bs.name', as:'bag_status', class: 'align-middle history_status',text:'Bag Status',value:'bag_status',download:true},

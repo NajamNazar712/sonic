@@ -64,8 +64,8 @@
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
-                                        <th class="border-primary border-darken-1">Address</th>
-                                        <th class="border-primary border-darken-1">Region</th>
+                                        {{-- <th class="border-primary border-darken-1">Address</th> --}}
+                                        <th class="border-primary border-darken-1">Zone</th>
                                         <th class="border-primary border-darken-1">City</th>
                                         <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
@@ -90,7 +90,7 @@
                                         <th class="border-primary border-darken-1">Account Disable Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
                                         <th class="border-primary border-darken-1">Account Disable Reason</th>
-                                        <th class="border-primary border-darken-1">Account Disable Count</th>
+                                        {{-- <th class="border-primary border-darken-1">Account Disable Count</th> --}}
                                         <th class="border-primary border-darken-1">Account Disable Days</th>
                                         <th class="border-primary border-darken-1">Document Uploaded At</th>
                                         <th class="border-primary border-darken-1">Documents Approved By</th>
@@ -104,10 +104,9 @@
                                         <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Sub Category Segment</th>
-                                        <th class="border-primary border-darken-1">Referral Code</th>
+                                        {{-- <th class="border-primary border-darken-1">Referral Code</th> --}}
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
-                                        <th class="border-primary border-darken-1">Expected Average Shipments</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -1002,6 +1001,8 @@ function checkboxStatus() {
 								var sub_segment = data.sub_segments;
 
                                 $.each(data.sub_segments, function (index, sub_segment) {
+									// console.log(index);	
+									// console.log(sub_segment);	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -1071,8 +1072,8 @@ function checkboxStatus() {
                         head.push('Account Type');
                         head.push('Company Name');
                         head.push('Contact Person');
-                        head.push('Address');
-                        head.push('Region');
+                        //head.push('Address');
+                        head.push('Zone');
                         head.push('City');
                         head.push('Territory');
                         head.push('Product Type');
@@ -1097,7 +1098,7 @@ function checkboxStatus() {
                         head.push('Account Disable Date');
                         head.push('Account Disable Remarks');
                         head.push('Account Disable Reason');
-                        head.push('Account Disable Count');
+                        //head.push('Account Disable Count');
                         head.push('Account Disable Day(s)');
                         head.push('Documents Uploaded At');
                         head.push('Documents Approved By');
@@ -1111,10 +1112,9 @@ function checkboxStatus() {
                         head.push('Intl Rates Status Remarks');
                         head.push('Segment');
                         head.push('Sub Category Segment');
-                        head.push('Referral Code');
+                        //head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
-                        head.push('Expected Average Shipments');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -1125,7 +1125,7 @@ function checkboxStatus() {
                             row.push(values.account_type);
                             row.push(values.name);
                             row.push(values.poc);
-                            row.push(values.address);
+                            //row.push(values.address);
                             row.push(values.zone);
                             row.push(values.city);
                             row.push(values.territory);
@@ -1151,7 +1151,7 @@ function checkboxStatus() {
                             row.push(values.disable_at);
                             row.push(values.disable_reason);
                             row.push(values.reason);
-                            row.push(values.status_count);
+                            //row.push(values.status_count);
                             row.push(values.days_to_disable);
                             row.push(values.documents_uploaded_at);
                             row.push(values.documents_approved_by);
@@ -1165,10 +1165,9 @@ function checkboxStatus() {
                             row.push(values.international_rejected_reason);    
                             row.push(values.segment);
                             row.push(values.sub_segment);
-                            row.push(values.referral_name);
+                            //row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
-                            row.push(values.expected_average_shipments);
                             body.push(row);
                         });
                     },
@@ -1746,7 +1745,7 @@ function checkboxStatus() {
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
-                {data: 'address', name: 'users.address', class: 'align-middle address'},
+                //{data: 'address', name: 'users.address', class: 'align-middle address'},
                 {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'territory', name: 't.name', class: 'align-middle territory'},
@@ -1772,7 +1771,7 @@ function checkboxStatus() {
                 {data: 'disable_at', name: 'users.disable_at', class: 'align-middle disable_at'},
                 {data: 'disable_reason', name: 'users.disable_reason', class: 'align-middle disable_reason', orderable: false, searchable: false},
                 {data: 'reason', name: 'bdru.name', class: 'align-middle reason'},
-                {data: 'status_count', name: 'ucs.status_count', class: 'align-middle status_count'},
+                //{data: 'status_count', name: 'ucs.status_count', class: 'align-middle status_count'},
                 {data: 'days_to_disable', name: 'days_to_disable', class: 'align-middle days_to_disable'},
                 {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', searchable: false},
                 {data: 'documents_approved_by', name: 'dab.name', class: 'align-middle documents_approved_by', searchable: false},
@@ -1786,10 +1785,9 @@ function checkboxStatus() {
                 {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
                 {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
                 {data: 'sub_segment', name: 'seg_sub.name', class: 'align-middle sub_segment'},
-                {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
+                //{data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
-                {data: 'expected_average_shipments', name: 'users.average_shipments', class: 'align-middle expected_average_shipments', orderable: true, searchable: true},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {
@@ -2759,6 +2757,7 @@ function checkboxStatus() {
             placeholder: 'Select Payment Cycle'
         }).on('change', function () {
             $('#msg_limit_days').addClass('d-none')
+           
         });
 
         $( "#set_territory" ).validate({
@@ -3045,11 +3044,11 @@ function checkboxStatus() {
             submitHandler: function (form) {
                 var formData = $(form).serializeArray();
                 var fortnite = formData[3]['value'].split(',');
-                var monthly = formData[5]['value'];
+                var monthly = formData[6]['value'];
                 var selected_days = [];
 
-                if (formData[6] && formData[6]['value']) {
-                    var splitValues = formData[6]['value'].split(',');
+                if (formData[7] && formData[7]['value']) {
+                    var splitValues = formData[7]['value'].split(',');
                     if (splitValues.length > 0) {
                         selected_days = splitValues;
                     }
@@ -3065,10 +3064,6 @@ function checkboxStatus() {
                 };
                 fortnite = fortnite.length;
                 selected_days = selected_days.length;
-
-                //for prod checking
-                console.log(selected_days);
-
                 if ((formData[2]['value'] == '4' && selected_days === 2) ||
                     (formData[2]['value'] == '5' && selected_days === 3) ||
                     (formData[2]['value'] == '2' && selected_days === 1) || 
@@ -3076,7 +3071,7 @@ function checkboxStatus() {
                     (formData[2]['value'] == '1') ||
                     (formData[2]['value'] == '3' && (monthly !== "nonem"))) {
                         swal(swalConfig);
-                        form.submit();
+                        form.submit();   
                 } 
                 else {
                     if(formData[2]['value'] == '4'){
@@ -3205,6 +3200,7 @@ function checkboxStatus() {
                                     '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
 
                         $.each(data.details, function (index,value) {
+                            // console.log(value,value.admin);
                                 var serial = index + 1;
                                 var status = '';
                                 if(value['status'] == 1){
@@ -3316,6 +3312,12 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             selectedValues = [];
             $('#payment_cycle_msg').text('')
             var id = $(this).val();
+
+
+            var option = $('<option></option>').attr('value', 1).text(1 + " Days");
+            $("#fornite_2").empty().append(option);
+
+
             if (id == 4 || id == 5 || id == 2) {
                 $("#checkboxContainer").removeClass("d-none");
                 $('#fornite').addClass('d-none')
@@ -3379,7 +3381,6 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             $('#total_commission').val(0).trigger('change');
             $('#total_commission_value').text('0');
             $('#datatable_rate').DataTable().clear().draw();
-            kam_count = 0;
         });
         
     var selected_users = [];
@@ -3413,8 +3414,23 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             $('#user_commission').attr('disabled', true)
         } else {
             $('#user_commission').val('');
-            $('#user_commission').attr('disabled', false)
+            if($('#sales_tier_select').val() == 3){
+                $('#user_commission').attr('disabled', true)
+                $('#user_commission').val('0');
+            }
+            else
+            {
+                $('#user_commission').attr('disabled', false)
+                $('#user_commission').val('');
+            }
         }
+
+        
+        if($('#user_select').val() != '')
+        {
+            $('#commission_add_button').attr('disabled', false);
+        }
+
         var index = $.inArray(id, selected_users);
         if (index !== -1) {
             var error = 'User previously selected!';
@@ -3443,6 +3459,17 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             $('#user_select').attr('disabled', false);
         } else {
             $('#external_person_name').attr('disabled', false);
+        }
+
+        if($(this).val() == 3)
+        {
+            $('#user_commission').attr('disabled', true);
+            $('#user_commission').val('0');
+        }
+        else
+        {
+            $('#user_commission').attr('disabled', false);
+            $('#user_commission').val('');
         }
 
     });
@@ -3517,10 +3544,8 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
     function roundToTwo(num) {
         return +(Math.round(num + "e+2") + "e-2");
     }
-    
-    var kam_count = 0;
+
     $('#commission_add_button').on('click', function () {
-        var is_kam = $('#sales_tier_select').find(":selected").text();
         var commission = parseFloat($('#user_commission').val());
         var this_btn = $(this);
 
@@ -3541,66 +3566,63 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         }
         if (!$('#user_commission').valid()) {
             flag = false;
-        }       
-      
+        }
+
         if (flag) {
-            if(is_kam == 'KAM' && kam_count > 0 ){
-                var kam_error = 'You Can Select One KAM Only!';
-                toastr.error(kam_error, 'Error!', {
+       
+
+            if (commission <= commission_max) {
+                selected_commission = roundToTwo(selected_commission + commission);
+                commission_max = commission_max - commission;
+                this_btn.attr('disabled', true);
+                var user_id = '';
+                var user_name = '';
+                var tier_id = '';
+                var tier_name = '';
+                var tier_type = '';
+                tier_id = $('#sales_tier_select').val();
+                tier_name = $('#sales_tier_select').find(":selected").text();
+                tier_type = $('#sales_tier_select').find(":selected").attr('type');
+                if (tier_type == 1) {
+                    user_id = $('#user_select').val();
+                    user_name = $('#user_select').find(":selected").text();
+                } else {
+                    user_name = $('#external_person_name').val();
+                }
+
+                if(tier_id == 3)
+                {
+                    if($('#user_select').val() == '')
+                    {
+                        var error = 'Please select user!';
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                            });
+                            return 0;
+                    }
+                }
+
+                add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
+                $('#sales_tier_select').val(null).trigger('change');
+                $('#user_select').val(null).trigger('change');
+                $('#user_select').attr('disabled', true);
+                $('#external_person_name').val('');
+                $('#external_person_name').attr('disabled', true);
+                $('#user_commission').val('');
+
+            } else {
+                var error = 'Selected Commission value exceeds!';
+                toastr.error(error, 'Error!', {
                     positionClass: 'toast-top-center',
                     containerId: 'toast-top-center'
                 });
-            }else{
-                if (commission <= commission_max) {
-                    selected_commission = roundToTwo(selected_commission + commission);
-                    commission_max = commission_max - commission;
-                    this_btn.attr('disabled', true);
-                    var user_id = '';
-                    var user_name = '';
-                    var tier_id = '';
-                    var tier_name = '';
-                    var tier_type = '';
-                    tier_id = $('#sales_tier_select').val();
-                    tier_name = $('#sales_tier_select').find(":selected").text();
-                    tier_type = $('#sales_tier_select').find(":selected").attr('type');
-                    if (tier_type == 1) {
-                        user_id = $('#user_select').val();
-                        user_name = $('#user_select').find(":selected").text();
-                    } else {
-                        user_name = $('#external_person_name').val();
-                    }
-                    if(is_kam == 'KAM'){
-                        kam_count+=1;
-                    }
-                    add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
-                    $('#sales_tier_select').val(null).trigger('change');
-                    $('#user_select').val(null).trigger('change');
-                    $('#user_select').attr('disabled', true);
-                    $('#external_person_name').val('');
-                    $('#external_person_name').attr('disabled', true);
-                    $('#user_commission').val('');
-
-                } else {
-                    var error = 'Selected Commission value exceeds!';
-                    toastr.error(error, 'Error!', {
-                        positionClass: 'toast-top-center',
-                        containerId: 'toast-top-center'
-                    });
-                }
             }
-       
         }
     });
         $('#datatable_rate tbody').on('click', 'tr td.action a.remove', function () {
             var id = $(this).parents('tr').attr('id');
-            //check if sale tier is KAM
-            var rowData = table_2.row($(this).parents('tr')).data();
-            var regex = /KAM/;
 
-            if (regex.test(rowData[2])) {
-                kam_count-=1;
-            } 
-            //
             var user_id = $('input[name="user_id[' + id + ']"]').val();
             if (user_id) {
                 var index = $.inArray(user_id, selected_users);

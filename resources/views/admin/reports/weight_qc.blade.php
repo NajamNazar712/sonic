@@ -35,7 +35,7 @@
                     </div>
                     <div class="col-3 mb-1">
                         <fieldset class="form-group">
-                            <select name="search_origin_hub" id="search_origin_hub" class="form-control select2">
+                            <select name="search_origin_hub" id="search_origin_hub" class="form-control select2" multiple="multiple">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach
@@ -212,7 +212,7 @@
                 width: '100%',
                 placeholder: 'Select Shipper',
             });
-            $('#search_form #search_origin_hub').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_form #search_origin_hub').prepend('<option value=""></option>').select2({
                 width: '100%',
                 placeholder: 'Origin Hub',
             });

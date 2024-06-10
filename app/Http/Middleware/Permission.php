@@ -51,6 +51,8 @@ class Permission
             'accounts.receiving_sheet.index' => 364,
             'accounts.restrict_order_id.info' => 619,
             'accounts.restrict_order_id.submit' => 619,
+            'accounts.kam_bulk_tagging.index' => 991,
+            'accounts.kam_bulk_tagging.update' => 991,
 
             'corporate.reimbursement_setting.index' => 598,
             'corporate.reimbursement_setting.store' => 598,
@@ -460,6 +462,9 @@ class Permission
             'finance.retail.done_payments.index' => 455,
             'finance.retail.done_payments.list' => 455,
 
+            'finance.tracking_number_wise_dncc_info.index' => 984,
+            'finance.tracking_number_wise_dncc_info.list' => 984,
+
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
             'petty_cash.statements.list' => 146,
@@ -786,6 +791,13 @@ class Permission
             'crm.dashboard.index' => 869,
             'crm.dashboard.list' => 869,
 
+            'settings.shippers.base_rate_revisions.index' => 990,
+            'settings.shippers.base_rate_revisions.list' => 990,
+            'settings.shippers.base_rate_revisions.bulk_store' => 990,
+            'settings.shippers.base_rate_revisions.approval1_update' => 990,
+            'settings.shippers.base_rate_revisions.approval2_update' => 990,
+            'settings.shippers.base_rate_revisions.shippers_with_rates' => 990,
+
             'settings.shippers.status_webhook.index' => 646,
             'settings.shippers.status_webhook.list' => 646,
             'settings.shippers.status_webhook.edit' => 646,
@@ -998,8 +1010,12 @@ class Permission
             'settings.project_arrival_shippers.index' => 828,
             'settings.project_arrival_shippers.store' => 828,
 
-            'admin.settings.rv_disable_shippers.index'=> 889,
-            'admin.settings.rv_disable_shippers.store'=> 889,
+            'settings.disable_email_on_arrival.index'=> 978,
+            'settings.disable_email_on_arrival.update'=> 978,
+            
+            'settings.rv_disable_shippers.index'=> 889,
+            'settings.rv_disable_shippers.store'=> 889,
+            
             'settings.background_image.index' => 891,
             'settings.background_image.store' => 891,
 
@@ -1013,6 +1029,7 @@ class Permission
             'settings.shipper_ibft_charges_settings.index' => 917,
             'settings.shipper_ibft_charges_settings.list' => 917,
 
+            'settings.shipper_negative_payable.index' => 982,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -1433,6 +1450,9 @@ class Permission
 
             'reports.operations_performance.index' => 892,
             'reports.operations_performance.export_to_excel' => 892,
+
+            'reports.ops_report.index' => 911,
+            'reports.ops_report.list' => 911,
             'settings.parcel_value_bypass.index' => 910,
             'settings.logistic_report.index' =>932,
 

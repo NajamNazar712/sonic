@@ -451,7 +451,7 @@
 												<span class="input-group-text">Rs</span>
 											</div>
 
-											<input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
+											<input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required" data-rule-remote="{{ route('cod.shipment.book.check_negative_payable') }}" data-msg-remote="Can not process Zero COD Shipment, due to pending negative payable amount.">
 										</div>
 
 
@@ -727,6 +727,7 @@
 			$('#parcel_value').prop('disabled', true);
 			$( "#amount" ).keyup(function() {
 				var amt = $('#amount').val();
+
 				if (amt == 0 )
 				{
 					// $("#parcel_value").css("background-color", "yellow");
@@ -1007,6 +1008,8 @@
 			if(service_type == 1){
 				$('#pieces_quantity').removeClass('d-none');
 			}
+
+
 			if (service_type == 2) {
 				$('#replacement').removeClass('d-none');
 				$('#try_and_buy_charges_div').addClass('d-none');
@@ -1040,6 +1043,8 @@
 					'max': 100000
 				});
 			}
+
+			
 			if (service_type == 3) {
 				$('#regular').addClass('d-none');
 				$('#try_and_buy').removeClass('d-none');
