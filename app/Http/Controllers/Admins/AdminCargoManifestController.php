@@ -2409,34 +2409,34 @@ class AdminCargoManifestController extends Controller
                 $shipper_status_id = NULL;
                 $consignee_status_id = NULL;
 
-                if ($bag_type == 1) {
-                    $shipper_status_id = 3;
-                    $consignee_status_id = 3;
-                } else {
-                    $shipper_status_id = 21;
-                    $consignee_status_id = 21;
+                // if ($bag_type == 1) {
+                //     $shipper_status_id = 3;
+                //     $consignee_status_id = 3;
+                // } else {
+                //     $shipper_status_id = 21;
+                //     $consignee_status_id = 21;
 
-                    if ($shipment->shipper_status_id != 20) {
-                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
-                            $shipper_status_id = 21;
-                            $consignee_status_id = 21;
-                        } else if ($shipment->booking_type_id == 2) {
-                            $shipper_status_id = 26;
-                            $consignee_status_id = 26;
-                        } else if ($shipment->booking_type_id == 3) {
-                            $shipper_status_id = 32;
-                            $consignee_status_id = 32;
-                        } else {
-                            $shipper_status_id = 21;
-                            $consignee_status_id = 21;
-                        }
-                    }
-                }
+                //     if ($shipment->shipper_status_id != 20) {
+                //         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
+                //             $shipper_status_id = 21;
+                //             $consignee_status_id = 21;
+                //         } else if ($shipment->booking_type_id == 2) {
+                //             $shipper_status_id = 26;
+                //             $consignee_status_id = 26;
+                //         } else if ($shipment->booking_type_id == 3) {
+                //             $shipper_status_id = 32;
+                //             $consignee_status_id = 32;
+                //         } else {
+                //             $shipper_status_id = 21;
+                //             $consignee_status_id = 21;
+                //         }
+                //     }
+                // }
 
-                $shipment->shipper_status_id = $shipper_status_id;
-                $shipment->consignee_status_id = $consignee_status_id;
+                // $shipment->shipper_status_id = $shipper_status_id;
+                // $shipment->consignee_status_id = $consignee_status_id;
 
-                $shipment->save();
+                // $shipment->save();
 
 
                 if (in_array($shipment_id, $open_box_ids)) {
@@ -2445,7 +2445,7 @@ class AdminCargoManifestController extends Controller
                     ShipmentOpenBoxJourneyController::add($shipment_id, 1, Auth::id());
                 }
 
-                ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $bag->id);
+                // ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $bag->id);
 
                 if ($bag_numbers == '') {
                     $bag_numbers = $bag->seal_number;
