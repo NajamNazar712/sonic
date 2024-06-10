@@ -1996,6 +1996,14 @@
                                             </a>
                                         </li>
                                         @endif
+
+                                        @if (session('role_id') == 1 || in_array(989, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.shippers.lead_progress.index') }}">
+                                                Lead Progress Setting 
+                                            </a>
+                                        </li>
+                                        @endif
                                 </ul>
 
                             </li>

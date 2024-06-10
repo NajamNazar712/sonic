@@ -2,10 +2,11 @@
 
 namespace App\Http\Middleware;
 
-use App\Http\Models\Admin\GlobalSettings;
-use Illuminate\Support\Facades\Auth;
-use Session;
+use Route;
 use Closure;
+use Session;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\Admin\GlobalSettings;
 
 class Permission
 {
@@ -1585,7 +1586,6 @@ class Permission
                 session(['sale_users_bypass' => []]);
             }
 
-
             if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions')) || (substr($action, 0, 4) == 'crm.' && session('role_id') == 6)) {
                 return $next($request);
             } else {
@@ -1593,13 +1593,40 @@ class Permission
             }
         } else if (Auth::guard('substitute_users')->check()) {
             $action = str_replace('cod.', '', $request->route()->getName());
-
             if (session('user_type') == 1 || !isset($this->actions['shipper'][$action]) || in_array($this->actions['shipper'][$action], session('permissions'))) {
                 return $next($request);
             } else {
                 return redirect()->route('cod.access_denied');
             }
-        } else {
+        } else if (in_array(session('status'), [0,1,2,5]) ) {
+            $action = str_replace('cod.', '', $request->route()->getName());
+
+            $allowedRoutes = [
+                'register.submit',
+                'orders.index',
+                'update.agreement_status',
+                'get_agreement',
+                'welcome',
+                'orders.list',
+
+            ];
+            
+            $wordpressRoutes = collect(Route::getRoutes())->filter(function ($route) {
+                return strpos($route->uri(), 'wordpress') !== false;
+            })->map(function ($route) {
+                return str_replace('cod.', '', $route->action['as'] ?? '');
+            })->toArray();
+            
+            $allowedRoutes = array_merge($allowedRoutes, $wordpressRoutes);
+            
+            if (!in_array($action, $allowedRoutes)){
+                return redirect()->route('cod.wordpress_access_denied');
+            }
+            
+            return $next($request);
+            
+            
+        }else{
             return $next($request);
         }
     }
