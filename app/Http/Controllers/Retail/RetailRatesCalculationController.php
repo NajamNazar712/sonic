@@ -190,7 +190,7 @@ class RetailRatesCalculationController extends Controller
             } else if ($shipping_mode_id == 9) {
                 $shipping_mode_id = 2;
             } else if ($shipping_mode_id == 11) {
-                $shipping_mode_id = 11;
+                $shipping_mode_id = 2;
             } else {
                 $shipping_mode_id = 3;
             }
@@ -220,13 +220,6 @@ class RetailRatesCalculationController extends Controller
                         {
                             $gst = 1 + $city->zone->gst;
                         }
-                        // $gst_charges = round($charges * $gst,2);
-                        // $charges = round($charges - $gst_charges,2);
-    
-                        // $discount_amount = round($charges * $discount,2);
-                        // $charges_with_discount = round($charges - $discount_amount,2);
-                        // $packaging_and_insurance_charges = $insurance_amount + $packaging;
-                        // $total_charges = round($charges_with_discount + $gst_charges + $packaging_and_insurance_charges,0,PHP_ROUND_HALF_UP);
     
                         $charges_without_gst = round($charges / $gst, 2); //
                         $gst_amount = round($charges - $charges_without_gst, 2);
