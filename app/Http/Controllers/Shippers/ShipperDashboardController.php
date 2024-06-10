@@ -2,127 +2,142 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use Auth;
+use Carbon\Carbon;
 use App\DailyVisit;
-use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
-use App\Http\Controllers\ShipmentsPickupJourneyController;
-use App\Http\Controllers\ShipperAgreementController;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
-use App\Http\Models\Admin\ReattemptPercentageForShipper;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\AverageShipmentCycle;
-use App\Http\Models\BookingType;
-use App\Http\Models\BookingTypeCharges;
-use App\Http\Models\BusinessCategory;
-use App\Http\Models\CashHandlingCharge;
-use App\Http\Models\Commission\SalesCommission;
-use App\Http\Models\Consolidation;
-use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\CorporateBookingTypeCharge;
-use App\Http\Models\CorporateCashHandlingCharge;
-use App\Http\Models\CorporateDefaultCashHandlingCharge;
-use App\Http\Models\CorporateDefaultDiscountCharge;
-use App\Http\Models\CorporateDefaultFuelSurcharge;
-use App\Http\Models\CorporateDefaultInsuranceCharge;
-use App\Http\Models\CorporateDefaultRateStatus;
-use App\Http\Models\CorporateDefaultReturnCharge;
-use App\Http\Models\CorporateDefaultWeightCharge;
-use App\Http\Models\CorporateDiscountCharge;
-use App\Http\Models\CorporateFuelSurcharge;
-use App\Http\Models\CorporateInsuranceCharge;
-use App\Http\Models\CorporateMinChargeableWeight;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CorporateReturnCharge;
-use App\Http\Models\CorporateReturnChargeZoneWise;
-use App\Http\Models\CorporateWeightCharge;
-use App\Http\Models\CorporateWeightChargeZoneWise;
-use App\Http\Models\CRM\CrmRequestCaseNature;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\CRM\CrmRequestChannel;
-use App\Http\Models\DiscountCharge;
-use App\Http\Models\DiscountWeightCharge;
-use App\Http\Models\DonePayment;
-use App\Http\Models\DonePaymentShipment;
-use App\Http\Models\FuelSurcharge;
-use App\Http\Models\InsuranceCharge;
-use App\Http\Models\InvoicingCycle;
-use App\Http\Models\PackagingMaterialRequest;
-use App\Http\Models\PackagingMaterialTypes;
-use App\Http\Models\PaymentMode;
-use App\Http\Models\Product;
-use App\Http\Models\RateRemark;
-use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
-use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
-use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
-use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
-use App\Http\Models\Rates\RateDestinationHub;
-use App\Http\Models\Rates\RateOriginHub;
-use App\Http\Models\RateStatus;
-use App\Http\Models\Reference;
-use App\Http\Models\ReturnCharge;
+use GuzzleHttp\Client;
+use App\RouteLocations;
+use App\Http\Models\City;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
-use App\Http\Models\ShipmentPaymentStatus;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\Shipper\ShipperPayment;
-use App\Http\Models\Shipper\UserOtpVerification;
-use App\Http\Models\ShipperContact;
-use App\Http\Models\ShipperNotificationEmail;
-use App\Http\Models\Sister_account\MergedSisterAccountMapping;
-use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Http\Models\UserDocumentAttachment;
-use App\Http\Models\V2Pickup\V2PickupRequest;
-use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Models\WeightCharge;
-use App\Http\Models\WMS\WmsCurrentStock;
-use App\Http\Models\WMS\WmsLabellingCharge;
-use App\Http\Models\WMS\WmsPackingCharge;
-use App\Http\Models\WMS\WmsPendingPicking;
-use App\Http\Models\WMS\WmsPerProductCharge;
-use App\Http\Models\WMS\WmsPerSquareFootCharge;
-use App\Http\Models\WMS\WmsShipmentProduct;
-use App\Http\Models\WMS\WmsStorageType;
-use App\Http\Models\WMS\WmsStorageTypeCharge;
-use App\Http\Models\WMS\WmsUserInformation;
-use App\RouteLocations;
-use GuzzleHttp\Client;
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\Admins\AdminPickupsController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Models\BanksList;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\Shipper\UserBankInfo;
-use App\Http\Models\DisputeType;
-use App\Http\Models\PackagingCharge;
-use App\Http\Models\Shipment;
-use App\Http\Models\City;
-use App\Http\Models\UserDefaultBankDuration;
-use Auth;
+use App\Http\Models\Product;
 use App\Http\Models\Segment;
-
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use App\Http\Models\BanksList;
+use App\Http\Models\Reference;
+use App\Http\Models\RateRemark;
+use App\Http\Models\RateStatus;
+use App\Http\Models\AccountType;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\BookingType;
+use App\Http\Models\DisputeType;
+use App\Http\Models\DonePayment;
+use App\Http\Models\PaymentMode;
 use Yajra\Datatables\Datatables;
-use Carbon\Carbon;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Models\Admin\Retail\OtherParcelReceiving;
-use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
-use App\Http\Models\Admin\Retail\OtherRetailShipment;
-use App\Http\Models\SubCategorySegment;
-use App\Http\Models\Rider\RiderReturnDelivery;
-use App\Http\Models\Admin\PODImage;
+use App\Http\Models\PaymentCycle;
+use App\Http\Models\ReturnCharge;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\WeightCharge;
+use App\Http\Models\Consolidation;
+use App\Http\Models\FuelSurcharge;
 use App\Http\Models\RiderDelivery;
-use App\Http\Models\InternationalShipment;
-use App\Http\Models\Sister_account\MergedSisterAccount;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Admin\PODImage;
+use App\Http\Models\DiscountCharge;
+use App\Http\Models\InvoicingCycle;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipperContact;
+use Illuminate\Support\Facades\App;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\InsuranceCharge;
+use App\Http\Models\PackagingCharge;
+use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Models\BusinessCategory;
+use App\Http\Models\BookingTypeCharges;
+use App\Http\Models\CashHandlingCharge;
+use App\Http\Models\SubCategorySegment;
+use App\Http\Models\WMS\WmsStorageType;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\Lead\LeadZone;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\Rates\RateOriginHub;
+use App\Http\Models\WMS\WmsCurrentStock;
 use App\Http\Models\Admin\GlobalSettings;
-use Illuminate\Support\Facades\Auth as FacadesAuth;
+use App\Http\Models\AverageShipmentCycle;
+use App\Http\Models\Commission\SalesTier;
+use App\Http\Models\DiscountWeightCharge;
+use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Models\WMS\WmsPackingCharge;
+use App\Http\Models\CorporateReturnCharge;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\InternationalShipment;
+use App\Http\Models\ShipmentPaymentStatus;
+use App\Http\Models\WMS\WmsPendingPicking;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\Shipper\ShipperPayment;
+use App\Http\Models\UserDocumentAttachment;
+use App\Http\Models\WMS\WmsLabellingCharge;
+use App\Http\Models\WMS\WmsShipmentProduct;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\Http\Models\CorporateDiscountCharge;
+use App\Http\Models\UserDefaultBankDuration;
+use App\Http\Models\WMS\WmsPerProductCharge;
+use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\Rates\RateDestinationHub;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\ShipperNotificationEmail;
+use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\WMS\WmsStorageTypeCharge;
+use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Admin\StandardReturnCharge;
+use App\Http\Models\Admin\StandardWeightCharge;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\CorporateBookingTypeCharge;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\PackagingMaterialTypeSizes;
 use App\Http\Models\ShipperVerificationPinCode;
+use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Http\Models\Admin\StandardFuelSurcharge;
+use App\Http\Models\CorporateCashHandlingCharge;
+use App\Http\Models\Shipper\UserOtpVerification;
+use App\Http\Controllers\NotificationsController;
+
+use App\Http\Models\CorporateDefaultReturnCharge;
+use App\Http\Models\CorporateDefaultWeightCharge;
+use App\Http\Models\CorporateMinChargeableWeight;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\Admin\StandardInsuranceCharge;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\CorporateReturnChargeZoneWise;
+use App\Http\Models\CorporateWeightChargeZoneWise;
+use App\Http\Models\CorporateDefaultDiscountCharge;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\ShipperAgreementController;
+use App\Http\Models\Admin\StandardBookingTypeCharge;
+use App\Http\Models\CorporateDefaultInsuranceCharge;
+use App\Http\Models\Admin\Retail\OtherRetailShipment;
+use App\Http\Models\Admin\StandardCashHandlingCharge;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Http\Models\Admin\Retail\OtherParcelReceiving;
+use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\Admin\UserShippingInfoStoreAddress;
+use App\Http\Models\CorporateDefaultCashHandlingCharge;
+use App\Http\Models\Sister_account\MergedSisterAccount;
+use App\Http\Models\Admin\ReattemptPercentageForShipper;
+use App\Http\Models\Rates\MinimumChargeableWeightSetting;
+use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
+use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
+use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
+use App\LeadProgressSetting;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -130,11 +145,14 @@ class ShipperDashboardController extends Controller
 {
     public function __construct() {
       $this->middleware('auth:web,substitute_users');
-
-      $this->middleware('Permission');
+      $this->middleware('Permission')->except('wordpress_access_denied', 'wordpressAddressView','wordpressBankView');
     }
 
     public function access_denied() {
+        return view('client.access_denied');
+    }
+
+    public function wordpress_access_denied() {
         return view('client.access_denied');
     }
 
@@ -250,9 +268,48 @@ class ShipperDashboardController extends Controller
                         ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
                 }
 
+                $percentage = null; 
+                $color = null;
+                $description = "";
+                $user = User::find($shipper_id);
+                
+                $weight_charges = WeightCharge::where('user_id' , $shipper_id);
+                if($user->status == 0 && !$weight_charges->exists() && (!isset($user->request_custom_quotation) || $user->request_custom_quotation != 1)){
+                    $lead_progress_setting = LeadProgressSetting::find(1);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
 
+                    $description = "Your account is $percentage% completed";
+                    
+                }else if(($weight_charges->exists() || $user->request_custom_quotation == 1) && !isset($user->rates_added_by)){
+                    $lead_progress_setting = LeadProgressSetting::find(2);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
 
+                    $description = "Your account is $percentage% completed";
 
+                }else if (isset($user->rates_added_by) && $user->documents_status != 2){
+                    $lead_progress_setting = LeadProgressSetting::find(3);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
+
+                    $description = "Your account is $percentage% completed";
+
+                }else if ($user->documents_status == 2 && $user->status != 3){
+                    $lead_progress_setting = LeadProgressSetting::find(4);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
+                    
+                    $description = "Your account is $percentage% completed";
+
+                }else if ($user->status == 3){
+                    $lead_progress_setting = LeadProgressSetting::find(5);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
+
+                    $description = "Your account is activated";
+
+                }
 
                 /*$shipper_payment = ShipperPayment::where('user_id', $shipper_id);
                 if($shipper_payment->exists()){
@@ -263,7 +320,7 @@ class ShipperDashboardController extends Controller
                 }*/
                 $shipper_payment = null;
 
-                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
+                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment, 'percentage' => $percentage, 'user' => $user, 'color' => $color , 'description' => $description]);
             }
  
         }
@@ -1097,7 +1154,8 @@ class ShipperDashboardController extends Controller
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $reference = Reference::where('id', $user->reference_id)->first();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
-        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
+
+        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
     }
 
     public function storeShipperId(Request $request)
@@ -1624,7 +1682,12 @@ class ShipperDashboardController extends Controller
                 ]);
                 if($request->password == $request->confirm_password){
                     User::where('id', session('user_id'))->update(['password' => Hash::make($request->password), 'updated_by_type' => 0, 'updated_by_id' => session('user_id')]);
-                    return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
+
+                    if(session('status') == 0){
+                        return redirect()->route('cod.welcome');
+                    }else{
+                        return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
+                    }
                 }
                 else{
                     return redirect()->back()->with(['error'=>"The password and confirmation password do not match"]);
@@ -2310,5 +2373,149 @@ class ShipperDashboardController extends Controller
         }
     }
 
-    
+    public function wordpressLeadRegistration(){
+          /*if($lead_id == NULL){
+            return redirect()->route('cod.getstarted');
+        }*/
+
+        $user = User::find(session('user_id'));
+        $lead = Lead::find($user->lead_id);
+        $account_type = AccountType::all();
+        $products = Product::all();
+        $banks = BanksList::all();
+        $city_list = City::where('status',1)->where('business_category_id' ,1)->where('id','!=',1244)->get();
+        $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
+        $references = Reference::all();
+        $average_shipment_durations = AverageShipmentCycle::all();
+//        $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7);
+        $segments = Segment::all();
+        $sub_segments = SubCategorySegment::all();
+        $payment_cycles = PaymentCycle::all();
+        $admins = Admin::all();
+
+
+        // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
+        // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
+        $invoicing_cycle = InvoicingCycle::all();
+
+
+        if (!RateStatus::where('user_id', $user->id)->exists()) {
+            $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
+            $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
+            $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
+            $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
+            $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
+            $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
+            $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
+            $packaging_sizes = array();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
+            $storage_types = WmsStorageType::all()->where('status', 1);
+            if (count($packaging_material_types) > 0) {
+
+                foreach ($packaging_material_types as $type) {
+                    $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                }
+            }
+
+
+            $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
+            $on = null;
+            $ol = null;
+            $det = null;
+            $same_day = null;
+            foreach ($minimum_chargeable_weights as $minimum_chargeable_weight) {
+                if ($minimum_chargeable_weight->shipping_mode_id == 1) {
+                    $on = $minimum_chargeable_weight->weight;
+                } elseif ($minimum_chargeable_weight->shipping_mode_id == 2) {
+                    $ol = $minimum_chargeable_weight->weight;
+                } elseif ($minimum_chargeable_weight->shipping_mode_id == 3) {
+                    $det = $minimum_chargeable_weight->weight;
+                } else {
+                    $same_day = $minimum_chargeable_weight->weight;
+                }
+            }
+            $commission_percentage = '';
+            $settings = GlobalSettings::where('type', 'commission_percentage');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                $commission_percentage = $settings->text;
+            }
+            $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission', 'sales_status']);
+            $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id','admins.trax_id'])->where('admins.status', 1)->get();
+            $riders_permanent = Rider::where('rider_type_id', 1)->get();
+     
+            $users = array();
+            $sales = array();
+            $all_users = array();
+            foreach ($admin_users as $u) {
+                if ($u->department_id != 7) {
+                    $users[] = array('id' => $u->id, 'text' => $u->name . '-' . $u->trax_id);
+                } else {
+                    $sales[] = array('id' => $u->id, 'text' => $u->name . '-' . $u->trax_id);
+                }
+            }
+          
+            $all_users['results'][0]['text'] = 'Sales';
+            $all_users['results'][0]['children'] = $sales;
+            $all_users['results'][1]['text'] = 'Admins';
+            $all_users['results'][1]['children'] = $users;
+            $all_users['results'][2]['text'] = 'Riders';
+            $all_users['results'][2]['children'] = [];
+            $all_users['pagination']['more'] = true;
+
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        }
+
+      
+        if($user->on_board_status == 1){
+            return view('client.access_denied');
+        }else{
+            return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities,'admins'=>$admins,]);
+        }
+    }
+
+
+
+    public function sales_person(Request $request){
+
+        $id = $request->id;
+        if($id){
+            $sales_persons_city = City::where('id', $id);
+            if ($sales_persons_city->exists()){
+                // Check if city exists
+                $sales_persons_city = $sales_persons_city->first();
+                $zone_id = $sales_persons_city->zone_id; 
+                $sale_persons = LeadZone::where(['zone_id' => $zone_id, 'status' => 1])->first(); 
+                
+                return response()->json(['status' => 0, 'sale_persons' => $sale_persons]);
+            }else{
+                $sale_person_admin = City::find($id)->name;
+                return response()->json(['status' => 1, 'error' => 'No sales person found for the selected city: ' . $sale_person_admin]);
+            }
+        }
+    }
+
+    public function get_sub_segment(Request $request){
+        $sub_segments = SubCategorySegment::where('segment_id',$request->segment_id);
+        if($sub_segments->exists()){
+            $sub_segments = $sub_segments->get();
+            return response()->json(['status' => 0, 'sub_segments' => $sub_segments]);
+        }else{
+            return response()->json(['status' => 1]);
+        }
+    }
+
+    public function wordpressAddressView(){
+        $products = Product::all();
+
+        // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
+        // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
+        $cities = City::where('pickup',1)->get();
+        return view('client.components.pickup_address')->with(['cities'=>$cities,'products'=>$products]);
+    }
+    public function wordpressBankView(){
+        $banks = BanksList::all();
+        $city_list = City::where('status',1)->get();
+        return view('client.components.banks')->with(['banks'=>$banks,'all_cities'=>$city_list]);
+    }
 }

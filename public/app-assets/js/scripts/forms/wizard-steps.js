@@ -9,6 +9,13 @@
 ==========================================================================================*/
 
 // Wizard tabs with numbers setup
+
+function getLastPartOfUrl() {
+    var urlParts = window.location.href.split('/');
+    return urlParts[urlParts.length - 1];
+}
+
+
 $(".number-tab-steps").steps({
     headerTag: "h6",
     bodyTag: "fieldset",
@@ -66,6 +73,7 @@ $(".steps-validation").steps({
     },
     onStepChanging: function (event, currentIndex, newIndex)
     {
+
         if(currentIndex === 0){
             var caddress = $('input[name="company_address"]').val();
             var cphone = $('input[name="shipper_phone"]').val();
@@ -169,6 +177,16 @@ $(".steps-validation").steps({
         form.validate().settings.ignore = ":disabled,:hidden";
         return form.valid();
     },
+    onStepChanged: function (event, currentIndex, priorIndex) {
+     
+        if(currentIndex === 4 && getLastPartOfUrl() == "wordpress"){
+            var newLi = $('<li class="clearfix"><button id="customQuotationBtn" class="btn btn-primary">Request For Custom Qoutes</button></li>');
+            $('.actions ul').append(newLi);
+        }else if(currentIndex != 4){
+            $('#customQuotationBtn').closest('li').remove();
+        }
+
+    },
     onFinishing: function (event, currentIndex)
     {
         form.validate().settings.ignore = ":disabled";
@@ -186,13 +204,21 @@ $(".steps-validation").steps({
     },
     onFinished: function (event, currentIndex)
     {
-        $('#registership').submit();
+
+        if ($('input[name="on_main_switch"]').is(':checked') || $('input[name="ol_main_switch"]').is(':checked') || $('input[name="detain_main_switch"]').is(':checked') || $('input[name="sameday_main_switch"]').is(':checked') || getLastPartOfUrl() != "wordpress") {
+            $('#registership').submit();
+        }else{
+            toastr.error('Select Any One Rate', 'Error!', {
+                positionClass: 'toast-top-center',
+                containerId: 'toast-top-center'
+            });
+            return currentIndex;
+        }
     }
 });
 
 // Initialize validation
 $(".steps-validation").validate({
-    ignore: 'input[type=hidden]', // ignore hidden fields
     errorClass: 'danger',
     successClass: 'success',
     highlight: function(element, errorClass) {
