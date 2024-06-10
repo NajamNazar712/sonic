@@ -55,7 +55,7 @@ class WebsiteLead extends Command
             $base_uri = 'https://trax.pk/wp-json/tl/v1/';
         }
         elseif ($environment == 'staging'){
-            $base_uri = 'https://trax.pk/wp-json/tl/v1/';
+            $base_uri = 'http://trax_website.test/trax_website/wp-json/tl/v1/';
         }
         else{
             $base_uri = 'http://trax_website.test/wp-json/tl/v1/';
