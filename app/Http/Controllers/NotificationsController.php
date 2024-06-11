@@ -5841,11 +5841,12 @@ class NotificationsController extends Controller
                         $body = str_replace('[preview]', $html, $body);
                     }
 
-                    $sale_head_email = Admin::where('role_id', 4)->select('email')->first();
+                    $sale_head_email = Admin::where('role_id', 4)->value('email');
 
-                    if ($sale_head_email != '') {
-                        $cc[] = $sale_head_email->email;
+                    if ($sale_head_email) {
+                        $cc[] = $sale_head_email;
                     }
+                    
                     if ($to == null) {
                         $cc = null;
                     }
