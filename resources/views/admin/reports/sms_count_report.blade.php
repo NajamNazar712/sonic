@@ -128,7 +128,7 @@
         $(document).ready(function () {
 
             $('#search_type').select2({
-                placeholder:'Select Shipper',
+                placeholder:'Select SMS Type',
                 width:'100%'
             });
 

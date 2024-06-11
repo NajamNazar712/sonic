@@ -8633,7 +8633,7 @@ class GlobalSettingsController extends Controller
         foreach ($shipper_notification_ids as $notification_id) {
             $details = array();
             $notification_settings = NotificationSetting::join('notifications as n', 'n.id', '=', 'notification_settings.notification_id')
-                ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name')
+                ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name' ,'notification_settings.charged_sms_toggle','notification_settings.sending_frequency','notification_settings.charging_frequency')
                 ->where('notification_id', $notification_id);
 
             if ($notification_settings->exists()) {
@@ -8641,6 +8641,9 @@ class GlobalSettingsController extends Controller
                 $details['id'] = $notification_setting->notification_id;
                 $details['name'] = $notification_setting->notification_name;
                 $details['shipper_toggle'] = $notification_setting->shipper_toggle;
+                $details['charged_sms_toggle'] =  $notification_setting->charged_sms_toggle;
+                $details['sending_frequency'] =  $notification_setting->sending_frequency;
+                $details['charging_frequency'] =  $notification_setting->charging_frequency;
                 $notification_setting_shippers = NotificationSettingShipper::where('notification_setting_id', $notification_setting->id);
                 if ($notification_setting_shippers->exists()) {
                     $notification_setting_shippers = $notification_setting_shippers->pluck('shipper_id')->toArray();
@@ -8657,6 +8660,9 @@ class GlobalSettingsController extends Controller
                     $details['name'] = $notification_setting->name;
                     $details['shipper_toggle'] = 1;
                     $details['shippers'] = null;
+                    $details['charged_sms_toggle'] = 0;
+                    $details['sending_frequency'] = null;
+                    $details['charging_frequency'] = null;
                     $notification_details[] = $details;
                 }
             }
@@ -8721,6 +8727,14 @@ class GlobalSettingsController extends Controller
                 $notification_setting->notification_id = $notification['id'];
                 $shippers = null;
                 $toggle = 0;
+
+                if (array_key_exists('charged_sms', $notification)) {
+                    if ($notification['charged_sms'] == 'on') {
+                        $notification_setting->charged_sms_toggle = 1;
+                        $notification_setting->sending_frequency  = $notification['sending_frequency'];
+                        $notification_setting->charging_frequency  = $notification['charging_frequency'];
+                    }
+                }
 
                 if (array_key_exists('all_shipper_toggle', $notification)) {
                     if ($notification['all_shipper_toggle'] == 'on') {

@@ -123,6 +123,7 @@ use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\ShipmentSmsLogs;
 use Illuminate\Support\Facades\Response;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\NotificationSetting;
 
 class AdminFinanceController extends Controller
 {
@@ -5502,7 +5503,22 @@ class AdminFinanceController extends Controller
 
             if ($valid) {
                 if($sms_charges_status == 1) {
-                    $shipment_sms_count = ShipmentSmsLogs::where('shipment_id' , $shipment->id)->where('paid', 0)->count();
+                    $shipment_sms_count = 0;
+                    $shipment_sms = ShipmentSmsLogs::select('notification_id', DB::raw('count(*) as count'))->where('shipment_id' , $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
+
+                    
+                    foreach($shipment_sms as $notification) {
+                        $notification_setting = NotificationSetting::where('notification_id', $notification->notification_id)->where('charged_sms_toggle',1);
+                        if ($notification_setting->exists()) {
+                            $notification_setting = $notification_setting->first();
+                            $charging_frequency = $notification_setting->charging_frequency;
+                            if($notification->count <= $charging_frequency ) {
+                                $shipment_sms_count += $notification->count;
+                            } else {
+                                $shipment_sms_count += $charging_frequency;
+                            }
+                        }
+                    }
                     $sms_charges = $current_sms_charges * $shipment_sms_count;
                     $payable = $payable - $sms_charges;
                     ShipmentSmsLogs::where('shipment_id', $shipment->id)->update(['paid'=>1]);
@@ -9950,7 +9966,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="14" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="15" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -10073,7 +10089,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="17">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="18">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -11052,7 +11068,7 @@ class AdminFinanceController extends Controller
                         <tbody>
                         <tr>
                             <td>Weight Charges</td>
-                            <td rowspan="13">' . $shipment_counts[$origin] . '</td>
+                            <td rowspan="14">' . $shipment_counts[$origin] . '</td>
                             <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
                         </tr>
                         <tr>
@@ -12110,7 +12126,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="13" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="15" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -12225,7 +12241,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="17">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="18">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -17754,7 +17770,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="14" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="15" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>

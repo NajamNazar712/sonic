@@ -1048,7 +1048,10 @@ class NotificationsController extends Controller
 
                     $sms_setting = self::sms_notification_setting(11, $shipper->id);
                     if($sms_setting){
-                        self::sms($body, $to, NULL,NULL, $id);
+                        $sending_frequency = self::checkSendingFrequency(11, $shipment->id);
+                        if($sending_frequency) {
+                            self::sms($body, $to, NULL,$shipment->id, $id);
+                        }
                     }
                 } else if ($id == 12) {
 
@@ -1134,7 +1137,11 @@ class NotificationsController extends Controller
 
                     $sms_setting = self::sms_notification_setting(12, $shipper->id);
                     if($sms_setting){
-                        self::sms($body, $to, NULL,$shipment->id, $id);
+                        $sending_frequency = self::checkSendingFrequency(12,$shipment->id);
+                        if($sending_frequency) {
+                            self::sms($body, $to, NULL,$shipment->id, $id);
+                        }
+                        
                     }
                 } else if ($id == 13) {
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
@@ -7043,7 +7050,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[shipper]', $shipper_info->name, $body);
                         }
                         $to = $shipper_info->shipper_phone_no;
-                        self::sms($body, $to, null, $shipment->id, $id);
+                        self::sms($body, $to, null, null, $id);
                     }
                 } else if ($id == 117) {
                     $date = str_replace('00:00:00', '', Carbon::today());
@@ -7810,7 +7817,10 @@ class NotificationsController extends Controller
                         $body = 'Your YAP debit card is on route and will be delivered between [Start Time] – [End time] Please keep your CNIC ready for verification purposes.' . PHP_EOL . PHP_EOL . 'AWB: ' . $shipment->tracking_number . PHP_EOL . PHP_EOL . 'Rider: ' . $rider . PHP_EOL . PHP_EOL . 'Refusal OTP: ' . $refusal_otp . PHP_EOL . PHP_EOL . 'Helpline: 021-111-118-729';
                         $to = $shipment->consignee_phone_number_1;
 
-                        self::sms($body, $to, null,$shipment->id, $id);
+                        $sending_frequency = self::checkSendingFrequency(132,$shipment->id);
+                        if($sending_frequency) {
+                            self::sms($body, $to, NULL,$shipment->id, $id);
+                        }
                         //yap sms end
                     } else {
 
@@ -7818,73 +7828,77 @@ class NotificationsController extends Controller
 
                         $sms_setting = self::sms_notification_setting(132, $shipper->id);
                         if ($sms_setting) {
-                            $to = $shipment->consignee_phone_number_1;
+                            $sending_frequency = self::checkSendingFrequency(132,$shipment->id);
+                                if($sending_frequency) {
+                                    $to = $shipment->consignee_phone_number_1;
 
-                            foreach ($delivery_note_fields as $key => $field) {
-                                if (strpos($body, '[' . $key . ']') !== FALSE) {
-                                    if ($key == 'delivery_note_number') {
-                                        $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                                    foreach ($delivery_note_fields as $key => $field) {
+                                        if (strpos($body, '[' . $key . ']') !== FALSE) {
+                                            if ($key == 'delivery_note_number') {
+                                                $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                                            } else {
+                                                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                                            }
+                                        }
+                                    }
+
+                                    foreach ($shipment_fields as $key => $field) {
+
+                                        if (strpos($body, '[' . $key . ']') !== FALSE) {
+
+                                            if ($shipment['consignee_name']) {
+                                                $first_name = explode(' ', trim($shipment['consignee_name']));
+                                                $shipment['consignee_name'] = $first_name[0];
+                                            }
+
+                                            $body = str_replace('[' . $key . ']', $shipment[$field], $body);
+                                        }
+                                    }
+                                    if ($delivery_note->special_rider) {
+                                        if (strpos($body, '[rider]') !== FALSE) {
+                                            if ($delivery_note_shipment->rider_information) {
+                                                $body = str_replace('[rider]', str_replace('-', '', $delivery_note->special_rider_phone), $body);
+                                            } else {
+                                                $body = str_replace('[rider]', '', $body);
+                                            }
+                                        }
                                     } else {
-                                        $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
-                                    }
-                                }
-                            }
-
-                            foreach ($shipment_fields as $key => $field) {
-
-                                if (strpos($body, '[' . $key . ']') !== FALSE) {
-
-                                    if ($shipment['consignee_name']) {
-                                        $first_name = explode(' ', trim($shipment['consignee_name']));
-                                        $shipment['consignee_name'] = $first_name[0];
+                                        if (strpos($body, '[rider]') !== FALSE) {
+                                            if ($delivery_note_shipment->rider_information) {
+                                                $body = str_replace('[rider]', str_replace('-', '', $delivery_note->rider->phone), $body);
+                                            } else {
+                                                $body = str_replace('[rider]', '', $body);
+                                            }
+                                        }
                                     }
 
-                                    $body = str_replace('[' . $key . ']', $shipment[$field], $body);
-                                }
-                            }
-                            if ($delivery_note->special_rider) {
-                                if (strpos($body, '[rider]') !== FALSE) {
-                                    if ($delivery_note_shipment->rider_information) {
-                                        $body = str_replace('[rider]', str_replace('-', '', $delivery_note->special_rider_phone), $body);
+                                    if ($shipment->pickup_address->pickup_brand_name != NULL) {
+                                        $brand_name = $shipment->pickup_address->pickup_brand_name;
                                     } else {
-                                        $body = str_replace('[rider]', '', $body);
+                                        if ($shipper->brand_name != NULL) {
+                                            $brand_name = $shipper->brand_name;
+                                        } else {
+                                            $brand_name = $shipper->name;
+                                        }
                                     }
-                                }
-                            } else {
-                                if (strpos($body, '[rider]') !== FALSE) {
-                                    if ($delivery_note_shipment->rider_information) {
-                                        $body = str_replace('[rider]', str_replace('-', '', $delivery_note->rider->phone), $body);
-                                    } else {
-                                        $body = str_replace('[rider]', '', $body);
+                                    if (strpos($body, '[company_name]') !== FALSE) {
+                                        $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $brand_name), 0, 25), $body);
                                     }
+
+                                    if (strpos($body, '[payment_mode]') !== FALSE) {
+                                        $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
+                                    }
+
+                                    if ($shipment_otp->exists()) {
+                                        $shipment_otp = $shipment_otp->first();
+                                        if (strpos($body, '[refusal_otp]') !== FALSE) {
+                                            $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
+                                        }
+                                    }
+                                    self::sms($body, $to, null,$shipment->id,$id);
                                 }
                             }
-
-                            if ($shipment->pickup_address->pickup_brand_name != NULL) {
-                                $brand_name = $shipment->pickup_address->pickup_brand_name;
-                            } else {
-                                if ($shipper->brand_name != NULL) {
-                                    $brand_name = $shipper->brand_name;
-                                } else {
-                                    $brand_name = $shipper->name;
-                                }
-                            }
-                            if (strpos($body, '[company_name]') !== FALSE) {
-                                $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $brand_name), 0, 25), $body);
-                            }
-
-                            if (strpos($body, '[payment_mode]') !== FALSE) {
-                                $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
-                            }
-
-                            if ($shipment_otp->exists()) {
-                                $shipment_otp = $shipment_otp->first();
-                                if (strpos($body, '[refusal_otp]') !== FALSE) {
-                                    $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
-                                }
-                            }
-                            self::sms($body, $to, null,$shipment->id,$id);
-                        }
+                            
                     }
                 } else if ($id == 134) {
                     $user = User::find($reference_1_id);
@@ -9794,7 +9808,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[rider]', $rider->name, $body);
                         }
                         $to = $rider->phone;
-                        self::sms($body, $to, null, $one_link_transaction->shipment_id,$id);
+                        self::sms($body, $to, null, null,$id);
                     }
                 } else if ($id == 186) {
                     $role = $reference_2_id;
@@ -9933,12 +9947,12 @@ class NotificationsController extends Controller
 
                     $to = $shipment->consignee_phone_number_1;
                     // self::sms($body, $to, 1);
-                    self::sms_otp($body, $to, $name, $shipment_otp->otp, 3,$shipment_id , $id);
+                    self::sms_otp($body, $to, $name, $shipment_otp->otp, 3,null, $id);
                     // self::sms_otp($body, $to, $name, 21323, 3);
                     if ($shipment->consignee_phone_number_2 != NULL) {
                         $to = $shipment->consignee_phone_number_2;
                         // self::sms($body, $to, 1);
-                        self::sms_otp($body, $to, $name, $shipment_otp->otp, 3, $shipment_id, $id);
+                        self::sms_otp($body, $to, $name, $shipment_otp->otp, 3, null, $id);
 
                     }
                 } else if ($id == 205) {
@@ -11533,5 +11547,25 @@ class NotificationsController extends Controller
             return true;
         }
         return false;
+    }
+
+    static public function checkSendingFrequency($notification_id, $shipment_id) {
+        
+        $notification_setting = NotificationSetting::where('notification_id', $notification_id)->where('charged_sms_toggle',1);
+        if ($notification_setting->exists()) {
+            $notification_setting = $notification_setting->first();
+            $sending_frequency = $notification_setting->sending_frequency;
+
+            $send_sms = ShipmentSmsLogs::where('notification_id',$notification_id)->where('shipment_id', $shipment_id)->count();
+
+            if($send_sms < $sending_frequency ) {
+                return true;
+            } else { 
+                return false;
+            }
+
+        } else {
+            return true;
+        }
     }
 }

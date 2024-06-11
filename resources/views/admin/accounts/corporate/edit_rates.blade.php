@@ -130,7 +130,7 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-12">
-                                                <h4>Do you want to charge SMS?</h4>
+                                                <h4>Do you want to charge SMS? (Applied Per Shipment)</h4>
                                             </div>
                                         </div>
                                         <div class="row mt-2">
