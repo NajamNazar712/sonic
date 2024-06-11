@@ -5811,11 +5811,11 @@ class NotificationsController extends Controller
                             $cc[] = 'adeel.ali@trax.pk';
                         }
 
-                        if ($person['old_sale_person']->email) {
+                        if ($person['old_sale_person']) {
                             $cc[] = $person['old_sale_person']->email;
                         }
 
-                        if ($person['new_sale_person']->email) {
+                        if ($person['new_sale_person']) {
                             $to[] = $person['new_sale_person']->email;
                         }
                     }
@@ -5826,7 +5826,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[preview]', $html, $body);
                     }
 
-                    $sale_head_email = Admin::where('role_id', 4)->value('email');
+                    $sale_head_email = Admin::where('role_id', 4)->select('email')->first();
 
                     if ($sale_head_email) {
                         $cc[] = $sale_head_email;
