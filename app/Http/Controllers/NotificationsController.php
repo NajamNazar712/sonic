@@ -5819,30 +5819,20 @@ class NotificationsController extends Controller
 
 
                         $html .= '</tr>';
-
-                        $cc = [];
-                        $to = [];
-                        
-                        if (isset($person['zone']->id)) {
-                            switch ($person['zone']->id) {
-                                case 1:
-                                    $cc[] = 'nabeel.ahmed@trax.pk';
-                                    break;
-                                case 2:
-                                    $cc[] = 'ali.qureshi@trax.pk';
-                                    $cc[] = 'adeel.ali@trax.pk';
-                                    break;
-                            }
+                        if ($person['zone']->id == 1) {
+                            $cc[] = 'nabeel.ahmed@trax.pk';
+                        } else if ($person['zone']->id == 2) {
+                            $cc[] = 'ali.qureshi@trax.pk';
+                            $cc[] = 'adeel.ali@trax.pk';
                         }
-                        
-                        if (isset($person['old_sale_person']->email)) {
+
+                        if ($person['old_sale_person']->email) {
                             $cc[] = $person['old_sale_person']->email;
                         }
-                        
-                        if (isset($person['new_sale_person']->email)) {
+
+                        if ($person['new_sale_person']->email) {
                             $to[] = $person['new_sale_person']->email;
                         }
-                        
                     }
 
                     $html .= '</tbody></table>';
