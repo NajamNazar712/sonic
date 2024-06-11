@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\BlockEmail;
 use Carbon\Carbon;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Client;
@@ -230,17 +231,30 @@ class NotificationsController extends Controller
 
     static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null)
     {
+        $block_email = BlockEmail::select('email')->pluck('email')->toArray();
+
+        $filterBlockedEmails = function ($emails) use ($block_email) {
+            if (is_array($emails)) {
+                return array_values(array_filter($emails, function ($email) use ($block_email) {
+                    return !in_array($email, $block_email);
+                }));
+            } elseif (is_string($emails) && in_array($emails, $block_email)) {
+                return null;
+            }
+            return $emails;
+        };
+
 
         if ($to) {
-
+            $to = $filterBlockedEmails($to);
             if (is_array($to)) {
-
                 $to = array_values(array_filter($to));
                 if (empty($to)) {
                     return false;
                 }
             }
             if ($cc != NULL) {
+                $cc = $filterBlockedEmails($cc);
                 if (is_array($cc)) {
                     $cc = array_values(array_filter($cc));
                     if (empty($cc)) {
@@ -249,6 +263,7 @@ class NotificationsController extends Controller
                 }
             }
             if ($bcc != NULL) {
+                $bcc = $filterBlockedEmails($bcc);
                 if (is_array($bcc)) {
                     $bcc = array_values(array_filter($bcc));
                     if (empty($bcc)) {
