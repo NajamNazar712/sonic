@@ -15,6 +15,7 @@
 
                     @else
                         <h4>Trax Center</h4>
+                        <input type="hidden" name="store" value="2">
                     @endif
                     {{-- <select name="store" id="edit_store" class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
                         @if ($retail_user->category==1)
@@ -91,8 +92,6 @@
                     </div>
                     <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement Start date">
                 </div>
-
-                {{-- @dump() --}}
 
                 <div class="form-group">
                     <input type="number" name="salary" id="salary" class="form-control" placeholder="Salary" value="{{ count($retail_user_salary) > 0 ? $retail_user_salary[0] : '' }}">

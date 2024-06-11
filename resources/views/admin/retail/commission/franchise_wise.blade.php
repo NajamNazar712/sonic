@@ -13,15 +13,15 @@
                     <div id="search_form" class="row p-1">
                         <div class="col-4">
                             <select name="month" id="month" class="form-control select2">
-                                <option value="1">January</option>
-                                <option value="2">February</option>
-                                <option value="3">March</option>
-                                <option value="4">April</option>
-                                <option value="5">May</option>
-                                <option value="6">June</option>
-                                <option value="7">July</option>
-                                <option value="8">August</option>
-                                <option value="9">September</option>
+                                <option value="01">January</option>
+                                <option value="02">February</option>
+                                <option value="03">March</option>
+                                <option value="04">April</option>
+                                <option value="05">May</option>
+                                <option value="06">June</option>
+                                <option value="07">July</option>
+                                <option value="08">August</option>
+                                <option value="09">September</option>
                                 <option value="10">October</option>
                                 <option value="11">November</option>
                                 <option value="12">December</option>
@@ -48,24 +48,20 @@
                                 <thead>
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1"></th>
-                                        <th class="border-primary border-darken-1">S.no</th>
+                                        <th class="border-primary border-darken-1">Product Name</th>
                                         <th class="border-primary border-darken-1">Franchise Name</th>
-                                        <th class="border-primary border-darken-1">Franchise Code</th>
+                                        <th class="border-primary border-darken-1">Address</th>
+                                        <th class="border-primary border-darken-1">Code</th>
+                                        <th class="border-primary border-darken-1">CNIC</th>
+                                        <th class="border-primary border-darken-1">Phone Number</th>
                                         <th class="border-primary border-darken-1">Month</th>
-                                        <th class="border-primary border-darken-1">Product</th>
-                                        <th class="border-primary border-darken-1">Number of shipments</th>
+                                        <th class="border-primary border-darken-1">Commission %</th>
+                                        <th class="border-primary border-darken-1">Number of Shipments</th>
                                         <th class="border-primary border-darken-1">Total Charges</th>
-                                        <th class="border-primary border-darken-1">Product %</th>
-                                        <th class="border-primary border-darken-1">Commission</th>
-                                        <th class="border-primary border-darken-1">GST %</th>
                                         <th class="border-primary border-darken-1">GST Amount</th>
-                                        <th class="border-primary border-darken-1">Total Commission</th>
-                                        <th class="border-primary border-darken-1">Withholding %</th>
-                                        <th class="border-primary border-darken-1">Franchise Withholding amount</th>
-                                        <th class="border-primary border-darken-1">Charges minus withholding</th>
-                                        <th class="border-primary border-darken-1">Deduction %</th>
-                                        <th class="border-primary border-darken-1">Franchise Deduction amount</th>
-                                        <th class="border-primary border-darken-1">Net Commission</th>
+                                        <th class="border-primary border-darken-1">Weight Charges</th>
+                                        <th class="border-primary border-darken-1">Commission amount</th>
+                                        <th class="border-primary border-darken-1">Franchise Withholding Percentage</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -121,7 +117,6 @@
                     franchise: franchise
                 },
                 success: function(response) {
-
                     $('.select-checkbox input[type="checkbox"]').on('change', function() {
                         var checked = $('.select-checkbox input[type="checkbox"]:checked').length > 0;
                         $('.unselect_all').prop('disabled', !checked);
@@ -173,20 +168,25 @@
                                     text: 'Print Invoice',
                                     className: 'btn btn-primary print_invoice',
                                     action: function () {
-                                        var selectedFranchiseNames = [];
+                                        var selectedFranchiseCodes = [];
+                                        var selectedProductName = [];
                                         $('#datatable > tbody > .selected').each(function(index){
-                                            var franchiseName = $(this).find('td:eq(1)').text().trim();
-                                            if (franchiseName) {
-                                                selectedFranchiseNames.push(franchiseName);
+                                            var franchiseCode = $(this).find('td:eq(4)').text().trim();
+                                            var productName = $(this).find('td:eq(1)').text().trim();
+                                            if (franchiseCode) {
+                                                selectedFranchiseCodes.push(franchiseCode);
+                                                selectedProductName.push(productName);
                                             }
                                         });
-                                        var franchiseNames = selectedFranchiseNames.join(', ');
-                                        if (franchiseNames.length > 0) {
+                                        var franchiseCodes = selectedFranchiseCodes.join(', ');
+                                        var productNames = selectedProductName.join(', ');
+                                        if (franchiseCodes.length > 0) {
                                             $.ajax({
                                                 url: '{{ route('admin.retail.franchise.franchise_commission_invoice_print') }}',
                                                 method: 'POST',
                                                 data: {
-                                                    trax_users: franchiseNames,
+                                                    franchise_code: franchiseCodes,
+                                                    product_name: productNames,
                                                     _token: '{{ csrf_token() }}'
                                                 }
                                             }).then(function(response) {
@@ -220,25 +220,23 @@
                                         return '<input type="checkbox" class="select-checkbox d-none" />';
                                     }
                                 },
-                                { data: 'id' },
+
+                                { data: 'retail_shipping_mode_name' },
                                 { data: 'franchise_name' },
+                                { data: 'franchise_address' },
                                 { data: 'franchise_code' },
+                                { data: 'franchise_cnic' },
+                                { data: 'franchise_phone' },
                                 { data: 'month_name' },
-                                { data: 'shipping_mode_name' },
-                                { data: 'number_of_shipments' },
-                                { data: 'total_charges_without_gst' },
                                 { data: 'product_percentage' },
+                                { data: 'total_shipments' },
+                                { data: 'total_charges' },
+                                { data: 'total_franchise_gst_amount' },
+                                { data: 'total_weight_charges' },
                                 { data: 'commission' },
-                                { data: 'gst_percentage' },
-                                { data: 'franchise_gst_amount' },
-                                { data: 'total_charges_with_gst' },
                                 { data: 'franchise_withholding_percentage' },
-                                { data: 'franchise_withholding_amount' },
-                                { data: 'charges_without_withholding' },
-                                { data: 'deduction_percentage' },
-                                { data: 'deduction_amount' },
-                                { data: 'net_commission' },
                             ],
+
                             scrollX: true,
                             scrollY: true,
                         });

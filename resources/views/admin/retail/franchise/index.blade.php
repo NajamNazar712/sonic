@@ -268,12 +268,12 @@
                                     </div>
                                 </div>
 
-                                {{-- <div class="input-group mb-2">
+                                <div class="input-group mb-2">
                                     <input type="text" name="franchise_withholding" id="withholding_tax_percentage_edit" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Withholding Tax">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>
-                                </div> --}}
+                                </div>
 
                                 {{-- <div class="input-group mb-2">
                                     <input type="text" name="franchise_deduction" id="deduction_percentage_edit" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Deduction">
@@ -668,7 +668,7 @@
                     data: { franchise_id: id },
                     success: function (response) {
                         $('#commission_percentage_edit').val(response.data.franchise_gst);
-                        // $('#withholding_tax_percentage_edit').val(response.data.franchise_withholding);
+                        $('#withholding_tax_percentage_edit').val(response.data.franchise_withholding);
                         // $('#deduction_percentage_edit').val(response.data.franchise_deduction);
                     }
                 });

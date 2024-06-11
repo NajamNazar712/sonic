@@ -51,92 +51,79 @@ class CalculateFranchiseCommission extends Command
     {
         $franchise_users = RetailUser::where('category', 1)->get();
         $user_ids = $franchise_users->pluck('category_id')->toArray();
-        $month = Carbon::now()->subMonth()->month;
+        $month = str_pad(Carbon::now()->subMonth()->month, 2, "0", STR_PAD_LEFT);
 
         $baseQuery = RetailShipment::query()
         ->leftJoin('retail_users', 'retail_shipments.retail_user_id', '=', 'retail_users.id')
         ->leftJoin('retail_franchises', 'retail_users.category_id', '=', 'retail_franchises.id')
-        ->leftJoin('retail_franchise_product_percentages', 'retail_franchise_product_percentages.franchise_id', '=', 'retail_franchises.id')
+        // ->leftJoin('retail_franchise_product_percentages', 'retail_franchise_product_percentages.franchise_id', '=', 'retail_franchises.id')
+        ->leftJoin('retail_franchise_product_percentages', function($join) {
+            $join->on('retail_franchise_product_percentages.franchise_id', '=', 'retail_franchises.id')
+                ->on('retail_franchise_product_percentages.retail_shipping_mode_id', '=', 'retail_shipments.shipping_mode');
+        })
         ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id')
-        ->leftJoin('retail_franchise_charges', 'retail_franchises.id', '=', 'retail_franchise_charges.franchise_id')
-        ->groupBy('retail_shipments.shipping_mode');
+        ->leftJoin('retail_franchise_charges', 'retail_franchises.id', '=', 'retail_franchise_charges.franchise_id');
 
         $shipments = $baseQuery
         ->whereIn('retail_shipments.category_id', $user_ids)
         ->whereMonth('retail_shipments.created_at', $month)
         ->select([
-            'retail_shipments.total_charges as total_charges',
-            'retail_shipments.gst as gst',
-            'retail_shipments.weight_charges as weight_charges',
             'retail_shipments.created_at as shipment_month',
+            'retail_shipments.total_charges_without_gst as total_charges_without_gst',
+            'retail_shipments.gst as gst_amount',
+            'retail_shipments.total_charges as total_charges',
+            'retail_shipments.weight_charges as weight_charges',
+
             'retail_franchises.id as franchise_id',
             'retail_franchises.code as franchise_code',
             'retail_franchises.name as franchise_name',
             'retail_franchises.cnic as franchise_cnic',
-            'retail_franchises.phone as franchise_phone',
+            'retail_franchises.phone_no as franchise_phone',
+
+            'retail_users.address as franchise_address',
 
             'retail_franchise_product_percentages.product_percentage as product_percentage',
-            'retail_franchise_charges.franchise_gst',
-            'retail_franchise_charges.franchise_withholding',
             'retail_franchise_charges.franchise_deduction',
+            'retail_franchise_charges.franchise_gst as gst_percentage',
+            'retail_franchise_charges.franchise_withholding as withholding_percentage',
+
             'retail_shipping_modes.id as retail_shipping_mode_id',
             'retail_shipping_modes.name as shipping_mode_name',
 
             DB::raw('COUNT(retail_shipments.id) as shipment_count')
         ])
+        ->groupBy([
+            'shipment_month',
+            'franchise_id',
+            'retail_shipping_mode_id'
+        ])
         ->get();
-
+        
         foreach ($shipments as $shipment) {
             // Shipment count
             $shipmentCount = $shipment->shipment_count;
-            
-            // Calculate commission percentage
-            if ($shipment->product_percentage !== null) {
-                $product_percentage = $shipment->product_percentage / 100;
-                $commission = $product_percentage * $shipment->total_charges_without_gst;
-
-            } else {
-                $commission = '-';
-                $shipment->product_percentage = '-';
-            }
-
-            // Calculate GST
-            if ($shipment->franchise_gst !== null &&  $commission !== null) {
-                $franchise_gst = $shipment->franchise_gst / 100;
-                $gst = $commission * $franchise_gst;
-                $charges_with_gst = $gst + $commission; 
-            } else {
-                $gst = '-';
-                $charges_with_gst = '-';
-                $shipment->franchise_gst = '-';
-            }
-        
-            // Calculate withholding
-            if ($shipment->franchise_withholding !== null) {
-                $franchise_withholding_amount = $shipment->franchise_withholding;
-                $franchise_withholding = $shipment->franchise_withholding / 100;
-                $withholding = $charges_with_gst !== null ? $charges_with_gst * $franchise_withholding : null;
-                $charges_without_withholding = $charges_with_gst - $withholding;
-            } else {
-                $withholding = '-';
-                $charges_without_withholding = '-';
-                $shipment->franchise_withholding = '-';
-            }
-        
-            // Calculate deduction
-            if ($shipment->franchise_deduction !== null) {
-                $franchise_deduction_percentage = $shipment->franchise_deduction;
-                $franchise_deduction = $shipment->franchise_deduction / 100;
-                $deduction = $charges_without_withholding !== null ? $charges_without_withholding * $franchise_deduction : null;
-                $net_commission = $charges_without_withholding - $deduction;
-            } else {
-                $deduction = '-';
-                $net_commission = '-';
-                $shipment->franchise_deduction = '-';
-            }
+            $product_percentage_amount = $shipment->product_percentage / 100 ;
+            $commission = $product_percentage_amount * $shipment->weight_charges;
 
             RetailFranchiseCommission::create([
-                
+                'franchise_id' => $shipment->franchise_id,
+                'franchise_code' => $shipment->franchise_code,
+                'franchise_name' => $shipment->franchise_name,
+                'franchise_cnic' => $shipment->franchise_cnic,
+                'franchise_phone' => $shipment->franchise_phone,
+                'franchise_address' => $shipment->franchise_address,
+                'month' => $month,
+                'retail_shipping_mode_id' => $shipment->retail_shipping_mode_id,
+                'retail_shipping_mode_name' => $shipment->shipping_mode_name,
+                'number_of_shipments' => $shipmentCount,
+                'total_charges_without_gst' => $shipment->total_charges_without_gst,
+                'total_charges' => $shipment->total_charges,
+                'weight_charges' => $shipment->weight_charges,
+                'gst_percentage'=> $shipment->gst_percentage,
+                'franchise_gst_amount' => $shipment->gst_amount,
+                'franchise_withholding_percentage' => $shipment->withholding_percentage,
+                'product_percentage' => $shipment->product_percentage,
+                'commission' => $commission
             ]);
         }
     }
@@ -145,109 +132,77 @@ class CalculateFranchiseCommission extends Command
     {
         $franchise_users = RetailUser::where('category', 2)->get();
         $user_ids = $franchise_users->pluck('id')->toArray();   
-        $month = Carbon::now()->subMonth()->month;
+        $month = str_pad(Carbon::now()->subMonth()->month, 2, "0", STR_PAD_LEFT);
 
         $baseQuery = RetailShipment::query()
         ->leftJoin('retail_users', 'retail_shipments.retail_user_id', '=', 'retail_users.id')
-        ->leftJoin('retail_trax_centers', 'retail_users.name', '=', 'retail_trax_centers.name')
-        ->leftJoin('retail_franchise_product_percentages', function($join) {
-            $join->on('retail_trax_centers.id', '=', 'retail_franchise_product_percentages.franchise_id')
-                ->on('retail_shipments.shipping_mode', '=', 'retail_franchise_product_percentages.retail_shipping_mode_id');
+        ->leftJoin('retail_trax_centers', 'retail_users.category_id', '=', 'retail_trax_centers.id')
+        ->leftJoin('retail_user_product_percentages', function($join) {
+            $join->on('retail_user_product_percentages.retail_user_id', '=', 'retail_shipments.retail_user_id')
+                ->on('retail_user_product_percentages.retail_shipping_mode_id', '=', 'retail_shipments.shipping_mode');
         })
-        ->leftJoin('retail_franchise_charges', function($join) {
-            $join->on('retail_trax_centers.id', '=', 'retail_franchise_charges.franchise_id');
-        })
-        ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id')
-        ->leftJoin('retail_user_product_percentages', 'retail_shipments.retail_user_id', '=', 'retail_user_product_percentages.retail_user_id');
+        ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id');
 
         $shipments = $baseQuery
         ->whereIn('retail_shipments.retail_user_id', $user_ids)
         ->whereMonth('retail_shipments.created_at', $month)
-        ->groupBy('retail_shipments.shipment_id')
+
         ->select([
-            'retail_shipments.*',
             'retail_shipments.created_at as shipment_month',
-            'retail_users.*',
-            'retail_trax_centers.code',
-            'retail_franchise_product_percentages.product_percentage',
-            'retail_franchise_charges.franchise_gst',
-            'retail_franchise_charges.franchise_withholding',
-            'retail_franchise_charges.franchise_deduction',
-            'retail_shipping_modes.name as shipping_mode_name',
-            'retail_user_product_percentages.product_percentage as retail_user_product_percentages'
+            'retail_shipments.total_charges_without_gst as total_charges_without_gst',
+            'retail_shipments.gst as gst_amount',
+            'retail_shipments.total_charges as total_charges',
+            'retail_shipments.weight_charges as weight_charges',
+
+            'retail_users.id as retail_user_id',
+
+            'retail_trax_centers.code as trax_center_code',
+            'retail_users.name as trax_center_name',
+            'retail_trax_centers.cnic as trax_center_cnic',
+            'retail_trax_centers.phone_no as trax_center_phone',
+
+            'retail_users.address as franchise_address',
+
+            'retail_user_product_percentages.product_percentage as trax_center_product_percentage',
+
+            'retail_shipping_modes.id as retail_shipping_mode_id',
+            'retail_shipping_modes.name as retail_shipping_mode_name',
+
+            DB::raw('COUNT(retail_shipments.id) as shipment_count')
+        ])
+        ->groupBy([
+            'shipment_month',
+            'retail_user_id',
+            'retail_shipping_mode_id'
         ])
         ->get();
-        
+
         foreach ($shipments as $shipment) {
-            $shipmentCounts = $shipments->where('category_id', $shipment->category_id)
-            ->where('shipping_mode', $shipment->shipping_mode)
-            ->count();
-            $shipment->shipmentCounts = $shipmentCounts;
-            // Calculate commission percentage
-            if ($shipment->retail_user_product_percentages !== null) {
-                $product_percentage = $shipment->retail_user_product_percentages / 100;
-                $commission = $product_percentage * $shipment->total_charges_without_gst;
-            } else {
-                $commission = '-';
-                $shipment->retail_user_product_percentages = '-';
-            }
 
-            // Calculate GST
-            if ($shipment->franchise_gst !== null &&  $commission !== null) {
-                $franchise_gst = $shipment->franchise_gst / 100;
-                $gst = $commission * $franchise_gst;
-                $charges_with_gst = $gst + $commission; 
-            } else {
-                $gst = '-';
-                $charges_with_gst = '-';
-                $shipment->franchise_gst = '-';
-            }
-
-            // Calculate withholding
-            if ($shipment->franchise_withholding !== null) {
-                $franchise_withholding_amount = $shipment->franchise_withholding;
-                $franchise_withholding = $shipment->franchise_withholding / 100;
-                $withholding = $charges_with_gst !== null ? $charges_with_gst * $franchise_withholding : null;
-                $charges_without_withholding = $charges_with_gst - $withholding;
-            } else {
-                $franchise_withholding_amount = '-';
-                $withholding = '-';
-                $charges_without_withholding = '-';
-                $shipment->franchise_withholding = '-';
-            }
-
-            // Calculate deduction
-            if ($shipment->franchise_deduction !== null) {
-                $franchise_deduction_percentage = $shipment->franchise_deduction;
-                $franchise_deduction = $shipment->franchise_deduction / 100;
-                $deduction = $charges_without_withholding !== null ? $charges_without_withholding * $franchise_deduction : null;
-                $net_commission = $charges_without_withholding - $deduction;
-            } else {
-                $franchise_deduction_percentage = '-';
-                $deduction = '-';
-                $net_commission = '-';
-                $shipment->franchise_deduction = '-';
-            }
+            $shipmentCount = $shipment->shipment_count;
+            $product_percentage_amount = $shipment->trax_center_product_percentage / 100 ;
+            $net_commission = $product_percentage_amount * $shipment->weight_charges;
 
             RetailUserCommission::create([
                 'franchise_id' => $shipment->retail_user_id,
+                'franchise_code' => $shipment->trax_center_code,
+                'trax_center_name' => $shipment->trax_center_name,
+                'trax_center_cnic' => $shipment->trax_center_cnic,
+                'trax_center_phone' => $shipment->trax_center_phone,
+                'franchise_address' => $shipment->franchise_address,
                 'month' => $month,
-                'retail_shipping_mode_id' => $shipment->shipping_mode,
-                'franchise_code' => $shipment->code,
-                'number_of_shipments' => $shipmentCounts,
+                'retail_shipping_mode_id' => $shipment->retail_shipping_mode_id,
+                'retail_shipping_mode_name' => $shipment->retail_shipping_mode_name,
+                'number_of_shipments' => $shipmentCount,
                 'total_charges_without_gst' => $shipment->total_charges_without_gst,
-                // 'product_percentage' => $shipment->product_percentage,
-                'product_percentage' => $shipment->retail_user_product_percentages,
-                'commission' => $commission,
-                'gst_percentage' => $shipment->franchise_gst,
-                'franchise_gst_amount' => $gst,
-                'total_charges_with_gst' => $charges_with_gst,
-                'franchise_withholding_percentage' => $shipment->franchise_withholding,
-                'franchise_withholding_amount' => $withholding,
-                'charges_without_withholding' => $charges_without_withholding,
-                'deduction_percentage' => $shipment->franchise_deduction,
-                'deduction_amount' => $deduction,
                 'net_commission' => $net_commission,
+                'commission' => $shipment->trax_center_product_percentage,
+                'franchise_gst_amount' => $shipment->gst_amount,
+                'total_charges' => $shipment->total_charges,
+                'weight_charges' => $shipment->weight_charges,
+                // 'product_percentage',
+                // 'total_charges_with_gst',
+                // 'gst_percentage',
             ]);
         }
     }
