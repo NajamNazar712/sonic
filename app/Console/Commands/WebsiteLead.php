@@ -120,7 +120,7 @@ class WebsiteLead extends Command
                     $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
                     $new_lead->average_parcel_cod_amount = $lead->data->avg_parcel;
                     $new_lead->business_address = $lead->data->business_address;
-                    $new_lead->company_name = $lead->data->company_name;
+                    $new_lead->company = $lead->data->company_name;
                     $new_lead->business_registered_status = isset($lead->data->business_address) ? 1 : 0;
                     $new_lead->reference_id = $reference_id;
                     $new_lead->activation_code = $token;
