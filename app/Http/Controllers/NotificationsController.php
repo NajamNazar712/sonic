@@ -9302,7 +9302,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[preview]', $preview, $body);
                         }
 
-                        $to = ["talha.hussain@trax.pk", 'syed.anam@trax.pk', 'waqas@trax.pk'];
+                        $to = ['syed.anam@trax.pk', 'waqas@trax.pk'];
                         self::email($subject, $body, $to);
                     }
                 } else if ($id == 169) {
@@ -9980,7 +9980,7 @@ class NotificationsController extends Controller
                     $to = array();
 
                     $to[] = $admin->email;
-                    $to[] = 'talha.hussain@trax.pk';
+
 
                     self::email($subject, $body, $to);
                 } else if ($id == 206) {

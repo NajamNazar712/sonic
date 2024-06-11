@@ -1672,9 +1672,7 @@
                 {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
                 {data: 'tagged_poc', name: 'p.name', class: 'align-middle tagged_poc'},
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
-                {data: 'ref', name: 'r.name', class: 'align-middle ref',render:function(data,type,row){
-                        return row.ref +' - '+ row.rider_id;
-                }},
+                {data: 'ref', name: 'r.name', class: 'align-middle ref'},
                 // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
                 {data: 'rate_status', name: 'users.rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
