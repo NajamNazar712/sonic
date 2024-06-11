@@ -2347,38 +2347,67 @@ class RetailShipmentBookController extends Controller
         $franchise_commission = RetailFranchiseCommission::whereIn('franchise_code', $retail_franchise_code)->first(); 
 
         if ($retail_user_commission && $user->id == $retail_user_commission->franchise_id){
-            $retail_user_commission = RetailUserCommission::query()
-                ->select(
-                    'retail_user_commissions.*', 
-                    'retail_users.name as franchise_name',
-                    'retail_users.phone_no as phone_no',
-                    'retail_shipping_modes.name as shipping_mode_name',
-                    DB::raw('DATE_FORMAT(CONCAT("2022-", retail_user_commissions.month, "-01"), "%M") as month_name')
-                )
-                ->where('retail_user_commissions.month', $month)
-                ->where('retail_user_commissions.franchise_id', $user->id)
-                ->leftJoin('retail_users', 'retail_users.id', '=', 'retail_user_commissions.franchise_id')
-                ->leftJoin('retail_shipping_modes', 'retail_shipping_modes.id', '=', 'retail_user_commissions.retail_shipping_mode_id');
-            $results = $retail_user_commission->get();
-
+            $query = RetailUserCommission::select(
+                'franchise_id',
+                'franchise_code',
+                'trax_center_name as franchise_name',
+                'trax_center_cnic as franchise_cnic',
+                'trax_center_phone as franchise_phone',
+                'franchise_address',
+                DB::raw("MONTHNAME(STR_TO_DATE(month, '%m')) as month_name"),
+                'retail_shipping_mode_id',
+                'retail_shipping_mode_name',
+                DB::raw('SUM(number_of_shipments) as total_shipments'),
+                DB::raw('SUM(total_charges_without_gst) as total_charges_without_gst'),
+                DB::raw('SUM(total_charges) as total_charges'),
+                DB::raw('SUM(weight_charges) as total_weight_charges'),
+                DB::raw('SUM(franchise_gst_amount) as total_franchise_gst_amount'),
+                'commission as product_percentage',
+                DB::raw('(commission/100) * SUM(weight_charges) as commission')
+            )
+            ->groupBy('retail_shipping_mode_id')
+            ->where('franchise_id', $user->id)
+            ->where('month', $month);
+            if (!empty($franchise)) {
+                $query->where('franchise_id', $franchise);
+            }
+            $retail_trax_center_commission = $query->get();
+            $results = $retail_trax_center_commission;
             return response()->json([
                 'data' => $results,
             ]);
         }
         elseif ($franchise_commission->franchise_code == $user->store->code)
         {
-            $retail_franchise_commission = RetailFranchiseCommission::query()
-                ->select(
-                    'retail_franchise_commissions.*', 
-                    'retail_franchises.name as franchise_name',
-                    'retail_shipping_modes.name as shipping_mode_name',
-                    DB::raw('DATE_FORMAT(CONCAT("2022-", retail_franchise_commissions.month, "-01"), "%M") as month_name')
-                )
-                ->where('retail_franchise_commissions.month', $month)
-                ->where('retail_franchise_commissions.franchise_code', $user->store->code)
-                ->leftJoin('retail_franchises', 'retail_franchises.id', '=', 'retail_franchise_commissions.franchise_id')
-                ->leftJoin('retail_shipping_modes', 'retail_shipping_modes.id', '=', 'retail_franchise_commissions.retail_shipping_mode_id');
-            $results = $retail_franchise_commission->get();
+            $query = RetailFranchiseCommission::select(
+                'franchise_id',
+                'franchise_code',
+                'franchise_cnic',
+                'franchise_phone',
+                'franchise_name',
+                'franchise_address',
+                DB::raw("MONTHNAME(STR_TO_DATE(month, '%m')) as month_name"),
+                'retail_shipping_mode_id',
+                'retail_shipping_mode_name',
+                DB::raw('SUM(number_of_shipments) as total_shipments'),
+                DB::raw('SUM(total_charges_without_gst) as total_charges_without_gst'),
+                DB::raw('SUM(total_charges) as total_charges'),
+                DB::raw('SUM(weight_charges) as total_weight_charges'),
+                DB::raw('SUM(franchise_gst_amount) as total_franchise_gst_amount'),
+                'retail_shipping_mode_name',
+                'franchise_gst_amount',
+                'franchise_withholding_percentage',
+                'product_percentage',
+                DB::raw('(product_percentage/100) * SUM(weight_charges) as commission')
+            )
+            ->groupBy('retail_shipping_mode_id')
+            ->where('franchise_code', $user->store->code)
+            ->where('month', $month);
+            if (!empty($franchise)) {
+                $query->where('franchise_id', $franchise);
+            }
+            $retail_franchise_commission = $query->get();
+            $results = $retail_franchise_commission;
             return response()->json([
                 'data' => $results,
             ]);
@@ -2389,7 +2418,30 @@ class RetailShipmentBookController extends Controller
     {
         $trax_user = $request->trax_users;
         $data = explode(', ', $trax_user);
-        $retail_commissions = RetailUserCommission::whereIn('id', $data)->get();
+        $retail_commissions = RetailUserCommission::whereIn('franchise_code', $data)
+        ->select(
+            'franchise_id',
+            'franchise_code',
+            'trax_center_name',
+            'trax_center_cnic',
+            'trax_center_phone',
+            'franchise_address',
+            DB::raw("MONTHNAME(STR_TO_DATE(month, '%m')) as month"),
+            'retail_shipping_mode_id',
+            'retail_shipping_mode_name',
+            DB::raw('SUM(number_of_shipments) as total_shipments'),
+            DB::raw('SUM(total_charges_without_gst) as total_charges_without_gst'),
+            DB::raw('SUM(total_charges) as total_charges'),
+            DB::raw('SUM(weight_charges) as total_weight_charges'),
+            DB::raw('SUM(franchise_gst_amount) as total_franchise_gst_amount'),
+            'commission',
+            DB::raw('(commission/100) * SUM(weight_charges) as net_commission')
+        )
+        ->groupBy(
+            'retail_shipping_mode_id',
+            'retail_shipping_mode_name',
+        )
+        ->get();
 
         $html = '';
         $html .= '<!doctype html>';
@@ -2432,71 +2484,184 @@ class RetailShipmentBookController extends Controller
     
         $html .= '<div>';
         $html .= '<div class="p-1">';
-    
-        $html .= '<div class="row align-items-start justify-content-between summary">';
-        $html .= '<div class="col-6">';
-        $html .= '<table class="table table-sm table-bordered border">';
-        $html .= '<tbody>';
-        $html .= '<tr>';
-        $html .= '<td class="color primary" colspan="3"><strong>Franchise Details</strong></td>';
-        $html .= '</tr>';
 
-        // table set
-        $html .= '<tr>';
-        $html .= '<td class="color secondary"><strong></strong>Trax User Name</td>';
-        $html .= '<td class="color secondary"><strong></strong>Franchise Code</td>';
-        $html .= '<td class="color secondary"><strong></strong>Month</td>';
-        $html .= '</tr>';
-        // table set
-
-        $grouped_commissions = $retail_commissions->groupBy('franchise_id');
-
-        foreach ($grouped_commissions as $franchise_id => $commissions) {
-            $franchise_name = RetailUser::find($franchise_id)->name;
-            $commission = $commissions->first();
-            $html .= '<tr>';
-            $html .= '<td><strong></strong>'. $franchise_name .'</td>';
-            $html .= '<td><strong></strong>'. $commission->franchise_code .'</td>';
-            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
-            $html .= '</tr>';
+        $grouped_data = [];
+        foreach ($retail_commissions as $data) {
+            $grouped_data[$data->trax_center_name][] = $data;
         }
 
-        $html .= '<div class="row align-items-start justify-content-between summary">';
-        $html .= '<div class="col-12">';
-        $html .= '<table class="table table-sm table-bordered border">';
-        $html .= '<thead>';
-        $html .= '<tr>';
-        $html .= '<th class="color primary">Franchise Name</th>';
-        $html .= '<th class="color primary">Franchise Code</th>';
-        $html .= '<th class="color primary">Month</th>';
-        $html .= '<th class="color primary">Retail Shipping Mode</th>';
-        $html .= '<th class="color primary">Number of Shipments</th>';
-        $html .= '<th class="color primary">Total Charges Without GST</th>';
-        $html .= '<th class="color primary">Product Percentage</th>';
-        $html .= '<th class="color primary">Commission</th>';
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= '<tbody>';
+        foreach ($grouped_data as $franchise_name => $records) {
+            // Start the main container for a franchise
+            $html .= '<div class="row align-items-start justify-content-between summary my-4">';
+            $html .= '<div class="col-6">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<tbody>';
+            
+            // Franchise details
+            $html .= '<tr><td>Retail User Name:</td><td>' . $franchise_name . '</td></tr>';
+            $html .= '<tr><td>Address:</td><td>' . $records[0]->franchise_address . '</td></tr>';
+            $html .= '<tr><td>Code:</td><td>' . $records[0]->franchise_code . '</td></tr>';
+            $html .= '<tr><td>CNIC:</td><td>' . $records[0]->trax_center_cnic . '</td></tr>';
+            $html .= '<tr><td>Phone #</td><td>' . $records[0]->trax_center_phone . '</td></tr>';
+            $html .= '<tr><td><strong>Payment Month:</strong></td><td>' . $records[0]->month . '</td></tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
         
-        foreach ($retail_commissions as $commission) {
-            $franchise_name = RetailUser::find($commission->franchise_id)->name;
-            $retail_shipping_modes = RetailShippingMode::where('id', $commission->retail_shipping_mode_id)->pluck('name')->toArray();
-            $retail_shipping_mode = implode(', ', $retail_shipping_modes);
-
+            // Start the table for product details
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<thead>';
             $html .= '<tr>';
-            $html .= '<td>' . $franchise_name . '</td>';
-            $html .= '<td>' . $commission->franchise_code . '</td>';
-            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
-            $html .= '<td>' . $retail_shipping_mode . '</td>';
-            $html .= '<td>' . $commission->number_of_shipments . '</td>';
-            $html .= '<td>' . $commission->total_charges_without_gst . '</td>';
-            $html .= '<td>' . $commission->product_percentage . '</td>';
-            $html .= '<td>' . $commission->commission . '</td>';
+            $html .= '<th class="color primary">Product</th>';
+            $html .= '<th class="color primary">Approved Percentage</th>';
+            $html .= '<th class="color primary">Shipments</th>';
+            $html .= '<th class="color primary">Total Charges</th>';
+            $html .= '<th class="color primary">GST</th>';
+            $html .= '<th class="color primary">Weight Charges</th>';
+            $html .= '<th class="color primary">Commission</th>';
             $html .= '</tr>';
-        }   
+            $html .= '</thead>';
+            $html .= '<tbody>';
         
-        $html .= '</tbody>';
-        $html .= '</table>';
+            // Product records
+            $total_shipments = 0;
+            $total_charges = 0;
+            $total_gst = 0;
+            $total_weight_charges = 0;
+            $total_commission = 0;
+        
+            foreach ($records as $record) {
+                $html .= '<tr>';
+                $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
+                $html .= '<td>' . $record->commission . '%</td>';
+                $html .= '<td>' . $record->total_shipments . '</td>';
+                $html .= '<td>' . $record->total_charges . '</td>';
+                $html .= '<td>' . $record->total_franchise_gst_amount . '</td>';
+                $html .= '<td>' . $record->total_weight_charges . '</td>';
+                $html .= '<td>' . $record->net_commission . '</td>';
+                $html .= '</tr>';
+        
+                // Summing up totals
+                $total_shipments += $record->total_shipments;
+                $total_charges += $record->total_charges;
+                $total_gst += $record->total_franchise_gst_amount;
+                $total_weight_charges += $record->total_weight_charges;
+                $total_commission += $record->net_commission;
+            }
+        
+            // Totals row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="2">Total</td>';
+            $html .= '<td>' . $total_shipments . '</td>';
+            $html .= '<td>' . $total_charges . '</td>';
+            $html .= '<td>' . $total_gst . '</td>';
+            $html .= '<td>' . $total_weight_charges . '</td>';
+            $html .= '<td>' . $total_commission . '</td>';
+            $html .= '</tr>';
+        
+            $gross_commission = $total_commission;
+        
+            // Gross commission row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
+            $html .= '<td>' . $gross_commission . '</td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+        
+            // Third table: Deposits
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th class="color primary">Deposits</th>';
+            $html .= '<th class="color primary">Amount</th>';
+            $html .= '<th class="color primary">Bank Name</th>';
+            $html .= '<th class="color primary">Cheque #</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+            $html .= '<tr><td>Security Deposit</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
+            $html .= '<tr><td>License Fees</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+        
+            // Fourth table: Pending Sales
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
+            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Prepared by and Checked by
+            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            $html .= '<div class="col-6 d-flex justify-content-between">';
+            $html .= '<strong>Prepared By:</strong>';
+            $html .= '<strong>Checked By:</strong>';
+            $html .= '</div>';
+            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
+            $html .= '<strong>Verified By:</strong>';
+            $html .= '<strong>Approved By:</strong>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            $html .= '<div class="row col-6">';
+            $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
+            $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
+            $html .= '</div>';
+
+            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            $html .= '<div class="col-6 d-flex justify-content-between">';
+            $html .= '<strong>Retail Team</strong>';
+            $html .= '<strong>Finance Team</strong>';
+            $html .= '</div>';
+            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
+            $html .= '<strong>Head of Retail</strong>';
+            $html .= '<strong>COO</strong>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Empty tables
+            $html .= '<div class="row align-items-start summary">';
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
 
         $html .= '<div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
 
@@ -2510,9 +2675,34 @@ class RetailShipmentBookController extends Controller
 
     public function franchise_commission_invoice_print(Request $request)
     {
-        $trax_user = $request->trax_users;
-        $data = explode(', ', $trax_user);
-        $retail_commissions = RetailFranchiseCommission::whereIn('id', $data)->get();
+        $franchise_code = $request->franchise;
+        $franchise = explode(', ', $franchise_code);
+        $franchise_names = RetailFranchiseCommission::whereIn('franchise_code', $franchise)
+        ->select(
+            'franchise_id',
+            'franchise_code',
+            'franchise_cnic',
+            'franchise_phone',
+            'franchise_name',
+            'franchise_address',
+            'retail_shipping_mode_id',
+            'retail_shipping_mode_name',
+            'franchise_gst_amount',
+            'franchise_withholding_percentage',
+            'product_percentage',
+            DB::raw("MONTHNAME(STR_TO_DATE(month, '%m')) as month_name"),
+            DB::raw('SUM(number_of_shipments) as total_shipments'),
+            DB::raw('SUM(total_charges_without_gst) as total_charges_without_gst'),
+            DB::raw('SUM(total_charges) as total_charges'),
+            DB::raw('SUM(weight_charges) as total_weight_charges'),
+            DB::raw('SUM(franchise_gst_amount) as total_franchise_gst_amount'),
+            DB::raw('(franchise_withholding_percentage/100) * SUM(weight_charges) as commission')
+        )
+        ->groupBy(
+            'retail_shipping_mode_id',
+            'retail_shipping_mode_name',
+        )
+        ->get();
 
         $html = '';
         $html .= '<!doctype html>';
@@ -2556,102 +2746,195 @@ class RetailShipmentBookController extends Controller
         $html .= '<div>';
         $html .= '<div class="p-1">';
     
-        $html .= '<div class="row align-items-start justify-content-between summary">';
-        $html .= '<div class="col-6">';
-        $html .= '<table class="table table-sm table-bordered border">';
-        $html .= '<tbody>';
-        $html .= '<tr>';
-        $html .= '<td class="color primary" colspan="3"><strong>Franchise Details</strong></td>';
-        $html .= '</tr>';
 
-        // table set
-        $html .= '<tr>';
-        $html .= '<td class="color secondary"><strong></strong>Franchise Name</td>';
-        $html .= '<td class="color secondary"><strong></strong>Franchise Code</td>';
-        $html .= '<td class="color secondary"><strong></strong>Month</td>';
-        $html .= '</tr>';
-        // table set
-
-        $grouped_commissions = $retail_commissions->groupBy('franchise_id');
-        foreach ($grouped_commissions as $franchise_id => $commissions) {
-            $franchise_code = $commissions->pluck("franchise_code");
-            // $franchise_name = RetailFranchise::where($franchise_id)->name;
-            $franchise_name = RetailFranchise::whereIn('code', $franchise_code)->first();
-            $name = $franchise_name->name;
-            $commission = $commissions->first();
-            $html .= '<tr>';
-            $html .= '<td><strong></strong>'. $name .'</td>';
-            $html .= '<td><strong></strong>'. $commission->franchise_code .'</td>';
-            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
-            $html .= '</tr>';
+        $grouped_data = [];
+        foreach ($franchise_names as $data) {
+            $grouped_data[$data->franchise_name][] = $data;
         }
 
-        $html .= '</tbody>';
-        $html .= '</table>';
-        $html .= '</div>';
-        $html .= '</div>';
-
-        $html .= '<div class="row align-items-start justify-content-between summary">';
-        $html .= '<div class="col-12">';
-        $html .= '<table class="table table-sm table-bordered border">';
-        $html .= '<thead>';
-        $html .= '<tr>';
-        $html .= '<th class="color primary">Franchise User</th>';
-        $html .= '<th class="color primary">Franchise Code</th>';
-        $html .= '<th class="color primary">Month</th>';
-        $html .= '<th class="color primary">Retail Shipping Mode</th>';
-        $html .= '<th class="color primary">Number of Shipments</th>';
-        $html .= '<th class="color primary">Total Charges Without GST</th>';
-        $html .= '<th class="color primary">Product Percentage</th>';
-        $html .= '<th class="color primary">Commission</th>';
-        $html .= '<th class="color primary">GST %</th>';
-        $html .= '<th class="color primary">GST Amount</th>';
-        $html .= '<th class="color primary">Total Commission</th>';
-        $html .= '<th class="color primary">Withholding %</th>';
-        $html .= '<th class="color primary">Franchise withholding Amount</th>';
-        $html .= '<th class="color primary">Charges minus withholding</th>';
-        $html .= '<th class="color primary">Deduction %</th>';
-        $html .= '<th class="color primary">Franchise deduction amount</th>';
-        $html .= '<th class="color primary">Net Commission</th>';
-
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= '<tbody>';
+        foreach ($grouped_data as $franchise_name => $records) {
+            // Start the main container for a franchise
+            $html .= '<div class="row align-items-start justify-content-between summary my-4">';
+            $html .= '<div class="col-6">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<tbody>';
+            
+            // Franchise details
+            $html .= '<tr><td>Franchise Name:</td><td>' . $franchise_name . '</td></tr>';
+            $html .= '<tr><td>Address:</td><td>' . $records[0]->franchise_address . '</td></tr>';
+            $html .= '<tr><td>Code:</td><td>' . $records[0]->franchise_code . '</td></tr>';
+            $html .= '<tr><td>CNIC:</td><td>' . $records[0]->franchise_cnic . '</td></tr>';
+            $html .= '<tr><td>Phone #</td><td>' . $records[0]->franchise_phone . '</td></tr>';
+            $html .= '<tr><td><strong>Payment Month:</strong></td><td>' . $records[0]->month_name . '</td></tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
         
-        foreach ($retail_commissions as $commission) {
-            $franchise_name = RetailUser::find($commission->franchise_id)->name;
-            $retail_shipping_modes = RetailShippingMode::where('id', $commission->retail_shipping_mode_id)->pluck('name')->toArray();
-            $retail_shipping_mode = implode(', ', $retail_shipping_modes);
-
+            // Start the table for product details
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<thead>';
             $html .= '<tr>';
-            $html .= '<td>' . $franchise_name . '</td>';
-            $html .= '<td>' . $commission->franchise_code . '</td>';
-            $html .= '<td>' . date("F", mktime(0, 0, 0, $commission->month)) . '</td>';
-            $html .= '<td>' . $retail_shipping_mode . '</td>';
-            $html .= '<td>' . $commission->number_of_shipments . '</td>';
-            $html .= '<td>' . $commission->total_charges_without_gst . '</td>';
-            $html .= '<td>' . $commission->product_percentage . '</td>';
-            $html .= '<td>' . $commission->commission . '</td>';
-            $html .= '<td>' . $commission->gst_percentage . '</td>';
-            $html .= '<td>' . $commission->total_charges_with_gst . '</td>';
-            $html .= '<td>' . $commission->franchise_gst_amount . '</td>';
-            $html .= '<td>' . $commission->franchise_withholding_percentage . '</td>';
-            $html .= '<td>' . $commission->franchise_withholding_amount . '</td>';
-            $html .= '<td>' . $commission->charges_without_withholding . '</td>';
-            $html .= '<td>' . $commission->deduction_percentage . '</td>';
-            $html .= '<td>' . $commission->deduction_amount . '</td>';
-            $html .= '<td>' . $commission->net_commission . '</td>';
+            $html .= '<th class="color primary">Product</th>';
+            $html .= '<th class="color primary">Approved Percentage</th>';
+            $html .= '<th class="color primary">Shipments</th>';
+            $html .= '<th class="color primary">Total Charges</th>';
+            $html .= '<th class="color primary">GST</th>';
+            $html .= '<th class="color primary">Weight Charges</th>';
+            $html .= '<th class="color primary">Commission</th>';
             $html .= '</tr>';
-        }   
+            $html .= '</thead>';
+            $html .= '<tbody>';
         
-        $html .= '</tbody>';
-        $html .= '</table>';
+            // Product records
+            $total_shipments = 0;
+            $total_charges = 0;
+            $total_gst = 0;
+            $total_weight_charges = 0;
+            $total_commission = 0;
+        
+            foreach ($records as $record) {
+                $html .= '<tr>';
+                $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
+                $html .= '<td>' . $record->product_percentage . '%</td>';
+                $html .= '<td>' . $record->total_shipments . '</td>';
+                $html .= '<td>' . $record->total_charges . '</td>';
+                $html .= '<td>' . $record->total_franchise_gst_amount . '</td>';
+                $html .= '<td>' . $record->total_weight_charges . '</td>';
+                $html .= '<td>' . $record->commission . '</td>';
+                $html .= '</tr>';
+        
+                // Summing up totals
+                $total_shipments += $record->total_shipments;
+                $total_charges += $record->total_charges;
+                $total_gst += $record->total_franchise_gst_amount;
+                $total_weight_charges += $record->total_weight_charges;
+                $total_commission += $record->commission;
+            }
+        
+            // Totals row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="2">Total</td>';
+            $html .= '<td>' . $total_shipments . '</td>';
+            $html .= '<td>' . $total_charges . '</td>';
+            $html .= '<td>' . $total_gst . '</td>';
+            $html .= '<td>' . $total_weight_charges . '</td>';
+            $html .= '<td>' . $total_commission . '</td>';
+            $html .= '</tr>';
+        
+            $withholding_amount = ($records[0]->franchise_withholding_percentage / 100 * $total_commission);
+            $gross_commission = $total_commission - $withholding_amount;
+            // Withholding tax row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6">Withholding Income Tax' . $records[0]->franchise_withholding_percentage . '%</td>';
+            $html .= '<td>' . $withholding_amount . '</td>';
+            $html .= '</tr>';
+        
+            // Gross commission row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
+            $html .= '<td>' . $gross_commission . '</td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+        
+            // Third table: Deposits
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th class="color primary">Deposits</th>';
+            $html .= '<th class="color primary">Amount</th>';
+            $html .= '<th class="color primary">Bank Name</th>';
+            $html .= '<th class="color primary">Cheque #</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+            $html .= '<tr><td>Security Deposit</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
+            $html .= '<tr><td>License Fees</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+        
+            // Fourth table: Pending Sales
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
+            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
 
-        $html .= '<div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
+            // Prepared by and Checked by
+            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            $html .= '<div class="col-6 d-flex justify-content-between">';
+            $html .= '<strong>Prepared By:</strong>';
+            $html .= '<strong>Checked By:</strong>';
+            $html .= '</div>';
+            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
+            $html .= '<strong>Verified By:</strong>';
+            $html .= '<strong>Approved By:</strong>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            $html .= '<div class="row col-6">';
+            $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
+            $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
+            $html .= '</div>';
+
+            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            $html .= '<div class="col-6 d-flex justify-content-between">';
+            $html .= '<strong>Retail Team</strong>';
+            $html .= '<strong>Finance Team</strong>';
+            $html .= '</div>';
+            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
+            $html .= '<strong>Head of Retail</strong>';
+            $html .= '<strong>COO</strong>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Empty tables
+            $html .= '<div class="row align-items-start summary">';
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
+        $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
 
         $html .= '</div>';
         $html .= '</div>';
-        
+
         $html .= '</body>';
         $html .= '</html>';
         return $html;

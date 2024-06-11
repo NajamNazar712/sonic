@@ -685,8 +685,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<td>' . $total_commission . '</td>';
             $html .= '</tr>';
         
-            $withholding_amount = ($records[0]->franchise_withholding_percentage / 100 * $total_commission);
-            $gross_commission = $total_commission - $withholding_amount;
+            $gross_commission = $total_commission;
         
             // Gross commission row
             $html .= '<tr>';
