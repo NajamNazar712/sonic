@@ -335,6 +335,8 @@ trait RvTrait
         } else {
             $shipment_assign_agent_table_columns['rv_state_id'] = 2;
         }
+
+        $shipment_assign_agent_table_columns['call_count'] = ($shipment_assign_agent->call_count ?? 0) + 1;
         return $shipment_assign_agent_table_columns;
     }
 
