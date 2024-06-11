@@ -57,7 +57,7 @@
                                                         <div class="form-group">
                                                             <label>Customer</label>
                                                             <select class="select select2 mb-1" name="shipper_id" id="shipper_select">
-                                                                @foreach ($shippers as $shipper)
+                                                                @foreach ($shipper as $single_shipper)
                                                                     <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
                                                                 @endforeach
                                                             </select>
@@ -775,7 +775,7 @@
         $('#service_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
             width: '100%',
             placeholder: 'Select Service'
-        }).val(bookings.product_id).trigger('change');
+        }).val(bookings.service_id).trigger('change');
         {{--.bind('change',function(){--}}
         {{--    var product_id = parseInt($(this).val());--}}
         {{--    $.ajax({--}}
