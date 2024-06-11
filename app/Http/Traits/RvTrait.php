@@ -2037,6 +2037,7 @@ trait RvTrait
 
                 if ($agent_unassign_shipment) {
                     $agent_unassign_shipment->agent_id = $data['agent_id'];
+                    $agent_unassign_shipment->increment('call_count');
                     $agent_unassign_shipment->shipments_journey_id = $shipments_journey->id;
                     $agent_unassign_shipment->last_shipments_journey_id = $shipments_journey->id;
                     $agent_unassign_shipment->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
@@ -2051,6 +2052,7 @@ trait RvTrait
                     $updated_data = [
                         'rv_shipment_assign_agent_id' => $agent_unassign_shipment->id,
                         'agent_id' => $agent_unassign_shipment->agent_id,
+                        'call_count' => $agent_unassign_shipment->call_count,
                         'shipments_journey_id' => $agent_unassign_shipment->shipments_journey_id,
                         'last_shipments_journey_id' => $agent_unassign_shipment->last_shipments_journey_id,
                         'shipment_id' => $agent_unassign_shipment->shipment_id,
@@ -2072,6 +2074,7 @@ trait RvTrait
                 //agent is udating the status
                 else if ($rv_customer_experience_agent) {
                     $rv_customer_experience_agent->agent_id = $data['agent_id'];
+                    $rv_customer_experience_agent->increment('call_count');
                     $rv_customer_experience_agent->shipments_journey_id = $shipments_journey->id;
                     $rv_customer_experience_agent->last_shipments_journey_id = $shipments_journey->id;
                     $rv_customer_experience_agent->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
@@ -2086,6 +2089,7 @@ trait RvTrait
                     $updated_data = [
                         'rv_shipment_assign_agent_id' => $rv_customer_experience_agent->id,
                         'agent_id' => $rv_customer_experience_agent->agent_id,
+                        'call_count' => $rv_customer_experience_agent->call_count,
                         'shipments_journey_id' => $rv_customer_experience_agent->shipments_journey_id,
                         'last_shipments_journey_id' => $rv_customer_experience_agent->last_shipments_journey_id,
                         'shipment_id' => $rv_customer_experience_agent->shipment_id,
@@ -2104,6 +2108,7 @@ trait RvTrait
                     $this->data_rv_shipment_assign_agent_details($updated_data);
                 } else if ($existing_completed_shipment) {
                     $existing_completed_shipment->agent_id = $data['agent_id'];
+                    $existing_completed_shipment->increment('call_count');
                     $existing_completed_shipment->shipments_journey_id = $shipments_journey->id;
                     $existing_completed_shipment->last_shipments_journey_id = $shipments_journey->id;
                     $existing_completed_shipment->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
@@ -2118,6 +2123,7 @@ trait RvTrait
                     $updated_data = [
                         'rv_shipment_assign_agent_id' => $existing_completed_shipment->id,
                         'agent_id' => $existing_completed_shipment->agent_id,
+                        'call_count' => $existing_completed_shipment->call_count,
                         'shipments_journey_id' => $existing_completed_shipment->shipments_journey_id,
                         'last_shipments_journey_id' => $existing_completed_shipment->last_shipments_journey_id,
                         'shipment_id' => $existing_completed_shipment->shipment_id,
@@ -2141,6 +2147,7 @@ trait RvTrait
 
                 $rv_shipment_assign_agent = new RvShipmentAssignAgent();
                 $rv_shipment_assign_agent->agent_id = $data['agent_id'];
+                $rv_shipment_assign_agent->call_count = $data['call_count'] ?? 0;
                 $rv_shipment_assign_agent->shipments_journey_id = $shipments_journey->id;
                 $rv_shipment_assign_agent->last_shipments_journey_id = $shipments_journey->id;
                 $rv_shipment_assign_agent->shipment_id = $data['shipment_id'];
@@ -2164,6 +2171,7 @@ trait RvTrait
                 $updated_data = [
                     'rv_shipment_assign_agent_id' => $rv_shipment_assign_agent->id,
                     'agent_id' => $rv_shipment_assign_agent->agent_id,
+                    'call_count' => $rv_shipment_assign_agent->call_count,
                     'shipments_journey_id' => $rv_shipment_assign_agent->shipments_journey_id,
                     'last_shipments_journey_id' => $rv_shipment_assign_agent->last_shipments_journey_id,
                     'shipment_id' => $rv_shipment_assign_agent->shipment_id,
@@ -2214,12 +2222,14 @@ trait RvTrait
             $rv_shipment_assign_agent->updated_type_id = 1;
             $rv_shipment_assign_agent->updated_by_id = $data['updated_by_id'];
             $rv_shipment_assign_agent->remarks = isset($data['remarks']) ? $data['remarks'] : null;
+            $rv_shipment_assign_agent->increment('call_count');
             $rv_shipment_assign_agent->save();
 
             $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $data['shipment_id'])->latest()->first();
             $updated_data = [
                 'rv_shipment_assign_agent_id' => $rv_shipment_assign_agent->id,
                 'agent_id' => $rv_shipment_assign_agent->agent_id,
+                'call_count' => $rv_shipment_assign_agent->call_count,
                 'shipments_journey_id' => $rv_shipment_assign_agent->shipments_journey_id,
                 'last_shipments_journey_id' => $rv_shipment_assign_agent->last_shipments_journey_id,
                 'shipment_id' => $rv_shipment_assign_agent->shipment_id,
