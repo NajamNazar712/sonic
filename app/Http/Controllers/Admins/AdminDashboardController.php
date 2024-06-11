@@ -1397,8 +1397,10 @@ class AdminDashboardController extends Controller
                     $old_sale_person_date = $old_sale_person->created_at;
                     if ($old_sale_person) {
                         $old_sale_person = $old_sale_person->sales_person;
-                    } else {
+                        $old_sale_person_date = $old_sale_person->created_at;
+                    } else {    
                         $old_sale_person = null;
+                        $old_sale_person_date = null;
                     }
                     $new_sale_person = Admin::find($tag_id);
                     $shipper_data = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->get();
