@@ -107,7 +107,7 @@ trait RvTrait
             $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $data['shipment_id'])->latest()->first();
             if ($rv_shipment_assign_agent) {
                 $rv_shipment_assign_agent->agent_id = $data['agent_id'];
-
+                $rv_shipment_assign_agent->call_count = $data['call_count'] ?? 0;
                 $rv_shipment_assign_agent->shipments_journey_id = $data['shipments_journey_id'];
                 $rv_shipment_assign_agent->last_shipments_journey_id = $data['shipments_journey_id'];
                 $rv_shipment_assign_agent->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
@@ -122,6 +122,7 @@ trait RvTrait
                 $rv_shipment_assign_agent = RvShipmentAssignAgent::create([
                     'shipment_id' => $data['shipment_id'],
                     'agent_id' => $data['agent_id'],
+                    'call_count' => $data['call_count'] ?? 0,
                     'shipments_journey_id' => $data['shipments_journey_id'],
                     'last_shipments_journey_id' => $data['shipments_journey_id'],
                     'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'],
@@ -159,6 +160,7 @@ trait RvTrait
             'shipment_id' => $data['shipment_id'],
             'shipments_journey_id' => $data['shipments_journey_id'],
             'agent_id' => $data['agent_id'],
+            'call_count' => $data['call_count'] ?? null,
             'updated_type_id' => Auth::guard('agent')->check() ? '2' : '1',
             'updated_by_id' => Auth::id(),
             'rv_state_id' => $data['rv_state_id'] ?? '1',
@@ -258,6 +260,7 @@ trait RvTrait
             $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
             $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
             $rv_shipment_assign_agent_details->agent_id = $shipment_assign_agent->agent_id;
+            $rv_shipment_assign_agent_details->call_count = $shipment_assign_agent->call_count;
             $rv_shipment_assign_agent_details->shipment_id = $request->shipment_id;
             $rv_shipment_assign_agent_details->shipments_journey_id = $shipments_journey->id;
             $rv_shipment_assign_agent_details->last_shipments_journey_id = $shipments_journey->id;
@@ -769,6 +772,7 @@ trait RvTrait
                 $status->save();
 
                 $rv_shipment_assign_agent->increment('unresponsive_count');
+                $rv_shipment_assign_agent->increment('call_count');
                 $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
                 $rv_shipment_assign_agent->save();
 
@@ -1272,6 +1276,7 @@ trait RvTrait
                                 'call_to_id' => 0,
                                 'assigned_to_type_id' => Null,
                                 'assigned_by' => Null,
+                                'call_count' => null,
                             ];
                         $this->data_rv_shipment_assign_agent_details($data, $ticketId);
                         break;
@@ -1305,6 +1310,7 @@ trait RvTrait
                             'rv_assign_agent_sub_status_id' => null,
                             'assigned_to_type_id' => null,
                             'assigned_by' => null,
+                            'call_count' => 0,
                         ];
                         
                         //updating a row and creating new one
@@ -1330,6 +1336,7 @@ trait RvTrait
                         'rv_assign_agent_sub_status_id' => null,
                         'assigned_to_type_id' => null,
                         'assigned_by' => null,
+                        'call_count' => 0,
                     ];
                     
                     // creating a new record
@@ -1929,6 +1936,7 @@ trait RvTrait
         $rv_shipment_assign_agent_details = new RvShipmentAssignAgentDetails();
         $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $data['rv_shipment_assign_agent_id'];
         $rv_shipment_assign_agent_details->agent_id = $data['agent_id'];
+        $rv_shipment_assign_agent_details->call_count = $data['call_count'] ?? null;
         $rv_shipment_assign_agent_details->shipments_journey_id = $data['shipments_journey_id'];
         $rv_shipment_assign_agent_details->last_shipments_journey_id = $data['last_shipments_journey_id'];
         $rv_shipment_assign_agent_details->shipment_id = $data['shipment_id'];
