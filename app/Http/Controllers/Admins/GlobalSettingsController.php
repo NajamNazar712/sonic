@@ -9629,7 +9629,7 @@ class GlobalSettingsController extends Controller
                 'lead_progress_settings.percent as percent',
                 'lead_progress_settings.color as color',
                 'a.name as updated_by',
-                'lead_progress_settings.updated_at as updated_at',
+                'lead_progress_settings.updated_at as updated_at'
             );
         $datatable = Datatables::of($query)
         ->addColumn('action', function($datatable){
