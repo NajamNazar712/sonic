@@ -648,6 +648,8 @@ Route::name('api.')->group(function () {
                 Route::post('shipping_modes', 'ShipperAPIController@reimbursement_shipping_modes')->name('shipping_modes');
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
+
+            Route::get('fetch_complaints', 'APIController@fetch_complaints')->name('fetch_complaints');
         });
     });
 
