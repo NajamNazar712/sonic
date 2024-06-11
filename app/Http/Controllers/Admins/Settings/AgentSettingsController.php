@@ -43,7 +43,7 @@ class AgentSettingsController extends Controller
         
         $datatables = Datatables::of($agents)
             ->addColumn('action', function ($roles) {
-                if (session('role_id') == 1 || in_array(666, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(993, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
