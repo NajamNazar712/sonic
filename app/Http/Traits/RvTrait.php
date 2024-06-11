@@ -772,7 +772,6 @@ trait RvTrait
                 $status->save();
 
                 $rv_shipment_assign_agent->increment('unresponsive_count');
-                $rv_shipment_assign_agent->increment('call_count');
                 $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
                 $rv_shipment_assign_agent->save();
 
