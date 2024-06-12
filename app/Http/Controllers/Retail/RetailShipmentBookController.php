@@ -56,6 +56,8 @@ use DNS2D;
 use App\Http\Models\RetailRequestCity;
 use App\Http\Models\RetailUserCommission;
 use App\Http\Models\RetailFranchiseCommission;
+use App\Http\Models\RetailUserHistory;
+use App\Http\Models\RetailUserProductPercentage;
 
 class RetailShipmentBookController extends Controller
 {
@@ -534,7 +536,32 @@ class RetailShipmentBookController extends Controller
                 $retail_shipment->admin_discount_type = 1;
             }
         }
+        $trax_center = RetailTraxCenter::where('code', Auth::user()->store->code)->first();
+        $retail_shipping_mode = RetailShippingMode::where('id', $retail_shipment->shipping_mode)->first();
+        $retail_user_commission = RetailUserProductPercentage::where('retail_shipping_mode_id', $retail_shipment->shipping_mode)->first();
+
+        if ($retail_user_commission == null){
+            $commission = null;
+        } else {
+            $commission = $retail_user_commission->product_percentage;
+        }
         $retail_shipment->save();
+
+        // retail user history
+        RetailUserHistory::create([
+            'retail_user_id' => $retail_shipment->retail_user_id,
+            'trax_center_id' => $trax_center->id,
+            'trax_center_name' => $trax_center->name,
+            'trax_center_code' => $trax_center->code,
+            'joining_date',
+            'last_date',
+            'retail_shipping_mode_id' => $retail_shipment->shipping_mode,
+            'retail_shipping_mode_name' => $retail_shipping_mode->name,
+            'product_commission' => $commission,
+            'booking_date' => $retail_shipment->created_at,
+        ]);
+        
+
 
         $shipment = Shipment::find($shipment_id);
         if($shipment->charges_mode_id != 2){

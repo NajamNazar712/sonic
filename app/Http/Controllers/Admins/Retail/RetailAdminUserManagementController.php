@@ -1626,10 +1626,18 @@ class RetailAdminUserManagementController extends Controller
 
         $retail_user_old_product_percentage = RetailUserProductPercentage::where('retail_user_id', $retail_user->id)->first();
 
+        // dd(
+        //     empty($retailShippingModeNames),
+        //     $retail_user_old_product_percentage,
+        // );
+
+
         if ($request->has('retail_shipping_mode_id')) {
-            if ($retail_user_old_product_percentage) {
+            if ($retail_user_old_product_percentage && !empty($retailShippingModeNames)) {
+                dd(1);
                 $retail_user_old_product_percentage->delete();
             } else {
+                dd(2);
                 foreach ($retailShippingModeNames as $key => $retailShippingModeName){
                     $retailShippingModeName = ($retailShippingModeName !== null) ? $retailShippingModeName : null;
                     $productPercentage = ($productPercentages[$key] !== null) ? $productPercentages[$key] : null;
