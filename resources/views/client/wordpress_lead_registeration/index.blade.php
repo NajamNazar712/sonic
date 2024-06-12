@@ -2911,10 +2911,7 @@
         }
 
       
-        .switchery.switchery-xsmall.switchery-default {
-    display: none;
-}
-
+      
         .readonly-overlay {
     pointer-events: none; /* Mouse events disabled */
     opacity: 0.6; /* Opacity set for visual indication */
