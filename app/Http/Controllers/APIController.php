@@ -9748,7 +9748,12 @@ class APIController extends Controller
         ->where('shipment_id', $shipment_id)
         ->select(['crm_requests.description as description','crcn.name as complaint_nature','crcnt.type as complaint_nature_type', 'crs.name as status'])->get();
 
-        return response()->json(['status' => 0, 'data' => $record]);
+        if(count($record) > 0){
+            $message = 'List of Complaints';
+        } else {
+            $message = 'No record found';
+        }
+        return response()->json(['status' => 0, 'message' => $message, 'data' => $record]);
 
     }
 }
