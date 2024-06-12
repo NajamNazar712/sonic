@@ -1201,11 +1201,12 @@
                                                                             <fieldset>
                                                                                 <div class="input-group form-group">
                                                                                     <select name="on_dws_weight" id="on_dws_weight"
-                                                                                            class="form-control">
-                                                                                        <option value="1" selected>High</option>
+                                                                                            class="form-control" disabled>
+                                                                                        <option value="1">High</option>
                                                                                         <option value="2">Low</option>
                                                                                     </select>
                                                                                 </div>
+                                                                                <input type="hidden" name="on_dws_weight" value="1">
                                                                             </fieldset>
                                                                         </div>
                                                                     </div>
@@ -1683,7 +1684,7 @@
                                                                                 <div class="input-group form-group">
                                                                                     <label class="card-title mr-1">DWS Weight </label>
                                                                                     <input type="checkbox" name="ol_dws" id="ol_dws"
-                                                                                           class="switchery ol_dws d-none" data-size="xs"
+                                                                                           class="ol_dws d-none" data-size="xs"
                                                                                            data-switchery="true" checked>
                                                                                 </div>
                                                                             </fieldset>
@@ -1692,11 +1693,13 @@
                                                                             <fieldset>
                                                                                 <div class="input-group form-group">
                                                                                     <select name="ol_dws_weight" id="ol_dws_weight"
-                                                                                            class="form-control">
+                                                                                            class="form-control" disabled>
                                                                                         <option value="1">High</option>
                                                                                         <option value="2">Low</option>
                                                                                     </select>
                                                                                 </div>
+                                                                                <input type="hidden" name="ol_dws_weight" value="1">
+
                                                                             </fieldset>
                                                                         </div>
                                                                     </div>
@@ -2170,7 +2173,7 @@
                                                                                 <div class="input-group form-group">
                                                                                     <label class="card-title mr-1">DWS Weight </label>
                                                                                     <input type="checkbox" name="detain_dws" id="detain_dws"
-                                                                                           class="switchery detain_dws d-none" data-size="xs"
+                                                                                           class="detain_dws d-none" data-size="xs"
                                                                                            data-switchery="true" checked>
                                                                                 </div>
                                                                             </fieldset>
@@ -2179,11 +2182,12 @@
                                                                             <fieldset>
                                                                                 <div class="input-group form-group">
                                                                                     <select name="detain_dws_weight" id="detain_dws_weight"
-                                                                                            class="form-control">
+                                                                                            class="form-control" disabled>
                                                                                         <option value="1">High</option>
                                                                                         <option value="2">Low</option>
                                                                                     </select>
                                                                                 </div>
+                                                                                <input type="hidden" name="detain_dws_weight" value="1">
                                                                             </fieldset>
                                                                         </div>
                                                                     </div>
@@ -2622,7 +2626,7 @@
                                                                                 <div class="input-group form-group">
                                                                                     <label class="card-title mr-1">DWS Weight </label>
                                                                                     <input type="checkbox" name="sameday_dws"
-                                                                                           id="sameday_dws" class="switchery sameday_dws d-none"
+                                                                                           id="sameday_dws" class="sameday_dws d-none"
                                                                                            data-size="xs" data-switchery="true" checked>
                                                                                 </div>
                                                                             </fieldset>
@@ -2631,10 +2635,12 @@
                                                                             <fieldset>
                                                                                 <div class="input-group form-group">
                                                                                     <select name="sameday_dws_weight"
-                                                                                            id="sameday_dws_weight" class="form-control">
+                                                                                            id="sameday_dws_weight" class="form-control" disabled>
                                                                                         <option value="1">High</option>
                                                                                         <option value="2">Low</option>
                                                                                     </select>
+                                                                                    <input type="hidden" name="sameday_dws_weight" value="1">
+
                                                                                 </div>
                                                                             </fieldset>
                                                                         </div>
