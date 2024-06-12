@@ -106,6 +106,7 @@ use App\Http\Models\Segment;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
@@ -625,7 +626,7 @@ class ShipperDashboardController extends Controller
              $connection = 'mysql';
          }
 
-
+        $connection = 'mysql';
         $shipments = DB::connection($connection)->table('shipments')
             ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -675,6 +676,17 @@ class ShipperDashboardController extends Controller
             $to = $request->get('booking_to_date');
             $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+
+        if ($phone_number = $request->get('phone_number')) {
+            $shipments->where('shipments.consignee_phone_number_1', $phone_number);
+        }
+
+
+        //Log::channel('cronJobLog')->info('s ' .$shipments->toSql() .'shipments.created_at '. $from. ' and '.$to.' users ' .session('user_id'));
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
@@ -801,13 +813,6 @@ class ShipperDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             });
-            if ($tracking_numbers = $request->get('tracking_numbers')) {
-                $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-            }
-
-            if ($phone_number = $request->get('phone_number')) {
-                $datatable->where('shipments.consignee_phone_number_1', $phone_number);
-            }
 
             return $datatable->make(true);
     }
