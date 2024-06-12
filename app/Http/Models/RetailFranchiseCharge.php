@@ -11,5 +11,7 @@ class RetailFranchiseCharge extends Model
         'franchise_gst',
         'franchise_withholding',
         'franchise_deduction',
+        'security_deposit',
+        'license_fees'
     ];
 }

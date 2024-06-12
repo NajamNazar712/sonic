@@ -250,6 +250,8 @@ class RetailAdminUserManagementController extends Controller
             'insurance' => 'required',
             'franchise_gst' => 'required',
             'retail_shipping_mode_id' => 'required',
+            'security_deposit' => 'required',
+            'license_fees' => 'required',
         ]);
 
         $admin = $request->user();
@@ -310,6 +312,8 @@ class RetailAdminUserManagementController extends Controller
         $franchise_product_charges->franchise_gst = $request->franchise_gst;
         $franchise_product_charges->franchise_withholding = $request->franchise_withholding;
         $franchise_product_charges->franchise_deduction = $request->franchise_deduction;
+        $franchise_product_charges->security_deposit = $request->security_deposit;
+        $franchise_product_charges->license_fees = $request->license_fees;
         $franchise_product_charges->save();
 
         $franchise_retail_product_attachment = new RetailFranchiseProductAttachment();
@@ -370,6 +374,8 @@ class RetailAdminUserManagementController extends Controller
             'edit_insurance' => 'required',
             'franchise_gst' => 'required',
             'retail_shipping_mode_id' => 'required',
+            'security_deposit' => 'required',
+            'license_fees' => 'required',
         ]);
         $date = Carbon::now()->format('Y_m_d');
         $admin = $request->user();
@@ -421,6 +427,8 @@ class RetailAdminUserManagementController extends Controller
                 $new_charges->franchise_gst = $request->franchise_gst;
                 $new_charges->franchise_withholding = $request->franchise_withholding;
                 $new_charges->franchise_deduction = $request->franchise_deduction;
+                $new_charges->security_deposit = $request->security_deposit;
+                $new_charges->license_fees = $request->license_fees;
                 $new_charges->save();
             } else {
                 $new_charges = new RetailFranchiseCharge();
@@ -428,6 +436,8 @@ class RetailAdminUserManagementController extends Controller
                 $new_charges->franchise_gst = $request->franchise_gst;
                 $new_charges->franchise_withholding = $request->franchise_withholding;
                 $new_charges->franchise_deduction = $request->franchise_deduction;
+                $new_charges->security_deposit = $request->security_deposit;
+                $new_charges->license_fees = $request->license_fees;
                 $new_charges->save();
             }
 

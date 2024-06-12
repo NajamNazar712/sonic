@@ -107,7 +107,7 @@
                                     </div>
             
                                     <div class="input-group mb-2">
-                                        <input type="text" name="franchise_gst" id="commission_percentage" class="form-control commission_percentage" placeholder="GST"  value="" max="100" data-rule-required="true" data-msg-required="GST is required">
+                                        <input type="text" name="franchise_gst" id="commission_percentage" class="form-control commission_percentage" placeholder="GST*"  value="" max="100" data-rule-required="true" data-msg-required="GST is required">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
@@ -199,6 +199,16 @@
                                         <label for="attachment_5">Attachment 5</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_5" id="attachment_5" accept="image/*,.doc,.docx,.pdf">
                                     </div>
+
+                                    <div class="mt-4">
+                                        <div class="form-group">
+                                            <input type="text" name="security_deposit" id="security_deposit" class="form-control security_deposit" placeholder="Security Deposit*" value="" data-rule-required="true" data-msg-required="Security Deposit is required">
+                                        </div>
+    
+                                        <div class="form-group">
+                                            <input type="text" name="license_fees" id="license_fees" class="form-control license_fees" placeholder="License Fees*" value="" data-rule-required="true" data-msg-required="License Fees is required">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -262,7 +272,7 @@
                                 </div>
 
                                 <div class="input-group mb-2">
-                                    <input type="text" name="franchise_gst" id="commission_percentage_edit" class="form-control commission_percentage" placeholder="GST"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="GST">
+                                    <input type="text" name="franchise_gst" id="commission_percentage_edit" class="form-control commission_percentage" placeholder="GST*"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="GST">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>
@@ -355,6 +365,16 @@
                                     <label for="attachment_5">Attachment 5</label>
                                     <input class="form-control form-control-sm" type="file" name="attachment_5" id="attachment_5" accept="image/*,.doc,.docx,.pdf">
                                     <a id="attachment_5_filename" target="_blank"></a>
+                                </div>
+
+                                <div class="">
+                                    <div class="form-group">
+                                        <input type="text" name="security_deposit" id="edit_security_deposit" class="form-control edit_security_deposit" placeholder="Security Deposit*"  value="" data-rule-required="true" data-msg-required="Security Deposit is required">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="license_fees" id="edit_license_fees" class="form-control edit_license_fees" placeholder="License Fees*"  value="" data-rule-required="true" data-msg-required="License Fees is required">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -669,6 +689,8 @@
                     success: function (response) {
                         $('#commission_percentage_edit').val(response.data.franchise_gst);
                         $('#withholding_tax_percentage_edit').val(response.data.franchise_withholding);
+                        $('#edit_security_deposit').val(response.data.security_deposit);
+                        $('#edit_license_fees').val(response.data.license_fees);
                         // $('#deduction_percentage_edit').val(response.data.franchise_deduction);
                     }
                 });
@@ -880,6 +902,14 @@
 
             $(".modal_close_btn").click(function() {
                 resetModal();
+            });
+
+            $('#security_deposit, #edit_security_deposit').on('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            $('#license_fees, #edit_license_fees').on('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
             });
         });
 
