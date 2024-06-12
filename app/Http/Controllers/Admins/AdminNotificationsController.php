@@ -156,12 +156,14 @@ class AdminNotificationsController extends Controller
                 // $body_attachment_message =  $body_attachment_message. PHP_EOL . 'NOTE: the attachments will be removed after 7 days(s)';
                 $body = $body . PHP_EOL . $body_attachment_message;
             }
-         
-         
-            foreach ($emails as $to) {
-                NotificationsController::custom(1, $subject, $body, $to,$from_email);
-            }
 
+
+            $totalItems = count($emails);
+            $chunkSize = 1000;
+            for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
+                $parsed_emails = array_slice($emails, $offset, $chunkSize);
+                NotificationsController::custom(1, $subject, $body, $parsed_emails,$from_email);
+            }
             return redirect()->back()->with('success', 'Custom Email Sent');
         }
         else {
@@ -1198,6 +1200,12 @@ class AdminNotificationsController extends Controller
             $details['receiver'] = ['Shipper Phone Number'];
 
             $details['fields'] = ['shipments_count','tracking_number','return_notes_id'];
+        }
+        else if ($id == 217)
+        {
+            $details['receiver'] = ['Rider'];
+
+            $details['fields'] = ['rider','amount','tip','tracking_number'];
         }
         else if ($id == 218)
         {
