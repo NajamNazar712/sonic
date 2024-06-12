@@ -151,6 +151,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\AgentSarNotification',
         'App\Console\Commands\SackBagStatusUpdate',
         'App\Console\Commands\AutoAssignCrmAgentNew',
+        'App\Console\Commands\ShipperLogisticBookingCron',
         ];
 
     /**
@@ -532,6 +533,7 @@ class Kernel extends ConsoleKernel
 		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground();
 		$schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
 		$schedule->command('clean:7DaysQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
+        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
     }
     /**
      * Register the commands for the application.
