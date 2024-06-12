@@ -76,7 +76,7 @@ class WebsiteLead extends Command
             $leads = $response->leads;
             foreach ($leads as $key => $lead) {
                 
-                if($lead->data){
+                if($lead->data && isset($lead->data->contact_person)){
                     
                     $city = City::where('name', $lead->data->city_name[0])->first();
                     if($city){
