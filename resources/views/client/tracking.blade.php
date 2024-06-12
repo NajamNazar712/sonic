@@ -610,7 +610,11 @@
                                     if (isMatch) {
                                         shipment += '<td>' + details.shipper.name + '</td>';
                                     } else {
-                                        shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
+                                        if (details.pickup.vendor == null || details.pickup.vendor == ''){
+                                            shipment += '<td>' + details.shipper.name + '</td>';
+                                        } else {
+                                            shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
+                                        }
                                     }
                                 } else {
                                     shipment += '<td>' + details.shipper.name + '</td>';
@@ -656,12 +660,14 @@
                                 shipment += '<td>' + details.pickup.person_of_contact + '</td>';
 
                                 if (isMatch){
-                                    shipment += '<td><strong>Vendor</strong></td>';
+                                    // shipment += '<td><strong>Vendor</strong></td>';
                                     if (details.pickup.vendor) {
-                                        shipment += '<td>' + details.pickup.vendor + '</td>';
-                                    } else {
+                                        // shipment += '<td>' + details.pickup.vendor + '</td>';
                                         shipment += '<td></td>'
-                                    }
+                                    } 
+                                    // else {
+                                    //     shipment += '<td></td>'
+                                    // }
                                 } 
                                 else {
                                     shipment += '<td><strong>Brand Name</strong></td>';

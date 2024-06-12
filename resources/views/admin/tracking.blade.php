@@ -1348,7 +1348,11 @@
                                     $('#HighAlertModal h4.high_alert_text').text(details.high_alert);
                                 } else {
                                     // shipment += '<td>' + details.shipper.name + '</td>';
-                                    shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
+                                    if(details.pickup.vendor == null || details.pickup.vendor == ''){
+                                        shipment += '<td>' + details.shipper.name + '</td>';
+                                    } else {
+                                        shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
+                                    }
                                 }
                                 shipment += '<td><strong>Account No.</strong></td>';
                                 shipment += '<td>' + details.shipper.account_number + '</td>';
