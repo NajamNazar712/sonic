@@ -38,7 +38,7 @@
     <script src="{{asset('szimek-signature_pad/signature.min.js')}}" type="text/javascript"></script>
 @endif
 
-@if(isset($user) && $user->status != 0)
+@if(Session::has('status') && session('status') != 0)
     
 <script type="text/javascript">
 
