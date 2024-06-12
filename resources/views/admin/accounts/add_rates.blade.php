@@ -2919,7 +2919,7 @@
 
                             </div>
 
-                            <div class="row justify-content-center mt-2" id="commission_div">
+                            {{-- <div class="row justify-content-center mt-2" id="commission_div">
                                 <div class="form-group row">
                                     <label class="col-md-4 label-control" for="commission">Total Commission</label>
                                     <div class="col-md-8">
@@ -2998,7 +2998,7 @@
                                         </tfoot>
                                     </table>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="row mt-2 justify-content-center">
                                 <div class="col-5 form-group">
                                     <textarea name="rate_remarks" id="rate_remarks" class="form-control"

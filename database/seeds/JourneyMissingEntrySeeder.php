@@ -3,6 +3,7 @@
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\ConsigneeUser;
 use App\Http\Models\PendingPayment;
@@ -25,89 +26,100 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //
         $shipmentId = [
-            485242398837, 485242398597, 485242397303, 38331537990121, 38319838051944, 38318638030275, 38317438027775, 31534237964263, 31531538056738, 31531538049774, 31531537947069, 31528838004672, 29317438024264, 28831537902309, 28828837961958, 28817438060156, 28817438045643, 28817438045371, 28816537968032, 28417437924800, 28328837897557, 28322337508768, 28317437897850, 28315837956482, 27141537936091, 27138337807212, 27135337666283, 27131538021550, 27117437982160, 27117437596436, 26731537935565, 251356137856619, 251356137817148, 251356137712683, 25131538025278, 25131537914848, 25131537700388, 25119838017761, 25118638019034, 25117437984857, 25117437918403, 25117437803333, 25117437647420, 25116538022752, 25115938045855, 25115838060627, 25115837992814, 22341537738448, 22341537735926, 22338338039550, 22338338017595, 223356138040496, 22334238026497, 22334238004548, 22334237991408, 223341037855365, 22333537885565, 22331937936839, 22331937883488, 22331937823272, 22331937788361, 22331937734348, 22331937716103, 22331538033573, 22331538031530, 22331538031298, 22331538016709, 22331538016148, 22331538010002, 22331538005976, 22331538004013, 22331537999669, 22331537999518, 22331537999450, 22331537997623, 22331537995286, 22331537986346, 22331537970797, 22331537969593, 22331537968822, 22331537961823, 22331537958776, 22331537957933, 22331537948191, 22331537944435, 22331537944427, 22331537944372, 22331537944285, 22331537944245, 22331537943773, 22331537928131, 22331537926107, 22331537919324, 22331537908998, 22331537904171, 22331537904002, 22331537902427, 22331537892426, 22331537890810, 22331537888043, 22331537885931, 22331537821619, 22331537791265, 22331537780349, 22331537733342, 22331537688539, 22331537182945, 22329037969348, 22329037963225, 22329037923135, 22329037895298, 22329037883608, 22329037879533, 22329037855352, 22329037831441, 22328838031306, 22328838019919, 22328838017084, 22328838012375, 22328837984667, 22328837963900, 22328837961875, 22328837956110, 22328837942706, 22328837929887, 22328837787386, 22328837580061, 22328837498190, 22326437951417, 22326437944804, 22326437937191, 22326437886553, 22326437854156, 22326437834819, 22326437828905, 22324438009085, 22324437996948, 22324437996066, 22324437966847, 22324437811725, 22322137796976, 22322137731120, 22322137194365, 22319838033377, 22318638065759, 22318638055768, 22318638046270, 22318638016605, 22318638013998, 22318637983981, 22318637919153, 22317938023949, 22317938016144, 22317938008675, 22317938006989, 22317637813775, 22317438037971, 22317438031830, 22317438031585, 22317438025352, 22317438022403, 22317438021113, 22317438020337, 22317438019633, 22317438017577, 22317438016928, 22317438016566, 22317438016446, 22317438016273, 22317438014719, 22317438013864, 22317438012137, 22317438011938, 22317438006209, 22317438000089, 22317437995833, 22317437973245, 22317437967905, 22317437963988, 22317437957127, 22317437954998, 22317437944696, 22317437931603, 22317437931184, 22317437886361, 22317437880695, 22317437878675, 22317437847328, 22317437823622, 22317437822353, 22317437788443, 22317437762826, 22317437637153, 22317437547416, 22317437260275, 22316537810128, 22315938082831, 22315938070383, 22315938070379, 22315938070205, 22315938069371, 22315938058078, 22315938055955, 22315938031239, 22315938017678, 22315938012565, 22315938004011, 22315937981322, 22315937897226, 22315937880633, 22315838072032, 22315838035787, 22315838024700, 22315838015598, 22315838008537, 22315838007113, 22315837997000, 22315837996647, 22315837996405, 22315837985452, 22315837975941, 22315837975914, 22315837964015, 22315837958952, 22315837957937, 22315837928924, 22315837888347, 22315837887207, 22315837793691, 22313938005015, 21331937978076, 21331538023738, 21331538020519, 21331538020488, 21331538020436, 21331538020412, 20918637893473, 20246537950290, 20241537765908, 20241537656933, 20238337978632, 20238337926302, 202356137951368, 202356137876172, 202356137835168, 202356137727125, 202356137624667, 202341037905989, 202341037882818, 202341037771287, 20233537862224, 20233537712364, 20231937855336, 20231937850829, 20231937827933, 20231937817450, 20231937752808, 20231937732436, 20231937672729, 20231537951925, 20231537948474, 20231537945502, 20231537938817, 20231537937338, 20231537930643, 20231537930600, 20231537928108, 20231537925335, 20231537916853, 20231537911162, 20231537910216, 20231537904103, 20231537896392, 20231537896283, 20231537869279, 20231537847246, 20231537839937, 20231537837095, 20231537735032, 20231537703529, 20231537667496, 20231537651934, 20230437853898, 20230437851470, 20229037897408, 20229037895694, 20228837997095, 20228837994353, 20228837993676, 20228837990251, 20228837981720, 20228837977196, 20228837976284, 20228837971056, 20228837965688, 20228837948626, 20228837943963, 20228837922425, 20228837842852, 20228837794865, 20228837549638, 20228837469724, 20228837423117, 20227137504538, 20226437848114, 20226437802639, 20226437551104, 20224437943839, 20224437867267, 20224437810708, 20224437498690, 20223737978874, 20223737955310, 20223737954246, 20223737646598, 20223737635621, 20222137830063, 20222137722184, 20222137677636, 20221537627962, 20219838009344, 20219837995504, 20219837985264, 20219837941660, 20218638000104, 20218637994340, 20218637984839, 20218637979941, 20218637973107, 20218637972787, 20218637965905, 20218637956135, 20218637942374, 20218637934381, 20218637933256, 20218637920769, 20218637900443, 20218637842288, 20218637798073, 20217937995555, 20217937981525, 20217937959869, 20217637696957, 20217437991584, 20217437991060, 20217437990339, 20217437988653, 20217437980638, 20217437979931, 20217437978827, 20217437976420, 20217437971307, 20217437971255, 20217437967737, 20217437966479, 20217437964546, 20217437963899, 20217437962117, 20217437962059, 20217437960446, 20217437960424, 20217437960410, 20217437960202, 20217437957916, 20217437948002, 20217437945793, 20217437932948, 20217437929014, 20217437928663, 20217437920461, 20217437915895, 20217437915213, 20217437914284, 20217437904043, 20217437900366, 20217437899173, 20217437893106, 20217437890560, 20217437880440, 20217437878691, 20217437875798, 20217437843749, 20217437808252, 20217437804384, 20217437790062, 20217437677214, 20217437537850, 20216537982945, 20216537966628, 20216537966286, 20216537939466, 20216537935607, 20216537914586, 20216537894484, 20216537812851, 20216537786877, 20215938003185, 20215937994389, 20215937992608, 20215937991205, 20215937982217, 20215937979470, 20215937962887, 20215937960324, 20215937956748, 20215937954349, 20215937950696, 20215937928886, 20215937914209, 20215937908127, 20215937894661, 20215937893406, 20215838026112, 20215837998557, 20215837982637, 20215837976080, 20215837967826, 20215837950847, 20215837950605, 20215837934432, 20215837931994, 20215837921679, 20215837916642, 20215837905670, 20215837903410, 20215837902470, 20215837882030, 20215837866521, 20215837838960, 20215837680909, 20215737981302, 20213937934487, 19528838024723, 18618638055526, 17441537888927, 17441537756180, 174356138055657, 17434238014337, 17431537932631, 17417438050384, 17417438046097, 17415837955629, 16526437655669, 16520237966175, 16131537880454, 15931538007527, 15917438017412, 15917438007593, 15831538032420, 15831538032397, 15831537952544, 15831537861108, 15826437984626, 15824437879456, 15817438022609, 15817438001303, 15817437692063, 15815937921284, 15815838071052, 15815837998630, 152991362601, 152991362300, 152991361997, 152991359312, 14446837871729, 14446637928593, 14432037936189, 14431538024318, 14431538018032, 14431538014722, 14431537926704, 14428838035692, 14428838007067, 14428837475369, 14418638016557, 14417438014777, 14417437970267, 14417437958945, 14415838038388, 14415838018438, 11031537851518, 11031537650441, 10729037850888, 10124437965160        ];
+            20217238031884, 22317237013863, 20217236958405, 20217236934113
+        ];
         echo count($shipmentId);
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
 
             foreach ($shipmentId as $shipment) {
-
+                $shipment->return_address_id = 47711;
+                $shipment->save();
+                
+                
                 if ($shipment->shipper_status_id === 5) {
                     // $shipment->created_at = $shipment->updated_at;
                     $shipment->shipper_status_id = 14;
                     $shipment->consignee_status_id = 14;
                     $shipment->save();
                 }
-                if (in_array($shipment->shipper_status_id, [13, 14])) {
-                    $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
-                    $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
-                    $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-                    $zone = Zone::find($shipment->pickup_address->city->zone_id);
-                    if ($zone->gst == '0.16') {
-                        $addgst = 16.0;
-                    } elseif ($zone->gst == '0.13') {
-                        $addgst = 13.0;
-                    } else {
-                        $addgst = $zone->gst;
-                    }
+                $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
 
-                    $gst = ROUND($charges * $zone->gst, 2, PHP_ROUND_HALF_DOWN);
-                    $payable = $shipment->amount - $gst;
-                    if ($pending_payment->exists()) {
-                        $pending_payment = $pending_payment->first();
+                // if (in_array($shipment->shipper_status_id, [13, 14])) {
+                //     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
+                //     $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                //     $zone = Zone::find($shipment->pickup_address->city->zone_id);
+                //     if ($zone->gst == '0.16') {
+                //         $addgst = 16.0;
+                //     } elseif ($zone->gst == '0.13') {
+                //         $addgst = 13.0;
+                //     } else {
+                //         $addgst = $zone->gst;
+                //     }
 
-                        $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
-                        $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
+                //     $gst = ROUND($charges * $zone->gst, 2, PHP_ROUND_HALF_DOWN);
+                //     $payable = $shipment->amount - $gst;
+                //     if ($pending_payment->exists()) {
+                //         $pending_payment = $pending_payment->first();
 
-                        // $pending_payment->save();
-                    } else {
-                        $pending_payment = new PendingPayment();
+                //         $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+                //         $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
 
-                        $pending_payment->user_id = $shipment->user_id;
-                        $pending_payment->total_shipments = 1;
-                        $pending_payment->delivered_shipments = 1;
-                        $pending_payment->returned_shipments = 0;
-                        $pending_payment->adjusted_shipments = 0;
+                //         // $pending_payment->save();
+                //     } else {
+                //         $pending_payment = new PendingPayment();
 
-                        $pending_payment->save();
-                    }
-                    $pending_payment_shipment = new PendingPaymentShipment();
-                    $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-                    $pending_payment_shipment->created_at = $deliveryNoteId->updated_at;
-                    $pending_payment_shipment->updated_at = $deliveryNoteId->updated_at;
-                    $pending_payment_shipment->shipment_id = $shipment->id;
-                    $pending_payment_shipment->type = 0;
-                    $pending_payment_shipment->amount = $shipment->amount;
-                    $pending_payment_shipment->charges = $charges;
-                    $pending_payment_shipment->gst = $addgst;
-                    $pending_payment_shipment->payable = $payable;
-                    $pending_payment_shipment->save();
+                //         $pending_payment->user_id = $shipment->user_id;
+                //         $pending_payment->total_shipments = 1;
+                //         $pending_payment->delivered_shipments = 1;
+                //         $pending_payment->returned_shipments = 0;
+                //         $pending_payment->adjusted_shipments = 0;
 
-                    // $deliveryNoteId->status = 6;
-                    // $deliveryNoteId->save();
-                    // ShipmentsJourneyController::add($shipment->id, $shipment->shipper_status_id, $shipment->shipper_status_id, NULL, NULL, $shipment->user_id, NULL, $deliveryNoteId->delivery_note_id);
+                //         $pending_payment->save();
+                //     }
+                //     $pending_payment_shipment = new PendingPaymentShipment();
+                //     $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                //     $pending_payment_shipment->created_at = $deliveryNoteId->updated_at;
+                //     $pending_payment_shipment->updated_at = $deliveryNoteId->updated_at;
+                //     $pending_payment_shipment->shipment_id = $shipment->id;
+                //     $pending_payment_shipment->type = 0;
+                //     $pending_payment_shipment->amount = $shipment->amount;
+                //     $pending_payment_shipment->charges = $charges;
+                //     $pending_payment_shipment->gst = $addgst;
+                //     $pending_payment_shipment->payable = $payable;
+                //     $pending_payment_shipment->save();
 
-                }
+                //     // $deliveryNoteId->status = 6;
+                //     // $deliveryNoteId->save();
+                //     // ShipmentsJourneyController::add($shipment->id, $shipment->shipper_status_id, $shipment->shipper_status_id, NULL, NULL, $shipment->user_id, NULL, $deliveryNoteId->delivery_note_id);
+
+                // }
+                $shipmentstatus = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 22)->first();
+                if (!$shipmentstatus) {
+
+                
                 $verification = 1;
                 $shipment_journey = new ShipmentsJourney();
                 $status_id = (!in_array($shipment->shipper_status_id, [14]) ? '14' : $shipment->shipper_status_id);
                 $shipment_journey->shipment_id = $shipment->id;
                 $shipment_journey->verification = $verification;
-                $shipment_journey->created_at = $deliveryNoteId->updated_at;
-                $shipment_journey->updated_at = $deliveryNoteId->updated_at;
-                $shipment_journey->shipper_status_id = $status_id;
-                $shipment_journey->consignee_status_id = $status_id;
+                $shipment_journey->created_at = $deliveryNoteId->updated_at ?? $shipment->updated_at;
+                $shipment_journey->updated_at = $deliveryNoteId->updated_at ?? $shipment->updated_at;
+                $shipment_journey->shipper_status_id = 22;
+                $shipment_journey->consignee_status_id = 22;
                 $shipment_journey->status_reason_id = null;
+                $shipment_journey->city_id =  202;
                 $shipment_journey->remarks =  null;
                 $shipment_journey->user_id = null;
                 $shipment_journey->admin_id = 346;
                 $shipment_journey->rider_id = null;
-                $shipment_journey->reference_1_id = $deliveryNoteId->delivery_note_id;
+                $shipment_journey->reference_1_id = null;
                 $shipment_journey->reference_2_id = null;
                 $shipment_journey->received_or_refused_by = null;
                 $shipment_journey->relation = null;
                 $shipment_journey->cnic = null;
                 $shipment_journey->save();
+
                 if ($shipment->shipper_status_id != 1) {
                     ShipmentStatusWebhookController::webhook_subscription($shipment->id, $shipment->shipper_status_id, null);
                 }
@@ -125,6 +137,7 @@ class JourneyMissingEntrySeeder extends Seeder
                         NotificationsController::app_notification(8, $consignee_id, 4, $shipment->id, $shipment->shipper_status_id);
                     }
                     ShipperShipmentsSubscription::where('shipment_id', $shipment->id)->delete();
+                }
                 }
             }
         }

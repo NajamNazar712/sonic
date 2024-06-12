@@ -143,6 +143,7 @@ use App\Http\Models\Rates\HistoryPackagingCharge;
 use App\Http\Models\Rates\PendingInsuranceCharge;
 use App\Http\Models\Rates\PendingPackagingCharge;
 use App\Http\Models\Admin\ShipementReceiveDetails;
+use App\Http\Models\Admin\ShipperInterceptExclude;
 use App\Http\Models\Admin\StandardInsuranceCharge;
 use App\Http\Models\Admin\StandardPackagingCharge;
 use App\Http\Models\InternationalUsersInformation;
@@ -185,9 +186,9 @@ use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
+
 use App\Http\Models\Commission\SalesCommissionExternalUser;
 use App\Http\Models\Operataions\OperationForecastShipments;
-
 use App\Http\Models\Shipper\SubstituteUserModulePermission;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Operataions\OperationForecastWeightRange;
@@ -200,7 +201,6 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Http\Models\Admin\ShipperInterceptExclude;
 
 class AdminDashboardController extends Controller
 {
@@ -1393,11 +1393,12 @@ class AdminDashboardController extends Controller
         if (AdminHub::where('admin_id', $tag_id)->where('hub_id', $shipper_hub_id)->exists()) {
             if (!SalePersonTag::where(['admin_id' => $tag_id, 'user_id' => $shipper_id, 'status' => 0])->exists()) {
                 $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
-                $old_sale_person_date = $old_sale_person->created_at;
                 if ($old_sale_person) {
                     $old_sale_person = $old_sale_person->sales_person;
+                    $old_sale_person_date = $old_sale_person->created_at;
                 } else {
                     $old_sale_person = null;
+                    $old_sale_person_date = null;
                 }
                 $new_sale_person = Admin::find($tag_id);
                 $shipper_data = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->get();
@@ -1430,7 +1431,6 @@ class AdminDashboardController extends Controller
         }
 
     }
-
     public function tagSubmitBulk(Request $request)
     {
         $tag_id = $request->admin_id;
@@ -7238,7 +7238,6 @@ class AdminDashboardController extends Controller
         $ol_validations = array();
         $detain_validations = array();
         $sameday_validations = array();
-
         $shipper_id = $id;
         if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
             $on_validations = [
@@ -8395,8 +8394,18 @@ class AdminDashboardController extends Controller
             }
         }
 
+        
 
-        User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+        if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
+            User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_authorized_by' => 346, 'rates_approved_at' => Carbon::now(), 'rates_added_at' => Carbon::now(), 'rate_status' => 0, 'request_custom_quotation' => 0, 'on_board_status' => 1]);
+        } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
+            User::where('id', $id)->update(['status' => 0, 'rate_status' => 0, 'request_custom_quotation' => 1, 'on_board_status' => 1]);
+            // NotificationsController::send(231, $id);
+        } else {
+            User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+        }
+        
+
         if ($request->has('rate_remarks') && $request->rate_remarks != null) {
             $rate_remark = new RateRemark();
             $rate_remark->user_id = $id;
@@ -8943,99 +8952,116 @@ class AdminDashboardController extends Controller
 
         if ($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0) {
             DwsWeightChargesController::approve($id);
-            User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => 32, 'rates_approved_at' => Carbon::now()]);
+
+            if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
+                User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_authorized_by' => 346, 'rates_approved_at' => Carbon::now(), 'rates_added_at' => Carbon::now(), 'rate_status' => 0, 'request_custom_quotation' => 0, 'on_board_status' => 1]);
+            } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
+                User::where('id', $id)->update(['status' => 0, 'rate_status' => 0, 'request_custom_quotation' => 1, 'on_board_status' => 1]);
+                NotificationsController::send(231, $id);
+
+            } else {
+                User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+            }
+            
         }
 
 
         //Sales Commisssion
-
-        if ($request->has('user_id')) {
-            $total_commission = $request->total_commission;
-            $users_count = count($request->user_id);
-
-            $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
-            if ($sales_commission->exists()) {
-                $sales_commission = $sales_commission->first();
-                $sales_commission->commission_users_count = $users_count;
-                $sales_commission->commission = $total_commission;
-                $sales_commission->updated_by = Auth::id();
-                $sales_commission->save();
-                $sales_commission_id = $sales_commission->id;
-                $actual_commission = 0;
-                SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
-                foreach ($request->tier_id as $row_id => $tier) {
-                    $sales_tier = SalesTier::find($tier);
-                    if ($sales_tier) {
-                        $sales_commission_user = new SalesCommissionUser();
-                        $sales_commission_user->sales_commission_id = $sales_commission_id;
-                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
-                        $sales_commission_user->tier_id = $tier;
-                        if ($sales_tier->tier_type == 1) {
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
-                                $sales_commission_user->user_type = "2";
-                            }  
-                            $sales_commission_user->user_id = $request->user_id[$row_id];
-                        }                        
-                        else if ($sales_tier->tier_type == 2) {
-                            $external_user = new SalesCommissionExternalUser();
-                            $external_user->name = $request->user_id[$row_id];
-                            $external_user->shipper_id = $shipper_id;
-                            $external_user->save();
-                            $sales_commission_user->user_id = $external_user->id;
+        if(!$request->has('wordpress_account')){
+            if ($request->has('user_id')) {
+                $total_commission = $request->total_commission;
+                $users_count = count($request->user_id);
+    
+                $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
+                if ($sales_commission->exists()) {
+                    $sales_commission = $sales_commission->first();
+                    $sales_commission->commission_users_count = $users_count;
+                    $sales_commission->commission = $total_commission;
+                    $sales_commission->updated_by = Auth::id();
+                    $sales_commission->save();
+                    $sales_commission_id = $sales_commission->id;
+                    $actual_commission = 0;
+                    SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
+                    foreach ($request->tier_id as $row_id => $tier) {
+                        $sales_tier = SalesTier::find($tier);
+                        if ($sales_tier) {
+                            $sales_commission_user = new SalesCommissionUser();
+                            $sales_commission_user->sales_commission_id = $sales_commission_id;
+                            $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                            $sales_commission_user->tier_id = $tier;
+                            if ($sales_tier->tier_type == 1) {
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
+                            }                        
+                            else if ($sales_tier->tier_type == 2) {
+                                $external_user = new SalesCommissionExternalUser();
+                                $external_user->name = $request->user_id[$row_id];
+                                $external_user->shipper_id = $shipper_id;
+                                $external_user->save();
+                                $sales_commission_user->user_id = $external_user->id;
+                            }
+                            $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                            $actual_commission += $request->commission_percentage[$row_id];
+                            $sales_commission_user->save();
                         }
-                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
-                        $actual_commission += $request->commission_percentage[$row_id];
-                        $sales_commission_user->save();
                     }
-                }
-                $sales_commission->commission = $actual_commission;
-                $sales_commission->save();
-
-            } else {
-                $sales_commission = new SalesCommission();
-                $sales_commission->shipper_id = $shipper_id;
-                $sales_commission->commission_users_count = $users_count;
-                $sales_commission->commission = $total_commission;
-                $sales_commission->updated_by = Auth::id();
-                $sales_commission->save();
-                $sales_commission_id = $sales_commission->id;
-                $actual_commission = 0;
-                foreach ($request->tier_id as $row_id => $tier) {
-                    $sales_tier = SalesTier::find($tier);
-                    if ($sales_tier) {
-                        $sales_commission_user = new SalesCommissionUser();
-                        $sales_commission_user->sales_commission_id = $sales_commission_id;
-                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
-                        $sales_commission_user->tier_id = $tier;
-                        if ($sales_tier->tier_type == 1) {
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
-                                $sales_commission_user->user_type = "2";
-                            }  
-                            $sales_commission_user->user_id = $request->user_id[$row_id];         
-                        } else if ($sales_tier->tier_type == 2) {
-                            $external_user = new SalesCommissionExternalUser();
-                            $external_user->name = $request->user_id[$row_id];
-                            $external_user->shipper_id = $shipper_id;
-                            $external_user->save();
-                            $sales_commission_user->user_id = $external_user->id;
+                    $sales_commission->commission = $actual_commission;
+                    $sales_commission->save();
+    
+                } else {
+                    $sales_commission = new SalesCommission();
+                    $sales_commission->shipper_id = $shipper_id;
+                    $sales_commission->commission_users_count = $users_count;
+                    $sales_commission->commission = $total_commission;
+                    $sales_commission->updated_by = Auth::id();
+                    $sales_commission->save();
+                    $sales_commission_id = $sales_commission->id;
+                    $actual_commission = 0;
+                    foreach ($request->tier_id as $row_id => $tier) {
+                        $sales_tier = SalesTier::find($tier);
+                        if ($sales_tier) {
+                            $sales_commission_user = new SalesCommissionUser();
+                            $sales_commission_user->sales_commission_id = $sales_commission_id;
+                            $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                            $sales_commission_user->tier_id = $tier;
+                            if ($sales_tier->tier_type == 1) {
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                $sales_commission_user->user_id = $request->user_id[$row_id];         
+                            } else if ($sales_tier->tier_type == 2) {
+                                $external_user = new SalesCommissionExternalUser();
+                                $external_user->name = $request->user_id[$row_id];
+                                $external_user->shipper_id = $shipper_id;
+                                $external_user->save();
+                                $sales_commission_user->user_id = $external_user->id;
+                            }
+                            $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                            $actual_commission += $request->commission_percentage[$row_id];
+                            $sales_commission_user->save();
                         }
-                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
-                        $actual_commission += $request->commission_percentage[$row_id];
-                        $sales_commission_user->save();
                     }
+                    $sales_commission->commission = $actual_commission;
+                    $sales_commission->save();
                 }
-                $sales_commission->commission = $actual_commission;
-                $sales_commission->save();
+    
             }
-
         }
+
+      
 
 
         //Sales Commissison End
 
-        NotificationsController::send(38, $id);
-
-        return redirect(route('admin.accounts.pending'))->with('success', 'All Rates are added');
+        if(!$request->has('wordpress_account')){
+            $user =  User::find($id);
+            if(!isset($user->on_board_status)){
+                NotificationsController::send(38, $id);
+            }
+            return redirect(route('admin.accounts.pending'))->with('success', 'All Rates are added');
+        }
     }
 
 
@@ -9228,7 +9254,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
             ->leftjoin('block_disable_reason_users as bdru', 'bdru.id', '=', 'users.disable_reason_1')
-            ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason'])
+            ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason'])
             ->whereIn('users.status', [3, 4])
             ->where('users.blacklist', 0)
             ->groupBy('users.id');
@@ -9427,43 +9453,18 @@ class AdminDashboardController extends Controller
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return $users->ref;
-                    }
-                } else {
-                    return $users->ref;
-                }
-            })
-            ->editColumn('kam', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
-                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
-                
-                if (isset($shipper, $sales_tiers)) {
-                    $sales_commission_users = DB::table('sales_commission_users')
-                        ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-                        ->get();
-                
-                    if ($sales_commission_users->isNotEmpty()) {
-                        $array = [];
-                        foreach ($sales_commission_users as $sales_commission_user) {
-                            $type = $sales_commission_user->user_type;
-                            $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-                            if ($admins) {
-                                $array[] = $admins->name;
-                            } else {
-                                return '-';
-                            }
+                        if($users->rider_id)
+                        {
+                            return $users->rider_id.'-'.$users->ref;
                         }
-                        $old_kam = explode(', ', $users->kam);
-                        $new_array = array_unique(array_merge($array, $old_kam));
-                        $new_array = implode(', ', $new_array);
-                        
-                        $array = implode(', ', $array);
-                        return $array;
-                    } else {
-                        return $users->kam;
+                        return '-';
                     }
                 } else {
-                    return $users->kam;
+                    if($users->rider_id)
+                    {
+                        return $users->rider_id.'-'.$users->ref;
+                    }
+                    return '-';
                 }
             })
             ->filterColumn('r.name', function ($query, $keyword) {
@@ -9889,11 +9890,11 @@ class AdminDashboardController extends Controller
             ->leftjoin('riders as scun_r', 'scun_r.id', '=', 'scu.user_id')
             ->leftjoin('admins as p', 'p.id', '=', 'st.poc')
             ->leftjoin('admins as k', 'k.id', '=', 'st.kam')
-            ->leftjoin('admins as r', 'r.id', '=', 'st.ref')
+            ->leftjoin('riders as r', 'r.id', '=', 'st.ref')
             ->leftjoin('admins as e', 'e.id', '=', 'st.eso')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)->groupBy('users.id');
+            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)->groupBy('users.id');
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -9958,6 +9959,8 @@ class AdminDashboardController extends Controller
                     return "Authorized";
                 } else if ($users->rate_status == 0 && $users->status == 1) {
                     return "Requested";
+                } else if ($users->rate_status == 0 && $users->status == 0) {
+                    return "Requested For Custom Quotation";
                 }
             })
             ->editColumn('documents_status', function ($users) {
@@ -10061,45 +10064,21 @@ class AdminDashboardController extends Controller
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return $users->ref;
-                    }
-                } else {
-                    return $users->ref;
-                }
-
-            })
-            
-            ->editColumn('kam', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
-                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
-                
-                if (isset($shipper, $sales_tiers)) {
-                    $sales_commission_users = DB::table('sales_commission_users')
-                    ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-                    ->get();
-
-                    if ($sales_commission_users->isNotEmpty()) {
-                        $array = [];
-                        foreach ($sales_commission_users as $sales_commission_user) {
-                            $type = $sales_commission_user->user_type;
-                            $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-                            if ($admins) {
-                                $array[] = $admins->name;
-                            } else {
-                                return '-';
-                            }
+                        if($users->rider_id)
+                        {
+                            return $users->rider_id.'-'.$users->ref;
                         }
-                        $array = implode(', ', $array);
-                        return $array;
-                    } else {
-                        return $users->kam;
+                        return '-';
                     }
                 } else {
-                    return $users->kam;
+                    if($users->rider_id)
+                        {
+                            return $users->rider_id.'-'.$users->ref;
+                        }
+                        return '-';
                 }
 
             })
-
 
             ->filterColumn('r.name', function ($query, $keyword) {
                 $query->where('r.name', $keyword)
