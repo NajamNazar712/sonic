@@ -218,6 +218,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('report/list', 'Admins\AdminDashboardController@survey_report_list')->name('report.list');
             Route::get('report/submitresponse', 'Admins\AdminDashboardController@submitresponse_report')->name('report.submitresponse');
         });
+
+        Route::prefix('kam_bulk_tagging')->name('kam_bulk_tagging.')->group(function () {
+            Route::get('', 'Admins\Shippers\Accounts\KAMBulkTaggingController@index')->name('index');
+            Route::post('update', 'Admins\Shippers\Accounts\KAMBulkTaggingController@update')->name('update');
+        });
     });
 
     Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
@@ -2527,6 +2532,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('shippers')->name('shippers.')->group(function () {
+
+            Route::prefix('base_rate_revisions')->name('base_rate_revisions.')->group(function () {
+                Route::get('', 'Admins\Settings\Shippers\BaseRateRivisionController@index')->name('index');
+                Route::get('list', 'Admins\Settings\Shippers\BaseRateRivisionController@base_rate_revisions_list')->name('list');
+                Route::post('store', 'Admins\Settings\Shippers\BaseRateRivisionController@add_bulk_shipper_rate_adjustment_store')->name('bulk_store');
+                Route::get('{base_rate_revision_id}/approval1_update/{action}','Admins\Settings\Shippers\BaseRateRivisionController@approval1_update')->name('approval1_update');
+                Route::get('{base_rate_revision_id}/approval2_update/{action}','Admins\Settings\Shippers\BaseRateRivisionController@approval2_update')->name('approval2_update');
+                Route::get('shippers_with_rates/{base_rate_revision_id}', 'Admins\Settings\Shippers\BaseRateRivisionController@shippersWithRates')->name('shippers_with_rates');
+            });
+
             Route::prefix('status_webhook')->name('status_webhook.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@status_webhook_index')->name('index');
                 Route::get('list', 'Admins\GlobalSettingsController@status_webhook_list')->name('list');
@@ -2543,6 +2558,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@bypass_weight_index')->name('index');
                 Route::post('update', 'Admins\GlobalSettingsController@bypass_weight_update')->name('update');
 
+            });
+
+            
+            Route::prefix('lead_progress')->name('lead_progress.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@lead_progress_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@lead_progress_list')->name('list');
+                Route::post('update', 'Admins\GlobalSettingsController@lead_progress_update')->name('update');
             });
         });
 
@@ -3791,6 +3813,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('info', 'Admins\LeadManagementController@info')->name('info');
         Route::post('edit', 'Admins\LeadManagementController@edit')->name('edit');
         Route::post('add', 'Admins\LeadManagementController@add')->name('add');
+        Route::get('edit_service_list', 'Admins\LeadManagementController@edit_service_list')->name('edit_service_list');
     });
 
     Route::prefix('pam_leads')->name('pam_leads.')->group(function () {

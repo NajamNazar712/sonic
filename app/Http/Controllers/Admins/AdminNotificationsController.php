@@ -1201,6 +1201,12 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = ['shipments_count','tracking_number','return_notes_id'];
         }
+        else if ($id == 217)
+        {
+            $details['receiver'] = ['Rider'];
+
+            $details['fields'] = ['rider','amount','tip','tracking_number'];
+        }
         else if ($id == 218)
         {
             $details['receiver'] = ['Admin Email'];

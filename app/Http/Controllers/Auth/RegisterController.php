@@ -2,44 +2,47 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Admins\AdminDashboardController;
+use Carbon\Carbon;
+use App\Http\Models\City;
+use App\Mail\Notifications;
+use App\Http\Models\Product;
+use App\Http\Models\Segment;
+use Illuminate\Http\Request;
+use App\Http\Models\Referral;
+use App\Http\Models\BanksList;
+use App\Http\Models\Reference;
+use App\Http\Models\PickupType;
 use App\Http\Models\AccountType;
 use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AreaTerritory;
-use App\Http\Models\Admin\Lead\Lead;
-use App\Http\Models\Admin\AdminHub;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\Territory;
-use App\Http\Models\AverageShipmentCycle;
-use App\Http\Models\BanksList;
-use App\Http\Models\City;
-use App\Http\Models\Commission\SalesCommission;
-use App\Http\Models\Commission\SalesCommissionUser;
-use App\Http\Models\CRFTermsConditions;
-use App\Http\Models\DuplicateUser;
-use App\Http\Models\InvoicingCycle;
-use App\Http\Models\Reference;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\Shipper\UserBankInfo;
-use App\Http\Models\UserDocumentAttachment;
-use App\Mail\Notifications;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Admin\AutoTagTerritory;
 use App\Http\Models\PaymentCycle;
-use Illuminate\Auth\Events\Registered;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\DuplicateUser;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\InvoicingCycle;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Territory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Foundation\Auth\RegistersUsers;
-use App\Http\Models\Product;
-use App\Http\Models\PickupType;
-use App\Http\Models\Referral;
-use App\Http\Models\Segment;
+use Illuminate\Auth\Events\Registered;
+use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\SubCategorySegment;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\AreaTerritory;
+use App\Http\Models\Admin\Lead\LeadZone;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\AverageShipmentCycle;
+use App\Http\Models\Shipper\UserBankInfo;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\AutoTagTerritory;
+use App\Http\Models\UserDocumentAttachment;
+use App\Http\Models\Shipper\UserShippingInfo;
+use Illuminate\Foundation\Auth\RegistersUsers;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Commission\SalesCommissionUser;
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
@@ -68,9 +71,14 @@ class RegisterController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Request $request)
     {
-        $this->middleware('guest');
+        if ($request->wordpress_account == 1 || $request->wordpress_lead_register == 1) {
+            // No middleware applied
+        } else {
+            $this->middleware('guest');
+        }
+        
     }
 
     public function showRegistrationForm($lead_id = NULL)
@@ -114,77 +122,122 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-        if($data['nature_of_account'] == 1){
-        	return Validator::make($data, [
-                'name' => 'required|string|max:255|unique:users',
+        if ($data['nature_of_account'] == 1 && !isset($data['wordpress_lead_register'])) {
+                if (isset($data['wordpress_account']) && $data['wordpress_account'] == 1) {
+                    return Validator::make($data, [
+                        'name' => 'nullable',
+                        'email' => 'nullable',
+                        'password' => 'nullable',
+                        'shipper_poc' => 'required|regex:/^[a-zA-Z ]+$/u|max:255',
+                        'company_address' => 'nullable',
+                        'phone' => 'nullable',
+                        'nature_of_account' => 'nullable',
+                        'average_shipment' => 'required',
+                        'sale_person' => 'nullable',
+                        'average_shipment_duration' => 'required',
+                        'cnic' => 'nullable',
+                        'url' => 'required|string|max:255',
+                        'shipper_city' => 'required|string|max:255',
+                        'shipper_product_type' => 'required|int',
+                        'product_name' => 'required_if:shipper_product_type,24',
+                        'shipping_city.*' => 'required|string|max:255',
+                        'pickup_address.*' => 'required|string|max:255',
+                        'pickup_brand_name.*' => 'required|string|max:255',
+                        'shipping_poc.*' => 'required|regex:/^[a-zA-Z ]+$/u|max:255',
+                        'shipping_phone.*' => 'required|string|max:255',
+                        'shipping_email.*' => 'required|string|max:255',
+                        'product_type.*' => 'required|max:255',
+                        'bank_city.*' => 'required|max:255',
+                        'bank_name.*' => 'required|max:255',
+                        'bank_branch.*' => 'required|string|max:255',
+                        'account_no.*' => 'required|string|max:255',
+                        'account_title.*' => 'required|string|max:255',
+                        'iban_no.*' => 'required|string|max:255',
+                        'cnic_front_image' => 'mimes:png,jpeg,jpg',
+                        'cnic_back_image' => 'mimes:png,jpeg,jpg',
+                        'blank_cheque_image' => 'mimes:png,jpeg,jpg',
+                        'segments' => 'required',
+                        'sub_segments' => 'required',
+                        'referral' => '',
+                    ]);
+                } else {
+                    return Validator::make($data, [
+                        'name' => 'required|string|max:255|unique:users',
+                        'email' => 'required|string|email|max:255|unique:users',
+                        'password' => 'required|string|min:6',
+                        'shipper_poc' => 'required|regex:/^[a-zA-Z ]+$/u|max:255',
+                        'company_address' => 'required|string|max:255',
+                        'phone' => 'required|string|max:255|unique:users',
+                        'nature_of_account' => 'required',
+                        'average_shipment' => 'required',
+                        'sale_person' => 'required',
+                        'average_shipment_duration' => 'required',
+                        'cnic' => 'required|string|max:255',
+                        'url' => 'required|string|max:255',
+                        'shipper_city' => 'required|string|max:255',
+                        'shipper_product_type' => 'required|int',
+                        'product_name' => 'required_if:shipper_product_type,24',
+                        'shipping_city.*' => 'required|string|max:255',
+                        'pickup_address.*' => 'required|string|max:255',
+                        'pickup_brand_name.*' => 'required|string|max:255',
+                        'shipping_poc.*' => 'required|regex:/^[a-zA-Z ]+$/u|max:255',
+                        'shipping_phone.*' => 'required|string|max:255',
+                        'shipping_email.*' => 'required|string|max:255',
+                        'product_type.*' => 'required|max:255',
+                        'bank_city.*' => 'required|max:255',
+                        'bank_name.*' => 'required|max:255',
+                        'bank_branch.*' => 'required|string|max:255',
+                        'account_no.*' => 'required|string|max:255',
+                        'account_title.*' => 'required|string|max:255',
+                        'iban_no.*' => 'required|string|max:255',
+                        'cnic_front_image' => 'mimes:png,jpeg,jpg',
+                        'cnic_back_image' => 'mimes:png,jpeg,jpg',
+                        'blank_cheque_image' => 'mimes:png,jpeg,jpg',
+                        'segments' => 'required',
+                        'sub_segments' => 'required',
+                        'referral' => '',
+                    ]);
+                }
+            
+            
+        } else if ($data['nature_of_account'] == 1 && $data['wordpress_lead_register'] == 1) {
+            return Validator::make($data, [
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:6',
-                'shipper_poc'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
-                'company_address'=>'required|string|max:255',
-                'phone'=>'required|string|max:255|unique:users',
-                'nature_of_account' => 'required',
-                'average_shipment' => 'required',
-                'sale_person' => 'required',
-                'average_shipment_duration' => 'required',
-                'cnic'=>'required|string|max:255',
-				'url'=>'required|string|max:255',
-                'shipper_city'=>'required|int',
-                'shipper_product_type'=>'required|int',
-                'product_name' => 'required_if:shipper_product_type, ==, 24',
-                'shipping_city.*'=>'required|string|max:255',
-                'pickup_address.*'=>'required|string|max:255',
-                'pickup_brand_name.*'=>'required|string|max:255',
-                'shipping_poc.*'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
-                'shipping_phone.*'=>'required|string|max:255',
-                'shipping_email.*'=>'required|string|max:255',
-                'product_type.*'=>'required|max:255',
-                'bank_city.*'=>'required|max:255',
-                'bank_name.*'=>'required|max:255',
-                'bank_branch.*'=>'required|string|max:255',
-                'account_no.*'=>'required|string|max:255',
-                'account_title.*'=>'required|string|max:255',
-                'iban_no.*'=>'required|string|max:255',
-                'cnic_front_image' => 'mimes:png,jpeg,jpg',
-                'cnic_back_image' => 'mimes:png,jpeg,jpg',
-                'blank_cheque_image' => 'mimes:png,jpeg,jpg',
-                // 'g-recaptcha-response' => 'required|captcha',
-                'segments' => 'required',
-                'sub_segments' => 'required',
-                'referral' => '',
-                
-                
+                'name' => 'required|string|max:255|unique:users',
+                'phone' => 'required|string|max:255|unique:users',
             ]);
-        }else{
+            
+        } else {
             return Validator::make($data, [
                 'name' => 'required|string|max:255|unique:users',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:6',
-                'shipper_poc'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
-                'company_address'=>'required|string|max:255',
-                'phone'=>'required|string|max:255|unique:users',
+                'shipper_poc' => 'required|regex:/^[a-zA-Z ]+$/u|max:255',
+                'company_address' => 'required|string|max:255',
+                'phone' => 'required|string|max:255|unique:users',
                 'nature_of_account' => 'required',
                 'average_shipment' => 'required',
                 'sale_person' => 'required',
                 'average_shipment_duration' => 'required',
-                'cnic'=>'required|string|max:255',
-				'url'=>'required|string|max:255',
-                'shipper_city'=>'required|string|max:255',
-                'shipper_product_type'=>'required|int',
-                'product_name' => 'required_if:shipper_product_type, ==, 24',
-                'shipping_city.*'=>'required|string|max:255',
-                'pickup_address.*'=>'required|string|max:255',
-                'pickup_brand_name.*'=>'required|string|max:255',
-                'shipping_poc.*'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
-                'shipping_phone.*'=>'required|string|max:255',
-                'shipping_email.*'=>'required|string|max:255',
-                'product_type.*'=>'required|max:255',
-                'bank_city.*'=>'required|max:255',
-                'bank_name.*'=>'required|max:255',
-                'bank_branch.*'=>'required|string|max:255',
-                'account_no.*'=>'required|string|max:255',
-                'account_title.*'=>'required|string|max:255',
-                'iban_no.*'=>'required|string|max:255',
-//                'generation_date' => 'required_if:cycle_of_invoicing,==,1|required_if:cycle_of_invoicing,==,3|numeric',
+                'cnic' => 'required|string|max:255',
+                'url' => 'required|string|max:255',
+                'shipper_city' => 'required|string|max:255',
+                'shipper_product_type' => 'required|int',
+                'product_name' => 'required_if:shipper_product_type,24',
+                'shipping_city.*' => 'required|string|max:255',
+                'pickup_address.*' => 'required|string|max:255',
+                'pickup_brand_name.*' => 'required|string|max:255',
+                'shipping_poc.*' => 'required|regex:/^[a-zA-Z ]+$/u|max:255',
+                'shipping_phone.*' => 'required|string|max:255',
+                'shipping_email.*' => 'required|string|max:255',
+                'product_type.*' => 'required|max:255',
+                'bank_city.*' => 'required|max:255',
+                'bank_name.*' => 'required|max:255',
+                'bank_branch.*' => 'required|string|max:255',
+                'account_no.*' => 'required|string|max:255',
+                'account_title.*' => 'required|string|max:255',
+                'iban_no.*' => 'required|string|max:255',
                 'billing_person_name' => 'required|string|max:255',
                 'billing_person_phone' => 'required|string|max:255',
                 'billing_person_email' => 'required|string|email|max:255',
@@ -192,61 +245,71 @@ class RegisterController extends Controller
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
-                // 'g-recaptcha-response' => 'required|captcha',
                 'segments' => 'required',
                 'sub_segments' => 'required',
                 'cycle_of_invoicing' => 'required',
-                'referral' => ''
-
+                'referral' => '',
             ]);
         }
+            
 
     }
 
     public function register(Request $request)
     {
         $this->validator($request->all())->validate();
-        event(new Registered($user = $this->create($request->all())));
-        
-        $user_attachment = new UserDocumentAttachment();
-        $user_attachment->user_id = $user->id;
-        $date = Carbon::now()->format('Y_m_d');
+        event(new Registered($user = $this->create($request->all(), $request)));
+        if($request->wordpress_lead_register != 1){
 
-        if ($request->hasFile('cnic_front_image')) {
-            if($user_attachment->cnic_front_image != NULL) {
-                Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_front_image);
-            }
-            $filename = 'cnic_front_image_' . $date . '_' . $user->id . '.png';
-            $file = $request->file('cnic_front_image');
-            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
-            $user_attachment->cnic_front_image = $filename;
-        }
-        
-        if ($request->hasFile('cnic_back_image')) {
-            if($user_attachment->cnic_back_image != NULL) {
-                Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_back_image);
-            }
-            $filename = 'cnic_back_image_' . $date . '_' . $user->id . '.png';
-            $file = $request->file('cnic_back_image');
-            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
-            $user_attachment->cnic_back_image = $filename;
-        }
-        
-        if ($request->hasFile('blank_cheque_image')) {
-            if($user_attachment->blank_cheque_image != NULL){
-                Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->blank_cheque_image);
-            }
-            $filename = 'blank_cheque_image_' . $date . '_' . $user->id . '.png';
-            $file = $request->file('blank_cheque_image');
-            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
-            $user_attachment->blank_cheque_image = $filename;
-        }
-        $user_attachment->uploaded_at = Carbon::now();
-        $user_attachment->save();
+            $user_attachment = new UserDocumentAttachment();
+            $user_attachment->user_id = $user->id;
+            $date = Carbon::now()->format('Y_m_d');
 
-        
-        return $this->registered($request, $user)
-            ?: redirect($this->redirectPath());
+            if ($request->hasFile('cnic_front_image')) {
+                if($user_attachment->cnic_front_image != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_front_image);
+                }
+                $filename = 'cnic_front_image_' . $date . '_' . $user->id . '.png';
+                $file = $request->file('cnic_front_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
+                $user_attachment->cnic_front_image = $filename;
+            }
+            
+            if ($request->hasFile('cnic_back_image')) {
+                if($user_attachment->cnic_back_image != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_back_image);
+                }
+                $filename = 'cnic_back_image_' . $date . '_' . $user->id . '.png';
+                $file = $request->file('cnic_back_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
+                $user_attachment->cnic_back_image = $filename;
+            }
+            
+            if ($request->hasFile('blank_cheque_image')) {
+                if($user_attachment->blank_cheque_image != NULL){
+                    Storage::disk('public')->delete('users_attached_documents/'. $request->user_id .'/'. $user_attachment->blank_cheque_image);
+                }
+                $filename = 'blank_cheque_image_' . $date . '_' . $user->id . '.png';
+                $file = $request->file('blank_cheque_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
+                $user_attachment->blank_cheque_image = $filename;
+            }
+            $user_attachment->uploaded_at = Carbon::now();
+            $user_attachment->save();
+
+            
+            if(!$request->has('wordpress_account')){
+                return $this->registered($request, $user)
+                ?: redirect($this->redirectPath());
+            }else{
+                return redirect()->route('cod.welcome');
+
+            }
+
+
+        }else{
+            return redirect()->route('cod.login')->with('success', 'User Register Successfully!');
+        }
     }
 
     public function duplicate_user_info($user_id, $name, $phone1, $phone2, $cnic, $ibans){
@@ -332,266 +395,367 @@ class RegisterController extends Controller
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
+     * @param Request $request
      * @return \App\User
      */
-    protected function create(array $data)
-    {     
-        if(array_key_exists('lead_id', $data)){
-            $lead_id = $data['lead_id'];
-        }
-        else{
-            $lead_id = null;
-        }
-        if(array_key_exists('territory_id', $data)){
-            $territory_id = $data['territory_id'];
-        }
-        else{
-            $auto_tag_territory = AutoTagTerritory::where('admin_id',$data['sale_person'])->where('status',1);
-            if($auto_tag_territory->exists()){
-                $auto_tag_territory = $auto_tag_territory->first();
-                $territory_id = $auto_tag_territory->territory_id;
-            }else{
-                $territory_id = null;
-            }
-        }
-        $referral = Referral::where('name',$data['referral'])->get()->first();
-        if($referral){
-            $referral_id = $referral->id;
-        }else{
-            $referral_id = null;
-        }
+    protected function create(array $data, Request $request)
+    {    
+        $admin_auto_tag_territory = null; 
+        if(isset($data['wordpress_lead_register']) && $data['wordpress_lead_register'] == 1){
+            $lead = Lead::find($data['lead_id']);
+            User::create([
+                'name' => $lead->company_name,
+                'email' => $lead->email_address,
+                'address' => $lead->business_address,
+                'password' => Hash::make($data['password']),
+                'phone'=>$lead->phone_number,
+                'city_id'=>$lead->city_id,
+                'reference_id' => $lead->reference_id,
+                'lead_id' => $lead->id,
+                'average_shipments' => $lead->average_shipment_per_week,
+                'account_type_id' => '1',
+                'ntn_no' => $lead->ntn_number,
+                'status' => '0',
+                'payment_cycle_id' => '0',
+                'rcp_tat_option_id' => '0',
+                'on_board_status' => '0',
+            ]);
 
-        switch ($data['payment_cycles']) {
-            case '2':
-            case '4':
-            case '5':
-                $payment_cycle_days = $data['selected_days'];
-                break;
-            case '6':
-                $payment_cycle_days = $data['fortnite'];
-                break;
-            case '3':
-                $payment_cycle_days = $data['monthly'];
-                break;
-            default:
-                $payment_cycle_days = 0;
-        }
-
-        $newUser = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'address' => $data['company_address'],
-            'poc' => $data['shipper_poc'],
-            'phone'=>$data['phone'],
-            'phone2'=>$data['phone2'],
-            'cnic' => $data['cnic'],
-            'ntn_no' => $data['ntn_no'],
-            'strn_no' => $data['strn_no'],
-            'url' => $data['url'],
-            'city_id'=>$data['shipper_city'],
-            'product_id'=>$data['shipper_product_type'],
-            'other_product_name'=> (array_key_exists('product_name', $data))? $data['product_name']:null,
-            'account_type_id' => $data['nature_of_account'],
-            'average_shipments' => $data['average_shipment'],
-            'average_shipment_duration_id' => $data['average_shipment_duration'],
-            'reference_id' => $data['reference'],
-            'email_verified' => 0,
-            'brand_name' => $data['brand_name'],
-            'segment_id' => $data['segments'],
-            'sub_segment_id' => $data['sub_segments'],
-            'referral_id' => $referral_id,
-            'lead_id' => $lead_id,
-            'api_token' => uniqid(base64_encode(str_random(60))),
-            'territory_id' =>  $territory_id,
-            'payment_cycle_id' =>  $data['payment_cycles'],
-            'payment_cycle_days' => $payment_cycle_days
-        ]);
-        $shipper = User::find($newUser->id);
-//        $shipper->products()->attach($data['product_type']);
-
-        if($data['sale_person']){
-            $sale_person = new SalePersonTag();
-            $sale_person->admin_id = $data['sale_person'];
-            $sale_person->user_id = $newUser->id;
-            $sale_person->status = 0;
-            $sale_person->save();
-
-            $sales_commission = new SalesCommission();
-            $sales_commission->shipper_id = $newUser->id;
-            $sales_commission->commission_users_count = 1;
-            $sales_commission->commission = 2.5;
-            $sales_commission->save();
-            $sales_commission_id = $sales_commission->id;
-            $sales_commission_user = new SalesCommissionUser();
-            $sales_commission_user->sales_commission_id = $sales_commission_id;
-            $sales_commission_user->tier_type_id = 1;
-            $sales_commission_user->tier_id = 1;
-            $sales_commission_user->user_id = $data['sale_person'];
-            $sales_commission_user->commission = 2.5;
-            $sales_commission_user->save();
-        }
-        $first = TRUE;
-
-        foreach ($data['pickup_address'] as $index => $pickup_address) {
-
-            if ($first) {
-                UserShippingInfo::create([
-                    'user_id' => $newUser->id,
-                    'pickup_address' => $pickup_address,
-                    'poc' => $data['shipping_poc'][$index],
-                    'phone' => $data['shipping_phone'][$index],
-                    'email' => $data['shipping_email'][$index],
-                    'city_id' => $data['shipping_city'][$index],
-                    'pickup_brand_name' => $data['pickup_brand_name'][$index],
-                    'default_address' => TRUE
-                ]);
-
-                $first = FALSE;
-            }
-            else {
-                UserShippingInfo::create([
-                    'user_id' => $newUser->id,
-                    'pickup_address' => $pickup_address,
-                    'poc' => $data['shipping_poc'][$index],
-                    'phone' => $data['shipping_phone'][$index],
-                    'email' => $data['shipping_email'][$index],
-                    'city_id' => $data['shipping_city'][$index],
-                    'pickup_brand_name' => $data['pickup_brand_name'][$index],
-                    
-                ]);
-            }
-        }
-        $iban_array = array();
-        $default_bank = TRUE;
-        foreach($data['bank_name'] as $rowId => $bank){
-            if($data['nature_of_account'] == 1){
-                if($default_bank){
-                    UserBankInfo::create([
-                        'user_id'=>$newUser->id,
-                        'bank_name'=> $bank,
-                        'bank_branch'=>$data['bank_branch'][$rowId],
-                        'account_no'=>$data['account_no'][$rowId],
-                        'account_title'=>$data['account_title'][$rowId],
-                        'iban'=> strtoupper($data['iban_no'][$rowId]),
-                        'city_id'=>$data['bank_city'][$rowId],
-                        'default_bank' => 1
-                    ]);
-                    $iban_array[] = $data['iban_no'][$rowId];
-                    $default_bank = FALSE;
-                }else{
-                    UserBankInfo::create([
-                        'user_id'=>$newUser->id,
-                        'bank_name'=> $bank,
-                        'bank_branch'=>$data['bank_branch'][$rowId],
-                        'account_no'=>$data['account_no'][$rowId],
-                        'account_title'=>$data['account_title'][$rowId],
-                        'iban'=> strtoupper($data['iban_no'][$rowId]),
-                        'city_id'=>$data['bank_city'][$rowId]
-                    ]);
-                    $iban_array[] = $data['iban_no'][$rowId];
+            
+            $city = City::find($lead->city_id); // Using find() to directly get the city by ID
+            if($city){ // Check if city exists
+                $zone_id = $city->zone_id; // Assuming there's a zone_id in your City model
+                $lead_zone = LeadZone::where(['zone_id' => $zone_id, 'status' => 1])->first(); // Get lead zone
+                if($lead_zone){ // Check if lead zone exists
+                    $sale_person = new SalePersonTag();
+                    $sale_person->admin_id = $lead_zone->admin_id; // Corrected comma to semicolon
+                    $sale_person->user_id = User::max('id'); // Corrected comma to semicolon
+                    $sale_person->status = 0; // Corrected comma to semicolon
+                    $sale_person->save(); // Corrected comma to semicolon and added save() method
+                    $admin_auto_tag_territory = $lead_zone->admin_id;
                 }
+                
+                if($lead){
+                    $lead->sale_person_id = $lead_zone->admin_id ?? null;
+                    $lead->save();
+                }
+            }
+        }else{
+            if(array_key_exists('lead_id', $data)){
+                $lead_id = $data['lead_id'];
+            }
+            else{
+                $lead_id = null;
+            }
+
+            if(array_key_exists('territory_id', $data)){
+                $territory_id = $data['territory_id'];
+            } else{
+                if(isset($data['sale_person'])){
+                    $auto_tag_territory = AutoTagTerritory::where('admin_id',$data['sale_person'])->where('status',1);
+                    if($auto_tag_territory->exists()){
+                        $auto_tag_territory = $auto_tag_territory->first();
+                        $territory_id = $auto_tag_territory->territory_id;
+                    }else{
+                        $territory_id = null;
+                    }
+                }else{
+                    $auto_tag_territory = AutoTagTerritory::where('admin_id', $admin_auto_tag_territory)->where('status',1);
+                    if($auto_tag_territory->exists()){
+                        $auto_tag_territory = $auto_tag_territory->first();
+                        $territory_id = $auto_tag_territory->territory_id;
+                    }else{
+                        $territory_id = null;
+                    }
+                }
+            }
+            $referral = Referral::where('name',$data['referral'])->get()->first();
+            if($referral){
+                $referral_id = $referral->id;
+            }else{
+                $referral_id = null;
+            }
+
+            switch ($data['payment_cycles']) {
+                case '2':
+                case '4':
+                case '5':
+                    $payment_cycle_days = $data['selected_days'];
+                    break;
+                case '6':
+                    $payment_cycle_days = $data['fortnite'];
+                    break;
+                case '3':
+                    $payment_cycle_days = $data['monthly'];
+                    break;
+                default:
+                    $payment_cycle_days = 0;
+            }
+
+            if(isset($data['wordpress_account']) && $data['wordpress_account'] == 1 ){
+                $newUser = User::updateOrCreate(
+                    ['phone' => $data['phone']],
+                    [
+                    'address' => $data['company_address'],
+                    'poc' => $data['shipper_poc'],
+                    'phone2'=>$data['phone2'],
+                    'cnic' => $data['cnic'],
+                    'ntn_no' => $data['ntn_no'],
+                    'strn_no' => $data['strn_no'],
+                    'url' => $data['url'],
+                    'city_id'=>$data['shipper_city'],
+                    'product_id'=>$data['shipper_product_type'],
+                    'other_product_name'=> (array_key_exists('product_name', $data))? $data['product_name']:null,
+                    'account_type_id' => $data['nature_of_account'],
+                    'average_shipments' => $data['average_shipment'],
+                    'average_shipment_duration_id' => $data['average_shipment_duration'],
+                    'reference_id' => $data['reference'],
+                    'email_verified' => 0,
+                    'brand_name' => $data['brand_name'],
+                    'segment_id' => $data['segments'],
+                    'sub_segment_id' => $data['sub_segments'],
+                    'referral_id' => $referral_id,
+                    'lead_id' => $lead_id,
+                    'api_token' => uniqid(base64_encode(str_random(60))),
+                    'territory_id' =>  $territory_id,
+                    'payment_cycle_id' =>  $data['payment_cycles'],
+                    'payment_cycle_days' => $payment_cycle_days
+                ]);
+
+                
+                $adminDashboardController = new AdminDashboardController();
+                $adminDashboardController->addRates($request, User::max('id'));
+
+                $lead = Lead::find($data['lead_id']);
+                $lead->status_id = 9;
+                $lead->save();
 
             }else{
-                $generation_date = $data['generation_date'];
-                $invoicing_cycle = $data['cycle_of_invoicing'];
-
-                UserBankInfo::create([
-                    'user_id'=>$newUser->id,
-                    'bank_name'=>$bank,
-                    'bank_branch'=>$data['bank_branch'][$rowId],
-                    'account_no'=>$data['account_no'][$rowId],
-                    'account_title'=>$data['account_title'][$rowId],
-                    'iban'=> strtoupper($data['iban_no'][$rowId]),
-                    'city_id'=> $data['bank_city'][$rowId],
-                    'invoicing_cycle_id' => $invoicing_cycle,
-                    'generation_date' => $generation_date,
-                    'billing_person_name' => $data['billing_person_name'],
-                    'billing_person_phone' => $data['billing_person_phone'],
-                    'billing_person_email' => $data['billing_person_email'],
-                    'billing_address' => $data['billing_address'],
-                    'default_bank' => 1
+                $newUser = User::create([
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'password' => Hash::make($data['password']),
+                    'address' => $data['company_address'],
+                    'poc' => $data['shipper_poc'],
+                    'phone'=>$data['phone'],
+                    'phone2'=>$data['phone2'],
+                    'cnic' => $data['cnic'],
+                    'ntn_no' => $data['ntn_no'],
+                    'strn_no' => $data['strn_no'],
+                    'url' => $data['url'],
+                    'city_id'=>$data['shipper_city'],
+                    'product_id'=>$data['shipper_product_type'],
+                    'other_product_name'=> (array_key_exists('product_name', $data))? $data['product_name']:null,
+                    'account_type_id' => $data['nature_of_account'],
+                    'average_shipments' => $data['average_shipment'],
+                    'average_shipment_duration_id' => $data['average_shipment_duration'],
+                    'reference_id' => $data['reference'],
+                    'email_verified' => 0,
+                    'brand_name' => $data['brand_name'],
+                    'segment_id' => $data['segments'],
+                    'sub_segment_id' => $data['sub_segments'],
+                    'referral_id' => $referral_id,
+                    'lead_id' => $lead_id,
+                    'api_token' => uniqid(base64_encode(str_random(60))),
+                    'territory_id' =>  $territory_id,
+                    'payment_cycle_id' =>  $data['payment_cycles'],
+                    'payment_cycle_days' => $payment_cycle_days
                 ]);
             }
-        }
-        self::duplicate_user_info($newUser->id, $data['name'], $data['phone'], $data['phone2'], $data['cnic'], $iban_array);
+          
+            $shipper = User::find($newUser->id);
+    //        $shipper->products()->attach($data['product_type']);
 
-        $token = uniqid(base64_encode(str_random(60)));
-        $crf_terms_and_conditions = new CRFTermsConditions();
-        $crf_terms_and_conditions->user_id = $newUser->id;
-        $crf_terms_and_conditions->token = $token;
-        $crf_terms_and_conditions->save();
+            if(isset($data['sale_person'])){
+                $sale_person = new SalePersonTag();
+                $sale_person->admin_id = $data['sale_person'];
+                $sale_person->user_id = $newUser->id;
+                $sale_person->status = 0;
+                $sale_person->save();
 
+                $sales_commission = new SalesCommission();
+                $sales_commission->shipper_id = $newUser->id;
+                $sales_commission->commission_users_count = 1;
+                $sales_commission->commission = 2.5;
+                $sales_commission->save();
+                $sales_commission_id = $sales_commission->id;
+                $sales_commission_user = new SalesCommissionUser();
+                $sales_commission_user->sales_commission_id = $sales_commission_id;
+                $sales_commission_user->tier_type_id = 1;
+                $sales_commission_user->tier_id = 1;
+                $sales_commission_user->user_id = $data['sale_person'];
+                $sales_commission_user->commission = 2.5;
+                $sales_commission_user->save();
+            }
+            $first = TRUE;
 
-        $banks_infos =array();
-        $user_bank_infos = UserBankInfo::where('user_id', $newUser->id)->get();
+            foreach ($data['pickup_address'] as $index => $pickup_address) {
 
-        $route = route('cod.email.verified', ['user_id' => $newUser->id]);
+                if ($first) {
+                    UserShippingInfo::create([
+                        'user_id' => $newUser->id,
+                        'pickup_address' => $pickup_address,
+                        'poc' => $data['shipping_poc'][$index],
+                        'phone' => $data['shipping_phone'][$index],
+                        'email' => $data['shipping_email'][$index],
+                        'city_id' => $data['shipping_city'][$index],
+                        'pickup_brand_name' => $data['pickup_brand_name'][$index],
+                        'default_address' => TRUE
+                    ]);
 
-        $subject = 'Sonic - Account Verification';
-
-        $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
-                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
-                        <img src="' . asset('img/sonic_logo_new.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
-                        <img src="' . asset('img/trax_logo_new.png') . '" alt="Trax" style="display: inline-block; width: 15%">
-                    </div>';
-        $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
-                    <h3 style="margin-top: 0px; margin-bottom: 0px;">Thank you for choosing TRAX</h3>
-                    <p>Dear '. $newUser->name .','. PHP_EOL .'You are almost ready to start working with us.'. PHP_EOL .'You have entered Your Contact number is: '. $newUser->phone .', address: '. $newUser->address .''. PHP_EOL .'Your Bank information is:';
-                    if(count($user_bank_infos) > 0){
-                        $html .='<table style="width:100%;">';
-                        $html .= '<thead><tr>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account #</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account Title</th>
-                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Branch Name</th></tr></thead><tbody>';
-                        foreach($user_bank_infos as $banks_info){
-                            $html .='<tr>';
-                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$banks_info->account_no.'</td>';
-                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$banks_info->account_title.'</td>';
-                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$banks_info->bank_branch.'</td>';
-                            $html .='</tr>';
-                        }
-
-                        $html .= '</tbody></table>';
+                    $first = FALSE;
+                }
+                else {
+                    UserShippingInfo::create([
+                        'user_id' => $newUser->id,
+                        'pickup_address' => $pickup_address,
+                        'poc' => $data['shipping_poc'][$index],
+                        'phone' => $data['shipping_phone'][$index],
+                        'email' => $data['shipping_email'][$index],
+                        'city_id' => $data['shipping_city'][$index],
+                        'pickup_brand_name' => $data['pickup_brand_name'][$index],
+                        
+                    ]);
+                }
+            }
+            $iban_array = array();
+            $default_bank = TRUE;
+            foreach($data['bank_name'] as $rowId => $bank){
+                if($data['nature_of_account'] == 1){
+                    if($default_bank){
+                        UserBankInfo::create([
+                            'user_id'=>$newUser->id,
+                            'bank_name'=> $bank,
+                            'bank_branch'=>$data['bank_branch'][$rowId],
+                            'account_no'=>$data['account_no'][$rowId],
+                            'account_title'=>$data['account_title'][$rowId],
+                            'iban'=> strtoupper($data['iban_no'][$rowId]),
+                            'city_id'=>$data['bank_city'][$rowId],
+                            'default_bank' => 1
+                        ]);
+                        $iban_array[] = $data['iban_no'][$rowId];
+                        $default_bank = FALSE;
                     }else{
-                        $html .= '<p>No bank information found.</p>';
+                        UserBankInfo::create([
+                            'user_id'=>$newUser->id,
+                            'bank_name'=> $bank,
+                            'bank_branch'=>$data['bank_branch'][$rowId],
+                            'account_no'=>$data['account_no'][$rowId],
+                            'account_title'=>$data['account_title'][$rowId],
+                            'iban'=> strtoupper($data['iban_no'][$rowId]),
+                            'city_id'=>$data['bank_city'][$rowId]
+                        ]);
+                        $iban_array[] = $data['iban_no'][$rowId];
                     }
 
-        $html .= 'To finish signing up, simply click below to verify your email address.</p>  <div align="center" style="overflow: hidden; display: flex; justify-content:space-around;">
-                        <a href="'.$route.'" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Verify Your Account</a>
-                    </div>
-                </div>
-                    <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>
-                </div>';
-        $body = $html;
-        $to = array();
-        $to[] = $newUser->email;
-        $admins_sales = Admin::where('role_id', 4)->where('status', 1);
-        if ($admins_sales->exists()) {
-            $to = array_merge($to, $admins_sales->pluck('email')->toArray());
-        }
-        
-        $city_id = $shipper->city_id;
-        $hub_id = City::find($city_id)->hub_id;
-        $managers = Admin::whereIn('role_id',[31,44])->where('status', 1)->pluck('id','email')->toArray();
-        foreach($managers as $rms => $index){
-            $admin_hubs = AdminHub::where('admin_id',$index);
-            if($admin_hubs->exists()){
-                $admin_hubs = $admin_hubs->pluck('hub_id')->toArray();
-                if(in_array($hub_id , $admin_hubs)) {
-                    $to[] = $rms;
+                }else{
+                    $generation_date = $data['generation_date'];
+                    $invoicing_cycle = $data['cycle_of_invoicing'];
+
+                    UserBankInfo::create([
+                        'user_id'=>$newUser->id,
+                        'bank_name'=>$bank,
+                        'bank_branch'=>$data['bank_branch'][$rowId],
+                        'account_no'=>$data['account_no'][$rowId],
+                        'account_title'=>$data['account_title'][$rowId],
+                        'iban'=> strtoupper($data['iban_no'][$rowId]),
+                        'city_id'=> $data['bank_city'][$rowId],
+                        'invoicing_cycle_id' => $invoicing_cycle,
+                        'generation_date' => $generation_date,
+                        'billing_person_name' => $data['billing_person_name'],
+                        'billing_person_phone' => $data['billing_person_phone'],
+                        'billing_person_email' => $data['billing_person_email'],
+                        'billing_address' => $data['billing_address'],
+                        'default_bank' => 1
+                    ]);
                 }
             }
+            self::duplicate_user_info($newUser->id, $data['name'], $data['phone'], $data['phone2'], $data['cnic'], $iban_array);
+
+            $token = uniqid(base64_encode(str_random(60)));
+            $crf_terms_and_conditions = new CRFTermsConditions();
+            $crf_terms_and_conditions->user_id = $newUser->id;
+            $crf_terms_and_conditions->token = $token;
+            $crf_terms_and_conditions->save();
+
+
+            $banks_infos =array();
+            $user_bank_infos = UserBankInfo::where('user_id', $newUser->id)->get();
+
+            $route = route('cod.email.verified', ['user_id' => $newUser->id]);
+
+            $subject = 'Sonic - Account Verification';
+
+            $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
+                        <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
+                            <img src="' . asset('img/sonic_logo_new.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
+                            <img src="' . asset('img/trax_logo_new.png') . '" alt="Trax" style="display: inline-block; width: 15%">
+                        </div>';
+            $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff">
+                        <h3 style="margin-top: 0px; margin-bottom: 0px;">Thank you for choosing TRAX</h3>
+                        <p>Dear '. $newUser->name .','. PHP_EOL .'You are almost ready to start working with us.'. PHP_EOL .'You have entered Your Contact number is: '. $newUser->phone .', address: '. $newUser->address .''. PHP_EOL .'Your Bank information is:';
+                        if(count($user_bank_infos) > 0){
+                            $html .='<table style="width:100%;">';
+                            $html .= '<thead><tr>
+                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account #</th>
+                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account Title</th>
+                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Branch Name</th></tr></thead><tbody>';
+                            foreach($user_bank_infos as $banks_info){
+                                $html .='<tr>';
+                                $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$banks_info->account_no.'</td>';
+                                $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$banks_info->account_title.'</td>';
+                                $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$banks_info->bank_branch.'</td>';
+                                $html .='</tr>';
+                            }
+
+                            $html .= '</tbody></table>';
+                        }else{
+                            $html .= '<p>No bank information found.</p>';
+                        }
+
+                        if (!isset($newUser->on_board_status)) {
+                            $html .= '<p>To finish signing up, simply click below to verify your email address.</p>
+                            <div align="center" style="overflow: hidden; display: flex; justify-content: space-around;">
+                                <a href="' . $route . '" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Verify Your Account</a>
+                            </div>';
+                        }
+
+
+                    $html.= '</div>
+                        <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>
+                    </div>';
+            $body = $html;
+            $to = array();
+            $to[] = $newUser->email;
+            $admins_sales = Admin::where('role_id', 4)->where('status', 1);
+            if ($admins_sales->exists()) {
+                $to = array_merge($to, $admins_sales->pluck('email')->toArray());
+            }
+            
+            $city_id = $shipper->city_id;
+            $hub_id = City::find($city_id)->hub_id;
+            $managers = Admin::whereIn('role_id',[31,44])->where('status', 1)->pluck('id','email')->toArray();
+            foreach($managers as $rms => $index){
+                $admin_hubs = AdminHub::where('admin_id',$index);
+                if($admin_hubs->exists()){
+                    $admin_hubs = $admin_hubs->pluck('hub_id')->toArray();
+                    if(in_array($hub_id , $admin_hubs)) {
+                        $to[] = $rms;
+                    }
+                }
+            }
+            $to = array_values(array_filter($to));
+            if(!empty($to)){
+                $mail = Mail::to($to);
+
+                $mail->send(new Notifications($subject, $body, null));
+            }
+
+
+            
+            return $newUser;
         }
-        $to = array_values(array_filter($to));
-        if(!empty($to)){
-            $mail = Mail::to($to);
 
-            $mail->send(new Notifications($subject, $body, null));
-        }
-
-
-        return $newUser;
     }
     public function email_verified($id){
         $user = User::find($id);
@@ -599,6 +763,7 @@ class RegisterController extends Controller
         $user->save();
         return view('client.register_success')->with(['verify' => 1]);
     }
+    
     public function register_success(){
         return view('client.register_success')->with(['verify' => 0]);
     }
@@ -675,7 +840,6 @@ class RegisterController extends Controller
 
         }
     }
-
     public function sales_person(Request $request){
 
         $id = $request->id;
@@ -704,6 +868,8 @@ class RegisterController extends Controller
             }
         }
     }
+
+   
 
     public function territory(Request $request)
     {
