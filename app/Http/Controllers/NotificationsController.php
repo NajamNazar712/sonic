@@ -15,6 +15,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\Runner;
 use App\Jobs\ProcessOTPSMS;
 use App\Mail\Notifications;
+use Illuminate\Support\Str;
 use App\Http\Models\Dispute;
 use App\Http\Models\Invoice;
 use Illuminate\Http\Request;
@@ -101,6 +102,7 @@ use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\NotificationSettingShipper;
+use App\Http\Models\ShipperVerificationPinCode;
 use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\OvernightOverlandReportData;
@@ -122,10 +124,9 @@ use App\Http\Controllers\Admins\GlobalSettingsController;
 use App\Http\Models\Excel_reports\MonthAverageDestination;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
-use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
-use App\Http\Models\ShipperVerificationPinCode;
+use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use App\Http\Models\ShipmentsWeightType;
 
 class NotificationsController extends Controller
@@ -5800,14 +5801,25 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $tagged_by . '</td>';
                         if ($person['old_sale_person'] != null) {
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person']->name . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person']->name   . '</td>';
                         } else {
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
                         }
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person_date'] . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['new_sale_person']->name . '</td>';
-                        $html .= '</tr>';
 
+                        if ($person['old_sale_person_date'] != null) {
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['old_sale_person_date']   . '</td>';
+                        } else {
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
+                        }
+
+                        if ($person['new_sale_person'] != null) {
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $person['new_sale_person']->name   . '</td>';
+                        } else {
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
+                        }
+
+
+                        $html .= '</tr>';
                         if ($person['zone']->id == 1) {
                             $cc[] = 'nabeel.ahmed@trax.pk';
                         } else if ($person['zone']->id == 2) {
@@ -5815,11 +5827,11 @@ class NotificationsController extends Controller
                             $cc[] = 'adeel.ali@trax.pk';
                         }
 
-                        if ($person['old_sale_person']->email) {
+                        if ($person['old_sale_person']) {
                             $cc[] = $person['old_sale_person']->email;
                         }
 
-                        if ($person['new_sale_person']->email) {
+                        if ($person['new_sale_person']) {
                             $to[] = $person['new_sale_person']->email;
                         }
                     }
@@ -5832,9 +5844,10 @@ class NotificationsController extends Controller
 
                     $sale_head_email = Admin::where('role_id', 4)->select('email')->first();
 
-                    if ($sale_head_email != '') {
-                        $cc[] = $sale_head_email->email;
+                    if ($sale_head_email) {
+                        $cc[] = $sale_head_email;
                     }
+                    
                     if ($to == null) {
                         $cc = null;
                     }
@@ -8586,21 +8599,23 @@ class NotificationsController extends Controller
                         ->first();
 
                     if (strpos($sale_person_body, '[person_of_contact]') !== FALSE) {
-                        $sale_person_body = str_replace('[person_of_contact]', $sale_person->name, $sale_person_body);
+                        if ($sale_person) { 
+                            $sale_person_body = str_replace('[person_of_contact]', $sale_person->name, $sale_person_body);
+                            $to = $sale_person->email;
+                            self::email($subject, $sale_person_body, $to);
+        
+                            $finance_admin = AdminDepartment::where('id', 4)->first();
+                            $finance_admin = $finance_admin->department_head;
+        
+                            if (strpos($finance_body, '[person_of_contact]') !== FALSE) {
+                                $finance_body = str_replace('[person_of_contact]', $finance_admin['name'], $finance_body);
+                            }
+        
+                            $to = $finance_admin['email'];
+                            self::email($subject, $finance_body, $to);
+                        }
                     }
 
-                    $to = $sale_person->email;
-                    self::email($subject, $sale_person_body, $to);
-
-                    $finance_admin = AdminDepartment::where('id', 4)->first();
-                    $finance_admin = $finance_admin->department_head;
-
-                    if (strpos($finance_body, '[person_of_contact]') !== FALSE) {
-                        $finance_body = str_replace('[person_of_contact]', $finance_admin['name'], $finance_body);
-                    }
-
-                    $to = $finance_admin['email'];
-                    self::email($subject, $finance_body, $to);
                 } else if ($id == 150) {
                     $shipment_ids = $reference_1_id;
                     $table = '<div><table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Customer Name</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Destination</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Remarks</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Collection Amount</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Updated By</strong></th></tr></thead><tbody>';
@@ -11073,7 +11088,57 @@ class NotificationsController extends Controller
                     $body = str_replace('[status]', $status, $body);
 
                     self::email($subject, $body, $to);
-                } else if($id == 232) {
+                } else if ($id == 230){
+                    // $subject = $notification->subject;
+                    // $body = $notification->body;
+                    $lead_ids = $reference_1_id;
+                    $tokens = $reference_2_id;
+                    
+                    foreach ($lead_ids as $key => $lead_id) {
+                        $lead = Lead::find($lead_id);
+                        if(isset($tokens[$key])){
+                            $route = route('cod.signup', ['id' => $lead->id, 'token' => $tokens[$key]]);
+                            $link = '<a href="' . $route . '">Click here to sign up</a>';
+                        
+                            $body = $notification->body; // Reset $body to its original state
+                            $subject = $notification->subject;  // Reset $subject to its original state
+    
+                            if (strpos($body, '[Link]') !== FALSE) {
+                                $body = str_replace('[Link]', $link, $body); // Use $body instead of $old_body
+                            }
+                            if (strpos($body, '[Company Name]') !== FALSE) {
+                                $body = str_replace('[Company Name]', $lead->company_name, $body); // Use $body instead of $old_body
+                            }
+                            if (strpos($body, '[Full Name]') !== FALSE) {
+                                $body = str_replace('[Full Name]', $lead->contact_person, $body); // Use $body instead of $old_body
+                            }
+                            if (strpos($subject, '[Company Name]') !== FALSE) {
+                                $subject = str_replace('[Company Name]', $lead->company_name, $subject);
+                            }
+                            self::email($subject, $body, $lead->email_address); // Send email with $body
+                        }
+                    }                    
+                } else if ($id == 231){
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $user_id = $reference_1_id;
+                    $user = User::find($user_id);
+                    $sale_person = Admin::find($user->lead->sale_person_id);
+                    if (strpos($body, '[Company Name]') !== FALSE) {
+                        $body = str_replace('[Company Name]', $user->name, $body); 
+                    }
+                    if (strpos($body, '[account ID]') !== FALSE) {
+                        $body = str_replace('[account ID]', $user->id, $body); 
+                    }
+                    if (strpos($subject, '[Company Name]') !== FALSE) {
+                        $subject = str_replace('[Company Name]', $user->name, $subject); 
+                    }
+
+                    if($sale_person){
+                        self::email($subject, $body, $sale_person->email); // Send email with $body
+                    }
+                                
+                }else if($id == 232) {
                     $subject = $notification->subject;
                     $body = $notification->body;
                     $shipper_ids=$reference_1_id;
