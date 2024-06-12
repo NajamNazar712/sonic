@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class StandardBookingTypeChargesTableSeeder extends Seeder
 {
@@ -19,4 +20,4 @@ class StandardBookingTypeChargesTableSeeder extends Seeder
             array('shipping_mode_id'=>4,'replacement_charges'=>200,'try_and_buy_charges'=>150, 'reverse_pickup_charges' => 100),
         ));
     }
-}200
+}
