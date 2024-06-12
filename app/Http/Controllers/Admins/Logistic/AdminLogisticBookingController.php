@@ -534,6 +534,7 @@ class AdminLogisticBookingController extends Controller
             'dense_weight'=>['nullable','numeric'],
             'volumetric_weight'=>['nullable','numeric'],
             'shipper_address_id'=>['required','integer'],
+            'total_pieces'=>['required','integer'],
             'consignee_name'=>['required','string','max:255'],
 //            'consignee_phone_1'=>['required','integer'],
 //            'consignee_address'=>['required','string','max:255'],
@@ -596,6 +597,7 @@ class AdminLogisticBookingController extends Controller
                     $logistic_booking->consignment_type=$request->consignment_type;
                     $logistic_booking->handling_inst=$request->handling_inst;
                     $logistic_booking->updated_by = $admin_id;
+                    $logistic_booking->total_pieces=$request->total_pieces;
                     $logistic_booking->save();
 
                     $shipment=Shipment::where('tracking_number',$request->cn_number);
