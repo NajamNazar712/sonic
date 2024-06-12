@@ -113,7 +113,7 @@
                                                     <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Total Pieces</label>
-                                                            <input type="text" name="total_pieces" class="form-control" value="{{$logistic_booking->total_pieces}}" readonly>
+                                                            <input type="text" name="total_pieces" class="form-control" value="{{$logistic_booking->total_pieces}}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-3">

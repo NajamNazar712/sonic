@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
 use Carbon\Carbon;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Client;
@@ -11057,7 +11058,57 @@ class NotificationsController extends Controller
                     $body = str_replace('[status]', $status, $body);
 
                     self::email($subject, $body, $to);
+                } else if($id == 232) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $shipper_ids=$reference_1_id;
+                    $privous_date=$reference_2_id;
+                    $to='';
+                    foreach ($shipper_ids as $shipper_id) {
+                        $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
+                            ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
+                            ->select('u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
+                            ->where('trax_logistic_bookings.booking_date',$privous_date)->where('trax_logistic_bookings.shipper_id',$shipper_id)->get();
+
+
+                        $html = '<table style="width:100%;border-collapse: collapse;">';
+                        $html .= '<thead><tr>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Account ID</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Shipper</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Order reference #</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Destination</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Weight</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">PCS</th>';
+                        $html .= '</tr></thead><tbody>';
+                        $serial = 1;
+                        foreach ($logisticbookings as $booking) {
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->shipper_id . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->shipper_name . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->tracking_number . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->order_reference . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->destination . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->total_booking_weight . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->total_pieces . '</td>';
+                            $html .= '</tr>';
+                            $serial++;
+                            $to=$booking->shipper_email;
+                        }
+                        $html .= '</tbody></table>';
+
+                        if (strpos($body, '[Booking_at]') !== FALSE) {
+                            $body = str_replace('[Booking_at]', $privous_date, $body);
+                        }
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $html, $body);
+                        }
+                        self::email($subject, $body, $to);
+                    }
                 }
+
             }
         }
     }
