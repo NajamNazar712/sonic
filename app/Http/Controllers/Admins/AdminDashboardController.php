@@ -4277,7 +4277,7 @@ class AdminDashboardController extends Controller
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
 
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->back()->with('success', 'All Rates are updateddd');
         }
 
         if ($user['status'] == 3) {
@@ -9474,8 +9474,7 @@ class AdminDashboardController extends Controller
 
 
             ->filterColumn('k.name', function ($query, $keyword) {
-                $query->where('k.name', $keyword)
-                ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
+                $query->where('k.name', $keyword);
             })
 
   
@@ -10087,8 +10086,7 @@ class AdminDashboardController extends Controller
 
 
             ->filterColumn('k.name', function ($query, $keyword) {
-                $query->where('k.name', $keyword)
-                ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
+                $query->where('k.name', $keyword);
             })
 
   

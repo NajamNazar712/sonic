@@ -1253,6 +1253,12 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = ['employee_name', 'employee_type', 'depatment', 'updated_by'];
         }
+        else if ($id == 232)
+        {
+            $details['receiver'] = ['Shipper Email'];
+
+            $details['fields'] = ['Booking_at','preview'];
+        }
         return $details;
     }
 

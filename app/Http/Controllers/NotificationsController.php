@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
 use App\BlockEmail;
 use Carbon\Carbon;
 use GuzzleHttp\Psr7;
@@ -11087,9 +11088,6 @@ class NotificationsController extends Controller
                     $body = str_replace('[status]', $status, $body);
 
                     self::email($subject, $body, $to);
-                    
-                    
-               
                 } else if ($id == 230){
                     // $subject = $notification->subject;
                     // $body = $notification->body;
@@ -11098,8 +11096,8 @@ class NotificationsController extends Controller
                     
                     foreach ($lead_ids as $key => $lead_id) {
                         $lead = Lead::find($lead_id);
-                        if(isset($tokens[$key])){
-                            $route = route('cod.signup', ['id' => $lead->id, 'token' => $tokens[$key]]);
+                        // if(isset($tokens[$key])){
+                            $route = route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]);
                             $link = '<a href="' . $route . '">Click here to sign up</a>';
                         
                             $body = $notification->body; // Reset $body to its original state
@@ -11118,7 +11116,7 @@ class NotificationsController extends Controller
                                 $subject = str_replace('[Company Name]', $lead->company_name, $subject);
                             }
                             self::email($subject, $body, $lead->email_address); // Send email with $body
-                        }
+                        // }
                     }                    
                 } else if ($id == 231){
                     $subject = $notification->subject;
@@ -11140,7 +11138,57 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $sale_person->email); // Send email with $body
                     }
                                 
+                }else if($id == 232) {
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $shipper_ids=$reference_1_id;
+                    $privous_date=$reference_2_id;
+                    $to='';
+                    foreach ($shipper_ids as $shipper_id) {
+                        $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
+                            ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
+                            ->select('u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
+                            ->where('trax_logistic_bookings.booking_date',$privous_date)->where('trax_logistic_bookings.shipper_id',$shipper_id)->get();
+
+
+                        $html = '<table style="width:100%;border-collapse: collapse;">';
+                        $html .= '<thead><tr>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Account ID</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Shipper</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Order reference #</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Destination</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">Weight</th>
+                                               <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">PCS</th>';
+                        $html .= '</tr></thead><tbody>';
+                        $serial = 1;
+                        foreach ($logisticbookings as $booking) {
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->shipper_id . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->shipper_name . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->tracking_number . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->order_reference . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->destination . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->total_booking_weight . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->total_pieces . '</td>';
+                            $html .= '</tr>';
+                            $serial++;
+                            $to=$booking->shipper_email;
+                        }
+                        $html .= '</tbody></table>';
+
+                        if (strpos($body, '[Booking_at]') !== FALSE) {
+                            $body = str_replace('[Booking_at]', $privous_date, $body);
+                        }
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $html, $body);
+                        }
+                        self::email($subject, $body, $to);
+                    }
                 }
+
             }
         }
     }
