@@ -61,6 +61,21 @@ class RetailAdminUserManagementController extends Controller
         $user->updated_by = Auth::id();
         $user->save();   
 
+        // retail user histroy
+        if ($category == 2){
+            $trax_center = RetailTraxCenter::where('id', $category_id)->first();
+            if ($trax_center){
+                $data = [
+                    'retail_user_id' => $user->id,
+                    'trax_center_id' => $category_id,
+                    'trax_center_name' => $trax_center->name,
+                    'trax_center_code' => $trax_center->code,
+                    'joining_date' => $joining_date,
+                ];
+                RetailUserHistory::create($data);
+            }
+        }
+
         // retail user commission
         $retailShippingModeNames = is_array($retailShippingModeNames) ? $retailShippingModeNames : [];
         $productPercentages = is_array($productPercentages) ? $productPercentages : [];
@@ -78,25 +93,6 @@ class RetailAdminUserManagementController extends Controller
             $retail_user_product_percentage->product_percentage = $productPercentage;
             $retail_user_product_percentage->created_by = Auth::id();
             $retail_user_product_percentage->save();
-
-            if ($category == 2){
-                // retail user histroy
-                $trax_center = RetailTraxCenter::where('id', $category_id)->first();
-                if ($trax_center){
-                    $data = [
-                        'retail_user_id' => $user->id,
-                        'trax_center_id' => $category_id,
-                        'trax_center_name' => $trax_center->name,
-                        'trax_center_code' => $trax_center->code,
-                        'joining_date' => $joining_date,
-                        'retail_shipping_mode_id' => $joining_date,
-                        'retail_shipping_mode_id' => $joining_date,
-                        'retail_shipping_mode_name' => $joining_date,
-                        'product_commission' => $joining_date,
-                    ];
-                    RetailUserHistory::create($data);
-                }
-            }
         }
 
         // retail user family info
@@ -1617,6 +1613,7 @@ class RetailAdminUserManagementController extends Controller
 
     public function user_update(Request $request, $id)
     {
+        // dd($request->all());
         $request->validate([
             'trax_id' => [
                 'nullable',
@@ -1642,19 +1639,36 @@ class RetailAdminUserManagementController extends Controller
         $retail_user->updated_by = Auth::id();
         $retail_user->trax_id = $request->trax_id;
         $retail_user->save();
-
-        // retail user history
-        $trax_center = RetailTraxCenter::where('code', $retail_user->store->code)->first();
-        $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->get();
-
-        foreach($retail_user_history as $history){
-            $newHistory = new RetailUserHistory();
-            $newHistory->fill($history->getAttributes());
-            unset($newHistory->id);
-            $newHistory->trax_center_id = $trax_center->id;
-            $newHistory->trax_center_name = $trax_center->name;
-            $newHistory->trax_center_code = $trax_center->code;
-            $newHistory->save();
+        
+        if ($retail_user->category == 2){
+            // retail user history
+            $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->first();
+            $trax_center = RetailTraxCenter::where('code', $retail_user->store->code)->first();
+            $new_trax_center_code = $trax_center->code;
+            $new_trax_center_name = $trax_center->name;
+            if ($retail_user_history){
+                $old_trax_center_code = $retail_user_history->trax_center_code;
+                if ($old_trax_center_code != $new_trax_center_code){
+                    $data = [
+                        'retail_user_id' => $retail_user->id,
+                        'trax_center_id' => $trax_center->id,
+                        'trax_center_name' => $new_trax_center_name,
+                        'trax_center_code' => $new_trax_center_code,
+                        'joining_date' => $request->agreement_start_date,
+                    ];
+                    RetailUserHistory::create($data);
+                    $retail_user_history->update(['last_date' => $request->agreement_start_date]);
+                }
+            } else {
+                $data = [
+                    'retail_user_id' => $retail_user->id,
+                    'trax_center_id' => $trax_center->id,
+                    'trax_center_name' => $new_trax_center_name,
+                    'trax_center_code' => $new_trax_center_code,
+                    'joining_date' => $request->agreement_start_date,
+                ];
+                RetailUserHistory::create($data);
+            }
         }
 
 
