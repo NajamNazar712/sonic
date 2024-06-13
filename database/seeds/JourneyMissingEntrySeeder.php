@@ -26,7 +26,7 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //
         $shipmentId = [
-            20217238031884, 22317237013863, 20217236958405, 20217236934113
+            20217238037352, 14420237942705, 20220237930511
         ];
         echo count($shipmentId);
         if ($shipmentId) {
@@ -37,12 +37,12 @@ class JourneyMissingEntrySeeder extends Seeder
                 $shipment->save();
                 
                 
-                if ($shipment->shipper_status_id === 5) {
+                // if ($shipment->shipper_status_id === 5) {
                     // $shipment->created_at = $shipment->updated_at;
                     $shipment->shipper_status_id = 14;
                     $shipment->consignee_status_id = 14;
                     $shipment->save();
-                }
+                // }
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
 
                 // if (in_array($shipment->shipper_status_id, [13, 14])) {
