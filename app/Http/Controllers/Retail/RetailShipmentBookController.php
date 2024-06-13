@@ -541,7 +541,7 @@ class RetailShipmentBookController extends Controller
         $trax_center = RetailTraxCenter::where('code', Auth::user()->store->code)->first();
         $retail_shipping_mode = RetailShippingMode::where('id', $retail_shipment->shipping_mode)->first();
         $retail_user_commission = RetailUserProductPercentage::where('retail_shipping_mode_id', $retail_shipment->shipping_mode)->first();
-        $retail_user = RetailUser::where('id', $retail_shipment->retail_user_i)->first();
+        $retail_user = RetailUser::where('id', $retail_shipment->retail_user_id)->first();
 
         if ($retail_user_commission == null){
             $commission = null;

@@ -90,6 +90,9 @@ class RetailAdminUserManagementController extends Controller
                 $family_member_type = 4; // Mother
             } elseif ($key === 2) {
                 $family_member_type = 1; // Spouse
+            } 
+            elseif ($key == 3) {
+                $family_member_type = 5; // Spouse DOB
             } else {
                 $family_member_type = 2; // children
             }
