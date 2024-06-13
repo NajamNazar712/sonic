@@ -336,7 +336,6 @@ trait RvTrait
             $shipment_assign_agent_table_columns['rv_state_id'] = 2;
         }
 
-        $shipment_assign_agent_table_columns['call_count'] = ($shipment_assign_agent->call_count ?? 0) + 1;
         return $shipment_assign_agent_table_columns;
     }
 
@@ -360,7 +359,11 @@ trait RvTrait
                 $shipment_assign_agent_table_columns['updated_type_id'] = 1; // admin type
             }
 
+            // dump($shipment_assign_agent);
+            $shipment_assign_agent_table_columns['call_count'] = (($shipment_assign_agent->call_count ?? 0) + 1);
+            // dump($shipment_assign_agent_table_columns);
             $shipment_assign_agent->update($shipment_assign_agent_table_columns);
+            // dump($shipment_assign_agent);
             return true;
         } else {
             return false;
