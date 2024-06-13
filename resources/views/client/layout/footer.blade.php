@@ -14,6 +14,7 @@
   <!-- END MODERN JS-->
 
 
+  
 @if (isset($ticker) || isset($shipper_return_note_ticker))
   <script src="{{asset('app-assets/vendors/js/marquee3000/marquee3k.js')}}" type="text/javascript"></script>
 
@@ -36,6 +37,9 @@
 @if(Session::has('agreement_signed') && session('agreement_signed') != 1)
     <script src="{{asset('szimek-signature_pad/signature.min.js')}}" type="text/javascript"></script>
 @endif
+
+@if(isset($user) && $user->status != 0)
+    
 <script type="text/javascript">
 
     $(document).ready(function() {
@@ -300,5 +304,6 @@
         @endif
     });
 </script>
+@endif
 
   @yield('js')

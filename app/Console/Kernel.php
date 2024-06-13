@@ -151,6 +151,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\AgentSarNotification',
         'App\Console\Commands\SackBagStatusUpdate',
         'App\Console\Commands\AutoAssignCrmAgentNew',
+        'App\Console\Commands\ShipperLogisticBookingCron',
 
         'App\Console\Commands\CalculateFranchiseCommission'
         ];
@@ -537,6 +538,7 @@ class Kernel extends ConsoleKernel
 
         // Commission calculation schedule
         $schedule->command('commission:calculate_commission')->monthlyOn(1, '00:00')->runInBackground();
+        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

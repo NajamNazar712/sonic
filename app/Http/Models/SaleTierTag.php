@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class SaleTierTag extends Model
 {
+
+    protected $guarded = [];
+
     public function poc_admin() {
         return $this->belongsTo('App\Http\Models\Admin\Admin', 'poc', 'id');
     }
