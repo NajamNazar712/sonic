@@ -1184,68 +1184,7 @@ trait RvTrait
 
         $agent = Admin::find($agent_id);
 
-        $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
-        // If excluded_shippers setting is not found, initialize as an empty array
-        $included_shippers = [];
-
-        if ($all_shipper_exists) {
-            $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
-            // Check if excluded_shippers exists and process it
-            if ($included_shipper->exists()) {
-                $included_shipper = $included_shipper->first();
-                $included_shippers = explode(',', $included_shipper['text']);
-            }
-        }
-        
-        $included_shippers = array_filter($included_shippers, function($value){
-            return $value != "";
-        });
-
-        $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
-        // If only_shippers setting is not found, initialize as an empty array
-        $only_shippers = [];
-        // Check if only_shippers exists and process it
-        if ($only_shipper->exists()) {
-            $only_shipper = $only_shipper->first();
-            $only_shippers = explode(',', $only_shipper['text']);
-        }
-
-        $only_shippers = array_filter($only_shippers, function($value){
-            return $value != "";
-        });
-
-        $shipments = [];
-
-        //Rv Disable Shippers Setting when all shippers are enbale and there are exluded shipper(agents can get those shippers shipments)
-        if (!empty($included_shippers)) {
-
-            $shipments = $this->getShipmentsFromRvShipmentTicket($agent);
-
-        }
-
-        
-        //Rv Disable Shippers Setting Screen when all shippers are disabled and there are shippers in only shippers select box(agents will not get those shippers shipments)
-        else if (!empty($only_shippers) && !($all_shipper_exists)) {
-            $all_shippers = User::where('status', 3)->pluck('id')->toArray();
-
-            $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
-                return !in_array($value, $only_shippers);
-            });
-
-            $included_shippers = array_filter($all_shippers, function($value){ 
-                return $value != '';
-            });
-            
-            if (!empty($included_shippers)){
-
-                $shipments = $this->getShipmentsFromRvShipmentTicket($agent);
-                
-            }
-        }
- 
-        else if ($all_shipper_exists && !($included_shipper)->exists()) {
-            $shipment = null;
-        }
+        $shipments = $this->getShipmentsFromRvShipmentTicket($agent);
 
         // check if shipments exist or if admin is assign shipment to agent
             //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
@@ -1365,7 +1304,7 @@ trait RvTrait
                     }
                     else
                     {
-                        return $query->orderBy('call_count','ASC');
+                        return $query->orderBy('call_count','ASC');//These Agents will get shipments in order of call count to Agent of Both Call Type
                     }
                 })
                 ->whereNotIn('shipment_status_reason_id',[12, 27, 35])
