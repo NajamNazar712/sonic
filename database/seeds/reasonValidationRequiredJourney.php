@@ -27,7 +27,7 @@ class reasonValidationRequiredJourney extends Seeder
                 $shipment->consignee_status_id = 12;
                 $shipment->save();
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
-                $deliveryNoteId->status = 6;
+                $deliveryNoteId->status = 1;
                 $deliveryNoteId->save();
                 ShipmentsJourneyController::add($shipment->id, 12, 12, null, null, null, 346, $deliveryNoteId->delivery_note_id,null,0);
             }

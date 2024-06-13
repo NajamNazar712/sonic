@@ -32,7 +32,8 @@ class outForDeliveryJourney extends Seeder
 
             foreach ($shipmentId as $shipment) {
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
-                $delivertNote   = DeliveryNote::find($deliveryNoteId->delivery_note_id)->latest();
+                $delivertNote   = DeliveryNote::find($deliveryNoteId->delivery_note_id);
+                
                 if($delivertNote->request_note_id){
                     $rider_for_delivery = RiderDeliveryNoteRequest::find($delivertNote->request_note_id);
                 }
