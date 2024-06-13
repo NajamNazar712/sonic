@@ -32,6 +32,7 @@ use App\Http\Models\TraxCenterAttachment;
 use App\Http\Models\RetailUserFamilyInformation;
 use App\Http\Models\RetailUserProductPercentage;
 use App\Http\Models\RetailUserAttachment;
+use App\Http\Models\RetailUserHistory;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -42,9 +43,8 @@ class RetailAdminUserManagementController extends Controller
         $this->middleware('Permission');
     }
 
-    public static function add_user($name, $password, $phone_number, $hub, $cnic, $address, $category, $category_id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages, $attachment_1, $attachment_2, $attachment_3, $attachment_4, $attachment_5, $file_1, $file_2, $file_3, $file_4, $file_5)
+    public static function add_user($name, $password, $phone_number, $hub, $cnic, $address, $category, $category_id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages, $attachment_1, $attachment_2, $attachment_3, $attachment_4, $attachment_5, $file_1, $file_2, $file_3, $file_4, $file_5, $joining_date)
     {
-
         $user = new RetailUser();
         $user->trax_id = $traxId;
         $user->city_id = $hub;
@@ -59,7 +59,7 @@ class RetailAdminUserManagementController extends Controller
         $user->status = 1;
         $user->created_by = Auth::id();
         $user->updated_by = Auth::id();
-        $user->save();
+        $user->save();   
 
         // retail user commission
         $retailShippingModeNames = is_array($retailShippingModeNames) ? $retailShippingModeNames : [];
@@ -72,13 +72,31 @@ class RetailAdminUserManagementController extends Controller
             $productPercentage = ($productPercentages[$key] !== null) ? $productPercentages[$key] : null;
             $retailShippingModeId = $matchingRetailShippingModeIds[$key] ?? null;
 
-            
             $retail_user_product_percentage = new RetailUserProductPercentage();
             $retail_user_product_percentage->retail_user_id = $user->id;
             $retail_user_product_percentage->retail_shipping_mode_id = $retailShippingModeId;
             $retail_user_product_percentage->product_percentage = $productPercentage;
             $retail_user_product_percentage->created_by = Auth::id();
             $retail_user_product_percentage->save();
+
+            if ($category == 2){
+                // retail user histroy
+                $trax_center = RetailTraxCenter::where('id', $category_id)->first();
+                if ($trax_center){
+                    $data = [
+                        'retail_user_id' => $user->id,
+                        'trax_center_id' => $category_id,
+                        'trax_center_name' => $trax_center->name,
+                        'trax_center_code' => $trax_center->code,
+                        'joining_date' => $joining_date,
+                        'retail_shipping_mode_id' => $joining_date,
+                        'retail_shipping_mode_id' => $joining_date,
+                        'retail_shipping_mode_name' => $joining_date,
+                        'product_commission' => $joining_date,
+                    ];
+                    RetailUserHistory::create($data);
+                }
+            }
         }
 
         // retail user family info
@@ -100,6 +118,7 @@ class RetailAdminUserManagementController extends Controller
             $retail_user_family_information->retail_user_id = $user->id;
             $retail_user_family_information->family_member_name = $familyMemberName;
             $retail_user_family_information->family_member_type = $family_member_type;
+            $retail_user_family_information->agreement_start_date = $joining_date;
             $retail_user_family_information->save();
         }
 
@@ -1416,6 +1435,7 @@ class RetailAdminUserManagementController extends Controller
         $franchises = RetailFranchise::where('status', 1)->get();
         $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
         $retail_user_family_names_query = RetailUserFamilyInformation::where('retail_user_id', $retail_user_id);
+        $old_trax_center = RetailUserHistory::where('retail_user_id', $id);
 
         if ($retail_user_family_names_query->exists()) {
             $retail_user_family_names_query = $retail_user_family_names_query->get();
@@ -1560,6 +1580,7 @@ class RetailAdminUserManagementController extends Controller
             $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);
             $productPercentages = json_decode($request->product_percentage, true);
             $familyMemberNames = $request->family_member_name;
+            $joining_date = $request->agreement_start_date;
             $traxId = $request->trax_id;
             $attachment_1 = $request->hasFile('attachment_1');
             $attachment_2 = $request->hasFile('attachment_2');
@@ -1572,7 +1593,7 @@ class RetailAdminUserManagementController extends Controller
             $file_4 = $request->file('attachment_4');
             $file_5 = $request->file('attachment_5');
 
-            $this->add_user($request->name, $password, $request->phone_number, $store->default_hub, $request->cnic, $request->address, $request->store, $store->id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages, $attachment_1, $attachment_2, $attachment_3, $attachment_4, $attachment_5, $file_1, $file_2, $file_3, $file_4, $file_5);
+            $this->add_user($request->name, $password, $request->phone_number, $store->default_hub, $request->cnic, $request->address, $request->store, $store->id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages, $attachment_1, $attachment_2, $attachment_3, $attachment_4, $attachment_5, $file_1, $file_2, $file_3, $file_4, $file_5, $joining_date);
 
             return redirect()->back()->with('success', 'Retail User Added Successfully!');
         } else {
@@ -1612,13 +1633,31 @@ class RetailAdminUserManagementController extends Controller
         } else {
             $retail_user->category_id = $request->trax_center;
         }
-        $retail_user->password = Hash::make($request->password);
+        if (!empty($request->password)){
+            $retail_user->password = Hash::make($request->password);
+        }
         $retail_user->phone_no = $request->phone_number;
         $retail_user->cnic = $request->cnic;
         $retail_user->address = $request->address;
         $retail_user->updated_by = Auth::id();
+        $retail_user->trax_id = $request->trax_id;
         $retail_user->save();
-        
+
+        // retail user history
+        $trax_center = RetailTraxCenter::where('code', $retail_user->store->code)->first();
+        $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->get();
+
+        foreach($retail_user_history as $history){
+            $newHistory = new RetailUserHistory();
+            $newHistory->fill($history->getAttributes());
+            unset($newHistory->id);
+            $newHistory->trax_center_id = $trax_center->id;
+            $newHistory->trax_center_name = $trax_center->name;
+            $newHistory->trax_center_code = $trax_center->code;
+            $newHistory->save();
+        }
+
+
         // retail user commission
         $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);
         $productPercentages = json_decode($request->product_percentage, true);

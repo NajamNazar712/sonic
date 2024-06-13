@@ -220,6 +220,11 @@
                     <input class="form-control form-control-sm" type="file" name="attachment_5" id="attachment_5" accept="image/*,.doc,.docx,.pdf">
                     <a id="attachment_5_filename" target="_blank"></a>
                 </div>
+
+                <div class="old_working_place">
+                    <h1></h1>
+                </div>
+
             </div>
         </div>
         <div class="form-group ml-1">
