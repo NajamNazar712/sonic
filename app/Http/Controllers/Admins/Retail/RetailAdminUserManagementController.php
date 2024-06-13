@@ -1640,15 +1640,66 @@ class RetailAdminUserManagementController extends Controller
         $retail_user->trax_id = $request->trax_id;
         $retail_user->save();
         
-        if ($retail_user->category == 2){
+        // if ($retail_user->category == 2){
+        //     // retail user history
+        //     $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->first();
+        //     $trax_center = RetailTraxCenter::where('code', $retail_user->store->code)->first();
+        //     $new_trax_center_code = $trax_center->code;
+        //     $new_trax_center_name = $trax_center->name;
+        //     if ($retail_user_history){
+        //         $old_trax_center_code = $retail_user_history->trax_center_code;
+        //         if ($old_trax_center_code != $new_trax_center_code){
+        //             $data = [
+        //                 'retail_user_id' => $retail_user->id,
+        //                 'trax_center_id' => $trax_center->id,
+        //                 'trax_center_name' => $new_trax_center_name,
+        //                 'trax_center_code' => $new_trax_center_code,
+        //                 'joining_date' => $request->agreement_start_date,
+        //             ];
+        //             RetailUserHistory::create($data);
+        //             $retail_user_history->update(['last_date' => $request->agreement_start_date]);
+        //         }
+        //     } else {
+        //         $data = [
+        //             'retail_user_id' => $retail_user->id,
+        //             'trax_center_id' => $trax_center->id,
+        //             'trax_center_name' => $new_trax_center_name,
+        //             'trax_center_code' => $new_trax_center_code,
+        //             'joining_date' => $request->agreement_start_date,
+        //         ];
+        //         RetailUserHistory::create($data);
+        //     }
+        // }
+
+
+        if ($retail_user->category == 2) {
             // retail user history
-            $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->first();
+            $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->latest()->first();
             $trax_center = RetailTraxCenter::where('code', $retail_user->store->code)->first();
-            $new_trax_center_code = $trax_center->code;
-            $new_trax_center_name = $trax_center->name;
-            if ($retail_user_history){
-                $old_trax_center_code = $retail_user_history->trax_center_code;
-                if ($old_trax_center_code != $new_trax_center_code){
+        
+            if ($trax_center) {
+                $new_trax_center_code = $trax_center->code;
+                $new_trax_center_name = $trax_center->name;
+        
+                if ($retail_user_history) {
+                    $old_trax_center_code = $retail_user_history->trax_center_code;
+        
+                    if ($old_trax_center_code != $new_trax_center_code) {
+                        // Create a new entry with the new Trax center code and name
+                        $data = [
+                            'retail_user_id' => $retail_user->id,
+                            'trax_center_id' => $trax_center->id,
+                            'trax_center_name' => $new_trax_center_name,
+                            'trax_center_code' => $new_trax_center_code,
+                            'joining_date' => $request->agreement_start_date,
+                        ];
+                        RetailUserHistory::create($data);
+        
+                        // Update the last_date of the old history record
+                        $retail_user_history->update(['last_date' => $request->agreement_start_date]);
+                    }
+                } else {
+                    // No previous history, create the first entry
                     $data = [
                         'retail_user_id' => $retail_user->id,
                         'trax_center_id' => $trax_center->id,
@@ -1657,19 +1708,10 @@ class RetailAdminUserManagementController extends Controller
                         'joining_date' => $request->agreement_start_date,
                     ];
                     RetailUserHistory::create($data);
-                    $retail_user_history->update(['last_date' => $request->agreement_start_date]);
                 }
-            } else {
-                $data = [
-                    'retail_user_id' => $retail_user->id,
-                    'trax_center_id' => $trax_center->id,
-                    'trax_center_name' => $new_trax_center_name,
-                    'trax_center_code' => $new_trax_center_code,
-                    'joining_date' => $request->agreement_start_date,
-                ];
-                RetailUserHistory::create($data);
             }
         }
+
 
 
         // retail user commission

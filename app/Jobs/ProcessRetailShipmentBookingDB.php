@@ -309,41 +309,23 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
             $retail_shipment->admin_discount = $this->booking['admin_discount'];
             $retail_shipment->admin_discount_type = $admin_discount_type;
         }
-            $retail_shipment->parcel_amount = $this->booking['parcel_amount'];
-            $retail_shipment->quantity = $this->booking['quantity'];
-            $retail_shipment->save();
+        $retail_shipment->parcel_amount = $this->booking['parcel_amount'];
+        $retail_shipment->quantity = $this->booking['quantity'];
+        $retail_shipment->save();
 
-            $trax_center = RetailTraxCenter::where('code', Auth::user()->store->code)->first();
-            $retail_shipping_mode = RetailShippingMode::where('id', $retail_shipment->shipping_mode)->first();
-            $retail_user_commission = RetailUserProductPercentage::where('retail_shipping_mode_id', $retail_shipment->shipping_mode)->first();
-            $retail_user = RetailUser::where('id', $retail_shipment->retail_user_i)->first();
-    
-            if ($retail_user_commission == null){
-                $commission = null;
-            } else {
-                $commission = $retail_user_commission->product_percentage;
-            }
-    
-            if ($retail_user->store->code == $trax_center->code){
-                $last_date = $retail_shipment->created_at;
-            } else {
-                $last_date = $retail_shipment->updated_at;
-            }
-    
-            // retail user history
-            RetailUserHistory::create([
-                'retail_user_id' => $retail_shipment->retail_user_id,
-                'trax_center_id' => $trax_center->id,
-                'trax_center_name' => $trax_center->name,
-                'trax_center_code' => $trax_center->code,
-                'joining_date' => $retail_user->created_at,
-                'last_date' => $last_date,
-                'retail_shipping_mode_id' => $retail_shipment->shipping_mode,
-                'retail_shipping_mode_name' => $retail_shipping_mode->name,
-                'product_commission' => $commission,
-                'booking_date' => $retail_shipment->created_at,
-            ]);
+        // retail user history
+        $shipping_mode_id = $retail_shipment->shipping_mode;
+        $shipping_mode = RetailShippingMode::where('id', $shipping_mode_id)->first();
+        $product_commission = RetailUserProductPercentage::where('retail_user_id', $retail_shipment->retail_user_id)
+            ->where('retail_shipping_mode_id', $shipping_mode->id)->first();
+        $data = [
+            'retail_shipping_mode_id' => $shipping_mode_id,
+            'retail_shipping_mode_name' => $shipping_mode,
+            'product_commission' => $product_commission->product_percentage,
+            'booking_date' => $retail_shipment->created_at
+        ];
 
+        RetailUserHistory::create($data);
         $shipment = Shipment::find($shipment_id);
         if($shipment->charges_mode_id != 2) {
             $date = Carbon::today()->toDateString();
