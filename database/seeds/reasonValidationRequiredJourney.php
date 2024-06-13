@@ -16,7 +16,7 @@ class reasonValidationRequiredJourney extends Seeder
     {
         //
         $shipmentId = [
-            267341037927479
+            22343838316653
             ];
         echo count($shipmentId);
         if ($shipmentId) {
