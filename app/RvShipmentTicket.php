@@ -11,6 +11,6 @@ class RvShipmentTicket extends Model
     
     protected $guarded = [];
 
-    protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at','updated_at'];
 
 }
