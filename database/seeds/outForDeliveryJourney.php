@@ -24,7 +24,7 @@ class outForDeliveryJourney extends Seeder
     {
         //
         $shipmentId = [
-            20243837906480, 20243837949473, 20243837881247, 202341037894948, 22343838019147, 22343838004824
+            22343837944832
             ];
         echo count($shipmentId);
         if ($shipmentId) {
@@ -32,7 +32,7 @@ class outForDeliveryJourney extends Seeder
 
             foreach ($shipmentId as $shipment) {
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
-                $delivertNote   = DeliveryNote::find($deliveryNoteId->delivery_note_id);
+                $delivertNote   = DeliveryNote::find($deliveryNoteId->delivery_note_id)->latest();
                 if($delivertNote->request_note_id){
                     $rider_for_delivery = RiderDeliveryNoteRequest::find($delivertNote->request_note_id);
                 }

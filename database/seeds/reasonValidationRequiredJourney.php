@@ -16,7 +16,7 @@ class reasonValidationRequiredJourney extends Seeder
     {
         //
         $shipmentId = [
-            20243837906480, 20243837949473, 20243837881247, 202341037894948, 22343838019147, 22343838004824
+            22343837944832
             ];
         echo count($shipmentId);
         if ($shipmentId) {
@@ -29,7 +29,7 @@ class reasonValidationRequiredJourney extends Seeder
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
                 $deliveryNoteId->status = 6;
                 $deliveryNoteId->save();
-                ShipmentsJourneyController::add($shipment->id, 12, 12, null, null, null, 346, $deliveryNoteId->delivery_note_id);
+                ShipmentsJourneyController::add($shipment->id, 12, 12, null, null, null, 346, $deliveryNoteId->delivery_note_id,null,0);
             }
         }
     }
