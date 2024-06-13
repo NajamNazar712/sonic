@@ -4277,7 +4277,7 @@ class AdminDashboardController extends Controller
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
 
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->back()->with('success', 'All Rates are updateddd');
         }
 
         if ($user['status'] == 3) {
