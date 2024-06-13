@@ -1307,7 +1307,6 @@ trait RvTrait
                         return $query->orderBy('call_count','ASC');//These Agents will get shipments in order of call count to Agent of Both Call Type
                     }
                 })
-                ->whereNotIn('shipment_status_reason_id',[12, 27, 35])
                 ->where('in_progress',0)
                 ->where('is_completed',0)
                 ->orderBy('updated_at','ASC')
