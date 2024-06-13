@@ -24,7 +24,7 @@ class outForDeliveryJourney extends Seeder
     {
         //
         $shipmentId = [
-            14443837905157
+            267341037927479
             ];
         echo count($shipmentId);
         if ($shipmentId) {
