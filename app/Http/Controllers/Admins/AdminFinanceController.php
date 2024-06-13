@@ -5417,7 +5417,7 @@ class AdminFinanceController extends Controller
 
     }
 
-    static public function add_payment($shipment_id, $type,$shipment = array())
+    static public function add_payment_old($shipment_id, $type,$shipment = array())
     {
         if(empty($shipment)) {
             $shipment = Shipment::find($shipment_id);
@@ -6710,7 +6710,10 @@ class AdminFinanceController extends Controller
                         $detail['type'] = 'Delivered';
                     } else if ($pending_payment_shipment->type == 1) {
                         $detail['type'] = 'Returned';
-                    } else {
+                    } else if ($pending_payment_shipment->type == 3) {
+                        $detail['type'] = 'Arrival';
+                    }
+                    else {
                         $detail['type'] = 'Adjusted';
                     }
 
@@ -6731,7 +6734,10 @@ class AdminFinanceController extends Controller
                     $detail['type'] = 'Delivered';
                 } else if ($pending_payment_shipment->type == 1) {
                     $detail['type'] = 'Returned';
-                } else {
+                } else if ($pending_payment_shipment->type == 3) {
+                    $detail['type'] = 'Arrival';
+                }
+                else {
                     $detail['type'] = 'Adjusted';
                 }
 
@@ -6880,7 +6886,10 @@ class AdminFinanceController extends Controller
                     return 'Delivered';
                 } else if ($pending_payment_shipment->type == 1) {
                     return 'Returned';
-                } else {
+                } else if ($pending_payment_shipment->type == 3) {
+                    return 'Arrival';
+                }
+                else {
                     return 'Adjusted';
                 }
             })
@@ -18170,6 +18179,340 @@ class AdminFinanceController extends Controller
 
          else {
             return redirect()->back()->with('error', 'Invalid Tracking Numbers');
+        }
+    }
+
+    static public function add_payment($shipment_id, $type,$shipment = array())
+    {
+        if(empty($shipment)) {
+            $shipment = Shipment::find($shipment_id);
+        }
+        $check_arrival = self::check_arrival($shipment_id);
+        $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
+        if($service_charges->exists()){
+            $service_charges = $service_charges->first();
+            $service_charges = $service_charges->reverse_pickup_charges;
+        }else{
+            $service_charges = 0;
+        }
+        $setting = CorporateReimbursementSetting::where('user_id', $shipment->user_id);
+        $crs = false;
+        if ($setting->exists()) {
+            $setting = $setting->first();
+            if ($setting->setting_on == 1 && $shipment->user->account_type_id == 2) {
+                $crs = true;
+            }
+        }
+        $amount = $shipment->amount;
+        if ($shipment->shipment_type == 1) {
+            if (!$shipment->packaging_material_request) {
+                if ($type == 0) {
+                    if($check_arrival){
+                        $charges =  $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges + $service_charges ;
+                    }else{
+                        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges + $service_charges ;
+                    }
+                    if ($shipment->business_category_id == 1) {
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
+                    } else {
+                        $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    if ($crs) {
+                        $wht = (($charges + $gst) * 3) / 100;
+                    } else {
+                        $wht = 0;
+                    }
+                    $payable = $amount - ($charges + $gst - $wht);
+                }else if ($type == 3) {
+                    $charges = $shipment->weight_charges  + $shipment->fuel_surcharge;
+                    if ($shipment->business_category_id == 1) {
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
+                    } else {
+                        $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    if ($crs) {
+                        $wht = (($charges + $gst) * 3) / 100;
+                    } else {
+                        $wht = 0;
+                    }
+                    $payable = $amount - ($charges + $gst - $wht);
+                } else {
+                    $amount = 0;
+                    if($check_arrival) {
+                        $charges = $shipment->insurance_charges + $shipment->return_charges  + $shipment->intercept_charges + $shipment->nsa_osa_charges;
+                    }else{
+                        $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges + $shipment->nsa_osa_charges;
+                    }
+                    if ($shipment->business_category_id == 1) {
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
+                    } else {
+                        $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    if ($crs) {
+                        $wht = (($charges + $gst) * 3) / 100;
+                    } else {
+                        $wht = 0;
+                    }
+                    $payable = 0 - ($charges + $gst - $wht);
+                }
+            } else {
+                $charges = $shipment->packaging_material_charges;
+                $gst = 0;
+
+                if ($crs) {
+                    $wht = (($charges + $gst) * 3) / 100;
+                } else {
+                    $wht = 0;
+                }
+
+                $payable = $amount - ($charges + $gst - $wht);
+            }
+
+            $account_type_id = $shipment->user->account_type_id;
+
+            $valid = TRUE;
+
+            if ($account_type_id == 1) {
+                if ($type != 2 && PendingPaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()) {
+                    $valid = FALSE;
+                }
+            } else {
+                if ($type != 2 && PendingInvoiceShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()) {
+                    $valid = FALSE;
+                }
+            }
+
+            if ($valid) {
+                if ($account_type_id == 1 || ($account_type_id == 2 && !$shipment->packaging_material_request) || $crs) {
+                    $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+
+                    if ($pending_payment->exists()) {
+                        $pending_payment = $pending_payment->first();
+
+                        if($type ==3){
+                            $pending_payment->total_shipments = 0;
+                        }else{
+                            $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+                        }
+                        if ($type == 0) {
+                            $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
+                        }else if ($type == 3) {
+                            $pending_payment->returned_shipments = 0;
+                        }else{
+                            $pending_payment->returned_shipments = $pending_payment->returned_shipments + 1;
+                        }
+
+                        $pending_payment->save();
+                    } else {
+                        $pending_payment = new PendingPayment();
+
+                        $pending_payment->user_id = $shipment->user_id;
+                        if($type ==3) {
+                            $pending_payment->total_shipments = 0;
+                        }else{
+                            $pending_payment->total_shipments = 1;
+                        }
+
+                        if ($type == 0) {
+                            $pending_payment->delivered_shipments = 1;
+                            $pending_payment->returned_shipments = 0;
+                            $pending_payment->adjusted_shipments = 0;
+                        }else if($type == 3){
+                            $pending_payment->delivered_shipments = 0;
+                            $pending_payment->returned_shipments = 0;
+                            $pending_payment->adjusted_shipments = 0;
+                        } else {
+                            $pending_payment->delivered_shipments = 0;
+                            $pending_payment->returned_shipments = 1;
+                            $pending_payment->adjusted_shipments = 0;
+                        }
+
+                        $pending_payment->save();
+                    }
+
+                    $pending_payment_shipment = new PendingPaymentShipment();
+
+                    if ($account_type_id == 1) {
+                        $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                        $pending_payment_shipment->shipment_id = $shipment_id;
+                        $pending_payment_shipment->type = $type;
+                        $pending_payment_shipment->amount = ($type == 3) ? 0 : $amount;
+                        $pending_payment_shipment->charges = $charges;
+                        $pending_payment_shipment->gst = $gst;
+                        $pending_payment_shipment->wht = 0;
+                        $pending_payment_shipment->payable = $payable;
+
+                        $pending_payment_shipment->save();
+
+                        self::add_pending_payment_charges($pending_payment->id, ($type == 3) ? 0 : $amount, $charges, $gst, $payable, $wht);
+                    } else {
+                        if (!$shipment->packaging_material_request) {
+
+                            $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                            $pending_payment_shipment->shipment_id = $shipment_id;
+                            $pending_payment_shipment->type = $type;
+                            $pending_payment_shipment->amount = ($type == 3) ? 0 : $amount;
+                            if ($crs) {
+                                $pending_payment_shipment->charges = $charges;
+                                $pending_payment_shipment->gst = $gst;
+                                $pending_payment_shipment->wht = $wht;
+                                $pending_payment_shipment->payable = $payable;
+                            } else {
+                                $pending_payment_shipment->charges = 0;
+                                $pending_payment_shipment->gst = 0;
+                                $pending_payment_shipment->wht = 0;
+                                $pending_payment_shipment->payable = ($type == 3) ? 0 : $amount;
+                            }
+
+                            $pending_payment_shipment->save();
+
+                            if ($crs) {
+                                self::add_pending_payment_charges($pending_payment->id, ($type == 3) ? 0 : $amount, $charges, $gst, $payable, $wht);
+                            } else {
+                                self::add_pending_payment_charges($pending_payment->id, ($type == 3) ? 0 : $amount, 0, 0, ($type == 3) ? 0 : $amount, 0);
+                            }
+
+                            $pending_invoice_shipment = new PendingInvoiceShipment();
+
+                            $pending_invoice_shipment->shipment_id = $shipment_id;
+                            $pending_invoice_shipment->type = $type;
+                            $pending_invoice_shipment->charges = $charges;
+                            $pending_invoice_shipment->gst = $gst;
+                            $pending_invoice_shipment->invoice_amount = $charges + $gst;
+
+                            $pending_invoice_shipment->save();
+                        } else {
+                            if ($crs) {
+                                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                                $pending_payment_shipment->shipment_id = $shipment_id;
+                                $pending_payment_shipment->type = $type;
+                                $pending_payment_shipment->amount = ($type == 3) ? 0 : $amount;
+                                $pending_payment_shipment->payable = $payable;
+                                $pending_payment_shipment->save();
+
+                                self::add_pending_payment_charges($pending_payment->id, ($type == 3) ? 0 : $amount, $charges, $gst, $payable, $wht);
+                            }
+
+                            $pending_invoice_shipment = new PendingInvoiceShipment();
+
+                            $pending_invoice_shipment->shipment_id = $shipment_id;
+                            $pending_invoice_shipment->type = $type;
+                            $pending_invoice_shipment->charges = $charges;
+                            $pending_invoice_shipment->gst = $gst;
+                            $pending_invoice_shipment->invoice_amount = $charges + $gst;
+
+                            $pending_invoice_shipment->save();
+                        }
+                    }
+                } else {
+                    if ($shipment->packaging_material_request == 1) {
+                        $packaging_check = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number);
+                        if ($packaging_check->exists()) {
+                            $packaging_check = $packaging_check->first();
+                            if ($packaging_check->packaging_payment_mode_id == 2) {
+                                $pending_invoice_shipment = new PendingInvoiceShipment();
+
+                                $pending_invoice_shipment->shipment_id = $shipment_id;
+                                $pending_invoice_shipment->type = $type;
+                                $pending_invoice_shipment->charges = $charges;
+                                $pending_invoice_shipment->gst = $gst;
+                                $pending_invoice_shipment->invoice_amount = $charges + $gst;
+
+                                $pending_invoice_shipment->save();
+                            }
+                        }
+                    } else {
+                        $pending_invoice_shipment = new PendingInvoiceShipment();
+
+                        $pending_invoice_shipment->shipment_id = $shipment_id;
+                        $pending_invoice_shipment->type = $type;
+                        $pending_invoice_shipment->charges = $charges;
+                        $pending_invoice_shipment->gst = $gst;
+                        $pending_invoice_shipment->invoice_amount = $charges + $gst;
+
+                        $pending_invoice_shipment->save();
+                    }
+                }
+            }
+        } else {
+            $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
+
+            if ($retail_shipment->shipping_mode == 3) {
+                if ($shipment->charges_mode_id == 2) {
+                    $charges = $retail_shipment->total_charges;
+                } else {
+                    $charges = 0;
+                }
+                $gst = 0;
+                $payable = $amount - $charges;
+
+//            $account_type_id = $retail_shipment->shipper->account_type_id;
+
+                $valid = TRUE;
+
+                if ($type != 2 && RetailPendingPaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()) {
+                    $valid = FALSE;
+                }
+
+                if ($valid) {
+                    if ($amount != 0) {
+                        $pending_payment = RetailPendingPayment::where('user_id', $retail_shipment->shipper_account_no);
+
+                        if ($pending_payment->exists()) {
+                            $pending_payment = $pending_payment->first();
+
+                            $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+
+                            if ($type == 0) {
+                                $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
+                            } else {
+                                $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
+
+                            }
+
+                            $pending_payment->save();
+                        } else {
+                            $pending_payment = new RetailPendingPayment();
+
+                            $pending_payment->user_id = $retail_shipment->shipper_account_no;
+                            $pending_payment->total_shipments = 1;
+
+                            if ($type == 0) {
+                                $pending_payment->delivered_shipments = 1;
+                                $pending_payment->adjusted_shipments = 0;
+                            } else {
+                                $pending_payment->delivered_shipments = 0;
+                                $pending_payment->adjusted_shipments = 1;
+                            }
+
+                            $pending_payment->save();
+                        }
+
+                        $pending_payment_shipment = new RetailPendingPaymentShipment();
+
+                        $pending_payment_shipment->retail_pending_payment_id = $pending_payment->id;
+                        $pending_payment_shipment->shipment_id = $shipment_id;
+                        $pending_payment_shipment->type = $type;
+                        $pending_payment_shipment->amount = $amount;
+                        $pending_payment_shipment->payable = $payable;
+
+                        $pending_payment_shipment->save();
+
+                        self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, 0, 1);
+                    }
+                }
+            }
+        }
+    }
+
+    static public function check_arrival($shipment_id){
+        if(PendingPaymentShipment::where('shipment_id', $shipment_id)->where('type', 3)->exists() ||  PendingInvoiceShipment::where('shipment_id', $shipment_id)->where('type', 3)->exists()){
+            return true;
+        }else{
+            return false;
         }
     }
 }

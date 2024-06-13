@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins\V2Pickup;
 
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -2583,6 +2585,12 @@ class V2AdminPickupsController extends Controller
                         NotificationsController::send(85, $shipment_ids, Auth::id());
                     }
                 }
+                //shipment calculate arrival charges
+                $shipment->refresh();
+                if(in_array($shipment->shipper_status_id,[2,15])){
+
+                    self::arrival_chagres($request,$shipment);
+                }
             } else {
                 unset($shipment_ids[$key]);
             }
@@ -2622,9 +2630,7 @@ class V2AdminPickupsController extends Controller
 
         foreach ($shipment_ids as $shipment_id) {
             $shipment = Shipment::find($shipment_id);
-
             $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->whereIn('pickup_request_id', $pickup_request_ids);
-
             if ($pickup_request_shipment->exists()) {
                 $pickup_note_id = NULL;
                 $pickup_request_shipment = $pickup_request_shipment->first();
@@ -4732,5 +4738,25 @@ class V2AdminPickupsController extends Controller
       ';
 
         return $html;
+    }
+
+    static function arrival_chagres (Request $request,$parcel){
+        if ($parcel) {
+            $shipment = $parcel->id;
+            if ($parcel->booking_type_id == 2) {
+                ShipmentChargesController::replacement($shipment);
+            } else if ($parcel->booking_type_id == 3) {
+                ShipmentChargesController::try_and_buy($shipment);
+            }
+
+            if ($parcel->booking_type_id != 4) {
+                if (($parcel->packaging_material_request == 1 && $parcel->packaging_material_charges != '') || $parcel->packaging_material_request == 0) {
+                    if($parcel->shipment_type == 1) {
+                        AdminFinanceController::add_payment($shipment, 3, $parcel);
+                    }
+                }
+            }
+
+        }
     }
 }

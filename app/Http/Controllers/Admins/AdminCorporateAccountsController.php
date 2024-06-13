@@ -2686,7 +2686,7 @@ class AdminCorporateAccountsController extends Controller
                     'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
                     'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
                     'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
-                    'on_on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
+                    'on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
                     'on_return_discount_per' => 'required_if:on_return_discount_switch,==,on',
                 ];
             }
@@ -4976,7 +4976,7 @@ class AdminCorporateAccountsController extends Controller
                     'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
                     'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
                     'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
-                    'on_on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
+                    'on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
                     'on_return_discount_per' => 'required_if:on_return_discount_switch,==,on',
                 ];
             }
@@ -7967,7 +7967,7 @@ class AdminCorporateAccountsController extends Controller
                     'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
                     'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
                     'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
-                    'on_on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
+                    'on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
                     'on_return_discount_per' => 'required_if:on_return_discount_switch,==,on',
                 ];
             }
@@ -15949,7 +15949,7 @@ class AdminCorporateAccountsController extends Controller
                     'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
                     'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
                     'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
-                    'on_on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
+                    'on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
                     'on_return_discount_per' => 'required_if:on_return_discount_switch,==,on',
                 ];
             }
@@ -18734,7 +18734,7 @@ class AdminCorporateAccountsController extends Controller
                     'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
                     'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
                     'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
-                    'on_on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
+                    'on_cod_discount_per' => 'required_if:on_zero_cod_switch,==,on',
                     'on_return_discount_per' => 'required_if:on_return_discount_switch,==,on',
                 ];
             }

@@ -3904,7 +3904,8 @@ class DeliveryController extends Controller
 
                                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $shipper_status_id]);
                                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                                            } else if ($shipper_status_id == 20) {
+                                            }
+                                            else if ($shipper_status_id == 20) {
                                                 $parcel = Shipment::find($shipment);
 
                                                 if (!$parcel->packaging_material_request) {
@@ -3949,14 +3950,16 @@ class DeliveryController extends Controller
                                                         //                                                        }
                                                     }
                                                 }
-                                            } else if ($shipper_status_id == 56) {
+                                            }
+                                            else if ($shipper_status_id == 56) {
                                                 $parcel = Shipment::find($shipment);
                                                 if ($parcel->booking_type_id == 2) {
                                                     ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                     Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 56, 'consignee_status_id' => 56]);
                                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                                 }
-                                            } else if (in_array($shipper_status_id, $delivered_status_array)) {
+                                            }
+                                            else if (in_array($shipper_status_id, $delivered_status_array)) {
                                                 $parcel = Shipment::where('id', $shipment)->first();
                                                 if ($parcel->booking_type_id == 2) {
                                                     //                                                ShipmentsJourneyController::add($shipment, 30, 30, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
@@ -4083,7 +4086,6 @@ class DeliveryController extends Controller
                                     } //main if condition
 
                                 } else {
-
                                     $parcel = Shipment::find($shipment);
                                     if ($verification == 1) {
                                         if ($parcel->booking_type_id == 2) {
@@ -5736,7 +5738,7 @@ class DeliveryController extends Controller
                         'station_deposit_note_id' => $sdn->id,
                         'delivery_note_id' => $dncc
                     ]);
-                    DeliveryNote::where('id', $dncc)->update(['expense' => $request->expense[$dncc], 'net_amount' => $request->net_amount[$dncc], 'remarks' => $request->remarks[$dncc], 'dncc_status' => 1]);
+                    DeliveryNote::where('id', $dncc)->update(['expense' => isset($request->expense[$dncc]) ? $request->expense[$dncc] : 0, 'net_amount' => isset($request->net_amount[$dncc]) ? $request->net_amount[$dncc] : 0, 'remarks' => isset($request->remarks[$dncc]) ? $request->remarks[$dncc] : '', 'dncc_status' => 1]);
                 }
 
                 self::add_sdn_logs($sdn->id, 0, $created_by);
