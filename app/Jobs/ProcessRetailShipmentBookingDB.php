@@ -22,6 +22,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Models\RetailUserHistory;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
+use App\Http\Models\RetailUserProductPercentage;
 
 class ProcessRetailShipmentBookingDB implements ShouldQueue
 {
@@ -303,6 +306,30 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
             $retail_shipment->admin_discount_type = $admin_discount_type;
         }
             $retail_shipment->save();
+
+            $trax_center = RetailTraxCenter::where('code', Auth::user()->store->code)->first();
+            $retail_shipping_mode = RetailShippingMode::where('id', $retail_shipment->shipping_mode)->first();
+            $retail_user_commission = RetailUserProductPercentage::where('retail_shipping_mode_id', $retail_shipment->shipping_mode)->first();
+
+            if ($retail_user_commission == null){
+                $commission = null;
+            } else {
+                $commission = $retail_user_commission->product_percentage;
+            }
+
+            // retail user history
+            RetailUserHistory::create([
+                'retail_user_id' => $retail_shipment->retail_user_id,
+                'trax_center_id' => $trax_center->id,
+                'trax_center_name' => $trax_center->name,
+                'trax_center_code' => $trax_center->code,
+                'joining_date' => $retail_shipment->created_at,
+                'last_date' => $retail_shipment->created_at,
+                'retail_shipping_mode_id' => $retail_shipment->shipping_mode,
+                'retail_shipping_mode_name' => $retail_shipping_mode->name,
+                'product_commission' => $commission,
+                'booking_date' => $retail_shipment->created_at,
+            ]);
 
         $shipment = Shipment::find($shipment_id);
         if($shipment->charges_mode_id != 2) {
