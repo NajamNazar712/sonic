@@ -1511,8 +1511,22 @@ class RetailAdminUserManagementController extends Controller
                     }
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $data->id . ' rel="editretailuser" data-toggle="modal" data-target="#editRetailUser"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
-//                    $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
-                    //          ';
+                    if ($data->category != 1){
+                        $dropdown .= '
+                            <div class="row no-gutters align-items-center ml-2">
+                                <div class="col-2">
+                                    <i class="ft-x-circle"></i>
+                                </div>
+                                <div class="col-9 offset-1">
+                                    <a href="' . route("admin.retail.users.retail_history", ["id" => $data->id]) . '" class="text-dark" target="_blank">
+                                        History
+                                    </a>
+                                </div>
+                            </div>
+                        ';
+                    }                    
+
+                    //$dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     $dropdown .= '
                     </div>
                   </div>
@@ -3098,5 +3112,12 @@ class RetailAdminUserManagementController extends Controller
         return redirect()->route('admin.retail.rates.edit')->with('success', 'Rates Updated');
 
 
+    }
+
+    public function retail_history($id){
+        $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->get();
+        return view('admin.retail.users.history', [
+            'retail_user_history' => $retail_user_history
+        ]);
     }
 }

@@ -3867,6 +3867,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print', 'Admins\Retail\RetailAdminUserManagementController@user_commission_invoice_print')->name('user_commission_invoice_print');
 
             Route::get('/retail_user_attachments', 'Admins\Retail\RetailAdminUserManagementController@retail_user_attachments')->name('retail_user_attachments');
+
+            Route::get('{id}/retail_history', 'Admins\Retail\RetailAdminUserManagementController@retail_history')->name('retail_history');
         });
 
         Route::prefix('international')->name('international.')->group(function () {

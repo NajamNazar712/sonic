@@ -544,9 +544,12 @@ class RetailShipmentBookController extends Controller
         $product_commission = RetailUserProductPercentage::where('retail_user_id', $retail_shipment->retail_user_id)
             ->where('retail_shipping_mode_id', $shipping_mode->id)->first();
         $data = [
+            'retail_user_id' => $retail_shipment->retail_user_id,
+            'trax_center_name' => Auth::user()->store->name,
+            'trax_center_code' => Auth::user()->store->code,
             'retail_shipping_mode_id' => $shipping_mode_id,
-            'retail_shipping_mode_name' => $shipping_mode,
-            'product_commission' => $product_commission->product_percentage,
+            'retail_shipping_mode_name' => $shipping_mode->name,
+            'product_commission' => $product_commission->product_percentage ?? NULL,
             'booking_date' => $retail_shipment->created_at
         ];
         RetailUserHistory::create($data);
