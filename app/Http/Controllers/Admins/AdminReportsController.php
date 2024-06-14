@@ -14013,7 +14013,7 @@ class AdminReportsController extends Controller
                     
                     if(in_array($shipment_data->consignee_city_id,$zone_cities))
                     {
-                        $created_date = Carbon::parse($shipment_data->created_at);
+                        $created_date = Carbon::parse($shipment_data->updated_at);
                         
                         if(in_array($shipment_data->consignee_status_id, [14,30,36,12,20]) && $created_date->diffInDays($to_2) >= 1)
                         {
