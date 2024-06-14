@@ -11096,8 +11096,8 @@ class NotificationsController extends Controller
                     
                     foreach ($lead_ids as $key => $lead_id) {
                         $lead = Lead::find($lead_id);
-                        if(isset($tokens[$key])){
-                            $route = route('cod.signup', ['id' => $lead->id, 'token' => $tokens[$key]]);
+                        // if(isset($tokens[$key])){
+                            $route = route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]);
                             $link = '<a href="' . $route . '">Click here to sign up</a>';
                         
                             $body = $notification->body; // Reset $body to its original state
@@ -11116,7 +11116,7 @@ class NotificationsController extends Controller
                                 $subject = str_replace('[Company Name]', $lead->company_name, $subject);
                             }
                             self::email($subject, $body, $lead->email_address); // Send email with $body
-                        }
+                        // }
                     }                    
                 } else if ($id == 231){
                     $subject = $notification->subject;

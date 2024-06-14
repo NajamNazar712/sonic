@@ -278,6 +278,8 @@ class LoginController extends Controller
                 session(['user_id' => $user->user_id]);
                 session(['account_type' => $shipper->account_type_id]);
                 session(['restriction' => $substitute_user->restriction]);
+                session(['status' => $shipper->status]);
+
 
 //                if (PackagingCharge::where('user_id', $user->user_id)->exists()) {
 //                    $packaging_charges_check = TRUE;
