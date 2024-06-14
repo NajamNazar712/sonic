@@ -13871,29 +13871,51 @@ class AdminReportsController extends Controller
 
         $from = Carbon::parse($search_date)->subMonths(8)->setTime(21, 00, 00)->toDateTimeString();
         $to = Carbon::parse($search_date)->setTime(8, 59, 59)->toDateTimeString();
+        $to_2 = Carbon::parse($search_date)->setTime(8, 59, 59);
 
         $regions = DB::connection('reports_2')->table('regions')->select('id','name')->get();
         $ops_data = [];
 
         $shipment_journey_min_id =  DB::connection('reports')->table('shipments_journey')->where('created_at' , '>=' , $from)->orderBy('id','asc')->pluck('id')->first();
-
         $shipments = DB::connection('reports_2')->table('shipments')
-        ->leftJoin('shipments_journey as sj', function ($join) use ($shipment_journey_min_id) {
-            if($shipment_journey_min_id) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52, 55, 5, 20, 14, 12) and verification = 1 and shipments_journey.id >= '.$shipment_journey_min_id.')'));
-            } else {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.id', '=', DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52, 55, 5, 20, 14, 12) and verification = 1)'));
-            }
-        })
-               ->whereBetween('sj.created_at', [$from, $to])
-            //    ->where('sj.shipment_id', 2)
-        ->get();
+            ->leftJoin('shipments_journey as sj', function ($join) use ($shipment_journey_min_id) {
+                if($shipment_journey_min_id)
+                {
+                    $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sj.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52,55) and verification = 1 and  shipments_journey.id >= '.$shipment_journey_min_id.')')
+                    );
+                }
+                else{
+                    $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sj.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52,55) and verification = 1)')
+                    );
+                }
+                
+            })
+            ->whereBetween('sj.created_at', [$from, $to])->get();
 
+        $shipments_2 = DB::connection('reports_2')->table('shipments')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+        
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                ->where(
+                    'sj.id',
+                    '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (14,30,36,12,20))')
+                );
+            
+                
+            })
+            ->whereBetween('sj.created_at', [$from, $to_2])->get();
 
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
-        $re_attempt_and_intercept_status = array(13, 55);
+        $re_attempt_and_intercept_status = array(52,55);
 
         $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subMonths(8)->setTime(21, 00, 00);  //last 6 month
         $re_attempt_and_intercept_endDate = Carbon::parse($search_date)->subDay(1)->setTime(19, 59, 59);
@@ -13937,8 +13959,6 @@ class AdminReportsController extends Controller
             'delivery_notes.id as delivery_note','c.zone_id')
             ->groupBy('c.zone_id')->whereBetween('delivery_notes.created_at', [$other_statuses_startDate, $other_statuses_endDate])->get();
 
-            $flag = true;
-
         foreach ($regions as $region_key => $region) {
 
             $zones = DB::connection('reports_2')->table('zone_regions')->join('zones as z', 'z.id', 'zone_regions.zone_id')->where('zone_regions.region_id',$region->id)->where('z.status',1)->where('z.business_category_id',1)->select('z.id','z.name')->get();
@@ -13967,6 +13987,7 @@ class AdminReportsController extends Controller
                 $data['undelivered_percentage'] = 0;
                 $data['rcp'] = 0;
                 $data['rcp_percentage'] = 0;                
+                $data['minus'] = 0;                
 
                 $zone_cities = DB::connection('reports_2')->table('cities')->where('zone_id',$zone->id)->pluck('id')->toArray();
 
@@ -13975,26 +13996,30 @@ class AdminReportsController extends Controller
                     if(in_array($shipment_data->consignee_city_id,$zone_cities))
                     {
                         $created_date = Carbon::parse($shipment_data->created_at);
-
-                        if (in_array($shipment_data->consignee_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate, $re_attempt_and_intercept_endDate) == false)
-                        {
-                            $flag = false;
-                        }else{
-                            $flag = true;
-                        }
-
+                        
                         if(in_array($shipment_data->consignee_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate,$re_attempt_and_intercept_endDate))
                         {
                             $data['ready_for_delivery'] += 1;
                         }
-                        
                         else if(in_array($shipment_data->consignee_status_id,$pending_status) && $created_date->between($other_pending_status_startDate,$other_pending_status_endDate))
                         {
-                            if($flag){
-                                $data['ready_for_delivery'] += 1;
-                            }
+                            $data['ready_for_delivery'] += 1;
                         }
+                    }
+                }
 
+
+                foreach ($shipments_2 as $shipment_key => $shipment_data) {
+                    
+                    if(in_array($shipment_data->consignee_city_id,$zone_cities))
+                    {
+                        $created_date = Carbon::parse($shipment_data->created_at);
+                        
+                        if(in_array($shipment_data->consignee_status_id, [14,30,36,12,20]) && $created_date->diffInDays($to_2) >= 1)
+                        {
+                            $data['ready_for_delivery'] -= 1;
+                        }
+                       
                     }
                 }
 
