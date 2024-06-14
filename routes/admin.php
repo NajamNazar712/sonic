@@ -218,6 +218,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('report/list', 'Admins\AdminDashboardController@survey_report_list')->name('report.list');
             Route::get('report/submitresponse', 'Admins\AdminDashboardController@submitresponse_report')->name('report.submitresponse');
         });
+
+        Route::prefix('kam_bulk_tagging')->name('kam_bulk_tagging.')->group(function () {
+            Route::get('', 'Admins\Shippers\Accounts\KAMBulkTaggingController@index')->name('index');
+            Route::post('update', 'Admins\Shippers\Accounts\KAMBulkTaggingController@update')->name('update');
+        });
     });
 
     Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
@@ -2533,6 +2538,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('shippers')->name('shippers.')->group(function () {
+
+            Route::prefix('base_rate_revisions')->name('base_rate_revisions.')->group(function () {
+                Route::get('', 'Admins\Settings\Shippers\BaseRateRivisionController@index')->name('index');
+                Route::get('list', 'Admins\Settings\Shippers\BaseRateRivisionController@base_rate_revisions_list')->name('list');
+                Route::post('store', 'Admins\Settings\Shippers\BaseRateRivisionController@add_bulk_shipper_rate_adjustment_store')->name('bulk_store');
+                Route::get('{base_rate_revision_id}/approval1_update/{action}','Admins\Settings\Shippers\BaseRateRivisionController@approval1_update')->name('approval1_update');
+                Route::get('{base_rate_revision_id}/approval2_update/{action}','Admins\Settings\Shippers\BaseRateRivisionController@approval2_update')->name('approval2_update');
+                Route::get('shippers_with_rates/{base_rate_revision_id}', 'Admins\Settings\Shippers\BaseRateRivisionController@shippersWithRates')->name('shippers_with_rates');
+            });
+
             Route::prefix('status_webhook')->name('status_webhook.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@status_webhook_index')->name('index');
                 Route::get('list', 'Admins\GlobalSettingsController@status_webhook_list')->name('list');
@@ -2549,6 +2564,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@bypass_weight_index')->name('index');
                 Route::post('update', 'Admins\GlobalSettingsController@bypass_weight_update')->name('update');
 
+            });
+
+            
+            Route::prefix('lead_progress')->name('lead_progress.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@lead_progress_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@lead_progress_list')->name('list');
+                Route::post('update', 'Admins\GlobalSettingsController@lead_progress_update')->name('update');
             });
         });
 
@@ -3797,6 +3819,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('info', 'Admins\LeadManagementController@info')->name('info');
         Route::post('edit', 'Admins\LeadManagementController@edit')->name('edit');
         Route::post('add', 'Admins\LeadManagementController@add')->name('add');
+        Route::get('edit_service_list', 'Admins\LeadManagementController@edit_service_list')->name('edit_service_list');
     });
 
     Route::prefix('pam_leads')->name('pam_leads.')->group(function () {
@@ -4209,5 +4232,142 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\AdminCargoManifestController@sack_bag_list')->name('list');
         Route::post('store', 'Admins\AdminCargoManifestController@add_sack_bag')->name('store');
         Route::post('sack_bag_check', 'Admins\AdminCargoManifestController@sack_bag_no_check')->name('sack_bag_check');
+    });
+
+    //New Moudles Routes
+    Route::prefix('logistic')->name('logistic.')->group(function(){
+        Route::get('', 'Admins\Logistic\AdminLogisticBookingController@index')->name('index');
+        Route::get('list', 'Admins\Logistic\AdminLogisticBookingController@list')->name('list');
+        Route::get('create', 'Admins\Logistic\AdminLogisticBookingController@create')->name('create');
+        Route::post('store','Admins\Logistic\AdminLogisticBookingController@store')->name('store');
+        Route::get('edit/{batch_id}/{booking_id}','Admins\Logistic\AdminLogisticBookingController@edit')->name('edit');
+        Route::put('update','Admins\Logistic\AdminLogisticBookingController@update')->name('update');
+
+//        Route::get('/shipment/{cn_number}','Admins\Logistic\AdminLogisticBookingController@get_logistic_shipment')->name('shipment');
+
+        Route::post('shipper_info','Admins\Logistic\AdminLogisticBookingController@get_shipper_info')->name('shipper_info');
+        Route::post('product_services','Admins\Logistic\AdminLogisticBookingController@get_product_services')->name('product_services');
+
+        //child routes
+        Route::prefix('shipment_manifest')->name('shipment_manifest.')->group(function(){
+            Route::get('create','Admins\Logistic\ShipmentManifest\AdminShipmentManifestContoller@create')->name('create');
+            Route::post('store','Admins\Logistic\ShipmentManifest\AdminShipmentManifestContoller@store')->name('store');
+        });
+
+        Route::prefix('rbag_manifest')->name('rbag_manifest.')->group(function(){
+            Route::get('create','Admins\Logistic\RbagManifest\AdminRbagManifestController@create')->name('create');
+        });
+        Route::prefix('transit_manifest')->name('transit_manifest.')->group(function(){
+            Route::get('create','Admins\Logistic\TransitManifest\AdminTransitManifestController@create')->name('create');
+        });
+
+        Route::prefix('shipper_tagging')->name('shipper_tagging.')->group(function (){
+            Route::get('', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_index')->name('index');
+            Route::get('list', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_list')->name('list');
+            Route::post('store', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_store')->name('store');
+            Route::get('edit/{id}', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_edit')->name('edit');
+            Route::put('update', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_update')->name('update');
+
+
+        });
+        Route::prefix('master_product')->name('master_product.')->group(function (){
+            Route::get('', 'Admins\Logistic\AdminLogisticSetupController@master_product_index')->name('index');
+            Route::get('list', 'Admins\Logistic\AdminLogisticSetupController@master_product_list')->name('list');
+            Route::post('store', 'Admins\Logistic\AdminLogisticSetupController@master_product_store')->name('store');
+            Route::get('edit/{id}', 'Admins\Logistic\AdminLogisticSetupController@master_product_edit')->name('edit');
+            Route::put('update', 'Admins\Logistic\AdminLogisticSetupController@master_product_update')->name('update');
+
+        });
+
+        Route::prefix('product')->name('product.')->group(function (){
+            Route::get('', 'Admins\Logistic\AdminLogisticSetupController@product_index')->name('index');
+            Route::get('list', 'Admins\Logistic\AdminLogisticSetupController@product_list')->name('list');
+            Route::post('store', 'Admins\Logistic\AdminLogisticSetupController@product_store')->name('store');
+            Route::get('edit/{id}', 'Admins\Logistic\AdminLogisticSetupController@product_edit')->name('edit');
+            Route::put('update', 'Admins\Logistic\AdminLogisticSetupController@product_update')->name('update');
+
+
+        });
+
+        Route::prefix('service')->name('service.')->group(function (){
+            Route::get('', 'Admins\Logistic\AdminLogisticSetupController@service_index')->name('index');
+            Route::get('list', 'Admins\Logistic\AdminLogisticSetupController@service_list')->name('list');
+            Route::post('store', 'Admins\Logistic\AdminLogisticSetupController@service_store')->name('store');
+            Route::get('edit/{id}', 'Admins\Logistic\AdminLogisticSetupController@service_edit')->name('edit');
+            Route::put('update', 'Admins\Logistic\AdminLogisticSetupController@service_update')->name('update');
+
+        });
+
+
+        Route::prefix('cn')->name('cn.')->group(function(){
+            Route::prefix('issue_area_store')->name('issue_area_store.')->group(function(){
+                Route::get('','Admins\Logistic\AdminCnController@cn_area_store_index')->name('index');
+                Route::get('list','Admins\Logistic\AdminCnController@cn_area_store_list')->name('list');
+                Route::post('store','Admins\Logistic\AdminCnController@add_cn_area_store')->name('store');
+            });
+
+            Route::prefix('receive_admin_store')->name('receive_admin_store.')->group(function(){
+                Route::get('','Admins\Logistic\AdminCnController@cn_receive_admin_store_index')->name('index');
+                Route::get('list','Admins\Logistic\AdminCnController@cn_receive_admin_store_list')->name('list');
+                Route::post('store','Admins\Logistic\AdminCnController@cn_receive_admin_store_store')->name('store');
+                Route::get('edit/{id}', 'Admins\Logistic\AdminCnController@cn_receive_admin_store_edit')->name('edit');
+                Route::put('update', 'Admins\Logistic\AdminCnController@cn_receive_admin_store_update')->name('update');
+            });
+
+            Route::prefix('issue_to_rider')->name('issue_to_rider.')->group(function(){
+                Route::get('','Admins\Logistic\AdminCnController@cn_issue_to_rider_index')->name('index');
+                Route::get('list','Admins\Logistic\AdminCnController@cn_issue_to_rider_list')->name('list');
+                Route::post('store','Admins\Logistic\AdminCnController@cn_issue_to_rider_store')->name('store');
+                Route::get('edit/{id}', 'Admins\Logistic\AdminCnController@cn_issue_to_rider_edit')->name('edit');
+                Route::put('update', 'Admins\Logistic\AdminCnController@cn_issue_to_rider_update')->name('update');
+
+                Route::get('cn_index/{issue_id}','Admins\Logistic\AdminCnController@rider_cn_index')->name('cn_index');
+                Route::get('cn_list/{rider_issue_id}','Admins\Logistic\AdminCnController@rider_cn_list')->name('cn_list');
+                Route::post('barcodes_print','Admins\Logistic\AdminCnController@cn_barcodes_print')->name('barcodes_print');
+
+
+            });
+
+
+
+            Route::prefix('child_receive_admin_store')->name('child_receive_admin_store.')->group(function (){
+                Route::get('','Admins\Logistic\AdminCnController@cn_child_receive_admin_store_index')->name('index');
+                Route::get('list','Admins\Logistic\AdminCnController@cn_child_receive_admin_store_list')->name('list');
+                Route::post('store','Admins\Logistic\AdminCnController@cn_child_receive_admin_store_store')->name('store');
+                Route::get('edit/{id}', 'Admins\Logistic\AdminCnController@cn_child_receive_admin_store_edit')->name('edit');
+                Route::put('update', 'Admins\Logistic\AdminCnController@cn_child_receive_admin_store_update')->name('update');
+            });
+
+            Route::prefix('child_issue_to_rider')->name('child_issue_to_rider.')->group(function (){
+                Route::get('','Admins\Logistic\AdminCnController@cn_child_issue_to_rider_index')->name('index');
+                Route::get('list','Admins\Logistic\AdminCnController@cn_child_issue_to_rider_list')->name('list');
+                Route::post('store','Admins\Logistic\AdminCnController@cn_child_issue_to_rider_store')->name('store');
+                Route::get('edit/{id}', 'Admins\Logistic\AdminCnController@cn_child_issue_to_rider_edit')->name('edit');
+                Route::put('update', 'Admins\Logistic\AdminCnController@cn_child_issue_to_rider_update')->name('update');
+
+                Route::get('cn_index/{issue_id}','Admins\Logistic\AdminCnController@rider_child_cn_index')->name('cn_index');
+                Route::get('cn_list/{rider_issue_id}','Admins\Logistic\AdminCnController@rider_child_cn_list')->name('cn_list');
+                Route::post('barcodes_print','Admins\Logistic\AdminCnController@cn_barcodes_print')->name('barcodes_print');
+            });
+
+
+        });
+
+        Route::prefix('batch')->name('batch.')->group(function(){
+            Route::get('','Admins\Logistic\AdminBatchController@booking_batch_index')->name('index');
+            Route::get('list','Admins\Logistic\AdminBatchController@booking_batch_list')->name('list');
+            Route::post('assign_batch','Admins\Logistic\AdminBatchController@booking_batch_assign')->name('assign_batch');
+            Route::get('batch_bookings/{batch_id}', 'Admins\Logistic\AdminLogisticBookingController@batch_bookings')->name('batch_bookings');
+            Route::post('batch_booking_list','Admins\Logistic\AdminLogisticBookingController@batch_booking_list')->name('batch_booking_list');
+            Route::post('release_batch','Admins\Logistic\AdminLogisticBookingController@release_batch')->name('release_batch');
+
+
+
+//            Route::post('store', 'Admins\Logistic\AdminBatchController@batch_booking_store')->name('store');
+//            Route::get('edit/{id}', 'Admins\Logistic\AdminBatchController@batch_booking_edit')->name('edit');
+//            Route::put('update', 'Admins\Logistic\AdminBatchController@batch_booking_update')->name('update');
+        });
+
+
     });
 });
