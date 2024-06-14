@@ -1624,7 +1624,6 @@
                                         googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
                                     }
                                     var formattedDateTime = moment(history.date_time).format('YYYY-MM-DD HH:mm:ss');
-                                    console.log(history.responsible);
                                     shipment += '<tr>';
                                     shipment += '<td>' + formattedDateTime + '</td>';
                                     shipment += '<td>' + history.status + '</td>';
@@ -2397,7 +2396,6 @@
                 var selected_value = $(this).val();
                 var selected_data = $(this).select2('data');
                 var selected_text = selected_data[0].text;
-                console.log(selected_value);
                 if (selected_value == 12) {
                     $('#return_reason_shipment_remarks').attr('readonly', false);
                     $('#return_reason_shipment_remarks').val('');
@@ -2470,7 +2468,7 @@
                 var type = $(this).attr('data-type');
                 var id = $(this).closest('tr').attr('data-id');
                 var note = $(this).closest('tr').attr('data-note');
-                console.log(type, id);
+
                 swal({
                     text: 'Are you sure, you want to Mark Rider ' + text + '?',
                     icon: 'info',
@@ -3462,8 +3460,6 @@
         $(document).on('click', '.responsible_person_shipment', function() {
             var shipment_id = $(this).attr('data-shipment-id');
             var updated_at = $(this).attr('data-journey_updated_at');
-
-            console.log(updated_at);
 
             // Make an AJAX request
             $.ajax({

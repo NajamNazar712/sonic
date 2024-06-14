@@ -1710,8 +1710,6 @@
                     tracking + '</b></span></div>';
                 $('#shipment_id').val(id);
 
-                console.log(id);
-
                 $('#call_history_modal .modal-body').html('');
                 $('#call_history_modal').modal('show');
 
