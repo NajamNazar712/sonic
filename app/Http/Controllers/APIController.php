@@ -9746,7 +9746,7 @@ class APIController extends Controller
         ->leftJoin('crm_request_case_nature_types as crcnt','crcnt.id','crm_requests.case_nature_type_id')
         ->leftJoin('crm_request_statuses as crs' ,'crs.id', 'crm_requests.status_id')
         ->where('shipment_id', $shipment_id)
-        ->select(['crm_requests.description as description','crcn.name as complaint_nature','crcnt.type as complaint_nature_type', 'crs.name as status'])->get();
+        ->select(['crm_requests.id as request_no','crcn.name as complaint_nature','crcnt.type as complaint_nature_type','crm_requests.description as description', 'crs.name as status'])->get();
 
         if(count($record) > 0){
             $message = 'List of Complaints';
