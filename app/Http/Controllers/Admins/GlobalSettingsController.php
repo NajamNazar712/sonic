@@ -7339,6 +7339,9 @@ class GlobalSettingsController extends Controller
 
     public function auto_tag_territories_store(Request $request)
     {
+        $request->validate([
+            'territory_id' => 'required'
+        ]);
         $check_tagging = AutoTagTerritory::where('admin_id', $request->agent_id);
 
         if (!$check_tagging->exists()) {
