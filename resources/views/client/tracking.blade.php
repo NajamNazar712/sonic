@@ -600,7 +600,7 @@
 
                                 var user_id = details.shipper.id;
                                 var global_settings_userId = details.shipper.assigned;
-                                if (user_id && global_settings_userId && global_settings_userId.length > 0) {
+                                if (user_id && global_settings_userId && global_settings_userId.length > 0 && global_settings_userId[0] != null) {
                                     var userIdArray = global_settings_userId[0].split(',');
 
                                     var isMatch = userIdArray.some(function(userIdString) {

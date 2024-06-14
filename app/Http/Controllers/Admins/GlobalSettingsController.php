@@ -9621,7 +9621,7 @@ class GlobalSettingsController extends Controller
         if ($request->has('users')) {
             $users = implode(',', $request->users);
         } else {
-            $users = null;
+            $users = '';
         }
         $settings = GlobalSettings::where('setting_value', 0)->where('type', 'brand_and_vendor_rights')->first();
         if ($settings) {
