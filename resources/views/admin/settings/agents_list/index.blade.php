@@ -148,6 +148,39 @@
                 $('#zone_id').val('').trigger('change.select2');
                 
             });
+
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    blockPagePermanently();
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    params.excel = true;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.settings.agents_list.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Agent Name');
+                            head.push('Agent Type');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.name);
+                                row.push(values.agent_type.name);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+                    UnblockPagePermanently();
+
+                    return {body: body, header: head};
+                }
+            } );
             
             var selected_rows = [];
 
@@ -157,6 +190,12 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
                     @if (session('role_id') == 1 || in_array(994, session('permissions')))
+                    {
+                        extend: 'excel',
+                        title: 'Agents List',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
                     {
                         extend: 'selectAll',
                         text: 'Select All',
