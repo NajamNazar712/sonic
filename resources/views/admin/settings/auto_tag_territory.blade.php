@@ -169,9 +169,57 @@
                 $('#agent_id').val('').trigger('change.select2');
                 $('#city_id').val('').trigger('change.select2');
                 $('#territory_id').val('').trigger('change.select2');
+
                 $('#is_lead_user').prop('checked', false);
-                $('remaining_territory_id').val('').trigger('change.select2');
+                $('#remaining_territory_id').val('').trigger('change.select2');
                 $('#remaining_territory_select_div').addClass('d-none');
+
+                $('#city_id-error, #agent_id-error, #territory_id-error').hide();
+                citySelectedOnce = false;
+                agentSelectedOnce = false;
+                territorySelectedOnce = false;
+                remaining_territory_error_once = false;
+            });
+
+            var citySelectedOnce = false;
+            var agentSelectedOnce = false;
+            var territorySelectedOnce = false;
+            var remaining_territory_error_once = false;
+
+            $('#city_id').on('change', function () {
+                if ($(this).val()) {
+                    $('#city_id-error').hide();
+                    citySelectedOnce = true;
+                } else if (!citySelectedOnce) {
+                    $('#city_id-error').show();
+                }
+            });
+
+            $('#agent_id').on('change', function () {
+                if ($(this).val()) {
+                    $('#agent_id-error').hide();
+                    agentSelectedOnce = true;
+                } else if (!agentSelectedOnce) {
+                    $('#agent_id-error').show();
+                }
+            });
+
+            $('#territory_id').on('change', function () {
+                if ($(this).val()) {
+                    $('#territory_id-error').hide();
+                    territorySelectedOnce = true;
+                } else if (!territorySelectedOnce) {
+                    $('#territory_id-error').show();
+                }
+            });
+
+            $('#remaining_territory_id').on('change', function () {
+                if ($(this).val()) {
+                    $('#remaining_territory_error').hide();
+                    remaining_territory_error_once = true;
+                } else if (!remaining_territory_error_once) {
+                    $('#remaining_territory_error').show();
+                }
             });
 
             $('#territory_select').css('display','none');
@@ -611,25 +659,16 @@
             });
 
             $('#AssignAgentModal').on('show.bs.modal', function(){
-                $('#territory_id-error').addClass('d-none');
-                $('#agent_id-error').addClass('d-none');
-                $('#remaining_territory_error').addClass('d-none');
+                toggleLeadUserCheckbox();
             });
 
             function toggleLeadUserCheckbox() {
                 var disableLeadUser = !$('#agent_id').val() || !$('#city_id').val() || !$('#territory_id').val();
-                // $('#is_lead_user').prop('disabled', disableLeadUser);
-                $('#is_lead_user').prop('checked', !disableLeadUser);
-                if($('#is_lead_user').is(':checked')){
-                    $('#remaining_territory_select_div').removeClass('d-none');
-                } else {
-                    $('#remaining_territory_select_div').addClass('d-none');
+                $('#is_lead_user').prop('disabled', disableLeadUser);
+                if(disableLeadUser) {
+                    $('#is_lead_user').prop('checked', false);
                 }
             }
-
-            $('#AssignAgentModal').on('show.bs.modal', function() {
-                toggleLeadUserCheckbox();
-            });
 
             $('#agent_id, #city_id, #territory_id').change(function() {
                 toggleLeadUserCheckbox();
@@ -654,6 +693,7 @@
                     $('#assign_agentSubmit').on('click', function() {
                         if ($('#is_lead_user').is(':checked') && $('#remaining_territory_id').val() == ''){
                             $('#remaining_territory_error').removeClass('d-none');
+                            $('#remaining_territory_error').show();
                         } else {
                             $('#remaining_territory_error').addClass('d-none');
                             form.submit();
