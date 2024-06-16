@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\UserLeadEmail;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use App\Http\Models\City;
@@ -70,7 +71,6 @@ class WebsiteLead extends Command
         $response = json_decode($response);
         $leads_added = array();
         $old_leads = array();
-        $token_added = array();
 
         if($response->status == 0){
             $leads = $response->leads;
@@ -135,7 +135,6 @@ class WebsiteLead extends Command
                     $lead_log->updated_by = 7;
                     $lead_log->save();
                     $leads_added[] = $new_lead->id;
-                    $token_added[$key] = $token;
                     $old_leads[] = $lead->id;
                                  
                 }
@@ -146,7 +145,7 @@ class WebsiteLead extends Command
         if(count($old_leads) > 0){
             self::old_api_request_delete($base_uri, $old_leads);
             NotificationsController::send(203, $leads_added, Carbon::today());
-            NotificationsController::send(230, $leads_added, $token_added);                
+            UserLeadEmail::dispatchNow($leads_added);
         }
 
         Log::channel('cronJobLog')->info('s ' .'website:leads Running');
