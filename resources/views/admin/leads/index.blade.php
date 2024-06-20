@@ -651,6 +651,15 @@
                                 <div class="form-group">
                                     <input type="text" class="form-control" name="company" id="edit_company" placeholder="Company*" data-rule-required="true"  data-msg-required="Company Name is required">
                                 </div>
+
+                                <div class="form-group mb-4">
+                                    <select name="service_id" id="edit_service" class="form-control select2" data-rule-required="true"  data-msg-required="Service is required">
+                                        @foreach($services as $service)
+                                            <option value="{{ $service->id }}"> {{ $service->name }} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
@@ -662,13 +671,9 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="modal-footer">
                             <div class="form-group ml-1">
                                 <button type="submit" class="btn btn-primary width-200" value="Add">Edit</button>
                                 <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
-
-                            </div>
                         </div>
                     </form>
 
@@ -1074,7 +1079,7 @@
                                 row.push(values.phone_number);
                                 row.push(values.email_address);
                                 row.push(values.service);
-                                row.push(values.brand);
+                                row.push(values.brand_name);
                                 row.push(values.company);
                                 row.push(values.lead_reference);
                                 row.push(values.requested_date);
@@ -1082,7 +1087,7 @@
                                 row.push(values.sale_person);
                                 row.push(values.sale_person_updated_at);
                                 row.push(values.sale_person_tagged_aging);
-                                row.push(values.reference_person+' - '+values.rider_id);
+                                row.push(values.reference_person);
                                 row.push(values.status);
                                 row.push(values.reason_id);
                                 row.push(values.call_status);
@@ -1245,7 +1250,7 @@
                     {data: 'phone_number', name: 'leads.phone_number', class: 'align-middle phone_number'},
                     {data: 'email_address', name: 'leads.email_address', class: 'align-middle email_address'},
                     {data: 'service', name: 'leads.service_id', class: 'align-middle service'},
-                    {data: 'brand', name: 'leads.brand', class: 'align-middle brand'},
+                    {data: 'brand_name', name: 'u.brand_name', class: 'align-middle brand_name'},
                     {data: 'company', name: 'leads.company', class: 'align-middle company'},
                     {data: 'expected_shipments', name: 'leads.expected_shipments', class: 'align-middle expected_shipments'},
                     {data: 'lead_reference', name: 'lr.name', class: 'align-middle lead_reference'},
@@ -1258,9 +1263,11 @@
                         class: 'align-middle sale_person_updated_at'
                     },
                     {data: 'sale_person_tagged_aging', name: 'sale_person_tagged_aging', class: 'align-middle sale_person_tagged_aging', orderable: false, searchable: false},
-                    {data: 'reference_person', name: 'rp.name', class: 'align-middle sale_person',render: function(data,type,row){
-                        return row.reference_person +' - '+ row.rider_id;
-                    }},
+                    // {data: 'reference_person', name: 'rp.name', class: 'align-middle sale_person',render: function(data,type,row){
+                    //     return row.reference_person +' - '+ row.rider_id;
+                    // }},
+                    {data: 'reference_person', name: 'reference_person', class: 'align-middle reference_person', orderable: false},
+
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason_id', name: 'leads.reason', class: 'align-middle reason_id'},
                     {data: 'call_status', name: 'leads.call_status', class: 'align-middle call_status'},
@@ -2036,6 +2043,11 @@
                 width: '100%'
             });
 
+            $("#edit_service").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Service",
+                width: '100%'
+            });
+
             $("#add_territory").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Territory*",
                 width: '100%'
@@ -2137,6 +2149,27 @@
                 form_errors.find('.error').removeClass('error');
             });
 
+            $('#edit_lead_modal').on('show.bs.modal', function() {
+                var editLeadId = $('#edit_lead_id').val();
+                $.ajax({
+                    url: '{{ route('admin.leads.edit_service_list') }}',
+                    data: {
+                        'edit_lead_id': editLeadId,
+                    }
+                }).done(function(data) {
+                    if (data) {
+                        var serviceId = data.service_name.id;
+                        var serviceName = data.service_name.name;
+                        if ($('#edit_service option[value="' + serviceId + '"]').length == 0) {
+                            $('#edit_service').append('<option value="' + serviceId + '" selected>' + serviceName + '</option>');
+                        }
+                        $('#edit_service').select2({
+                            placeholder: "Select Service",
+                            width: '100%'
+                        });
+                    }
+                });
+            });
 
             var lead_table = $('#lead_info_table').DataTable({
                 dom: 'ltipr',
@@ -2199,6 +2232,7 @@
                             $('#edit_lead_form #edit_company').val(details.company);
                             $('#edit_lead_form #edit_territory').trigger('change');
                             $('#edit_lead_form #edit_reference_id').val(details.reference_id).trigger('change');
+                            $('#edit_lead_form #edit_service').val(details.service_id);
                             $('#edit_lead_form #edit_area').trigger('change');
                             $('#edit_lead_modal').modal('show');
 

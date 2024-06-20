@@ -3424,8 +3424,23 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             $('#user_commission').attr('disabled', true)
         } else {
             $('#user_commission').val('');
-            $('#user_commission').attr('disabled', false)
+            if($('#sales_tier_select').val() == 3){
+                $('#user_commission').attr('disabled', true)
+                $('#user_commission').val('0');
+            }
+            else
+            {
+                $('#user_commission').attr('disabled', false)
+                $('#user_commission').val('');
+            }
         }
+
+        
+        if($('#user_select').val() != '')
+        {
+            $('#commission_add_button').attr('disabled', false);
+        }
+
         var index = $.inArray(id, selected_users);
         if (index !== -1) {
             var error = 'User previously selected!';
@@ -3454,6 +3469,17 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             $('#user_select').attr('disabled', false);
         } else {
             $('#external_person_name').attr('disabled', false);
+        }
+
+        if($(this).val() == 3)
+        {
+            $('#user_commission').attr('disabled', true);
+            $('#user_commission').val('0');
+        }
+        else
+        {
+            $('#user_commission').attr('disabled', false);
+            $('#user_commission').val('');
         }
 
     });
@@ -3572,6 +3598,19 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
                     user_name = $('#user_select').find(":selected").text();
                 } else {
                     user_name = $('#external_person_name').val();
+                }
+
+                if(tier_id == 3)
+                {
+                    if($('#user_select').val() == '')
+                    {
+                        var error = 'Please select user!';
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                            });
+                            return 0;
+                    }
                 }
 
                 add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);

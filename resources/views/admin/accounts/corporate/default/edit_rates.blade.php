@@ -4598,7 +4598,7 @@
                                     </div>
                                 </form>
 
-                                <form id="ratesAdditionForm" class="card-body card-dashboard"  action="{{route('admin.accounts.add_rate_commission_corporate_reimb',['shippers'=>$shipper->id])}}" method="post" novalidate>
+                                {{-- <form id="ratesAdditionForm" class="card-body card-dashboard"  action="{{route('admin.accounts.add_rate_commission_corporate_reimb',['shippers'=>$shipper->id])}}" method="post" novalidate>
                                     @csrf
                                     <input type="hidden" name="edit" value="edit">
                                     <div class="modal-body">
@@ -4686,7 +4686,7 @@
                                         <button type="submit" class="btn btn-success" style="margin-right:680px;">Submit</button>
 
                                     </div>
-                                </form>
+                                </form> --}}
                         
                     </div>
                 </div>
