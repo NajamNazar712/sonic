@@ -157,7 +157,7 @@ class ShipmentChargesController extends Controller
                         $range_down = false;
                     }
                 }
-                if($weight_charge->doesntExist()) {
+                if(!$weight_charge->exists()) {
                     $weight_charge = WeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                 }
                 else{
@@ -218,7 +218,7 @@ class ShipmentChargesController extends Controller
                             $range_down = false;
                         }
                     }   
-                    if($weight_charge->doesntExist()) {
+                    if(!$weight_charge->exists()) {
                         $weight_charge = CorporateDefaultWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                     }
                     else{
@@ -230,7 +230,6 @@ class ShipmentChargesController extends Controller
 
             if ($weight_charge->exists()) {
                 $weight_charge = $weight_charge->first();
-
                 $base = FALSE;
                 if ($account_type_id == 2 && $rate_type_id != 3) {
                     $base_weight_charge = CorporateWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('id', '<', $weight_charge->id)->where('base', 1)->orderBy('id', 'DESC');
@@ -443,7 +442,7 @@ class ShipmentChargesController extends Controller
                     else {
                         $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
-                    
+
                     if ($weight > 1) {
                         $result['chargeable_weight'] = (CEIL($weight * 2) / 2);
                     }
@@ -796,7 +795,9 @@ class ShipmentChargesController extends Controller
             $shipper_weight_charges = false;
             if($shipment->actual_weight != $shipment->estimated_weight ) {
                 $result_shipper_weight = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->estimated_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
-                $shipper_weight_charges = true;
+                if($result_shipper_weight) {
+                    $shipper_weight_charges = true;
+                }
 
             }
             

@@ -18238,6 +18238,7 @@ class AdminFinanceController extends Controller
                         $wht = 0;
                     }
                     $payable = $amount - ($charges + $gst - $wht);
+                    $amount = 0;
                 } else {
                     $amount = 0;
                     if($check_arrival) {
@@ -18339,7 +18340,7 @@ class AdminFinanceController extends Controller
                         $pending_payment_shipment->pending_payment_id = $pending_payment->id;
                         $pending_payment_shipment->shipment_id = $shipment_id;
                         $pending_payment_shipment->type = $type;
-                        $pending_payment_shipment->amount = ($type == 3) ? 0 : $amount;
+                        $pending_payment_shipment->amount = $amount;
                         $pending_payment_shipment->charges = $charges;
                         $pending_payment_shipment->gst = $gst;
                         $pending_payment_shipment->wht = 0;
@@ -18347,14 +18348,14 @@ class AdminFinanceController extends Controller
 
                         $pending_payment_shipment->save();
 
-                        self::add_pending_payment_charges($pending_payment->id, ($type == 3) ? 0 : $amount, $charges, $gst, $payable, $wht);
+                        self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht);
                     } else {
                         if (!$shipment->packaging_material_request) {
 
                             $pending_payment_shipment->pending_payment_id = $pending_payment->id;
                             $pending_payment_shipment->shipment_id = $shipment_id;
                             $pending_payment_shipment->type = $type;
-                            $pending_payment_shipment->amount = ($type == 3) ? 0 : $amount;
+                            $pending_payment_shipment->amount = $amount;
                             if ($crs) {
                                 $pending_payment_shipment->charges = $charges;
                                 $pending_payment_shipment->gst = $gst;
@@ -18364,15 +18365,15 @@ class AdminFinanceController extends Controller
                                 $pending_payment_shipment->charges = 0;
                                 $pending_payment_shipment->gst = 0;
                                 $pending_payment_shipment->wht = 0;
-                                $pending_payment_shipment->payable = ($type == 3) ? 0 : $amount;
+                                $pending_payment_shipment->payable = $amount;
                             }
 
                             $pending_payment_shipment->save();
 
                             if ($crs) {
-                                self::add_pending_payment_charges($pending_payment->id, ($type == 3) ? 0 : $amount, $charges, $gst, $payable, $wht);
+                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht);
                             } else {
-                                self::add_pending_payment_charges($pending_payment->id, ($type == 3) ? 0 : $amount, 0, 0, ($type == 3) ? 0 : $amount, 0);
+                                self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount, 0);
                             }
 
                             $pending_invoice_shipment = new PendingInvoiceShipment();
@@ -18389,11 +18390,11 @@ class AdminFinanceController extends Controller
                                 $pending_payment_shipment->pending_payment_id = $pending_payment->id;
                                 $pending_payment_shipment->shipment_id = $shipment_id;
                                 $pending_payment_shipment->type = $type;
-                                $pending_payment_shipment->amount = ($type == 3) ? 0 : $amount;
+                                $pending_payment_shipment->amount = $amount;
                                 $pending_payment_shipment->payable = $payable;
                                 $pending_payment_shipment->save();
 
-                                self::add_pending_payment_charges($pending_payment->id, ($type == 3) ? 0 : $amount, $charges, $gst, $payable, $wht);
+                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht);
                             }
 
                             $pending_invoice_shipment = new PendingInvoiceShipment();
