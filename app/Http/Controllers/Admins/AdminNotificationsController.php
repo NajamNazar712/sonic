@@ -262,7 +262,7 @@ class AdminNotificationsController extends Controller
         else if ($id == 12) {
             $details['receiver'] = ['Consignee Phone Number'];
 
-            $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'consignee_name', 'consignee_address', 'order_id', 'amount', 'payment_mode', 'tracking_number', 'refusal_otp','online_payment_link'];
+            $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'consignee_name', 'consignee_address', 'order_id', 'amount', 'payment_mode', 'tracking_number', 'refusal_otp','online_payment_link', 'tracking_link'];
         }
         else if ($id == 13) {
              $details['receiver'] = ['Shipper Email'];

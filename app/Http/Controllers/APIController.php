@@ -9762,4 +9762,23 @@ class APIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
+
+    public function fetch_complaints(Request $request) {
+
+        $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first()->id;
+
+        $record = CrmRequest::leftJoin('crm_request_case_nature as crcn', 'crcn.id','crm_requests.case_nature_id')
+        ->leftJoin('crm_request_case_nature_types as crcnt','crcnt.id','crm_requests.case_nature_type_id')
+        ->leftJoin('crm_request_statuses as crs' ,'crs.id', 'crm_requests.status_id')
+        ->where('shipment_id', $shipment_id)
+        ->select(['crm_requests.id as request_no','crcn.name as complaint_nature','crcnt.type as complaint_nature_type','crm_requests.description as description', 'crs.name as status'])->orderBy('crm_requests.created_at','desc')->get();
+
+        if(count($record) > 0){
+            $message = 'List of Complaints';
+        } else {
+            $message = 'No record found';
+        }
+        return response()->json(['status' => 0, 'message' => $message, 'data' => $record]);
+
+    }
 }

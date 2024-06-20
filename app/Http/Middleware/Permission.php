@@ -1460,6 +1460,7 @@ class Permission
 
             'settings.mms_excel_booking_setting.index' => 938,
 			'reports.cargo_manifest.index' => 933,
+            'reports.sms.index' => 945,
 
             'logistic.master_product.index' =>952,
             'logistic.master_product.list' =>952,
