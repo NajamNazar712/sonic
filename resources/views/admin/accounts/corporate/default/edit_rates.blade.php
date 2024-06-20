@@ -4896,20 +4896,36 @@
         function add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission){
             var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove"><i class="la la-close"></i></a>';
             var tier = '<div><input type="hidden" name="tier_id['+ row +']"  value="'+ tier_id +'">'+ tier_name +'</div>';
+            var name;
+
             if(tier_type == 1){
-                var name = '<div><input type="hidden" name="user_id['+ row +']"  value="'+ user_id +'">'+ user_name +'</div>';
+                name = '<div><input type="hidden" name="user_id['+ row +']"  value="'+ user_id +'">'+ user_name +'</div>';
             }else{
-                var name = '<div><input type="hidden" name="user_id['+ row +']"  value="'+ user_name +'">'+ user_name +'</div>';
+                name = '<div><input type="hidden" name="user_id['+ row +']"  value="'+ user_name +'">'+ user_name +'</div>';
             }
             var commission_percentage = '<div><input type="hidden" name="commission_percentage['+ row +']"  value="'+ commission +'">'+ commission +'%</div>';
-            table.row.add([row,name,tier,commission_percentage,remove]).node().id = row;
+
+            // Add debug statement
+            console.log('Adding row:', row, name, tier, commission_percentage, remove);
+
+            var addedRow = table.row.add([row, name, tier, commission_percentage, remove]).node();
+
+            if (!addedRow) {
+                console.error('Failed to add row:', row);
+                return;
+            }
+
+            addedRow.id = row;
             table.draw(false);
-            if(tier_type == 1){
+
+            if (tier_type == 1) {
                 selected_users.push(user_id.toString());
             }
+
             $('#commission_add_button').attr('disabled', false);
             $('#total_commission_value').html(selected_commission);
             $('#total_commission').val(selected_commission);
+
             row++;
         }
 
