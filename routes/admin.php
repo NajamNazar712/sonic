@@ -3868,6 +3868,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::get('/list', 'Admins\AdminInternationalRatesController@retail_international_rates_margin_list')->name('list');
                 });
             });
+
+            //International Economy Rates
+            Route::prefix('economy-rates')->name('economy_rates.')->group(function () {
+                Route::get('', 'Admins\InternationalEconomyStandardRatesController@index')->name('index');
+                Route::get('list', 'Admins\InternationalEconomyStandardRatesController@list')->name('list');
+                Route::post('excel', 'Admins\InternationalEconomyStandardRatesController@upload_excel')->name('excel');
+            });
         });
 
         Route::get('add/standard_rates', 'Admins\Retail\RetailAdminUserManagementController@add_standard_rates')->name('add.rates');
