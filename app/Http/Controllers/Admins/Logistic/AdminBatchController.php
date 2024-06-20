@@ -54,7 +54,7 @@ class AdminBatchController extends Controller
             ->orderByDesc('trax_booking_batches.id');
         if (session('role_id') != 1)
         {
-            $booking_batch = $booking_batch->whereIn('trax_booking_batches.city_id',[$hub_ids]);
+            $booking_batch = $booking_batch->whereIn('trax_booking_batches.city_id',$hub_ids);
         }
 
 

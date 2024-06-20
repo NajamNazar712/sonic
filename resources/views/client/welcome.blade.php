@@ -9,7 +9,31 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body text-center">
                 <h1 class="mb-5">Welcome to Sonic..</h1>
-                <div class="row">
+        
+                @if(isset($user->lead_id) && isset($user->on_board_status))
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{ $percentage }}%; background-color: {{ $color }};" aria-valuenow="{{ $percentage }}">
+                            {{ $percentage }}%
+                        </div>
+                    </div>
+
+                    <div style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; max-width: 600px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="text-align: left; flex-grow: 1;">
+                            <h2>Your Account Status: Signed Up</h2>
+                            <p style="margin-top:20px;">{{ $description }}</p>
+                            @if(isset($user->on_board_status) && $user->on_board_status == 0)
+                                <a href="{{ route('cod.wordpress.register') }}" style="display: inline-block; padding: 10px 20px; color: white; background-color: #007bff; border-radius: 5px; text-decoration: none;">Start Onboarding</a>
+                            @endif
+                        </div>
+                        <div style="flex-shrink: 0; margin-left: 20px;">
+                            <img src="{{ asset('img/proposed_lead_image_onboard.png') }}" alt="Onboarding Image" style="width: 150px; height: auto;">
+                        </div>
+                    </div>
+                    
+
+                @endif
+            
+                <div class="row mt-2">
                         <div class="col">
                         <table class="table table-bordered">
                             @if(count($sales_person_data)> 0)
@@ -194,6 +218,8 @@
             text-align: center;
             width: 100%;
         }
+
+
     </style>
 @endsection
 @section('js')

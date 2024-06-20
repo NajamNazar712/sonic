@@ -57,7 +57,7 @@
                                                         <div class="form-group">
                                                             <label>Customer</label>
                                                             <select class="select select2 mb-1" name="shipper_id" id="shipper_select">
-                                                                @foreach ($shippers as $shipper)
+                                                                @foreach ($shipper as $single_shipper)
                                                                     <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
                                                                 @endforeach
                                                             </select>
@@ -113,7 +113,7 @@
                                                     <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Total Pieces</label>
-                                                            <input type="text" name="total_pieces" class="form-control" value="{{$logistic_booking->total_pieces}}" readonly>
+                                                            <input type="text" name="total_pieces" class="form-control" value="{{$logistic_booking->total_pieces}}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-3">
@@ -582,18 +582,20 @@
                                             <div class="row mt-4">
                                                 <div class="col-md-12 text-center" style="border: 1px solid lightgrey; padding:7px;">
                                                     <button type="submit" name="book" id="add" class="btn btn-primary w-50" value="Book">Update Booking</button>
-{{--                                                    @if(isset($batch_id) && $batch_id!=0)--}}
+                                                    @if(isset($batch_id) && $batch_id!=0)
                                                         <a href="{{route('admin.logistic.batch.batch_bookings',['batch_id'=>$batch_id])}}" class="btn btn-danger">Skip Entry</a>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            @if(isset($batch_id) && $batch_id!=0)
+                                                <div class="row mt-4">
+                                                    <div class="col-md-12 text-center">
+                                                        <input type="hidden" name="batch_id" value="{{$batch_id}}">
+                                                        <button type="button" name="batch_release" id="batch_release" class="btn btn-primary w-50" value="Book">Release Batch</button>
+                                                    </div>
+                                                </div>
+                                            @endif
 
-{{--                                                    @endif--}}
-                                                </div>
-                                            </div>
-                                            <div class="row mt-4">
-                                                <div class="col-md-12 text-center">
-                                                    <input type="hidden" name="batch_id" value="{{$batch_id}}">
-                                                    <button type="button" name="batch_release" id="batch_release" class="btn btn-primary w-50" value="Book">Release Batch</button>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                     
@@ -773,7 +775,7 @@
         $('#service_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
             width: '100%',
             placeholder: 'Select Service'
-        }).val(bookings.product_id).trigger('change');
+        }).val(bookings.service_id).trigger('change');
         {{--.bind('change',function(){--}}
         {{--    var product_id = parseInt($(this).val());--}}
         {{--    $.ajax({--}}

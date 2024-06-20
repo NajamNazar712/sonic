@@ -2240,6 +2240,7 @@ class ReturnController extends Controller
             ->leftjoin('city_areas AS ca', 'ca.id', '=', 'rsi.city_area_id')
             ->leftjoin('city_areas AS ca2', 'ca2.id', '=', 'usi.city_area_id')
             ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
+            ->leftjoin('cities as rch', 'rc.hub_id', '=', 'rch.id')
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
@@ -2346,7 +2347,8 @@ class ReturnController extends Controller
                 'rider.trax_id as rider_id',
                 'rider.name as rider_name',
                 'ca.name as area',
-                'ca2.name as area2'
+                'ca2.name as area2',
+                'rch.id as return_hub_id'
             )
             ->whereIn('shipments.shipper_status_id', $status_return);
         if (session('department_id') == 7) {
@@ -2368,6 +2370,9 @@ class ReturnController extends Controller
                 })
                     ->orWhere(function ($sub_query) {
                         $sub_query->whereIn('oc.hub_id', session('hubs'));
+                    })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->whereIn('rch.hub_id', session('hubs'));
                     });
             });
         }
