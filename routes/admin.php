@@ -1,6 +1,6 @@
 <?php
 //Admin Routes Start
-Route::get('/{tiny_url}', 'NotificationsController@get_actual_url');
+Route::get('/{tiny_url}', 'ShortUrlController@get_actual_url');
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('admin.login');
