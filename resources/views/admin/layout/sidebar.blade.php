@@ -3004,6 +3004,13 @@
                                     href="{{ route('admin.settings.auto_tag_territories.index') }}">Auto Tag
                                     Territories</a></li>
                         @endif
+                        @if (session('role_id') == 1)
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.settings.show_vendor.index') }}">
+                                    Brand and Vendor
+                                </a>
+                            </li>
+                        @endif
                         <!--                         add side bar-->
 
 

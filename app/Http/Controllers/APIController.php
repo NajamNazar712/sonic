@@ -8179,8 +8179,31 @@ class APIController extends Controller
 
     public function shipment_track_consignee_public(Request $request)
     {
+        $tracking_num = explode(',', $request->tracking_number);
+        $shipment_data = Shipment::whereIn('tracking_number', $tracking_num)->pluck('pickup_address_id');
+        $vendor = UserShippingInfo::whereIn('id', $shipment_data)->pluck('vendor');
+        $brand_name = UserShippingInfo::whereIn('id', $shipment_data)->pluck('pickup_brand_name');
+
+        // $rules = [
+        //     'tracking_number' => ['required'],
+        // ];
+
         $rules = [
             'tracking_number' => ['required'],
+            'vendor' => [
+                function ($attribute, $value, $fail) use ($vendor) {
+                    if (!$vendor->contains($value)) {
+                        $fail('The Vendor name is invalid.');
+                    }
+                }
+            ],
+            'pickup_brand_name' => [
+                function ($attribute, $value, $fail) use ($brand_name) {
+                    if (!$brand_name->contains($value)) {
+                        $fail('The Brand name is invalid.');
+                    }
+                }
+            ],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -8221,6 +8244,8 @@ class APIController extends Controller
                             $pickup = $shipment->pickup_address;
 
                             $details['pickup']['origin'] = $pickup->city->name;
+                            $details['pickup']['vendor'] = $pickup->vendor;
+                            $details['pickup']['brand_name'] = $pickup->pickup_brand_name;
 
                             $details['consignee']['name'] = $shipment->consignee_name;
                             $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;

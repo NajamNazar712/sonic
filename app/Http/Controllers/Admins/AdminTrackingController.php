@@ -164,6 +164,7 @@ class AdminTrackingController extends Controller
 
                     $details['pickup']['person_of_contact'] = $pickup->poc;
                     $details['pickup']['vendor'] = $pickup->vendor;
+                    $details['pickup']['pickup_brand_name'] = $pickup->pickup_brand_name;
                     $details['pickup']['phone_number'] = $pickup->phone;
                     $details['pickup']['email'] = $pickup->email;
                     $details['pickup']['origin'] = $pickup->city->name;
@@ -1122,6 +1123,7 @@ class AdminTrackingController extends Controller
 
                         $details['pickup']['person_of_contact'] = $pickup->poc;
                         $details['pickup']['vendor'] = $pickup->vendor;
+                        $details['pickup']['pickup_brand_name'] = $pickup->pickup_brand_name;
                         $details['pickup']['phone_number'] = $pickup->phone;
                         $details['pickup']['email'] = $pickup->email;
                         $details['pickup']['origin'] = $pickup->city->name;
