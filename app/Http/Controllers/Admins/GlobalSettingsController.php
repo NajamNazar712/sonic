@@ -163,6 +163,7 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\RvShipmentTicket;
 
 class GlobalSettingsController extends Controller
 {
