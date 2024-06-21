@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 
+use App\Http\Models\Shippers\ShipperPickupController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -133,7 +134,24 @@ use Illuminate\Http\Request;
         Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
         Route::get('check_pin', 'Rider\RiderAPIController@check_pin')->name('check_pin');
-
+     //   
+        Route::prefix('retail')->name('retail.')->group(function () {
+            Route::prefix('shipper')->name('shipper.')->group(function () {
+                Route::post('registration', 'Rider\RiderAPIController@shipper_registration')->name('shipper_registration');
+                Route::post('login', 'Rider\RiderAPIController@shipper_login')->name('login');
+                Route::get('shipper_cities', 'Rider\RiderAPIController@shipper_cities')->name('shipper_cities');
+                Route::get('shipper_products', 'Rider\RiderAPIController@shipper_products')->name('shipper_products');
+        
+                Route::post('shipper_change_pin', 'Rider\RiderAPIController@shipper_change_pin')->name('shipper_change_pin');
+                Route::post('shipper_flyer_types', 'Rider\RiderAPIController@shipper_flyer_types')->name('shipper_flyer_types');
+                Route::post('shipper_flyer_rates', 'Rider\RiderAPIController@shipper_flyer_rates')->name('shipper_flyer_rates');
+                Route::post('shipper_trax_city_center', 'Rider\RiderAPIController@shipper_trax_city_center')->name('shipper_trax_city_center');
+                Route::post('shipper_flyer_request', 'Rider\RiderAPIController@shipper_flyer_request')->name('shipper_flyer_request');
+                Route::post('shipper_all', 'Rider\RiderAPIController@shipper_all')->name('shipper_all');
+        
+            });
+        });
+        
         //Current
         Route::post('login_v5', 'Rider\RiderAPIController@login_v4')->name('login_v5');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');

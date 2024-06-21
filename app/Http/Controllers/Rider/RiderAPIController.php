@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Rider;
 use DB;
 use Validator;
 use App\SubReason;
+use App\TraxRetailShipperFlyerRequest;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use App\Http\Models\City;
@@ -168,6 +169,8 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TempRiderDelivery;
 use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
+use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\PackagingMaterialTypeSizes;
 
 class RiderAPIController extends Controller
 {
@@ -2213,6 +2216,43 @@ class RiderAPIController extends Controller
             }
         }
     }
+
+    public function shipper_cities(Request $request)
+    {
+
+       
+        $cities = City::where('status', 1)->where('business_category_id', 1);
+
+        if ($cities->exists()) {
+            $cities = $cities->get();
+
+            $details = array();
+
+            foreach ($cities as $city) {
+                $detail = array();
+
+                $detail['id'] = $city->id;
+                $detail['name'] = $city->name;
+
+                $details[] = $detail;
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Pickup and Delivery Information of Cities', 'cities' => $details]);
+        } else {
+            return response()->json(['status' => 1, 'message' => ' No City Present']);
+        }
+    }
+
+
+    public function shipper_products(Request $request){
+        $products = Product::all();
+        if($products){
+            return response()->json(["status" => 0, "message" => "Products Found!","products"=>$products]);
+        }else {
+            return response()->json(["status" => 1, "message" => "No products found!"]);
+        }
+    }
+
 
     public function cities(Request $request)
     {
@@ -14783,6 +14823,328 @@ class RiderAPIController extends Controller
             $delivery_note_data->save();
 
             return response()->json(['status' => 0, 'message' => 'Delivery Note is ready for verification!', 'delivery_note_id' => $request->delivery_note_id]);
+        }
+    }
+
+
+
+    public function shipper_registration(Request $request)
+    {
+
+
+       
+        $rules = [
+            'full_name' => ['required'],
+            'mobile_number' =>  ['required', 'regex:/^[0][0-9]{10}$/'],
+            'cnic' =>['required'],
+            'address' => ['required'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $full_name = $request->full_name;
+            $mobile_number = $request->mobile_number;
+            $mobile_number = substr_replace($mobile_number, '-', 4, 0);
+            $cnic = $request->cnic;
+            $address = $request->address;
+            $pin = $request->pin;
+            $pin = Hash::make($pin);
+            
+            $dataExist = RetailShipperInfo::where('shipper_phone_no',$mobile_number)->
+            where('shipper_name',$full_name)->
+            where('shipper_cnic',$cnic)->
+            where('shipper_address',$address)->exists();
+            
+            if(!$dataExist){
+                $result = RetailShipperInfo::create([
+                    'shipper_phone_no' => $mobile_number,
+                    'shipper_name' => $full_name,
+                    'shipper_cnic' => $cnic,
+                    'shipper_address' => $address,
+                    'pin' => $pin
+                ]);
+    
+                if($result){
+                    return response()->json(['status' => 0, 'create_message' => 'Retail Shipper has been created']);
+                }else {
+                    return response()->json(['status' => 1, 'create_message' => 'Retail Shipper account not created']);
+                }
+            }else {
+                return response()->json(['status' => 1, 'create_message' => 'Retail Shipper account already exist']);
+            }
+            
+            // create retail shipper account here
+
+        }
+    }
+
+
+    public function shipper_login(Request $request)
+    {
+
+
+       
+        $rules = [
+            'mobile_number' =>  ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $mobile_number = $request->mobile_number;
+            $mobile_number = substr_replace($mobile_number, '-', 4, 0);
+            $pin = $request->pin;
+            
+            $rider = RetailShipperInfo::where('shipper_phone_no', $mobile_number);
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                if ($rider->status) {
+                    $rPin = $rider->pin;
+                    $results = Hash::check($pin,$rider->pin);
+                    if($results){
+                        return response()->json(['status' => 0, 'message' => 'Shipper login successfully']);
+                    }else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid Pin','pin 1'=>$pin,'Pin 2 '=>$rPin,'Results '=>$results]);
+      
+                    }
+                
+                }
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => 'not Exist']);
+      
+            }
+            // create retail shipper account here
+
+        }
+    }
+
+    public function shipper_change_pin(Request $request)
+    {
+
+
+       
+        $rules = [
+            'mobile_number' =>  ['required', 'regex:/^[0][0-9]{10}$/'],
+            'old_pin' => ['required', 'integer', 'digits:4'],
+            'new_pin' => ['required', 'integer', 'digits:4'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $mobile_number = $request->mobile_number;
+            $mobile_number = substr_replace($mobile_number, '-', 4, 0);
+            $old_pin = $request->old_pin;
+            $new_pin = $request->new_pin;
+            $new_pin = Hash::make($new_pin);
+            
+            $rider = RetailShipperInfo::where('shipper_phone_no', $mobile_number);
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                if ($rider->status) {
+                    $rPin = $rider->pin;
+                    $results = Hash::check($old_pin,$rider->pin);
+                    if($results){
+                        $rider->pin = $new_pin;
+                        $rider->save();
+                            return response()->json(['status' => 0, 'message' => 'Shipper pin change successfully']);
+                        
+                    }else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid Pin','pin 1'=>$pin,'Pin 2 '=>$rPin,'Results '=>$results]);
+      
+                    }
+                
+                }
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => 'not Exist']);
+      
+            }
+            // create retail shipper account here
+
+        }
+    }
+
+
+    public function shipper_flyer_types(Request $request)
+    {
+
+
+       
+            
+            
+            $riders = PackagingMaterialTypes::where('status', 1);
+            if ($riders->exists()) {
+                $flyers = $riders->get();
+
+            $details = array();
+
+            foreach ($flyers as $flyer) {
+                $detail = array();
+
+                $detail['id'] = $flyer->id;
+                $detail['name'] = $flyer->type;
+                $detail['description'] = $flyer->description;
+
+                $details[] = $detail;
+            }
+            return response()->json(['status' => 1, 'message' => 'Record Found', 'result' => $details]);
+      
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Record not found!']);
+      
+            }
+            // create retail shipper account here
+
+        
+    }
+
+    public function shipper_flyer_rates(Request $request)
+    {
+
+
+       
+        $rules = [
+            'type_id' =>  ['required']
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $riders = PackagingMaterialTypeSizes::where('type_id', $request->type_id);
+            if ($riders->exists()) {
+                $flyers = $riders->get();
+
+            $details = array();
+
+            foreach ($flyers as $flyer) {
+                $detail = array();
+
+                $detail['id'] = $flyer->id;
+                $detail['size'] = $flyer->size;
+                $detail['charges'] = $flyer->standard_charges;
+
+                $details[] = $detail;
+            }
+            return response()->json(['status' => 1, 'message' => 'Record Found', 'result' => $details]);
+      
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Record not found!']);
+      
+            }
+            // create retail shipper account here
+
+        }
+    }
+
+    public function shipper_trax_city_center(Request $request)
+    {
+
+
+       
+        $rules = [
+            'city_id' =>  ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $city_id = $request->city_id; 
+            $retailTraxCenter = RetailTraxCenter::where('default_hub', $city_id);
+            if ($retailTraxCenter->exists()) {
+                $retailTraxCenter = $retailTraxCenter->get();
+                return response()->json(['status' => 0, 'message' => 'Record Found', 'success' => $retailTraxCenter]);
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Record not found', 'errors' => 'not Exist']);
+      
+            }
+            // create retail shipper account here
+
+        }
+    }
+
+
+
+    public function shipper_flyer_request(Request $request)
+    {
+
+
+       
+        $rules = [
+            'retail_shipper_id' => ['required'],
+            'type_size_id' =>  ['required'],
+            'trax_centre_id' =>['required'],
+            'qty' => ['required','integer','min:1'],
+            'amount' => ['required','integer','min:1'],
+            'status' => ['required'],
+
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $retail_shipper_id = $request->retail_shipper_id;
+            $type_size_id = $request->type_size_id;
+            $trax_centre_id = $request->trax_centre_id;
+            $qty = $request->qty;
+            $amount = $request->amount;
+            $status = $request->status;
+            
+                $result = TraxRetailShipperFlyerRequest::create([
+                    'retail_shipper_id' => $retail_shipper_id,
+                    'type_size_id' => $type_size_id,
+                    'trax_centre_id' => $trax_centre_id,
+                    'qty' => $qty,
+                    'amount' => $amount,
+                    'status'=>$status
+                ]);
+    
+                if($result){
+                    return response()->json(['status' => 0, 'create_message' => 'Retail Shipper Flyer Request has been created']);
+                }else {
+                    return response()->json(['status' => 1, 'create_message' => 'Retail Shipper Flyer Request  not created']);
+                }
+           
+            
+            // create retail shipper account here
+
+        }
+    }
+
+
+
+    public function shipper_all(Request $request)
+    {
+
+
+       
+        $rules = [
+            'shipper_id' =>  ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipper_id = $request->shipper_id; 
+            $retailTraxCenter = RetailShipperInfo::where('id', $shipper_id);
+            if ($retailTraxCenter->exists()) {
+                $retailTraxCenter = $retailTraxCenter->first();
+                return response()->json(['status' => 0, 'message' => 'Record Found', 'success' => $retailTraxCenter]);
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Record not found', 'errors' => 'not Exist']);
+      
+            }
+            // create retail shipper account here
+
         }
     }
 }
