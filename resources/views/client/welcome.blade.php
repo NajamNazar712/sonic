@@ -10,7 +10,7 @@
             <div class="card-body text-center">
                 <h1 class="mb-5">Welcome to Sonic..</h1>
         
-                @if(isset($user->lead_id) && isset($user->on_board_status))
+                @if(isset($user->lead_id))
                     <div class="progress">
                         <div class="progress-bar" role="progressbar" style="width: {{ $percentage }}%; background-color: {{ $color }};" aria-valuenow="{{ $percentage }}">
                             {{ $percentage }}%
