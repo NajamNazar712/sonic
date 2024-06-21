@@ -16,7 +16,9 @@ class TotalSumFranchiseCommission extends Model
         'sum_of_weight_charges',
         'sum_of_commission',
         'withholding_tax_percent',
+        'withholding_amount',
         'commission_gst_deduction_percent',
+        'deduction_amount',
         'net_commission',
     ]; 
 }

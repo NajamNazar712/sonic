@@ -24,7 +24,9 @@ class CreateTotalSumFranchiseCommissionsTable extends Migration
             $table->decimal('sum_of_weight_charges', 8, 2)->nullable();
             $table->decimal('sum_of_commission', 8, 2)->nullable();
             $table->decimal('withholding_tax_percent', 8, 2)->nullable();
+            $table->decimal('withholding_amount', 8, 2)->nullable();
             $table->decimal('commission_gst_deduction_percent', 8, 2)->nullable();
+            $table->decimal('deduction_amount', 8, 2)->nullable();
             $table->decimal('net_commission', 8, 2)->nullable();
             $table->timestamps();
         });
