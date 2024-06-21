@@ -1090,33 +1090,11 @@ class RetailAdminUserManagementController extends Controller
         return $html;
     }
 
-    public function franchise_commission_view_ajax_list(Request $request)
+    public function franchisex(Request $request)
     {
         $month = $request->month;
         $franchise = $request->franchise;
-        $query = RetailFranchiseCommission::select(
-            'franchise_id',
-            'franchise_code',
-            'franchise_cnic',
-            'franchise_phone',
-            'franchise_name',
-            'franchise_address',
-            DB::raw("MONTHNAME(STR_TO_DATE(month, '%m')) as month_name"),
-            'retail_shipping_mode_id',
-            'retail_shipping_mode_name',
-            DB::raw('SUM(number_of_shipments) as total_shipments'),
-            DB::raw('SUM(total_charges_without_gst) as total_charges_without_gst'),
-            DB::raw('SUM(total_charges) as total_charges'),
-            DB::raw('SUM(weight_charges) as total_weight_charges'),
-            DB::raw('SUM(franchise_gst_amount) as total_franchise_gst_amount'),
-            'retail_shipping_mode_name',
-            'franchise_gst_amount',
-            'franchise_withholding_percentage',
-            'product_percentage',
-            DB::raw('(product_percentage/100) * SUM(weight_charges) as commission')
-        )
-        ->groupBy('retail_shipping_mode_id')
-        ->where('month', $month);
+        $query = RetailFranchiseCommission::where('month', $month);
         if (!empty($franchise)) {
             $query->where('franchise_id', $franchise);
         }
@@ -1139,26 +1117,7 @@ class RetailAdminUserManagementController extends Controller
     {
         $month = $request->month;
         $franchise = $request->franchise;
-        $query = RetailUserCommission::select(
-            'franchise_id',
-            'franchise_code',
-            'trax_center_name',
-            'trax_center_cnic',
-            'trax_center_phone',
-            'franchise_address',
-            DB::raw("MONTHNAME(STR_TO_DATE(month, '%m')) as month"),
-            'retail_shipping_mode_id',
-            'retail_shipping_mode_name',
-            DB::raw('SUM(number_of_shipments) as total_shipments'),
-            DB::raw('SUM(total_charges_without_gst) as total_charges_without_gst'),
-            DB::raw('SUM(total_charges) as total_charges'),
-            DB::raw('SUM(weight_charges) as total_weight_charges'),
-            DB::raw('SUM(franchise_gst_amount) as total_franchise_gst_amount'),
-            'commission',
-            DB::raw('(commission/100) * SUM(weight_charges) as net_commission')
-        )
-        ->groupBy('retail_shipping_mode_id')
-        ->where('month', $month);
+        $query = RetailUserCommission::where('month', $month);
         if (!empty($franchise)) {
             $query->where('franchise_id', $franchise);
         }

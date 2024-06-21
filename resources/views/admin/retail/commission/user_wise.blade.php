@@ -118,6 +118,7 @@
                     franchise: franchise
                 },
                 success: function(response) {
+
                     if (response.data === 0) {
                         if (dataTable !== null) {
                             dataTable.clear().draw();
@@ -221,10 +222,10 @@
                                 { data: 'franchise_address' },
                                 { data: 'month' },
                                 { data: 'retail_shipping_mode_name' },
-                                { data: 'total_shipments' },
+                                { data: 'number_of_shipments' },
                                 { data: 'total_charges' },
-                                { data: 'total_weight_charges' },
-                                { data: 'total_franchise_gst_amount' },
+                                { data: 'weight_charges' },
+                                { data: 'franchise_gst_amount' },
                                 { data: 'commission' },
                                 { data: 'net_commission' },
                             ],
