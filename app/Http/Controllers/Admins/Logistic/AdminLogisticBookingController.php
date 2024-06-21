@@ -612,7 +612,7 @@ class AdminLogisticBookingController extends Controller
                         $shipment->estimated_weight=$request->booking_weight;
                         $shipment->consignee_name=$request->consignee_name;
                         $shipment->consignee_address=$request->consignee_address;
-                        $shipment->consignee_phone_number_1=$request->consignee_phone_number_1;
+                        $shipment->consignee_phone_number_1=$request->consignee_phone_1;
                         $shipment->consignee_email=$request->consignee_email;
                         $shipment->save();
                     }
