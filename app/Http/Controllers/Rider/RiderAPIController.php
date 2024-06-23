@@ -168,6 +168,8 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TempRiderDelivery;
 use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
+use App\Jobs\ProcessRemoveShipmentFromRvShipmentTicket;
+use App\Jobs\ProcessRvShipmentTicket;
 
 class RiderAPIController extends Controller
 {
@@ -11814,6 +11816,17 @@ class RiderAPIController extends Controller
                                             ShipmentsJourneyController::add($shipment->id, $shipper_status_id, $shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id, NULL, NULL, $remarks_id);
                                             DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
 
+                                            if($shipper_status_id == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
+                                            {
+                                                $rvData = [
+                                                    'shipment_id' => $shipment->id,
+                                                    'shipper_status_id' => $shipper_status_id,
+                                                    'status_reason_id' => $request->status_reason_id,
+                                                    'shipment_user_id' => $shipment->user_id,
+                                                    'call_count' => 0
+                                                ];
+                                                dispatch(new ProcessRvShipmentTicket($rvData));
+                                            }
 
                                             $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
                                             if (!$rider_delivery_note_status->exists()) {
@@ -11839,6 +11852,10 @@ class RiderAPIController extends Controller
                                             $otp_bypass = $this->otp_bypass($shipment->user_id);
                                             if ($otp_bypass) {
                                                 $this->auto_return_confirm($shipment->id);
+
+                                                //Remove Shipment from RV Shipment Ticket
+                                                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment->id));
+
                                                 ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id, NULL, NULL, $remarks_id);
                                             } else {
 //                                                $arr['shipment_id'] = $request->shipment_id;
@@ -13752,7 +13769,7 @@ class RiderAPIController extends Controller
         if ($shipment->shipment_type == 1) {
             if ($shipment->booking_type_id != 4) {
                 ShipmentChargesController::return($shipment_id);
-
+                
                 if ($shipment->packaging_material_request != 1) {
 
                     AdminFinanceController::add_payment($shipment_id, 1);

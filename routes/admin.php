@@ -3415,6 +3415,29 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+
+        //Agents List
+        Route::prefix('agents_list')->name('agents_list.')->group(function () {
+            Route::get('', 'Admins\Settings\AgentSettingsController@agents_list_index')->name('index');
+            Route::get('list', 'Admins\Settings\AgentSettingsController@agents_list_list')->name('list');
+            Route::post('store', 'Admins\Settings\AgentSettingsController@agent_type_store')->name('store');
+            Route::post('data', 'Admins\Settings\AgentSettingsController@agent_data')->name('data');
+            Route::post('update', 'Admins\Settings\AgentSettingsController@admin_agent_type_update')->name('update');
+            Route::post('bulk-update', 'Admins\Settings\AgentSettingsController@admin_agent_type_update_bulk')->name('update.bulk');
+
+        });
+
+        //Agent Types
+        Route::prefix('agent_types')->name('agent_types.')->group(function () {
+            Route::get('', 'Admins\Settings\AgentSettingsController@agent_types_index')->name('index');
+            Route::get('list', 'Admins\Settings\AgentSettingsController@agent_types_list')->name('list');
+            Route::post('store', 'Admins\Settings\AgentSettingsController@agent_type_store')->name('store');
+            Route::post('data', 'Admins\Settings\AgentSettingsController@agent_types_data')->name('data');
+            Route::post('update', 'Admins\Settings\AgentSettingsController@agent_type_update')->name('update');
+
+        });
+
+
     });
 
     Route::prefix('shipment')->name('shipment.')->group(function () {

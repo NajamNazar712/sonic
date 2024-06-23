@@ -93,7 +93,7 @@ class ReturnV2Controller extends Controller
         $employee_attendance = EmployeeAttendance::where('employee_id', $admin->employee_id)->where('attendance_date', date('Y-m-d'));
 
         if ($employee_attendance->exists()) {
-            $employee_attendance->update(['clock_in' => date('H:i:s'), 'clock_out' => null]);
+            $employee_attendance->update(['clock_in' => date('H:i:s'),'clock_out'=>null]);
         } else {
             $employee_attendance = new EmployeeAttendance();
             $employee_attendance->employee_id = $admin->employee_id;
@@ -117,6 +117,11 @@ class ReturnV2Controller extends Controller
 
         if ($admin->exists()) {
             $admin = $admin->first();
+
+            if($admin->agent_caller_type == null)
+            {
+                return response()->json(['status' => 7, 'error' => 'Contact Your Admin For Assigning Agent Type!']);
+            }
 
             $employee = Employee::where('phone_number', $admin->phone_number)->where('staff_category_id', 3)->where('status_id', '!=', 2);
 
@@ -180,7 +185,7 @@ class ReturnV2Controller extends Controller
 
                             // If no shipment is already assigned, assign a new one
                             if (!$already_assigned_shipment) {
-                                $shipment = $this->included_shippers($agent_id);
+                                $shipment = $this->findShipmentforAgent($agent_id);
                             } else {
                                 $shipment = $already_assigned_shipment->shipment_id;
                             }
@@ -188,7 +193,7 @@ class ReturnV2Controller extends Controller
                             $shipment = $assigned_shipment->shipment_id;
                         }
                         if ($shipment) {
-                            $shipment = Shipment::find($shipment->id ?? $shipment);
+                            $shipment = Shipment::find($shipment->shipment_id ?? $shipment);
                             try {
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
@@ -219,14 +224,21 @@ class ReturnV2Controller extends Controller
                                 ->latest()
                                 ->first();
                                 if (isset($latest_shipments_journey)) {
+                                    // $rider_details['reason'] = ShipmentStatusReason::where('id', $rider_info->rider_status_reason_id)->first();
+                                    // $rider_details['reason'] = $rider_details['reason']['name'] ? $rider_details['reason']['name'] : '-';
+                                    // $rider_details['reason'] =ShipmentStatusReason::where('id', ShipmentsJourney::where('shipper_status_id',12)->where('shipment_id', $shipment->id)->latest()->first()->status_reason_id)->first();
                                     $rider_details['reason'] =ShipmentStatusReason::where('id', $latest_shipments_journey->status_reason_id)->first();
                                     $rider_details['reason'] = $rider_details['reason'] ? $rider_details['reason']['name'] : '-';
                                     $rider_details['attempted_time'] = (isset($latest_shipments_journey->created_at)) ? ($latest_shipments_journey->created_at)->format('Y/m/d H:i:s') : '-';
                                     $rider_details['remarks'] = $latest_shipments_journey;
                                     $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
                                 } else {
+                                    // $rider_details['reason'] = '-';
+                                    // $rider_details['reason'] =ShipmentStatusReason::where('id', $latest_shipments_journey->status_reason_id)->first();
                                     $rider_details['reason'] = '-';
                                     $rider_details['attempted_time'] = '-';
+                                    // $rider_details['remarks'] = '-';
+                                    // $rider_details['remarks'] = $latest_shipments_journey;
                                     $rider_details['remarks'] = '-';
                                 }
 
@@ -325,7 +337,6 @@ class ReturnV2Controller extends Controller
     //2  reattempt, 3 intercept, 5 on hold
     public function submit_ticket(Request $request)
     {
-        
         $validations = [
             'rv_assign_agent_status_id' => 'required',
             'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3, 8',
@@ -354,15 +365,18 @@ class ReturnV2Controller extends Controller
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->latest()->first();
             if($shipment_assign_agent){
                 $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at', date('Y-m-d'))->first();
-                $admin_agent = Admin::where('id', Auth::id())->first();
+                $admin_agent = Admin::where('id', Auth::id())->first();       
                 $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
-                $employee = Employee::where('phone_number', $request->phone_number)->first();
-                $employee_shift = EmployeeShift::where('id', $employee->shift_id)->first();
+                // $employee = Employee::where('phone_number', $request->phone_number)->first();
+                // $employee_shift = EmployeeShift::where('id', $employee->shift_id)->first();
     
                 // Check Employee Shift Time
                     try{
                         DB::beginTransaction();
-                            //if agent already exists on same date update row
+                    //if agent already exists on same date update row
+                        if ($request->is_fake_status > 0) {
+                            $this->fakeStatusMarkedDeliveries($request);
+                        }
                         if ($assign_agent) 
                         {
                             $update_shipment_status = $this->update_shipment_status($request); //updating status of shipment
@@ -371,6 +385,7 @@ class ReturnV2Controller extends Controller
                                 return response()->json(['status' => 4, 'error' => $update_shipment_status['error']]);
                             } 
                             else{
+                                $rv_agent_call_history_record_id = $update_shipment_status['rv_agent_call_history_record_id'] ?? null;
                                 $shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->where('rv_assign_agent_status_id', 8)->latest()->first();
                                 if($shipment_assign_agents){
                                     $shipment_assign_agent = $shipment_assign_agents;
@@ -387,7 +402,7 @@ class ReturnV2Controller extends Controller
                                         // $shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->latest()->first();
                                         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
                                         // //adding logs in rv_shipment_assign_agent_details table
-                                        $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
+                                        $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey, $rv_agent_call_history_record_id);
                                         if($rv_shipment_assign_agent_details != true){
                                             DB::rollBack();
                                             return response()->json(['status' => 3, 'errors' => 'Shipment Details not updated']);
