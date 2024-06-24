@@ -4,7 +4,6 @@
 
 @section('content')
     <h1 class="mb-1">User Commission</h1>
-
     <section>
         <div class="row">
             <div class="col-12">
@@ -158,119 +157,116 @@
                         dataTable = $('#datatable').DataTable({
                             dom: '<"d-inline-block"l><"pull-right"B>tipr',
                             buttons: [
-                                
-                            {
-                                text: 'Mark as paid',
-                                className: 'select_to_pay disabled',
-                                action: function () {
-                                    var selectedFranchiseNames = [];
-                                    $('#datatable > tbody > .selected').each(function(index){
-                                        var franchiseCode = $(this).find('td:eq(1)').text().trim();
-                                        if (franchiseCode) {
-                                            selectedFranchiseNames.push(franchiseCode);
-                                        }
-                                    });
-                                    var franchiseCodes = selectedFranchiseNames.join(', ');
-
-                                    if (franchiseCodes.length > 0) {
-                                        $.ajax({
-                                            url: '{{ route('admin.retail.users.show_retail_commission') }}',
-                                            method: 'POST',
-                                            data: {
-                                                id: franchiseCodes,
-                                                _token: '{{ csrf_token() }}'
-                                            }
-                                        }).then(function (response) {
-                                            var modalBody = $('#paymentConfirmationModal .modal-body');
-                                            var paymentTable = '<table class="table"><thead><tr><th>Trax Center Code</th><th>Retail User Name</th><th>Is Paid</th></tr></thead><tbody>';
-                                            $.each(response.data, function (index, item) {
-                                                var isPaidText = item.is_paid == 1 ? '<span style="color: green;">Paid</span>' : '<span style="color: red;">Not Paid</span>';
-                                                paymentTable += '<tr><td>' + item.franchise_code + '</td><td>' + item.trax_center_name + '</td><td>' + isPaidText + '</td></tr>';
+                                @if ($allowed_users->contains('id', auth()->user()->id) || auth()->user()->role_id = 1)
+                                    {
+                                        text: 'Mark as paid',
+                                        className: 'select_to_pay disabled',
+                                        action: function () {
+                                            var selectedFranchiseNames = [];
+                                            $('#datatable > tbody > .selected').each(function(index){
+                                                var franchiseCode = $(this).find('td:eq(1)').text().trim();
+                                                if (franchiseCode) {
+                                                    selectedFranchiseNames.push(franchiseCode);
+                                                }
                                             });
-                                            paymentTable += '</tbody></table>';
-                                            modalBody.html(paymentTable);
-                                            $('#paymentConfirmationModal').modal('show');
-                                            $('#confirmPaymentBtn').off('click').on('click', function () {
+                                            var franchiseCodes = selectedFranchiseNames.join(', ');
+
+                                            if (franchiseCodes.length > 0) {
                                                 $.ajax({
-                                                    url: '{{ route('admin.retail.users.retail_commission_payment') }}',
+                                                    url: '{{ route('admin.retail.users.show_retail_commission') }}',
                                                     method: 'POST',
                                                     data: {
                                                         id: franchiseCodes,
                                                         _token: '{{ csrf_token() }}'
                                                     }
-                                                }).then(function (paymentResponse) {
-                                                    toastr.success('Payment has been made successfully.', '', {
-                                                        positionClass: 'toast-bottom-center',
-                                                        containerId: 'toast-bottom-center'
+                                                }).then(function (response) {
+                                                    var modalBody = $('#paymentConfirmationModal .modal-body');
+                                                    var paymentTable = '<table class="table"><thead><tr><th>Trax Center Code</th><th>Retail User Name</th><th>Is Paid</th></tr></thead><tbody>';
+                                                    $.each(response.data, function (index, item) {
+                                                        var isPaidText = item.is_paid == 1 ? '<span style="color: green;">Paid</span>' : '<span style="color: red;">Not Paid</span>';
+                                                        paymentTable += '<tr><td>' + item.franchise_code + '</td><td>' + item.trax_center_name + '</td><td>' + isPaidText + '</td></tr>';
                                                     });
+                                                    paymentTable += '</tbody></table>';
+                                                    modalBody.html(paymentTable);
+                                                    $('#paymentConfirmationModal').modal('show');
+                                                    $('#confirmPaymentBtn').off('click').on('click', function () {
+                                                        $.ajax({
+                                                            url: '{{ route('admin.retail.users.retail_commission_payment') }}',
+                                                            method: 'POST',
+                                                            data: {
+                                                                id: franchiseCodes,
+                                                                _token: '{{ csrf_token() }}'
+                                                            }
+                                                        }).then(function (paymentResponse) {
+                                                            toastr.success('Payment has been made successfully.', '', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
+                                                            });
 
-                                                    var table = $('#datatable').DataTable();
-                                                    var selectedIds = franchiseCodes.split(',').map(id => id.trim());
-                                                    selectedIds.forEach(id => {
-                                                        var row = table.row(function (idx, data, node) {
-                                                            return data.id == id;
+                                                            var table = $('#datatable').DataTable();
+                                                            var selectedIds = franchiseCodes.split(',').map(id => id.trim());
+                                                            selectedIds.forEach(id => {
+                                                                var row = table.row(function (idx, data, node) {
+                                                                    return data.id == id;
+                                                                });
+
+                                                                if (row && row.data()) {
+                                                                    row.data().is_paid = 1;
+                                                                    row.invalidate().draw(false);
+                                                                }
+                                                            });
+                                                        }).catch(function (paymentError) {
+                                                            if (paymentError.responseJSON && paymentError.responseJSON.error) {
+                                                                if (paymentError.responseJSON.status === 1) {
+                                                                    toastr.error('Selected data does not belong to the same user.', '', {
+                                                                        positionClass: 'toast-top-center',
+                                                                        containerId: 'toast-top-center'
+                                                                    });
+                                                                } else if (paymentError.responseJSON.status === 2) {
+                                                                    toastr.error('Payment for ' + paymentError.responseJSON.error_data + ' franchise has already been made.', '', {
+                                                                        positionClass: 'toast-top-center',
+                                                                        containerId: 'toast-top-center'
+                                                                    });
+                                                                } else {
+                                                                    toastr.error(paymentError.responseJSON.error, '', {
+                                                                        positionClass: 'toast-top-center',
+                                                                        containerId: 'toast-top-center'
+                                                                    });
+                                                                }
+                                                            } else {
+                                                                toastr.error('An unexpected error occurred during payment.', '', {
+                                                                    positionClass: 'toast-top-center',
+                                                                    containerId: 'toast-top-center'
+                                                                });
+                                                            }
                                                         });
 
-                                                        if (row && row.data()) {
-                                                            row.data().is_paid = 1;
-                                                            row.invalidate().draw(false);
-                                                        }
+                                                        $('#paymentConfirmationModal').modal('hide');
                                                     });
-                                                }).catch(function (paymentError) {
-                                                    if (paymentError.responseJSON && paymentError.responseJSON.error) {
-                                                        if (paymentError.responseJSON.status === 1) {
-                                                            toastr.error('Selected data does not belong to the same user.', '', {
-                                                                positionClass: 'toast-top-center',
-                                                                containerId: 'toast-top-center'
-                                                            });
-                                                        } else if (paymentError.responseJSON.status === 2) {
-                                                            toastr.error('Payment for ' + paymentError.responseJSON.error_data + ' franchise has already been made.', '', {
+                                                }).catch(function (error) {
+                                                    if (error.responseJSON && error.responseJSON.error) {
+                                                        if (error.responseJSON.status === 1) {
+                                                            toastr.error('Selected IDs do not belong to the same User.', '', {
                                                                 positionClass: 'toast-top-center',
                                                                 containerId: 'toast-top-center'
                                                             });
                                                         } else {
-                                                            toastr.error(paymentError.responseJSON.error, '', {
+                                                            toastr.error(error.responseJSON.error, '', {
                                                                 positionClass: 'toast-top-center',
                                                                 containerId: 'toast-top-center'
                                                             });
                                                         }
                                                     } else {
-                                                        toastr.error('An unexpected error occurred during payment.', '', {
+                                                        toastr.error('An unexpected error occurred.', '', {
                                                             positionClass: 'toast-top-center',
                                                             containerId: 'toast-top-center'
                                                         });
                                                     }
                                                 });
-
-                                                $('#paymentConfirmationModal').modal('hide');
-                                            });
-                                        }).catch(function (error) {
-                                            if (error.responseJSON && error.responseJSON.error) {
-                                                if (error.responseJSON.status === 1) {
-                                                    toastr.error('Selected IDs do not belong to the same User.', '', {
-                                                        positionClass: 'toast-top-center',
-                                                        containerId: 'toast-top-center'
-                                                    });
-                                                } else {
-                                                    toastr.error(error.responseJSON.error, '', {
-                                                        positionClass: 'toast-top-center',
-                                                        containerId: 'toast-top-center'
-                                                    });
-                                                }
-                                            } else {
-                                                toastr.error('An unexpected error occurred.', '', {
-                                                    positionClass: 'toast-top-center',
-                                                    containerId: 'toast-top-center'
-                                                });
                                             }
-                                        });
-                                    }
-                                }
-                            }
-
-                            
-                            ,
-
+                                        }
+                                    },
+                                @endif
                                 {
                                     extend: 'selectAll',
                                     text: 'Select All',

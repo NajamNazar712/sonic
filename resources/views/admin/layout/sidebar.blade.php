@@ -1424,23 +1424,20 @@
                         </li>
                     @endif
 
-                    @if (session('role_id') == 1 /* || count(array_intersect([408, 409], session('permissions'))) !== 0 */)
+                    {{-- @if (session('role_id') == 1 /* || count(array_intersect([408, 409], session('permissions'))) !== 0 */) --}}
+                    @if (session('role_id') == 1 || in_array(995, session('permissions')) || in_array(996, session('permissions')))
                         <li class=" nav-item"><a href="#"><span class="menu-title">Retail Commission</span></a>
                             <ul class="menu-content">
-                                @if (session('role_id') == 1 /* || in_array(408, session('permissions')) */)
-                                    <li>
-                                        <a class="menu-item" href="{{ route('admin.retail.franchise.franchise_wise_commission') }}">
-                                            Franchise wise commission
-                                        </a>
-                                    </li>
-                                @endif
-                                @if (session('role_id') == 1 /* || in_array(409, session('permissions')) */)
-                                    <li>
-                                        <a class="menu-item" href="{{ route('admin.retail.franchise.user_wise_commission') }}">
-                                            User wise commission
-                                        </a>
-                                    </li>
-                                @endif
+                                <li>
+                                    <a class="menu-item" href="{{ route('admin.retail.franchise.franchise_wise_commission') }}">
+                                        Franchise wise commission
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="menu-item" href="{{ route('admin.retail.franchise.user_wise_commission') }}">
+                                        User wise commission
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     @endif

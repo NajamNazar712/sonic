@@ -161,104 +161,206 @@
                         dataTable = $('#datatable').DataTable({
                             dom: '<"d-inline-block"l><"pull-right"B>tipr',
                             buttons: [
-                                {
-                                    text: 'Mark as paid',
-                                    className: 'select_to_pay disabled',
-                                    action: function () {
-                                        var selectedFranchiseCodes = [];
-                                        $('#datatable > tbody > .selected').each(function (index) {
-                                            var franchiseCode = $(this).find('td:eq(1)').text().trim();
-                                            if (franchiseCode) {
-                                                selectedFranchiseCodes.push(franchiseCode);
-                                            }
-                                        });
-                                        var franchiseCodes = selectedFranchiseCodes.join(', ');
 
-                                        if (franchiseCodes.length > 0) {
-                                            $.ajax({
-                                                url: '{{ route('admin.retail.franchise.show_commission') }}',
-                                                method: 'POST',
-                                                data: {
-                                                    id: franchiseCodes,
-                                                    _token: '{{ csrf_token() }}'
+                                @if ($allowed_users->contains('id', auth()->user()->id) || auth()->user()->role_id = 1)
+                                    {
+                                        text: 'Mark as paid',
+                                        className: 'select_to_pay disabled',
+                                        action: function () {
+                                            var selectedFranchiseCodes = [];
+                                            $('#datatable > tbody > .selected').each(function (index) {
+                                                var franchiseCode = $(this).find('td:eq(1)').text().trim();
+                                                if (franchiseCode) {
+                                                    selectedFranchiseCodes.push(franchiseCode);
                                                 }
-                                            }).then(function (response) {
-                                                var modalBody = $('#paymentConfirmationModal .modal-body');
-                                                var paymentTable = '<table class="table"><thead><tr><th>Franchise Code</th><th>Franchise Name</th><th>Payment Status</th></tr></thead><tbody>';
-                                                $.each(response.data, function (index, item) {
-                                                    var isPaidText = item.is_paid == 1 ? '<span style="color: green;">Paid</span>' : '<span style="color: red;">Not Paid</span>';
-                                                    paymentTable += '<tr><td>' + item.franchise_code + '</td><td>' + item.franchise_name + '</td><td>' + isPaidText + '</td></tr>';
-                                                });
-                                                paymentTable += '</tbody></table>';
-                                                modalBody.html(paymentTable);
+                                            });
+                                            var franchiseCodes = selectedFranchiseCodes.join(', ');
 
-                                                $('#paymentConfirmationModal').modal('show');
+                                            if (franchiseCodes.length > 0) {
+                                                $.ajax({
+                                                    url: '{{ route('admin.retail.franchise.show_commission') }}',
+                                                    method: 'POST',
+                                                    data: {
+                                                        id: franchiseCodes,
+                                                        _token: '{{ csrf_token() }}'
+                                                    }
+                                                }).then(function (response) {
+                                                    var modalBody = $('#paymentConfirmationModal .modal-body');
+                                                    var paymentTable = '<table class="table"><thead><tr><th>Franchise Code</th><th>Franchise Name</th><th>Payment Status</th></tr></thead><tbody>';
+                                                    $.each(response.data, function (index, item) {
+                                                        var isPaidText = item.is_paid == 1 ? '<span style="color: green;">Paid</span>' : '<span style="color: red;">Not Paid</span>';
+                                                        paymentTable += '<tr><td>' + item.franchise_code + '</td><td>' + item.franchise_name + '</td><td>' + isPaidText + '</td></tr>';
+                                                    });
+                                                    paymentTable += '</tbody></table>';
+                                                    modalBody.html(paymentTable);
 
-                                                $('#confirmPaymentBtn').off('click').on('click', function () {
-                                                    $.ajax({
-                                                        url: '{{ route('admin.retail.franchise.commission_payment') }}',
-                                                        method: 'POST',
-                                                        data: {
-                                                            id: franchiseCodes,
-                                                            _token: '{{ csrf_token() }}'
-                                                        }
-                                                    }).then(function (paymentResponse) {
-                                                        toastr.success('Payment has been made successfully.', '', {
-                                                            positionClass: 'toast-bottom-center',
-                                                            containerId: 'toast-bottom-center'
-                                                        });
+                                                    $('#paymentConfirmationModal').modal('show');
 
-                                                        var table = $('#datatable').DataTable();
-                                                        var selectedIds = franchiseCodes.split(',').map(id => id.trim());
-                                                        selectedIds.forEach(id => {
-                                                            var row = table.row(function (idx, data, node) {
-                                                                return data.id == id;
+                                                    $('#confirmPaymentBtn').off('click').on('click', function () {
+                                                        $.ajax({
+                                                            url: '{{ route('admin.retail.franchise.commission_payment') }}',
+                                                            method: 'POST',
+                                                            data: {
+                                                                id: franchiseCodes,
+                                                                _token: '{{ csrf_token() }}'
+                                                            }
+                                                        }).then(function (paymentResponse) {
+                                                            toastr.success('Payment has been made successfully.', '', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
                                                             });
 
-                                                            if (row && row.data()) {
-                                                                row.data().is_paid = 1;
-                                                                row.invalidate().draw(false);
+                                                            var table = $('#datatable').DataTable();
+                                                            var selectedIds = franchiseCodes.split(',').map(id => id.trim());
+                                                            selectedIds.forEach(id => {
+                                                                var row = table.row(function (idx, data, node) {
+                                                                    return data.id == id;
+                                                                });
+
+                                                                if (row && row.data()) {
+                                                                    row.data().is_paid = 1;
+                                                                    row.invalidate().draw(false);
+                                                                }
+                                                            });
+                                                        }).catch(function (paymentError) {
+                                                            if (paymentError.responseJSON && paymentError.responseJSON.error) {
+                                                                toastr.error(paymentError.responseJSON.error, '', {
+                                                                    positionClass: 'toast-top-center',
+                                                                    containerId: 'toast-top-center'
+                                                                });
+                                                            } else {
+                                                                toastr.error('An unexpected error occurred during payment.', '', {
+                                                                    positionClass: 'toast-top-center',
+                                                                    containerId: 'toast-top-center'
+                                                                });
                                                             }
                                                         });
-                                                    }).catch(function (paymentError) {
-                                                        if (paymentError.responseJSON && paymentError.responseJSON.error) {
-                                                            toastr.error(paymentError.responseJSON.error, '', {
+
+                                                        $('#paymentConfirmationModal').modal('hide');
+                                                    });
+                                                }).catch(function (error) {
+                                                    if (error.responseJSON && error.responseJSON.error) {
+                                                        if (error.responseJSON.status === 1) {
+                                                            toastr.error('Selected IDs do not belong to the same franchise.', '', {
                                                                 positionClass: 'toast-top-center',
                                                                 containerId: 'toast-top-center'
                                                             });
                                                         } else {
-                                                            toastr.error('An unexpected error occurred during payment.', '', {
+                                                            toastr.error(error.responseJSON.error, '', {
                                                                 positionClass: 'toast-top-center',
                                                                 containerId: 'toast-top-center'
                                                             });
                                                         }
-                                                    });
-
-                                                    $('#paymentConfirmationModal').modal('hide');
-                                                });
-                                            }).catch(function (error) {
-                                                if (error.responseJSON && error.responseJSON.error) {
-                                                    if (error.responseJSON.status === 1) {
-                                                        toastr.error('Selected IDs do not belong to the same franchise.', '', {
-                                                            positionClass: 'toast-top-center',
-                                                            containerId: 'toast-top-center'
-                                                        });
                                                     } else {
-                                                        toastr.error(error.responseJSON.error, '', {
+                                                        toastr.error('An unexpected error occurred.', '', {
                                                             positionClass: 'toast-top-center',
                                                             containerId: 'toast-top-center'
                                                         });
                                                     }
-                                                } else {
-                                                    toastr.error('An unexpected error occurred.', '', {
-                                                        positionClass: 'toast-top-center',
-                                                        containerId: 'toast-top-center'
-                                                    });
-                                                }
-                                            });
+                                                });
+                                            }
                                         }
-                                    }
-                                },
+                                    },
+                                @endif
+
+                                // {
+                                //     text: 'Mark as paid',
+                                //     className: 'select_to_pay disabled',
+                                //     action: function () {
+                                //         var selectedFranchiseCodes = [];
+                                //         $('#datatable > tbody > .selected').each(function (index) {
+                                //             var franchiseCode = $(this).find('td:eq(1)').text().trim();
+                                //             if (franchiseCode) {
+                                //                 selectedFranchiseCodes.push(franchiseCode);
+                                //             }
+                                //         });
+                                //         var franchiseCodes = selectedFranchiseCodes.join(', ');
+
+                                //         if (franchiseCodes.length > 0) {
+                                //             $.ajax({
+                                //                 url: '{{ route('admin.retail.franchise.show_commission') }}',
+                                //                 method: 'POST',
+                                //                 data: {
+                                //                     id: franchiseCodes,
+                                //                     _token: '{{ csrf_token() }}'
+                                //                 }
+                                //             }).then(function (response) {
+                                //                 var modalBody = $('#paymentConfirmationModal .modal-body');
+                                //                 var paymentTable = '<table class="table"><thead><tr><th>Franchise Code</th><th>Franchise Name</th><th>Payment Status</th></tr></thead><tbody>';
+                                //                 $.each(response.data, function (index, item) {
+                                //                     var isPaidText = item.is_paid == 1 ? '<span style="color: green;">Paid</span>' : '<span style="color: red;">Not Paid</span>';
+                                //                     paymentTable += '<tr><td>' + item.franchise_code + '</td><td>' + item.franchise_name + '</td><td>' + isPaidText + '</td></tr>';
+                                //                 });
+                                //                 paymentTable += '</tbody></table>';
+                                //                 modalBody.html(paymentTable);
+
+                                //                 $('#paymentConfirmationModal').modal('show');
+
+                                //                 $('#confirmPaymentBtn').off('click').on('click', function () {
+                                //                     $.ajax({
+                                //                         url: '{{ route('admin.retail.franchise.commission_payment') }}',
+                                //                         method: 'POST',
+                                //                         data: {
+                                //                             id: franchiseCodes,
+                                //                             _token: '{{ csrf_token() }}'
+                                //                         }
+                                //                     }).then(function (paymentResponse) {
+                                //                         toastr.success('Payment has been made successfully.', '', {
+                                //                             positionClass: 'toast-bottom-center',
+                                //                             containerId: 'toast-bottom-center'
+                                //                         });
+
+                                //                         var table = $('#datatable').DataTable();
+                                //                         var selectedIds = franchiseCodes.split(',').map(id => id.trim());
+                                //                         selectedIds.forEach(id => {
+                                //                             var row = table.row(function (idx, data, node) {
+                                //                                 return data.id == id;
+                                //                             });
+
+                                //                             if (row && row.data()) {
+                                //                                 row.data().is_paid = 1;
+                                //                                 row.invalidate().draw(false);
+                                //                             }
+                                //                         });
+                                //                     }).catch(function (paymentError) {
+                                //                         if (paymentError.responseJSON && paymentError.responseJSON.error) {
+                                //                             toastr.error(paymentError.responseJSON.error, '', {
+                                //                                 positionClass: 'toast-top-center',
+                                //                                 containerId: 'toast-top-center'
+                                //                             });
+                                //                         } else {
+                                //                             toastr.error('An unexpected error occurred during payment.', '', {
+                                //                                 positionClass: 'toast-top-center',
+                                //                                 containerId: 'toast-top-center'
+                                //                             });
+                                //                         }
+                                //                     });
+
+                                //                     $('#paymentConfirmationModal').modal('hide');
+                                //                 });
+                                //             }).catch(function (error) {
+                                //                 if (error.responseJSON && error.responseJSON.error) {
+                                //                     if (error.responseJSON.status === 1) {
+                                //                         toastr.error('Selected IDs do not belong to the same franchise.', '', {
+                                //                             positionClass: 'toast-top-center',
+                                //                             containerId: 'toast-top-center'
+                                //                         });
+                                //                     } else {
+                                //                         toastr.error(error.responseJSON.error, '', {
+                                //                             positionClass: 'toast-top-center',
+                                //                             containerId: 'toast-top-center'
+                                //                         });
+                                //                     }
+                                //                 } else {
+                                //                     toastr.error('An unexpected error occurred.', '', {
+                                //                         positionClass: 'toast-top-center',
+                                //                         containerId: 'toast-top-center'
+                                //                     });
+                                //                 }
+                                //             });
+                                //         }
+                                //     }
+                                // },
 
                                 {
                                     extend: 'selectAll',

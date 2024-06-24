@@ -36,6 +36,9 @@ use App\Http\Models\RetailUserHistory;
 use App\Http\Models\TotalSumFranchiseCommission;
 use App\Http\Models\TotalSumRetailTraxCenter;
 use App\Http\Models\BanksList;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\Admin;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -582,8 +585,12 @@ class RetailAdminUserManagementController extends Controller
     public function franchise_commission_view(){
         // $franchises = RetailUser::where('category', 1)->get();
         $franchises = RetailFranchise::get();
+        $finance_department = AdminDepartment::where('id', 4)->first();
+        $admin_roles = AdminRole::where('department_id', $finance_department->id)->get();
+        $allowed_users = Admin::whereIn('role_id', $admin_roles->pluck('id'))->get();
         return view('admin.retail.commission.franchise_wise', [
-            'franchises' => $franchises
+            'franchises' => $franchises,
+            'allowed_users' => $allowed_users
         ]);
     }
 
