@@ -9,6 +9,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\Log;
 
 class ProcessRvShipmentTicket implements ShouldQueue
 {
@@ -33,8 +34,10 @@ class ProcessRvShipmentTicket implements ShouldQueue
      */
     public function handle()
     {
+        Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Initiated');
 
         if (!in_array($this->shipment['status_reason_id'], [12, 27, 35])) { //only drop this shipment in rv_shipment_tickets if its status_reason_id is not in [12,27,35]
+            Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket In');
 
             $globalSettings = GlobalSettings::where('setting_value', 1)
                 ->whereIn('type', [
@@ -69,6 +72,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
             if (in_array($this->shipment['shipment_user_id'], $onlyShippers)) { //Mark Shipper Disabled if It's user id found in Only Shippers
                 $isShipperDisabled = 1;
             }
+            Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
 
             RvShipmentTicket::withTrashed()->updateOrCreate(
                 ['shipment_id' => $this->shipment['shipment_id']],
@@ -84,6 +88,10 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'delete_reason' => null
                 ]
             );
+            Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved1');
+
         }
+        Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Failed');
+
     }
 }
