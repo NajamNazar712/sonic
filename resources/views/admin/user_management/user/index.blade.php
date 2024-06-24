@@ -92,9 +92,11 @@
 								<div class="col-4">
 									<fieldset class="form-group">
 										<select name="search_roles[]" id="search_roles" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-											{{-- @foreach($roles as $role)
-												<option value="{{$role->id}}">{{$role->name}} - {{$role->department->name}}</option>
-											@endforeach --}}
+											@foreach($roles as $role)
+												@if($role->department)
+													<option value="{{$role->id}}">{{$role->name}} - {{$role->department->name}}</option>
+												@endif
+											@endforeach
 										</select>
 									</fieldset>
 								</div>
@@ -193,6 +195,37 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="modal fade text-left" id="lost_hub_user_shipment" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="lost_hub_user_shipment" aria-hidden="true">
+		<div class="modal-dialog modal-md" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="">User Lost Shipment Hub</h4>
+				</div>
+				<form id="lost_hub_user_shipment_form" action="{{ route('admin.user_management.users.lost_hub_user_shipment') }}" method="POST">
+					@method('POST')
+					@csrf						
+					<div class="modal-body">
+						<input type="hidden" id="admin_id" name="admin_id">
+						<div class="col-12 form-group">
+							<select name="select_lost_hub_user_shipment[]" id="select_lost_hub_user_shipment" class="form-control select2" multiple="multiple">
+								@foreach($hubs as $hub)
+									<option value="{{ $hub->id }}" > {{ $hub->name }} </option>
+								@endforeach
+							</select>
+							<div class="d-none text-danger" id="assign_hubs_msg_error_1">Please Select Hub(s)</div>
+						</div>
+
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-success" id="lost_hub_user_shipment_submit">Submit</button>
+						<button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	
 @endsection
 
 @section('css')
@@ -377,13 +410,17 @@
                                                         icon: 'success',
                                                     });
 
-                                                    table.draw();
+										
+												table.rows().deselect();
+												selected_rows = [];
+												table.draw();
+
                                                 }else{
                                                     swal(res.status, {
                                                         icon: 'warning',
                                                     });
 
-                                                    table.draw();
+													table.clear().draw();
                                                 }
                                             }, 
                                             error: function(xhr, status, error) {
@@ -808,7 +845,71 @@
                 $("#filter_management_users_btn").val(1);
                 table.draw();
             });
+
+
+
 			
+			$(document).on('click', '.lost_hub_user_shipment', function() {
+				var id = $(this).data('target-id');
+				$('#admin_id').val(id);
+
+				$.ajax({
+					url: '{!! route('admin.user_management.users.get_lost_hub_user_shipment') !!}',
+					method: 'GET',
+					data: {
+						admin_id: id
+					},
+					success: function(response) {
+						$('#select_lost_hub_user_shipment').val(null);
+						$(response.data).each(function(index, item) {
+							$('#select_lost_hub_user_shipment option[value="' + item + '"]').prop('selected', true);
+						});
+
+						$('#select_lost_hub_user_shipment').trigger('change');
+					},
+					error: function(xhr, status, error) {
+						console.error('Error:', error);
+					}
+				});
+
+				$('#lost_hub_user_shipment').modal('show');
+			});
+
+			$("#lost_hub_user_shipment_form").validate({
+
+				errorClass: "danger",
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					var lost_hub_shipment = $('#select_lost_hub_user_shipment').val();
+					if (lost_hub_shipment.length > 0) {
+
+						$(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+						swal({
+							title: 'Please Wait!',
+							text: 'Multiple Hub has been assigned!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+						form.submit();
+
+					} else {
+						$('#assign_hubs_msg_error_1').removeClass('d-none');
+						console.log(1);
+					}
+						
+				}
+			});
+			
+			$('#lost_hub_user_shipment').on('hidden.bs.modal', function (e) {
+				$('#admin_id ').val('');
+				$('#select_lost_hub_user_shipment').val([]).trigger('change');
+			});
+
 
 		});
 	</script>

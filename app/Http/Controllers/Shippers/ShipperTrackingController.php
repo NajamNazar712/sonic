@@ -46,7 +46,7 @@ class ShipperTrackingController extends Controller
         // dd(session()->all());
         $permission = session('permissions');
 
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::where('id','!=',3)->get();
         $row = array();
         if(session('user_type') !== 1){
             foreach($case_nature as $nature) {
@@ -77,8 +77,9 @@ class ShipperTrackingController extends Controller
     	$tracking = array();
 
     	foreach ($tracking_numbers as $tracking_number) {
-    		$shipment = Shipment::where('tracking_number', $tracking_number);
+//    		$shipment = Shipment::where('tracking_number', $tracking_number);
 
+            $shipment = Shipment::where('tracking_number', $tracking_number);
     		if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 $sub_shipment = true;
@@ -140,6 +141,9 @@ class ShipperTrackingController extends Controller
 
                         $shipper = $shipment->user;
 
+                        $allowed_user_id = GlobalSettings::where('setting_value', 0)->where('type', 'brand_and_vendor_rights')->pluck('text');
+                        $details['shipper']['id'] = $shipper->id;
+                        $details['shipper']['assigned'] = $allowed_user_id;
                         $details['shipper']['name'] = $shipper->name;
                         $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                         $details['shipper']['city'] = $shipper->city->name;
@@ -151,6 +155,7 @@ class ShipperTrackingController extends Controller
 
                         $details['pickup']['person_of_contact'] = $pickup->poc;
                         $details['pickup']['vendor'] = $pickup->vendor;
+                        $details['pickup']['pickup_brand_name'] = $pickup->pickup_brand_name;
                         $details['pickup']['phone_number'] = $pickup->phone;
                         $details['pickup']['email'] = $pickup->email;
                         $details['pickup']['origin'] = $pickup->city->name;
@@ -537,7 +542,7 @@ class ShipperTrackingController extends Controller
 
     public function order_index(){
 
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
@@ -590,6 +595,9 @@ class ShipperTrackingController extends Controller
 
                             $shipper = $shipment->user;
 
+                            $allowed_user_id = GlobalSettings::where('setting_value', 0)->where('type', 'brand_and_vendor_rights')->pluck('text');
+                            $details['shipper']['id'] = $shipper->id;
+                            $details['shipper']['assigned'] = $allowed_user_id;
                             $details['shipper']['name'] = $shipper->name;
                             $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                             $details['shipper']['city'] = $shipper->city->name;
@@ -602,6 +610,7 @@ class ShipperTrackingController extends Controller
 
                             $details['pickup']['person_of_contact'] = $pickup->poc;
                             $details['pickup']['vendor'] = $pickup->vendor;
+                            $details['pickup']['pickup_brand_name'] = $pickup->pickup_brand_name;
                             $details['pickup']['phone_number'] = $pickup->phone;
                             $details['pickup']['email'] = $pickup->email;
                             $details['pickup']['origin'] = $pickup->city->name;

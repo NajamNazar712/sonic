@@ -34,8 +34,52 @@
                         <div class="card-content">
                             <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}" name="corporate_rate_type_id">
                             <input type="hidden" id="packaging_invoice" name="packaging_invoice">
+                            
+                            <div class="card-header border-success">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3 class="display-inline card-title lead success">SMS Charges</h3>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a href="javascript:void(0);" class="pull-right" id="sms_main_switch"><input
+                                                    name="sms_main_switch" type="checkbox"
+                                                    class="switchery sms-main-switch" data-size="sm"/></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="sms" class="border-success no-border-top card hide"
+                                 aria-expanded="true">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <h4>Do you want to charge SMS? (Applied Per Shipment)</h4>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                                <div class="col-md-3 text-center">
+                                                    <fieldset>
+                                                        <div class="input-group form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">SMS Charges</span>
+                                                            </div>
+                                                            <input type="text" class="form-control"
+                                                                data-rule-required="true"
+                                                                data-msg-required="SMS charges is required" data-rule-range="[0.01,100000]" data-msg-range="Charges needs to be from 0.01 to 100000"
+                                                                value=""
+                                                                name="sms_charges">
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text">PKR</span>
+                                                            </div>
+                                                        </div>
+                                                    </fieldset>
+                                                </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <div id="" class="card-header border-success">
+                            <div id="" class="card-header border-success mt-1">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Rush</h3>
@@ -2287,7 +2331,7 @@
 
                             </div>
 
-                            <div class="row justify-content-center mt-2" id="commission_div">
+                            {{-- <div class="row justify-content-center mt-2" id="commission_div">
                                 <div class="form-group row">
                                     <label class="col-md-4 label-control" for="commission">Total Commission</label>
                                     <div class="col-md-8">
@@ -2348,7 +2392,7 @@
                                         </tfoot>
                                     </table>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="row mt-2 justify-content-center">
                                 <div class="col-5 form-group">
                                     <textarea name="rate_remarks" id="rate_remarks" class="form-control" placeholder="Rate Remarks..." rows="3"></textarea>
@@ -2738,7 +2782,16 @@
 
                 }
             });
+            $('#sms_main_switch').on('change',function(){
 
+                var smsmainswitch = document.querySelector('.switchery.sms-main-switch');
+                if (smsmainswitch.checked === true) {
+                    $('#sms').slideDown('slow');
+
+                } else if (smsmainswitch.checked === false) {
+                    $('#sms').slideUp('slow');
+                }
+            });
             $('#ol_main_switch').on('change',function(){
 
                 var olmainswitch = document.querySelector('.switchery.ol-main-switch');
@@ -5329,6 +5382,5 @@
             return timeRepeated === 1 || timeRepeated === 0;
 
         }, "Destination Can Not Be Duplicate");
-
     </script>
 @endsection

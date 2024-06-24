@@ -2,164 +2,167 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Models\Admin\CrmAgentAutoAssign;
-use App\Http\Models\Admin\CrmAgentAutoAssignBusSeg;
-use App\Http\Models\Admin\CrmAgentAutoAssignCaseNature;
-use App\Http\Models\Admin\CrmAgentAutoAssignCnType;
-use App\Http\Models\Admin\CrmAgentAutoAssignHub;
-use App\Http\Models\Admin\CrmAgentAutoAssignShipper;
-use App\Http\Models\Admin\CrmAgentAutoAssignShipStatus;
-use App\Http\Models\Admin\CrmAgentAutoAssignSNKey;
-use App\Http\Models\Admin\CrmAgentAutoAssignSubSegment;
-use App\Http\Models\Admin\CrmAgentAutoAssignZone;
-use App\Http\Models\Admin\SalePersonAssignedSegment;
-use App\Http\Models\Admin\Segment;
-use App\Http\Models\Admin\SegmentHistory;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\OneLink\OneLinkPaymentChargesRange;
-use App\Http\Models\Admin\AdminAppSlider;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\AutoTagTerritory;
-use App\Http\Models\Admin\BookingSmsForShippers;
-use App\Http\Models\Admin\BusinessProjectionReason;
-use App\Http\Models\Admin\BusinessProjectionShipment;
-use App\Http\Models\Admin\ByPassWeightShippers;
-use App\Http\Models\Admin\CompletedAgingReport;
-use App\Http\Models\Admin\CrmAutoTagUser;
-use App\Http\Models\Admin\DeliveryLocationMapping;
-use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\Fleet;
-use App\Http\Models\Admin\Fuel\FuelFactorHistory;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\Lead\LeadNotification;
-use App\Http\Models\Admin\Lead\LeadNotificationAttachment;
-use App\Http\Models\Admin\Lead\LeadTagging;
-use App\Http\Models\Admin\Lead\LeadZone;
-use App\Http\Models\Admin\LostShipmentAdmin;
-use App\Http\Models\Admin\LostShipmentShipper;
-use App\Http\Models\Admin\MonthClosingStatus;
-use App\Http\Models\Admin\MonthClosingType;
-use App\Http\Models\Admin\NonServiceArea;
-use App\Http\Models\Admin\PendingCashCollectionAgingReport;
-use App\Http\Models\Admin\PettyCashAccountHead;
-use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
-use App\Http\Models\Admin\PettyCashAccountTitle;
-use App\Http\Models\Admin\PettyCashConsignee;
-use App\Http\Models\Admin\PettyCashConsigneeHub;
-use App\Http\Models\Admin\RcpTatOption;
-use App\Http\Models\Admin\RetailAppSlider;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
-use App\Http\Models\Admin\RouteManagement;
-use App\Http\Models\Admin\RouteManagementJunction;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\SalePersonTarget;
-use App\Http\Models\Admin\FintechPaymentType;
-use App\Http\Models\Admin\SalePersonTargetLog;
-use App\Http\Models\Admin\SalePersonTargetDelete;
-use App\Http\Models\Admin\SalePersonTargetSegment;
-use App\Http\Models\Admin\SalesDesignation;
-use App\Http\Models\Admin\SalesDesignationJourney;
-use App\Http\Models\Admin\SalesIncentiveDate;
-use App\Http\Models\Admin\ShortReceiveReportTimeHubWise;
-use App\Http\Models\Admin\StandardWeightCharge;
-use App\Http\Models\Admin\Territory;
-use App\Http\Models\Admin\VehicleType;
-use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
-use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
-use App\Http\Models\Admin\WalkInStandardWeightCharge;
-
-use App\Http\Models\Blacklist\BlacklistCondition;
-use App\Http\Models\Blacklist\BlacklistedConsignee;
-use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
-use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
-use App\Http\Models\Blacklist\BlacklistLabeling;
-use App\Http\Models\Blacklist\BlacklistLogic;
-use App\Http\Models\Blacklist\BlacklistOperation;
-use App\Http\Models\Blacklist\BlacklistSetting;
-use App\Http\Models\Blacklist\BlacklistSettingCondition;
-use App\Http\Models\Blacklist\BlacklistShipmentRange;
-use App\Http\Models\Blacklist\ConsigneeInformation;
+use Carbon\Carbon;
 use App\Http\Models\City;
+use App\Http\Models\Zone;
+use App\Http\Models\Rider;
+use App\Http\Models\Runner;
+use App\LeadProgessSetting;
+use App\Http\Models\Holiday;
+use App\Http\Models\Product;
+use App\LeadProgressSetting;
+use Illuminate\Http\Request;
 use App\Http\Models\CityArea;
-use App\Http\Models\CorporateDefaultFuelSurcharge;
-use App\Http\Models\CorporateDefaultHistoryFuelSurcharge;
-use App\Http\Models\CorporateDefaultRateStatus;
-use App\Http\Models\CorporateFuelSurcharge;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CorporateWeightCharge;
-use App\Http\Models\CRM\CrmRequestCaseNature;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\CrmAgent;
-use App\Http\Models\DeliveryCallVerificationRatio;
+use App\Http\Models\Referral;
+use App\Http\Models\RateStatus;
+use Illuminate\Validation\Rule;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\Fleet;
 use App\Http\Models\FleetDriver;
 use App\Http\Models\FleetVendor;
-use App\Http\Models\FuelSurcharge;
-use App\Http\Models\Holiday;
-use App\Http\Models\InternationalStandardDhlRate;
-use App\Http\Models\MultipleSaleLead;
-use App\Http\Models\MultipleSaleTagging;
-use App\Http\Models\Notification;
-use App\Http\Models\NotificationSetting;
-use App\Http\Models\NotificationSettingShipper;
-use App\Http\Models\OvernightOverlandReportOriginHubs;
-use App\Http\Models\ProjectArrivalShipper;
-use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
-use App\Http\Models\Rates\HistoryCorporateWeightCharge;
-use App\Http\Models\Rates\HistoryFuelSurcharge;
-use App\Http\Models\Rates\HistoryWeightCharge;
-use App\Http\Models\Rates\MinimumChargeableWeightSetting;
-use App\Http\Models\RateStatus;
-use App\Http\Models\Referral;
-use App\Http\Models\RestrictedCityIntercept;
-use App\Http\Models\RestrictParcelsAttempt;
-use App\Http\Models\Rider;
-use App\Http\Models\Rider\RidersIncentiveSetting;
-use App\Http\Models\Rider\RidersShipmentPaymentType;
-use App\Http\Models\Rider\RidersShipmentWeightRange;
-use App\Http\Models\Rider\RiderTickerImage;
-use App\Http\Models\RiderCategory;
-use App\Http\Models\Runner;
-use App\Http\Models\RunnerJunction;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\SaleTierTag;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\ServiceList;
+use App\Http\Models\StarShipper;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\Notification;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
-use App\Http\Models\StarShipper;
-use App\Http\Models\SubCategorySegment;
-use App\Http\Models\TelenorShipmentStatusEstimatedTime;
-use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
-use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Http\Models\WeightCharge;
-use App\Http\Models\WeightChargeFactorHistory;
-use App\Http\Models\Zone;
-use App\Http\Models\Admin\BookingDestinationMapping;
-use App\Http\Models\Admin\BookingDestinationMappingKeyword;
-use App\Http\Models\Admin\LeadTaggingService;
-use App\Http\Models\ServiceList;
-use App\Http\Models\Admin\FintechCompany;
-use App\Http\Models\Admin\FintechCompanyCharges;
-use App\Http\Models\Admin\standard_fintech_charges;
-use App\RiderAssignedHubForDeliveryNote;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Models\Admin\Segment;
+use App\Http\Models\FuelSurcharge;
+use App\Http\Models\RiderCategory;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use Yajra\Datatables\Datatables;
-use App\Http\Models\Admin\BackgroundImage;
-use App\Http\Models\HR\Employee;
-use App\Http\Models\Product;
+use App\Http\Models\RunnerJunction;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\UserIbftCharge;
+use LeadProgressSettingTableSeeder;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\Territory;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\MultipleSaleLead;
+use App\Http\Models\Admin\VehicleType;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\RcpTatOption;
+use App\Http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\SubCategorySegment;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\Lead\LeadZone;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\MultipleSaleTagging;
+use App\Http\Models\NotificationSetting;
+use App\RiderAssignedHubForDeliveryNote;
+use App\Http\Models\Admin\AdminAppSlider;
+use App\Http\Models\Admin\CrmAutoTagUser;
+use App\Http\Models\Admin\FintechCompany;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Admin\SegmentHistory;
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\UserIbftChargeDetail;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\BackgroundImage;
+use App\Http\Models\Admin\RetailAppSlider;
+use App\Http\Models\Admin\RouteManagement;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\ProjectArrivalShipper;
+
+use App\Http\Models\Admin\AutoTagTerritory;
+use App\Http\Models\Admin\Lead\LeadTagging;
+use App\Http\Models\Admin\MonthClosingType;
+use App\Http\Models\Admin\SalePersonTarget;
+use App\Http\Models\Admin\SalesDesignation;
+use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\RestrictParcelsAttempt;
+use App\Http\Models\Rider\RiderTickerImage;
+use App\Http\Models\Admin\LostShipmentAdmin;
+use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Models\Admin\CrmAgentAutoAssign;
+use App\Http\Models\Admin\FintechPaymentType;
+use App\Http\Models\Admin\LeadTaggingService;
+use App\Http\Models\Admin\MonthClosingStatus;
+use App\Http\Models\Admin\PettyCashConsignee;
+use App\Http\Models\Admin\SalesIncentiveDate;
+use App\Http\Models\Blacklist\BlacklistLogic;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\Admin\LostShipmentShipper;
+use App\Http\Models\Admin\SalePersonTargetLog;
+use App\Http\Models\Rates\HistoryWeightCharge;
+use App\Http\Models\WeightChargeFactorHistory;
+use App\Http\Models\Admin\ByPassWeightShippers;
+use App\Http\Models\Admin\CompletedAgingReport;
+use App\Http\Models\Admin\PettyCashAccountHead;
+use App\Http\Models\Admin\StandardWeightCharge;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\NotificationSettingShipper;
+use App\Http\Models\Rates\HistoryFuelSurcharge;
+use App\Http\Models\Admin\BookingSmsForShippers;
+use App\Http\Models\Admin\CrmAgentAutoAssignHub;
+use App\Http\Models\Admin\FintechCompanyCharges;
+use App\Http\Models\Admin\Lead\LeadNotification;
+use App\Http\Models\Admin\PettyCashAccountTitle;
+use App\Http\Models\Admin\PettyCashConsigneeHub;
+use App\Http\Models\Blacklist\BlacklistLabeling;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\CrmAgentAutoAssignZone;
+use App\Http\Models\Admin\Fuel\FuelFactorHistory;
+use App\Http\Models\Admin\SalePersonTargetDelete;
+use App\Http\Models\Blacklist\BlacklistCondition;
+use App\Http\Models\Blacklist\BlacklistOperation;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\InternationalStandardDhlRate;
+use App\Http\Models\Rider\RidersIncentiveSetting;
+use App\Http\Models\Admin\CrmAgentAutoAssignSNKey;
+use App\Http\Models\Admin\DeliveryLocationMapping;
+use App\Http\Models\Admin\RouteManagementJunction;
+use App\Http\Models\Admin\SalePersonTargetSegment;
+use App\Http\Models\Admin\SalesDesignationJourney;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\DeliveryCallVerificationRatio;
+use App\Http\Models\Admin\BusinessProjectionReason;
+use App\Http\Models\Admin\CrmAgentAutoAssignBusSeg;
+use App\Http\Models\Admin\CrmAgentAutoAssignCnType;
+use App\Http\Models\Admin\standard_fintech_charges;
+use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\ConsigneeInformation;
+use App\Http\Models\Admin\BookingDestinationMapping;
+use App\Http\Models\Admin\CrmAgentAutoAssignShipper;
+use App\Http\Models\Admin\SalePersonAssignedSegment;
+use App\Http\Models\Rider\RidersShipmentPaymentType;
+use App\Http\Models\Rider\RidersShipmentWeightRange;
+use App\Http\Models\Admin\BusinessProjectionShipment;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
+use App\Http\Models\Blacklist\BlacklistShipmentRange;
+use App\Http\Models\OvernightOverlandReportOriginHubs;
+use App\Http\Models\Admin\CrmAgentAutoAssignCaseNature;
+use App\Http\Models\Admin\CrmAgentAutoAssignShipStatus;
+use App\Http\Models\Admin\CrmAgentAutoAssignSubSegment;
+use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Models\Rates\HistoryCorporateWeightCharge;
+use App\Http\Models\TelenorShipmentStatusEstimatedTime;
+use App\Http\Models\Webhook\ShipmentStatusSubscription;
+use App\Http\Models\Admin\ShortReceiveReportTimeHubWise;
+use App\Http\Models\Blacklist\BlacklistSettingCondition;
+use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
+use App\Http\Models\CorporateDefaultHistoryFuelSurcharge;
+use App\Http\Models\Rates\MinimumChargeableWeightSetting;
+use App\Http\Models\Admin\Lead\LeadNotificationAttachment;
+use App\Http\Models\Admin\BookingDestinationMappingKeyword;
+use App\Http\Models\Admin\PendingCashCollectionAgingReport;
+use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
+use App\Http\Models\Admin\OneLink\OneLinkPaymentChargesRange;
+use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
 
 class GlobalSettingsController extends Controller
 {
@@ -7259,14 +7262,41 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.auto_tag_territory', compact('agents', 'territories', 'cities'));
     }
 
-
     public function auto_tag_territories_list(Request $request)
     {
-
         $roles = AutoTagTerritory::join('admins as ad', 'ad.id', '=', 'auto_tag_territories.admin_id')
             ->leftjoin('territories as t', 't.id', 'auto_tag_territories.territory_id')
-            ->leftjoin('cities as c', 'c.id', 't.city_id')
-            ->select('auto_tag_territories.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'auto_tag_territories.status');
+            ->leftjoin('cities as c', 'c.id', 't.city_id');
+
+        // $roles->select('auto_tag_territories.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'auto_tag_territories.status');
+
+        $roles->select(
+            'auto_tag_territories.id',
+            'ad.name as agent_name',
+            'c.name as city_name',
+            'auto_tag_territories.status',
+            't.name as territory_name', 
+            DB::raw("
+                IF(
+                    (
+                        SELECT COUNT(t2.id)
+                        FROM territories AS t2
+                        JOIN auto_tag_territories AS att2 ON t2.id = att2.territory_id
+                        WHERE t2.id != t.id
+                        AND att2.admin_id = auto_tag_territories.admin_id
+                    ) > 0,
+                    (
+                        SELECT GROUP_CONCAT(t2.name ORDER BY t2.id SEPARATOR ', ')
+                        FROM territories AS t2
+                        JOIN auto_tag_territories AS att2 ON t2.id = att2.territory_id
+                        WHERE t2.id != t.id
+                        AND att2.admin_id = auto_tag_territories.admin_id
+                    ),
+                    '-'
+                ) as territory_names")
+        )
+        ->orderBy('auto_tag_territories.created_at', 'desc')
+        ->groupBy('auto_tag_territories.admin_id');
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
@@ -7312,14 +7342,27 @@ class GlobalSettingsController extends Controller
 
     public function auto_tag_territories_store(Request $request)
     {
+        $request->validate([
+            'territory_id' => 'required'
+        ]);
         $check_tagging = AutoTagTerritory::where('admin_id', $request->agent_id);
 
         if (!$check_tagging->exists()) {
-            $auto_tagging = new AutoTagTerritory;
-            $auto_tagging->admin_id = $request->agent_id;
-            $auto_tagging->territory_id = $request->territory_id;
-            $auto_tagging->save();
+            $territory_ids = $request->territory_id;
+            $is_lead_user = null;
+            if ($request->is_lead_user == 'on') {
+                $is_lead_user = 1;
+            } else {
+                $is_lead_user = 0;
+            }
 
+            foreach($territory_ids as $territory_id){
+                $auto_tagging = new AutoTagTerritory;
+                $auto_tagging->admin_id = $request->agent_id;
+                $auto_tagging->territory_id = $territory_id;
+                $auto_tagging->is_lead_user = $is_lead_user;
+                $auto_tagging->save();
+            }
             return redirect()->back()->with('success', 'Sales Person\'s Territory Added!');
         } else {
             return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');
@@ -7328,17 +7371,38 @@ class GlobalSettingsController extends Controller
 
     public function auto_tag_territories_enable_disable(Request $request)
     {
+        $button_disable = null;
         $auto_tagging = AutoTagTerritory::find($request->id);
-        if ($auto_tagging->status == 1) {
-            $auto_tagging->status = 0;
-            $auto_tagging->save();
-            return redirect()->back()->with('success', 'Sales Person\'s Territory Disabled!');
+        if (!$auto_tagging) {
+            return redirect()->back()->with('error', 'Territory not found!');
+        }
+        $admin_user = $auto_tagging->admin_id;
+        $all_territories = AutoTagTerritory::where('admin_id', $admin_user)->get();
+        $status_enabled = 0;
+        $status_disabled = 0;
+
+        foreach ($all_territories as $territory) {
+            if ($territory->status == 1) {
+                $territory->status = 0;
+                $status_disabled++;
+                $button_disable = 0;
+            } else {
+                $territory->status = 1;
+                $status_enabled++;
+                $button_disable = 1;
+            }
+            $territory->save();
+        }
+
+        if ($status_disabled > 0 && $status_enabled == 0) {
+            return redirect()->back()->with('success', 'Sales Person\'s Territory Disabled!')->with('button_disable', $button_disable);
+        } elseif ($status_enabled > 0 && $status_disabled == 0) {
+            return redirect()->back()->with('success', 'Sales Person\'s Territory Enabled!')->with('button_disable', $button_disable);
         } else {
-            $auto_tagging->status = 1;
-            $auto_tagging->save();
-            return redirect()->back()->with('success', 'Sales Person\'s Territory Enabled!');
+            return redirect()->back()->with('success', 'Sales Person\'s Territories Updated!')->with('button_disable', $button_disable);
         }
     }
+
 
     public function auto_tag_territories_data(Request $request)
     {
@@ -7348,28 +7412,60 @@ class GlobalSettingsController extends Controller
         $territory_id = $auto_tagging->territory_id;
         $city_id = Territory::find($territory_id)->city_id;
         $auto_tagging_id = $auto_tagging->id;
+        $is_lead_user = null;
+        if ($auto_tagging->is_lead_user == null || $auto_tagging->is_lead_user == 0){
+            $is_lead_user = 0;
+        } else {
+            $is_lead_user = 1;
+        }
 
-        return response()->json(['status' => 1, 'agent_id' => $agent_id, 'city_id' => $city_id, 'auto_tagging_id' => $auto_tagging_id, 'territory_id' => $territory_id]);
+        $all_territories = AutoTagTerritory::where('admin_id', $agent_id)->pluck('territory_id');
+        $total_terr = Territory::where('id', '!=', $all_territories[0])->pluck('id');
+        $other_territory_ids = AutoTagTerritory::where('admin_id', $agent_id)
+            ->whereIn('territory_id', $total_terr)->pluck('territory_id');
+        $other_territory_names = Territory::whereIn('id', $other_territory_ids)->get();
+        return response()->json([
+            'status' => 1, 
+            'agent_id' => $agent_id, 
+            'city_id' => $city_id,
+            'auto_tagging_id' => $auto_tagging_id,
+            'territory_id' => $territory_id,
+            'is_lead_user' => $is_lead_user,
+            'other_territory_names' => $other_territory_names
+        ]);
     }
 
     public function auto_tag_territories_update(Request $request)
     {
         $auto_tagging = AutoTagTerritory::find($request->auto_tagging_id);
-        if ($request->agent_id == $auto_tagging->admin_id) {
-            $auto_tagging->territory_id = $request->territory_id;
-            $auto_tagging->save();
-            return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
+        if ($auto_tagging->status == 0) {
+            return redirect()->back()->with('error', 'Sales Person\'s account is disabled!');
+        }
+
+        $territory_ids = $request->territory_id;
+        $first_territory = AutoTagTerritory::where('admin_id', $request->agent_id)->first();
+        $is_lead_user = $request->has('is_lead_user') ? 1 : 0;
+    
+        if (!$is_lead_user) {
+            if ($first_territory) {
+                AutoTagTerritory::where('admin_id', $request->agent_id)
+                    ->where('territory_id', '!=', $first_territory->territory_id)
+                    ->delete();
+                $first_territory->is_lead_user = $is_lead_user;
+                $first_territory->save();
+            }
         } else {
-            $check_tagging = AutoTagTerritory::where('admin_id', $request->agent_id);
-            if (!$check_tagging->exists()) {
+            AutoTagTerritory::where('admin_id', $request->agent_id)->delete();
+            // Insert new records
+            foreach ($territory_ids as $territory_id) {
+                $auto_tagging = new AutoTagTerritory();
                 $auto_tagging->admin_id = $request->agent_id;
-                $auto_tagging->territory_id = $request->territory_id;
+                $auto_tagging->territory_id = $territory_id;
+                $auto_tagging->is_lead_user = $is_lead_user;
                 $auto_tagging->save();
-                return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
-            } else {
-                return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');
             }
         }
+        return redirect()->back()->with('success', 'Sales Person\'s Territories Updated!');
     }
 
     public function referral()
@@ -8633,7 +8729,7 @@ class GlobalSettingsController extends Controller
         foreach ($shipper_notification_ids as $notification_id) {
             $details = array();
             $notification_settings = NotificationSetting::join('notifications as n', 'n.id', '=', 'notification_settings.notification_id')
-                ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name')
+                ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name' ,'notification_settings.charged_sms_toggle','notification_settings.sending_frequency','notification_settings.charging_frequency')
                 ->where('notification_id', $notification_id);
 
             if ($notification_settings->exists()) {
@@ -8641,6 +8737,9 @@ class GlobalSettingsController extends Controller
                 $details['id'] = $notification_setting->notification_id;
                 $details['name'] = $notification_setting->notification_name;
                 $details['shipper_toggle'] = $notification_setting->shipper_toggle;
+                $details['charged_sms_toggle'] =  $notification_setting->charged_sms_toggle;
+                $details['sending_frequency'] =  $notification_setting->sending_frequency;
+                $details['charging_frequency'] =  $notification_setting->charging_frequency;
                 $notification_setting_shippers = NotificationSettingShipper::where('notification_setting_id', $notification_setting->id);
                 if ($notification_setting_shippers->exists()) {
                     $notification_setting_shippers = $notification_setting_shippers->pluck('shipper_id')->toArray();
@@ -8657,6 +8756,9 @@ class GlobalSettingsController extends Controller
                     $details['name'] = $notification_setting->name;
                     $details['shipper_toggle'] = 1;
                     $details['shippers'] = null;
+                    $details['charged_sms_toggle'] = 0;
+                    $details['sending_frequency'] = null;
+                    $details['charging_frequency'] = null;
                     $notification_details[] = $details;
                 }
             }
@@ -8721,6 +8823,14 @@ class GlobalSettingsController extends Controller
                 $notification_setting->notification_id = $notification['id'];
                 $shippers = null;
                 $toggle = 0;
+
+                if (array_key_exists('charged_sms', $notification)) {
+                    if ($notification['charged_sms'] == 'on') {
+                        $notification_setting->charged_sms_toggle = 1;
+                        $notification_setting->sending_frequency  = $notification['sending_frequency'];
+                        $notification_setting->charging_frequency  = $notification['charging_frequency'];
+                    }
+                }
 
                 if (array_key_exists('all_shipper_toggle', $notification)) {
                     if ($notification['all_shipper_toggle'] == 'on') {
@@ -9608,4 +9718,86 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with('success', 'Admins have been assigned!');
     }
+
+    public function show_vendors()
+    {
+        $shippers = User::where('status', 3)->get();
+        $users = GlobalSettings::where('setting_value', 0)->where('type', 'brand_and_vendor_rights')->first();
+        return view('admin.settings.brand_and_vendor.index')->with(['users' => $users, 'shippers' => $shippers]);
+    }
+
+    public function store_vendors(Request $request)
+    {
+        if ($request->has('users')) {
+            $users = implode(',', $request->users);
+        } else {
+            $users = '';
+        }
+        $settings = GlobalSettings::where('setting_value', 0)->where('type', 'brand_and_vendor_rights')->first();
+        if ($settings) {
+            // Update the existing global setting
+            $settings->text = $users;
+            $settings->save();
+        } else {
+            $settings = new GlobalSettings();
+            $settings->type = 'brand_and_vendor_rights';
+            $settings->setting_value = 0;
+            $settings->text = $users;
+            $settings->save();
+        }
+
+        return redirect()->back()->with('success', 'Shippers have been assigned rights!');
+    }
+
+    public function lead_progress_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 795);
+        return view('admin.settings.shipper.lead_progress');
+    }
+
+    public function lead_progress_list()
+    {
+
+        $query = LeadProgressSetting::leftJoin('admins as a', 'a.id', '=', 'lead_progress_settings.updated_by')
+            ->select(
+                'lead_progress_settings.id as id',
+                'lead_progress_settings.stage as stage',
+                'lead_progress_settings.trigger as trigger',
+                'lead_progress_settings.percent as percent',
+                'lead_progress_settings.color as color',
+                'a.name as updated_by',
+                'lead_progress_settings.updated_at as updated_at'
+            );
+        $datatable = Datatables::of($query)
+        ->addColumn('action', function($datatable){
+            $dropdown = '
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+              <div class="dropdown-menu dropdown-menu-sm">
+          ';
+
+          $dropdown .= '<button type="button" class="dropdown-item edit_color_percent" data-id="' . $datatable->id . '" data-color="' . $datatable->color . '" data-percent="' . $datatable->percent . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Color-Percent</div></button>';
+            
+          return $dropdown;        
+            
+        });
+        return $datatable->make(true);
+    }
+
+    public function lead_progress_update(Request $request){
+        $id = $request->id;
+        $lead_progress_setting = LeadProgressSetting::find($id);
+
+        if($lead_progress_setting){
+            $lead_progress_setting->color = $request->colorHex;
+            $lead_progress_setting->percent = $request->percent;
+            $lead_progress_setting->updated_at = now();
+            $lead_progress_setting->updated_by = Auth::id();
+            $lead_progress_setting->save(); 
+
+            return redirect()->back()->with('success', 'Color/Percent Updated !!!');
+
+        }
+    }
+
 }

@@ -7828,18 +7828,18 @@ class APIController extends Controller
             if ($validate->fails()) {
                 $errors = array();
                 foreach ($validate->errors()->all() as $index => $error) {
-                    $errors[$index]['error_code'] = 0;
+                    $errors[$index]['error_code'] = 10;
                     $errors[$index]['error_text'] = 'Invalid Input.';
                     if ($error == 'delivery note id is Required.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 1;
                         $errors[$index]['ERROR_TEXT'] = 'Delivery note id is Required.';
                     }
                     if ($error == 'delivery note id must be an Integer.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 2;
                         $errors[$index]['error_text'] = 'Delivery note id must be an Integer.';
                     }
                     if ($error == 'Given delivery note id is of Invalid ID.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 3;
                         $errors[$index]['error_text'] = 'Given delivery note id is of Invalid ID.';
                     }
                 }
@@ -7912,42 +7912,42 @@ class APIController extends Controller
             if ($validate->fails()) {
                 $errors = array();
                 foreach ($validate->errors()->all() as $index => $error) {
-                    $errors[$index]['error_code'] = 0;
+                    $errors[$index]['error_code'] = 10;
                     $errors[$index]['error_text'] = 'Invalid Input.';
                     if ($error == 'retail note id is Required.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 1;
                         $errors[$index]['ERROR_TEXT'] = 'retail note id is Required.';
                     }
                     if ($error == 'retail note id must be an Integer.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 2;
                         $errors[$index]['error_text'] = 'retail note id must be an Integer.';
                     }
                     if ($error == 'Given retail note id is of Invalid ID.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 3;
                         $errors[$index]['error_text'] = 'Given retail note id is of Invalid ID.';
                     }
                     if ($error == 'Collection Amount is Required.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 4;
                         $errors[$index]['ERROR_TEXT'] = 'Collection Amount is Required.';
                     }
                     if ($error == 'Collection Amount must be a Number.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 5;
                         $errors[$index]['error_text'] = 'Collection Amount must be a Number.';
                     }
                     if ($error == 'The Collection Amount must be at least 0.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 6;
                         $errors[$index]['error_text'] = 'The Collection Amount must be at least 0.';
                     }
                     if ($error == 'transaction id is Required.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 7;
                         $errors[$index]['ERROR_TEXT'] = 'Transaction id is Required.';
                     }
                     if ($error == 'transaction id must be an Integer.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 8;
                         $errors[$index]['error_text'] = 'Transaction id must be an Integer.';
                     }
                     if ($error == 'The transaction id must be at least 0.') {
-                        $errors[$index]['error_code'] = 0;
+                        $errors[$index]['error_code'] = 9;
                         $errors[$index]['error_text'] = 'The transaction id must be at least 0.';
                     }
                 }
@@ -8179,8 +8179,31 @@ class APIController extends Controller
 
     public function shipment_track_consignee_public(Request $request)
     {
+        $tracking_num = explode(',', $request->tracking_number);
+        $shipment_data = Shipment::whereIn('tracking_number', $tracking_num)->pluck('pickup_address_id');
+        $vendor = UserShippingInfo::whereIn('id', $shipment_data)->pluck('vendor');
+        $brand_name = UserShippingInfo::whereIn('id', $shipment_data)->pluck('pickup_brand_name');
+
+        // $rules = [
+        //     'tracking_number' => ['required'],
+        // ];
+
         $rules = [
             'tracking_number' => ['required'],
+            'vendor' => [
+                function ($attribute, $value, $fail) use ($vendor) {
+                    if (!$vendor->contains($value)) {
+                        $fail('The Vendor name is invalid.');
+                    }
+                }
+            ],
+            'pickup_brand_name' => [
+                function ($attribute, $value, $fail) use ($brand_name) {
+                    if (!$brand_name->contains($value)) {
+                        $fail('The Brand name is invalid.');
+                    }
+                }
+            ],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -8221,6 +8244,8 @@ class APIController extends Controller
                             $pickup = $shipment->pickup_address;
 
                             $details['pickup']['origin'] = $pickup->city->name;
+                            $details['pickup']['vendor'] = $pickup->vendor;
+                            $details['pickup']['brand_name'] = $pickup->pickup_brand_name;
 
                             $details['consignee']['name'] = $shipment->consignee_name;
                             $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
@@ -9736,5 +9761,24 @@ class APIController extends Controller
 
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
+    }
+
+    public function fetch_complaints(Request $request) {
+
+        $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first()->id;
+
+        $record = CrmRequest::leftJoin('crm_request_case_nature as crcn', 'crcn.id','crm_requests.case_nature_id')
+        ->leftJoin('crm_request_case_nature_types as crcnt','crcnt.id','crm_requests.case_nature_type_id')
+        ->leftJoin('crm_request_statuses as crs' ,'crs.id', 'crm_requests.status_id')
+        ->where('shipment_id', $shipment_id)
+        ->select(['crm_requests.id as request_no','crcn.name as complaint_nature','crcnt.type as complaint_nature_type','crm_requests.description as description', 'crs.name as status'])->orderBy('crm_requests.created_at','desc')->get();
+
+        if(count($record) > 0){
+            $message = 'List of Complaints';
+        } else {
+            $message = 'No record found';
+        }
+        return response()->json(['status' => 0, 'message' => $message, 'data' => $record]);
+
     }
 }

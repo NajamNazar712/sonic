@@ -922,7 +922,7 @@
                         className: 'btn btn-primary print',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            table.button(0).disable();
+                            // table.button(0).disable();
                             table.button(1).disable();
                             print(selected_rows);
                             table.rows().deselect();
@@ -956,7 +956,11 @@
                                 $('#requested_shipments').html(html_rows);
                             }
                             else{
-                                $('#AddFeedbackModal').modal('show');
+                                //$('#AddFeedbackModal').modal('show');
+                                toastr.error('Select at least one shipment!', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
                             }
                         }
                     },
@@ -1038,7 +1042,6 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                deferLoading: 0,
                 ajax: {
                     url: '{{ route('cod.orders.list') }}',
                     data: function (d) {
@@ -1331,7 +1334,7 @@
                                 }else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
-                                table.button(0).disable();
+                                // table.button(0).disable();
                                 table.button(1).disable();
 
                                 table.rows().deselect();
@@ -1443,7 +1446,7 @@
 
                 }
                 else {
-                    table.button(0).disable();
+                    // table.button(0).disable();
                     table.button(1).disable();
                     table.button(2).disable();
                 }

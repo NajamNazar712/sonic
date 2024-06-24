@@ -379,7 +379,27 @@
 
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Name</strong></td>';
-                                shipment += '<td>' + details.shipper.name + '</td>';
+                                // shipment += '<td>' + details.shipper.name + '</td>';
+
+                                var user_id = details.shipper.id;
+                                var global_settings_userId = details.shipper.assigned;
+                                if (user_id && global_settings_userId && global_settings_userId.length > 0) {
+                                    var userIdArray = global_settings_userId[0].split(',');
+
+                                    var isMatch = userIdArray.some(function(userIdString) {
+                                        return userIdString === user_id.toString();
+                                    });
+
+                                    if (isMatch) {
+                                        shipment += '<td>' + details.shipper.name + '</td>';
+                                    } else {
+                                        shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
+                                    }
+                                } else {
+                                    // shipment += '<td>' + details.shipper.name + '</td>';
+                                    shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
+                                }
+
                                 shipment += '<td><strong>Account No.</strong></td>';
                                 shipment += '<td>' + details.shipper.account_number + '</td>';
                                 shipment += '<td><strong>City</strong></td>';
@@ -419,13 +439,34 @@
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Person of Contact</strong></td>';
                                 shipment += '<td>' + details.pickup.person_of_contact + '</td>';
-                                shipment += '<td><strong>Vendor</strong></td>';
-                                if (details.pickup.vendor) {
-                                    shipment += '<td>' + details.pickup.vendor + '</td>';
+
+                                if (isMatch){
+                                    if (details.pickup.vendor) {
+                                        shipment += '<td></td>'
+                                        // shipment += '<td>' + details.pickup.vendor + '</td>';
+                                        } else {
+                                        shipment += '<td><strong>Vendor</strong></td>';
+                                        shipment += '<td>' + details.pickup.vendor + '</td>';
+                                        // shipment += '<td></td>'
+                                    }
+                                } 
+                                else {
+                                    shipment += '<td><strong>Brand Name</strong></td>';
+                                    if (details.pickup.pickup_brand_name) {
+                                        shipment += '<td>' + details.pickup.pickup_brand_name + '</td>';
+                                    } else {
+                                        shipment += '<td></td>'
+                                    }
                                 }
-                                else{
-                                    shipment += '<td></td>'
-                                }
+
+                                // shipment += '<td><strong>Vendor</strong></td>';
+                                // if (details.pickup.vendor) {
+                                //     shipment += '<td>' + details.pickup.vendor + '</td>';
+                                // }
+                                // else{
+                                //     shipment += '<td></td>'
+                                // }
+
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Phone No.</strong></td>';

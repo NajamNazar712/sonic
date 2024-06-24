@@ -46,6 +46,17 @@
                                 </select>
                             </fieldset>
                         </div>
+
+                        <div class="col-4">
+                            <fieldset class="form-group">
+                                <select name="search_area" id="search_area" class="form-control select2">
+                                    @foreach($areas as $area)
+                                        <option value="{{$area->id}}">{{$area->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+
                         <div class="col-3 form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -79,6 +90,8 @@
                         <th class="border-primary border-darken-1">Handover ID</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
+                        <th class="border-primary border-darken-1">Created At Area</th>
+
                         <th class="border-primary border-darken-1">From</th>
                         <th class="border-primary border-darken-1">From Area</th>
                         <th class="border-primary border-darken-1">From Person Dept/Area/DES</th>
@@ -94,6 +107,8 @@
                         <th class="border-primary border-darken-1">Shipment Pieces</th>
                         <th class="border-primary border-darken-1">Received By</th>
                         <th class="border-primary border-darken-1">Received At</th>
+                        <th class="border-primary border-darken-1">Received At Area</th>
+
                     </tr>
                     </thead>
                 </table>
@@ -295,6 +310,12 @@
                 allowClear:true
             });
 
+            $('#search_area').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Area',
+                width:'100%',
+                allowClear:true
+            });
+
 
             function print(ids) {
 				$.ajax({
@@ -350,6 +371,8 @@
                             head.push('Handover ID');
                             head.push('Created At');
                             head.push('Created By');
+                            head.push('Created At Area');
+
                             head.push('From');
                             head.push('From Area');
                             head.push('From Person Dept/Area/DES');
@@ -364,6 +387,8 @@
                             head.push('Remaining Shipment(s)');
                             head.push('Received By');
                             head.push('Received At');
+                            head.push('Received At Area');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -371,6 +396,8 @@
                                 row.push(values.handover_id);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
+                                row.push(values.created_at_area);
+
                                 row.push(values.from);
                                 row.push(values.from_area);
                                 row.push(values.from_dept_area_desg);
@@ -385,6 +412,8 @@
                                 row.push(values.remaining);
                                 row.push(values.received_by);
                                 row.push(values.received_at);
+                                row.push(values.received_at_area);
+
 
                                 body.push(row);
                             });
@@ -532,6 +561,8 @@
                         d.search_to_admin = $('#search_to_admin').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_area = $("#search_area").val();
+
                     }
                 },
                 rowId: 'handover_id',
@@ -542,6 +573,7 @@
                     {data: 'handover_id_padded', name: 'handovers.id', class: 'align-middle handover_id_padded'},
                     {data: 'created_at', name: 'handovers.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
+                    {data: 'created_at_area', name: 'created_at_area', class: 'align-middle created_at_area'},
                     {data: 'from', name: 'hr.admin_id', class: 'align-middle from'},
                     {data: 'from_area', name: 'c_from.name', class: 'align-middle from_area'},
                     {data: 'from_dept_area_desg', name: 'from_dept_area_desg', class: 'align-middle from_dept_area_desg'},
@@ -557,6 +589,7 @@
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle text-center shipment_pieces', orderable: false, searchable: false},
                     {data: 'received_by', name: 'ad.name', class: 'align-middle received_by'},
                     {data: 'received_at', name: 'handovers.received_at', class: 'align-middle received_at'},
+                    {data: 'received_at_area', name: 'received_at_area', class: 'align-middle received_at_area'},
                 ],
                 rowCallback: function(row, data, index) {
                     // var info = table.page.info();
