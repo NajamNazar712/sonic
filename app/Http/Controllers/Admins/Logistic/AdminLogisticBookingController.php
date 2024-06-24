@@ -553,6 +553,7 @@ class AdminLogisticBookingController extends Controller
                 }),
             ],
             'insurance_item_code'=>['max:255'],
+            'shipper_reference'=>['string','max:255']
         ]);
         if($validate->fails())
         {
@@ -598,6 +599,7 @@ class AdminLogisticBookingController extends Controller
                     $logistic_booking->handling_inst=$request->handling_inst;
                     $logistic_booking->updated_by = $admin_id;
                     $logistic_booking->total_pieces=$request->total_pieces;
+                    $logistic_booking->shipper_reference=$request->shipper_reference;
                     $logistic_booking->save();
 
                     $shipment=Shipment::where('tracking_number',$request->cn_number);
@@ -609,6 +611,7 @@ class AdminLogisticBookingController extends Controller
 //                            $shipment->estimated_weight=$booking_weight;
 //                        }
                         //atif sir said shipment weight update regardless booking is arrived or not
+                        $shipment->order_id=$request->shipper_reference;
                         $shipment->estimated_weight=$request->booking_weight;
                         $shipment->consignee_name=$request->consignee_name;
                         $shipment->consignee_address=$request->consignee_address;
