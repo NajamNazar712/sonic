@@ -621,9 +621,16 @@ class RetailAdminUserManagementController extends Controller
         foreach ($grouped_data as $franchise_name => $records) {
             // Start the main container for a franchise
             $html .= '<div class="row align-items-start justify-content-between summary my-4">';
-            $html .= '<div class="col-6">';
+            $html .= '<div class="col-12">';
             $html .= '<table class="table table-sm table-bordered border">';
             $html .= '<tbody>';
+
+            $html .= '<tr>';
+            $html .= '<td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>';
+            $html .= '<td class="text-center align-middle color primary"><strong>Delivery Note</strong></td>';
+            $html .= '<td class="text-center align-middle color secondary">Created at ' . $records->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '</tr>';
             
             // Franchise details
             $html .= '<tr><td>Retail User Name:</td><td>' . $franchise_name . '</td></tr>';
@@ -853,9 +860,17 @@ class RetailAdminUserManagementController extends Controller
         foreach ($grouped_data as $franchise_name => $records) {
             // Start the main container for a franchise
             $html .= '<div class="row align-items-start justify-content-between summary my-4">';
-            $html .= '<div class="col-6">';
+            $html .= '<div class="col-12">';
             $html .= '<table class="table table-sm table-bordered border">';
             $html .= '<tbody>';
+
+            $html .= '<tr>';
+            $html .= '<td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>';
+            $html .= '<td class="text-center align-middle color primary"><strong>Delivery Note</strong></td>';
+            $html .= '<td class="text-center align-middle color secondary">Created at ' . $records[0]->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '</tr>';
+            
             
             // Franchise details
             $html .= '<tr><td>Franchise Name:</td><td>' . $franchise_name . '</td></tr>';
