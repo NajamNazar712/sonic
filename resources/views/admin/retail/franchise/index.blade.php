@@ -208,6 +208,19 @@
                                         <div class="form-group">
                                             <input type="text" name="license_fees" id="license_fees" class="form-control license_fees" placeholder="License Fees*" value="" data-rule-required="true" data-msg-required="License Fees is required">
                                         </div>
+
+                                        <div class="form-group">
+                                            <select name="bank_id" id="bank_id" class="form-control select2" data-rule-required="true" data-msg-required="Please select a bank" required>
+                                                @foreach ($bank_list as $list)
+                                                    <option value="{{ $list->id }}">{{ $list->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <input type="text" name="cheque_number" id="cheque_number" class="form-control" placeholder="Cheque Number*" value="" data-rule-required="true" data-msg-required="Cheque Number is required">
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -375,6 +388,19 @@
                                     <div class="form-group">
                                         <input type="text" name="license_fees" id="edit_license_fees" class="form-control edit_license_fees" placeholder="License Fees*"  value="" data-rule-required="true" data-msg-required="License Fees is required">
                                     </div>
+
+                                    <div class="form-group">
+                                        <select name="bank_id" id="edit_bank_id" class="form-control select2" data-rule-required="true" data-msg-required="Please select a bank" required>
+                                            @foreach ($bank_list as $list)
+                                                <option value="{{ $list->id }}">{{ $list->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <input type="text" name="cheque_number" id="edit_cheque_number" class="form-control edit_cheque_number" placeholder="Cheque Number*" value="" data-rule-required="true" data-msg-required="Cheque Number is required">
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -425,6 +451,12 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#bank_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Select a Bank',
+                width: '100%',
+                allowClear: true
+            });
+
             $('.phone_number').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
@@ -691,6 +723,8 @@
                         $('#withholding_tax_percentage_edit').val(response.data.franchise_withholding);
                         $('#edit_security_deposit').val(response.data.security_deposit);
                         $('#edit_license_fees').val(response.data.license_fees);
+                        $('#edit_bank_id').val(response.data.bank_id);
+                        $('#edit_cheque_number').val(response.data.cheque_number);
                         // $('#deduction_percentage_edit').val(response.data.franchise_deduction);
                     }
                 });

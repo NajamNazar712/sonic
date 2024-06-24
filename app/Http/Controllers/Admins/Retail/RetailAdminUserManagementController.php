@@ -35,6 +35,7 @@ use App\Http\Models\RetailUserAttachment;
 use App\Http\Models\RetailUserHistory;
 use App\Http\Models\TotalSumFranchiseCommission;
 use App\Http\Models\TotalSumRetailTraxCenter;
+use App\Http\Models\BanksList;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -169,7 +170,8 @@ class RetailAdminUserManagementController extends Controller
         $products = Product::orderBy('product_name')->get();
         $product_percentage = RetailFranchiseProductPercentage::get();
         $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
-        return view('admin.retail.franchise.index')->with(['hubs' => $hubs, 'products' => $products, 'product_percentage' => $product_percentage, 'shipping_modes' => $shipping_modes]);
+        $bank_list = BanksList::get();
+        return view('admin.retail.franchise.index')->with(['hubs' => $hubs, 'products' => $products, 'product_percentage' => $product_percentage, 'shipping_modes' => $shipping_modes, 'bank_list' => $bank_list]);
     }
 
     public function franchise_list(Request $request)
@@ -270,6 +272,8 @@ class RetailAdminUserManagementController extends Controller
             'retail_shipping_mode_id' => 'required',
             'security_deposit' => 'required',
             'license_fees' => 'required',
+            'bank_id' => 'required',
+            'cheque_number' => 'required',
         ]);
 
         $admin = $request->user();
@@ -332,6 +336,10 @@ class RetailAdminUserManagementController extends Controller
         $franchise_product_charges->franchise_deduction = $request->franchise_deduction;
         $franchise_product_charges->security_deposit = $request->security_deposit;
         $franchise_product_charges->license_fees = $request->license_fees;
+        $franchise_product_charges->bank_id = $request->bank_id;
+        $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
+        $franchise_product_charges->bank_name = $bank_name;
+        $franchise_product_charges->cheque_number = $request->cheque_number;
         $franchise_product_charges->save();
 
         $franchise_retail_product_attachment = new RetailFranchiseProductAttachment();
@@ -393,6 +401,8 @@ class RetailAdminUserManagementController extends Controller
             'retail_shipping_mode_id' => 'required',
             'security_deposit' => 'required',
             'license_fees' => 'required',
+            'bank_id' => 'required',
+            'cheque_number' => 'required',
         ]);
         $date = Carbon::now()->format('Y_m_d');
         $admin = $request->user();
@@ -446,6 +456,10 @@ class RetailAdminUserManagementController extends Controller
                 $new_charges->franchise_deduction = $request->franchise_deduction;
                 $new_charges->security_deposit = $request->security_deposit;
                 $new_charges->license_fees = $request->license_fees;
+                $new_charges->bank_id = $request->bank_id;
+                $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
+                $new_charges->bank_name = $bank_name;
+                $new_charges->cheque_number = $request->cheque_number;
                 $new_charges->save();
             } else {
                 $new_charges = new RetailFranchiseCharge();
@@ -455,6 +469,10 @@ class RetailAdminUserManagementController extends Controller
                 $new_charges->franchise_deduction = $request->franchise_deduction;
                 $new_charges->security_deposit = $request->security_deposit;
                 $new_charges->license_fees = $request->license_fees;
+                $new_charges->bank_id = $request->bank_id;
+                $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
+                $new_charges->bank_name = $bank_name;
+                $new_charges->cheque_number = $request->cheque_number;
                 $new_charges->save();
             }
 
@@ -1525,7 +1543,6 @@ class RetailAdminUserManagementController extends Controller
 
     public function user_update(Request $request, $id)
     {
-        // dd($request->all());
         $request->validate([
             'trax_id' => [
                 'nullable',

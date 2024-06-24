@@ -12,6 +12,9 @@ class RetailFranchiseCharge extends Model
         'franchise_withholding',
         'franchise_deduction',
         'security_deposit',
-        'license_fees'
+        'license_fees',
+        'bank_id',
+        'bank_name',
+        'cheque_number'
     ];
 }
