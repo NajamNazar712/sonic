@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Models\Admin\GlobalSettings;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -21,6 +22,7 @@ class FetchDataForRVShipmentTicketSeeder extends Seeder
             ->where('shipments_journey.id','=',
             DB::connection('reports_2')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
         })
+        ->whereDate('shipments_journey.created_at', '=', Carbon::today())
         ->whereIn('shipments.shipper_status_id', [12,66])
         ->groupBy('shipments.id', 'shipments.shipper_status_id', 'shipments_journey.status_reason_id', 'shipments.user_id', 'shipments.updated_at')
         ->select(
