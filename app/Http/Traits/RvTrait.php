@@ -801,6 +801,9 @@ trait RvTrait
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
                     //get the shipment journey table in reason validation id
 
+                    //Remove Shipment from RV Shipment Ticket
+                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+
                     // //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
                     ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id());
                     return ['status' => 1, 'success'=> 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
