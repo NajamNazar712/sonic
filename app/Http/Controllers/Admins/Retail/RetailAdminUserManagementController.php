@@ -1097,8 +1097,12 @@ class RetailAdminUserManagementController extends Controller
 
     public function user_commission_view(){
         $franchises = RetailUser::where('category', 2)->get();
+        $finance_department = AdminDepartment::where('id', 4)->first();
+        $admin_roles = AdminRole::where('department_id', $finance_department->id)->get();
+        $allowed_users = Admin::whereIn('role_id', $admin_roles->pluck('id'))->get();
         return view('admin.retail.commission.user_wise', [
-            'franchises' => $franchises
+            'franchises' => $franchises,
+            'allowed_users' => $allowed_users
         ]);
     }
 
