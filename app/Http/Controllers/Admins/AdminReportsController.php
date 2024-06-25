@@ -14461,7 +14461,7 @@ class AdminReportsController extends Controller
         $results = DB::select($Query,$bindings);
         if($request->get('excel') && $request->get('excel') == true) {
 
-            $headers = ['Booking Date', 'Origin', 'Destination', 'Segment', 'Tracking Number', 'Receiving City', 'Without Manifest', 'Misroute'];
+            $headers = ['Booking Date', 'Origin', 'Destination', 'Segment', 'Tracking Number', 'Receiving City', 'Without Manifest', 'Misroute', 'Status' ,'Remarks'];
 
             header('Content-Type: text/csv; charset=utf-8');  
             header('Content-Disposition: attachment; filename=data.csv');  
@@ -14481,7 +14481,8 @@ class AdminReportsController extends Controller
                 $new_array['receiving_city'] = $row['receiving_city'];
                 $new_array['withoutmanifest'] = $row['withoutmanifest'] == null ? 0 : $row['withoutmanifest'];
                 $new_array['misroute'] = $row['misroute'] == null ? 0 : $row['misroute'];
-
+                $new_array['shipper_status_id'] = $row['shipper_status_id'];
+                $new_array['Remarks'] = $row['Remarks'];
                 fputcsv($output, $new_array);
 
             }
