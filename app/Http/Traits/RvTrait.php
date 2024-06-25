@@ -472,6 +472,9 @@ trait RvTrait
             }
         }
 
+        //Remove Shipment from RV Shipment Ticket
+        dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+
         if (in_array($parcel->shipper_status_id, [12, 52, 66])) {
             $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52,  66])->latest('id')->first();
 
@@ -496,9 +499,6 @@ trait RvTrait
                 $parcel->save();
 
                 ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, Auth::id());
-
-                //Remove Shipment from RV Shipment Ticket
-                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
@@ -594,6 +594,10 @@ trait RvTrait
         $shipmentId = $request->shipment_id;
         $remark = $request->remarks;
         if ($shipmentId) {
+
+             //Remove Shipment from RV Shipment Ticket
+             dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipmentId));
+
             if (Shipment::where('id', $shipmentId)->where('shipper_status_id', '!=', 15)->exists()) {
                 $consolidated_shipments = ConsolidationShipments::where('shipment_id', $shipmentId);
                 if ($consolidated_shipments->exists()) {
@@ -607,9 +611,6 @@ trait RvTrait
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 15, 'consignee_status_id' => 15]);
                     ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, NULL, Auth::id());
                 }
-
-                //Remove Shipment from RV Shipment Ticket
-                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
                 return ['status' => 1, 'success' => "Shipment status successfully updated to Shipment - On Hold for Self Collection"];
             } else {
@@ -644,6 +645,9 @@ trait RvTrait
             if ($crm_request->exists()) {
                 $crm = true;
             }
+
+            //Remove Shipment from RV Shipment Ticket
+            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
             if (in_array($shipment->shipper_status_id, [12, 52, 66]) || $crm == true) {
                 if (
@@ -738,9 +742,6 @@ trait RvTrait
                                 $shipment_parcel_image->save();
                             }
                         }
-
-                        //Remove Shipment from RV Shipment Ticket
-                        dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
                         return ['status' => 1, 'success' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']];
                     }
