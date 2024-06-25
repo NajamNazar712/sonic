@@ -472,6 +472,9 @@ trait RvTrait
             }
         }
 
+        //Remove Shipment from RV Shipment Ticket
+        dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+
         if (in_array($parcel->shipper_status_id, [12, 52, 66])) {
             $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52,  66])->latest('id')->first();
 
@@ -496,9 +499,6 @@ trait RvTrait
                 $parcel->save();
 
                 ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, Auth::id());
-
-                //Remove Shipment from RV Shipment Ticket
-                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
@@ -544,6 +544,9 @@ trait RvTrait
         if ($parcel->booking_type_id == 5) {
             return ['status' => 0, 'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
         }
+        
+         //Remove Shipment from RV Shipment Ticket
+         dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
         // if current shipment statuses are following update the shipment status in shipments table
         // 7 = Shipment - Not Attempted
@@ -577,9 +580,6 @@ trait RvTrait
 
             ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, NULL, $globalAdminId ?? Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
 
-            //Remove Shipment from RV Shipment Ticket
-            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
-
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
         }
         return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Return - Confirm!"];
@@ -594,6 +594,10 @@ trait RvTrait
         $shipmentId = $request->shipment_id;
         $remark = $request->remarks;
         if ($shipmentId) {
+
+             //Remove Shipment from RV Shipment Ticket
+             dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipmentId));
+
             if (Shipment::where('id', $shipmentId)->where('shipper_status_id', '!=', 15)->exists()) {
                 $consolidated_shipments = ConsolidationShipments::where('shipment_id', $shipmentId);
                 if ($consolidated_shipments->exists()) {
@@ -607,9 +611,6 @@ trait RvTrait
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 15, 'consignee_status_id' => 15]);
                     ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, NULL, Auth::id());
                 }
-
-                //Remove Shipment from RV Shipment Ticket
-                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
                 return ['status' => 1, 'success' => "Shipment status successfully updated to Shipment - On Hold for Self Collection"];
             } else {
@@ -644,6 +645,9 @@ trait RvTrait
             if ($crm_request->exists()) {
                 $crm = true;
             }
+
+            //Remove Shipment from RV Shipment Ticket
+            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
             if (in_array($shipment->shipper_status_id, [12, 52, 66]) || $crm == true) {
                 if (
@@ -739,9 +743,6 @@ trait RvTrait
                             }
                         }
 
-                        //Remove Shipment from RV Shipment Ticket
-                        dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
-
                         return ['status' => 1, 'success' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']];
                     }
                 } else {
@@ -799,6 +800,9 @@ trait RvTrait
                     //updating the shipment status to Shipper Advise Requested(65) in shipments table
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
                     //get the shipment journey table in reason validation id
+
+                    //Remove Shipment from RV Shipment Ticket
+                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
                     // //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
                     ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id());
