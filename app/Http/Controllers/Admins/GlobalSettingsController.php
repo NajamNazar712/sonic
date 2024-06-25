@@ -1742,7 +1742,8 @@ class GlobalSettingsController extends Controller
     {
         $case_nature = CrmRequestCaseNature::whereNotIn('id', [3])->select(['id', 'name'])->get();
         $shipment_status = ShipmentStatus::where('status', 1)->get();
-        return view('admin.settings.crm_case_nature.add_form', compact('case_nature', 'shipment_status'));
+        $admin_departments = AdminDepartment::get();
+        return view('admin.settings.crm_case_nature.add_form', compact('case_nature', 'shipment_status', 'admin_departments'));
     }
 
     public function crm_case_nature_types_store(Request $request)

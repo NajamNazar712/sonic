@@ -16,7 +16,7 @@
                 <div class="card-content" aria-expanded="true">
                     <div class="card-body">
                         @include('admin.inc.messages')
-                        <form action="{{ route('admin.settings.crm_case_nature_types.store') }}" id="add_form">
+                        <form action="{{ route('admin.settings.crm_case_nature_types.store') }}" id="add_form" method="POST">
                             @csrf
                             <div class="row">
                                 <div class="col-6">
@@ -31,7 +31,7 @@
                 
                                     <fieldset class="form-group">
                                         <label class="d-flex">Shipment status visibility (<input type="checkbox" name="select_all_status" id="select_all_status"> select all) </label>
-                                        <select name="case_nature_select_visibility" id="case_nature_select_visibility" class="form-control select2">
+                                        <select name="case_nature_select_visibility[]" id="case_nature_select_visibility" class="form-control select2" multiple="multiple">
                                             @foreach($shipment_status as $status)
                                                 <option value="{{$status->id}}">{{$status->name}}</option>
                                             @endforeach
@@ -39,7 +39,7 @@
                                     </fieldset>
                 
                                     <label for="shipper_visibility">Visibility to Shippers (mark checked for visibility)</label>
-                                    <fieldset class="form-group d-flex" id="shipper_visibility_div">
+                                    <fieldset class="form-group d-flex mt-1" id="shipper_visibility_div">
                                         <input type="checkbox" name="shipper_visibility" id="shipper_visibility">
                                         <label for="shipper_visibility" id="shipper_visibility_label">Visible to shippers</label>
                                     </fieldset>
@@ -65,20 +65,25 @@
     
                                     <fieldset class="form-group">
                                         <label class="d-flex">Admin departments visibility (<input type="checkbox" name="select_all_admin_department" id="select_all_admin_department"> select all) </label>
-                                        <select name="admin_department_visibility" id="admin_department_visibility" class="form-control select2">
-                                            @foreach($shipment_status as $status)
-                                                <option value="{{$status->id}}">{{$status->name}}</option>
+                                        <select name="admin_department_visibility[]" id="admin_department_visibility" class="form-control select2" multiple="multiple">
+                                            @foreach($admin_departments as $department)
+                                                <option value="{{$department->id}}">{{$department->name}}</option>
                                             @endforeach
                                         </select>
                                     </fieldset>
     
                                     <label for="remarks_visibility">Remarks Visibility (Select Remarks)</label>
-                                    <fieldset class="form-group d-flex" id="remarks_visibility_div">
+                                    <fieldset class="form-group d-flex mt-1" id="remarks_visibility_div">
                                         <input type="checkbox" name="remarks_visibility" id="remarks_visibility">
                                         <label for="remarks_visibility" id="remarks_visibility_label">Remarks Visibility</label>
                                     </fieldset>
                                 </div>
                             </div>
+
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-success" id="add_case_nature_btn">Submit Case</button>
+                            </div>
+
                         </form>
                     </div>
                 </div>
@@ -140,6 +145,41 @@
                 $('#add_remarks_section').prop('disabled', false);
             }
         });
+
+        $('#case_nature_select_visibility').select2({
+            width:'100%',
+            placeholder:"Select Status",
+            allowClear:false,
+            dropdownParent:$('#add_form')
+        });
+
+        $('#select_all_status').change(function() {
+            if ($(this).is(':checked')) {
+                // Select all options
+                $('#case_nature_select_visibility > option').prop('selected', true).trigger('change');
+            } else {
+                // Deselect all options
+                $('#case_nature_select_visibility > option').prop('selected', false).trigger('change');
+            }
+        });
+
+        $('#admin_department_visibility').select2({
+            width:'100%',
+            placeholder:"Select Department",
+            allowClear:false,
+            dropdownParent:$('#add_form')
+        });
+
+        $('#select_all_admin_department').change(function() {
+            if ($(this).is(':checked')) {
+                // Select all options
+                $('#admin_department_visibility > option').prop('selected', true).trigger('change');
+            } else {
+                // Deselect all options
+                $('#admin_department_visibility > option').prop('selected', false).trigger('change');
+            }
+        });
+
     });
     </script>
 
