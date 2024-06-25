@@ -14428,7 +14428,13 @@ class AdminReportsController extends Controller
         $date_to = $date_to->format('Y-m-d');
 
         // $Query = "SELECT * FROM manifest_report2 WHERE origin_zonecode = :origin_value AND booking_date >= :date_from AND booking_date <= :date_to";
-        $Query = "SELECT * FROM manifest_report2 WHERE booking_date >= :date_from AND booking_date <= :date_to";
+        if($request->get('excel') && $request->get('excel') == true) {
+            $Query = "SELECT * FROM manifest_report2_excel WHERE booking_date >= :date_from AND booking_date <= :date_to";
+
+        } else{
+            $Query = "SELECT * FROM manifest_report2 WHERE booking_date >= :date_from AND booking_date <= :date_to";
+            
+        }
         
         $bindings = [
             // 'origin_value' => $origin,
@@ -14453,70 +14459,99 @@ class AdminReportsController extends Controller
         }
 
         $results = DB::select($Query,$bindings);
+        if($request->get('excel') && $request->get('excel') == true) {
 
-        $transformedData = collect($results)->map(function ($item) { // mapping for datatable
-            $segment = $item->sub_prod_name . ' (' . $item->parent_prod_name . ')';
-            return [
-                'origin' => $item->origin_zonecode,
-                'destination' => $item->destination_zonecode,
-                'booking_date' => $item->booking_date,
-                // 'segment' => $item->parent_prod_name,
-                'sub_segment' => $item->sub_prod_name,
-                'segment' => $segment,
-                'arrival' => $item->arrival,
-                'manifest' => $item->manifest,
-                'misroute' => $item->misroute,
-                'withoutmanifest' => $item->withoutmanifest,
-            ];
-        });
+            $headers = ['Booking Date', 'Origin', 'Destination', 'Segment', 'Tracking Number', 'Receiving City', 'Without Manifest', 'Misroute', 'Status' ,'Remarks'];
 
-        $datatable = Datatables::of($transformedData)
-            ->editColumn('manifest', function ($transformedData) {
-                if ($transformedData['manifest'] == null) {
-                    return '-';
-                } else {
-                    return $transformedData['manifest'];
-                }
-            })
-            ->editColumn('manifest_percentage', function ($transformedData) {
-                if ($transformedData['manifest'] == null) {
-                    return '-';
-                } else {
-                    $result = ($transformedData['manifest'] / $transformedData['arrival']) * 100;
-                    return number_format($result, 2) . ' %';
-                }
-            })
-            ->editColumn('withoutmanifest', function ($transformedData) {
-                if ($transformedData['withoutmanifest'] == null) {
-                    return '-';
-                } else {
-                    return $transformedData['withoutmanifest'];
-                }
-            })
-            ->editColumn('withoutmanifest_percentage', function ($transformedData) {
-                if ($transformedData['withoutmanifest'] == null) {
-                    return '-';
-                } else {
-                    $result = ($transformedData['withoutmanifest'] / $transformedData['arrival']) * 100;
-                    return number_format($result, 2) . ' %';
-                }
-            })
-            ->editColumn('misroute', function ($transformedData) {
-                if ($transformedData['misroute'] == null) {
-                    return '-';
-                } else {
-                    return $transformedData['misroute'];
-                }
-            })
-            ->editColumn('misroute_percentage', function ($transformedData) {
-                if ($transformedData['misroute'] == null) {
-                    return '-';
-                } else {
-                    $result = ($transformedData['misroute'] / $transformedData['arrival']) * 100;
-                    return number_format($result, 2) . ' %';
-                }
+            header('Content-Type: text/csv; charset=utf-8');  
+            header('Content-Disposition: attachment; filename=data.csv');  
+            $output = fopen("php://output", "w");  
+            fputcsv($output, $headers);
+
+            foreach ($results as $key => $row) {
+
+                $row = (array) $row;
+                $new_array = [];
+
+                $new_array['booking_date'] = $row['booking_date'];
+                $new_array['origin_zonecode'] = $row['origin_zonecode'];
+                $new_array['destination_zonecode'] = $row['destination_zonecode'];
+                $new_array['segment'] = $row['sub_prod_name'] . ' ' . $row['parent_prod_name'];
+                $new_array['tracking_number'] = $row['tracking_number'];
+                $new_array['receiving_city'] = $row['receiving_city'];
+                $new_array['withoutmanifest'] = $row['withoutmanifest'] == null ? 0 : $row['withoutmanifest'];
+                $new_array['misroute'] = $row['misroute'] == null ? 0 : $row['misroute'];
+                $new_array['shipper_status_id'] = $row['shipper_status_id'];
+                $new_array['Remarks'] = $row['Remarks'];
+                fputcsv($output, $new_array);
+
+            }
+        } else {
+            $transformedData = collect($results)->map(function ($item) { // mapping for datatable
+                $segment = $item->sub_prod_name . ' (' . $item->parent_prod_name . ')';
+                return [
+                    'origin' => $item->origin_zonecode,
+                    'destination' => $item->destination_zonecode,
+                    'booking_date' => $item->booking_date,
+                    // 'segment' => $item->parent_prod_name,
+                    'sub_segment' => $item->sub_prod_name,
+                    'segment' => $segment,
+                    'arrival' => $item->arrival,
+                    'manifest' => $item->manifest,
+                    'misroute' => $item->misroute,
+                    'withoutmanifest' => $item->withoutmanifest,
+                ];
             });
-        return $datatable->make(true);
+    
+            $datatable = Datatables::of($transformedData)
+                ->editColumn('manifest', function ($transformedData) {
+                    if ($transformedData['manifest'] == null) {
+                        return '-';
+                    } else {
+                        return $transformedData['manifest'];
+                    }
+                })
+                ->editColumn('manifest_percentage', function ($transformedData) {
+                    if ($transformedData['manifest'] == null) {
+                        return '-';
+                    } else {
+                        $result = ($transformedData['manifest'] / $transformedData['arrival']) * 100;
+                        return number_format($result, 2) . ' %';
+                    }
+                })
+                ->editColumn('withoutmanifest', function ($transformedData) {
+                    if ($transformedData['withoutmanifest'] == null) {
+                        return '-';
+                    } else {
+                        return $transformedData['withoutmanifest'];
+                    }
+                })
+                ->editColumn('withoutmanifest_percentage', function ($transformedData) {
+                    if ($transformedData['withoutmanifest'] == null) {
+                        return '-';
+                    } else {
+                        $result = ($transformedData['withoutmanifest'] / $transformedData['arrival']) * 100;
+                        return number_format($result, 2) . ' %';
+                    }
+                })
+                ->editColumn('misroute', function ($transformedData) {
+                    if ($transformedData['misroute'] == null) {
+                        return '-';
+                    } else {
+                        return $transformedData['misroute'];
+                    }
+                })
+                ->editColumn('misroute_percentage', function ($transformedData) {
+                    if ($transformedData['misroute'] == null) {
+                        return '-';
+                    } else {
+                        $result = ($transformedData['misroute'] / $transformedData['arrival']) * 100;
+                        return number_format($result, 2) . ' %';
+                    }
+                });
+            return $datatable->make(true);
+        }
+       
     }
 
     public function qsr_index(Request $request)
