@@ -170,6 +170,7 @@ use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
 use App\Jobs\ProcessRemoveShipmentFromRvShipmentTicket;
 use App\Jobs\ProcessRvShipmentTicket;
+use App\RvShipmentTicket;
 
 class RiderAPIController extends Controller
 {
@@ -9246,6 +9247,11 @@ class RiderAPIController extends Controller
                     $delivery_note_data->last_updated_at = Carbon::now();
                     $delivery_note_data->status_updated_at = Carbon::now();
                     $delivery_note_data->save();
+                }
+
+                //Remove Shipment from RV Shipment Ticket if it exists.
+                if(RvShipmentTicket::where('shipment_id', $request->shipment_id)->exists()){
+                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
                 }
 
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
