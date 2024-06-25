@@ -2768,6 +2768,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\GlobalSettingsController@crm_case_nature_types_list')->name('list');
             Route::post('status', 'Admins\GlobalSettingsController@crm_case_nature_types_status')->name('status');
             Route::post('store', 'Admins\GlobalSettingsController@crm_case_nature_types_store')->name('store');
+
+            Route::get('add', 'Admins\GlobalSettingsController@crm_case_nature_types_add_form')->name('add');
         });
 
         Route::prefix('return_delivered_to_shipper_email_cut_off_time')->name('return_delivered_to_shipper_email_cut_off_time.')->group(function () {
