@@ -544,6 +544,9 @@ trait RvTrait
         if ($parcel->booking_type_id == 5) {
             return ['status' => 0, 'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
         }
+        
+         //Remove Shipment from RV Shipment Ticket
+         dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
         // if current shipment statuses are following update the shipment status in shipments table
         // 7 = Shipment - Not Attempted
@@ -576,9 +579,6 @@ trait RvTrait
             }
 
             ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, NULL, $globalAdminId ?? Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
-
-            //Remove Shipment from RV Shipment Ticket
-            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
 
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
         }
