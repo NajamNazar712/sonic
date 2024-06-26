@@ -2770,6 +2770,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@crm_case_nature_types_store')->name('store');
 
             Route::get('add', 'Admins\GlobalSettingsController@crm_case_nature_types_add_form')->name('add');
+            Route::get('edit/{id}', 'Admins\GlobalSettingsController@crm_case_nature_types_edit_form')->name('edit');
+            Route::get('edit/ajax/{id}', 'Admins\GlobalSettingsController@crm_case_nature_types_edit_ajax_list')->name('edit_ajax');
         });
 
         Route::prefix('return_delivered_to_shipper_email_cut_off_time')->name('return_delivered_to_shipper_email_cut_off_time.')->group(function () {

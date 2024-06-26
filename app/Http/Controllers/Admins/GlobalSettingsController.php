@@ -163,6 +163,7 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\Http\Models\CrmCaseNatureRemark;
 
 class GlobalSettingsController extends Controller
 {
@@ -1701,6 +1702,7 @@ class GlobalSettingsController extends Controller
                 }
             })
             ->addColumn('action', function ($data) {
+                // $data->id
                 if (session('role_id') == 1 || in_array(537, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -1710,6 +1712,21 @@ class GlobalSettingsController extends Controller
                     } else {
                         $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                     }
+                    
+
+                    $dropdown .= '
+                                    <a href="' . route('admin.settings.crm_case_nature_types.edit', ['id' => $data->id]) . '" target="_blank" class="dropdown-item text-dark">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col-2">
+                                                <i class="ft-edit-2"></i>
+                                            </div>
+                                            <div class="col-9 offset-1">
+                                                Edit
+                                            </div>
+                                        </div>
+                                    </a>
+                                ';
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -1746,8 +1763,41 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.crm_case_nature.add_form', compact('case_nature', 'shipment_status', 'admin_departments'));
     }
 
+    public function crm_case_nature_types_edit_form()
+    {   
+        $case_nature = CrmRequestCaseNature::whereNotIn('id', [3])->select(['id', 'name'])->get();
+        $shipment_status = ShipmentStatus::where('status', 1)->get();
+        $admin_departments = AdminDepartment::get();
+        return view('admin.settings.crm_case_nature.edit_form', compact('case_nature', 'shipment_status', 'admin_departments'));
+    }
+
+    public function crm_case_nature_types_edit_ajax_list(Request $request) 
+    {   
+        $case_nature_id = $request->id;
+        $crm_case = CrmRequestCaseNatureType::where('id', $case_nature_id)->get();
+        $remarks = CrmCaseNatureRemark::where('case_nature_id', $case_nature_id)->get();
+
+        if (!$crm_case) {
+            $crm_case = [];
+            $remarks = [];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'case_nature' => $crm_case,
+                'remarks' => $remarks,
+            ],
+        ]);
+    }
+
     public function crm_case_nature_types_store(Request $request)
     {
+        $request->validate([
+            'case_nature' => 'required',
+            'case_nature_type' => 'required',
+        ]);
+
         $nature = $request->case_nature;
         $type = $request->case_nature_type;
         if ($nature == null && $type == null && $nature == '' && $type == '') {
@@ -1768,9 +1818,31 @@ class GlobalSettingsController extends Controller
             $new_case_nature_type->updated_at = Carbon::now();
             $new_case_nature_type->updated_by = Auth::id();
             $new_case_nature_type->type = $type;
+            $new_case_nature_type->shipper_visibility = $request->has('shipper_visibility');
+            $new_case_nature_type->remarks_visibility = $request->has('remarks_visibility');
+
+            if ($request->has('shipment_status')) {
+                $new_case_nature_type->shipment_status = json_encode($request->shipment_status);
+            }
+
+            if ($request->has('admin_departments')) {
+                $new_case_nature_type->admin_departments = json_encode($request->admin_departments);
+            }
+
             $new_case_nature_type->save();
 
-            return response()->json(['status' => 1, 'success' => 'New Case Nature Type added successfully!']);
+            // store remarks
+            if ($request->has('remarks')) {
+                foreach ($request->remarks as $remark) {
+                    $crm_remarks = new CrmCaseNatureRemark();
+                    $crm_remarks->case_nature_id = $new_case_nature_type->id;
+                    $crm_remarks->remarks = $remark;
+                    $crm_remarks->save();
+                }
+            }
+
+            // return response()->json(['status' => 1, 'success' => 'New Case Nature Type added successfully!']);
+            return redirect()->route('admin.settings.crm_case_nature_types.index')->with('success', 'New Case Nature Type added successfully!');
         }
     }
 

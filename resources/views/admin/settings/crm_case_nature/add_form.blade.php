@@ -21,8 +21,8 @@
                             <div class="row">
                                 <div class="col-6">
                                     <fieldset class="form-group">
-                                        <label for="case_nature_select">Case Nature*</label>
-                                        <select name="case_nature_select" id="case_nature_select" class="form-control select2">
+                                        <label for="case_nature">Case Nature*</label>
+                                        <select name="case_nature" id="case_nature" class="form-control select2" required data-rule-required="true" data-msg-required="Case Nature is required">
                                             @foreach($case_nature as $nature)
                                                 <option value="{{$nature->id}}">{{$nature->name}}</option>
                                             @endforeach
@@ -31,7 +31,7 @@
                 
                                     <fieldset class="form-group">
                                         <label class="d-flex">Shipment status visibility (<input type="checkbox" name="select_all_status" id="select_all_status"> select all) </label>
-                                        <select name="case_nature_select_visibility[]" id="case_nature_select_visibility" class="form-control select2" multiple="multiple">
+                                        <select name="shipment_status[]" id="shipment_status" class="form-control select2" multiple="multiple">
                                             @foreach($shipment_status as $status)
                                                 <option value="{{$status->id}}">{{$status->name}}</option>
                                             @endforeach
@@ -56,23 +56,19 @@
                                 <div class="col-6">
                                     <fieldset class="form-group">
                                         <label for="case_nature_type">Case Nature Type*</label>
-                                        <select name="case_nature_type" id="case_nature_type" class="form-control select2">
-                                            @foreach($case_nature as $nature)
-                                                <option value="{{$nature->id}}">{{$nature->name}}</option>
-                                            @endforeach
-                                        </select>
+                                        <input type="text" name="case_nature_type" id="case_nature_type" class="form-control" placeholder="Enter Case Nature Type" required data-rule-required="true" data-msg-required="Please enter case nature type">
                                     </fieldset>
     
                                     <fieldset class="form-group">
                                         <label class="d-flex">Admin departments visibility (<input type="checkbox" name="select_all_admin_department" id="select_all_admin_department"> select all) </label>
-                                        <select name="admin_department_visibility[]" id="admin_department_visibility" class="form-control select2" multiple="multiple">
+                                        <select name="admin_departments[]" id="admin_department_visibility" class="form-control select2" multiple="multiple">
                                             @foreach($admin_departments as $department)
                                                 <option value="{{$department->id}}">{{$department->name}}</option>
                                             @endforeach
                                         </select>
                                     </fieldset>
     
-                                    <label for="remarks_visibility">Remarks Visibility (Select Remarks)</label>
+                                    <label for="">Remarks Visibility (Select Remarks)</label>
                                     <fieldset class="form-group d-flex mt-1" id="remarks_visibility_div">
                                         <input type="checkbox" name="remarks_visibility" id="remarks_visibility">
                                         <label for="remarks_visibility" id="remarks_visibility_label">Remarks Visibility</label>
@@ -80,7 +76,7 @@
                                 </div>
                             </div>
 
-                            <div class="text-center">
+                            <div class="text-right">
                                 <button type="submit" class="btn btn-success" id="add_case_nature_btn">Submit Case</button>
                             </div>
 
@@ -119,22 +115,84 @@
     <script>
         $(document).ready(function() {
         var maxRemarks = 5;
-        $('#add_remarks_section').click(function(e) {
-            e.preventDefault();
+        function toggleRemarksVisibility() {
+            var isRemarksVisible = $('#remarks_visibility').is(':checked');
+            if (isRemarksVisible) {
+                // Show all remark fields
+                $('#remarks_section .remark-field').show();
+                // Ensure at least one remark field is present
+                if ($('#remarks_section .remark-field').length === 0) {
+                    addRemarkField();
+                }
+            } else {
+                // Hide all remark fields
+                $('#remarks_section .remark-field').hide();
+            }
+            toggleFirstRemarkRemoveButton();
+        }
+
+        function addRemarkField() {
             var currentRemarksCount = $('#remarks_section .remark-field').length;
+
             if (currentRemarksCount < maxRemarks) {
                 $('#remarks_section').append(`
                     <div class="remark-field d-flex mb-2">
                         <input type="text" class="form-control me-2" name="remarks[]" placeholder="Enter remark">
-                        <div class=mx-1>
+                        <div class="mx-1">
                             <button class="btn btn-danger remove-remark">Remove</button>
                         </div>
                     </div>
                 `);
+
+                if (currentRemarksCount >= maxRemarks - 1) {
+                    $('#add_remarks_section').attr('disabled', 'disabled');
+                }
             }
-            if (currentRemarksCount >= maxRemarks) {
-                $('#add_remarks_section').attr('disabled', 'disabled');
+
+            toggleFirstRemarkRemoveButton();
+        }
+
+        function toggleFirstRemarkRemoveButton() {
+            var isRemarksVisible = $('#remarks_visibility').is(':checked');
+            var firstRemoveButton = $('#remarks_section .remark-field:first .remove-remark');
+
+            if (isRemarksVisible) {
+                firstRemoveButton.hide();
+            } else {
+                firstRemoveButton.show();
             }
+        }
+
+        function validateRemarks() {
+            var isRemarksVisible = $('#remarks_visibility').is(':checked');
+            var remarkFields = $('#remarks_section .remark-field input').filter(function() {
+                return $(this).is(':visible');
+            });
+            var currentRemarksCount = remarkFields.length;
+            $('#remarks_error').remove();
+            if (isRemarksVisible) {
+                var filledRemarkCount = 0;
+                remarkFields.each(function() {
+                    if ($(this).val().trim() !== '') {
+                        filledRemarkCount++;
+                    }
+                });
+                if (filledRemarkCount === 0) {
+                    var errorMessage = '<span id="remarks_error" class="text-danger">At least one remark is required.</span>';
+                    $('#remarks_section').append(errorMessage);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        $('#remarks_visibility').change(function() {
+            toggleRemarksVisibility();
+        });
+
+        $('#add_remarks_section').click(function(e) {
+            e.preventDefault();
+            addRemarkField();
         });
 
         $('#remarks_section').on('click', '.remove-remark', function(e) {
@@ -142,11 +200,14 @@
             $(this).closest('.remark-field').remove();
             var currentRemarksCount = $('#remarks_section .remark-field').length;
             if (currentRemarksCount < maxRemarks) {
-                $('#add_remarks_section').prop('disabled', false);
+                $('#add_remarks_section').removeAttr('disabled');
             }
+            toggleFirstRemarkRemoveButton();
         });
 
-        $('#case_nature_select_visibility').select2({
+        toggleRemarksVisibility();
+
+        $('#shipment_status').select2({
             width:'100%',
             placeholder:"Select Status",
             allowClear:false,
@@ -156,10 +217,10 @@
         $('#select_all_status').change(function() {
             if ($(this).is(':checked')) {
                 // Select all options
-                $('#case_nature_select_visibility > option').prop('selected', true).trigger('change');
+                $('#shipment_status > option').prop('selected', true).trigger('change');
             } else {
                 // Deselect all options
-                $('#case_nature_select_visibility > option').prop('selected', false).trigger('change');
+                $('#shipment_status > option').prop('selected', false).trigger('change');
             }
         });
 
@@ -180,6 +241,25 @@
             }
         });
 
+        $('#case_nature').prepend('<option selected></option>').select2({
+            width:'100%',
+            placeholder:"Select Case Nature",
+            allowClear:true,
+            dropdownParent:$('#add_form')
+        });
+
+        $( "#add_form" ).validate({
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                var isValidRemarks = validateRemarks();
+                if (isValidRemarks) {
+                    form.submit();
+                }
+            }
+        });
     });
     </script>
 
