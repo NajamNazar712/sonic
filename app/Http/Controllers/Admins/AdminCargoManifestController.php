@@ -5979,7 +5979,7 @@ class AdminCargoManifestController extends Controller
             DB::beginTransaction();
             Log::channel('cronJobLog')->info('cargo:check_1');
 
-        $shipment_status_array = [2,3, 11,21, 26, 32, 49,68];
+        $shipment_status_array = [2,3, 20, 11,21, 26, 32, 49,68];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $open_box_ids = explode(',', $request->open_box_ids);
         $bag_ids = array();
