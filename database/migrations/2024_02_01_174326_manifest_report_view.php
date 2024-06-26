@@ -201,7 +201,7 @@ SELECT
   `k`.`mr_code`                        AS `misroute`,
   `k`.`wmcode`                         AS `withoutmanifest`,
   `k`.`shipper_status_id`              AS`shipper_status_id`,
-  
+  `k`.`destination_name`               AS`destination_name`,
   (CASE 
 	WHEN (`k`.`shipper_status_id` = 11) THEN 'Misroute Bag Shipment' 
 	WHEN (`k`.`shipper_status_id` = 68) THEN 'Misroute Shipment'
