@@ -14461,7 +14461,7 @@ class AdminReportsController extends Controller
         $results = DB::select($Query,$bindings);
         if($request->get('excel') && $request->get('excel') == true) {
 
-            $headers = ['Booking Date', 'Origin', 'Destination', 'Segment', 'Tracking Number', 'Receiving City', 'Without Manifest', 'Misroute', 'Status' ,'Remarks'];
+            $headers = ['Booking Date', 'Origin Zone', 'Destination Zone', 'Destination' , 'Segment', 'Tracking Number', 'Receiving City', 'Without Manifest', 'Misroute', 'Status' ,'Remarks'];
 
             header('Content-Type: text/csv; charset=utf-8');  
             header('Content-Disposition: attachment; filename=data.csv');  
@@ -14473,9 +14473,10 @@ class AdminReportsController extends Controller
                 $row = (array) $row;
                 $new_array = [];
 
-                $new_array['booking_date'] = $row['booking_date'];
+                $new_array['booking_date'] = date('d-M-Y',strtotime($row['booking_date']));
                 $new_array['origin_zonecode'] = $row['origin_zonecode'];
                 $new_array['destination_zonecode'] = $row['destination_zonecode'];
+                $new_array['destination_name'] = $row['destination_name'];
                 $new_array['segment'] = $row['sub_prod_name'] . ' ' . $row['parent_prod_name'];
                 $new_array['tracking_number'] = $row['tracking_number'];
                 $new_array['receiving_city'] = $row['receiving_city'];
@@ -14483,6 +14484,7 @@ class AdminReportsController extends Controller
                 $new_array['misroute'] = $row['misroute'] == null ? 0 : $row['misroute'];
                 $new_array['shipper_status_id'] = $row['shipper_status_id'];
                 $new_array['Remarks'] = $row['Remarks'];
+                
                 fputcsv($output, $new_array);
 
             }
@@ -14518,6 +14520,9 @@ class AdminReportsController extends Controller
                         $result = ($transformedData['manifest'] / $transformedData['arrival']) * 100;
                         return number_format($result, 2) . ' %';
                     }
+                })
+                ->editColumn('booking_date', function ($transformedData) {
+                    return date('d-M-Y',strtotime($transformedData['booking_date']));
                 })
                 ->editColumn('withoutmanifest', function ($transformedData) {
                     if ($transformedData['withoutmanifest'] == null) {
