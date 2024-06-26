@@ -1191,13 +1191,13 @@ trait RvTrait
         $shipment = null;
 
         $agent = Admin::find($agent_id);
+        try{
+            DB::beginTransaction();
+            $shipments = $this->getShipmentsFromRvShipmentTicket($agent);
 
-        $shipments = $this->getShipmentsFromRvShipmentTicket($agent);
-
-        // check if shipments exist or if admin is assign shipment to agent
+            // check if shipments exist or if admin is assign shipment to agent
             //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
-            if ($shipments->count())
-            {
+            if ($shipments->count()) {
                 foreach ($shipments as $shipment) {
                     $shipmentId = $shipment->shipment_id;
                     $ticketId = $shipment->id;
@@ -1206,33 +1206,34 @@ trait RvTrait
                     if ($shipment_assigned_unassigned_agent->exists()) {
                         $shipment_assigned_unassigned_agent->first();
                         RvShipmentAssignAgent::where('shipment_id', $shipmentId)
-                        ->where('rv_state_id', 3)
-                        ->update(['rv_state_id'=> 1, 'agent_id'=>$agent_id, 'assigned_by' => 0]);
-                        
+                            ->where('rv_state_id', 3)
+                            ->update(['rv_state_id'=> 1, 'agent_id'=> $agent_id, 'assigned_by'=> 0]);
+
                         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $shipmentId)->latest()->first();
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipmentId)->latest()->first();
 
-                        $data = ['rv_shipment_assign_agent_id' => $shipment_assign_agent->id, 'agent_id' => $agent_id,
-                                'shipments_journey_id' => $shipments_journey->id,
-                                'last_shipments_journey_id' => $shipments_journey->id,
-                                'shipment_id' => $shipmentId,
-                                'rv_assign_agent_status_id' => Null,
-                                'rv_assign_agent_sub_status_id' => Null,
-                                'rv_state_id' => 1,
-                                'updated_type_id' => 2,
-                                'updated_by_id' =>  Auth::id(),
-                                'is_fake_status' => 0,
-                                'rv_fake_status_id' => Null,
-                                'remarks' => Null,
-                                'call_to_id' => 0,
-                                'assigned_to_type_id' => Null,
-                                'assigned_by' => Null,
-                                'call_count' => null,
-                            ];
+                        $data = [
+                            'rv_shipment_assign_agent_id' => $shipment_assign_agent->id, 'agent_id' => $agent_id,
+                            'shipments_journey_id' => $shipments_journey->id,
+                            'last_shipments_journey_id' => $shipments_journey->id,
+                            'shipment_id' => $shipmentId,
+                            'rv_assign_agent_status_id' => Null,
+                            'rv_assign_agent_sub_status_id' => Null,
+                            'rv_state_id' => 1,
+                            'updated_type_id' => 2,
+                            'updated_by_id' =>  Auth::id(),
+                            'is_fake_status' => 0,
+                            'rv_fake_status_id' => Null,
+                            'remarks' => Null,
+                            'call_to_id' => 0,
+                            'assigned_to_type_id' => Null,
+                            'assigned_by' => Null,
+                            'call_count' => null,
+                        ];
                         $this->data_rv_shipment_assign_agent_details($data, $ticketId);
                         break;
                     }
-                    
+
                     // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
                     $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('agent_id', Auth::id())->where('rv_state_id', 1);
                     if ($shipment_assigned_assigned_agent->exists()) {
@@ -1242,16 +1243,15 @@ trait RvTrait
 
                     //  if shipment is found and unassigned(2) or completed(4) then update the current records
 
-                    if(RvShipmentAssignAgent::where('shipment_id', $shipmentId)->whereIn('rv_state_id', [2,4])->exists())
-                    {
-                        if(RvShipmentAssignAgent::where('shipment_id', $shipmentId)->whereDate('updated_at', date('Y-m-d'))->exists())//if updated_at is already updated today due to any reason () by any agent then skip this shipment for all agents
+                    if (RvShipmentAssignAgent::where('shipment_id', $shipmentId)->whereIn('rv_state_id', [2, 4])->exists()) {
+                        if (RvShipmentAssignAgent::where('shipment_id', $shipmentId)->whereDate('updated_at', date('Y-m-d'))->exists()) //if updated_at is already updated today due to any reason () by any agent then skip this shipment for all agents
                         {
                             $shipment = null;
-                            continue; 
+                            continue;
                         }
                         // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
-                        $shipments_journey = ShipmentsJourney::where('shipment_id', $shipmentId)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
-                        
+                        $shipments_journey = ShipmentsJourney::where('shipment_id', $shipmentId)->whereIn('shipper_status_id', [12, 66, 52])->latest()->first();
+
                         $data = [
                             'agent_id' => $agent_id,
                             'shipment_id' => $shipmentId,
@@ -1263,21 +1263,21 @@ trait RvTrait
                             'assigned_by' => null,
                             'call_count' => 0,
                         ];
-                        
+
                         //updating a row and creating new one
-                        $this->rv_shipment_assign($data,$ticketId);
+                        $this->rv_shipment_assign($data, $ticketId);
                         break;
                     }
-                    
+
                     // Shipment is found and already in working state or return is completed, new shipment will get to agent
                     $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipmentId)->first();
-                    if ($find_shipment_assigned_agent ) {
+                    if ($find_shipment_assigned_agent) {
                         $shipment = null;
                         continue;
                     }
-                    
+
                     $shipments_journey = ShipmentsJourney::where('shipment_id', $shipmentId)->latest()->first();
-                    
+
                     $data = [
                         'agent_id' => $agent_id,
                         'shipment_id' => $shipmentId,
@@ -1289,13 +1289,21 @@ trait RvTrait
                         'assigned_by' => null,
                         'call_count' => 0,
                     ];
-                    
+
                     // creating a new record
-                    $this->rv_shipment_assign($data,$ticketId);
+                    $this->rv_shipment_assign($data, $ticketId);
+
                     break;
                 }
             }
+            DB::commit();
+
             return $shipment;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['status' => 1, 'error' => $th->getMessage()];
+        }
+        
     }
 
     protected function getShipmentsFromRvShipmentTicket($agent = null)
