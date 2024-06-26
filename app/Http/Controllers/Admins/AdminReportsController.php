@@ -12595,7 +12595,8 @@ class AdminReportsController extends Controller
         'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 'add.id as agent_id', 'rv_reason.name as rv_reason')
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
         ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
-        ->groupBy('rv_shipment_assign_agent_details.created_at');
+        ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
+        ->groupBy('rv_shipment_assign_agent_details.created_at','rv_shipment_assign_agent_details.shipment_id');
 
         $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
