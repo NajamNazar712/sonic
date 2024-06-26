@@ -12594,6 +12594,7 @@ class AdminReportsController extends Controller
         'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date',
         'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 'add.id as agent_id', 'rv_reason.name as rv_reason')
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
+        ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
         ->groupBy('rv_shipment_assign_agent_details.created_at');
 
         $datatable = Datatables::of($rv_report)
