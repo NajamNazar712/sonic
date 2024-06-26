@@ -3,21 +3,27 @@
 @section('title', 'CRM Case Nature Types')
 
 @section('content')
+@php
+    $url = url()->current();
+    $segments = explode('/', $url);
+    $id = end($segments);
+@endphp
 <div class="app-content content">
     <div class="content-wrapper">
         <div class="content-header row">
         </div>
         <div class="content-body">
             <h1 class="mb-1">
-                Add CRM Case Nature
+                Edit CRM Case Nature
             </h1>
 
             <div class="card">
                 <div class="card-content" aria-expanded="true">
                     <div class="card-body">
                         @include('admin.inc.messages')
-                        <form action="{{ route('admin.settings.crm_case_nature_types.store') }}" id="edit_form" method="POST">
+                        <form action="{{ route('admin.settings.crm_case_nature_types.update') }}" id="edit_form" method="POST">
                             @csrf
+                            <input type="hidden" name="case_nature_id" value="{{ $id }}">
                             <div class="row">
                                 <div class="col-6">
                                     <fieldset class="form-group">
@@ -48,7 +54,7 @@
                                         <label for="">Add remarks (you can add maximum 5 remarks)</label>
                                         <fieldset class="form-group">
                                             <div id="edit_remarks_section" class="my-2"></div>
-                                            <button class="btn btn-success" type="button" id="edit_remarks_section">Add Remark</button>
+                                            <button class="btn btn-success" type="button" id="edit_add_remark_btn">Add Remark</button>
                                         </fieldset>
                                     </div>
                                 </div>
@@ -135,6 +141,24 @@
                 dropdownParent:$('#edit_form')
             });
 
+            $('#select_all_status').on('change', function() {
+                if ($(this).prop('checked')) {
+                    $('#edit_shipment_status').find('option').prop('selected', true);
+                } else {
+                    $('#edit_shipment_status').find('option').prop('selected', false);
+                }
+                $('#edit_shipment_status').trigger('change');
+            });
+
+            $('#edit_select_all_admin_department').on('change', function() {
+                if ($(this).prop('checked')) {
+                    $('#edit_admin_department_visibility').find('option').prop('selected', true);
+                } else {
+                    $('#edit_admin_department_visibility').find('option').prop('selected', false);
+                }
+                $('#edit_admin_department_visibility').trigger('change');
+            });            
+
             var url = window.location.href;
             var url_parts = new URL(url);
             var path = url_parts.pathname;
@@ -150,7 +174,6 @@
                     var case_nature = data.data.case_nature[0];
                     var remarks = data.data.remarks;
 
-                    
                     $('#edit_case_nature').val(case_nature.nature_id).trigger('change');
                     $('#edit_case_nature_type').val(case_nature.type);
                     
@@ -168,38 +191,90 @@
 
                     if (case_nature.remarks_visibility == 1){
                         $('#edit_remarks_visibility').prop('checked', true);
-                        }
-                    var remarksContainer = $('#edit_remarks_section');
-                    remarksContainer.empty();
+                    }
 
-                    remarks.forEach(function(remark, index) {
-                        // Limit to maximum 5 remarks
-                        if (index < 5) {
-                            var inputHtml = `
-                                <div class="form-group">
-                                    <label for="remark_${index + 1}">Remark ${index + 1}</label>
-                                    <input type="text" id="remark_${index + 1}" name="remarks[]" class="form-control" value="${remark.remarks}">
-                                </div>
-                            `;
-                            remarksContainer.append(inputHtml);
-                        }
-                        // Add Remark button functionality
-                        $('#add_remark_btn').on('click', function() {
-                            if (remarks.length < 5) {
-                                var newIndex = remarks.length + 1;
-                                var newInputHtml = `
-                                    <div class="form-group">
-                                        <label for="remark_${newIndex}">Remark ${newIndex}</label>
-                                        <input type="text" id="remark_${newIndex}" name="remarks[]" class="form-control">
+                    // remarks section
+                    var remarksContainer = $('#edit_remarks_section');
+
+                    function populateRemarks() {
+                        remarksContainer.empty();
+                        remarks.forEach(function(remark, index) {
+                            // Limit to maximum 5 remarks
+                            if (index < 5) {
+                                var inputHtml = `
+                                    <div class="form-group" id="remark_${remark.id}_container">
+                                        <div class="input-group">
+                                            <input type="text" id="remark_${remark.id}" name="remarks[]" class="form-control" value="${remark.remarks}">
+                                            <div class="input-group-append mx-1">
+                                                ${index === 0 && $('#edit_remarks_visibility').is(':checked') ? '' : `
+                                                <button class="btn btn-danger remove-remark-btn" data-remark-id="${remark.id}" type="button">Remove</button>
+                                                `}
+                                            </div>
+                                        </div>
                                     </div>
                                 `;
-                                remarksContainer.append(newInputHtml);
-                                remarks.push({ id: newIndex, case_nature_id: id, remarks: '', created_at: '', updated_at: '' });
-                            } else {
-                                alert('You can add maximum 5 remarks.');
+                                remarksContainer.append(inputHtml);
                             }
                         });
+
+                        // Disable "Add Remark" button if there are 5 remarks
+                        if (remarks.length >= 5) {
+                            $('#edit_add_remark_btn').prop('disabled', true);
+                        } else {
+                            $('#edit_add_remark_btn').prop('disabled', false);
+                        }
+                    }
+
+                    // Initial population of remarks
+                    populateRemarks();
+
+                    // Add Remark button functionality
+                    $('#edit_add_remark_btn').on('click', function() {
+                        if (remarks.length < 5) {
+                            var newIndex = remarks.length + 1;
+                            var newRemark = { id: newIndex, case_nature_id: 44, remarks: '', created_at: '', updated_at: '' };
+
+                            var newInputHtml = `
+                                <div class="form-group" id="remark_${newRemark.id}_container">
+                                    <div class="input-group">
+                                        <input type="text" id="remark_${newRemark.id}" name="remarks[]" class="form-control">
+                                        <div class="input-group-append mx-1">
+                                            <button class="btn btn-danger remove-remark-btn" data-remark-id="${newRemark.id}" type="button">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            remarksContainer.append(newInputHtml);
+                            remarks.push(newRemark);
+
+                            // Disable "Add Remark" button if there are now 5 remarks
+                            if (remarks.length >= 5) {
+                                $('#edit_add_remark_btn').prop('disabled', true);
+                            }
+                        } else {
+                            alert('You can add maximum 5 remarks.');
+                        }
                     });
+
+                    // Remove Remark button functionality
+                    $(document).on('click', '.remove-remark-btn', function() {
+                        var remarkId = $(this).data('remark-id');
+                        $('#remark_' + remarkId + '_container').remove();
+                        remarks = remarks.filter(function(remark) {
+                            return remark.id !== remarkId;
+                        });
+
+                        // Enable "Add Remark" button if remarks count is less than 5
+                        if (remarks.length < 5) {
+                            $('#edit_add_remark_btn').prop('disabled', false);
+                        }
+                    });
+
+                    // Check edit_remarks_visibility checkbox state
+                    $('#edit_remarks_visibility').on('change', function() {
+                        populateRemarks();
+                    });
+
                 }
             });
         });

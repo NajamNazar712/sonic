@@ -1802,15 +1802,18 @@ class GlobalSettingsController extends Controller
         $type = $request->case_nature_type;
         if ($nature == null && $type == null && $nature == '' && $type == '') {
             if ($nature == null && $nature == '') {
-                return response()->json(['status' => 0, 'error' => 'Please select Case Nature!']);
+                // return response()->json(['status' => 0, 'error' => 'Please select Case Nature!']);
+                return redirect()->back()->with('error', 'Please select Case Nature!');
             }
             if ($type == null && $type == '') {
-                return response()->json(['status' => 0, 'error' => 'Please enter Case Nature Type!']);
+                // return response()->json(['status' => 0, 'error' => 'Please enter Case Nature Type!']);
+                return redirect()->back()->with('error', 'Please enter Case Nature Type!');
             }
         }
         $case_nature_types = CrmRequestCaseNatureType::where('type', $type);
         if ($case_nature_types->exists()) {
-            return response()->json(['status' => 0, 'error' => 'Same Case Nature Type already exists!']);
+            // return response()->json(['status' => 0, 'error' => 'Same Case Nature Type already exists!']);
+            return redirect()->back()->with('error', 'Same Case Nature Type already exists!');
         } else {
             $new_case_nature_type = new CrmRequestCaseNatureType();
             $new_case_nature_type->nature_id = $nature;
@@ -1845,6 +1848,54 @@ class GlobalSettingsController extends Controller
             return redirect()->route('admin.settings.crm_case_nature_types.index')->with('success', 'New Case Nature Type added successfully!');
         }
     }
+
+
+    public function crm_case_nature_types_update(Request $request)
+    {
+        $type = $request->input('case_nature_type');
+        $case_nature_id = $request->input('case_nature_id');
+        $case_nature = $request->input('case_nature');
+        $shipment_status = json_encode($request->input('shipment_status'));
+        $admin_departments = json_encode($request->input('admin_departments'));
+        $shipper_visibility = $request->has('shipper_visibility');
+        $remarks_visibility = $request->has('remarks_visibility');
+        $remarks = $request->input('remarks');
+
+        $caseNatureType = CrmRequestCaseNatureType::findOrFail($case_nature_id);
+
+        if ($type !== $caseNatureType->type) {
+            $existingCaseNatureType = CrmRequestCaseNatureType::where('type', $type)->first();
+            if ($existingCaseNatureType && $existingCaseNatureType->id !== $case_nature_id) {
+                return redirect()->back()->with('error', 'Same Case Nature Type already exists!');
+            }
+        }
+        $caseNatureType->type = $type;
+        $caseNatureType->shipment_status = $shipment_status;
+        $caseNatureType->admin_departments = $admin_departments;
+        $caseNatureType->shipper_visibility = $shipper_visibility;
+        $caseNatureType->remarks_visibility = $remarks_visibility;
+        $caseNatureType->nature_id = $case_nature;
+        $caseNatureType->save();
+
+        // update remarks
+        foreach ($remarks as $remark) {
+            $existingRemark = CrmCaseNatureRemark::where('case_nature_id', $caseNatureType->id)->first();
+    
+            if ($existingRemark) {
+                $existingRemark->remarks = $remark;
+                $existingRemark->save();
+            } else {
+                // Create a new remark
+                $crm_remark = new CrmCaseNatureRemark();
+                $crm_remark->case_nature_id = $caseNatureType->id;
+                $crm_remark->remarks = $remark;
+                $crm_remark->save();
+            }
+        }
+
+        return redirect()->route('admin.settings.crm_case_nature_types.index')->with('success', 'Case Nature Type Updated successfully!');
+    }
+
 
     public function return_delivered_to_shipper_email_cut_off_time_index()
     {
