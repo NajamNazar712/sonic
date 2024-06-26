@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\BlockEmail;
 use Carbon\Carbon;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Client;
@@ -229,17 +230,30 @@ class NotificationsController extends Controller
 
     static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null)
     {
+        $block_email = BlockEmail::select('email')->pluck('email')->toArray();
+
+        $filterBlockedEmails = function ($emails) use ($block_email) {
+            if (is_array($emails)) {
+                return array_values(array_filter($emails, function ($email) use ($block_email) {
+                    return !in_array($email, $block_email);
+                }));
+            } elseif (is_string($emails) && in_array($emails, $block_email)) {
+                return null;
+            }
+            return $emails;
+        };
+
 
         if ($to) {
-
+            $to = $filterBlockedEmails($to);
             if (is_array($to)) {
-
                 $to = array_values(array_filter($to));
                 if (empty($to)) {
                     return false;
                 }
             }
             if ($cc != NULL) {
+                $cc = $filterBlockedEmails($cc);
                 if (is_array($cc)) {
                     $cc = array_values(array_filter($cc));
                     if (empty($cc)) {
@@ -248,6 +262,7 @@ class NotificationsController extends Controller
                 }
             }
             if ($bcc != NULL) {
+                $bcc = $filterBlockedEmails($bcc);
                 if (is_array($bcc)) {
                     $bcc = array_values(array_filter($bcc));
                     if (empty($bcc)) {
@@ -3619,13 +3634,13 @@ class NotificationsController extends Controller
                             }
                             $cc = array();
 
-                            $general_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 8, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub->id)->whereNotNull('admins.email');
+                            $general_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 8, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub->id)->whereNotNull('admins.email')->where('id','!=',2985); //exclude hassan.arman@trax.pk on request
 
                             if ($general_managers->exists()) {
                                 $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
                             }
 
-                            self::email($subject, $body, $to, $cc);
+                            self::email($subject, $body, $to);
 
                             $subject = $original_subject;
                             $body = $original_body;
@@ -6929,7 +6944,6 @@ class NotificationsController extends Controller
                     $route = route('cod.register', ['lead_id' => $lead->id]);
                     if ($lead != null) {
                         $sales_person = Admin::find($lead->sale_person_id);
-
                         if ($sales_person->official_phone_number != null) {
                             $phone_number = $sales_person->official_phone_number;
                         } else {
@@ -6937,10 +6951,10 @@ class NotificationsController extends Controller
                         }
 
                         $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
-                    <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
-                        <img src="' . asset('img/sonic_logo_new.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
-                        <img src="' . asset('img/trax_logo_new.png') . '" alt="Trax" style="display: inline-block; width: 15%">
-                    </div>';
+                        <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
+                            <img src="' . asset('img/sonic_logo_new.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
+                            <img src="' . asset('img/trax_logo_new.png') . '" alt="Trax" style="display: inline-block; width: 15%">
+                        </div>';
 
                         if (strpos($body, '[contact_person]') !== FALSE) {
                             $body = str_replace('[contact_person]', $lead->contact_person, $body);
@@ -7216,6 +7230,7 @@ class NotificationsController extends Controller
                     $leads = $reference_1_id;
                     $sale_person_id = $reference_2_id;
                     $sale_person = Admin::find($sale_person_id);
+
                     if ($sale_person) {
                         $html = '<table style="width:100%;">';
                         $html .= '<thead><tr>
@@ -7228,6 +7243,7 @@ class NotificationsController extends Controller
                                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Message</th>';
                         $html .= '</tr></thead><tbody>';
                         $serial = 1;
+
                         foreach ($leads as $lead) {
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
@@ -8296,7 +8312,11 @@ class NotificationsController extends Controller
                         ->join('sale_tier_tags as stt', function ($join) {
                             $join->on('stt.user_id', 'u.id');
                         })
-                        ->join('admins as a', 'a.id', 'stt.kam')
+//                        ->join('admins as a', 'a.id', 'stt.kam')
+                        ->join('admins as a', function ($join) {
+                            $join->on('a.id', '=', 'stt.kam')
+                                ->where('a.status', '=', 1);
+                        })
                         ->select('u.name as username', 'u.id as userid', 'a.name as adminname', 'a.email as email')
                         ->where('shipments.shipper_status_id', 20)
                         ->groupBy('userid')
@@ -9273,7 +9293,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[preview]', $preview, $body);
                         }
 
-                        $to = ["talha.hussain@trax.pk", 'syed.anam@trax.pk', 'waqas@trax.pk'];
+                        $to = ['syed.anam@trax.pk', 'waqas@trax.pk'];
                         self::email($subject, $body, $to);
                     }
                 } else if ($id == 169) {
@@ -9951,7 +9971,7 @@ class NotificationsController extends Controller
                     $to = array();
 
                     $to[] = $admin->email;
-                    $to[] = 'talha.hussain@trax.pk';
+
 
                     self::email($subject, $body, $to);
                 } else if ($id == 206) {

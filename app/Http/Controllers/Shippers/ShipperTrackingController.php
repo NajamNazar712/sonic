@@ -46,7 +46,7 @@ class ShipperTrackingController extends Controller
         // dd(session()->all());
         $permission = session('permissions');
 
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::where('id','!=',3)->get();
         $row = array();
         if(session('user_type') !== 1){
             foreach($case_nature as $nature) {
@@ -77,8 +77,9 @@ class ShipperTrackingController extends Controller
     	$tracking = array();
 
     	foreach ($tracking_numbers as $tracking_number) {
-    		$shipment = Shipment::where('tracking_number', $tracking_number);
+//    		$shipment = Shipment::where('tracking_number', $tracking_number);
 
+            $shipment = Shipment::where('tracking_number', $tracking_number);
     		if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 $sub_shipment = true;
@@ -537,7 +538,7 @@ class ShipperTrackingController extends Controller
 
     public function order_index(){
 
-        $case_nature = CrmRequestCaseNature::get();
+        $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();

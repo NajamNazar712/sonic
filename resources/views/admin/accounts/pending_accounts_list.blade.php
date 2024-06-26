@@ -1158,7 +1158,7 @@
                             row.push(values.admin_tag_id);
                             row.push(values.tagged_poc);
                             row.push(values.kam);
-                            row.push(values.ref);
+                            row.push(values.ref+' - ' + values.rider_id);
                             // row.push(values.eso);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);

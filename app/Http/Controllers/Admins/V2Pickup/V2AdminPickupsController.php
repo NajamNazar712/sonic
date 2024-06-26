@@ -749,7 +749,6 @@ class V2AdminPickupsController extends Controller
         $id = $request->shipment_id;
         $data = V2PickupRequest::find($id);
         $data->reminder_status = 1;
-        $data->reminder_status = 1;
         $data->save();
         return ['status' => 1, 'success' => "Reminder successfully Set"];
     }
@@ -1637,7 +1636,7 @@ class V2AdminPickupsController extends Controller
                     }
                 }
             } else {
-                unset($shipment_ids[$key]);
+                unset($shipments[$key]);
             }
         }
 

@@ -14591,9 +14591,9 @@ class AdminReportsController extends Controller
             'bs.name as bag_status',
             'sjfa.created_at as first_attempt_date',
             'sjrp.created_at as rider_picked_status_date',
-            'ssjal.location_status as location_status',
-            'ssjal_hss.location_status as location_status_hss',
-            'ca_scanning.name as scanning_city_area_name',
+            // 'ssjal.location_status as location_status',
+            // 'ssjal_hss.location_status as location_status_hss',
+            // 'ca_scanning.name as scanning_city_area_name',
             'spt.admin_id as sales_person_id',
             'sales_person.name as sales_person_name',
             'stt.kam as stt_kam_id',
@@ -14735,34 +14735,34 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
-            ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
-                $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
-                     ->whereRaw('ssj.id = (
-                                    select max(id) 
-                                    from shipment_scanning_journeys 
-                                    where shipment_scanning_journeys.shipment_id = journey.shipment_id
-                                    and shipment_scanning_journeys.screen_location_id IN (
-                                        select screen_location_id 
-                                        from shipment_status_screen_locations 
-                                        where shipment_status_id = journey.shipper_status_id
-                                    )
-                                    and (admin.role_id != 1 or admin.id is null)
-                                )');
-            })
-            ->leftJoin('shipment_scanning_journeys as ssj_hss', function ($join) {
-                $join->on('ssj_hss.shipment_id', '=', 'journey.shipment_id')
-                     ->whereRaw('ssj_hss.id = (
-                                    select max(id) 
-                                    from shipment_scanning_journeys 
-                                    where shipment_scanning_journeys.shipment_id = journey.shipment_id
-                                    and shipment_scanning_journeys.screen_location_id IN (
-                                        select screen_location_id 
-                                        from shipment_status_screen_locations 
-                                        where shipment_status_id = hss.id
-                                    )
-                                    and (admin.role_id != 1 or admin.id is null)
-                                )');
-            })
+            // ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
+            //     $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
+            //          ->whereRaw('ssj.id = (
+            //                         select max(id) 
+            //                         from shipment_scanning_journeys 
+            //                         where shipment_scanning_journeys.shipment_id = journey.shipment_id
+            //                         and shipment_scanning_journeys.screen_location_id IN (
+            //                             select screen_location_id 
+            //                             from shipment_status_screen_locations 
+            //                             where shipment_status_id = journey.shipper_status_id
+            //                         )
+            //                         and (admin.role_id != 1 or admin.id is null)
+            //                     )');
+            // })
+            // ->leftJoin('shipment_scanning_journeys as ssj_hss', function ($join) {
+            //     $join->on('ssj_hss.shipment_id', '=', 'journey.shipment_id')
+            //          ->whereRaw('ssj_hss.id = (
+            //                         select max(id) 
+            //                         from shipment_scanning_journeys 
+            //                         where shipment_scanning_journeys.shipment_id = journey.shipment_id
+            //                         and shipment_scanning_journeys.screen_location_id IN (
+            //                             select screen_location_id 
+            //                             from shipment_status_screen_locations 
+            //                             where shipment_status_id = hss.id
+            //                         )
+            //                         and (admin.role_id != 1 or admin.id is null)
+            //                     )');
+            // })
 
 
             ->leftJoin('shipment_scanning_journeys as ssj_last_location', function ($join) {
@@ -14771,22 +14771,27 @@ class AdminReportsController extends Controller
                                     select max(id) 
                                     from shipment_scanning_journeys 
                                     where shipment_scanning_journeys.shipment_id = journey.shipment_id
+                                    and shipment_scanning_journeys.screen_location_id not in (9, 18)
                                 )');
-            })
+            })            
             ->when(\DB::raw('ssj_last_location.user_type = 1'), function ($join) {
                 $join->leftJoin('admins as adm', function ($join) {
                     $join->on('adm.id', '=', 'ssj_last_location.admin_id')
                          ->where('adm.role_id', '<>', 1);
                 });
             })
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_last_location', 'ssjal_last_location.shipment_scanning_journey_id', '=', 'ssj_last_location.id')
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_last_location', function($join){
+                $join->on('ssjal_last_location.shipment_scanning_journey_id', '=', 'ssj_last_location.id')
+                     ->where('ssjal_last_location.hub_id', '=', DB::raw('journey.city_id'))
+                     ->where('ssjal_last_location.shipment_id', '=', DB::raw('journey.shipment_id'));
+            })                 
             ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
 
 
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
-            ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
+            // ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+            // ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
+            // ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
             ->select($select)
             ->groupBy('shipments.id');
 
@@ -14903,20 +14908,20 @@ class AdminReportsController extends Controller
                     return $shipment->shipper;
                 }
             })
-            ->editColumn('location_status', function ($shipment) {
-                if(isset($shipment->location_status)){
-                    return $shipment->location_status == 1 ? 'On-site' : 'Off-site';
-                }else{
-                    return '-';
-                }
-            })
-            ->editColumn('location_status_hss', function ($shipment) {
-                if(isset($shipment->location_status_hss)){
-                    return $shipment->location_status_hss == 1 ? 'On-site' : 'Off-site';
-                }else{
-                    return '-';
-                }
-            })
+            // ->editColumn('location_status', function ($shipment) {
+            //     if(isset($shipment->location_status)){
+            //         return $shipment->location_status == 1 ? 'On-site' : 'Off-site';
+            //     }else{
+            //         return '-';
+            //     }
+            // })
+            // ->editColumn('location_status_hss', function ($shipment) {
+            //     if(isset($shipment->location_status_hss)){
+            //         return $shipment->location_status_hss == 1 ? 'On-site' : 'Off-site';
+            //     }else{
+            //         return '-';
+            //     }
+            // })
             ->editColumn('current_hub', function ($shipment) {
                 if ($shipment->current_hub_id != null) {
                     return $shipment->current_hub_name;
@@ -15011,7 +15016,7 @@ class AdminReportsController extends Controller
                 }else{
                     return '-';
                 }
-            });;
+            });
       
 
         //return $datatable->make(true);
@@ -15050,12 +15055,12 @@ class AdminReportsController extends Controller
                 $rowArray = (array) $row;
                 //dd($rowArray);
                 // Apply modifications to the row
-                if (isset($rowArray['location_status'])) {
-                    $rowArray['location_status'] = ($rowArray['location_status']) ? (($rowArray['location_status'] == 1) ? 'On-site' : 'Off-site') : '-';
-                }
-                if (isset($rowArray['location_status_hss'])) {
-                    $rowArray['location_status_hss'] = ($rowArray['location_status_hss']) ? (($rowArray['location_status_hss'] == 1) ? 'On-site' : 'Off-site') : '-';
-                }
+                // if (isset($rowArray['location_status'])) {
+                //     $rowArray['location_status'] = ($rowArray['location_status']) ? (($rowArray['location_status'] == 1) ? 'On-site' : 'Off-site') : '-';
+                // }
+                // if (isset($rowArray['location_status_hss'])) {
+                //     $rowArray['location_status_hss'] = ($rowArray['location_status_hss']) ? (($rowArray['location_status_hss'] == 1) ? 'On-site' : 'Off-site') : '-';
+                // }
                 
                 $rowArray['shipper'] = ($rowArray['booking_type_id'] == 4) ? ($rowArray['shipper'] . ' (' . $rowArray['poc'] . ')') : $rowArray['shipper'];
                 

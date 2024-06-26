@@ -71,6 +71,11 @@
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        
+                        <th class="border-primary border-darken-1">Last Location Screen Name</th>
+                        <th class="border-primary border-darken-1">Sub Hub</th>
+                        <th class="border-primary border-darken-1">Last Location Updated At</th>
+
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Origin Arrival Date</th>
@@ -254,6 +259,11 @@
                         head.push('Shipping Mode');
                         head.push('Service Type');
                         head.push('Status');
+
+                        head.push('Last Location Screen Name');
+                        head.push('Sub Hub');
+                        head.push('Last Location Updated At');
+
                         head.push('Reason');
                         head.push('Remarks');
                         head.push('Origin Arrival Date');
@@ -285,6 +295,11 @@
                             row.push(values.shipping_mode);
                             row.push(values.service_type);
                             row.push(values.status);
+
+                            row.push(values.last_location_screen_location_name);
+                            row.push(values.ca_scanning_last_location_name);
+                            row.push(values.last_location_updated_at);
+
                             row.push(values.reason);
                             row.push(values.remarks);
                             row.push(values.arrival);
@@ -334,7 +349,7 @@
                 }
             },
             rowId: 'shId',
-            order: [[21, 'desc']],
+            order: [[25, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -356,6 +371,13 @@
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
+                
+
+                {data: 'last_location_screen_location_name', name: 'last_screen_location.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name'},
+                {data: 'ca_scanning_last_location_name', name: 'ca_scanning_last_location_name.name', as:'ca_scanning_last_location_name', class: 'align-middle ca_scanning_last_location_name'},
+                {data: 'last_location_updated_at', name: 'ssjal_last_location.updated_at', as:'last_location_updated_at', class: 'align-middle last_location_updated_at'},
+
+
                 {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
