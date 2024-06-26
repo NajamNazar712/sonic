@@ -1860,15 +1860,16 @@ class GlobalSettingsController extends Controller
         $shipper_visibility = $request->has('shipper_visibility');
         $remarks_visibility = $request->has('remarks_visibility');
         $remarks = $request->input('remarks');
-
+    
         $caseNatureType = CrmRequestCaseNatureType::findOrFail($case_nature_id);
-
+    
         if ($type !== $caseNatureType->type) {
             $existingCaseNatureType = CrmRequestCaseNatureType::where('type', $type)->first();
             if ($existingCaseNatureType && $existingCaseNatureType->id !== $case_nature_id) {
                 return redirect()->back()->with('error', 'Same Case Nature Type already exists!');
             }
         }
+        
         $caseNatureType->type = $type;
         $caseNatureType->shipment_status = $shipment_status;
         $caseNatureType->admin_departments = $admin_departments;
@@ -1876,25 +1877,37 @@ class GlobalSettingsController extends Controller
         $caseNatureType->remarks_visibility = $remarks_visibility;
         $caseNatureType->nature_id = $case_nature;
         $caseNatureType->save();
-
-        // update remarks
+    
+        // Handle remarks update
+        $existingRemarks = CrmCaseNatureRemark::where('case_nature_id', $caseNatureType->id)->get();
+        
+        // Delete remarks that are not in the new remarks
+        foreach ($existingRemarks as $existingRemark) {
+            if (!in_array($existingRemark->remarks, $remarks)) {
+                $existingRemark->delete();
+            }
+        }
+    
+        // Add or update remarks
         foreach ($remarks as $remark) {
-            $existingRemark = CrmCaseNatureRemark::where('case_nature_id', $caseNatureType->id)->first();
+            $existingRemark = CrmCaseNatureRemark::where('case_nature_id', $caseNatureType->id)
+                                                 ->where('remarks', $remark)
+                                                 ->first();
     
             if ($existingRemark) {
                 $existingRemark->remarks = $remark;
                 $existingRemark->save();
             } else {
-                // Create a new remark
                 $crm_remark = new CrmCaseNatureRemark();
                 $crm_remark->case_nature_id = $caseNatureType->id;
                 $crm_remark->remarks = $remark;
                 $crm_remark->save();
             }
         }
-
+    
         return redirect()->route('admin.settings.crm_case_nature_types.index')->with('success', 'Case Nature Type Updated successfully!');
     }
+    
 
 
     public function return_delivered_to_shipper_email_cut_off_time_index()
