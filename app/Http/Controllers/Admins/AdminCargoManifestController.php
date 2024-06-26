@@ -4426,7 +4426,7 @@ class AdminCargoManifestController extends Controller
                                 $bag->junction_mapping_id = null;
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
-                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49])) {
+                                    if (in_array($shipment_table->shipper_status_id, [3, 20, 21, 26, 32, 49])) {
                                         ShipmentsJourneyController::add($shipment->shipment_id, 11, 11, null, null, null, Auth::id(), $bag->seal_number);
                                         $shipment_table->shipper_status_id = 11;
                                         $shipment_table->consignee_status_id = 11;
