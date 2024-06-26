@@ -1431,10 +1431,11 @@
                         '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var drop_select =
                         '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="3">All</option>' +
+                        '<option value="4">All</option>' +
                         '<option value="0">Delivered</option>' +
                         '<option value="1">Returned</option>' +
                         '<option value="2">Adjusted</option>' +
+                        '<option value="3">Arrival</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;

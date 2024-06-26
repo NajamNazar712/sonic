@@ -12,6 +12,8 @@ use App\HistoryCorporateShipmentReturnDiscountCharges;
 use App\HistoryCorporateZeroCodDiscountCharges;
 use App\HistoryShipmentReturnDiscountCharges;
 use App\HistoryZeroCodDiscountCharges;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\PendingCorporateDefaultShipmentReturnDiscountCharges;
 use App\PendingCorporateDefaultZeroCodDiscountCharges;
 use App\PendingCorporateShipmentReturnDiscountCharges;
@@ -238,4 +240,23 @@ trait RateReusableTrait
         }
     }
 
+    static function arrival_chagres (Request $request,$parcel){
+        if ($parcel) {
+            $shipment = $parcel->id;
+            if ($parcel->booking_type_id == 2) {
+                ShipmentChargesController::replacement($shipment);
+            } else if ($parcel->booking_type_id == 3) {
+                ShipmentChargesController::try_and_buy($shipment);
+            }
+
+            if ($parcel->booking_type_id != 4) {
+                if (($parcel->packaging_material_request == 1 && $parcel->packaging_material_charges != '') || $parcel->packaging_material_request == 0) {
+                    if($parcel->shipment_type == 1) {
+                        AdminFinanceController::add_payment($shipment, 3, $parcel);
+                    }
+                }
+            }
+
+        }
+    }
 }

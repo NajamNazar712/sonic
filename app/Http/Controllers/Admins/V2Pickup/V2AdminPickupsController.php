@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins\V2Pickup;
 
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
+use App\Http\Traits\RateReusableTrait;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -69,6 +70,7 @@ use App\Http\Models\WeightType;
 
 class V2AdminPickupsController extends Controller
 {
+    use RateReusableTrait;
     public function __construct()
     {
         $this->middleware('auth:admin')->except('cancel');
@@ -2393,7 +2395,7 @@ class V2AdminPickupsController extends Controller
         if ($pickup_rider_id) {
             $unassigned_pickup_requests = explode(',', $request->pickup_request_ids);
         }
-
+        $arrival_charges_shipment = [];
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if ($shipment) {
@@ -2588,14 +2590,16 @@ class V2AdminPickupsController extends Controller
                 //shipment calculate arrival charges
                 $shipment->refresh();
                 if(in_array($shipment->shipper_status_id,[2,15])){
-
                     self::arrival_chagres($request,$shipment);
+                    array_push($arrival_charges_shipment,$shipment_id);
                 }
             } else {
                 unset($shipment_ids[$key]);
             }
         }
-
+        if(count($arrival_charges_shipment) > 0){
+            Shipment::whereIn('id',$arrival_charges_shipment)->update(['arrival_charges_applied'=>1]);
+        }
         $pickup_note_ids = array();
         foreach ($pickup_request_ids as $pickup_request_id) {
             $pickup_request = V2PickupRequest::find($pickup_request_id);
@@ -4738,25 +4742,5 @@ class V2AdminPickupsController extends Controller
       ';
 
         return $html;
-    }
-
-    static function arrival_chagres (Request $request,$parcel){
-        if ($parcel) {
-            $shipment = $parcel->id;
-            if ($parcel->booking_type_id == 2) {
-                ShipmentChargesController::replacement($shipment);
-            } else if ($parcel->booking_type_id == 3) {
-                ShipmentChargesController::try_and_buy($shipment);
-            }
-
-            if ($parcel->booking_type_id != 4) {
-                if (($parcel->packaging_material_request == 1 && $parcel->packaging_material_charges != '') || $parcel->packaging_material_request == 0) {
-                    if($parcel->shipment_type == 1) {
-                        AdminFinanceController::add_payment($shipment, 3, $parcel);
-                    }
-                }
-            }
-
-        }
     }
 }

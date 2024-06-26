@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\CorporateDefaultShipmentReturnDiscountCharges;
+use App\CorporateDefaultZeroCodDiscountCharges;
+use App\CorporateShipmentReturnDiscountCharges;
+use App\CorporateZeroCodDiscountCharges;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;
@@ -62,6 +66,8 @@ use App\Http\Models\City;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
 
+use App\ShipmentReturnDiscountCharges;
+use App\ZeroCodDiscountCharges;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Http\Models\ShipmentsWeightType;
@@ -435,7 +441,14 @@ class ShipmentChargesController extends Controller
                     }
 
                     $result = array();
-
+                    if($amount == 0){
+                        $zero_cod_discount_per = self::zero_cod_discount_chargers($rate_type_id,$shipping_mode_id,$account_type_id,$user_id);
+                        if($zero_cod_discount_per && $zero_cod_discount_per > 0){
+                            $charges = $charges - ($charges*($zero_cod_discount_per/100));
+                            $charges = ($charges > 0) ? $charges : 0;
+                            $result['zero_cod_discount_applied'] = 1;
+                        }
+                    }
                     if ($charges < $discount) {
                         $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
                     }
@@ -598,6 +611,15 @@ class ShipmentChargesController extends Controller
                     }
                     else {
                         $discount = floatval($discount);
+                    }
+
+                    if($amount == 0){
+                        $zero_cod_discount_per = self::zero_cod_discount_chargers($rate_type_id,$shipping_mode_id,$account_type_id,$user_id);
+                        if($zero_cod_discount_per && $zero_cod_discount_per > 0){
+                            $charges = $charges - ($charges*($zero_cod_discount_per/100));
+                            $charges = ($charges > 0) ? $charges : 0;
+                            $result['zero_cod_discount_applied'] = 1;
+                        }
                     }
 
                     if ($charges < $discount) {
@@ -898,6 +920,7 @@ class ShipmentChargesController extends Controller
                 $shipment->weight_charges = $result['weight_charges'];
                 $shipment->chargeable_weight = $result['chargeable_weight'];
             }
+            $shipment->zero_cod_discount_applied = isset($result['zero_cod_discount_applied']) ? 1 : 0;
             $shipment->save();
             if($result && $shipment->business_category_id == 1) {
                 $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id);
@@ -1429,6 +1452,15 @@ class ShipmentChargesController extends Controller
                     else {
                         $discount = floatval($discount);
                     }
+
+
+                    $return_discount_per = self::return_discount_charges($shipment);
+                    if($return_discount_per && $return_discount_per > 0){
+                        $charges = $charges - ($charges*($return_discount_per/100));
+                        $charges = ($charges > 0) ? $charges : 0;
+                        $shipment->return_cod_discount_applied = 1;
+                    }
+
 
                     if ($charges < $discount) {
                         $shipment->return_charges = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
@@ -2744,6 +2776,48 @@ class ShipmentChargesController extends Controller
             }
             $service_charges->shipment_id = $id;
             $service_charges->save();
+        }
+    }
+
+    static public function return_discount_charges($shipment){
+        $id = $shipment->id;
+        $account_type_id = $shipment->user->account_type_id;
+        $rate_type_id = $shipment->user->corporate_rate_type_id;
+        if ($account_type_id == 1) {
+            $ReturnDiscountCharges = ShipmentReturnDiscountCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->first();
+        }
+        else {
+            if($rate_type_id != 3){
+                $ReturnDiscountCharges = CorporateShipmentReturnDiscountCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->first();
+            }
+            else{
+                $ReturnDiscountCharges = CorporateDefaultShipmentReturnDiscountCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->first();
+            }
+        }
+        if(!empty($ReturnDiscountCharges)){
+            return $ReturnDiscountCharges->return_discount_per;
+        }else{
+            return false;
+        }
+
+    }
+
+    static public function zero_cod_discount_chargers($rate_type_id,$shipping_mode_id,$account_type_id,$user_id){
+        if ($account_type_id == 1) {
+            $ZeroCodDiscountCharges = ZeroCodDiscountCharges::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->first();
+        }
+        else {
+            if($rate_type_id == 1 || $rate_type_id == 2 ){
+                $ZeroCodDiscountCharges = CorporateZeroCodDiscountCharges::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->first();
+            }
+            else{
+                $ZeroCodDiscountCharges = CorporateDefaultZeroCodDiscountCharges::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->first();
+            }
+        }
+        if(!empty($ZeroCodDiscountCharges)){
+            return $ZeroCodDiscountCharges->cod_discount_per;
+        }else{
+            return false;
         }
     }
 }
