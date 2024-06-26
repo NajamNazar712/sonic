@@ -763,6 +763,7 @@ trait RvTrait
     protected function unresponsive(Request $request)
     {
         $shipment = Shipment::find($request->shipment_id);
+        
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
 
@@ -840,6 +841,84 @@ trait RvTrait
         }
     }
 
+    protected function unresponsiveForceFully($data)
+    {
+        
+        $shipment = Shipment::find($data->shipment_id);
+        Log::channel('cronJobLog')->info('s ' .'forceFUllyShipmentstatus update'.$shipment->tracking_number.'with id'. $shipment->tracking_number);
+        $user_id = $shipment->user_id;
+        $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $data->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
+
+        if ($rv_shipment_assign_agent) {
+            try {
+                $status = new RvAgentCallHistory();
+                $status->shipment_id = $data->shipment_id;
+                $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
+                $status->call_finding_id = 32; //call finding reasons
+                $status->call_to_id = $data->call_to_id; //Shipper or Consignee
+                $status->remarks = 'As per CX dept';
+                $status->updated_type_id = $data->updated_type_id;
+                $status->updated_by_id = $data->updated_by_id;
+                $status->save();
+
+                $rv_shipment_assign_agent->increment('unresponsive_count');
+                $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
+                $rv_shipment_assign_agent->save();
+                $rv_shipment_ticket = RvShipmentTicket::where('shipment_id', $data->shipment_id)->increment('call_count');
+
+                $reattempt_count = BoltUndeliveredReasonMapCount::where('shipment_id', $shipment)->where('count', 3)->first();
+                //if reattempt count is 3 then shipment status will be auto return confirm
+                // if ($rv_shipment_assign_agent->unresponsive_count > 0 && $reattempt_count) {
+                //     request()->request->add([
+                //         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                //         'remarks' => $request->remarks,
+                //         'rv_assign_agent_sub_status_id' => null
+                //     ]);
+                //     $this->return_confirm($request);
+                //     return ['status' => 1, 'success' => 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
+                // }
+                //if unresponsive count is 2 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
+                if ($rv_shipment_assign_agent->unresponsive_count > 1) {
+                    //updating the shipment status to Shipper Advise Requested(65) in shipments table
+                    Shipment::where('id', $data->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+                    //get the shipment journey table in reason validation id
+
+                    //Remove Shipment from RV Shipment Ticket
+                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data->shipment_id));
+                    // //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
+                    ShipmentsJourneyController::add($data->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($data->shipment_id), NULL, $user_id, 346);
+                    return ['status' => 1, 'success' => 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
+                }
+
+                //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
+                // else if ($rv_shipment_assign_agent->unresponsive_count > 2) {
+
+                //     request()->request->add([
+                //         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                //         'remarks' => $request->remarks,
+                //         'rv_assign_agent_sub_status_id' => null
+                //     ]);
+                //     $this->return_confirm($request);
+                // }
+
+                //if unresponsive and current status of shipment is 52 (shipment reattempt requested) then shipment status will be auto return confirm
+                // else if ($shipment->shipper_status_id == 52) {
+                //     request()->request->add([
+                //         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                //         'remarks' => $request->remarks,
+                //         'rv_assign_agent_sub_status_id' => null
+                //     ]);
+                //     $this->return_confirm($request);
+                // }
+                return ['status' => 1, 'success' => 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
+            } catch (\Throwable $th) {
+                $th->getMessage();
+                return ['status' => 0, 'error' => 'Something Went Wrong', 'redirect' => true];
+            }
+        } else {
+            return ['status' => 0, 'error' => 'Shipment not found', 'redirect' => true];
+        }
+    }
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
