@@ -19,6 +19,7 @@ use Illuminate\Support\Str;
 use App\Http\Models\Dispute;
 use App\Http\Models\Invoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Excel;
 use App\Http\Models\Shipment;
 use App\Jobs\ProcessOTPSMSITS;
@@ -3580,72 +3581,76 @@ class NotificationsController extends Controller
 
                         $date = $reference_1_id;
                         foreach ($hubs as $hub) {
-                            $debriefing = Debriefing::where('hub', $hub->id)->first();
-                            if (strpos($subject, '[hub]') !== FALSE) {
-                                $subject = str_replace('[hub]', $hub->name, $subject);
-                            }
-                            if (strpos($body, '[hub]') !== FALSE) {
-                                $body = str_replace('[hub]', $hub->name, $body);
-                            }
+                            $debriefing = Debriefing::where('hub', $hub->id);
+                            if($debriefing->exists())
+                            {
+                                $debriefing=$debriefing->first();
+                                if (strpos($subject, '[hub]') !== FALSE) {
+                                    $subject = str_replace('[hub]', $hub->name, $subject);
+                                }
+                                if (strpos($body, '[hub]') !== FALSE) {
+                                    $body = str_replace('[hub]', $hub->name, $body);
+                                }
 
-                            if (strpos($subject, '[date]') !== FALSE) {
-                                $subject = str_replace('[date]', $date, $subject);
+                                if (strpos($subject, '[date]') !== FALSE) {
+                                    $subject = str_replace('[date]', $date, $subject);
+                                }
+                                if (strpos($body, '[date]') !== FALSE) {
+                                    $body = str_replace('[date]', $date, $body);
+                                }
+
+                                $details = '<table style="width:100%;">';
+                                $details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Hub</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivered</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Unsuccessful</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">On Hold</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">Status Not Attempted</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">Fake Status</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Confirmation Pending</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Pending</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Tomorrow</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Grand Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th></tr></thead>';
+                                $details .= '<tbody>';
+                                $details .= '<tr>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $hub->name . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivered . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_unsuccessful . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->on_hold . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->status_not_attempted . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->fake_status . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->confirmation_pending . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_1 . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_1_ratio . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_note_pending . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_2 . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_2_ratio . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_tomorrow . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->grand_total . '</td>';
+                                $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->grand_total_ratio . '</td>';
+                                $details .= '</tr>';
+                                $details .= '</tbody></table>';
+
+                                if (strpos($body, '[preview]') !== FALSE) {
+                                    $body = str_replace('[preview]', $details, $body);
+                                }
+                                $file = Storage::disk('public')->url('/reports/debriefing/hubs/debriefing_report_' . $date . '_' . $hub->id . '.xlsx');
+
+                                $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+                                if (strpos($subject, '[link]') !== FALSE) {
+                                    $subject = str_replace('[link]', $link, $subject);
+                                }
+                                if (strpos($body, '[link]') !== FALSE) {
+                                    $body = str_replace('[link]', $link, $body);
+                                }
+                                $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [9, 10])->where('admins.status', 1)->whereNotNull('admins.email')->where('admin_hubs.hub_id', '=', $hub->id);
+                                if ($operation_admins->exists()) {
+                                    $to = $operation_admins->pluck('admins.email')->toArray();
+                                }
+                                $cc = array();
+
+                                $general_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 8, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub->id)->whereNotNull('admins.email')->where('id','!=',2985); //exclude hassan.arman@trax.pk on request
+
+                                if ($general_managers->exists()) {
+                                    $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
+                                }
+
+                                self::email($subject, $body, $to);
+
+                                $subject = $original_subject;
+                                $body = $original_body;
                             }
-                            if (strpos($body, '[date]') !== FALSE) {
-                                $body = str_replace('[date]', $date, $body);
-                            }
-
-                            $details = '<table style="width:100%;">';
-                            $details .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Hub</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivered</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Unsuccessful</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">On Hold</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">Status Not Attempted</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">Fake Status</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Confirmation Pending</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Note Pending</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Delivery Tomorrow</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Grand Total</th><th style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue">Ratio</th></tr></thead>';
-                            $details .= '<tbody>';
-                            $details .= '<tr>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $hub->name . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivered . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_unsuccessful . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->on_hold . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->status_not_attempted . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: red">' . $debriefing->fake_status . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->confirmation_pending . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_1 . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_1_ratio . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_note_pending . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_2 . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->total_2_ratio . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $debriefing->delivery_tomorrow . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->grand_total . '</td>';
-                            $details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; color: blue; font-weight: bold">' . $debriefing->grand_total_ratio . '</td>';
-                            $details .= '</tr>';
-                            $details .= '</tbody></table>';
-
-                            if (strpos($body, '[preview]') !== FALSE) {
-                                $body = str_replace('[preview]', $details, $body);
-                            }
-                            $file = Storage::disk('public')->url('/reports/debriefing/hubs/debriefing_report_' . $date . '_' . $hub->id . '.xlsx');
-
-                            $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-
-                            if (strpos($subject, '[link]') !== FALSE) {
-                                $subject = str_replace('[link]', $link, $subject);
-                            }
-                            if (strpos($body, '[link]') !== FALSE) {
-                                $body = str_replace('[link]', $link, $body);
-                            }
-                            $operation_admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('admins.role_id', [9, 10])->where('admins.status', 1)->whereNotNull('admins.email')->where('admin_hubs.hub_id', '=', $hub->id);
-                            if ($operation_admins->exists()) {
-                                $to = $operation_admins->pluck('admins.email')->toArray();
-                            }
-                            $cc = array();
-
-                            $general_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->whereIn('role_id', [3, 8, 18, 19, 20, 34])->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $hub->id)->whereNotNull('admins.email')->where('id','!=',2985); //exclude hassan.arman@trax.pk on request
-
-                            if ($general_managers->exists()) {
-                                $cc = array_merge($cc, $general_managers->pluck('admins.email')->toArray());
-                            }
-
-                            self::email($subject, $body, $to);
-
-                            $subject = $original_subject;
-                            $body = $original_body;
                         }
                     }
                 } else if ($id == 45) {
@@ -11143,8 +11148,8 @@ class NotificationsController extends Controller
                     $body = $notification->body;
                     $shipper_ids=$reference_1_id;
                     $privous_date=$reference_2_id;
-                    $to='';
-                    foreach ($shipper_ids as $shipper_id) {
+                    foreach ($shipper_ids as $user_email=>$shipper_id) {
+                        $current_body = $body;
                         $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
                             ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
                             ->select('u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
@@ -11164,6 +11169,7 @@ class NotificationsController extends Controller
                         $html .= '</tr></thead><tbody>';
                         $serial = 1;
                         foreach ($logisticbookings as $booking) {
+
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->shipper_id . '</td>';
@@ -11175,18 +11181,22 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->total_pieces . '</td>';
                             $html .= '</tr>';
                             $serial++;
-                            $to=$booking->shipper_email;
                         }
                         $html .= '</tbody></table>';
 
-                        if (strpos($body, '[Booking_at]') !== FALSE) {
-                            $body = str_replace('[Booking_at]', $privous_date, $body);
+
+                        if (strpos($current_body, '[Booking_at]') !== FALSE) {
+                            $current_body = str_replace('[Booking_at]', $privous_date, $current_body);
                         }
-                        if (strpos($body, '[preview]') !== FALSE) {
-                            $body = str_replace('[preview]', $html, $body);
+
+                        if (strpos($current_body, '[preview]') !== FALSE) {
+                            $current_body = str_replace('[preview]', $html, $current_body);
                         }
-                        self::email($subject, $body, $to);
+
+                        self::email($subject, $current_body, $user_email);
                     }
+
+
                 }
 
             }
