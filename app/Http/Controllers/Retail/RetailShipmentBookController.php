@@ -2439,7 +2439,7 @@ class RetailShipmentBookController extends Controller
 
             $html .= '<tr>';
             $html .= '<td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>';
-            $html .= '<td class="text-center align-middle color primary"><strong>Delivery Note</strong></td>';
+            $html .= '<td class="text-center align-middle color primary"><strong>User Details</strong></td>';
             $html .= '<td class="text-center align-middle color secondary">Created at ' . $records[0]->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
             $html .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
             $html .= '</tr>';
@@ -2680,7 +2680,7 @@ class RetailShipmentBookController extends Controller
 
             $html .= '<tr>';
             $html .= '<td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>';
-            $html .= '<td class="text-center align-middle color primary"><strong>Delivery Note</strong></td>';
+            $html .= '<td class="text-center align-middle color primary"><strong>Franchise Details</strong></td>';
             $html .= '<td class="text-center align-middle color secondary">Created at ' . $records[0]->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
             $html .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
             $html .= '</tr>';
