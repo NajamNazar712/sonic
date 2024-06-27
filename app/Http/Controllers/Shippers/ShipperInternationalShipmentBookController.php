@@ -736,10 +736,10 @@ class ShipperInternationalShipmentBookController extends Controller
                             $new_data[] = $row;
                         }
                         if ($user_id != 3324) {
-                            dispatch(new ProcessShipmentBookingDB($row));
+                            dispatch(new ProcessShipmentBookingDB($new_data));
                         }
                         else {
-                            dispatch(new ProcessShipmentBookingDBPriority($row));
+                            dispatch(new ProcessShipmentBookingDBPriority($new_data));
                         }
 
                         return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
