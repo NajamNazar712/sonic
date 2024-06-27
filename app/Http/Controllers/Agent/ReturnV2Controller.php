@@ -71,7 +71,7 @@ class ReturnV2Controller extends Controller
             $query->where('rv_assign_agent_status_id',1)
             ->whereIn('rv_assign_agent_sub_status_id', $sub_status_return);
         })
-        ->orWhere('rv_assign_agent_status_id',8)
+        ->where('rv_assign_agent_status_id',8)
         ->whereNotNull('rv_assign_agent_sub_status_id')
         ->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
 
