@@ -68,10 +68,13 @@ class ReturnV2Controller extends Controller
         // $refused_on_call = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('updated_by_id', '=', Auth::id())->whereIn('rv_assign_agent_status_id', [1,8])->whereNotNull('rv_assign_agent_sub_status_id')->whereIn('rv_assign_agent_sub_status_id', $sub_status_return)->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
         $refused_on_call = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('updated_by_id', '=', Auth::id())
         ->where(function ($query) use ($sub_status_return) {
-            $query->where('rv_assign_agent_status_id',1)
-            ->whereIn('rv_assign_agent_sub_status_id', $sub_status_return);
+            $query->where(function ($query) use ($sub_status_return) {
+                $query->where('rv_assign_agent_status_id', 1)
+                    ->whereIn('rv_assign_agent_sub_status_id', $sub_status_return);
+            })->orWhere(function ($query) {
+                $query->where('rv_assign_agent_status_id', 8);
+            });
         })
-        ->orWhere('rv_assign_agent_status_id',8)
         ->whereNotNull('rv_assign_agent_sub_status_id')
         ->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
 
