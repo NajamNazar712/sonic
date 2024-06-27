@@ -33,6 +33,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
+use App\RvShipmentTicket;
 use Illuminate\Support\Facades\DB;
 
 class ReturnV2Controller extends Controller
@@ -187,9 +188,15 @@ class ReturnV2Controller extends Controller
                             if (!$already_assigned_shipment) {
                                 $shipment = $this->findShipmentforAgent($agent_id);
                             } else {
+
+                                //update in_progress to 1 for ticket
+                                RvShipmentTicket::where('shipment_id',$already_assigned_shipment->shipment_id)->update(['in_progress'=>1]);
                                 $shipment = $already_assigned_shipment->shipment_id;
                             }
                         } else {
+                            
+                            //update in_progress to 1 for ticket
+                            RvShipmentTicket::where('shipment_id',$assigned_shipment->shipment_id)->update(['in_progress'=>1]);
                             $shipment = $assigned_shipment->shipment_id;
                         }
                         if ($shipment) {
