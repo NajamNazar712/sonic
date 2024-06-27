@@ -93,7 +93,7 @@
                     <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement Start date">
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="salary_div">
                     <input type="number" name="salary" id="salary" class="form-control" placeholder="Salary" value="{{ count($retail_user_salary) > 0 ? $retail_user_salary[0] : '' }}">
                 </div>
 
@@ -239,9 +239,11 @@
         var franchise_account = @json($retail_user->category);
         if (franchise_account == 1) {
             $('#edit_for_trax_user').addClass('d-none');
+            $('#salary_div').addClass('d-none');
             $('#edit_user_form #delivery_date_from').attr('placeholder', 'Agreement Start date');
         } else if (franchise_account != 1) { 
             $('#edit_for_trax_user').removeClass('d-none');
+            $('#salary_div').removeClass('d-none');
             $('#edit_user_form #delivery_date_from').attr('placeholder', 'Joining date');
         }
 
@@ -565,22 +567,22 @@
         });
 
         $('#edit_store').on('change', function(){
-                var category = $(this).val();
-                if (category == 1) {
-                    $('#trax_id_edit').addClass("d-none");
-                    $('#salary').addClass("d-none");
-                    $('#edit_for_trax_user').addClass("d-none");
-                } else {
-                    $('#trax_id_edit').removeClass("d-none");
-                    $('#trax_id_edit').on('input', function(event) {
-                        $(this).val(function(_, value) {
-                            return value.replace(/\D/g, '');
-                        });
+            var category = $(this).val();
+            if (category == 1) {
+                $('#trax_id_edit').addClass("d-none");
+                $('#salary_div').addClass("d-none");
+                $('#edit_for_trax_user').addClass("d-none");
+            } else {
+                $('#trax_id_edit').removeClass("d-none");
+                $('#trax_id_edit').on('input', function(event) {
+                    $(this).val(function(_, value) {
+                        return value.replace(/\D/g, '');
                     });
-                    $('#salary').removeClass("d-none");
-                    $('#edit_for_trax_user').removeClass("d-none");
-                }
-            });
+                });
+                $('#salary_div').removeClass("d-none");
+                $('#edit_for_trax_user').removeClass("d-none");
+            }
+        });
 
     });
 </script>    
