@@ -18925,5 +18925,17 @@ class AdminFinanceController extends Controller
          }
      }
 
+    public function service_charges_ledger_index()
+    {
+        $users = User::where('status', 3)->get();
+        return view('admin.finance.service_charge_ledger.index', compact('users'));
+    }
 
- }
+    public function service_charges_ledger_list(Request $request)
+    {
+        $shippers = $request->input('formData.shippers');
+        $from_date = $request->input('formData.from_date');
+        $to_date = $request->input('formData.to_date');
+    }
+
+}

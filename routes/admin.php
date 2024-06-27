@@ -1785,6 +1785,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\AdminFinanceController@tracking_number_wise_dncc_info_index')->name('index');
                 Route::get('list', 'Admins\AdminFinanceController@tracking_number_wise_dncc_info_list')->name('list');
         });
+
+        Route::prefix('service_charges_ledger')->name('service_charges_ledger.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@service_charges_ledger_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@service_charges_ledger_list')->name('list');
+        });
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function () {
