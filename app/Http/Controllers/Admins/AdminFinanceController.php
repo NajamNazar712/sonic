@@ -18938,14 +18938,13 @@ class AdminFinanceController extends Controller
         $from_date = $request->input('formData.from_date');
         $to_date = $request->input('formData.to_date');
 
-        $from_date = date('Y-m-d', strtotime($from_date));
-        $to_date = date('Y-m-d', strtotime($to_date));
+        $from_date = date('Y-m-d', strtotime(str_replace(',', '', $from_date)));
+        $to_date = date('Y-m-d', strtotime(str_replace(',', '', $to_date)));
         
         $shipment_ledger = ShipmentLedger::where('user_id', $shipper_id)
         ->whereDate('shipment_book_date', '>=', $from_date)
         ->whereDate('shipment_book_date', '<=', $to_date)
         ->get();
-
         return response()->json([
             'data' => $shipment_ledger
         ]);

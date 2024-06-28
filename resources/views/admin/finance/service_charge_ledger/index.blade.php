@@ -143,25 +143,25 @@
                 data: {formData},
                 success: function (response) {
                     if ($.fn.DataTable.isDataTable('#datatable')) {
-                        // Destroy the existing DataTable instance
                         $('#datatable').DataTable().destroy();
                     }
-
                     $('#datatable').DataTable({
                         data: response.data,
+                        dom: 'ltipr',
                         columns: [
-                            { data: 'shipment_book_date' },
-                            { data: 'particulars' },
-                            { data: 'debit' },
-                            { data: 'credit' },
-                            { data: 'balance' },
-                            { data: 'reference_id' },
-                            { data: 'number_of_shipments' },
-                        ]
+                            { data: 'shipment_book_date', searchable: true },
+                            { data: 'particulars', searchable: true },
+                            { data: 'debit', searchable: true },
+                            { data: 'credit', searchable: true },
+                            { data: 'balance', searchable: true },
+                            { data: 'reference_id', searchable: true },
+                            { data: 'number_of_shipments', searchable: true },
+                        ],
                     });
                 }
             });
         });
+
     });
     </script>
 
