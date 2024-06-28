@@ -8748,6 +8748,11 @@ class GlobalSettingsController extends Controller
                     $details['shippers'] = null;
                 }
 
+                if($notification_setting->shipper_toggle == 0) {
+                    $details['sms_enable_shippers'] = User::where('sms_charges_status', 1)->whereIn('id', $notification_setting_shippers)->pluck('id')->toArray();
+                } else {
+                    $details['sms_enable_shippers'] = null;
+                }
                 $notification_details[] = $details;
             } else {
                 $notification_setting = Notification::find($notification_id);
@@ -8759,13 +8764,13 @@ class GlobalSettingsController extends Controller
                     $details['charged_sms_toggle'] = 0;
                     $details['sending_frequency'] = null;
                     $details['charging_frequency'] = null;
+                    $details['sms_enable_shippers'] = null;
                     $notification_details[] = $details;
                 }
             }
         }
 
         $shippers = User::select('id', 'name')->where('status', 3)->get();
-
         return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shippers, 'notification_details' => $notification_details]);
     }
 
@@ -8852,6 +8857,7 @@ class GlobalSettingsController extends Controller
                     if (array_key_exists('only_users', $notification)) {
                         if (count($notification['only_users']) > 0) {
                             $shippers = $notification['only_users'];
+                            //dd($shippers);
                         }
                     }
                 }
