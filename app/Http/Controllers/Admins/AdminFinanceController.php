@@ -122,6 +122,7 @@ use App\Http\Models\Admin\StationDepositeNoteActionLog;
 use App\Http\Models\Admin\Settings\GeneralSetting;
 use Illuminate\Support\Facades\Response;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\ShipmentLedger;
 
 class AdminFinanceController extends Controller
 {
@@ -18933,9 +18934,20 @@ class AdminFinanceController extends Controller
 
     public function service_charges_ledger_list(Request $request)
     {
-        $shippers = $request->input('formData.shippers');
+        $shipper_id = $request->input('formData.shippers');
         $from_date = $request->input('formData.from_date');
         $to_date = $request->input('formData.to_date');
-    }
 
+        $from_date = date('Y-m-d', strtotime($from_date));
+        $to_date = date('Y-m-d', strtotime($to_date));
+        
+        $shipment_ledger = ShipmentLedger::where('user_id', $shipper_id)
+        ->whereDate('shipment_book_date', '>=', $from_date)
+        ->whereDate('shipment_book_date', '<=', $to_date)
+        ->get();
+
+        return response()->json([
+            'data' => $shipment_ledger
+        ]);
+    }
 }

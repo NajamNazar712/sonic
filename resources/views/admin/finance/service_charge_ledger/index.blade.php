@@ -1,17 +1,17 @@
 @extends('admin.layout.master')
-@section('title','Service Charges Ledger')
+@section('title','Service Ledger')
 
 
 @section('content')
     <h1 class="mb-1">
-        Service Charges Ledger
+        Service Ledger
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form action="{{ route('admin.finance.service_charges_ledger.list') }}" method="GET" id="search_form">
+                <form action="{{ route('admin.finance.shipment_ledger.list') }}" method="GET" id="search_form">
                     <div class="row">
                         <div class="col-4">
                             <label for="">Shipper Name</label>
@@ -45,13 +45,31 @@
                                 <input type="text" name="to_date" id="to_date" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Date (To)">
                             </div>
                         </div>
+                        <div class="ml-2" id="search_btn_div">
+                            <button type="button" class="btn btn-primary" id="search_btn">
+                                Search
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="" id="search_btn_div">
-                        <button type="button" class="btn btn-primary" id="search_btn">
-                            Search
-                        </button>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
+                                <thead>
+                                    <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1">Date</th>
+                                        <th class="border-primary border-darken-1">Particulars</th>
+                                        <th class="border-primary border-darken-1">Debit</th>
+                                        <th class="border-primary border-darken-1">Credit</th>
+                                        <th class="border-primary border-darken-1">Balance</th>
+                                        <th class="border-primary border-darken-1">Referenece</th>
+                                        <th class="border-primary border-darken-1">Number of shipments</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
                     </div>
+
                 </form>
             </div>
         </div>
@@ -121,10 +139,26 @@
                 to_date: $('#to_date').val()
             };
             $.ajax({
-                url: "{{ route('admin.finance.service_charges_ledger.list') }}",
+                url: "{{ route('admin.finance.shipment_ledger.list') }}",
                 data: {formData},
                 success: function (response) {
-                    console.log(response);
+                    if ($.fn.DataTable.isDataTable('#datatable')) {
+                        // Destroy the existing DataTable instance
+                        $('#datatable').DataTable().destroy();
+                    }
+
+                    $('#datatable').DataTable({
+                        data: response.data,
+                        columns: [
+                            { data: 'shipment_book_date' },
+                            { data: 'particulars' },
+                            { data: 'debit' },
+                            { data: 'credit' },
+                            { data: 'balance' },
+                            { data: 'reference_id' },
+                            { data: 'number_of_shipments' },
+                        ]
+                    });
                 }
             });
         });

@@ -1008,7 +1008,7 @@
 
                         {{-- Ledger --}}
                         @if (session('role_id') == 1 /* || in_array(984, session('permissions')) */)
-                            <li><a class="menu-item" href="{{ route('admin.finance.service_charges_ledger.index') }}">Service Ledger</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.finance.shipment_ledger.index') }}">Service Ledger</a></li>
                         @endif
                     </ul>
 
