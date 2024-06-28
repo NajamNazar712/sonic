@@ -8857,7 +8857,6 @@ class GlobalSettingsController extends Controller
                     if (array_key_exists('only_users', $notification)) {
                         if (count($notification['only_users']) > 0) {
                             $shippers = $notification['only_users'];
-                            //dd($shippers);
                         }
                     }
                 }
