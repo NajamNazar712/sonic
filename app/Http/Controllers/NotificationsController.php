@@ -11074,18 +11074,29 @@ class NotificationsController extends Controller
                     $body = str_replace('[status]', $status, $body);
 
                     self::email($subject, $body, $to);
-                } else if($id == 232) {
+                } else if($id == 232 || $id == 233) {
                     $subject = $notification->subject;
                     $body = $notification->body;
                     $shipper_ids=$reference_1_id;
-                    $privous_date=$reference_2_id;
+                    $date=$reference_2_id;
                     foreach ($shipper_ids as $user_email=>$shipper_id) {
                         $current_body = $body;
-                        $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
-                            ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
-                            ->select('u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
-                            ->where('trax_logistic_bookings.booking_date',$privous_date)->where('trax_logistic_bookings.shipper_id',$shipper_id)->get();
+                        if($id == 232)
+                        {
+                                $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
+                                ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
+                                ->select('u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
+                                ->where('trax_logistic_bookings.booking_date',$date)->where('trax_logistic_bookings.shipper_id',$shipper_id)->get();
 
+                        } else{
+                                $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
+                                ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
+                                ->select('u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
+                                ->where('trax_logistic_bookings.booking_date',$date)
+                                    ->where('trax_logistic_bookings.is_email',0)
+                                    ->where('trax_logistic_bookings.shipper_id',$shipper_id)->get();
+                                dd($logisticbookings);
+                        }
 
                         $html = '<table style="width:100%;border-collapse: collapse;">';
                         $html .= '<thead><tr>
@@ -11117,7 +11128,7 @@ class NotificationsController extends Controller
 
 
                         if (strpos($current_body, '[Booking_at]') !== FALSE) {
-                            $current_body = str_replace('[Booking_at]', $privous_date, $current_body);
+                            $current_body = str_replace('[Booking_at]', $date, $current_body);
                         }
 
                         if (strpos($current_body, '[preview]') !== FALSE) {
