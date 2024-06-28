@@ -203,6 +203,9 @@ use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\Http\Models\HistorySmsCharges;
 use App\Http\Models\PendingSmsCharges;
+use App\Http\Models\NotificationSetting;
+use App\Http\Models\NotificationSettingShipper;
+
 
 class AdminDashboardController extends Controller
 {
@@ -1351,7 +1354,7 @@ class AdminDashboardController extends Controller
         }
         if ($status == 'activate') {
 
-            if ($user->status == 2) {
+            if ($user->status == 2) {   
                 $now = Carbon::now();
                 $action = User::where('id', $user->id)->update(['status' => 3, 'account_activated_by' => Auth::id(), 'activated_at' => $now, 'reactivated_at' => $now]);
                 if ($user->lead_id != null) {
@@ -1369,7 +1372,16 @@ class AdminDashboardController extends Controller
                     $lead->updated_by = Auth::id();
                     $lead->save();
                 }
-                if ($action == 1) {
+                if ($action == 1) { 
+                    if($user->sms_charges_status == 1) {
+                        $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                        foreach($notification_settings as $notification_setting ) {
+                            $notification_setting_shipper = new NotificationSettingShipper();
+                            $notification_setting_shipper->notification_setting_id = $notification_setting;
+                            $notification_setting_shipper->shipper_id = $user->id;
+                            $notification_setting_shipper->save();
+                        }
+                    }
                     NotificationsController::send(1, $user->id);
 
                     return redirect()->route('admin.accounts.active')->with('success', 'User is activated.');
@@ -6967,8 +6979,17 @@ class AdminDashboardController extends Controller
 
                 }
 
+                $user = User::find($id);
+                if($user->sms_charges_status == 1) {
+                    $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                    foreach($notification_settings as $notification_setting ) {
+                        $notification_setting_shipper = new NotificationSettingShipper();
+                        $notification_setting_shipper->notification_setting_id = $notification_setting;
+                        $notification_setting_shipper->shipper_id = $id;
+                        $notification_setting_shipper->save();
+                    }
+                }
 
-                
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
