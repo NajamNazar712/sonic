@@ -18,6 +18,7 @@ use App\Mail\Notifications;
 use App\Http\Models\Dispute;
 use App\Http\Models\Invoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Excel;
 use App\Http\Models\Shipment;
 use App\Jobs\ProcessOTPSMSITS;
@@ -11078,8 +11079,8 @@ class NotificationsController extends Controller
                     $body = $notification->body;
                     $shipper_ids=$reference_1_id;
                     $privous_date=$reference_2_id;
-                    $to='';
-                    foreach ($shipper_ids as $shipper_id) {
+                    foreach ($shipper_ids as $user_email=>$shipper_id) {
+                        $current_body = $body;
                         $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
                             ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
                             ->select('u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
@@ -11099,6 +11100,7 @@ class NotificationsController extends Controller
                         $html .= '</tr></thead><tbody>';
                         $serial = 1;
                         foreach ($logisticbookings as $booking) {
+
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->shipper_id . '</td>';
@@ -11110,18 +11112,22 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->total_pieces . '</td>';
                             $html .= '</tr>';
                             $serial++;
-                            $to=$booking->shipper_email;
                         }
                         $html .= '</tbody></table>';
 
-                        if (strpos($body, '[Booking_at]') !== FALSE) {
-                            $body = str_replace('[Booking_at]', $privous_date, $body);
+
+                        if (strpos($current_body, '[Booking_at]') !== FALSE) {
+                            $current_body = str_replace('[Booking_at]', $privous_date, $current_body);
                         }
-                        if (strpos($body, '[preview]') !== FALSE) {
-                            $body = str_replace('[preview]', $html, $body);
+
+                        if (strpos($current_body, '[preview]') !== FALSE) {
+                            $current_body = str_replace('[preview]', $html, $current_body);
                         }
-                        self::email($subject, $body, $to);
+
+                        self::email($subject, $current_body, $user_email);
                     }
+
+
                 }
 
             }
