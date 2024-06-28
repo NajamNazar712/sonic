@@ -6,6 +6,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class HourlyShipperLogisticBookingEmailCron extends Command
 {
