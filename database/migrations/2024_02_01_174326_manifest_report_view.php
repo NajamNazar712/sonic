@@ -14,10 +14,11 @@ class ManifestReportView extends Migration
  */
 public function up()
 {
-$manifest_report = "Create or Replace VIEW `manifest_report` AS SELECT
+$manifest_report = "Create or Replace VIEW `manifest_report` AS 
+SELECT
 `sh`.`created_at`        AS `created_at`,
 `sh`.`id`                AS `id`,
-`u`.`city_id`            AS `origin`,
+`ur`.`city_id`            AS `origin`,
 `oc`.`name`              AS `origin_name`,
 `oz`.`name`              AS `origin_zonecode`,
 `sh`.`consignee_city_id` AS `shipment_destination`,
@@ -36,8 +37,9 @@ NULL                     AS `mr_code`,
 'Misroute'               AS `Misroute`,
 NULL                     AS `wmcode`,
 'Without_manifest'       AS `Without_manifest`
-FROM (((((((((`shipments` `sh`
+FROM ((((((((((`shipments` `sh`
 JOIN `users` `u`)
+JOIN `user_shipping_infos` `ur`)
 JOIN `segments` `p`)
 JOIN `sub_category_segments` `sp`)
 JOIN `cities` `c`)
@@ -49,6 +51,7 @@ JOIN `shipments_journey` `sj`)
 WHERE ((`sh`.`id` = `sj`.`shipment_id`)
 AND (`sj`.`shipper_status_id` = '2')
 AND (`sh`.`user_id` = `u`.`id`)
+AND (`u`.`id` = `ur`.`user_id`)
 AND (`p`.`id` = `sp`.`segment_id`)
 AND (`u`.`segment_id` = `p`.`id`)
 AND (`u`.`sub_segment_id` = `sp`.`id`)
@@ -56,10 +59,12 @@ AND (`c`.`zone_id` = `z`.`id`)
 AND (`oc`.`zone_id` = `oz`.`id`)
 AND (`rc`.`id` = `sj`.`city_id`)
 AND (`sh`.`consignee_city_id` = `c`.`id`)
-AND (`u`.`city_id` = `oc`.`id`))UNION SELECT
+AND (`ur`.`city_id` = `oc`.`id`)
+AND (`sh`.`pickup_address_id` = `ur`.`id` ) )
+UNION SELECT
 `sh`.`created_at`         AS `created_at`,
 `sh`.`id`                 AS `id`,
-`u`.`city_id`             AS `origin`,
+`ur`.`city_id`             AS `origin`,
 `oc`.`name`               AS `origin_name`,
 `oz`.`name`               AS `origin_zonecode`,
 `sh`.`consignee_city_id`  AS `shipment_destination`,
@@ -78,8 +83,9 @@ NULL                      AS `Misroute_code`,
 'Misroute'                AS `Misroute`,
 NULL                      AS `wm_code`,
 'Without_manifest'        AS `Without_manifest`
-FROM (((((((((`shipments` `sh`
+FROM ((((((((((`shipments` `sh`
 JOIN `users` `u`)
+JOIN `user_shipping_infos` `ur`)
 JOIN `segments` `p`)
 JOIN `sub_category_segments` `sp`)
 JOIN `cities` `c`)
@@ -91,6 +97,7 @@ JOIN `shipments_journey` `sj`)
 WHERE ((`sh`.`id` = `sj`.`shipment_id`)
 AND (`sj`.`shipper_status_id` = '3')
 AND (`sh`.`user_id` = `u`.`id`)
+AND (`u`.`id` = `ur`.`user_id`)
 AND (`p`.`id` = `sp`.`segment_id`)
 AND (`u`.`segment_id` = `p`.`id`)
 AND (`u`.`sub_segment_id` = `sp`.`id`)
@@ -98,10 +105,12 @@ AND (`c`.`zone_id` = `z`.`id`)
 AND (`oc`.`zone_id` = `oz`.`id`)
 AND (`rc`.`id` = `sj`.`city_id`)
 AND (`sh`.`consignee_city_id` = `c`.`id`)
-AND (`u`.`city_id` = `oc`.`id`))UNION SELECT
+AND (`ur`.`city_id` = `oc`.`id`)
+AND (`sh`.`pickup_address_id` = `ur`.`id` ))
+UNION SELECT
 `sh`.`created_at`          AS `created_at`,
 `sh`.`id`                  AS `id`,
-`u`.`city_id`              AS `origin`,
+`ur`.`city_id`              AS `origin`,   -- by atf
 `oc`.`name`                AS `origin_name`,
 `oz`.`name`                AS `origin_zonecode`,
 `sh`.`consignee_city_id`   AS `shipment_destination`,
@@ -120,8 +129,9 @@ NULL                       AS `NULL`,
 'Misroute'                 AS `Misroute`,
 NULL                       AS `wm_code`,
 'Without_manifest'         AS `Without_manifest`
-FROM (((((((((`shipments` `sh`
+FROM ((((((((((`shipments` `sh`
 JOIN `users` `u`)
+JOIN `user_shipping_infos` `ur`)
 JOIN `segments` `p`)
 JOIN `sub_category_segments` `sp`)
 JOIN `cities` `c`)
@@ -133,6 +143,9 @@ JOIN `shipments_journey` `sj`)
 WHERE ((`sh`.`id` = `sj`.`shipment_id`)
 AND (`sj`.`shipper_status_id` IN('68','11'))
 AND (`sh`.`user_id` = `u`.`id`)
+AND (`u`.`id` = `ur`.`user_id`)
+AND (`ur`.`city_id` = `oc`.`id`)
+AND (`sh`.`pickup_address_id` = `ur`.`id` )
 AND (`p`.`id` = `sp`.`segment_id`)
 AND (`u`.`segment_id` = `p`.`id`)
 AND (`u`.`sub_segment_id` = `sp`.`id`)
@@ -140,49 +153,54 @@ AND (`c`.`zone_id` = `z`.`id`)
 AND (`oc`.`zone_id` = `oz`.`id`)
 AND (`rc`.`id` = `sj`.`city_id`)
 AND (`sh`.`consignee_city_id` = `c`.`id`)
-AND (`u`.`city_id` = `oc`.`id`))UNION SELECT
-		 `sh`.`created_at`           AS `created_at`,
-		 `sh`.`id`                   AS `id`,
-		 `u`.`city_id`               AS `origin`,
-		 `oc`.`name`                 AS `origin_name`,
-		 `oz`.`name`                 AS `origin_zonecode`,
-		 `sh`.`consignee_city_id`    AS `shipment_destination`,
-		 `sj`.`shipper_status_id`    AS `shipper_status_id`,
-		 `rc`.`name`                 AS `shipment_receiving_destination`,
-		 `sh`.`tracking_number`      AS `shipment_tracking_number`,
-		 `c`.`name`                  AS `destination_name`,
-		 `z`.`name`                  AS `destination_zonecode`,
-		 `p`.`name`                  AS `parent_prod_name`,
-		 `sp`.`name`                 AS `sub_prod_name`,
-		 NULL                        AS `NULL`,
-		 NULL                        AS `arrival`,
-		 NULL                        AS `NULL`,
-		 NULL                        AS `NULL`,
-		 NULL                        AS `NULL`,
-		 NULL                        AS `NULL`,
-		 (CASE WHEN (`sj`.`shipper_status_id` = 67) THEN 1 ELSE 0 END) AS `WM_cont`,
-		 'Without_manifest'          AS `Without_manifest`
-	       FROM (((((((((`shipments` `sh`
-			  JOIN `users` `u`)
-			 JOIN `segments` `p`)
-			JOIN `sub_category_segments` `sp`)
-		       JOIN `cities` `c`)
-		      JOIN `zones` `z`)
-		     JOIN `cities` `oc`)
-		    JOIN `cities` `rc`)
-		   JOIN `zones` `oz`)
-		  JOIN `shipments_journey` `sj`)
-	       WHERE ((`sh`.`id` = `sj`.`shipment_id`)
-		      AND (`sj`.`shipper_status_id` = '67')
-		      AND (`sh`.`user_id` = `u`.`id`)
-		      AND (`p`.`id` = `sp`.`segment_id`)
-		      AND (`u`.`segment_id` = `p`.`id`)
-		      AND (`u`.`sub_segment_id` = `sp`.`id`)
-		      AND (`c`.`zone_id` = `z`.`id`)
-		      AND (`oc`.`zone_id` = `oz`.`id`)
-		      AND (`rc`.`id` = `sj`.`city_id`)
-		      AND (`sh`.`consignee_city_id` = `c`.`id`)
-		      AND (`u`.`city_id` = `oc`.`id`))";
+)
+UNION SELECT
+`sh`.`created_at`           AS `created_at`,
+`sh`.`id`                   AS `id`,
+`ur`.`city_id`               AS `origin` ,
+`oc`.`name`                 AS `origin_name`,
+`oz`.`name`                 AS `origin_zonecode`,
+`sh`.`consignee_city_id`    AS `shipment_destination`,
+`sj`.`shipper_status_id`    AS `shipper_status_id`,
+`rc`.`name`                 AS `shipment_receiving_destination`,
+`sh`.`tracking_number`      AS `shipment_tracking_number`,
+`c`.`name`                  AS `destination_name`,
+`z`.`name`                  AS `destination_zonecode`,
+`p`.`name`                  AS `parent_prod_name`,
+`sp`.`name`                 AS `sub_prod_name`,
+NULL                        AS `NULL`,
+NULL                        AS `arrival`,
+NULL                        AS `NULL`,
+NULL                        AS `NULL`,
+NULL                        AS `NULL`,
+NULL                        AS `NULL`,
+(CASE WHEN (`sj`.`shipper_status_id` = 67) THEN 1 ELSE 0 END) AS `WM_cont`,
+'Without_manifest'          AS `Without_manifest`
+FROM ((((((((((`shipments` `sh`
+JOIN `users` `u`)
+JOIN `user_shipping_infos` `ur`)
+JOIN `segments` `p`)
+JOIN `sub_category_segments` `sp`)
+JOIN `cities` `c`)
+JOIN `zones` `z`)
+JOIN `cities` `oc`)
+JOIN `cities` `rc`)
+JOIN `zones` `oz`)
+JOIN `shipments_journey` `sj`)
+WHERE ((`sh`.`id` = `sj`.`shipment_id`)
+AND (`sj`.`shipper_status_id` = '67')
+AND (`sh`.`user_id` = `u`.`id`)
+AND (`u`.`id` = `ur`.`user_id`)
+AND (`ur`.`city_id` = `oc`.`id`)
+AND (`sh`.`pickup_address_id` = `ur`.`id` )
+AND (`p`.`id` = `sp`.`segment_id`)
+AND (`u`.`segment_id` = `p`.`id`)
+AND (`u`.`sub_segment_id` = `sp`.`id`)
+AND (`c`.`zone_id` = `z`.`id`)
+AND (`oc`.`zone_id` = `oz`.`id`)
+AND (`rc`.`id` = `sj`.`city_id`)
+AND (`sh`.`consignee_city_id` = `c`.`id`)
+)";
 
 $manifest_report2 = "CREATE or replace VIEW manifest_report2 as
 select cast(`k`.`created_at` as date) AS `booking_date`,`k`.`origin_zonecode` AS `origin_zonecode`,`k`.`destination_zonecode` AS `destination_zonecode`,count(`k`.`id`) AS `COUNT(id)`,`k`.`parent_prod_name` AS `parent_prod_name`,`k`.`sub_prod_name` AS `sub_prod_name`,sum(`k`.`arrival_count`) AS `arrival`,sum(`k`.`manifest_code`) AS `manifest`,sum(`k`.`mr_code`) AS `misroute`,sum(`k`.`wmcode`) AS `withoutmanifest` from `manifest_report` `k` group by cast(`k`.`created_at` as date),`k`.`origin_zonecode`,`k`.`destination_zonecode`,`k`.`parent_prod_name`,`k`.`sub_prod_name`";
