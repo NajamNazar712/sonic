@@ -50,7 +50,7 @@ class HourlyShipperLogisticBookingEmailCron extends Command
         if($shippers->exists())
         {
             $shippers=$shippers->pluck('trax_logistic_bookings.shipper_id','u.email');
-            Log::channel('code_test_log')->info('logisticbooking-1'.json_encode($shippers));
+//            Log::channel('code_test_log')->info('logisticbooking-1'.json_encode($shippers));
 
             NotificationsController::send(233,$shippers,$date);
         }
