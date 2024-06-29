@@ -11151,7 +11151,7 @@ class NotificationsController extends Controller
 
                         } catch (\Throwable $th){
                             DB::rollBack();
-                            Log::error('failed-logisticbooking-email'.json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
+                            Log::channel('cronJobLog.log')->error('failed-logisticbooking-email'.json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
                         }
                     }
 
