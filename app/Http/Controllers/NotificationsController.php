@@ -11080,6 +11080,7 @@ class NotificationsController extends Controller
                     $shipper_ids=$reference_1_id;
                     $date=$reference_2_id;
                     $booking_ids=[];
+                    Log::channel('code_test_log')->info('logisticbooking-2'.json_encode($shipper_ids));
 
                     foreach ($shipper_ids as $user_email=>$shipper_id) {
                         $current_body = $body;
@@ -11098,6 +11099,8 @@ class NotificationsController extends Controller
                                 ->where('trax_logistic_bookings.booking_date',$date)
                                     ->where('trax_logistic_bookings.is_email',0)
                                     ->where('trax_logistic_bookings.shipper_id',$shipper_id)->get();
+                            Log::channel('code_test_log')->info('logisticbooking-3'.json_encode($logisticbookings));
+
                         }
 
                         $html = '<table style="width:100%;border-collapse: collapse;">';
