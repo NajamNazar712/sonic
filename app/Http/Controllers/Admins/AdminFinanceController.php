@@ -6824,7 +6824,7 @@ class AdminFinanceController extends Controller
                     ->where('sj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id', 'sj.created_at as arrival_date', 's.packaging_charges', 'u.id as shipper_id');
+            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id', 'sj.created_at as arrival_date', 's.packaging_charges', 'u.id as shipper_id','u.account_type_id');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -6907,6 +6907,13 @@ class AdminFinanceController extends Controller
             })
             ->filterColumn('deductable', function ($query, $keyword) {
                 $query->where(DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst'), '=', $keyword);
+            })
+            ->editColumn('account_type_id', function ($pending_payment_shipment) {
+                if ($pending_payment_shipment->account_type_id == 1) {
+                    return 'Reimbursement';
+                } else{
+                    return 'Corporate';
+                }
             })
             ->orderColumn('deductable', DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst') . ' $1');
 
@@ -9238,7 +9245,9 @@ class AdminFinanceController extends Controller
                     $billing_period_from_date = Carbon::now()->subDays(1)->startOfDay()->toDateString();
                     //}
                 }
+                //$generate = TRUE;
 
+                //$billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
                 if ($generate) {
 
                     $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<=', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
@@ -10258,6 +10267,7 @@ class AdminFinanceController extends Controller
         $invoice = InvoiceForReimbursement::find($id);
 
         $shipper = $invoice->shipper;
+        $arrival_charges_applied = $shipper->arrival_charges_applied;
 
         $shipper_bank = $shipper->bank()->where('default_bank', 1)->first();
 
@@ -10441,8 +10451,8 @@ class AdminFinanceController extends Controller
                           <td>' . $shipment->shipping_mode->mode . '</td>
                           <td>' . $date . '</td>
                           <td>' . $shipment->actual_weight . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied)))  ? number_format($shipment->weight_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
@@ -10503,20 +10513,28 @@ class AdminFinanceController extends Controller
                     $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                     $total_replacement_charges[$origin] += $shipment->replacement_charges;
                     $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
-                } else {
+                }else if($invoice_shipment->type == 3) {
+
+                }
+                else {
                     $total_return_charges[$origin] += $shipment->return_charges;
                 }
 
-                $total_weight_charges[$origin] += $shipment->weight_charges;
-
-                if ($shipment->packaging_material_request) {
-                    $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                if($invoice_shipment->type == 3) {
+                    $total_weight_charges[$origin] += $shipment->weight_charges;
+                    $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                }else{
+                    if ($shipment->packaging_material_request) {
+                        $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                    }
+                    $total_insurance_charges[$origin] += $shipment->insurance_charges;
+                    $total_intercept_charges[$origin] += $shipment->intercept_charges;
+                    $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                    if(!$arrival_charges_applied){
+                        $total_weight_charges[$origin] += $shipment->weight_charges;
+                        $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                    }
                 }
-
-                $total_insurance_charges[$origin] += $shipment->insurance_charges;
-                $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
-                $total_intercept_charges[$origin] += $shipment->intercept_charges;
-                $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
             } else {
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
@@ -11411,6 +11429,7 @@ class AdminFinanceController extends Controller
 
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
+            $arrival_charges_applied = $shipment->arrival_charges_applied;
 
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
@@ -11495,20 +11514,28 @@ class AdminFinanceController extends Controller
                     $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                     $total_replacement_charges[$origin] += $shipment->replacement_charges;
                     $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
-                } else {
+                }else if($invoice_shipment->type == 3) {
+
+                }
+                else {
                     $total_return_charges[$origin] += $shipment->return_charges;
                 }
 
-                $total_weight_charges[$origin] += $shipment->weight_charges;
-
-                if ($shipment->packaging_material_request) {
-                    $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                if($invoice_shipment->type == 3) {
+                    $total_weight_charges[$origin] += $shipment->weight_charges;
+                    $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                }else{
+                    if ($shipment->packaging_material_request) {
+                        $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                    }
+                    $total_insurance_charges[$origin] += $shipment->insurance_charges;
+                    $total_intercept_charges[$origin] += $shipment->intercept_charges;
+                    $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                    if(!$arrival_charges_applied){
+                        $total_weight_charges[$origin] += $shipment->weight_charges;
+                        $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                    }
                 }
-
-                $total_insurance_charges[$origin] += $shipment->insurance_charges;
-                $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
-                $total_intercept_charges[$origin] += $shipment->intercept_charges;
-                $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
             } else {
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
@@ -12564,6 +12591,7 @@ class AdminFinanceController extends Controller
 
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
+            $arrival_charges_applied = $shipment->arrival_charges_applied;
 
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
@@ -12607,8 +12635,8 @@ class AdminFinanceController extends Controller
                           <td>' . $shipment->shipping_mode->mode . '</td>
                           <td>' . $date . '</td>
                           <td>' . $shipment->actual_weight . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied)))  ? number_format($shipment->weight_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
@@ -12681,15 +12709,28 @@ class AdminFinanceController extends Controller
                     $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                     $total_replacement_charges[$origin] += $shipment->replacement_charges;
                     $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
-                } else {
+                }else if($invoice_shipment->type == 3) {
+
+                }
+                else {
                     $total_return_charges[$origin] += $shipment->return_charges;
                 }
 
-                $total_weight_charges[$origin] += $shipment->weight_charges;
-                $total_insurance_charges[$origin] += $shipment->insurance_charges;
-                $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
-                $total_intercept_charges[$origin] += $shipment->intercept_charges;
-                $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                if($invoice_shipment->type == 3) {
+                    $total_weight_charges[$origin] += $shipment->weight_charges;
+                    $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                }else{
+                    if ($shipment->packaging_material_request) {
+                        $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                    }
+                    $total_insurance_charges[$origin] += $shipment->insurance_charges;
+                    $total_intercept_charges[$origin] += $shipment->intercept_charges;
+                    $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                    if(!$arrival_charges_applied){
+                        $total_weight_charges[$origin] += $shipment->weight_charges;
+                        $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                    }
+                }
             } else {
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
@@ -13991,6 +14032,7 @@ class AdminFinanceController extends Controller
 
                 foreach ($payment_shipments as $invoice_shipment) {
                     $shipment = $invoice_shipment->shipment;
+                    $arrival_charges_applied = $shipment->arrival_charges_applied;
 
                     $shipment_weight = $shipment->actual_weight;
                     $weight_charges = $shipment->weight_charges;
@@ -14030,8 +14072,8 @@ class AdminFinanceController extends Controller
                                       <td>' . $shipment->shipping_mode->mode . '</td>
                                       <td>' . $date . '</td>
                                       <td>' . $shipment_weight . '</td>
-                                      <td>' . (($invoice_shipment->type != 2) ? number_format($weight_charges, 2) : '0') . '</td>
-                                      <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
+                                      <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied)))  ? number_format($weight_charges, 2) : '0') . '</td>
+                                      <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
                                       <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                                       <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->payable, 2) : '0') . '</td>
                                       <td>' . number_format($invoice_shipment->charges, 2) . '</td>
@@ -14047,20 +14089,28 @@ class AdminFinanceController extends Controller
                                 $total_cash_handling_charges += $shipment->cash_handling_charges;
                                 $total_replacement_charges += $shipment->replacement_charges;
                                 $total_try_and_buy_charges += $shipment->try_and_buy_charges;
-                            } else {
+                            } elseif($invoice_shipment->type == 3) {
+
+                            }
+                            else {
                                 $total_return_charges += $shipment->return_charges;
                             }
 
-                            $total_weight_charges += $weight_charges;
-
-                            if ($shipment->packaging_material_request) {
-                                $total_packaging_material_charges += $shipment->packaging_material_charges;
+                            if($invoice_shipment->type == 3) {
+                                $total_weight_charges += $weight_charges;
+                                $total_fuel_surcharge += $shipment->fuel_surcharge;
+                            }else{
+                                if ($shipment->packaging_material_request) {
+                                    $total_packaging_material_charges += $shipment->packaging_material_charges;
+                                }
+                                $total_insurance_charges += $shipment->insurance_charges;
+                                $total_intercept_charges += $shipment->intercept_charges;
+                                $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                                if(!$arrival_charges_applied){
+                                    $total_weight_charges += $weight_charges;
+                                    $total_fuel_surcharge += $shipment->fuel_surcharge;
+                                }
                             }
-
-                            $total_insurance_charges += $shipment->insurance_charges;
-                            $total_fuel_surcharge += $shipment->fuel_surcharge;
-                            $total_intercept_charges += $shipment->intercept_charges;
-                            $total_nsa_osa_charges += $shipment->nsa_osa_charges;
                         } else {
                             $total_adjustment_charges += $invoice_shipment->payable;
 
@@ -18925,5 +18975,20 @@ class AdminFinanceController extends Controller
          }
      }
 
+     public function make_payments_invoice(Request $request){
+         if(isset($request->pending_payment_shipment_ids)){
+             $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', explode(',', $request->pending_payment_shipment_ids))->select('pending_payment_id')->pluck('pending_payment_id')->toArray();
+             foreach ($pending_payment_shipment_ids as $pending_payment_id) {
+                 $pending_payment = PendingPayment::find($pending_payment_id);
+
+                 if ($pending_payment) {
+
+                 }
+             }
+             return ['status' => 1];
+         }else{
+             return ['status' => 0];
+         }
+     }
 
  }
