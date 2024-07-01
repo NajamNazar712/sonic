@@ -133,6 +133,7 @@
                         @if (session('user_type') == 1 || in_array(14, session('permissions')))
                             <li><a href="{{ route('cod.finance.invoice.index') }}">Invoice</a></li>
                         @endif
+                        <li><a href="{{ route('cod.finance.shipment_ledger.index') }}">Shipment Ledger</a></li>
                     </ul>
                 </li>
             @endif

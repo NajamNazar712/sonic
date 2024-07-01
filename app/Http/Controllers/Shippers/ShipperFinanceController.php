@@ -34,6 +34,7 @@ use NumberToWords\NumberToWords;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use App\Http\Models\ShipmentLedger;
 
 class ShipperFinanceController extends Controller
 {
@@ -4906,6 +4907,32 @@ class ShipperFinanceController extends Controller
         return $html;
 
 
+    }
+
+    public function shipment_ledger()
+    {
+        return view('client.finance.service_ledger.index');
+    }
+
+    public function shipment_ledger_list(Request $request)
+    {
+        $from_date = $request->input('formData.from_date');
+        $to_date = $request->input('formData.to_date');
+
+        $from_date = date('Y-m-d', strtotime(str_replace(',', '', $from_date)));
+        $to_date = date('Y-m-d', strtotime(str_replace(',', '', $to_date)));
+
+        $shipment_ledger = ShipmentLedger::where('user_id', Auth::user()->id)
+        ->whereDate('shipment_book_date', '>=', $from_date)
+        ->whereDate('shipment_book_date', '<=', $to_date)
+        ->join('cities as origin_city', 'shipment_ledgers.origin', '=', 'origin_city.id')
+        ->join('cities as destination_city', 'shipment_ledgers.destination', '=', 'destination_city.id')
+        ->select('shipment_ledgers.*', 'origin_city.name as origin_city_name', 'destination_city.name as destination_city_name')
+        ->get();
+
+        return response()->json([
+            'data' => $shipment_ledger
+        ]);
     }
 
 }

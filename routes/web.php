@@ -348,6 +348,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
                 Route::post('print', 'Shippers\ShipperFinanceController@invoice_reimbursement_print')->name('invoices_print');
             });
         });
+
+        Route::prefix('shipment_ledger')->name('shipment_ledger.')->group(function () {
+            Route::get('', 'Shippers\ShipperFinanceController@shipment_ledger')->name('index');
+            Route::get('list', 'Shippers\ShipperFinanceController@shipment_ledger_list')->name('list');
+        });
     });
 
     Route::prefix('reports')->name('reports.')->group(function () {

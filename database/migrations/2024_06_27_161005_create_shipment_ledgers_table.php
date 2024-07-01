@@ -29,7 +29,7 @@ class CreateShipmentLedgersTable extends Migration
             $table->integer('origin')->nullable();
             $table->integer('destination')->nullable();
             $table->float('cod_amount', 15, 2)->nullable();
-            $table->integer('type_of_charges')->nullable();
+            $table->string('type_of_charges')->nullable();
             $table->float('weight_charges', 15, 2)->nullable();
             $table->float('fuel_surcharge', 15, 2)->nullable();
             $table->float('gst', 15, 2)->nullable();

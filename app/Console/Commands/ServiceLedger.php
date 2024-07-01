@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\PendingInvoiceShipment;
+use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentLedger;
 use App\Http\Models\ShipmentsJourney;
@@ -51,20 +53,56 @@ class ServiceLedger extends Command
         $users = User::where('status', 3)->get();
         foreach ($users as $user) {
             $shipments = Shipment::where('user_id', $user->id)->get();
-            $type_of_charges = '';
+            // $totalShipments = $shipments->count();
+            $totalShipmentsPicked = DB::table('shipments')
+            ->join('shipments_journey', 'shipments.id', '=', 'shipments_journey.shipment_id')
+            ->where('shipments.user_id', $user->id)
+            ->where('shipments_journey.shipper_status_id', 2)
+            ->count();
 
-            $totalShipments = $shipments->count();
             foreach ($shipments as $shipment) {
                 $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
                     ->where('shipper_status_id', 2)
                     ->first();
                 $done_shipment_payment = DonePaymentShipment::where('shipment_id', $shipment->id)->get();
+
                 // Calculate credit
                 $credit = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->fuel_surcharge;
 
                 // Calculate debit and total debit amount
                 $totalDebit = $done_shipment_payment->sum('charges');
                 $balance = $credit - $totalDebit;
+
+                $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id)->first();
+                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id)->first();
+
+                if ($pending_invoice_shipment) {
+                    if ($pending_invoice_shipment->type == 0) {
+                        $type_of_charges = 'Delivered';
+                    } elseif ($pending_invoice_shipment->type == 1) {
+                        $type_of_charges = 'Returned';
+                    } elseif ($pending_invoice_shipment->type == 2) {
+                        $type_of_charges = 'Adjusted';
+                    } elseif ($pending_invoice_shipment->type == 3) {
+                        $type_of_charges = 'Arrived';
+                    } else {
+                        $type_of_charges = 'Unknown Type';
+                    }
+                } elseif ($pending_payment_shipment) {
+                    if ($pending_payment_shipment->type == 0) {
+                        $type_of_charges = 'Delivered';
+                    } elseif ($pending_payment_shipment->type == 1) {
+                        $type_of_charges = 'Returned';
+                    } elseif ($pending_payment_shipment->type == 2) {
+                        $type_of_charges = 'Adjusted';
+                    } elseif ($pending_payment_shipment->type == 3) {
+                        $type_of_charges = 'Arrived';
+                    } else {
+                        $type_of_charges = 'Unknown Type';
+                    }
+                } else {
+                    $type_of_charges = 'Type Not Found';
+                }
 
                 // Ledger entry for "Shipment Picked"
                 if ($shipments_journey && $shipments_journey->shipper_status_id == 2) {
@@ -78,12 +116,12 @@ class ServiceLedger extends Command
                         'credit' => $credit,
                         'balance' => $credit,
                         'ledger_time' => now(),
-                        'number_of_shipments' => $totalShipments,
+                        'number_of_shipments' => $totalShipmentsPicked,
                         'tracking_number' => $shipment->tracking_number,
                         'origin' => $user->city_id,
                         'destination' => $shipment->consignee_city_id,
                         'cod_amount' => $shipment->amount,
-                        'type_of_charges' => null,
+                        'type_of_charges' => $type_of_charges,
                         'weight_charges' => $shipment->weight_charges,
                         'fuel_surcharge' => $shipment->fuel_surcharge,
                         'gst' => $shipment->gst,
@@ -92,6 +130,7 @@ class ServiceLedger extends Command
                     ]);
                 }
 
+                $totalDoneShipments = DonePaymentShipment::whereIn('shipment_id', $shipments->pluck('id'))->count();
                 // Ledger entry for "Charges"
                 if ($totalDebit > 0) {
                     ShipmentLedger::create([
@@ -104,12 +143,12 @@ class ServiceLedger extends Command
                         'credit' => $credit,
                         'balance' => $credit - $totalDebit,
                         'ledger_time' => now(),
-                        'number_of_shipments' => $totalShipments,
+                        'number_of_shipments' => $totalDoneShipments,
                         'tracking_number' => $shipment->tracking_number,
                         'origin' => $user->city_id,
                         'destination' => $shipment->consignee_city_id,
                         'cod_amount' => $shipment->amount,
-                        'type_of_charges' => null,
+                        'type_of_charges' => $type_of_charges,
                         'weight_charges' => $shipment->weight_charges,
                         'fuel_surcharge' => $shipment->fuel_surcharge,
                         'gst' => $shipment->gst,
@@ -119,6 +158,7 @@ class ServiceLedger extends Command
                 }
 
                 // Ledger entries for "Payment"
+                $totalDoneShipments = DonePaymentShipment::whereIn('shipment_id', $shipments->pluck('id'))->count();
                 foreach ($done_shipment_payment as $payment) {
                     $remainingBalance = $balance - $payment->charges;
                     ShipmentLedger::create([
@@ -131,12 +171,12 @@ class ServiceLedger extends Command
                         'credit' => $remainingBalance, 
                         'balance' => $remainingBalance,
                         'ledger_time' => now(),
-                        'number_of_shipments' => $totalShipments,
+                        'number_of_shipments' => $totalDoneShipments,
                         'tracking_number' => $shipment->tracking_number,
                         'origin' => $user->city_id,
                         'destination' => $shipment->consignee_city_id,
                         'cod_amount' => $shipment->amount,
-                        'type_of_charges' => null,
+                        'type_of_charges' => $type_of_charges,
                         'weight_charges' => $shipment->weight_charges,
                         'fuel_surcharge' => $shipment->fuel_surcharge,
                         'gst' => $payment->gst,

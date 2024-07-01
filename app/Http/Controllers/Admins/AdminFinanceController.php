@@ -18944,7 +18944,11 @@ class AdminFinanceController extends Controller
         $shipment_ledger = ShipmentLedger::where('user_id', $shipper_id)
         ->whereDate('shipment_book_date', '>=', $from_date)
         ->whereDate('shipment_book_date', '<=', $to_date)
+        ->join('cities as origin_city', 'shipment_ledgers.origin', '=', 'origin_city.id')
+        ->join('cities as destination_city', 'shipment_ledgers.destination', '=', 'destination_city.id')
+        ->select('shipment_ledgers.*', 'origin_city.name as origin_city_name', 'destination_city.name as destination_city_name')
         ->get();
+
         return response()->json([
             'data' => $shipment_ledger
         ]);

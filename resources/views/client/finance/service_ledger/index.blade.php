@@ -1,4 +1,4 @@
-@extends('admin.layout.master')
+@extends('client.layout.master')
 @section('title','Service Ledger')
 
 
@@ -13,17 +13,7 @@
                 @include('admin.inc.messages')
                 <form action="{{ route('admin.finance.shipment_ledger.list') }}" method="GET" id="search_form">
                     <div class="row">
-                        <div class="col-4">
-                            <label for="">Shipper Name</label>
-                            <select name="shippers" id="shippers" class="form-control select2" data-rule-required="true" data-msg-required="Shipper is required">
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                @endforeach
-                            </select>
-                            <span class="text-danger d-none" id="shipper_error">This field is required</span>
-                        </div>
-    
-                        <div class="col-4">
+                        <div class="col-5">
                             <label for="">Date (From)</label>
                             <div class="form-group input-group mb-0">
                                 <div class="input-group-prepend">
@@ -31,12 +21,12 @@
                                         <span class="la la-calendar-o"></span>
                                     </span>
                                 </div>
-                                <input type="text" name="from_date" id="from_date" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Date (From)" data-rule-required="true" data-msg-required="From date is required">
-                            </div>
+                                <input type="text" name="from_date" id="from_date" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Date (From)">
+                                </div>
                             <span class="text-danger d-none" id="from_date_error">This field is required</span>
                         </div>
     
-                        <div class="col-4">
+                        <div class="col-5">
                             <label for="">Date (To)</label>
                             <div class="form-group input-group mb-0">
                                 <div class="input-group-prepend">
@@ -44,11 +34,11 @@
                                         <span class="la la-calendar-o"></span>
                                     </span>
                                 </div>
-                                <input type="text" name="to_date" id="to_date" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Date (To)" data-rule-required="true" data-msg-required="To date is required">
+                                <input type="text" name="to_date" id="to_date" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Date (To)">
                             </div>
                             <span class="text-danger d-none" id="to_date_error">This field is required</span>
                         </div>
-                        <div class="ml-2 mt-2" id="search_btn_div">
+                        <div class="ml-2" id="search_btn_div">
                             <button type="button" class="btn btn-primary" id="search_btn">
                                 Search
                             </button>
@@ -141,6 +131,7 @@
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
@@ -151,10 +142,16 @@
         .info_modal{
             max-width: 110rem;
         }
+
+        #search_btn_div{
+            margin: 29px 0px 0px 0px;
+        }
     </style>
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
@@ -196,31 +193,21 @@
             }
         });
 
-        $('#shippers').prepend('<option selected></option>').select2({
-            placeholder: 'Select a Shipper',
-            width: '100%',
-            allowClear: true
-        });
-
         $('#search_btn').on('click', function () {
-
-            var shippers = $('#shippers').val();
-            var from_date = $('#from_date').val();
-            var to_date = $('#to_date').val();
-
-            if (shippers == '' || from_date == '' || to_date == '') {
-                $('#shipper_error, #from_date_error, #to_date_error').removeClass('d-none');
+            
+            if ($('#from_date').val() == '' || $('#to_date').val() == '' || ($('#from_date').val() == '' && $('#to_date').val() == '')){
+                $('#from_date_error, #to_date_error').removeClass('d-none');
             }
 
             else {
+                $('#from_date_error, #to_date_error').addClass('d-none');
                 var formData = {
-                    shippers: $('#shippers').val(),
                     from_date: $('#from_date').val(),
                     to_date: $('#to_date').val()
                 };
 
                 $.ajax({
-                    url: "{{ route('admin.finance.shipment_ledger.list') }}",
+                    url: "{{ route('cod.finance.shipment_ledger.list') }}",
                     data: { formData },
                     success: function (response) {
                         if ($.fn.DataTable.isDataTable('#datatable')) {
@@ -292,8 +279,6 @@
                     }
                 });
             }
-
-
         });
 
 
