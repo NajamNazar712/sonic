@@ -11392,10 +11392,81 @@ class AdminDashboardController extends Controller
                 }
 
                 // --------------x-------------------x-------------x---------------
-                
+
                 // --------------x-------------------x-------------x---------------
 
                 // for creating mappings from destination to origin (2nd way)
+                $closestHubDestinationMappings = V2JunctionMapping::where('destination_id', $closestHubId)->get();
+
+                foreach ($closestHubDestinationMappings as  $closestHubMapping) {
+                    
+                    $mapping = new V2JunctionMapping();
+
+                    $mapping->origin_id = $closestHubMapping->origin_id; //here origin will be the closest hub for all mappings
+                    $mapping->destination_id = $city->id;//here destination will be the newly created hub for all mappings
+                    $mapping->status = $closestHubMapping->status;
+                    $mapping->updated_by = $authId;
+                    $mapping->save();
+
+                    $junctions = V2Junctions::where('junction_mapping_id', $closestHubMapping->id)->get();
+
+                    foreach ($junctions as $j) {
+                        $junction = new V2Junctions();
+                        $junction->junction_mapping_id = $mapping->id;
+                        $junction->junction_id = $j->junction_id;
+                        $junction->save();
+                    }
+
+                    $previous = $mapping->destination_id;
+
+                    $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
+
+                    foreach ($routeJunctions as $rj) {
+                        $route_junction = new V2JunctionRoutes();
+                        $route_junction->junction_mapping_id = $mapping->id;
+                        $route_junction->starting_hub_id = $previous;
+                        $route_junction->ending_hub_id = $rj->ending_hub_id;
+                        $route_junction->save();
+            
+                        $previous = $rj->ending_hub_id;
+
+                        $vehicles = V2JunctionVehicles::where('junction_route_id', $rj->id)->get();
+            
+                        foreach ($vehicles as $vehicle) {
+                            $route_vehicle = new V2JunctionVehicles();
+                            $route_vehicle->junction_route_id = $route_junction->id;
+                            $route_vehicle->vehicle_id = $vehicle->vehicle_id;
+                            $route_vehicle->save();
+                        }
+                    }
+                    
+                }
+
+                //for creating second way mapping between the newly created hub and the closest hub
+                $mapping1 = new V2JunctionMapping();
+
+                $mapping1->origin_id = $closestHubId;
+                $mapping1->destination_id = $city->id;
+                $mapping1->updated_by = Auth::id();
+                $mapping1->save();
+
+                $route_junction1 = new V2JunctionRoutes();
+                $route_junction1->junction_mapping_id = $mapping1->id;
+                $route_junction1->starting_hub_id = $mapping1->origin_id;
+                $route_junction1->ending_hub_id = $mapping1->destination_id;
+                $route_junction1->save();
+
+                foreach ($vehicles as $vehicle) {
+                    $route_vehicle = new V2JunctionVehicles();
+                    $route_vehicle->junction_route_id = $route_junction1->id;
+                    $route_vehicle->vehicle_id = $vehicle;
+                    $route_vehicle->save();
+                }
+
+                // --------------x-------------------x-------------x---------------
+
+
+                // --------------x-------------------x-------------x----------
 
                 // Commit the transaction
                 DB::commit();
