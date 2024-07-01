@@ -185,6 +185,10 @@ use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
+use App\Http\Models\Admin\CargoManifest\V2JunctionMapping;
+use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
+use App\Http\Models\Admin\CargoManifest\V2Junctions;
+use App\Http\Models\Admin\CargoManifest\V2JunctionVehicles;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Commission\SalesCommissionExternalUser;
@@ -11298,6 +11302,51 @@ class AdminDashboardController extends Controller
 
             $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
             self::addManagementHubUser($admin_ids, $city->id);
+
+            //Check if Closest Hub Selected then auto assign mapping according to the selected hub to the new newly created hub.
+            // if closest_hub found then need to copy two way mappings of the closest hub to the newly created hub.
+            if ($closestHubId = $request->closest_hub) {
+                //take this hub as reference hub
+                $authId = Auth::id();
+
+                // for creating mappings from origin to destination (1st way)
+                $closestHubOriginMappings = V2JunctionMapping::with('junctions','routes')
+                ->where(['origin_id', $closestHubId])->get(['destination_id','status']);
+
+                foreach ($closestHubOriginMappings as  $closestHubMapping) {
+                    
+                    $mapping = new V2JunctionMapping();
+
+                    $mapping->origin_id = $city->id; //here origin will be the newly created hub for all mappings
+                    $mapping->destination_id = $closestHubMapping->destination_id;//destinations will be of the closest hub
+                    $mapping->status = $closestHubMapping->status;
+                    $mapping->updated_by = $authId;
+                    $mapping->save();
+                    
+                    V2Junctions::where('');
+
+                    $route_junction = new V2JunctionRoutes();
+                    $route_junction->junction_mapping_id = $mapping->id;
+                    $route_junction->starting_hub_id = $mapping->origin_id;
+                    $route_junction->ending_hub_id = $mapping->destination_id;
+                    $route_junction->save();
+
+                    foreach ($request->vehicles as $vehicle) {
+                        $route_vehicle = new V2JunctionVehicles();
+                        $route_vehicle->junction_route_id = $route_junction->id;
+                        $route_vehicle->vehicle_id = $vehicle;
+                        $route_vehicle->save();
+                    }
+                    
+                }
+
+                //for creating mapping between the newly created hub and the closest hub
+
+                // for creating mappings from destination to origin (2nd way)
+
+                
+                
+            }
 
             return redirect()->back()->with('success', 'Hub city added successfully');
         }
