@@ -11303,11 +11303,25 @@ class AdminDashboardController extends Controller
             $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
             self::addManagementHubUser($admin_ids, $city->id);
 
-            //Check if Closest Hub Selected then auto assign mapping according to the selected hub to the new newly created hub.
-            // if closest_hub found then need to copy two way mappings of the closest hub to the newly created hub.
+            //Check if Closest Hub is Selected then auto assign mappings according to the selected hub to the new newly created hub.
             if ($closestHubId = $request->closest_hub) {
-                //take this hub as reference hub
-                $authId = Auth::id();
+                $this->makeDynamicHubsMapping($request->vehicles, $closestHubId, $city);
+            }
+   
+        }
+
+        return redirect()->back()->with('success', 'Hub city added successfully');
+
+    }
+
+    private function makeDynamicHubsMapping($vehicles, $closestHubId, $city)
+    {
+            //take this hub as reference hub
+            $authId = Auth::id();
+
+            DB::beginTransaction();
+
+            try {
 
                 // for creating mappings from origin to destination (1st way)
                 $closestHubOriginMappings = V2JunctionMapping::where('origin_id', $closestHubId)->get();
@@ -11327,7 +11341,7 @@ class AdminDashboardController extends Controller
                     foreach ($junctions as $j) {
                         $junction = new V2Junctions();
                         $junction->junction_mapping_id = $mapping->id;
-                        $junction->junction_id = $j;
+                        $junction->junction_id = $j->junction_id;
                         $junction->save();
                     }
 
@@ -11349,7 +11363,7 @@ class AdminDashboardController extends Controller
                         foreach ($vehicles as $vehicle) {
                             $route_vehicle = new V2JunctionVehicles();
                             $route_vehicle->junction_route_id = $route_junction->id;
-                            $route_vehicle->vehicle_id = $vehicle;
+                            $route_vehicle->vehicle_id = $vehicle->vehicle_id;
                             $route_vehicle->save();
                         }
                     }
@@ -11357,15 +11371,40 @@ class AdminDashboardController extends Controller
                 }
 
                 //for creating mapping between the newly created hub and the closest hub
+                $mapping1 = new V2JunctionMapping();
+
+                $mapping1->origin_id = $city->id;
+                $mapping1->destination_id = $closestHubId;
+                $mapping1->updated_by = Auth::id();
+                $mapping1->save();
+
+                $route_junction1 = new V2JunctionRoutes();
+                $route_junction1->junction_mapping_id = $mapping1->id;
+                $route_junction1->starting_hub_id = $mapping1->origin_id;
+                $route_junction1->ending_hub_id = $mapping1->destination_id;
+                $route_junction1->save();
+
+                foreach ($vehicles as $vehicle) {
+                    $route_vehicle = new V2JunctionVehicles();
+                    $route_vehicle->junction_route_id = $route_junction1->id;
+                    $route_vehicle->vehicle_id = $vehicle;
+                    $route_vehicle->save();
+                }
+
+                // --------------x-------------------x-------------x---------------
+                
+                // --------------x-------------------x-------------x---------------
 
                 // for creating mappings from destination to origin (2nd way)
 
-                
-                
-            }
+                // Commit the transaction
+                DB::commit();
 
-            return redirect()->back()->with('success', 'Hub city added successfully');
-        }
+            } catch (\Exception $e) {
+                // Rollback the transaction if any error occurs
+                DB::rollBack();
+                throw $e;
+            }
     }
 
     public function CityStatus(Request $request)

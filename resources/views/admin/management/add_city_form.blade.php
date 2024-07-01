@@ -304,7 +304,8 @@
        
         $('#closest_hub_list').prepend('<option value="" selected></option>').select2({
             placeholder: 'Select Closest Hub (optional)',
-            allowClear: true
+            dropdownParent: $("#addCity"),
+            allowClear: true,
         }).bind('change', function() {
             $(this).valid();
             if ($(this).val() == '') {
