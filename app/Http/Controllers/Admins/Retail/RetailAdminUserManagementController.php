@@ -664,7 +664,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<thead>';
             $html .= '<tr>';
             $html .= '<th class="color primary">Product</th>';
-            $html .= '<th class="color primary">Approved Percentage</th>';
+            $html .= '<th class="color primary">Approved Percentage (Commission)</th>';
             $html .= '<th class="color primary">Shipments</th>';
             $html .= '<th class="color primary">Total Charges</th>';
             $html .= '<th class="color primary">GST</th>';
@@ -695,10 +695,10 @@ class RetailAdminUserManagementController extends Controller
                 $html .= '</tr>';
     
                 // Summing up totals
-                $total_shipments = $data->sum_of_shipments;
-                $total_charges = $data->sum_of_total_charges;
-                $total_gst = $data->sum_of_gst;
-                $total_weight_charges = $data->sum_of_weight_charges;
+                $total_shipments += $record->number_of_shipments;
+                $total_charges += $record->total_charges;
+                $total_gst += $record->franchise_gst_amount;
+                $total_weight_charges += $record->weight_charges;
                 $total_commission += $record->net_commission;
             }
     
@@ -906,7 +906,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<thead>';
             $html .= '<tr>';
             $html .= '<th class="color primary">Product</th>';
-            $html .= '<th class="color primary">Approved Percentage</th>';
+            $html .= '<th class="color primary">Approved Percentage (Commission)</th>';
             $html .= '<th class="color primary">Shipments</th>';
             $html .= '<th class="color primary">Total Charges</th>';
             $html .= '<th class="color primary">GST</th>';
@@ -928,7 +928,7 @@ class RetailAdminUserManagementController extends Controller
 
                 $html .= '<tr>';
                 $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
-                $html .= '<td>' . $record->product_percentage . '%</td>';
+                $html .= '<td>' . ($record->product_percentage ?? '0') . '%</td>';
                 $html .= '<td>' . $record->number_of_shipments . '</td>';
                 $html .= '<td>' . $record->total_charges . '</td>';
                 $html .= '<td>' . $record->franchise_gst_amount . '</td>';
@@ -936,11 +936,11 @@ class RetailAdminUserManagementController extends Controller
                 $html .= '<td>' . $record->commission . '</td>';
                 $html .= '</tr>';
 
-                $total_shipments = $data->sum_of_all_shipments;
-                $total_charges = $data->sum_of_total_charges;
-                $total_gst = $data->sum_of_gst;
-                $total_weight_charges = $data->sum_of_weight_charges;
-                $total_commission = $data->sum_of_commission;
+                $total_shipments += $record->number_of_shipments;
+                $total_charges += $record->total_charges;
+                $total_gst += $record->franchise_gst_amount;
+                $total_weight_charges += $record->weight_charges;
+                $total_commission += $record->commission;
             }
 
             // Totals row
