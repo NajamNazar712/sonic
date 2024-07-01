@@ -7858,16 +7858,20 @@ class APIController extends Controller
             } else {
                 
                 $retail_note_cash_collection_id = $request->retail_note_cash_collection_id;
-                $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);
+                $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);              
                 if ($retail_note->exists()) {
-                    $retail_note = $retail_note->first();
-                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();
+                    $retail_note = $retail_note->first();          
+                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();              
                     if ($retail_note->created_at >= $min_date) {
-                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note->id);
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note->id);                    
                         $transactions_amount = 0;
                         if ($hbl_konnect_transaction_delivery_note->exists()) {
                             $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
                             $transactions_amount = $hbl_konnect_transaction_delivery_note->transactions_amount;
+                            $sumNoofTransaction = HblKonnectTransactionRetail::where('retail_note_id', $retail_note->id)->sum('amount');
+                            if($sumNoofTransaction == $transactions_amount || $transactions_amount >= $sumNoofTransaction){
+                                 return response()->json(['status' => 11, 'message' => 'RetailNote AlReady Payed!']);
+                            }
                         }
                         $net_amount = $retail_note->total_cash - $transactions_amount;
                         $retail_user_id = $retail_note->retail_user_id;
