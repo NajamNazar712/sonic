@@ -2,10 +2,11 @@
 
 namespace App\Http\Middleware;
 
-use App\Http\Models\Admin\GlobalSettings;
-use Illuminate\Support\Facades\Auth;
-use Session;
+use Route;
 use Closure;
+use Session;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\Admin\GlobalSettings;
 
 class Permission
 {
@@ -50,6 +51,8 @@ class Permission
             'accounts.receiving_sheet.index' => 364,
             'accounts.restrict_order_id.info' => 619,
             'accounts.restrict_order_id.submit' => 619,
+            'accounts.kam_bulk_tagging.index' => 991,
+            'accounts.kam_bulk_tagging.update' => 991,
 
             'corporate.reimbursement_setting.index' => 598,
             'corporate.reimbursement_setting.store' => 598,
@@ -388,6 +391,7 @@ class Permission
             'return.rider_request.approve' => 833,
             'return.rider_request.reject' => 834,
             'return.rider_request.update' => 835,
+            'settings.agents_list.index' => 951,
 
 
             'finance.outstanding_sdn.index' => 52,
@@ -787,6 +791,13 @@ class Permission
             'crm.consignee_info.list' => 363,
             'crm.dashboard.index' => 869,
             'crm.dashboard.list' => 869,
+
+            'settings.shippers.base_rate_revisions.index' => 990,
+            'settings.shippers.base_rate_revisions.list' => 990,
+            'settings.shippers.base_rate_revisions.bulk_store' => 990,
+            'settings.shippers.base_rate_revisions.approval1_update' => 990,
+            'settings.shippers.base_rate_revisions.approval2_update' => 990,
+            'settings.shippers.base_rate_revisions.shippers_with_rates' => 990,
 
             'settings.shippers.status_webhook.index' => 646,
             'settings.shippers.status_webhook.list' => 646,
@@ -1639,7 +1650,6 @@ class Permission
                 session(['sale_users_bypass' => []]);
             }
 
-
             if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions')) || (substr($action, 0, 4) == 'crm.' && session('role_id') == 6)) {
                 return $next($request);
             } else {
@@ -1647,13 +1657,40 @@ class Permission
             }
         } else if (Auth::guard('substitute_users')->check()) {
             $action = str_replace('cod.', '', $request->route()->getName());
-
             if (session('user_type') == 1 || !isset($this->actions['shipper'][$action]) || in_array($this->actions['shipper'][$action], session('permissions'))) {
                 return $next($request);
             } else {
                 return redirect()->route('cod.access_denied');
             }
-        } else {
+        } else if (in_array(session('status'), [0,1,2,5]) ) {
+            $action = str_replace('cod.', '', $request->route()->getName());
+
+            $allowedRoutes = [
+                'register.submit',
+                'orders.index',
+                'update.agreement_status',
+                'get_agreement',
+                'welcome',
+                'orders.list',
+
+            ];
+            
+            $wordpressRoutes = collect(Route::getRoutes())->filter(function ($route) {
+                return strpos($route->uri(), 'wordpress') !== false;
+            })->map(function ($route) {
+                return str_replace('cod.', '', $route->action['as'] ?? '');
+            })->toArray();
+            
+            $allowedRoutes = array_merge($allowedRoutes, $wordpressRoutes);
+            
+            if (!in_array($action, $allowedRoutes)){
+                return redirect()->route('cod.wordpress_access_denied');
+            }
+            
+            return $next($request);
+            
+            
+        }else{
             return $next($request);
         }
     }

@@ -7678,6 +7678,7 @@ class ReturnController extends Controller
                     $unresponsive_shipments_error = true;
                 } else if ($assigned_shipment) {
                     $assigned_shipment->agent_id = Auth::id();
+                    $assigned_shipment->increment('call_count');
                     $assigned_shipment->shipment_id = $shipment_id;
                     $assigned_shipment->shipments_journey_id = $shipments_journey->id;
                     $assigned_shipment->last_shipments_journey_id = $shipments_journey->id;
@@ -7714,6 +7715,7 @@ class ReturnController extends Controller
                     $open_unresponsive_shipment->updated_type_id = 1; //this status will always updated by admin
                     $open_unresponsive_shipment->remarks =  $request->remark;
                     $open_unresponsive_shipment->updated_by_id = Auth::id();
+                    $open_unresponsive_shipment->increment('call_count');
                     $open_unresponsive_shipment->save();
 
                     $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
@@ -7742,6 +7744,7 @@ class ReturnController extends Controller
                     $completed_shipment->updated_by_id = Auth::id();
                     $completed_shipment->remarks = $request->remark;
                     $completed_shipment->call_to_id = $request->call_to_id;
+                    $completed_shipment->increment('call_count');
                     $completed_shipment->save();
 
                     $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
@@ -7763,6 +7766,7 @@ class ReturnController extends Controller
                     $sar_unresponsive_shipment->updated_type_id = 1; //this status will always updated by admin
                     $sar_unresponsive_shipment->remarks =  $request->remark;
                     $sar_unresponsive_shipment->updated_by_id = Auth::id();
+                    $sar_unresponsive_shipment->increment('call_count');
                     $sar_unresponsive_shipment->save();
 
 
@@ -7792,6 +7796,7 @@ class ReturnController extends Controller
                     $completed_shipment_first_unresponsive->updated_by_id = Auth::id();
                     $completed_shipment_first_unresponsive->remarks = $request->remark;
                     $completed_shipment_first_unresponsive->call_to_id = $request->call_to_id;
+                    $completed_shipment_first_unresponsive->increment('call_count');
                     $completed_shipment_first_unresponsive->save();
 
                     $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
@@ -7822,6 +7827,7 @@ class ReturnController extends Controller
                     $old_completed_shipments->call_to_id = $request->call_to_id;
                     $old_completed_shipments->assigned_to_type_id = 0;
                     $old_completed_shipments->assigned_by = 0;
+                    $old_completed_shipments->increment('call_count');
 
                     //if admin marks unresponsive 3rd time after reattempt from agent on 3rd Call then set rv_assign_agent_status_id to 1 (return)
                     if ($request->call_finding_id == 6 && $old_completed_shipments->unresponsive_count >= 2) {
@@ -7845,6 +7851,7 @@ class ReturnController extends Controller
             } else {
                 $add_call_status = new RvShipmentAssignAgent;
                 $add_call_status->agent_id = Auth::id();
+                $add_call_status->call_count = 0;
                 $add_call_status->shipment_id = $shipment_id;
                 $add_call_status->shipments_journey_id = $shipments_journey->id;
                 $add_call_status->last_shipments_journey_id = $shipments_journey->id;

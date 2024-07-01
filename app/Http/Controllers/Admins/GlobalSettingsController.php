@@ -2,164 +2,168 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Models\Admin\CrmAgentAutoAssign;
-use App\Http\Models\Admin\CrmAgentAutoAssignBusSeg;
-use App\Http\Models\Admin\CrmAgentAutoAssignCaseNature;
-use App\Http\Models\Admin\CrmAgentAutoAssignCnType;
-use App\Http\Models\Admin\CrmAgentAutoAssignHub;
-use App\Http\Models\Admin\CrmAgentAutoAssignShipper;
-use App\Http\Models\Admin\CrmAgentAutoAssignShipStatus;
-use App\Http\Models\Admin\CrmAgentAutoAssignSNKey;
-use App\Http\Models\Admin\CrmAgentAutoAssignSubSegment;
-use App\Http\Models\Admin\CrmAgentAutoAssignZone;
-use App\Http\Models\Admin\SalePersonAssignedSegment;
-use App\Http\Models\Admin\Segment;
-use App\Http\Models\Admin\SegmentHistory;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\OneLink\OneLinkPaymentChargesRange;
-use App\Http\Models\Admin\AdminAppSlider;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\AutoTagTerritory;
-use App\Http\Models\Admin\BookingSmsForShippers;
-use App\Http\Models\Admin\BusinessProjectionReason;
-use App\Http\Models\Admin\BusinessProjectionShipment;
-use App\Http\Models\Admin\ByPassWeightShippers;
-use App\Http\Models\Admin\CompletedAgingReport;
-use App\Http\Models\Admin\CrmAutoTagUser;
-use App\Http\Models\Admin\DeliveryLocationMapping;
-use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\Fleet;
-use App\Http\Models\Admin\Fuel\FuelFactorHistory;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\Lead\LeadNotification;
-use App\Http\Models\Admin\Lead\LeadNotificationAttachment;
-use App\Http\Models\Admin\Lead\LeadTagging;
-use App\Http\Models\Admin\Lead\LeadZone;
-use App\Http\Models\Admin\LostShipmentAdmin;
-use App\Http\Models\Admin\LostShipmentShipper;
-use App\Http\Models\Admin\MonthClosingStatus;
-use App\Http\Models\Admin\MonthClosingType;
-use App\Http\Models\Admin\NonServiceArea;
-use App\Http\Models\Admin\PendingCashCollectionAgingReport;
-use App\Http\Models\Admin\PettyCashAccountHead;
-use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
-use App\Http\Models\Admin\PettyCashAccountTitle;
-use App\Http\Models\Admin\PettyCashConsignee;
-use App\Http\Models\Admin\PettyCashConsigneeHub;
-use App\Http\Models\Admin\RcpTatOption;
-use App\Http\Models\Admin\RetailAppSlider;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
-use App\Http\Models\Admin\RouteManagement;
-use App\Http\Models\Admin\RouteManagementJunction;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\SalePersonTarget;
-use App\Http\Models\Admin\FintechPaymentType;
-use App\Http\Models\Admin\SalePersonTargetLog;
-use App\Http\Models\Admin\SalePersonTargetDelete;
-use App\Http\Models\Admin\SalePersonTargetSegment;
-use App\Http\Models\Admin\SalesDesignation;
-use App\Http\Models\Admin\SalesDesignationJourney;
-use App\Http\Models\Admin\SalesIncentiveDate;
-use App\Http\Models\Admin\ShortReceiveReportTimeHubWise;
-use App\Http\Models\Admin\StandardWeightCharge;
-use App\Http\Models\Admin\Territory;
-use App\Http\Models\Admin\VehicleType;
-use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
-use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
-use App\Http\Models\Admin\WalkInStandardWeightCharge;
-
-use App\Http\Models\Blacklist\BlacklistCondition;
-use App\Http\Models\Blacklist\BlacklistedConsignee;
-use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
-use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
-use App\Http\Models\Blacklist\BlacklistLabeling;
-use App\Http\Models\Blacklist\BlacklistLogic;
-use App\Http\Models\Blacklist\BlacklistOperation;
-use App\Http\Models\Blacklist\BlacklistSetting;
-use App\Http\Models\Blacklist\BlacklistSettingCondition;
-use App\Http\Models\Blacklist\BlacklistShipmentRange;
-use App\Http\Models\Blacklist\ConsigneeInformation;
+use Carbon\Carbon;
 use App\Http\Models\City;
+use App\Http\Models\Zone;
+use App\Http\Models\Rider;
+use App\Http\Models\Runner;
+use App\LeadProgessSetting;
+use App\Http\Models\Holiday;
+use App\Http\Models\Product;
+use App\LeadProgressSetting;
+use Illuminate\Http\Request;
 use App\Http\Models\CityArea;
-use App\Http\Models\CorporateDefaultFuelSurcharge;
-use App\Http\Models\CorporateDefaultHistoryFuelSurcharge;
-use App\Http\Models\CorporateDefaultRateStatus;
-use App\Http\Models\CorporateFuelSurcharge;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CorporateWeightCharge;
-use App\Http\Models\CRM\CrmRequestCaseNature;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\CrmAgent;
-use App\Http\Models\DeliveryCallVerificationRatio;
+use App\Http\Models\Referral;
+use App\Http\Models\RateStatus;
+use Illuminate\Validation\Rule;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\Fleet;
 use App\Http\Models\FleetDriver;
 use App\Http\Models\FleetVendor;
-use App\Http\Models\FuelSurcharge;
-use App\Http\Models\Holiday;
-use App\Http\Models\InternationalStandardDhlRate;
-use App\Http\Models\MultipleSaleLead;
-use App\Http\Models\MultipleSaleTagging;
-use App\Http\Models\Notification;
-use App\Http\Models\NotificationSetting;
-use App\Http\Models\NotificationSettingShipper;
-use App\Http\Models\OvernightOverlandReportOriginHubs;
-use App\Http\Models\ProjectArrivalShipper;
-use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
-use App\Http\Models\Rates\HistoryCorporateWeightCharge;
-use App\Http\Models\Rates\HistoryFuelSurcharge;
-use App\Http\Models\Rates\HistoryWeightCharge;
-use App\Http\Models\Rates\MinimumChargeableWeightSetting;
-use App\Http\Models\RateStatus;
-use App\Http\Models\Referral;
-use App\Http\Models\RestrictedCityIntercept;
-use App\Http\Models\RestrictParcelsAttempt;
-use App\Http\Models\Rider;
-use App\Http\Models\Rider\RidersIncentiveSetting;
-use App\Http\Models\Rider\RidersShipmentPaymentType;
-use App\Http\Models\Rider\RidersShipmentWeightRange;
-use App\Http\Models\Rider\RiderTickerImage;
-use App\Http\Models\RiderCategory;
-use App\Http\Models\Runner;
-use App\Http\Models\RunnerJunction;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\SaleTierTag;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\ServiceList;
+use App\Http\Models\StarShipper;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\Notification;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
-use App\Http\Models\StarShipper;
-use App\Http\Models\SubCategorySegment;
-use App\Http\Models\TelenorShipmentStatusEstimatedTime;
-use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
-use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Http\Models\WeightCharge;
-use App\Http\Models\WeightChargeFactorHistory;
-use App\Http\Models\Zone;
-use App\Http\Models\Admin\BookingDestinationMapping;
-use App\Http\Models\Admin\BookingDestinationMappingKeyword;
-use App\Http\Models\Admin\LeadTaggingService;
-use App\Http\Models\ServiceList;
-use App\Http\Models\Admin\FintechCompany;
-use App\Http\Models\Admin\FintechCompanyCharges;
-use App\Http\Models\Admin\standard_fintech_charges;
-use App\RiderAssignedHubForDeliveryNote;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Models\Admin\Segment;
+use App\Http\Models\FuelSurcharge;
+use App\Http\Models\RiderCategory;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use Yajra\Datatables\Datatables;
-use App\Http\Models\Admin\BackgroundImage;
-use App\Http\Models\HR\Employee;
-use App\Http\Models\Product;
+use App\Http\Models\RunnerJunction;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\UserIbftCharge;
+use LeadProgressSettingTableSeeder;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\Territory;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\MultipleSaleLead;
+use App\Http\Models\Admin\VehicleType;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\RcpTatOption;
+use App\Http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\SubCategorySegment;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\Lead\LeadZone;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\MultipleSaleTagging;
+use App\Http\Models\NotificationSetting;
+use App\RiderAssignedHubForDeliveryNote;
+use App\Http\Models\Admin\AdminAppSlider;
+use App\Http\Models\Admin\CrmAutoTagUser;
+use App\Http\Models\Admin\FintechCompany;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Admin\SegmentHistory;
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\UserIbftChargeDetail;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\BackgroundImage;
+use App\Http\Models\Admin\RetailAppSlider;
+use App\Http\Models\Admin\RouteManagement;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\ProjectArrivalShipper;
+
+use App\Http\Models\Admin\AutoTagTerritory;
+use App\Http\Models\Admin\Lead\LeadTagging;
+use App\Http\Models\Admin\MonthClosingType;
+use App\Http\Models\Admin\SalePersonTarget;
+use App\Http\Models\Admin\SalesDesignation;
+use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\RestrictParcelsAttempt;
+use App\Http\Models\Rider\RiderTickerImage;
+use App\Http\Models\Admin\LostShipmentAdmin;
+use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Models\Admin\CrmAgentAutoAssign;
+use App\Http\Models\Admin\FintechPaymentType;
+use App\Http\Models\Admin\LeadTaggingService;
+use App\Http\Models\Admin\MonthClosingStatus;
+use App\Http\Models\Admin\PettyCashConsignee;
+use App\Http\Models\Admin\SalesIncentiveDate;
+use App\Http\Models\Blacklist\BlacklistLogic;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\Admin\LostShipmentShipper;
+use App\Http\Models\Admin\SalePersonTargetLog;
+use App\Http\Models\Rates\HistoryWeightCharge;
+use App\Http\Models\WeightChargeFactorHistory;
+use App\Http\Models\Admin\ByPassWeightShippers;
+use App\Http\Models\Admin\CompletedAgingReport;
+use App\Http\Models\Admin\PettyCashAccountHead;
+use App\Http\Models\Admin\StandardWeightCharge;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\NotificationSettingShipper;
+use App\Http\Models\Rates\HistoryFuelSurcharge;
+use App\Http\Models\Admin\BookingSmsForShippers;
+use App\Http\Models\Admin\CrmAgentAutoAssignHub;
+use App\Http\Models\Admin\FintechCompanyCharges;
+use App\Http\Models\Admin\Lead\LeadNotification;
+use App\Http\Models\Admin\PettyCashAccountTitle;
+use App\Http\Models\Admin\PettyCashConsigneeHub;
+use App\Http\Models\Blacklist\BlacklistLabeling;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\CrmAgentAutoAssignZone;
+use App\Http\Models\Admin\Fuel\FuelFactorHistory;
+use App\Http\Models\Admin\SalePersonTargetDelete;
+use App\Http\Models\Blacklist\BlacklistCondition;
+use App\Http\Models\Blacklist\BlacklistOperation;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\InternationalStandardDhlRate;
+use App\Http\Models\Rider\RidersIncentiveSetting;
+use App\Http\Models\Admin\CrmAgentAutoAssignSNKey;
+use App\Http\Models\Admin\DeliveryLocationMapping;
+use App\Http\Models\Admin\RouteManagementJunction;
+use App\Http\Models\Admin\SalePersonTargetSegment;
+use App\Http\Models\Admin\SalesDesignationJourney;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\DeliveryCallVerificationRatio;
+use App\Http\Models\Admin\BusinessProjectionReason;
+use App\Http\Models\Admin\CrmAgentAutoAssignBusSeg;
+use App\Http\Models\Admin\CrmAgentAutoAssignCnType;
+use App\Http\Models\Admin\standard_fintech_charges;
+use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\ConsigneeInformation;
+use App\Http\Models\Admin\BookingDestinationMapping;
+use App\Http\Models\Admin\CrmAgentAutoAssignShipper;
+use App\Http\Models\Admin\SalePersonAssignedSegment;
+use App\Http\Models\Rider\RidersShipmentPaymentType;
+use App\Http\Models\Rider\RidersShipmentWeightRange;
+use App\Http\Models\Admin\BusinessProjectionShipment;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
+use App\Http\Models\Blacklist\BlacklistShipmentRange;
+use App\Http\Models\OvernightOverlandReportOriginHubs;
+use App\Http\Models\Admin\CrmAgentAutoAssignCaseNature;
+use App\Http\Models\Admin\CrmAgentAutoAssignShipStatus;
+use App\Http\Models\Admin\CrmAgentAutoAssignSubSegment;
+use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Models\Rates\HistoryCorporateWeightCharge;
+use App\Http\Models\TelenorShipmentStatusEstimatedTime;
+use App\Http\Models\Webhook\ShipmentStatusSubscription;
+use App\Http\Models\Admin\ShortReceiveReportTimeHubWise;
+use App\Http\Models\Blacklist\BlacklistSettingCondition;
+use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
+use App\Http\Models\CorporateDefaultHistoryFuelSurcharge;
+use App\Http\Models\Rates\MinimumChargeableWeightSetting;
+use App\Http\Models\Admin\Lead\LeadNotificationAttachment;
+use App\Http\Models\Admin\BookingDestinationMappingKeyword;
+use App\Http\Models\Admin\PendingCashCollectionAgingReport;
+use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
+use App\Http\Models\Admin\OneLink\OneLinkPaymentChargesRange;
+use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\RvShipmentTicket;
 
 class GlobalSettingsController extends Controller
 {
@@ -8928,6 +8932,7 @@ class GlobalSettingsController extends Controller
 
     public function rv_disable_shippers_store(Request $request)
     {
+
         ActivityTrailController::createActivityTrailLog(Auth::id(), 682);
 
         $all_shipper_settings = GlobalSettings::where('type', 'rv_disable_shippers_all_shippers');
@@ -8954,6 +8959,10 @@ class GlobalSettingsController extends Controller
             $settings->setting_value = 1;
             $settings->text = $excluded_users;
             $settings->save();
+
+            // Update disabled users in RV shipment tickets (Set disable_shipper to 0 of given shippers)
+            $shippers = explode(',', $excluded_users);
+            $this->updateDisabledUserInRvShipmentTickets($shippers, 0);
         } else {
             GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value' => 0, 'text' => NULL]);
         }
@@ -8972,12 +8981,35 @@ class GlobalSettingsController extends Controller
             $settings->save();
             GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->update(['setting_value' => 0, 'text' => NULL]);
             GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value' => 0, 'text' => NULL]);
+
+            // Update disabled users in RV shipment tickets (Set disable_shipper to 1 of given shippers)
+            $shippers = explode(',', $only_users);
+            $this->updateDisabledUserInRvShipmentTickets($shippers, 1);
         } else {
             GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->update(['setting_value' => 0, 'text' => NULL]);
         }
 
+        if (!($request->has('all_shipper_toggle') && $request->has('excluded_users')) && !(!$request->has('all_shipper_toggle') && $request->has('only_users'))) {
+            $this->updateDisabledUserInRvShipmentTickets(null, 1);
+        }
+
+        if (!($request->has('all_shipper_toggle') && $request->has('excluded_users')) && !(!$request->has('all_shipper_toggle') && $request->has('only_users'))) {
+            $this->updateDisabledUserInRvShipmentTickets(null, 1);
+        }
+
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    private function updateDisabledUserInRvShipmentTickets($shipperUserIds = null, $isDisabled = null)
+    {
+        if (!empty($shipperUserIds)) {
+            RvShipmentTicket::whereIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => $isDisabled]);
+            RvShipmentTicket::whereNotIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => !$isDisabled]);
+        } else {
+            RvShipmentTicket::where('disabled_shipper', $isDisabled ? 0 : 1)->update(['disabled_shipper' => $isDisabled]);
+        }
+    }
+
     public function get_hub(Request  $request)
     {
         if (isset($request->zone_id)) {
@@ -9162,7 +9194,7 @@ class GlobalSettingsController extends Controller
                 $count = count(explode(',', $hubs));
                 return '<button ref="' . $rider_id . '" class="btn btn-sm btn-outline-info align-middle hubs_count">' . $count . '</button>';
             })->addColumn('action', function ($data) {
-                if($data['main_category'] < 3){
+                if ($data['main_category'] < 3) {
                     $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -9171,14 +9203,12 @@ class GlobalSettingsController extends Controller
                     if (session('role_id') == 1 || in_array(896, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
-                    
-
-                }else{
+                } else {
                     $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
-                    '; 
+                    ';
                 }
                 return $dropdown;
             });
@@ -9607,5 +9637,55 @@ class GlobalSettingsController extends Controller
             $settings->save();
         }
         return redirect()->back()->with('success', 'Admins have been assigned!');
+    }
+
+    public function lead_progress_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 795);
+        return view('admin.settings.shipper.lead_progress');
+    }
+
+    public function lead_progress_list()
+    {
+
+        $query = LeadProgressSetting::leftJoin('admins as a', 'a.id', '=', 'lead_progress_settings.updated_by')
+            ->select(
+                'lead_progress_settings.id as id',
+                'lead_progress_settings.stage as stage',
+                'lead_progress_settings.trigger as trigger',
+                'lead_progress_settings.percent as percent',
+                'lead_progress_settings.color as color',
+                'a.name as updated_by',
+                'lead_progress_settings.updated_at as updated_at'
+            );
+        $datatable = Datatables::of($query)
+            ->addColumn('action', function ($datatable) {
+                $dropdown = '
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+              <div class="dropdown-menu dropdown-menu-sm">
+          ';
+
+                $dropdown .= '<button type="button" class="dropdown-item edit_color_percent" data-id="' . $datatable->id . '" data-color="' . $datatable->color . '" data-percent="' . $datatable->percent . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Color-Percent</div></button>';
+
+                return $dropdown;
+            });
+        return $datatable->make(true);
+    }
+
+    public function lead_progress_update(Request $request)
+    {
+        $id = $request->id;
+        $lead_progress_setting = LeadProgressSetting::find($id);
+
+        if ($lead_progress_setting) {
+            $lead_progress_setting->color = $request->colorHex;
+            $lead_progress_setting->percent = $request->percent;
+            $lead_progress_setting->updated_at = now();
+            $lead_progress_setting->updated_by = Auth::id();
+            $lead_progress_setting->save();
+
+            return redirect()->back()->with('success', 'Color/Percent Updated !!!');
+        }
     }
 }

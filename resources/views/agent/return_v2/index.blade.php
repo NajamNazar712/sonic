@@ -996,6 +996,14 @@
                                     containerId: 'toast-top-center'
                                 });
                             } 
+
+                            else if (data.status == 7) {
+                                $('#get_ticket_button').prop('disabled', false);
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            } 
                         })
                 }
 

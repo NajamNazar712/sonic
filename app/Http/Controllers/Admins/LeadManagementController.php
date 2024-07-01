@@ -29,6 +29,7 @@ use App\Http\Models\Admin\Lead\LeadNotification;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Models\Admin\Lead\LeadCallStatusLog;
+use App\Http\Models\ServiceList;
 
 class LeadManagementController extends Controller
 {
@@ -171,13 +172,14 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as sp', 'sp.id', '=', 'leads.sale_person_id')
             ->leftjoin('riders as rp', 'rp.id', '=', 'leads.reference_person_id')
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
+    
+            ->leftjoin('users as u', 'u.lead_id', '=', 'leads.id')
+
             ->leftjoin('lead_references as lr', 'lr.id', '=', 'leads.reference_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status','leads.expected_shipments as expected_shipments')
-           ->OrderByDesc('leads.requested_date');
-
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status','leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name')->OrderByDesc('leads.requested_date');
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
         }
@@ -835,6 +837,7 @@ class LeadManagementController extends Controller
             $details['email_address'] = $lead->email_address;
             $details['brand'] = $lead->brand;
             $details['company'] = $lead->company;
+            $details['service_id'] = $lead->service_id;
 
             return response()->json(['status' => 0, 'details' => $details]);
         } else {
@@ -842,8 +845,16 @@ class LeadManagementController extends Controller
         }
     }
 
-    public function edit(Request $request)
-    {
+    public function edit_service_list(Request $request){
+        $lead_service = Lead::where('id', $request->edit_lead_id)->first();
+        $service_id = $lead_service->service_id;
+        $service_name = ServiceList::where('id', $service_id)->first();
+        return response()->json([
+            'service_name' => $service_name
+        ]);
+    }
+
+    public function edit(Request $request){
 
         $lead_id = $request->edit_lead_id;
         if ($lead_id) {
@@ -858,6 +869,7 @@ class LeadManagementController extends Controller
                 $lead->company = $request->company;
                 $lead->reference_id = $request->edit_reference_id;
                 $lead->status_id = 15;
+                $lead->service_id = $request->service_id;
                 $lead->save();
 
                 LeadTaggingController::auto_tagging($lead->id, Auth::id());

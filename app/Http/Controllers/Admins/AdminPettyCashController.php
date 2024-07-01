@@ -2464,19 +2464,24 @@ class AdminPettyCashController extends Controller
             $update_petty_cash = PettyCashStatement::where('id',$petty_detail->petty_cash_statement_id)
                 ->update(['total_amount'=>$existing_petty_cash->total_amount - $petty_detail->amount + $amount]);
 
-//            $data = response()->json([
-//                'status' => 1,
-//                'message' => 'Updated !!',
-//            ]);
+            $sdn_link = PettyCashStatement::where('id',$petty_detail->petty_cash_statement_id)->first();
+            $sdn_amount = StationDepositNote::where('id', $sdn_link->sdn_id)->first(); 
+            $sdn_amount->adjustment_amount = (int)$sdn_link->total_amount;
+            $sdn_amount->save();
+
+            //            $data = response()->json([
+            //                'status' => 1,
+            //                'message' => 'Updated !!',
+            //            ]);
             return redirect()->back()->with('success','Updated !');
         } else {
-//            $data = response()->json([
-//                'status' => 0,
-//                'message' => 'Petty Cash Details Not Found !!',
-//            ]);
+            //            $data = response()->json([
+            //                'status' => 0,
+            //                'message' => 'Petty Cash Details Not Found !!',
+            //            ]);
             return redirect()->back()->with('error','Petty Cash Details Not Found !!');
         }
-//        return $data;
+            //        return $data;
     }
 
     //todo : advance petty cash

@@ -2,34 +2,35 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Admins\GlobalSettingsController;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\CorporateDefaultRateStatus;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\InternationalUsersInformation;
-use App\Http\Models\ProjectArrivalShipper;
-use App\Http\Models\RateStatus;
-use App\Http\Models\ShipmentPrebook;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\UserOtpVerification;
-use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Illuminate\Support\Facades\Auth;
-
+use App\Http\Models\RateStatus;
 use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\SubstituteUserPermission;
-use App\Http\Models\PackagingCharge;
-use App\Http\Models\Shipper\ShipperAirWaybillSettings;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\NpsSurvey;
+use App\Http\Models\PackagingCharge;
+use App\Http\Models\ShipmentPrebook;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Models\NpsShipperRatting;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\NpsShipperSkipSurvey;
-use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\Http\Models\Admin\BackgroundImage;
+use App\Http\Models\ProjectArrivalShipper;
+
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Models\Admin\Settings\GeneralSetting;
+use App\Http\Models\InternationalUsersInformation;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use App\Http\Models\Shipper\SubstituteUserPermission;
+use App\Http\Models\Shipper\ShipperAirWaybillSettings;
+use App\Http\Controllers\Admins\GlobalSettingsController;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 
 
 class LoginController extends Controller
@@ -81,36 +82,59 @@ class LoginController extends Controller
         return view('client.auth.login')->with(['background_image' => $background_image]);
     }
 
+
+    public function showLeadWordPressLoginForm($id, $token)
+    {
+        $background_image = [];
+        $background_images = BackgroundImage::where('background_image_screen_id', 2);
+        if ($background_images->exists()) {
+            $background_image = $background_images->first();
+            $background_image['path'] = 'storage/' . $background_image->picture_path;
+            $background_image['version'] = $background_image->version;
+        } else {
+            $background_image['path'] = "/img/promo-background-11-07-2023.png";
+            $background_image['version'] = "2.6";
+        }
+
+        $lead = Lead::find($id);
+
+        if(isset($lead) && $token == $lead->activation_code){
+            return view('client.auth.lead_wordpress_register')->with(['lead' => $lead , 'background_image' => $background_image]);
+        }else{
+            return view('errors.404');
+        }
+
+    }
+
     protected function attemptLogin(Request $request)
     {
         // dd(1);
         $attempt = Auth::guard('web')->attempt($this->credentials($request), $request->filled('remember'));
 
         
-        // dd($request->all());
-
-
-
+        
+        
+        
         if ($attempt) {
             session(['user_type' => 1]);
         }
         else {
             $attempt = Auth::guard('substitute_users')->attempt($this->credentials($request), $request->filled('remember'));
-
+            
             if ($attempt) {
                 session(['user_type' => 2]);
             }
         }
-
+        
         return $attempt;
     }
-
+    
     protected function sendLoginResponse(Request $request)
     {
         $request->session()->regenerate();
-
+        
         $this->clearLoginAttempts($request);
-
+        
         if (session('user_type') == 1) {
             $guard = Auth::guard('web');
         }
@@ -134,7 +158,7 @@ class LoginController extends Controller
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Blacklisted, Contact Admin');
             }
-            else if ($user->status != 3) {
+            else if (!in_array($user->status, [0,1,3,2,5]) || $user->status == 4) {
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
             }
@@ -148,12 +172,16 @@ class LoginController extends Controller
             }
             else if ($user->id == 9358) {
                 auth('web')->logout();
-                return back()->with('info', 'Access Denied!');
+                return back()->with('info', 'Access Dernied!');
             }
             else {
                 $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
                 session(['sister_users' => $sister_users]);
                 session(['user_id' => $user->id]);
+                session(['status' => $user->status]);
+                session(['request_custom_quotation' => $user->request_custom_quotation]);
+                session(['on_board_status' => $user->on_board_status]);
+
                 if (SalePersonTag::where('user_id', session('user_id'))->where('status', 0)->exists()){
                     session(['sale_person_status' => 1]);
                 }
@@ -250,6 +278,8 @@ class LoginController extends Controller
                 session(['user_id' => $user->user_id]);
                 session(['account_type' => $shipper->account_type_id]);
                 session(['restriction' => $substitute_user->restriction]);
+                session(['status' => $shipper->status]);
+
 
 //                if (PackagingCharge::where('user_id', $user->user_id)->exists()) {
 //                    $packaging_charges_check = TRUE;
