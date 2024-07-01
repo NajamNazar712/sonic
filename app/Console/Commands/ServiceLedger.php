@@ -118,6 +118,7 @@ class ServiceLedger extends Command
                 // Ledger entry for "Charges"
                 if ($pending_payment_calculation) {
                     $new_debit = $pending_payment_calculation->charges;
+                    $old_balance = $balance;
                     $balance -= $new_debit;
                     $totalPendingShipments = $pending_payments->total_shipments;
     
@@ -128,7 +129,7 @@ class ServiceLedger extends Command
                         'particular_id' => 2,
                         'particulars' => 'Charges',
                         'debit' => $new_debit,
-                        'credit' => 0,
+                        'credit' => $old_balance,
                         'balance' => $balance,
                         'ledger_time' => now(),
                         'number_of_shipments' => $totalPendingShipments,
@@ -148,6 +149,7 @@ class ServiceLedger extends Command
                 // Ledger entries for "Payment"
                 foreach ($done_payment_shipments as $payment) {
                     $debit = $payment->charges;
+                    $old_updated_balance = $balance;
                     $balance -= $debit;
                     $totalDoneShipments = $done_payments->sum('total_shipments');
     
@@ -158,7 +160,7 @@ class ServiceLedger extends Command
                         'particular_id' => 3,
                         'particulars' => 'Payment',
                         'debit' => $debit,
-                        'credit' => 0,
+                        'credit' => $old_updated_balance,
                         'balance' => $balance,
                         'ledger_time' => now(),
                         'number_of_shipments' => $totalDoneShipments,
