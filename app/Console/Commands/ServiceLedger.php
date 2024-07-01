@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Models\DonePayment;
+use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\PendingInvoiceShipment;
 use App\Http\Models\PendingPayment;
@@ -49,69 +51,46 @@ class ServiceLedger extends Command
     {
         $this->store_shipment_ledger();
     }
-
     protected function store_shipment_ledger()
     {
         $users = User::where('status', 3)->get();
+    
         foreach ($users as $user) {
-
-            $pending_payments = PendingPayment::where('user_id', $user->id)->first();
-            $pending_payment_calculations = PendingPaymentCalculation::where('pending_payment_id', $pending_payments->id)->first();
-
             $shipments = Shipment::where('user_id', $user->id)->get();
-            // $totalShipments = $shipments->count();
             $totalShipmentsPicked = DB::table('shipments')
-            ->join('shipments_journey', 'shipments.id', '=', 'shipments_journey.shipment_id')
-            ->where('shipments.user_id', $user->id)
-            ->where('shipments_journey.shipper_status_id', 2)
-            ->count();
-
+                ->join('shipments_journey', 'shipments.id', '=', 'shipments_journey.shipment_id')
+                ->where('shipments.user_id', $user->id)
+                ->where('shipments_journey.shipper_status_id', 2)
+                ->count();
+            
+            $balance = 0; // Initialize balance
+    
             foreach ($shipments as $shipment) {
                 $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
                     ->where('shipper_status_id', 2)
                     ->first();
-                $done_shipment_payment = DonePaymentShipment::where('shipment_id', $shipment->id)->get();
-
-                // Calculate credit
-                $credit = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->fuel_surcharge;
-
-                // Calculate debit and total debit amount
-                $totalDebit = $done_shipment_payment->sum('charges');
-                $balance = $credit - $totalDebit;
-
+    
+                $pending_payments = PendingPayment::where('user_id', $shipment->user_id)->first();
+                $pending_payment_calculation = PendingPaymentCalculation::where('pending_payment_id', $pending_payments->id)->first();
                 $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id)->first();
                 $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id)->first();
-
+                
+                $done_payments = DonePayment::where('user_id', $user->id)->get();
+                $done_payment_shipments = DonePaymentShipment::where('shipment_id', $shipment->id)->latest()->get();
+    
                 if ($pending_invoice_shipment) {
-                    if ($pending_invoice_shipment->type == 0) {
-                        $type_of_charges = 'Delivered';
-                    } elseif ($pending_invoice_shipment->type == 1) {
-                        $type_of_charges = 'Returned';
-                    } elseif ($pending_invoice_shipment->type == 2) {
-                        $type_of_charges = 'Adjusted';
-                    } elseif ($pending_invoice_shipment->type == 3) {
-                        $type_of_charges = 'Arrived';
-                    } else {
-                        $type_of_charges = 'Unknown Type';
-                    }
+                    $type_of_charges = $this->getTypeOfCharges($pending_invoice_shipment->type);
                 } elseif ($pending_payment_shipment) {
-                    if ($pending_payment_shipment->type == 0) {
-                        $type_of_charges = 'Delivered';
-                    } elseif ($pending_payment_shipment->type == 1) {
-                        $type_of_charges = 'Returned';
-                    } elseif ($pending_payment_shipment->type == 2) {
-                        $type_of_charges = 'Adjusted';
-                    } elseif ($pending_payment_shipment->type == 3) {
-                        $type_of_charges = 'Arrived';
-                    } else {
-                        $type_of_charges = 'Unknown Type';
-                    }
+                    $type_of_charges = $this->getTypeOfCharges($pending_payment_shipment->type);
                 } else {
                     $type_of_charges = 'Type Not Found';
                 }
-
+    
                 // Ledger entry for "Shipment Picked"
                 if ($shipments_journey && $shipments_journey->shipper_status_id == 2) {
+                    $credit = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->fuel_surcharge;
+                    $balance += $credit;
+    
                     ShipmentLedger::create([
                         'user_id' => $user->id,
                         'user_name' => $user->name,
@@ -120,7 +99,7 @@ class ServiceLedger extends Command
                         'particulars' => 'Shipment Picked',
                         'debit' => 0,
                         'credit' => $credit,
-                        'balance' => $credit,
+                        'balance' => $balance,
                         'ledger_time' => now(),
                         'number_of_shipments' => $totalShipmentsPicked,
                         'tracking_number' => $shipment->tracking_number,
@@ -135,30 +114,28 @@ class ServiceLedger extends Command
                         'reference_id' => null
                     ]);
                 }
-
+    
                 // Ledger entry for "Charges"
-                if ($totalDebit > 0) {
-                    $totalPendingShipments = 0;
-                    if ($pending_invoice_shipment){
-                        $totalPendingShipments = PendingInvoiceShipment::whereIn('shipment_id', $shipments->pluck('id'))->count();
-                    } else if ($pending_payment_shipment){
-                        $totalPendingShipments = PendingPaymentShipment::whereIn('shipment_id', $shipments->pluck('id'))->count();
-                    }
+                if ($pending_payment_calculation) {
+                    $new_debit = $pending_payment_calculation->charges;
+                    $balance -= $new_debit;
+                    $totalPendingShipments = $pending_payments->total_shipments;
+    
                     ShipmentLedger::create([
                         'user_id' => $user->id,
                         'user_name' => $user->name,
                         'shipment_book_date' => $shipment->created_at,
                         'particular_id' => 2,
                         'particulars' => 'Charges',
-                        'debit' => $totalDebit,
-                        'credit' => $credit,
-                        'balance' => $credit - $totalDebit,
+                        'debit' => $new_debit,
+                        'credit' => 0,
+                        'balance' => $balance,
                         'ledger_time' => now(),
                         'number_of_shipments' => $totalPendingShipments,
                         'tracking_number' => $shipment->tracking_number,
                         'origin' => $user->city_id,
                         'destination' => $shipment->consignee_city_id,
-                        'cod_amount' => $pending_payment_calculations->amount,
+                        'cod_amount' => $pending_payment_calculation->amount,
                         'type_of_charges' => $type_of_charges,
                         'weight_charges' => $shipment->weight_charges,
                         'fuel_surcharge' => $shipment->fuel_surcharge,
@@ -167,20 +144,22 @@ class ServiceLedger extends Command
                         'reference_id' => null
                     ]);
                 }
-
+    
                 // Ledger entries for "Payment"
-                $totalDoneShipments = DonePaymentShipment::whereIn('shipment_id', $shipments->pluck('id'))->count();
-                foreach ($done_shipment_payment as $payment) {
-                    $remainingBalance = $balance - $payment->charges;
+                foreach ($done_payment_shipments as $payment) {
+                    $debit = $payment->charges;
+                    $balance -= $debit;
+                    $totalDoneShipments = $done_payments->sum('total_shipments');
+    
                     ShipmentLedger::create([
                         'user_id' => $user->id,
                         'user_name' => $user->name,
                         'shipment_book_date' => $shipment->created_at,
-                        'particular_id' => 3, 
+                        'particular_id' => 3,
                         'particulars' => 'Payment',
-                        'debit' => $payment->charges, 
-                        'credit' => $remainingBalance, 
-                        'balance' => $remainingBalance,
+                        'debit' => $debit,
+                        'credit' => 0,
+                        'balance' => $balance,
                         'ledger_time' => now(),
                         'number_of_shipments' => $totalDoneShipments,
                         'tracking_number' => $shipment->tracking_number,
@@ -199,4 +178,19 @@ class ServiceLedger extends Command
         }
     }
 
+    private function getTypeOfCharges($type)
+    {
+        switch ($type) {
+            case 0:
+                return 'Delivered';
+            case 1:
+                return 'Returned';
+            case 2:
+                return 'Adjusted';
+            case 3:
+                return 'Arrived';
+            default:
+                return 'Unknown Type';
+        }
+    }
 }
