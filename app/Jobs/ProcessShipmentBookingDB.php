@@ -22,22 +22,26 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\City;
 use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ExcelQueueCount;
+
 
 class ProcessShipmentBookingDB implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $booking;
+    protected $queue_id;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(array $booking)
+    public function __construct(array $booking, $queue_id)
     {
         $this->queue = 'shipment_booking_db';
         $this->booking = $booking;
+        $this->queue_id = $queue_id;
     }
 
     /**
@@ -47,6 +51,12 @@ class ProcessShipmentBookingDB implements ShouldQueue
      */
     public function handle()
     {
+        $queue_count = ExcelQueueCount::find($this->queue_id);
+        $diff = count($this->booking) - $queue_count->total_shipment;
+        if($diff > 0){
+            $this->booking =  array_slice($this->booking, $diff);
+        }
+
         foreach($this->booking as $booking) {
             $user_id = $booking['user_id'];
             $service_type_id = $booking['service_type_id'];
@@ -500,6 +510,9 @@ class ProcessShipmentBookingDB implements ShouldQueue
                 NotificationsController::send(152, $shipment_id);
                 NotificationsController::send(153, $shipment_id);
             }
+
+            $queue_count->total_shipment -= 1;
+            $queue_count->save();
         }
     }
 }

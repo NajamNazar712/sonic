@@ -33,6 +33,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Session;
 use Validator;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\ExcelQueueCount;
+
 
 class ShipperInternationalShipmentBookController extends Controller
 {
@@ -735,11 +737,14 @@ class ShipperInternationalShipmentBookController extends Controller
                             $row['business_category_id'] = 2;
                             $new_data[] = $row;
                         }
+                        $queue_count = new ExcelQueueCount();
+                        $queue_count->total_shipment = count($new_data);
+                        $queue_count->save();
                         if ($user_id != 3324) {
-                            dispatch(new ProcessShipmentBookingDB($new_data));
+                            dispatch(new ProcessShipmentBookingDB($new_data, $queue_count->id));
                         }
                         else {
-                            dispatch(new ProcessShipmentBookingDBPriority($new_data));
+                            dispatch(new ProcessShipmentBookingDBPriority($new_data, $queue_count->id));
                         }
 
                         return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);

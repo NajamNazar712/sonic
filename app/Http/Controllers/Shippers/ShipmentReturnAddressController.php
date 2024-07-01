@@ -36,6 +36,8 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Models\ExcelQueueCount;
+
 
 class ShipmentReturnAddressController extends Controller
 {
@@ -951,11 +953,15 @@ class ShipmentReturnAddressController extends Controller
                             
                             $new_data[] = $row;
                         }
+                        $queue_count = new ExcelQueueCount();
+                        $queue_count->total_shipment = count($new_data);
+                        $queue_count->save();
+
                         if ($user_id != 3324) {
-                            dispatch(new ProcessShipmentBookingDB($new_data));
+                            dispatch(new ProcessShipmentBookingDB($new_data, $queue_count->id));
                         }
                         else {
-                            dispatch(new ProcessShipmentBookingDBPriority($new_data));
+                            dispatch(new ProcessShipmentBookingDBPriority($new_data, $queue_count->id));
                         }
 
                         return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);

@@ -81,7 +81,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Session;
 use SnappyPDF;
 use Validator;
-
+use App\Http\Models\ExcelQueueCount;
 class ShipperShipmentBookController extends Controller
 {
 
@@ -3674,10 +3674,14 @@ class ShipperShipmentBookController extends Controller
                                 $new_data[] = $row;
                                
                             }
+                            $queue_count = new ExcelQueueCount();
+                            $queue_count->total_shipment = count($new_data);
+                            $queue_count->save();
+
                             if (in_array($user_id, [32722, 3324])) {
-                                dispatch(new ProcessShipmentBookingDBPriority($new_data));
+                                dispatch(new ProcessShipmentBookingDBPriority($new_data, $queue_count->id));
                             } else {
-                                dispatch(new ProcessShipmentBookingDB($new_data));
+                                dispatch(new ProcessShipmentBookingDB($new_data,$queue_count->id));
                             }
 
                             return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
@@ -5515,7 +5519,10 @@ class ShipperShipmentBookController extends Controller
 
                                 $new_data[] = $row;
                             }
-                            dispatch(new ProcessShipmentBookingDBPriority($new_data));
+                            $queue_count = new ExcelQueueCount();
+                            $queue_count->total_shipment = count($new_data);
+                            $queue_count->save();
+                            dispatch(new ProcessShipmentBookingDBPriority($new_data, $queue_count->id));
                             // if (in_array($user_id, [32722, 3324])) {
                             //     dispatch(new ProcessShipmentBookingDBPriority($row));
                             // } else {
@@ -6510,10 +6517,14 @@ class ShipperShipmentBookController extends Controller
                                 
                                 $new_data[] = $row;
                             }
+                            $queue_count = new ExcelQueueCount();
+                            $queue_count->total_shipment = count($new_data);
+                            $queue_count->save();
+
                             if (in_array($user_id, [32722, 3324])) {
-                                dispatch(new ProcessShipmentBookingDBPriority($new_data));
+                                dispatch(new ProcessShipmentBookingDBPriority($new_data , $queue_count->id));
                             } else {
-                                dispatch(new ProcessShipmentBookingDB($new_data));
+                                dispatch(new ProcessShipmentBookingDB($new_data,$queue_count->id));
                             }
 
                             return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
@@ -8218,10 +8229,13 @@ class ShipperShipmentBookController extends Controller
                             $new_data[] = $row;
                             
                         }
+                        $queue_count = new ExcelQueueCount();
+                        $queue_count->total_shipment = count($new_data);
+                        $queue_count->save();
                         if (in_array($user_id, [32722, 3324])) {
-                            dispatch(new ProcessShipmentBookingDBPriority($new_data));
+                            dispatch(new ProcessShipmentBookingDBPriority($new_data, $queue_count->id));
                         } else {
-                            dispatch(new ProcessShipmentBookingDB($new_data));
+                            dispatch(new ProcessShipmentBookingDB($new_data, $queue_count->id));
                         }
 
                         return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
