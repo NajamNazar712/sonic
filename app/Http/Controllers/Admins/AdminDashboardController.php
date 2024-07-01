@@ -186,7 +186,7 @@ use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
-
+use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Commission\SalesCommissionExternalUser;
 use App\Http\Models\Operataions\OperationForecastShipments;
 use App\Http\Models\Shipper\SubstituteUserModulePermission;
@@ -10914,7 +10914,8 @@ class AdminDashboardController extends Controller
         $zones = Zone::where('business_category_id', 1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::where('id', '!=', 4)->get();
-        return view('admin.management.add_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking]);
+        $vehicles = Fleet::where('status', 1)->select(['id', 'reg_number'])->get();
+        return view('admin.management.add_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'vehicles' => $vehicles]);
     }
 
     public function getEditCityForm($id)

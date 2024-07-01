@@ -2,14 +2,41 @@
 <form action="{{route('admin.management.city')}}" method="post" class="mt-2" id="addCityHubForm" novalidate="novalidate">
     {{csrf_field()}}
 
-    <div class="row mb-2">
+    <div class="row">
         <div class="col-6">
-            <fieldset class="form-group">
-                <input type="text" class="form-control" name="cityName" placeholder="Add City Name*" required data-rule-required="true" data-msg-required="This field is required">
-            </fieldset>
-            <fieldset class="form-group">
-                <input type="text" class="form-control" name="city_code" placeholder="Add City Code">
-            </fieldset>
+            <div class="row">
+                <div class="col-12">
+                    <fieldset class="form-group">
+                        <input type="text" class="form-control" name="cityName" placeholder="Add City Name*" required data-rule-required="true" data-msg-required="City Name is required">
+                    </fieldset>
+                    <fieldset class="form-group">
+                        <input type="text" class="form-control" name="city_code" placeholder="Add City Code">
+                    </fieldset>
+                </div>
+            </div>
+            <div class="row" >
+                <div class="col-12" id="hub_list_div">
+                    <fieldset class="form-group">
+                        <select name="hubs" id="hub_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+        
+                            @foreach($hubs as $hub)
+                                <option value="{{$hub->hub_id}}">{{$hub->name}}</option>
+                            @endforeach
+                        </select>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12" id="zone_selection" style="display: none" >
+                    <fieldset class="form-group">
+                        <select name="zone_id" id="zone" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                            @foreach($zones as $zone)
+                                <option value="{{ $zone->id }}">{{ $zone->name }}</option>
+                            @endforeach
+                        </select>
+                    </fieldset>
+                </div>
+            </div>
         </div>
         <div class="col-6">
             <div class="row mb-2">
@@ -28,45 +55,33 @@
 
                 </div>
             </div>
-            <div class="row" id="dynamic_hub_fields" style="display: none">
-                <div class="col-12">
-                    <fieldset class="form-group mt-1">
-                        <select name="closest_hub" id="closest_hub_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-        
-                            @foreach($hubs as $hub)
-                                <option value="{{$hub->hub_id}}">{{$hub->name}}</option>
-                            @endforeach
-                        </select>
-                    </fieldset>
+            <div id="dynamic_hub_fields"  style="display: none">
+                <div class="row">
+                    <div class="col-12">
+                        <fieldset class="form-group mt-1">
+                            <select name="closest_hub" id="closest_hub_list" class="form-control select2" style="width: 100%;">
+            
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->hub_id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="row" id="vehicles_list_div" style="display: none">
+                    <div class="col-12">
+                        <fieldset class="form-group">
+                            <select name="vehicles[]" id="vehicles_list" class="form-control select2" data-msg-required="Vehicle is Required" data-rule-required="true" multiple="multiple">
+                                @foreach($vehicles as $vehicle)
+                                    <option value="{{$vehicle->id}}">{{$vehicle->reg_number}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row mb-2" id="hub_list_div" >
-        <div class="col-6">
-            <fieldset class="form-group">
-                <select name="hubs" id="hub_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-
-                    @foreach($hubs as $hub)
-                        <option value="{{$hub->hub_id}}">{{$hub->name}}</option>
-                    @endforeach
-                </select>
-            </fieldset>
-        </div>
-    </div>
-
-    <div class="row mb-2 d-none" id="zone_selection">
-        <div class="col-6">
-            <fieldset class="form-group">
-                <select name="zone_id" id="zone" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
-                    @foreach($zones as $zone)
-                        <option value="{{ $zone->id }}">{{ $zone->name }}</option>
-                    @endforeach
-                </select>
-            </fieldset>
-        </div>
-    </div>
-
     <div class="row mb-2">
         <div class="col-6">
             <fieldset class="form-group">
@@ -290,6 +305,22 @@
         $('#closest_hub_list').prepend('<option value="" selected></option>').select2({
             placeholder: 'Select Closest Hub (optional)',
             allowClear: true
+        }).bind('change', function() {
+            $(this).valid();
+            if ($(this).val() == '') {
+                $('#vehicles_list_div').hide();
+                $('#vehicles_list_div').attr('required',false);
+            }
+            else
+            {
+                $('#vehicles_list_div').show();
+                $('#vehicles_list_div').attr('required',true);
+            }
+        });
+
+        $("#vehicles_list").select2({
+            placeholder: 'Vehicle Numbers*',
+            width: '100%'
         });
 
 
@@ -311,22 +342,22 @@
                 $('#city_type').val('city');
                 if($('#hub_list_div').is(':hidden')){
                     // $('#hub_list_div').css('display','block');
-                    $('#hub_list_div').fadeIn("slow");
+                    $('#hub_list_div').toggle("slow");
 
                     $('#dynamic_hub_fields').toggle('slow');
 
-                    $('#zone_selection').addClass('d-none');
+                    $('#zone_selection').toggle('slow');
                 }
             }else if(rtype == 'hub'){
                 $('#city_type').val('hub');
 
                 if(!$('#hub_list_div').is(':hidden')){
-                    $('#hub_list_div').fadeOut("slow");
+                    $('#hub_list_div').toggle("slow");
 
                     // $('#hub_list_div').fadeIn('slow');
                     $('#dynamic_hub_fields').toggle('slow');
 
-                    $('#zone_selection').removeClass('d-none');
+                    $('#zone_selection').toggle('slow');
                 }
 
             }
