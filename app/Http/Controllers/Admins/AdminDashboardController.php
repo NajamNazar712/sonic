@@ -11443,25 +11443,25 @@ class AdminDashboardController extends Controller
                 }
 
                 //for creating second way mapping between the newly created hub and the closest hub
-                $mapping1 = new V2JunctionMapping();
+                // $mapping2 = new V2JunctionMapping();
 
-                $mapping1->origin_id = $closestHubId;
-                $mapping1->destination_id = $city->id;
-                $mapping1->updated_by = Auth::id();
-                $mapping1->save();
+                // $mapping2->origin_id = $closestHubId;
+                // $mapping2->destination_id = $city->id;
+                // $mapping2->updated_by = Auth::id();
+                // $mapping2->save();
 
-                $route_junction1 = new V2JunctionRoutes();
-                $route_junction1->junction_mapping_id = $mapping1->id;
-                $route_junction1->starting_hub_id = $mapping1->origin_id;
-                $route_junction1->ending_hub_id = $mapping1->destination_id;
-                $route_junction1->save();
+                // $route_junction2 = new V2JunctionRoutes();
+                // $route_junction2->junction_mapping_id = $mapping2->id;
+                // $route_junction2->starting_hub_id = $mapping2->origin_id;
+                // $route_junction2->ending_hub_id = $mapping2->destination_id;
+                // $route_junction2->save();
 
-                foreach ($vehicles as $vehicle) {
-                    $route_vehicle = new V2JunctionVehicles();
-                    $route_vehicle->junction_route_id = $route_junction1->id;
-                    $route_vehicle->vehicle_id = $vehicle;
-                    $route_vehicle->save();
-                }
+                // foreach ($vehicles as $vehicle) {
+                //     $route_vehicle = new V2JunctionVehicles();
+                //     $route_vehicle->junction_route_id = $route_junction2->id;
+                //     $route_vehicle->vehicle_id = $vehicle;
+                //     $route_vehicle->save();
+                // }
 
                 // --------------x-------------------x-------------x---------------
 
