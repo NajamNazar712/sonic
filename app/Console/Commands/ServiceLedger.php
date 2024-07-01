@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\PendingInvoiceShipment;
+use App\Http\Models\PendingPayment;
+use App\Http\Models\PendingPaymentCalculation;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentLedger;
@@ -52,6 +54,10 @@ class ServiceLedger extends Command
     {
         $users = User::where('status', 3)->get();
         foreach ($users as $user) {
+
+            $pending_payments = PendingPayment::where('user_id', $user->id)->first();
+            $pending_payment_calculations = PendingPaymentCalculation::where('pending_payment_id', $pending_payments->id)->first();
+
             $shipments = Shipment::where('user_id', $user->id)->get();
             // $totalShipments = $shipments->count();
             $totalShipmentsPicked = DB::table('shipments')
@@ -130,9 +136,14 @@ class ServiceLedger extends Command
                     ]);
                 }
 
-                $totalDoneShipments = DonePaymentShipment::whereIn('shipment_id', $shipments->pluck('id'))->count();
                 // Ledger entry for "Charges"
                 if ($totalDebit > 0) {
+                    $totalPendingShipments = 0;
+                    if ($pending_invoice_shipment){
+                        $totalPendingShipments = PendingInvoiceShipment::whereIn('shipment_id', $shipments->pluck('id'))->count();
+                    } else if ($pending_payment_shipment){
+                        $totalPendingShipments = PendingPaymentShipment::whereIn('shipment_id', $shipments->pluck('id'))->count();
+                    }
                     ShipmentLedger::create([
                         'user_id' => $user->id,
                         'user_name' => $user->name,
@@ -143,11 +154,11 @@ class ServiceLedger extends Command
                         'credit' => $credit,
                         'balance' => $credit - $totalDebit,
                         'ledger_time' => now(),
-                        'number_of_shipments' => $totalDoneShipments,
+                        'number_of_shipments' => $totalPendingShipments,
                         'tracking_number' => $shipment->tracking_number,
                         'origin' => $user->city_id,
                         'destination' => $shipment->consignee_city_id,
-                        'cod_amount' => $shipment->amount,
+                        'cod_amount' => $pending_payment_calculations->amount,
                         'type_of_charges' => $type_of_charges,
                         'weight_charges' => $shipment->weight_charges,
                         'fuel_surcharge' => $shipment->fuel_surcharge,
@@ -175,7 +186,7 @@ class ServiceLedger extends Command
                         'tracking_number' => $shipment->tracking_number,
                         'origin' => $user->city_id,
                         'destination' => $shipment->consignee_city_id,
-                        'cod_amount' => $shipment->amount,
+                        'cod_amount' => $payment->amount,
                         'type_of_charges' => $type_of_charges,
                         'weight_charges' => $shipment->weight_charges,
                         'fuel_surcharge' => $shipment->fuel_surcharge,
