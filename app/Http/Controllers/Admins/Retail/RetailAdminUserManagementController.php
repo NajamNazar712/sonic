@@ -1678,26 +1678,39 @@ class RetailAdminUserManagementController extends Controller
             }
         }
 
-
-
         // retail user commission
         $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);
         $productPercentages = json_decode($request->product_percentage, true);
+        
         $retailShippingModeNames = is_array($retailShippingModeNames) ? $retailShippingModeNames : [];
         $productPercentages = is_array($productPercentages) ? $productPercentages : [];
+        
         $retailShippingModes = RetailShippingMode::whereIn('name', $retailShippingModeNames)->get();
         $matchingRetailShippingModeIds = $retailShippingModes->pluck('id')->toArray();
-
-        $retail_user_old_product_percentage = RetailUserProductPercentage::where('retail_user_id', $retail_user->id)->first();
+        
+        $retail_user_old_product_percentages = RetailUserProductPercentage::where('retail_user_id', $retail_user->id)->get();
+        
         if ($request->has('retail_shipping_mode_id')) {
-            if ($retail_user_old_product_percentage && !empty($retailShippingModeNames)) {
-                $retail_user_old_product_percentage->delete();
-            } else {
-                foreach ($retailShippingModeNames as $key => $retailShippingModeName){
-                    $retailShippingModeName = ($retailShippingModeName !== null) ? $retailShippingModeName : null;
-                    $productPercentage = ($productPercentages[$key] !== null) ? $productPercentages[$key] : null;
-                    $retailShippingModeId = $matchingRetailShippingModeIds[$key] ?? null;
-                    
+            // Delete old records not present in the new request
+            foreach ($retail_user_old_product_percentages as $oldPercentage) {
+                if (!in_array($oldPercentage->retail_shipping_mode_id, $matchingRetailShippingModeIds)) {
+                    $oldPercentage->delete();
+                }
+            }
+        
+            // Update or create new records
+            foreach ($retailShippingModeNames as $key => $retailShippingModeName) {
+                $retailShippingModeId = $matchingRetailShippingModeIds[$key] ?? null;
+                $productPercentage = $productPercentages[$key] ?? null;
+        
+                $existingRecord = $retail_user_old_product_percentages->firstWhere('retail_shipping_mode_id', $retailShippingModeId);
+        
+                if ($existingRecord) {
+                    if ($existingRecord->product_percentage != $productPercentage) {
+                        $existingRecord->product_percentage = $productPercentage;
+                        $existingRecord->save();
+                    }
+                } else {
                     $retail_user_product_percentage = new RetailUserProductPercentage();
                     $retail_user_product_percentage->retail_user_id = $retail_user->id;
                     $retail_user_product_percentage->retail_shipping_mode_id = $retailShippingModeId;
