@@ -3,7 +3,7 @@
     {{csrf_field()}}
 
     <div class="row mb-2">
-        <div class="col">
+        <div class="col-6">
             <fieldset class="form-group">
                 <input type="text" class="form-control" name="cityName" placeholder="Add City Name*" required data-rule-required="true" data-msg-required="This field is required">
             </fieldset>
@@ -11,19 +11,35 @@
                 <input type="text" class="form-control" name="city_code" placeholder="Add City Code">
             </fieldset>
         </div>
-        <div class="col-3">
-            <input type="hidden" id="city_type" name="postType" value="city">
-            <fieldset class="radio-inline ml-1">
-                <input type="radio" name="city-radio" class="icheck cradio" id="city-radio" rel="city" checked>
-                <label for="city-radio">City</label>
-            </fieldset>
-        </div>
-        <div class="col-3">
-            <fieldset class="radio-inline ml-2">
-                <input type="radio" name="city-radio" class="icheck cradio" id="hub-radio" rel="hub">
-                <label for="hub-radio">Hub</label>
-            </fieldset>
+        <div class="col-6">
+            <div class="row mb-2">
+                <div class="col-6">
+                    <input type="hidden" id="city_type" name="postType" value="city">
+                    <fieldset class="radio-inline ml-1">
+                        <input type="radio" name="city-radio" class="icheck cradio" id="city-radio" rel="city" checked>
+                        <label for="city-radio">City</label>
+                    </fieldset>
+                </div>
+                <div class="col-6">
+                    <fieldset class="radio-inline ml-2">
+                        <input type="radio" name="city-radio" class="icheck cradio" id="hub-radio" rel="hub">
+                        <label for="hub-radio">Hub</label>
+                    </fieldset>
 
+                </div>
+            </div>
+            <div class="row" id="dynamic_hub_fields" style="display: none">
+                <div class="col-12">
+                    <fieldset class="form-group mt-1">
+                        <select name="closest_hub" id="closest_hub_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+        
+                            @foreach($hubs as $hub)
+                                <option value="{{$hub->hub_id}}">{{$hub->name}}</option>
+                            @endforeach
+                        </select>
+                    </fieldset>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row mb-2" id="hub_list_div" >
@@ -271,6 +287,12 @@
             increaseArea: '20%' // optional
         });
        
+        $('#closest_hub_list').prepend('<option value="" selected></option>').select2({
+            placeholder: 'Select Closest Hub (optional)',
+            allowClear: true
+        });
+
+
         $('#hub_list').prepend('<option value="" selected></option>').select2({
             placeholder: 'Select Hub',
             dropdownParent: $("#addCity")
@@ -291,6 +313,8 @@
                     // $('#hub_list_div').css('display','block');
                     $('#hub_list_div').fadeIn("slow");
 
+                    $('#dynamic_hub_fields').toggle('slow');
+
                     $('#zone_selection').addClass('d-none');
                 }
             }else if(rtype == 'hub'){
@@ -300,6 +324,7 @@
                     $('#hub_list_div').fadeOut("slow");
 
                     // $('#hub_list_div').fadeIn('slow');
+                    $('#dynamic_hub_fields').toggle('slow');
 
                     $('#zone_selection').removeClass('d-none');
                 }
