@@ -953,8 +953,11 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<td>' . $total_commission . '</td>';
             $html .= '</tr>';
 
-            $withholding_amount = $data->withholding_amount;
-            $deduction_amount = $data->deduction_amount;
+            // $withholding_amount = $data->withholding_amount;
+            // $deduction_amount = $data->deduction_amount;
+
+            $withholding_amount = ($record->franchise_withholding_percentage / 100) * $total_commission;
+            $deduction_amount = ($record->deduction_percentage / 100) * $total_commission;
             $gross_commission = $total_commission - ($withholding_amount + $deduction_amount);
 
             // Withholding tax row
