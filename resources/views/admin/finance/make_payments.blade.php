@@ -341,6 +341,7 @@
                                                     <tr role="row" class="bg-primary white">
                                                         <th class="border-primary border-darken-1"></th>
                                                         <th class="border-primary border-darken-1">S. No.</th>
+                                                        <th class="border-primary border-darken-1">Account Type</th>
                                                         <th class="border-primary border-darken-1">Shipper</th>
                                                         <th class="border-primary border-darken-1">Shipment</th>
                                                         <th class="border-primary border-darken-1">Origin</th>
@@ -355,7 +356,7 @@
                                                         <th class="border-primary border-darken-1">WHT</th>
                                                         <th class="border-primary border-darken-1">Fintech Charges</th>
                                                         <th class="border-primary border-darken-1">Packing Charges</th>
-                                                        <th class="border-primary border-darken-1">Deductable</th>
+                                                        <th class="border-primary border-darken-1">Deductible</th>
                                                         <th class="border-primary border-darken-1">Payable</th>
                                                         <th class="border-primary border-darken-1">Arrival Date</th>
                                                         <th class="d-none">Shipper</th>
@@ -435,7 +436,7 @@
 
                                                 <div class="col-2">
                                                     <div class="form-group">
-                                                        <label class="mx-auto">Total Deductable</label>
+                                                        <label class="mx-auto">Total Deductible</label>
                                                         <input type="text" name="total_deductable"
                                                             class="form-control text-center total_deductable"
                                                             placeholder="Total Deductable" readonly="readonly">
@@ -461,9 +462,12 @@
                                                 </div>
 
                                                 <div class="w-100"></div>
+                                                <hr>
 
                                                 <button type="button" class="mr-auto btn btn-secondary"
                                                     data-dismiss="modal">Close</button>
+                                                <button type="button" name="make_invoice" onclick="verify_make_invoice_payments()"
+                                                        class="mr-1 btn btn-primary make_invoice">Corporate Invoice for Negative Payable</button>
                                                 <button type="submit" name="make"
                                                     class="mr-1 btn btn-primary make">Make & Export Bank Order</button>
                                             </form>
@@ -740,10 +744,9 @@
                                 $('#make_payments #make_payments_form .wht').val(0);
 
 
-                                $('#make_payments #make_payments_form button.make').prop('disabled',
-                                    true);
-                                $('#make_payments #make_payments_form button.export_bank_order')
-                                    .prop('disabled', true);
+                                $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                                $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
+                                $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
 
                                 $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
 
@@ -1243,6 +1246,7 @@
                                 var parent = $(row.node());
 
                                 calculation(parent);
+
                             }
                            
                         });
@@ -1258,6 +1262,10 @@
                             $('#make_payments #make_payments_form button.make').prop('disabled', true);
                             $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                         }
+                        if(total_payable_amt < 0){
+                            $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
+                        }
+                        check_reimbursement();
                         
                     }
                 }, {
@@ -1279,6 +1287,7 @@
                                 calculation(parent);
                             }
                         });
+                        check_reimbursement();
                     }
                 }],
                 scrollX: true,
@@ -1304,7 +1313,7 @@
                 },
                 rowId: 'id',
                 order: [
-                    [2, 'desc']
+                    [3, 'desc']
                 ],
                 columns: [{
                         data: 'id',
@@ -1326,6 +1335,13 @@
                         render: function(data, type, row) {
                             return '';
                         }
+                    },
+                    {
+                        data: 'account_type_id',
+                        name: 'u.account_type_id',
+                        class: 'align-middle text-center account_type_id',
+                        orderable: false,
+                        searchable: false,
                     },
                     {
                         data: 'shipper',
@@ -1743,6 +1759,7 @@
                     $('#make_payments #make_payments_form .wht').val(0);
 
                     $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                    $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
                     $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
 
                     $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
@@ -1777,7 +1794,6 @@
                 var id = parseInt(parent.attr('id'));
                 var payable = parent.children('td.payable').html();
                 var shipper_id = parent.children('td.shipper_id').html();
-
                 var index = $.inArray(id, selected_rows_shipments);
 
                 var total_amount_selector = $('#make_payments #make_payments_form .total_amount');
@@ -1892,6 +1908,7 @@
                     total_hold_selector.val(parseFloat(total_hold).toFixed(2));
 
                     $('#make_payments #make_payments_form button.make').prop('disabled', false);
+                    $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
                     $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
 
                     //if total payable is grate than 0 it enable make and export bank order button
@@ -1903,9 +1920,11 @@
                             if (isAnyNegative) {
                                 $('#make_payments #make_payments_form button.make').prop('disabled', true);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                                $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
                             } else {
                                 $('#make_payments #make_payments_form button.make').prop('disabled', false);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
+                                $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
                             }
                             total_payable_amt+=total_payable;
                             // console.log(total_payable_amt);
@@ -1913,6 +1932,7 @@
                     else{
                         $('#make_payments #make_payments_form button.make').prop('disabled', true);
                         $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
                     }
 
                 } else {
@@ -1926,6 +1946,7 @@
                     total_hold_selector.val(parseFloat(initial_total_hold).toFixed(2));
 
                     $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                    $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
                     $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                 }
 
@@ -1969,7 +1990,6 @@
             }
 
             $('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
-                
                 var parent = $(this).parent('tr');
                 var selected_id = $(this).parent('tr').attr('id');
                 var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
@@ -2002,7 +2022,6 @@
                         }
 
                     });
-                    
                     if(total_payable_amt > shipper_limit)
                      {
                          scan_sound(2);
@@ -2010,9 +2029,12 @@
                          $('#make_payments #make_payments_form button.make').prop('disabled', true);
                          $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                     }
+                    if(total_payable_amt < 0){
+                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
+                    }
 
                 } else {
-                    
+
                     calculation(parent);
                      if(total_payable_amt > shipper_limit)
                      {
@@ -2021,9 +2043,37 @@
                          $('#make_payments #make_payments_form button.make').prop('disabled', true);
                          $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                     }
+                    if(total_payable_amt < 0){
+                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
+                    }
                 }
-
+                check_reimbursement();
             });
+
+            function check_reimbursement(){
+                setTimeout(function() {
+                    var reimbursement_check = false;
+                    make_payments_table.rows().nodes().each(function(index) {
+                        var row2 = make_payments_table.row(index);
+
+                        if ($(row2.node().firstChild).hasClass('select-checkbox') && $(row2.node()).hasClass('selected')) {
+                            var parent = $(row2.node());
+                            if(parent.children('td.account_type_id').html() == 'Reimbursement'){
+                                console.log(parent.children('td.account_type_id').html());
+                                reimbursement_check = true;
+                            }
+                        }
+
+                    });
+
+                    if(reimbursement_check){
+                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
+                    }else{
+                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
+                    }
+                }, 200);
+
+            }
 
             var shipments_array = [];
 
@@ -2289,6 +2339,7 @@
                     });
             }
 
+
             $('#star_shippers_filter').on('click', function() {
                 $('#star_shippers_filter').val(1);
                 table.draw(true);
@@ -2330,5 +2381,19 @@
 			});
 
         });
+
+        function verify_make_invoice_payments() {
+            $.ajax({
+                url: '{!! route('admin.finance.make_payments.invoice') !!}',
+                method: 'POST',
+                data: {
+                    '_token': '{{ csrf_token() }}',
+                    'pending_payment_shipment_ids': $('#make_payments #make_payments_form .pending_payment_shipment_ids').val()
+                }
+            })
+            .done(function(data) {
+
+            });
+        }
     </script>
 @endsection

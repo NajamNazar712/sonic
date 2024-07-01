@@ -985,6 +985,7 @@ class V2AdminPickupsController extends Controller
         }
 
         $walkin_shipment_ids = array();
+        $arrival_charges_shipment = [];
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if ($shipment) {
@@ -1256,9 +1257,18 @@ class V2AdminPickupsController extends Controller
                         $walkin_shipment_ids[] = $shipment->id;
                     }
                 }
+                //shipment calculate arrival charges
+                $shipment->refresh();
+                if(in_array($shipment->shipper_status_id,[2,15])){
+                    self::arrival_chagres($request,$shipment);
+                    array_push($arrival_charges_shipment,$shipment_id);;
+                }
             } else {
                 unset($shipment_ids[$key]);
             }
+        }
+        if(count($arrival_charges_shipment) > 0){
+            Shipment::whereIn('id',$arrival_charges_shipment)->update(['arrival_charges_applied'=>1]);
         }
 
         foreach ($shipment_ids as $shipment_id) {
@@ -1364,7 +1374,7 @@ class V2AdminPickupsController extends Controller
     }
 
 
-    public function add_weight_bypass($shipments, $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests)
+    public function add_weight_bypass($shipments, $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests,Request $request)
     {
         $settings = GlobalSettings::where('type', 'global_rider_id');
         $pickup_rider_id = null;
@@ -1376,7 +1386,7 @@ class V2AdminPickupsController extends Controller
         if ($pickup_rider_id) {
             $unassigned_pickup_requests;
         }
-
+        $arrival_charges_shipment = [];
         foreach ($shipments as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if ($shipment) {
@@ -1635,9 +1645,17 @@ class V2AdminPickupsController extends Controller
                         $walkin_shipment_ids[] = $shipment->id;
                     }
                 }
+                $shipment->refresh();
+                if(in_array($shipment->shipper_status_id,[2,15])){
+                    self::arrival_chagres($request,$shipment);
+                    array_push($arrival_charges_shipment,$shipment_id);;
+                }
             } else {
                 unset($shipments[$key]);
             }
+        }
+        if(count($arrival_charges_shipment) > 0){
+            Shipment::whereIn('id',$arrival_charges_shipment)->update(['arrival_charges_applied'=>1]);
         }
 
         foreach ($shipments as $shipment_id) {
@@ -1760,7 +1778,7 @@ class V2AdminPickupsController extends Controller
         $pickup_request_ids = array();
         $unassigned_pickup_requests = array();
 
-        $this->add_weight_bypass($shipments_to_be_bypassed, $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests);
+        $this->add_weight_bypass($shipments_to_be_bypassed, $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests,$request);
         return response()->json(['status' => 0, 'shipments_to_be_bypassed'=> $shipments_to_be_bypassed, 'shipments_to_be_not_bypassed' => $shipments_to_be_not_bypassed]);
     }
     
@@ -2590,7 +2608,7 @@ class V2AdminPickupsController extends Controller
                 $shipment->refresh();
                 if(in_array($shipment->shipper_status_id,[2,15])){
                     self::arrival_chagres($request,$shipment);
-                    array_push($arrival_charges_shipment,$shipment_id);
+                    array_push($arrival_charges_shipment,$shipment_id);;
                 }
             } else {
                 unset($shipment_ids[$key]);

@@ -1668,6 +1668,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('shipment_list', 'Admins\AdminFinanceController@make_payments_shipment_list')->name('shipment_list');
             Route::get('shipment_export_selected', 'Admins\AdminFinanceController@make_payments_shipment_export_selected')->name('shipment_export_selected');
             Route::post('verify', 'Admins\AdminFinanceController@make_payments_verify')->name('verify');
+            Route::post('invoice', 'Admins\AdminFinanceController@make_payments_invoice')->name('invoice');
             Route::get('export_bank_order', 'Admins\AdminFinanceController@make_payments_export_bank_order')->name('export_bank_order');
             Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
             Route::get('stats_calculate', 'Admins\AdminFinanceController@make_payments_stats_calculate')->name('stats_calculate');
