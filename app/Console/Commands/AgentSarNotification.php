@@ -108,6 +108,8 @@ class AgentSarNotification extends Command
 
             if ($unresponsive_shipments->isNotEmpty()) {
                 foreach ($unresponsive_shipments as $shipment) {
+                    Log::channel('cronJobLog')->info('s ' . ' agent:sarnotification unresponsive_shipments:in');
+
                     // $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
                     $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
 
@@ -153,6 +155,7 @@ class AgentSarNotification extends Command
             if ($refusal_call_shipments->isNotEmpty()) {
                 foreach ($refusal_call_shipments as $refusal_call_shipment) {
                     $refusal_call_shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
+                    Log::channel('cronJobLog')->info('s ' . 'agent:sarnotification Completedagent:sarnotification Completed');
 
                     $request = (object) [
                         'shipment_id' => $refusal_call_shipment->shipment_id,
@@ -162,6 +165,7 @@ class AgentSarNotification extends Command
                     ];
                     $globalAdminId = 346;
                     $this->return_confirm($request,$globalAdminId);
+                    Log::channel('cronJobLog')->info('s ' . ' agent:sarnotification return_confirm');
 
                     $data = [
                         'rv_shipment_assign_agent_id' => $refusal_call_shipment->id,
@@ -185,7 +189,7 @@ class AgentSarNotification extends Command
                 }
             }
 
-            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completed');
+            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completedagent:sarnotification Completed');
 
         } catch (\Throwable $th) {
             Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Failed'. $th->getMessage());
