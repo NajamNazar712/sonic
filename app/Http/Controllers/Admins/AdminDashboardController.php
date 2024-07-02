@@ -10947,11 +10947,12 @@ class AdminDashboardController extends Controller
         $walk_in_city = WalkInCities::where('city_id', $city['id'])->get();
         $walk_in_delivery = array();
         $osa_list = CityOsaRate::where('city_id', $city->id)->get();
+        $vehicles = Fleet::where('status', 1)->select(['id', 'reg_number'])->get();
 
         foreach ($walk_in_city as $walk_in_detail) {
             $walk_in_delivery[$walk_in_detail['delivery']] = $walk_in_detail['delivery'];
         }
-        return view('admin.management.edit_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'isHub' => $isHub, 'city' => $city, 'delivery' => $delivery, 'cityhub' => $cityhub, 'walk_in_city' => $walk_in_delivery, 'osa_list' => $osa_list]);
+        return view('admin.management.edit_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'isHub' => $isHub, 'city' => $city, 'delivery' => $delivery, 'cityhub' => $cityhub, 'walk_in_city' => $walk_in_delivery, 'osa_list' => $osa_list, 'vehicles' => $vehicles]);
 
     }
 
