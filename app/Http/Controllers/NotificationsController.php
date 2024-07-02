@@ -10516,7 +10516,7 @@ class NotificationsController extends Controller
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment_journey->shipment_status_reason->name) ? $shipment_journey->shipment_status_reason->name : '---') . '</td>';
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($last_unresposnsive_reasons->rv_sub_status->name) ? $last_unresposnsive_reasons->rv_sub_status->name : '---') . '</td>';
                                 $html .= '</tr>';
-                                $to_user_email = $shipment->user->email;
+                                $to_user_email = $email;
                             }
                             
                         }
