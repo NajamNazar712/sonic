@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 
 class RetailParcelReceivingController extends Controller
-{public function __construct()
+{
+    public function __construct()
     {
     $this->middleware('auth:retail');
 
@@ -384,6 +385,7 @@ class RetailParcelReceivingController extends Controller
 
     public function other_index()
     {
+        //return view('retail.flyer_shipper.flyer_shipper_reports');
         return view('retail.parcel_receiving.other_parcel_receiving');
 
     }

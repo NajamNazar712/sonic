@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Http\Models\Admin\Retail\RetailReference;
+use App\Http\Models\Blacklist\ConsigneeInformation;
+use App\Http\Models\Blacklist\ConsigneeInformationLog;
+use App\Http\Models\ConsigneeInfo;
+use App\Http\Models\InternationalShipment;
 use DB;
 use Validator;
 use App\SubReason;
@@ -38,6 +43,7 @@ use App\Http\Models\PickupRequest;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\ShipmentPiece;
+use App\Http\Models\PendingPayment;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentStatus;
@@ -171,10 +177,14 @@ use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
 use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\PackagingMaterialTypeSizes;
+use Illuminate\Support\Str;
+use App\Http\Models\Shipper\User;
+use App\RetailShipperNameVerification;
+
 
 class RiderAPIController extends Controller
 {
-    use LastMileAppReportTrait;
+    //use LastMileAppReportTrait;
 
     private $names = [
         'phone_number' => 'Phone Number',
@@ -2217,41 +2227,7 @@ class RiderAPIController extends Controller
         }
     }
 
-    public function shipper_cities(Request $request)
-    {
-
-       
-        $cities = City::where('status', 1)->where('business_category_id', 1);
-
-        if ($cities->exists()) {
-            $cities = $cities->get();
-
-            $details = array();
-
-            foreach ($cities as $city) {
-                $detail = array();
-
-                $detail['id'] = $city->id;
-                $detail['name'] = $city->name;
-
-                $details[] = $detail;
-            }
-
-            return response()->json(['status' => 0, 'message' => 'Pickup and Delivery Information of Cities', 'cities' => $details]);
-        } else {
-            return response()->json(['status' => 1, 'message' => ' No City Present']);
-        }
-    }
-
-
-    public function shipper_products(Request $request){
-        $products = Product::all();
-        if($products){
-            return response()->json(["status" => 0, "message" => "Products Found!","products"=>$products]);
-        }else {
-            return response()->json(["status" => 1, "message" => "No products found!"]);
-        }
-    }
+   
 
 
     public function cities(Request $request)
@@ -14832,13 +14808,15 @@ class RiderAPIController extends Controller
     {
 
 
-       
+        //return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $request]);
+      
         $rules = [
             'full_name' => ['required'],
             'mobile_number' =>  ['required', 'regex:/^[0][0-9]{10}$/'],
             'cnic' =>['required'],
             'address' => ['required'],
             'pin' => ['required', 'integer', 'digits:4'],
+            'city_id'=>['required', 'integer']
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -14852,6 +14830,7 @@ class RiderAPIController extends Controller
             $address = $request->address;
             $pin = $request->pin;
             $pin = Hash::make($pin);
+            $city_id = $request->city_id;
             
             $dataExist = RetailShipperInfo::where('shipper_phone_no',$mobile_number)->
             where('shipper_name',$full_name)->
@@ -14864,11 +14843,15 @@ class RiderAPIController extends Controller
                     'shipper_name' => $full_name,
                     'shipper_cnic' => $cnic,
                     'shipper_address' => $address,
-                    'pin' => $pin
+                    'pin' => $pin,
+                    'city_id' => $city_id
                 ]);
+
+                $result->city_id = $city_id;
+                $result->save();
     
                 if($result){
-                    return response()->json(['status' => 0, 'create_message' => 'Retail Shipper has been created']);
+                    return response()->json(['status' => 0, 'create_message' => 'Retail Shipper has been created','abc'=>$city_id]);
                 }else {
                     return response()->json(['status' => 1, 'create_message' => 'Retail Shipper account not created']);
                 }
@@ -14906,8 +14889,14 @@ class RiderAPIController extends Controller
                 if ($rider->status) {
                     $rPin = $rider->pin;
                     $results = Hash::check($pin,$rider->pin);
+                    $user = Auth::user();
                     if($results){
-                        return response()->json(['status' => 0, 'message' => 'Shipper login successfully']);
+                        $token = Str::random(80);
+                        $apiToken = hash('sha256', $token);;
+                        $rider->api_token = $apiToken;
+                        $rider->save();
+
+                        return response()->json(['status' => 0, 'message' => 'Shipper login successfully','profile_data'=>$rider]);
                     }else {
                         return response()->json(['status' => 1, 'message' => 'Invalid Pin','pin 1'=>$pin,'Pin 2 '=>$rPin,'Results '=>$results]);
       
@@ -14927,7 +14916,12 @@ class RiderAPIController extends Controller
     {
 
 
-       
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
         $rules = [
             'mobile_number' =>  ['required', 'regex:/^[0][0-9]{10}$/'],
             'old_pin' => ['required', 'integer', 'digits:4'],
@@ -14956,7 +14950,7 @@ class RiderAPIController extends Controller
                             return response()->json(['status' => 0, 'message' => 'Shipper pin change successfully']);
                         
                     }else {
-                        return response()->json(['status' => 1, 'message' => 'Invalid Pin','pin 1'=>$pin,'Pin 2 '=>$rPin,'Results '=>$results]);
+                        return response()->json(['status' => 1, 'message' => 'Invalid Pin','pin 1'=>$old_pin,'Pin 2 '=>$rPin,'Results '=>$results]);
       
                     }
                 
@@ -14975,7 +14969,11 @@ class RiderAPIController extends Controller
     {
 
 
-       
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
             
             
             $riders = PackagingMaterialTypes::where('status', 1);
@@ -15007,7 +15005,11 @@ class RiderAPIController extends Controller
     public function shipper_flyer_rates(Request $request)
     {
 
-
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
        
         $rules = [
             'type_id' =>  ['required']
@@ -15043,10 +15045,72 @@ class RiderAPIController extends Controller
         }
     }
 
+ 
+
+
+
+
+
+
+    public function shipper_all(Request $request)
+    {
+
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
+       
+        $rules = [
+            'shipper_id' =>  ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipper_id = $request->shipper_id; 
+            $retailShipperInfo = RetailShipperInfo::where('id', $shipper_id);
+            if ($retailShipperInfo->exists()) {
+                $retailShipperInfo = $retailShipperInfo->first();
+                $user = User::where('id',1381)->first();
+                $api_token = $user->api_token;
+                $products = Product::all();
+                $cities = City::where('status', 1)->get();
+                $city_id = $retailShipperInfo->city_id;
+                $retailTraxCenter = RetailTraxCenter::where('status',1)->where('default_hub', $city_id)->get();
+                //trax metarial types
+                $packagingMaterialTypes = PackagingMaterialTypes::where('status', 1)->where('category',3)->get();
+                $packagingMaterialTypeSizes = PackagingMaterialTypeSizes::all();
+                $retail_shipping_modes = RetailShippingMode::all();
+                $consigneeInfos = ConsigneeInfo::where('shipper_id',$shipper_id)->get();
+                return response()->json(['status' => 0, 'message' => 'Record Found',
+                'products'=>$products,
+                'cities'=>$cities,
+                'retail_trax_centre'=>$retailTraxCenter,
+                'packaging_material_types'=>$packagingMaterialTypes,
+                'packaging_material_type_sizes'=>$packagingMaterialTypeSizes,
+                'retail_shipping_modes'=>$retail_shipping_modes,
+                'consignee_infos'=>$consigneeInfos
+            ]); //RetailTraxStoreId bind for users table booking
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Record not found', 'errors' => 'not Exist']);
+      
+            }
+            // create retail shipper account here
+
+        }
+    }
+
+
     public function shipper_trax_city_center(Request $request)
     {
 
-
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
        
         $rules = [
             'city_id' =>  ['required'],
@@ -15069,13 +15133,14 @@ class RiderAPIController extends Controller
 
         }
     }
-
-
-
     public function shipper_flyer_request(Request $request)
     {
 
-
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
        
         $rules = [
             'retail_shipper_id' => ['required'],
@@ -15083,7 +15148,8 @@ class RiderAPIController extends Controller
             'trax_centre_id' =>['required'],
             'qty' => ['required','integer','min:1'],
             'amount' => ['required','integer','min:1'],
-            'status' => ['required'],
+            'trax_centre_name_verification_id'=>['required','integer']
+           
 
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -15096,7 +15162,8 @@ class RiderAPIController extends Controller
             $trax_centre_id = $request->trax_centre_id;
             $qty = $request->qty;
             $amount = $request->amount;
-            $status = $request->status;
+            $trax_centre_name_verification_id = $request->trax_centre_name_verification_id;
+            $status = 0;
             
                 $result = TraxRetailShipperFlyerRequest::create([
                     'retail_shipper_id' => $retail_shipper_id,
@@ -15104,11 +15171,13 @@ class RiderAPIController extends Controller
                     'trax_centre_id' => $trax_centre_id,
                     'qty' => $qty,
                     'amount' => $amount,
-                    'status'=>$status
+                    'status'=>$status,
+                    'trax_centre_name_verification_id'=>$trax_centre_name_verification_id
                 ]);
     
                 if($result){
-                    return response()->json(['status' => 0, 'create_message' => 'Retail Shipper Flyer Request has been created']);
+                    $request->trax_centre_name_verification_id=$trax_centre_name_verification_id;
+                    return response()->json(['status' => 0, 'create_message' => 'Retail Shipper Flyer Request has been created','success'=>$trax_centre_name_verification_id]);
                 }else {
                     return response()->json(['status' => 1, 'create_message' => 'Retail Shipper Flyer Request  not created']);
                 }
@@ -15119,12 +15188,15 @@ class RiderAPIController extends Controller
         }
     }
 
-
-
-    public function shipper_all(Request $request)
+    //
+    public function shipper_retail_shipper_name_verifications(Request $request)
     {
 
-
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
        
         $rules = [
             'shipper_id' =>  ['required'],
@@ -15135,10 +15207,12 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $shipper_id = $request->shipper_id; 
-            $retailTraxCenter = RetailShipperInfo::where('id', $shipper_id);
-            if ($retailTraxCenter->exists()) {
-                $retailTraxCenter = $retailTraxCenter->first();
-                return response()->json(['status' => 0, 'message' => 'Record Found', 'success' => $retailTraxCenter]);
+            $retail_shipper_name_verifications = RetailShipperNameVerification::where('retail_shipper_info_id',$shipper_id)->get();
+            if ($retail_shipper_name_verifications) {
+                $request_flyer_last_id = TraxRetailShipperFlyerRequest::where('retail_shipper_id', $shipper_id)
+                ->orderBy('id', 'desc')
+                ->value('trax_centre_id');
+                return response()->json(['status' => 0, 'message' => 'Record Found', 'retail_shipper_name_verifications' => $retail_shipper_name_verifications,'last_trax_centre_id'=>$request_flyer_last_id]);
             }else {
                 return response()->json(['status' => 1, 'message' => 'Record not found', 'errors' => 'not Exist']);
       
@@ -15146,5 +15220,665 @@ class RiderAPIController extends Controller
             // create retail shipper account here
 
         }
+    }         
+    public function shipper_cities(Request $request)
+    {
+
+       
+        $cities = City::where('status', 1);
+
+        if ($cities->exists()) {
+            $cities = $cities->get();
+
+            $details = array();
+
+            foreach ($cities as $city) {
+                $detail = array();
+
+                $detail['id'] = $city->id;
+                $detail['name'] = $city->name;
+                $detail['business_category_id'] = $city->business_category_id;
+
+
+                $details[] = $detail;
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Pickup and Delivery Information of Cities', 'cities' => $details]);
+        } else {
+            return response()->json(['status' => 1, 'message' => ' No City Present']);
+        }
     }
+
+
+    public function shipper_products(Request $request){
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
+       
+        $products = Product::all();
+        if($products){
+            return response()->json(["status" => 0, "message" => "Products Found!","products"=>$products]);
+        }else {
+            return response()->json(["status" => 1, "message" => "No products found!"]);
+        }
+    }
+
+    
+    public function shipper_change_status(Request $request){
+
+        $rules = [
+            'retail_shipper_request_id' =>  ['required'],
+            'status_type'=>['required']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        $retail_shipper_request_id = $request->retail_shipper_request_id;
+        $result = TraxRetailShipperFlyerRequest::where('id', $retail_shipper_request_id)->first();
+        if($result){
+            $status_type = $request->status_type;
+            if($status_type=='Rejected'){
+                $result->status = "2";
+                $result->save();
+            }else if($status_type=='Completed'){
+                $result->status = "3";
+                $result->save();
+            }
+            return response()->json(["status" => 0, "message" => "Status Updated!"]);
+            
+        }else {
+            return response()->json(["status" => 1, "message" => "Record not found!"]);
+            
+        }
+
+    }
+
+
+    public function shippment_book_retail(Request $request){
+
+
+        // add validation array for requested parameters
+        // $refs = ['Social Media','Website','Signages','Existing Customer','Others'];
+       
+        // if($request->ref == 'Others'){
+        //   $ref = $request->ref_name;
+        // }else{
+            $token = $request->bearerToken();
+        
+            if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+               return response()->json(['message' => 'Unauthorized'], 401);
+            }
+          $ref = "Others";//$request->ref;
+        // }
+
+        $rules = [
+            'order_id' => ['nullable', 'string', 'max:255'],
+            'consignee_name' =>  ['required'],
+            'consignee_address' =>['required'],
+            'consignee_phone_no' => ['required'],
+            'packaging_amount' => ['nullable','integer'],
+            'special_instructions' => ['nullable', 'string', 'max:255'],
+            'business_category' => ['required','integer'],
+            'shipping_mode' => ['required','integer','min:1'],
+            'domestic_overland_destination' => ['required','integer'],
+
+            'international_destination' => ['required','integer'],
+            'domestic_destination' => ['required','integer'],
+            'charges_mode' => ['required','integer'],
+            'parcel_amount' => ['required','integer'],
+
+            'quantity' => ['required','integer'],
+            'product_type_id' => ['required','integer'],
+            'tracking_number' => ['nullable','string'],
+            'shipper_id'=>['required','integer'],
+            'city_id'=>['required','integer'],
+            'city_id'=>['required'],
+            'shipper_name'=>['required'],
+            'shipper_cnic'=>['required'],
+            'shipper_address'=>['required']
+            
+
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+        }
+        $order_id = $request->input('order_id');
+        $consignee_name = $request->input('consignee_name');
+        $consignee_address = $request->input('consignee_address');
+        $consignee_phone_number_1 = $request->input('consignee_phone_no');
+        $packaging_amount = $request->packaging_amount;
+        $special_instructions = $request->special_instructions;
+        $business_category_id = $request->input('business_category');
+        $shipper_phone_no = $request->shipper_phone_no;
+        $shipper_name = $request->shipper_name;
+        $shipper_cnic = $request->shipper_cnic;
+        $shipper_address = $request->shipper_cnic;
+    
+        $retail_shipper_id = $request->shipper_id;
+        $city_id = $request->city_id;
+        
+        $setting = GlobalSettings::where('type', 'retail_store')->first();
+        $shipper_user_id = $setting->setting_value;
+        $user_id = $shipper_user_id;
+        try{
+        //$pickup_address_id = Auth::user();//->store;//->pickup_address_id;
+        //return response()->json(['status' => 1, 'message' => $user_id]);
+        $pickup_address = UserShippingInfo::where('user_id',$shipper_user_id)->where('city_id',$city_id);
+        $pickup_address_id = '';
+        if($pickup_address->exists()){
+            $pickup_address = $pickup_address->first();
+            $pickup_address_id = $pickup_address->id;
+        }
+        }catch(\Exception $ex){
+        }
+      
+        $information_display = TRUE;
+
+        $discount = 0;// Auth::user()->store->discount;
+        $insurance = 0;// Auth::user()->store->insurance;
+        $consignee_phone_number_2 = NULL;
+        $consignee_email_address = NULL;
+        $package_type = FALSE;
+        
+        $packaging = ($packaging_amount != null) ?  str_replace(',', '', $packaging_amount) : 0;
+        $insurance_amount = 0;//($request->insurance_amount != null) ?  str_replace(',', '',$request->insurance_amount) : 0;
+
+       
+        $shipping_mode_check = $request->input('shipping_mode');
+        if ($shipping_mode_check == 1) {
+            if($request->input('business_category') == 1)
+            {
+                $consignee_city_id = $request->input('domestic_overland_destination');
+            }
+            else{
+                $consignee_city_id = $request->input('international_destination');
+            }
+            $shipping_mode_id = 2;
+        }
+        elseif ($shipping_mode_check == 4){
+            if($request->input('business_category') == 1) {
+                $consignee_city_id = $request->input('domestic_destination');
+            }
+            else{
+                $consignee_city_id = $request->input('international_destination');
+            }
+            $shipping_mode_id = 3;
+        }
+        else{
+            if($request->input('business_category') == 1) {
+                $consignee_city_id = $request->input('domestic_destination');
+            }
+            else{
+                $consignee_city_id = $request->input('international_destination');
+            }
+            $shipping_mode_id = 1;
+        }
+        $same_day_timing_id = NULL;
+
+            $estimated_weight = 1; // by default hardcoded weight of flyer
+            $length = null;
+            $breadth = null;
+            $height = null;
+            $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging);
+
+
+       
+        if ($rates['total_charges'] <= 0)
+        {
+            return response()->json(['status' => 1, 'message' => 'Total charges cannot be less than zero !','val',[$rates,$packaging]]);
+        }
+
+       
+        if( $rates['charges'] == 0 && $rates['charges_with_discount'] == 0) {
+          //  return response()->json(['status' => 1, 'message' => 'Charges should be greater than zero']);
+        }
+
+
+        
+        $charges_mode_id = $request->input('charges_mode');
+        if($shipping_mode_check == 3){
+            $amount = str_replace(',', '', $request->input('cod'));
+            $r_amount = 0;
+            if($charges_mode_id == 2){
+                $amount = $amount + $rates['total_charges'];
+            }
+        }
+        else{
+            $amount = 0;
+            if($charges_mode_id == 2){
+                $amount = $rates['total_charges'];
+            }
+            $r_amount = 0;
+        }
+        $payment_mode_id = 1;
+        $try_and_buy_charges = NULL;
+
+        $pieces_quantity = 1;
+        $business_category_id = $request->input('business_category');
+
+        $parcelAmount = $request->input('parcel_amount');
+        $parcelAmount = trim($parcelAmount);
+        $parcelAmount = str_replace(',', '', $parcelAmount);
+        $parcelAmoutInShipment = (float)$parcelAmount;
+
+        $quantity = $request->input('quantity');
+        $quantity = trim($quantity);
+        $quantity = str_replace(',', '', $quantity);
+        $quantityForShipmentItem = (int)$quantity;
+
+        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height, $parcelAmoutInShipment);
+
+        if($request->input('business_category') == 2) {
+            $international_shipment_booking = new InternationalShipment();
+            $international_shipment_booking->shipment_id = $shipment_id;
+            $international_shipment_booking->postal_code = 00000;
+            $international_shipment_booking->save();
+        }
+
+        $tracking_number = $request->tracking_number;
+        if($tracking_number==''){
+            $tracking_number = $this->generate_tracking_number($shipment_id, $city_id, $consignee_city_id);
+        }
+       
+        $product_type_id = $request->product_type_id;
+
+        $item_description = NULL;
+
+        // $item_quantity = 1;
+        $item_quantity = $quantityForShipmentItem;
+        $price = NULL;
+        $insurance = FALSE;
+    
+        $type = 0;
+
+        $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+
+        if($pieces_quantity > 1){
+            $this->create_shipment_pieces($shipment_id, $pieces_quantity);
+        }
+
+        if($request->shipping_mode == 1){
+            if($request->input('business_category') == 1) {
+                $destination = $request->domestic_overland_destination;
+            }
+            else{
+                $destination = $request->input('international_destination');
+            }
+        }
+        else{
+            if($request->input('business_category') == 1) {
+                $destination = $request->domestic_destination;
+            }
+            else{
+            $destination = $request->input('international_destination');
+            }
+        }
+
+        $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no);
+        if($shipper_info->exists()){
+            $shipper_info = $shipper_info->first();
+            $shipper_info->shipper_phone_no = $request->shipper_phone_no;
+            $shipper_info->shipper_name = $request->shipper_name;
+            $shipper_info->shipper_cnic = $request->shipper_cnic;
+            $shipper_info->shipper_address = $request->shipper_address;
+            $shipper_info->city_id = $city_id;
+
+            if (!$shipper_info->iban_no && (!$request->iban_no || $request->iban_no == '')) {
+               
+                return response()->json(['status' => 1, 'message' => 'Please provide the IBAN number']);
+            }
+            if (!$shipper_info->account_no && (!$request->account_no || $request->account_no == '')) {
+                return response()->json(['status' => 1, 'message' => 'Please provide the account number']);
+            }
+            if (!$shipper_info->bank && (!$request->bank || $request->bank == '')) {
+                return response()->json(['status' => 1, 'message' => 'Please choose a bank']);
+            }
+            if (!$shipper_info->cheque_image && !$request->hasFile('cheque_image')) {
+                return response()->json(['status' => 1, 'message' => 'Please provide the cheque image']);
+            }
+
+            if ($request->iban_no != null && $request->account_no != null && $request->bank != null) {
+                $shipper_info->bank_id = $request->bank;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                if ($request->hasFile('cheque_image')){
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+
+                    $file = $request->file('cheque_image');
+
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                    $shipper_info->cheque_image = $filename;
+                    $shipper_info->completed_status = 1;
+                }
+            }
+            $shipper_info->save();
+        }
+        else{
+            $shipper_info = new RetailShipperInfo();
+            $shipper_info->shipper_phone_no = $request->shipper_phone_no;
+            $shipper_info->shipper_name = $request->shipper_name;
+            $shipper_info->shipper_cnic = $request->shipper_cnic;
+            $shipper_info->shipper_address = $request->shipper_address;
+            $shipper_info->city_id = $city_id;
+           // return response()->json(['status' => 1, 'message' => $shipper_info]);
+            $shipper_info->save();
+
+            if ($request->iban_no == null || $request->iban_no == ''){
+                return response()->json(['status' => 1, 'message' => 'Please provide the IBAN number']);
+            } 
+            if ($request->account_no == null || $request->account_no == '') {
+                return response()->json(['status' => 1, 'message' => 'Please provide the account number']);
+            } 
+            if ($request->bank == null || $request->bank == ''){
+                return response()->json(['status' => 1, 'message' => 'Please choose a bank']);
+            } 
+            if (!$request->hasFile('cheque_image')){
+                return response()->json(['status' => 1, 'message' => 'Please provide the cheque image']);
+     
+            } 
+
+            if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
+                $shipper_info->bank_id = $request->bank;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                if ($request->hasFile('cheque_image')) {
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+
+                    $file = $request->file('cheque_image');
+
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                    $shipper_info->cheque_image = $filename;
+                    $shipper_info->completed_status = 1;
+                }
+            }
+            return response()->json(['status' => 1, 'message' => $shipper_info]);
+     
+            $shipper_info->save();
+        }
+
+        $admin_id = Auth::id();
+        $center_n_franchise = RetailUser::where('id',$admin_id)->select('category','category_id');
+        if ($center_n_franchise->exists())
+        {
+            $center_n_franchise = $center_n_franchise->first();
+            $cat = $center_n_franchise->category;
+            $cat_id = $center_n_franchise->category_id;
+        }
+        else
+        {
+            $cat = $center_n_franchise = null;
+            $cat_id = $center_n_franchise = null;
+        }
+
+        $retail_shipment = new RetailShipment();
+        $retail_shipment->shipment_id = $shipment_id;
+        $retail_shipment->product_type_id = $request->product_type_id;
+        $retail_shipment->shipping_mode = $request->shipping_mode;
+        $retail_shipment->destination = $destination;
+        $retail_shipment->payment_mode_id = $request->payment_mode_id;
+        $retail_shipment->shipper_phone_no = $request->shipper_phone_no;
+        $retail_shipment->shipper_name = $request->shipper_name;
+        $retail_shipment->shipper_cnic = $request->shipper_cnic;
+        $retail_shipment->shipper_address = $request->shipper_address;
+        $retail_shipment->trax_box_id = $request->trax_box;
+        $retail_shipment->total_charges_without_gst = $rates['charges'];
+        $retail_shipment->gst = $rates['gst_charges'];
+        $retail_shipment->total_charges = $rates['total_charges'];
+        $retail_shipment->weight_charges = $rates['charges'];
+        $retail_shipment->discount = $rates['discount_amount'];
+        $retail_shipment->charges_with_discount = $rates['charges_with_discount'];
+        $retail_shipment->insurance_charges = $insurance_amount;
+        $retail_shipment->packaging_charges = $packaging;
+        $retail_shipment->shipper_account_no = $shipper_info->id;
+        $retail_shipment->weight = $estimated_weight;
+        $retail_shipment->length = $length;
+        $retail_shipment->breadth = $breadth;
+        $retail_shipment->height = $height;
+        $retail_shipment->retail_user_id = Auth::id();
+        $retail_shipment->category = $cat;
+        $retail_shipment->category_id = $cat_id;
+        if($request->has('admin_discount'))
+        {
+            $retail_shipment->admin_discount = $request->admin_discount;
+        }
+        if($request->has('admin_discount_type'))
+        {
+            if($request->admin_discount_type == 1)
+            {
+                $retail_shipment->admin_discount_type = 0;
+            }
+            elseif ($request->admin_discount_type == 0)
+            {
+                $retail_shipment->admin_discount_type = 1;
+            }
+        }
+        $retail_shipment->parcel_amount = $parcelAmount;
+        $retail_shipment->quantity = $quantity;
+        $retail_shipment->save();
+
+        $shipment = Shipment::find($shipment_id);
+        if($shipment->charges_mode_id != 2){
+            $date = Carbon::today()->toDateString();
+            //RetailUser::where();
+            $retail_user_id = 1;
+            $category_id = RetailUser::where("id",$retail_user_id)->first()->category;
+            $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', $category_id)->where('retail_user_id', $retail_user_id)->where('finalize', 0);
+            if($cash_deposit->exists()){
+                $cash_deposit = $cash_deposit->first();
+                $total_shipments = $cash_deposit->total_cn + 1;
+                $total_cash = floatval($cash_deposit->total_cash) + floatval($rates['total_charges']);
+                $cash_deposit->total_cn = $total_shipments;
+                $cash_deposit->total_cash = $total_cash;
+                $cash_deposit->save();
+            }
+            else{
+                $cash_deposit = new RetailCashDeposit();
+                $cash_deposit->category = $category_id;
+                $cash_deposit->retail_user_id =$retail_user_id;
+                $cash_deposit->total_cn = 1;
+                $cash_deposit->total_cash = floatval($rates['total_charges']);
+                $cash_deposit->save();
+            }
+
+            $cash_deposit_shipment = new RetailCashDepositShipment();
+            $cash_deposit_shipment->cash_deposit_id = $cash_deposit->id;
+            $cash_deposit_shipment->shipment_id = $shipment_id;
+            $cash_deposit_shipment->shipping_mode_id = $request->shipping_mode;
+            $cash_deposit_shipment->save();
+        }
+
+
+        AdminPickupsController::generate($shipment_id);
+       
+        $retail_reference = new RetailReference();//RetailReference();
+        $retail_reference->shipment_id = $shipment_id;
+        $retail_reference->ref = $ref;
+        $retail_reference->save();
+
+        $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address, $shipper_info->id);
+
+        if($request->book_button == 0){
+            return response()->json(['status' => 0, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);
+        }
+        else{
+            $print = $shipment_id;
+            return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
+        }
+    }
+
+
+    static public function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
+        $shipment_item = new ShipmentItem();
+
+        $shipment_item->shipment_id = $shipment_id;
+        $shipment_item->product_type_id = $product_type_id;
+        $shipment_item->description = $item_description;
+        $shipment_item->quantity = $item_quantity;
+        $shipment_item->price = $price;
+        $shipment_item->insurance = $insurance;
+        $shipment_item->type = $type;
+
+        $shipment_item->save();
+    }
+
+    static public function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
+        $shipment = Shipment::find($shipment_id);
+
+        $tracking_number = $pickup_city_id . $consignee_city_id . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
+
+        $shipment->tracking_number = $tracking_number;
+
+        $shipment->save();
+
+        return $tracking_number;
+    }
+
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $business_category_id, $length, $breadth, $height, $parcelAmoutInShipment) {
+
+        $shipment = new Shipment();
+
+        $shipment->user_id = $user_id;
+        $shipment->booking_type_id = $service_type_id;
+        $shipment->pickup_address_id = $pickup_address_id;
+        $shipment->information_display = $information_display;
+
+        $shipment->consignee_city_id = $consignee_city_id;
+        $shipment->consignee_name = $consignee_name;
+        $shipment->consignee_address = $consignee_address;
+        $shipment->consignee_phone_number_1 = $consignee_phone_number_1;
+        $shipment->consignee_phone_number_2 = $consignee_phone_number_2;
+        $shipment->consignee_email = $consignee_email_address;
+
+        $shipment->order_id = $order_id;
+        $shipment->package_type = $package_type;
+        $shipment->special_instructions = $special_instructions;
+
+
+        $shipment->estimated_weight = $estimated_weight;
+        $shipment->length = $length;
+        $shipment->breadth = $breadth;
+        $shipment->height = $height;
+
+        $shipment->shipping_mode_id = $shipping_mode_id;
+        $shipment->same_day_timing_id = $same_day_timing_id;
+
+        $shipment->received_amount = $r_amount;
+        $shipment->amount = $amount;
+        $shipment->payment_mode_id = $payment_mode_id;
+        $shipment->charges_mode_id = $charges_mode_id;
+        $shipment->shipper_status_id = 1;
+        $shipment->consignee_status_id = 1;
+
+        $shipment->try_and_buy_fees = $try_and_buy_charges;
+        $shipment->pieces = $pieces;
+        $shipment->business_category_id = $business_category_id;
+        $shipment->shipment_type = 2;
+
+        $shipment->parcel_value = $parcelAmoutInShipment;
+
+        $shipment->save();
+
+        $shipment_id = $shipment->id;
+
+
+        $reference_1_id = null;
+        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL, $reference_1_id);
+        
+        $consignee_information = ConsigneeInformation::where('phone', $consignee_phone_number_1);
+        if(!$consignee_information->exists()){
+            $consignee_information = new ConsigneeInformation();
+            $consignee_information->phone = $consignee_phone_number_1;
+            $consignee_information->phone2 = $consignee_phone_number_2;
+            $consignee_information->name = $consignee_name;
+            $consignee_information->address = $consignee_address;
+            $consignee_information->city_id = $consignee_city_id;
+            $consignee_information->retail_consignee = 1;
+            $consignee_information->save();
+
+            // $consignee_information = $consignee_information->first();
+            $consignee_information_log = new ConsigneeInformationLog();
+            $consignee_information_log->consignee_information_id = $consignee_information->id;
+            $consignee_information_log->phone = $consignee_information->phone;
+            $consignee_information_log->phone2 = $consignee_information->phone2;
+            $consignee_information_log->name = $consignee_information->name;
+            $consignee_information_log->address = $consignee_information->address;
+            $consignee_information_log->city_id = $consignee_information->city_id;
+            $consignee_information_log->user_id = $user_id;
+            $consignee_information_log->save();
+
+        }else{
+
+          $consignee_information = $consignee_information->first();
+            $consignee_information->phone = $consignee_phone_number_1;
+            $consignee_information->phone2 = $consignee_phone_number_2;
+            $consignee_information->name = $consignee_name;
+            $consignee_information->address = $consignee_address;
+            $consignee_information->city_id = $consignee_city_id;
+            $consignee_information->save();
+
+            $consignee_information_log = new ConsigneeInformationLog();
+            $consignee_information_log->consignee_information_id = $consignee_information->id;
+            $consignee_information_log->phone = $consignee_information->phone;
+            $consignee_information_log->phone2 = $consignee_information->phone2;
+            $consignee_information_log->name = $consignee_information->name;
+            $consignee_information_log->address = $consignee_information->address;
+            $consignee_information_log->city_id = $consignee_information->city_id;
+            $consignee_information_log->user_id = $user_id;
+            $consignee_information_log->save();
+        }
+        return $shipment_id;
+    }
+
+    static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address, $id)
+    {
+        $phone_number = str_replace('-', '', $phone_number);
+        $shipper_cnic = str_replace('-', '', $shipper_cnic);
+
+        $existing_records = RetailShipperNameVerification::where('phone_number', $phone_number)->get();
+
+        if ($existing_records->isNotEmpty()) {
+            $foundDuplicate = false;
+
+            foreach ($existing_records as $existing_record) {
+                if (
+                    $existing_record->phone_number == $phone_number &&
+                    $existing_record->shipper_name == $shipper_name &&
+                    $existing_record->shipper_cnic == $shipper_cnic &&
+                    $existing_record->shipper_address == $shipper_address
+                ) {
+                    $foundDuplicate = true;
+                    break; // Exit the loop as soon as an exact match is found
+                }
+            }
+
+            if (!$foundDuplicate) {
+                // No exact match found, create a new record
+                $new_shipper = new RetailShipperNameVerification();
+                $new_shipper->phone_number = $phone_number;
+                $new_shipper->shipper_name = $shipper_name;
+                $new_shipper->shipper_cnic = $shipper_cnic;
+                $new_shipper->shipper_address = $shipper_address;
+                $new_shipper->retail_shipper_info_id = $id;
+                $new_shipper->save();
+            }
+        } else {
+            // No existing record found, create a new one
+            $new_shipper = new RetailShipperNameVerification();
+            $new_shipper->phone_number = $phone_number;
+            $new_shipper->shipper_name = $shipper_name;
+            $new_shipper->shipper_cnic = $shipper_cnic;
+            $new_shipper->shipper_address = $shipper_address;
+            $new_shipper->retail_shipper_info_id = $id;
+            $new_shipper->save();
+        }
+
+    }
+
 }

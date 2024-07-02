@@ -125,6 +125,13 @@ use App\Http\Models\Shippers\ShipperPickupController;
         Route::post('payment-details', 'APIController@fintech_payment_detials')->name('payment-details');
     });
 
+    Route::prefix('retail')->name('retail.')->group(function () {
+       
+        Route::get('other_list', 'Rider\RiderAPIController@other_list')->name('other_list');
+        
+      
+
+    });
     Route::prefix('rider')->name('rider.')->group(function () {
         //Obsoleted
         Route::post('login', 'Rider\RiderAPIController@login')->name('login');
@@ -141,6 +148,7 @@ use App\Http\Models\Shippers\ShipperPickupController;
                 Route::post('login', 'Rider\RiderAPIController@shipper_login')->name('login');
                 Route::get('shipper_cities', 'Rider\RiderAPIController@shipper_cities')->name('shipper_cities');
                 Route::get('shipper_products', 'Rider\RiderAPIController@shipper_products')->name('shipper_products');
+                Route::post('shipper_name_varification', 'Rider\RiderAPIController@shipper_retail_shipper_name_verifications')->name('shipper_products');
         
                 Route::post('shipper_change_pin', 'Rider\RiderAPIController@shipper_change_pin')->name('shipper_change_pin');
                 Route::post('shipper_flyer_types', 'Rider\RiderAPIController@shipper_flyer_types')->name('shipper_flyer_types');
@@ -148,6 +156,7 @@ use App\Http\Models\Shippers\ShipperPickupController;
                 Route::post('shipper_trax_city_center', 'Rider\RiderAPIController@shipper_trax_city_center')->name('shipper_trax_city_center');
                 Route::post('shipper_flyer_request', 'Rider\RiderAPIController@shipper_flyer_request')->name('shipper_flyer_request');
                 Route::post('shipper_all', 'Rider\RiderAPIController@shipper_all')->name('shipper_all');
+                Route::post('shipper_booking', 'Rider\RiderAPIController@shippment_book_retail')->name('shipper_booking');
         
             });
         });
@@ -725,5 +734,10 @@ use App\Http\Models\Shippers\ShipperPickupController;
         Route::post('app_login', 'APIController@app_login')->name('app_login');
         Route::post('forget_pin', 'APIController@forget_pin')->name('forget_pin');
         Route::post('reset_pin', 'APIController@reset_pin')->name('reset_pin');
+        
     });
+
+    
+
 });
+

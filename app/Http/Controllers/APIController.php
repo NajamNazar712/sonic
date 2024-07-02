@@ -1535,6 +1535,8 @@ class APIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
+
+    
     public function shipment_book_international(Request $request)
     {
         $user_id = $request->user_id;

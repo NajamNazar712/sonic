@@ -20,6 +20,7 @@ class TraxRetailShipperFlyerRequest extends Model
         'trax_centre_id',
         'qty',
         'amount',
-        'status'
+        'status',
+        'trax_centre_name_verification_id'
     ];
 }

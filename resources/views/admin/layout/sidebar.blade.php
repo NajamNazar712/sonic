@@ -102,6 +102,7 @@
                                 </ul>
                             </li>
                         @endif
+
                         @if (session('role_id') == 1 || count(array_intersect([79], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Packaging</span></a>
                                 <ul class="menu-content">
@@ -301,6 +302,7 @@
                 </li>
             @endif
 
+          
             @if (session('role_id') == 1 ||
                     count(array_intersect([17, 20, 23, 123, 368, 369, 370, 446, 670, 830], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i

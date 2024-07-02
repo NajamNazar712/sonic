@@ -259,9 +259,11 @@
             var name_check = $('#name').valid();
             var password_check = $('#password').valid();
             if(name_check && password_check){
+                latitude = 0;
+                longitude = 0;
                 if(latitude == null && longitude == null){
                     swal({
-                        title: 'Location Not Found',
+                        title: 'Location Not Founds',
                         text: 'Please allow browser to access your location!',
                         icon: 'warning',
                         buttons: {
@@ -295,6 +297,7 @@
                         if(data.status === 1){
                             $('#radius_error').addClass('d-none');
                             $('#OtpModal').modal('show');
+                            $('#otp_input').text('{{ csrf_token() }}');
                         }else{
                             $('#radius_error').removeClass('d-none');
                             $('#radius_error').text(data.error);

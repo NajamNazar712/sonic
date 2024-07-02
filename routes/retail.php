@@ -50,6 +50,16 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('hbl_konnect_cash', 'Retail\RetailCashDepositController@hbl_konnect_cash')->name('hbl_konnect_cash');
     });
 
+    Route::prefix('flyer_shipper')->name('flyer_shipper.')->group(function(){
+       Route::get('other_index', 'Retail\FlyerShipperController@other_index')->name('other_index');
+       Route::get('other_list', 'Retail\FlyerShipperController@other_list')->name('other_list');
+       Route::post('/other_generate', 'Retail\FlyerShipperController@other_generate')->name('other_generate');
+       Route::post('/other_shipments', 'Retail\FlyerShipperController@other_shipments')->name('other_shipments');
+       Route::post('other_print', 'Retail\FlyerShipperController@other_print')->name('other_print');
+       Route::post('changestatus', 'Retail\FlyerShipperController@shipper_change_status')->name('changestatus');
+        
+    });
+
     Route::prefix('parcel_receiving')->name('parcel_receiving.')->group(function () {
         Route::get('', 'Retail\RetailParcelReceivingController@index')->name('index');
         Route::get('/list', 'Retail\RetailParcelReceivingController@list')->name('list');
@@ -59,6 +69,8 @@ Route::prefix('retail')->name('retail.')->group(function () {
 
         Route::get('other_parcel', 'Retail\RetailParcelReceivingController@other_parcel')->name('other_parcel');
         Route::get('other_index', 'Retail\RetailParcelReceivingController@other_index')->name('other_index');
+        Route::get('flyer', 'Retail\FlyerShipperController@flyer')->name('flyer');
+       
         Route::post('/other_shipment_details', 'Retail\RetailParcelReceivingController@other_shipment_details')->name('other_shipment_details');
         Route::post('/other_parcel_shipments', 'Retail\RetailParcelReceivingController@other_parcel_shipments')->name('other_parcel_shipments');
         Route::get('/other_list', 'Retail\RetailParcelReceivingController@other_list')->name('other_list');

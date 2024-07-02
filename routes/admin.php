@@ -147,6 +147,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('submit', 'Admins\AdminDashboardController@payment_cycle_submit')->name('submit');
         });
 
+        Route::prefix('flyer')->name('flyer.')->group(function () {
+            Route::get('request', 'Admins\AdminDashboardController@pendingAccountsList')->name('request');
+            Route::post('submit', 'Admins\AdminDashboardController@payment_cycle_submit')->name('submit');
+        });
+
         // shippper_exclude_route
         Route::post('/store_shipper_exclude', 'Admins\AdminDashboardController@shipperExclude')->name('store_shipper_exclude');
 
