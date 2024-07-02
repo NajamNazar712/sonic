@@ -10480,7 +10480,7 @@ class NotificationsController extends Controller
                             $emailShipments[$email][] = $user->shipment_id;
                         }
                     }
-
+                    Log::channel('cronJobLog')->info('s ' . 'agent:sarnotification  $emailShipments'. $emailShipments);
                     $htmlHeader = '<table style="width:100%;margin-top:-145px">';
                     $htmlHeader .= '<thead><tr>
                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Cn</th>
