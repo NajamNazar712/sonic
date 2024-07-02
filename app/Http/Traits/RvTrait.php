@@ -1272,11 +1272,19 @@ trait RvTrait
         //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
         if ($shipments->count()) {
             foreach ($shipments as $shipment) {
+
                 $shipmentId = $shipment->shipment_id;
                 $ticketId = $shipment->id;
+                //Shipment table check the current status.
+                if (!Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $shipmentId)->exists()) {
+                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipmentId));
+                    continue;
+                }
                 // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
                 $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('rv_state_id', 3);
+                
                 if ($shipment_assigned_unassigned_agent->exists()) {
+                    
                     $shipment_assigned_unassigned_agent->first();
 
                     // skip this shipment if already is in progress
