@@ -11314,7 +11314,7 @@ class AdminDashboardController extends Controller
 
     }
 
-    private function makeDynamicHubsMapping($vehicles, $closestHubId, $city)
+    private function makeDynamicHubsMapping($requestVehicles, $closestHubId, $city)
     {
             //take this hub as reference hub
             $authId = Auth::id();
@@ -11386,7 +11386,7 @@ class AdminDashboardController extends Controller
                 $route_junction1->ending_hub_id = $mapping1->destination_id;
                 $route_junction1->save();
 
-                foreach ($vehicles as $vehicle) {
+                foreach ($requestVehicles as $vehicle) {
                     $route_vehicle = new V2JunctionVehicles();
                     $route_vehicle->junction_route_id = $route_junction1->id;
                     $route_vehicle->vehicle_id = $vehicle;
@@ -11457,7 +11457,7 @@ class AdminDashboardController extends Controller
                 $route_junction2->ending_hub_id = $mapping2->destination_id;
                 $route_junction2->save();
 
-                foreach ($vehicles as $vehicle) {
+                foreach ($requestVehicles as $vehicle) {
                     $route_vehicle = new V2JunctionVehicles();
                     $route_vehicle->junction_route_id = $route_junction2->id;
                     $route_vehicle->vehicle_id = $vehicle;
