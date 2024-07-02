@@ -189,7 +189,6 @@
                         <th class="border-primary border-darken-1">NSA/OSA Charges</th>
                         <th class="border-primary border-darken-1">Intercept Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
-                        <th class="border-primary border-darken-1">SMS Charges</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Estimated Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
@@ -448,7 +447,6 @@
                             head.push('NSA/OSA Charges');
                             head.push('Intercept Charges');
                             head.push('GST');
-                            head.push('SMS Charges');
                             head.push('Total Charges');
                             head.push('Estimated Charges');
                             head.push('Net Payable');
@@ -494,7 +492,6 @@
                                 row.push(values.nsa_osa_charges);
                                 row.push(values.intercept_charges);
                                 row.push(values.p_gst);
-                                row.push(values.pps_sms_charges);
                                 row.push(values.p_total_charges);
                                 row.push(values.estimated_charges);
                                 row.push(values.p_net_payable);
@@ -593,7 +590,6 @@
                     { data:'nsa_osa_charges' ,name: 'shipments.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
                     { data:'intercept_charges' ,name: 'shipments.intercept_charges', class: 'align-middle intercept_charges'},
                     { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
-                    { data:'pps_sms_charges' ,name: 'pps.pps_sms_charges', class: 'align-middle pps_sms_charges',sortable:false},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
                     { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},

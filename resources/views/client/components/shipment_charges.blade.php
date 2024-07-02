@@ -37,19 +37,6 @@
                 @if ($shipment->nsa_osa_charges != null)
                 <th class="border-primary border-darken-1 align-middle text-center">NSA/OSA Charges</th>
                 @endif
-                @if ($shipment->nsa_osa_charges != null)
-                <th class="border-primary border-darken-1 align-middle text-center">NSA/OSA Charges</th>
-                @endif
-                @if($shipment->account_type == 1)
-                    @if($shipment->pps_sms_charge != null || $shipment->dps_sms_charge != null)
-                    <th class="border-primary border-darken-1 align-middle text-center">SMS Charges</th>   
-                    @endif
-                
-                @elseif($shipment->account_type == 2)
-                    @if($shipment->pis_sms_charge != null || $shipment->is_sms_charge != null)
-                    <th class="border-primary border-darken-1 align-middle text-center">SMS Charges</th>   
-                    @endif
-                @endif
             @else
                 <th class="border-primary border-darken-1 align-middle text-center">Packaging Material</th>
             @endif
@@ -96,21 +83,6 @@
 
                 @if ($shipment->nsa_osa_charges != null)
                     <td class="align-middle text-center">Rs. {{ floatval($shipment->nsa_osa_charges) }}</td>
-                @endif
-
-                @if($shipment->account_type == 1)
-                    @if($shipment->pps_sms_charge != null)
-                    <td class="align-middle text-center">Rs. {{ floatval($shipment->pps_sms_charge) }}</td>
-                    @elseif($shipment->dps_sms_charge != null)
-                    <td class="align-middle text-center">Rs. {{ floatval($shipment->dps_sms_charge) }}</td>
-                    @endif
-                
-                @elseif($shipment->account_type == 2)
-                    @if($shipment->pis_sms_charge != null)
-                    <td class="align-middle text-center">Rs. {{ floatval($shipment->pis_sms_charge) }}</td>
-                    @elseif($shipment->is_sms_charge != null)
-                    <td class="align-middle text-center">Rs. {{ floatval($shipment->is_sms_charge) }}</td>
-                    @endif
                 @endif
 
                 @if ($shipment->packaging_material_charges != null)
