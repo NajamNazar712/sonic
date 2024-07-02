@@ -424,6 +424,11 @@ trait RvTrait
     // Description:
     protected function update_shipment_status($request)
     {
+        if (Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('shipment_id', $request->shipment_id)->doesntExist()) {
+            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+            return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Reattempted!"];
+        }
+        
         if ($request->rv_assign_agent_status_id) {
             $rv_assign_agent_status = RvAssignAgentStatus::find($request->rv_assign_agent_status_id);
             $shipment_status_id = $rv_assign_agent_status->shipment_status_id; //replicate values from shipment_status table
