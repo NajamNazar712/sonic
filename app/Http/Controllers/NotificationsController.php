@@ -10467,7 +10467,7 @@ class NotificationsController extends Controller
                     $from = 'noreply@trax.pk';
                     $emailShipments = [];
                     $subject = $notification->subject;
-
+                    
                     foreach ($reference_1_id as $user) {
                         $shipment = Shipment::where('id', $user->shipment_id)->pluck('user_id')->toArray();
                         $emails = User::whereIn('id', $shipment)->pluck('email')->toArray();
@@ -10515,7 +10515,7 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($last_unresposnsive_reasons->rv_sub_status->name) ? $last_unresposnsive_reasons->rv_sub_status->name : '---') . '</td>';
                             $html .= '</tr>';
                             $to_user_email = $shipment->user->email;
-                            // dd($to_user_email);
+                            dd($to_user_email);
                         }
                         $html .= '</tbody></table>';
 
