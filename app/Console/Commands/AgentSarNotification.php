@@ -94,11 +94,16 @@ class AgentSarNotification extends Command
 
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status being set on the shipment, 
             // the system will automatically update the shipment status to "Return Confirm."
-            $unresponsive_shipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
-                ->where('rv_state_id', 2)
-                ->where('unresponsive_count', 2)
-                ->where('unresponsive_email_count', '>', 0)
-                ->where('unresponsive_email_time', '<=', $nowSub48Hours)
+            $unresponsive_shipments = RvShipmentAssignAgent::join('shipments', function ($join){
+                $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
+                    ->where('shipments.shipper_status_id','=' , 65);
+                })
+                ->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 7)
+                ->where('rv_shipment_assign_agents.rv_state_id', 2)
+                ->where('rv_shipment_assign_agents.unresponsive_count', 2)
+                ->where('rv_shipment_assign_agents.unresponsive_email_count', '>', 0)
+                ->where('rv_shipment_assign_agents.unresponsive_email_time', '<=', $nowSub48Hours)
+                ->select('rv_shipment_assign_agents.*') // Select only columns from rv_shipment_assign_agents
                 ->get();
 
             if ($unresponsive_shipments->isNotEmpty()) {
