@@ -275,15 +275,6 @@ class RetailShipmentBookController extends Controller
             }
             $shipping_mode_id = 3;
         }
-        elseif ($shipping_mode_check == 11){
-            if($request->input('business_category') == 1) {
-                $consignee_city_id = $request->input('domestic_destination');
-            }
-            else{
-                $consignee_city_id = $request->input('international_destination');
-            }
-            $shipping_mode_id = 2;
-        }
         else{
             if($request->input('business_category') == 1) {
                 $consignee_city_id = $request->input('domestic_destination');

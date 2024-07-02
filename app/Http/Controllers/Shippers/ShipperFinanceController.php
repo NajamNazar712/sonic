@@ -34,7 +34,6 @@ use NumberToWords\NumberToWords;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-use App\Http\Models\DonePaymentCalculation;
 
 class ShipperFinanceController extends Controller
 {
@@ -334,6 +333,7 @@ class ShipperFinanceController extends Controller
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $done_payment = DonePayment::find($request->id);
+
         $shipper = $done_payment->shipper;
 
         if ($done_payment->user_bank_info_id == null) {
@@ -485,7 +485,6 @@ class ShipperFinanceController extends Controller
         $total_charges = 0;
         $total_adjustments = 0;
         $total_payable = 0;
-        $total_sms_charges = 0;
         $total_fintech_charges = 0;
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
@@ -547,7 +546,6 @@ class ShipperFinanceController extends Controller
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0') . '</td>
-                              <td>' . (($done_payment_shipment->sms_charges != 0) ? number_format($done_payment_shipment->sms_charges, 2) : '0') . '</td>
                               <td>' . number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) . '</td>
                               <td>' . number_format($done_payment_shipment->payable, 2) . '</td>
                             </tr>
@@ -584,7 +582,6 @@ class ShipperFinanceController extends Controller
                 $total_wht += $done_payment_shipment->wht;
                 $total_charges += $done_payment_shipment->charges;
                 $total_payable += $done_payment_shipment->payable;
-                $total_sms_charges += $done_payment_shipment->sms_charges;
             } else {
                 if ($done_payment_shipment->type == 0) {
                     $total_collection_amount += $done_payment_shipment->amount;
@@ -608,8 +605,8 @@ class ShipperFinanceController extends Controller
                                 <td class="color secondary"><strong>' . number_format($total_fintech_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_gst, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_gst, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_wht, 2) . '</strong></td>
-                                <td class="color secondary"><strong>' . number_format($total_sms_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount - $total_payable, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_payable, 2) . '</strong></td>
                             </tr>
@@ -654,7 +651,6 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>Total Charges (PKR)</strong></td>
                               <td class="color primary"><strong>GST</strong></td>
                               <td class="color primary"><strong>WHT</strong></td>
-                              <td class="color primary"><strong>SMS Charges</strong></td>
                               <td class="color primary"><strong>Net Retained Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Net Disbursement Amount (PKR)</strong></td>
                             </tr>
@@ -738,12 +734,8 @@ class ShipperFinanceController extends Controller
                                         <td>' . number_format($done_payment->ibft_charges, 2) . '</td>
                                     </tr>
                                     <tr>
-                                        <td class="color secondary"><strong> Total SMS Charges</strong></td>
-                                        <td>' . number_format($total_sms_charges, 2) . '</td>
-                                    </tr>
-                                    <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_sms_charges+ $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht), 2) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
@@ -1801,9 +1793,8 @@ class ShipperFinanceController extends Controller
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->esc_charges, 2) : '0') . '</td>
-                          <td>' . number_format($invoice_shipment->sms_charges, 2) . '</td>
-                          <td>' . number_format($invoice_shipment->charges + $invoice_shipment->sms_charges , 2) . '</td>
+                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->esc_charges, 2) : '0') . '</td>
+                          <td>' . number_format($invoice_shipment->charges, 2) . '</td>
                           <td>' . number_format($invoice_shipment->gst, 2) . '</td>
                           <td>' . number_format($invoice_shipment->invoice_amount, 2) . '</td>
                         </tr>
@@ -1858,10 +1849,6 @@ class ShipperFinanceController extends Controller
             if (!isset($total_extra_service_charges[$origin])) {
                 $total_extra_service_charges[$origin] = 0;
             }
-            if (!isset($total_sms_charges[$origin])) {
-                $total_sms_charges[$origin] = 0;
-            }
-
 
 
             if ($invoice_shipment->type != 2) {
@@ -1875,7 +1862,6 @@ class ShipperFinanceController extends Controller
                 }
 
                 $total_weight_charges[$origin] += $shipment->weight_charges;
-                $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
 
                 if ($shipment->packaging_material_request) {
                     $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
@@ -1889,7 +1875,7 @@ class ShipperFinanceController extends Controller
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
 
-            $total_charges += $invoice_shipment->charges + $invoice_shipment->sms_charges;
+            $total_charges += $invoice_shipment->charges;
             $total_gst += $invoice_shipment->gst;
             $total_invoice_amount += $invoice_shipment->invoice_amount;
         }
@@ -1898,7 +1884,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="14" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="13" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -1914,7 +1900,6 @@ class ShipperFinanceController extends Controller
                             <th class="color secondary">Packaging Charges (PKR)</th>
                             <th class="color secondary">Extra Service Charges (PKR)</th>
                             <th class="color secondary">Adjustment Charges (PKR)</th>
-                            <th class="color secondary">SMS Charges(PKR)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1936,7 +1921,6 @@ class ShipperFinanceController extends Controller
                             <td>' . number_format($total_packaging_material_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_sms_charges[$origin], 2) . '</td>
                         </tr>
             ';
         }
@@ -2017,7 +2001,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="17">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="16">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -2033,7 +2017,6 @@ class ShipperFinanceController extends Controller
                           <th class="color secondary">Adjustment Charges (PKR)</th>
                           <th class="color secondary">Packaging Charges (PKR)</th>
                           <th class="color secondary">Extra Service Charges (PKR)</th>
-                          <th class="color secondary">SMS Charges (PKR)</th>
                           <th class="color secondary">Total Charges (PKR)</th>
                           <th class="color secondary">GST (PKR)</th>
                           <th class="color secondary">Invoice Amount (PKR)</th>
@@ -2585,9 +2568,6 @@ class ShipperFinanceController extends Controller
                 if (!isset($total_invoice_amount[$origin])) {
                     $total_invoice_amount[$origin] = 0;
                 }
-                if (!isset($total_sms_charges[$origin])) {
-                    $total_sms_charges[$origin] = 0;
-                }
 
                 if ($invoice_shipment->type != 2) {
                     if ($invoice_shipment->type == 0) {
@@ -2600,7 +2580,6 @@ class ShipperFinanceController extends Controller
                     }
 
                     $total_weight_charges[$origin] += $shipment->weight_charges;
-                    $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
 
                     if ($shipment->packaging_material_request) {
                         $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
@@ -2614,7 +2593,7 @@ class ShipperFinanceController extends Controller
                     $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
                 }
 
-                $total_charges[$origin] += $invoice_shipment->charges + $invoice_shipment->sms_charges;
+                $total_charges[$origin] += $invoice_shipment->charges;
                 $total_gst[$origin] += $invoice_shipment->gst;
                 $total_invoice_amount[$origin] += $invoice_shipment->invoice_amount;
             }
@@ -2765,7 +2744,7 @@ class ShipperFinanceController extends Controller
                         <tbody>
                         <tr>
                             <td>Weight Charges</td>
-                            <td rowspan="13">'.$shipment_counts[$origin].'</td>
+                            <td rowspan="12">'.$shipment_counts[$origin].'</td>
                             <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
                         </tr>
                         <tr>
@@ -2811,10 +2790,6 @@ class ShipperFinanceController extends Controller
                          <tr>
                             <td>Extra Service Charges</td>
                             <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
-                        </tr>
-                        <tr>
-                            <td>SMS Charges</td>
-                            <td>' . number_format($total_sms_charges[$origin], 2) . '</td>
                         </tr>
                       </tbody>
                       </table>
@@ -4619,9 +4594,6 @@ class ShipperFinanceController extends Controller
                 if (!isset($total_extra_service_charges[$origin])) {
                     $total_extra_service_charges[$origin] = 0;
                 }
-                if (!isset($total_sms_charges[$origin])) {
-                    $total_sms_charges[$origin] = 0;
-                }
 
 
                 if ($invoice_shipment->type != 2) {
@@ -4635,7 +4607,6 @@ class ShipperFinanceController extends Controller
                     }
 
                     $total_weight_charges[$origin] += $shipment->weight_charges;
-                    $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
 
                     if ($shipment->packaging_material_request) {
                         $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
@@ -4649,7 +4620,7 @@ class ShipperFinanceController extends Controller
                     $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
                 }
 
-                $total_charges += $invoice_shipment->charges + $invoice_shipment->sms_charges;
+                $total_charges += $invoice_shipment->charges;
                 $total_gst += $invoice_shipment->gst;
                 $total_invoice_amount += $invoice_shipment->invoice_amount;
             }
@@ -4658,7 +4629,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="14" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="13" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -4674,7 +4645,6 @@ class ShipperFinanceController extends Controller
                             <th class="color secondary">Packaging Charges (PKR)</th>
                             <th class="color secondary">Extra Service Charges (PKR)</th>
                             <th class="color secondary">Adjustment Charges (PKR)</th>
-                            <th class="color secondary">SMS Charges (PKR)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -4696,7 +4666,6 @@ class ShipperFinanceController extends Controller
                             <td>' . number_format($total_packaging_material_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_extra_service_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_sms_charges[$origin], 2) . '</td>
                         </tr>
             ';
             }
