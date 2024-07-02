@@ -163,6 +163,7 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\RvShipmentTicket;
 
 class GlobalSettingsController extends Controller
 {
@@ -9043,6 +9044,7 @@ class GlobalSettingsController extends Controller
 
     public function rv_disable_shippers_store(Request $request)
     {
+
         ActivityTrailController::createActivityTrailLog(Auth::id(), 682);
 
         $all_shipper_settings = GlobalSettings::where('type', 'rv_disable_shippers_all_shippers');
@@ -9069,6 +9071,10 @@ class GlobalSettingsController extends Controller
             $settings->setting_value = 1;
             $settings->text = $excluded_users;
             $settings->save();
+
+            // Update disabled users in RV shipment tickets (Set disable_shipper to 0 of given shippers)
+            $shippers = explode(',', $excluded_users);
+            $this->updateDisabledUserInRvShipmentTickets($shippers, 0);
         } else {
             GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value' => 0, 'text' => NULL]);
         }
@@ -9087,12 +9093,35 @@ class GlobalSettingsController extends Controller
             $settings->save();
             GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->update(['setting_value' => 0, 'text' => NULL]);
             GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value' => 0, 'text' => NULL]);
+
+            // Update disabled users in RV shipment tickets (Set disable_shipper to 1 of given shippers)
+            $shippers = explode(',', $only_users);
+            $this->updateDisabledUserInRvShipmentTickets($shippers, 1);
         } else {
             GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->update(['setting_value' => 0, 'text' => NULL]);
         }
 
+        if (!($request->has('all_shipper_toggle') && $request->has('excluded_users')) && !(!$request->has('all_shipper_toggle') && $request->has('only_users'))) {
+            $this->updateDisabledUserInRvShipmentTickets(null, 1);
+        }
+
+        if (!($request->has('all_shipper_toggle') && $request->has('excluded_users')) && !(!$request->has('all_shipper_toggle') && $request->has('only_users'))) {
+            $this->updateDisabledUserInRvShipmentTickets(null, 1);
+        }
+
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    private function updateDisabledUserInRvShipmentTickets($shipperUserIds = null, $isDisabled = null)
+    {
+        if (!empty($shipperUserIds)) {
+            RvShipmentTicket::whereIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => $isDisabled]);
+            RvShipmentTicket::whereNotIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => !$isDisabled]);
+        } else {
+            RvShipmentTicket::where('disabled_shipper', $isDisabled ? 0 : 1)->update(['disabled_shipper' => $isDisabled]);
+        }
+    }
+
     public function get_hub(Request  $request)
     {
         if (isset($request->zone_id)) {
@@ -9277,7 +9306,7 @@ class GlobalSettingsController extends Controller
                 $count = count(explode(',', $hubs));
                 return '<button ref="' . $rider_id . '" class="btn btn-sm btn-outline-info align-middle hubs_count">' . $count . '</button>';
             })->addColumn('action', function ($data) {
-                if($data['main_category'] < 3){
+                if ($data['main_category'] < 3) {
                     $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -9286,14 +9315,12 @@ class GlobalSettingsController extends Controller
                     if (session('role_id') == 1 || in_array(896, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
-                    
-
-                }else{
+                } else {
                     $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
-                    '; 
+                    ';
                 }
                 return $dropdown;
             });
@@ -9774,35 +9801,33 @@ class GlobalSettingsController extends Controller
                 'lead_progress_settings.updated_at as updated_at'
             );
         $datatable = Datatables::of($query)
-        ->addColumn('action', function($datatable){
-            $dropdown = '
+            ->addColumn('action', function ($datatable) {
+                $dropdown = '
             <div class="btn-group">
               <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
               <div class="dropdown-menu dropdown-menu-sm">
           ';
 
-          $dropdown .= '<button type="button" class="dropdown-item edit_color_percent" data-id="' . $datatable->id . '" data-color="' . $datatable->color . '" data-percent="' . $datatable->percent . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Color-Percent</div></button>';
-            
-          return $dropdown;        
-            
-        });
+                $dropdown .= '<button type="button" class="dropdown-item edit_color_percent" data-id="' . $datatable->id . '" data-color="' . $datatable->color . '" data-percent="' . $datatable->percent . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Color-Percent</div></button>';
+
+                return $dropdown;
+            });
         return $datatable->make(true);
     }
 
-    public function lead_progress_update(Request $request){
+    public function lead_progress_update(Request $request)
+    {
         $id = $request->id;
         $lead_progress_setting = LeadProgressSetting::find($id);
 
-        if($lead_progress_setting){
+        if ($lead_progress_setting) {
             $lead_progress_setting->color = $request->colorHex;
             $lead_progress_setting->percent = $request->percent;
             $lead_progress_setting->updated_at = now();
             $lead_progress_setting->updated_by = Auth::id();
-            $lead_progress_setting->save(); 
+            $lead_progress_setting->save();
 
             return redirect()->back()->with('success', 'Color/Percent Updated !!!');
-
         }
     }
-
 }
