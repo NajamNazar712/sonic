@@ -424,6 +424,11 @@ trait RvTrait
     // Description:
     protected function update_shipment_status($request)
     {
+        if (Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('shipment_id', $request->shipment_id)->doesntExist()) {
+            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+            return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Reattempted!"];
+        }
+        
         if ($request->rv_assign_agent_status_id) {
             $rv_assign_agent_status = RvAssignAgentStatus::find($request->rv_assign_agent_status_id);
             $shipment_status_id = $rv_assign_agent_status->shipment_status_id; //replicate values from shipment_status table
@@ -1274,8 +1279,13 @@ trait RvTrait
             foreach ($shipments as $shipment) {
                 $shipmentId = $shipment->shipment_id;
                 $ticketId = $shipment->id;
+                //Shipment table check the current status.
+                if (!Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $shipmentId)->exists()) {
+                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipmentId));
+                    continue;
+                }
                 // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
-                $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('rv_state_id', 3);
+                $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('rv_state_id', 3);     
                 if ($shipment_assigned_unassigned_agent->exists()) {
                     $shipment_assigned_unassigned_agent->first();
 
