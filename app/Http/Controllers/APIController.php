@@ -7870,7 +7870,7 @@ class APIController extends Controller
                             $transactions_amount = $hbl_konnect_transaction_delivery_note->transactions_amount;
                             $sumNoofTransaction = HblKonnectTransactionRetail::where('retail_note_id', $retail_note->id)->sum('amount');
                             if($sumNoofTransaction == $transactions_amount || $transactions_amount >= $sumNoofTransaction){
-                                 return response()->json(['status' => 11, 'message' => 'RetailNote AlReady Payed!']);
+                                 return response()->json(['status' => 12, 'message' => 'RetailNote AlReady Payed!']);
                             }
                         }
                         $net_amount = $retail_note->total_cash - $transactions_amount;
