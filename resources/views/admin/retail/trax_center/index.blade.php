@@ -96,23 +96,23 @@
 
                                 <div class="col">
                                     <div class="form-group">
-                                        <input type="text" name="advance_amount" id="advance_amount" class="form-control advance_amount" placeholder="Advance Amount" data-rule-required="true" data-msg-required="Advance Amount is required" pattern="[0-9]{1,8}" maxlength="10">
+                                        <input type="text" name="advance_amount" id="advance_amount" class="form-control advance_amount" placeholder="Advance Amount*" data-rule-required="true" data-msg-required="Advance Amount is required" pattern="[0-9]{1,8}" maxlength="10">
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" name="rental" id="rental" class="form-control rental" placeholder="Rental Amount" data-rule-required="true" data-msg-required="Rental Amount is required" pattern="[0-9]{1,7}" maxlength="9">
+                                        <input type="text" name="rental" id="rental" class="form-control rental" placeholder="Rental Amount*" data-rule-required="true" data-msg-required="Rental Amount is required" pattern="[0-9]{1,7}" maxlength="9">
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" name="landlord_name" id="landlord_name" class="form-control landlord_name" placeholder="Landlord Name" data-rule-required="true" data-msg-required="Landlord name is required">
+                                        <input type="text" name="landlord_name" id="landlord_name" class="form-control landlord_name" placeholder="Landlord Name*" data-rule-required="true" data-msg-required="Landlord name is required">
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" name="landlord_contact_number" id="landlord_contact_number" class="form-control landlord_contact_number" placeholder="Landlord Contact Number" data-rule-required="true" data-msg-required="Landlord contact number is required">
+                                        <input type="text" name="landlord_contact_number" id="landlord_contact_number" class="form-control landlord_contact_number" placeholder="Landlord Contact Number*" data-rule-required="true" data-msg-required="Landlord contact number is required">
                                     </div>
 
                                     <div class="form-group">
-                                        <textarea name="shop_address" id="shop_address" class="form-control shop_address" placeholder="Shop Address" rows="4" cols="50"></textarea>
+                                        <textarea name="shop_address" id="shop_address" class="form-control shop_address" placeholder="Shop Address*" rows="4" cols="50"></textarea>
                                     </div>
                                     <div class="row">
                                         <div class="col">
@@ -122,7 +122,7 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                                 </div>
-                                                <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement Start date">
+                                                <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement Start date*" data-rule-required="true" data-msg-required="Agreement Start date is required">
                                             </div>
                                         </div>
 
@@ -133,13 +133,13 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                                 </div>
-                                                <input type="text" name="agreement_end_date" id="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement End date">
+                                                <input type="text" name="agreement_end_date" id="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement End date*" data-rule-required="true" data-msg-required="Agreement End     date is required">
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="attachment_1">Agreement File</label>
+                                        <label for="attachment_1">Agreement File*</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
                                     </div>
             
@@ -226,7 +226,7 @@
 
                                 <div class="col">
                                     <div class="form-group">
-                                        <input type="text" name="advance_amount" id="advance_amount_edit" class="form-control advance_amount" placeholder="Advance Amount" data-rule-required="true" data-msg-required="Advance Amount is required" value="" pattern="[0-9]{1,8}" maxlength="10">
+                                        <input type="text" name="advance_amount" id="advance_amount_edit" class="form-control advance_amount" placeholder="Advance Amount*" data-rule-required="true" data-msg-required="Advance Amount is required" value="" pattern="[0-9]{1,8}" maxlength="10">
                                     </div>
 
                                     <div class="form-group">
@@ -234,15 +234,15 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" name="landlord_name" id="landlord_name_edit" class="form-control landlord_name" placeholder="Landlord Name" data-rule-required="true" data-msg-required="Landlord name is required" value="">
+                                        <input type="text" name="landlord_name" id="landlord_name_edit" class="form-control landlord_name" placeholder="Landlord Name*" data-rule-required="true" data-msg-required="Landlord name is required" value="">
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" name="landlord_contact_number" id="landlord_contact_number_edit" class="form-control landlord_contact_number" placeholder="Landlord Contact Number" data-rule-required="true" data-msg-required="Landlord contact number is required" value="">
+                                        <input type="text" name="landlord_contact_number" id="landlord_contact_number_edit" class="form-control landlord_contact_number" placeholder="Landlord Contact Number*" data-rule-required="true" data-msg-required="Landlord contact number is required" value="">
                                     </div>
 
                                     <div class="form-group">
-                                        <textarea name="shop_address" id="shop_address_edit" class="form-control shop_address" placeholder="Shop Address" rows="4" cols="50" value=""></textarea>
+                                        <textarea name="shop_address" id="shop_address_edit" class="form-control shop_address" placeholder="Shop Address*" rows="4" cols="50" value=""></textarea>
                                     </div>
                                     <div class="row">
                                         <div class="col">
@@ -252,7 +252,7 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                                 </div>
-                                                <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement Start date">
+                                                <input type="text" name="agreement_start_date" id="edit_delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement Start date*" data-rule-required="true" data-msg-required="Agreement Start date is required">
                                             </div>
                                         </div>
 
@@ -263,7 +263,7 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                                 </div>
-                                                <input type="text" name="agreement_end_date" id="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement End date">
+                                                <input type="text" name="agreement_end_date" id="edit_delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Agreement End date*" data-rule-required="true" data-msg-required="Agreement End date is required">
                                             </div>
                                         </div>
                                     </div>
@@ -688,6 +688,22 @@
                         $('#landlord_name_edit').val(response.data.landlord_name);
                         $('#landlord_contact_number_edit').val(response.data.landlord_contact_number);
                         $('#shop_address_edit').val(response.data.shop_address);
+
+                        var agreement_start_date = response.data.agreement_start_date;
+                        var agreement_end_date = response.data.agreement_end_date;
+
+                        if (agreement_start_date) {
+                            $('#edit_delivery_date_from').val(agreement_start_date);
+                        } else {
+                            $('#edit_delivery_date_from').val('');
+                        }
+
+                        if (agreement_end_date) {
+                            $('#edit_delivery_date_to').val(agreement_end_date);
+                        } else {
+                            $('#edit_delivery_date_to').val('');
+                        }
+
                         for (var i = 1; i <= 5; i++) {
                             var attachmentKey = 'attachment_' + i;
                             var attachmentFileName = response.data[attachmentKey];

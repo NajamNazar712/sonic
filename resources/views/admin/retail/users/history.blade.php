@@ -4,7 +4,7 @@
 
 @section('content')
 <h1 class="mb-1">
-    Retail Users History
+    {{ $retail_user }} History
 </h1>
 
 <div class="card">

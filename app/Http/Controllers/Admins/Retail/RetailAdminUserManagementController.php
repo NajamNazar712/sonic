@@ -1466,16 +1466,16 @@ class RetailAdminUserManagementController extends Controller
 
                     if ($data->category != 1){
                         $dropdown .= '
-                            <div class="row no-gutters align-items-center ml-2">
-                                <div class="col-2">
-                                    <i class="ft-x-circle"></i>
-                                </div>
-                                <div class="col-9 offset-1">
-                                    <a href="' . route("admin.retail.users.retail_history", ["id" => $data->id]) . '" class="text-dark" target="_blank">
+                            <a href="' . route("admin.retail.users.retail_history", ["id" => $data->id]) . '" class="text-dark" target="_blank">
+                                <div class="row no-gutters align-items-center ml-2">
+                                    <div class="col-2">
+                                        <i class="ft-x-circle"></i>
+                                    </div>
+                                    <div class="col-9" style="margin: 6px 0px 9px 5px;">
                                         History
-                                    </a>
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                         ';
                     }                    
 
@@ -3081,8 +3081,17 @@ class RetailAdminUserManagementController extends Controller
 
     public function retail_history($id){
         $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->get();
+        $retail_user_data = RetailUser::whereIn('id', $retail_user_history->pluck('retail_user_id'))->first();
+
+        if ($retail_user_data != null) {
+            $retail_user = $retail_user_data->name;
+        } else {
+            $retail_user = RetailUser::where('id', $id)->first()->name;
+        }
+
         return view('admin.retail.users.history', [
-            'retail_user_history' => $retail_user_history
+            'retail_user_history' => $retail_user_history,
+            'retail_user' => $retail_user
         ]);
     }
 

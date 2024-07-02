@@ -318,17 +318,28 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $shipping_mode = RetailShippingMode::where('id', $shipping_mode_id)->first();
         $product_commission = RetailUserProductPercentage::where('retail_user_id', $retail_shipment->retail_user_id)
             ->where('retail_shipping_mode_id', $shipping_mode->id)->first();
+        $retail_user_history = RetailUserHistory::where('retail_user_id', Auth::user()->id);
+
+        if ($retail_user_history->exists()) {
+            $history_data = $retail_user_history->latest()->first();
+            $joining_date = $history_data->joining_date; 
+        } else {
+            $joining_date = null;
+        }
+
         $data = [
             'retail_user_id' => $retail_shipment->retail_user_id,
             'trax_center_name' => Auth::user()->store->name,
             'trax_center_code' => Auth::user()->store->code,
+            'trax_center_id' => Auth::user()->store->id,
+            'joining_date' => $joining_date,
             'retail_shipping_mode_id' => $shipping_mode_id,
-            'retail_shipping_mode_name' => $shipping_mode,
-            'product_commission' => $product_commission->product_percentage,
+            'retail_shipping_mode_name' => $shipping_mode->name ?? NULL,
+            'product_commission' => $product_commission->product_percentage ?? NULL,
             'booking_date' => $retail_shipment->created_at
         ];
-
         RetailUserHistory::create($data);
+
         $shipment = Shipment::find($shipment_id);
         if($shipment->charges_mode_id != 2) {
             $date = Carbon::today()->toDateString();

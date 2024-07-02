@@ -192,20 +192,25 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="attachment_1">Agreement Details</label>
-                    <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf">
+                    @if ($retail_user->category==1)
+                        <label for="attachment_1">Agreement Details*</label>
+                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf" data-rule-required="true" data-msg-required="Agreement Details are required">
+                    @else
+                        <label for="attachment_1">Employee Form*</label>
+                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf" data-rule-required="true" data-msg-required="Employee Form is required">
+                    @endif
                     <a id="attachment_1_filename" target="_blank"></a>
                 </div>
 
                 <div class="form-group">
-                    <label for="attachment_2">CNIC front image</label>
-                    <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf">
+                    <label for="attachment_2">CNIC front image*</label>
+                    <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="CNIC front image is required">
                     <a id="attachment_2_filename" target="_blank"></a>
                 </div>
 
                 <div class="form-group">
-                    <label for="attachment_3">CNIC back image</label>
-                    <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf">
+                    <label for="attachment_3">CNIC back image*</label>
+                    <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="CNIC back image is required">
                     <a id="attachment_3_filename" target="_blank"></a>
                 </div>
 

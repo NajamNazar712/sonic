@@ -114,7 +114,7 @@
                                     </div> --}}
             
                                     <div class="input-group mb-2">
-                                        <input type="text" name="franchise_withholding" id="withholding_tax_percentage" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-rule-required="true" data-msg-required="Withholding Tax is required">
+                                        <input type="text" name="franchise_withholding" id="withholding_tax_percentage" class="form-control withholding_tax_percentage" placeholder="Withholding Tax*"  value="" max="100" data-rule-required="true" data-msg-required="Withholding Tax is required">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
@@ -176,7 +176,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="attachment_1">Franchise Agreement</label>
+                                        <label for="attachment_1">Franchise Agreement*</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
                                     </div>
             
@@ -296,7 +296,7 @@
                                 </div> --}}
 
                                 <div class="input-group mb-2">
-                                    <input type="text" name="franchise_withholding" id="withholding_tax_percentage_edit" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Withholding Tax">
+                                    <input type="text" name="franchise_withholding" id="withholding_tax_percentage_edit" class="form-control withholding_tax_percentage" placeholder="Withholding Tax*"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Withholding Tax">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>
@@ -355,7 +355,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="attachment_1">Franchise Agreement</label>
+                                    <label for="attachment_1">Franchise Agreement*</label>
                                     <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf">
                                     <a id="attachment_1_filename" target="_blank"></a>
                                 </div>

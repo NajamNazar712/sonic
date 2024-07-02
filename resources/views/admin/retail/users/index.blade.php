@@ -115,7 +115,7 @@
                                             <span class="la la-calendar-o"></span>
                                         </span>
                                         </div>
-                                        <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Joining date" required>
+                                        <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Joining date*" required>
                                     </div>
 
                                     <div class="form-group">
@@ -220,18 +220,18 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="attachment_1" id="attachment_1_label">Upload Employee Form</label>
+                                        <label for="attachment_1" id="attachment_1_label">Upload Employee Form*</label>
                                         <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf" data-rule-required="true" data-msg-required="Employee Form is required">
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_2">CNIC front image</label>
-                                        <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf">
+                                        <label for="attachment_2">CNIC front image*</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="CNIC front image is required">
                                     </div>
             
                                     <div class="form-group">
-                                        <label for="attachment_3">CNIC back image</label>
-                                        <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf">
+                                        <label for="attachment_3">CNIC back image*</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="CNIC back image is required">
                                     </div>
             
                                     <div class="form-group">
@@ -755,12 +755,12 @@
             var dateInput = document.getElementById("delivery_date_from");
 
             if (selectedValue == 1) {
-                attachment_1_label.textContent = "Franchise Agreement Form";
+                attachment_1_label.textContent = "Franchise Agreement Form*";
                 dateInput.placeholder = "Agreement Start date";
                 // dateInput.removeAttribute('required');
                 dateInput.setAttribute('data-msg-required', "Franchise Agreement Form is required");
             } else if (selectedValue == 2) {
-                attachment_1_label.textContent = "Upload Employee Form";
+                attachment_1_label.textContent = "Upload Employee Form*";
                 dateInput.placeholder = "Joining date";
                 dateInput.setAttribute('required', true);
                 dateInput.setAttribute('data-msg-required', "Employee Form is required");
