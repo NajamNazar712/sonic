@@ -559,6 +559,7 @@ trait RvTrait
         // if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52])) { old for rv
 
         if (in_array($parcel->shipper_status_id, [12, 52, 66]) || $globalAdminId) {
+            Log::channel('cronJobLog')->info('s ' . ' agent:sarnotification return_confirm:in');
 
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
             NotificationsController::send(15, 0, $request->shipment_id);
