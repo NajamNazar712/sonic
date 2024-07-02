@@ -10500,6 +10500,7 @@ class NotificationsController extends Controller
 
                         foreach ($shipments as $rv_shipment) {
                             $shipment = Shipment::find($rv_shipment);
+                            
                             $shipment_journey = ShipmentsJourney::where('shipment_id', $rv_shipment)->whereIn('shipper_status_id', [7, 8, 9, 12, 15])->latest()->first();
                             $last_unresposnsive_reasons = RvShipmentAssignAgent::where('shipment_id', $rv_shipment)->where('rv_assign_agent_status_id', 7)->where('unresponsive_count', 2)->latest()->first();
 
@@ -10515,8 +10516,8 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($last_unresposnsive_reasons->rv_sub_status->name) ? $last_unresposnsive_reasons->rv_sub_status->name : '---') . '</td>';
                             $html .= '</tr>';
                             $to_user_email = $shipment->user->email;
-                            dd($to_user_email);
                         }
+                        dd($to_user_email);
                         $html .= '</tbody></table>';
 
                         // $link = '<a href="https://sonic.pk/cod/tracking">https://sonic.pk/cod/tracking</a>';
