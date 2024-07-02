@@ -90,7 +90,7 @@ class AgentSarNotification extends Command
                         $shipment->save();
                     }
                 }
-                NotificationsController::send(220, $sendEmail);
+                // NotificationsController::send(220, $sendEmail);
 
             }
 
