@@ -10474,11 +10474,12 @@ class NotificationsController extends Controller
                             
 
                         foreach ($emails as $email) {
-                            Log::channel('cronJobLog')->info('s ' . 'agent:sarnotification  $emailShipments'. $email);
+                            Log::channel('cronJobLog')->info('s ' . 'agent:sarnotification  $emailShipments'. $user->shipment_id);
                             if (!isset($emailShipments[$email])) {
                                 $emailShipments[$email] = [];
                             }
                             $emailShipments[$email][] = $user->shipment_id;
+
                         }
                     }
                     $htmlHeader = '<table style="width:100%;margin-top:-145px">';
