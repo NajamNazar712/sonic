@@ -10471,7 +10471,7 @@ class NotificationsController extends Controller
                     foreach ($reference_1_id as $user) {
                         $shipment = Shipment::where('id', $user->shipment_id)->pluck('user_id')->toArray();
                         $emails = User::whereIn('id', $shipment)->pluck('email')->toArray();
-
+                            
 
                         foreach ($emails as $email) {
                             if (!isset($emailShipments[$email])) {
