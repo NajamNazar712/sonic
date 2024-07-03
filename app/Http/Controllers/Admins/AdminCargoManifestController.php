@@ -4306,10 +4306,19 @@ class AdminCargoManifestController extends Controller
                                 $bag->junction_mapping_id = null;
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
-                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49])) {
-                                        ShipmentsJourneyController::add($shipment->shipment_id, 11, 11, null, null, null, Auth::id(), $bag->seal_number);
-                                        $shipment_table->shipper_status_id = 11;
-                                        $shipment_table->consignee_status_id = 11;
+                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76])) {
+                                        if($shipment_table->booking_type == 2) {
+                                            $status = 72;
+                                        } elseif($shipment_table->booking_type == 3) {
+                                            $status = 69;
+                                        } else {
+                                            $status = 11;
+                                        }
+                                        
+                                        ShipmentsJourneyController::add($shipment->shipment_id, $status, $status, null, null, null, Auth::id(), $bag->seal_number);
+                                        $shipment_table->shipper_status_id = $status;
+                                        $shipment_table->consignee_status_id = $status;
+
                                         $shipment_table->update();
                                         $short_received_count++;
                                     } else {
@@ -4365,10 +4374,17 @@ class AdminCargoManifestController extends Controller
                                 $bag->junction_mapping_id = null;
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
-                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49])) {
-                                        ShipmentsJourneyController::add($shipment->shipment_id, 11, 11, null, null, null, Auth::id(), $bag->seal_number);
-                                        $shipment_table->shipper_status_id = 11;
-                                        $shipment_table->consignee_status_id = 11;
+                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76])) {
+                                        if($shipment_table->booking_type == 2) {
+                                            $status = 72;
+                                        } elseif($shipment_table->booking_type == 3) {
+                                            $status = 69;
+                                        } else {
+                                            $status = 11;
+                                        }
+                                        ShipmentsJourneyController::add($shipment->shipment_id, $status, $status, null, null, null, Auth::id(), $bag->seal_number);
+                                        $shipment_table->shipper_status_id = $status;
+                                        $shipment_table->consignee_status_id = $status;
                                         $shipment_table->update();
                                         $short_received_count++;
 
@@ -4426,10 +4442,17 @@ class AdminCargoManifestController extends Controller
                                 $bag->junction_mapping_id = null;
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
-                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49])) {
-                                        ShipmentsJourneyController::add($shipment->shipment_id, 11, 11, null, null, null, Auth::id(), $bag->seal_number);
-                                        $shipment_table->shipper_status_id = 11;
-                                        $shipment_table->consignee_status_id = 11;
+                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76])) {
+                                        if($shipment_table->booking_type == 2) {
+                                            $status = 72;
+                                        } elseif($shipment_table->booking_type == 3) {
+                                            $status = 69;
+                                        } else {
+                                            $status = 11;
+                                        }
+                                        ShipmentsJourneyController::add($shipment->shipment_id,  $status,  $status, null, null, null, Auth::id(), $bag->seal_number);
+                                        $shipment_table->shipper_status_id =  $status;
+                                        $shipment_table->consignee_status_id =  $status;
                                         $shipment_table->update();
                                         $short_received_count++;
 
