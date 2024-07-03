@@ -141,6 +141,9 @@ class ShipperTrackingController extends Controller
 
                         $shipper = $shipment->user;
 
+                        $allowed_user_id = GlobalSettings::where('setting_value', 0)->where('type', 'brand_and_vendor_rights')->pluck('text');
+                        $details['shipper']['id'] = $shipper->id;
+                        $details['shipper']['assigned'] = $allowed_user_id;
                         $details['shipper']['name'] = $shipper->name;
                         $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                         $details['shipper']['city'] = $shipper->city->name;
@@ -152,6 +155,7 @@ class ShipperTrackingController extends Controller
 
                         $details['pickup']['person_of_contact'] = $pickup->poc;
                         $details['pickup']['vendor'] = $pickup->vendor;
+                        $details['pickup']['pickup_brand_name'] = $pickup->pickup_brand_name;
                         $details['pickup']['phone_number'] = $pickup->phone;
                         $details['pickup']['email'] = $pickup->email;
                         $details['pickup']['origin'] = $pickup->city->name;
@@ -591,6 +595,9 @@ class ShipperTrackingController extends Controller
 
                             $shipper = $shipment->user;
 
+                            $allowed_user_id = GlobalSettings::where('setting_value', 0)->where('type', 'brand_and_vendor_rights')->pluck('text');
+                            $details['shipper']['id'] = $shipper->id;
+                            $details['shipper']['assigned'] = $allowed_user_id;
                             $details['shipper']['name'] = $shipper->name;
                             $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                             $details['shipper']['city'] = $shipper->city->name;
@@ -603,6 +610,7 @@ class ShipperTrackingController extends Controller
 
                             $details['pickup']['person_of_contact'] = $pickup->poc;
                             $details['pickup']['vendor'] = $pickup->vendor;
+                            $details['pickup']['pickup_brand_name'] = $pickup->pickup_brand_name;
                             $details['pickup']['phone_number'] = $pickup->phone;
                             $details['pickup']['email'] = $pickup->email;
                             $details['pickup']['origin'] = $pickup->city->name;

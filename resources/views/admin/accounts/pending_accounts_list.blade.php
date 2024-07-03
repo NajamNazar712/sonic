@@ -71,6 +71,7 @@
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
                                         {{-- <th class="border-primary border-darken-1">ESO Tagged</th> --}}
+                                        <th class="border-primary border-darken-1">SMS charges per shipment</th>
                                         <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
@@ -1184,6 +1185,7 @@
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
                         // head.push('ESO Tagged');
+                        head.push('SMS charges per shipment');
                         head.push('Rate Status');
                         head.push('Rates Status Remarks');
                         head.push('Rates Added By');
@@ -1229,6 +1231,7 @@
                             row.push(values.kam);
                             row.push(values.ref+' - ' + values.rider_id);
                             // row.push(values.eso);
+                            row.push(values.sms_charges);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);
                             row.push(values.rates_added_by);
@@ -1704,6 +1707,7 @@
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
                 // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
+                {data: 'sms_charges', name: 'users.sms_charges', class: 'align-middle sms_charges'},
                 {data: 'rate_status', name: 'users.rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
@@ -1795,8 +1799,7 @@
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        }
-                    else {
+                    } else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
                         }).wrap(td).after(icon);
@@ -1813,6 +1816,12 @@
                     dropdownCssClass: 'form-control-sm p-0'
                 });
                 $("#status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $("#sms_charges_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
                     width:'100%',
                     containerCssClass: 'select-xs',

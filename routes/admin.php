@@ -1,5 +1,6 @@
 <?php
 //Admin Routes Start
+Route::get('/{tiny_url}', 'ShortUrlController@get_actual_url');
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('admin.login');
@@ -1698,7 +1699,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('done_payments')->name('done_payments.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@done_payments_index')->name('index');
-            Route::get('list', 'Admins\AdminFinanceController@done_payments_list')->name('list');
+            Route::post('list', 'Admins\AdminFinanceController@done_payments_list')->name('list');
             Route::put('paid', 'Admins\AdminFinanceController@done_payments_paid')->name('paid');
             Route::put('reverted', 'Admins\AdminFinanceController@done_payments_reverted')->name('reverted');
             Route::post('delivered_shipments', 'Admins\AdminFinanceController@done_payments_delivered_shipments')->name('delivered_shipments');
@@ -2465,6 +2466,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@cargo_manifest_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
         });
+
+        Route::prefix('sms')->name('sms.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@sms_report_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@sms_report_list')->name('list');
+        });
         Route::prefix('ops')->name('ops_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ops_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@ops_report_list')->name('list');
@@ -2516,6 +2522,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {
+
+        Route::prefix('show_vendor')->name('show_vendor.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@show_vendors')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@store_vendors')->name('store');
+            // Route::post('udpate', 'Admins\GlobalSettingsController@delivery_revert_access_update')->name('update');
+        });
 
         Route::prefix('delivery_revert_access')->name('delivery_revert_access.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@delivery_revert_access_index')->name('index');
@@ -3891,6 +3903,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('/submit', 'Admins\AdminInternationalRatesController@retail_international_rates_margin_submit')->name('update');
                     Route::get('/list', 'Admins\AdminInternationalRatesController@retail_international_rates_margin_list')->name('list');
                 });
+            });
+
+            //International Economy Rates
+            Route::prefix('economy-rates')->name('economy_rates.')->group(function () {
+                Route::get('', 'Admins\InternationalEconomyStandardRatesController@index')->name('index');
+                Route::get('list', 'Admins\InternationalEconomyStandardRatesController@list')->name('list');
+                Route::post('excel', 'Admins\InternationalEconomyStandardRatesController@upload_excel')->name('excel');
             });
         });
 

@@ -7858,16 +7858,20 @@ class APIController extends Controller
             } else {
                 
                 $retail_note_cash_collection_id = $request->retail_note_cash_collection_id;
-                $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);
+                $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);              
                 if ($retail_note->exists()) {
-                    $retail_note = $retail_note->first();
-                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();
+                    $retail_note = $retail_note->first();          
+                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();              
                     if ($retail_note->created_at >= $min_date) {
-                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note->id);
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note->id);                    
                         $transactions_amount = 0;
                         if ($hbl_konnect_transaction_delivery_note->exists()) {
                             $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
                             $transactions_amount = $hbl_konnect_transaction_delivery_note->transactions_amount;
+                            $sumNoofTransaction = HblKonnectTransactionRetail::where('retail_note_id', $retail_note->id)->sum('amount');
+                            if($sumNoofTransaction == $transactions_amount || $transactions_amount >= $sumNoofTransaction){
+                                 return response()->json(['status' => 12, 'message' => 'RetailNote AlReady Payed!']);
+                            }
                         }
                         $net_amount = $retail_note->total_cash - $transactions_amount;
                         $retail_user_id = $retail_note->retail_user_id;
@@ -8209,8 +8213,31 @@ class APIController extends Controller
 
     public function shipment_track_consignee_public(Request $request)
     {
+        $tracking_num = explode(',', $request->tracking_number);
+        $shipment_data = Shipment::whereIn('tracking_number', $tracking_num)->pluck('pickup_address_id');
+        $vendor = UserShippingInfo::whereIn('id', $shipment_data)->pluck('vendor');
+        $brand_name = UserShippingInfo::whereIn('id', $shipment_data)->pluck('pickup_brand_name');
+
+        // $rules = [
+        //     'tracking_number' => ['required'],
+        // ];
+
         $rules = [
             'tracking_number' => ['required'],
+            'vendor' => [
+                function ($attribute, $value, $fail) use ($vendor) {
+                    if (!$vendor->contains($value)) {
+                        $fail('The Vendor name is invalid.');
+                    }
+                }
+            ],
+            'pickup_brand_name' => [
+                function ($attribute, $value, $fail) use ($brand_name) {
+                    if (!$brand_name->contains($value)) {
+                        $fail('The Brand name is invalid.');
+                    }
+                }
+            ],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -8251,6 +8278,8 @@ class APIController extends Controller
                             $pickup = $shipment->pickup_address;
 
                             $details['pickup']['origin'] = $pickup->city->name;
+                            $details['pickup']['vendor'] = $pickup->vendor;
+                            $details['pickup']['brand_name'] = $pickup->pickup_brand_name;
 
                             $details['consignee']['name'] = $shipment->consignee_name;
                             $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
@@ -9766,5 +9795,24 @@ class APIController extends Controller
 
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
+    }
+
+    public function fetch_complaints(Request $request) {
+
+        $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first()->id;
+
+        $record = CrmRequest::leftJoin('crm_request_case_nature as crcn', 'crcn.id','crm_requests.case_nature_id')
+        ->leftJoin('crm_request_case_nature_types as crcnt','crcnt.id','crm_requests.case_nature_type_id')
+        ->leftJoin('crm_request_statuses as crs' ,'crs.id', 'crm_requests.status_id')
+        ->where('shipment_id', $shipment_id)
+        ->select(['crm_requests.id as request_no','crcn.name as complaint_nature','crcnt.type as complaint_nature_type','crm_requests.description as description', 'crs.name as status'])->orderBy('crm_requests.created_at','desc')->get();
+
+        if(count($record) > 0){
+            $message = 'List of Complaints';
+        } else {
+            $message = 'No record found';
+        }
+        return response()->json(['status' => 0, 'message' => $message, 'data' => $record]);
+
     }
 }
