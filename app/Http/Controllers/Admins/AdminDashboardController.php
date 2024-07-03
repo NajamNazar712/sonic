@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\FafCharges;
 use Exception;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -1331,7 +1332,7 @@ class AdminDashboardController extends Controller
                 'same_consignee' => $same_consignee,
             ]
         );
-        
+
         return redirect()->back()->with('success', 'Shipper exclude settings saved successfully.');
     }
 
@@ -9922,6 +9923,9 @@ class AdminDashboardController extends Controller
                     if (session('role_id') == 1 || in_array(619, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
                     }
+                    if (session('role_id') == 1 || in_array(998, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item faf_charges_status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Faf Charges</div></button>';
+                    }
 
                     if (session('role_id') == 1 || in_array(660, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item auto_cancel_days_setting"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Auto Cancel Days</div></button>';
@@ -10487,7 +10491,9 @@ class AdminDashboardController extends Controller
                 if (session('role_id') == 1 || in_array(619, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
                 }
-
+                if (session('role_id') == 1 || in_array(998, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item faf_charges_status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Faf Charges</div></button>';
+                }
 
                 if (session('role_id') == 1 || in_array(856, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
@@ -14512,6 +14518,25 @@ class AdminDashboardController extends Controller
             }
             AdminHub::insert($data);
         }
+    }
+
+    public function faf_charges_info(Request $request)
+    {
+        $faf_charges = FafCharges::where('user_id',$request->user_id)->first();
+        return response()->json(['status' => !empty($faf_charges->status) ? $faf_charges->status : 0]);
+    }
+    public function faf_charges_submit(Request $request)
+    {
+        $faf_charges_checkbox = isset($request->faf_charges_checkbox) ? 1 : 0;
+        $faf_charges = FafCharges::where('user_id',$request->user_id)->first();
+        if(empty($faf_charges)){
+            $faf_charges = new FafCharges();
+        }
+        $faf_charges->user_id =$request->user_id;
+        $faf_charges->status =$faf_charges_checkbox;
+        $faf_charges->save();
+
+        return redirect()->back()->with('success', 'FAF Charges Status Updated');
     }
     
 }
