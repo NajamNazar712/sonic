@@ -54,7 +54,8 @@
                     </fieldset>
                 </div>
             </div>
-            <div id="dynamic_hub_fields"  style="display: none">
+            {{-- <div id="dynamic_hub_fields"  style="display: none"> --}}
+            <div id="dynamic_hub_fields"  style="display:{{ ($isHub == 0) ? 'none' : ''}}">
                 <div class="row">
                     <div class="col-12">
                         <fieldset class="form-group mt-1">

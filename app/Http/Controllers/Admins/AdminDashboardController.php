@@ -11104,6 +11104,31 @@ class AdminDashboardController extends Controller
                     $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
                     self::addManagementHubUser($admin_ids, $id);
 
+                    //Check if Closest Hub is Selected then auto assign mappings according to the selected hub to the new newly created hub and delete all current mappings
+                    if ($request->closest_hub) {
+                        $closestHubId = $request->closest_hub;
+
+                        // get all mappings ids of the edited hub
+                        $mappings = V2JunctionMapping::where('origin_id', $id)->orWhere('destination_id', $id)->pluck('id')->toArray();
+
+                        //delete current junctions
+                        V2Junctions::whereIn('junction_mapping_id', $mappings)->delete();
+
+                        //delete current junction_routes
+                        $v2JunctionRoutes = V2JunctionRoutes::whereIn('junction_mapping_id', $mappings)->pluck('id')->toArray();
+
+                        //delete current junction_vehicles
+                        V2JunctionVehicles::whereIn('junction_route_id', $v2JunctionRoutes)->delete();
+
+                        V2JunctionRoutes::whereIn('id', $v2JunctionRoutes)->delete();
+                        V2JunctionMapping::whereIn('id', $mappings)->delete();
+                        //All current mappings of this city are removed now
+                        //--------x------------x-------------x-------------x----------------
+
+                        //now create new mappings according to the selected hub
+                        $city = City::find($id);
+                        $this->makeDynamicHubsMapping($request->vehicles, $closestHubId, $city);
+                    }
                 
                     return redirect()->back()->with('success', 'Hub/city updated successfully');
                 }
@@ -11305,7 +11330,8 @@ class AdminDashboardController extends Controller
             self::addManagementHubUser($admin_ids, $city->id);
 
             //Check if Closest Hub is Selected then auto assign mappings according to the selected hub to the new newly created hub.
-            if ($closestHubId = $request->closest_hub) {
+            if ($request->closest_hub) {
+                $closestHubId = $request->closest_hub;
                 $this->makeDynamicHubsMapping($request->vehicles, $closestHubId, $city);
             }
    
