@@ -445,6 +445,7 @@ class OrderManagementController extends Controller
                 ShipmentChargesController::cash_handling($shipment->id);
                 ShipmentChargesController::insurance($shipment->id);
                 ShipmentChargesController::fuel_surcharge($shipment->id);
+                ShipmentChargesController::faf_charges($shipment->id);
             }
             return ['status' => 0, 'success' => 'Shipment(s) arrived successfully'];
         }
@@ -481,6 +482,7 @@ class OrderManagementController extends Controller
                 ShipmentChargesController::cash_handling($shipment->id);
                 ShipmentChargesController::insurance($shipment->id);
                 ShipmentChargesController::fuel_surcharge($shipment->id);
+                ShipmentChargesController::faf_charges($shipment->id);
             }
             return ['status' => 0, 'success' => 'Shipment(s) arrived successfully'];
         }

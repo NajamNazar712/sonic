@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\FafCharges;
+use App\FafChargesGlobal;
+use App\FafChargesGlobalHistory;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -163,6 +166,7 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
+use App\RvShipmentTicket;
 
 class GlobalSettingsController extends Controller
 {
@@ -7262,14 +7266,41 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.auto_tag_territory', compact('agents', 'territories', 'cities'));
     }
 
-
     public function auto_tag_territories_list(Request $request)
     {
-
         $roles = AutoTagTerritory::join('admins as ad', 'ad.id', '=', 'auto_tag_territories.admin_id')
             ->leftjoin('territories as t', 't.id', 'auto_tag_territories.territory_id')
-            ->leftjoin('cities as c', 'c.id', 't.city_id')
-            ->select('auto_tag_territories.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'auto_tag_territories.status');
+            ->leftjoin('cities as c', 'c.id', 't.city_id');
+
+        // $roles->select('auto_tag_territories.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'auto_tag_territories.status');
+
+        $roles->select(
+            'auto_tag_territories.id',
+            'ad.name as agent_name',
+            'c.name as city_name',
+            'auto_tag_territories.status',
+            't.name as territory_name', 
+            DB::raw("
+                IF(
+                    (
+                        SELECT COUNT(t2.id)
+                        FROM territories AS t2
+                        JOIN auto_tag_territories AS att2 ON t2.id = att2.territory_id
+                        WHERE t2.id != t.id
+                        AND att2.admin_id = auto_tag_territories.admin_id
+                    ) > 0,
+                    (
+                        SELECT GROUP_CONCAT(t2.name ORDER BY t2.id SEPARATOR ', ')
+                        FROM territories AS t2
+                        JOIN auto_tag_territories AS att2 ON t2.id = att2.territory_id
+                        WHERE t2.id != t.id
+                        AND att2.admin_id = auto_tag_territories.admin_id
+                    ),
+                    '-'
+                ) as territory_names")
+        )
+        ->orderBy('auto_tag_territories.created_at', 'desc')
+        ->groupBy('auto_tag_territories.admin_id');
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
@@ -7315,14 +7346,27 @@ class GlobalSettingsController extends Controller
 
     public function auto_tag_territories_store(Request $request)
     {
+        $request->validate([
+            'territory_id' => 'required'
+        ]);
         $check_tagging = AutoTagTerritory::where('admin_id', $request->agent_id);
 
         if (!$check_tagging->exists()) {
-            $auto_tagging = new AutoTagTerritory;
-            $auto_tagging->admin_id = $request->agent_id;
-            $auto_tagging->territory_id = $request->territory_id;
-            $auto_tagging->save();
+            $territory_ids = $request->territory_id;
+            $is_lead_user = null;
+            if ($request->is_lead_user == 'on') {
+                $is_lead_user = 1;
+            } else {
+                $is_lead_user = 0;
+            }
 
+            foreach($territory_ids as $territory_id){
+                $auto_tagging = new AutoTagTerritory;
+                $auto_tagging->admin_id = $request->agent_id;
+                $auto_tagging->territory_id = $territory_id;
+                $auto_tagging->is_lead_user = $is_lead_user;
+                $auto_tagging->save();
+            }
             return redirect()->back()->with('success', 'Sales Person\'s Territory Added!');
         } else {
             return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');
@@ -7331,17 +7375,38 @@ class GlobalSettingsController extends Controller
 
     public function auto_tag_territories_enable_disable(Request $request)
     {
+        $button_disable = null;
         $auto_tagging = AutoTagTerritory::find($request->id);
-        if ($auto_tagging->status == 1) {
-            $auto_tagging->status = 0;
-            $auto_tagging->save();
-            return redirect()->back()->with('success', 'Sales Person\'s Territory Disabled!');
+        if (!$auto_tagging) {
+            return redirect()->back()->with('error', 'Territory not found!');
+        }
+        $admin_user = $auto_tagging->admin_id;
+        $all_territories = AutoTagTerritory::where('admin_id', $admin_user)->get();
+        $status_enabled = 0;
+        $status_disabled = 0;
+
+        foreach ($all_territories as $territory) {
+            if ($territory->status == 1) {
+                $territory->status = 0;
+                $status_disabled++;
+                $button_disable = 0;
+            } else {
+                $territory->status = 1;
+                $status_enabled++;
+                $button_disable = 1;
+            }
+            $territory->save();
+        }
+
+        if ($status_disabled > 0 && $status_enabled == 0) {
+            return redirect()->back()->with('success', 'Sales Person\'s Territory Disabled!')->with('button_disable', $button_disable);
+        } elseif ($status_enabled > 0 && $status_disabled == 0) {
+            return redirect()->back()->with('success', 'Sales Person\'s Territory Enabled!')->with('button_disable', $button_disable);
         } else {
-            $auto_tagging->status = 1;
-            $auto_tagging->save();
-            return redirect()->back()->with('success', 'Sales Person\'s Territory Enabled!');
+            return redirect()->back()->with('success', 'Sales Person\'s Territories Updated!')->with('button_disable', $button_disable);
         }
     }
+
 
     public function auto_tag_territories_data(Request $request)
     {
@@ -7351,28 +7416,60 @@ class GlobalSettingsController extends Controller
         $territory_id = $auto_tagging->territory_id;
         $city_id = Territory::find($territory_id)->city_id;
         $auto_tagging_id = $auto_tagging->id;
+        $is_lead_user = null;
+        if ($auto_tagging->is_lead_user == null || $auto_tagging->is_lead_user == 0){
+            $is_lead_user = 0;
+        } else {
+            $is_lead_user = 1;
+        }
 
-        return response()->json(['status' => 1, 'agent_id' => $agent_id, 'city_id' => $city_id, 'auto_tagging_id' => $auto_tagging_id, 'territory_id' => $territory_id]);
+        $all_territories = AutoTagTerritory::where('admin_id', $agent_id)->pluck('territory_id');
+        $total_terr = Territory::where('id', '!=', $all_territories[0])->pluck('id');
+        $other_territory_ids = AutoTagTerritory::where('admin_id', $agent_id)
+            ->whereIn('territory_id', $total_terr)->pluck('territory_id');
+        $other_territory_names = Territory::whereIn('id', $other_territory_ids)->get();
+        return response()->json([
+            'status' => 1, 
+            'agent_id' => $agent_id, 
+            'city_id' => $city_id,
+            'auto_tagging_id' => $auto_tagging_id,
+            'territory_id' => $territory_id,
+            'is_lead_user' => $is_lead_user,
+            'other_territory_names' => $other_territory_names
+        ]);
     }
 
     public function auto_tag_territories_update(Request $request)
     {
         $auto_tagging = AutoTagTerritory::find($request->auto_tagging_id);
-        if ($request->agent_id == $auto_tagging->admin_id) {
-            $auto_tagging->territory_id = $request->territory_id;
-            $auto_tagging->save();
-            return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
+        if ($auto_tagging->status == 0) {
+            return redirect()->back()->with('error', 'Sales Person\'s account is disabled!');
+        }
+
+        $territory_ids = $request->territory_id;
+        $first_territory = AutoTagTerritory::where('admin_id', $request->agent_id)->first();
+        $is_lead_user = $request->has('is_lead_user') ? 1 : 0;
+    
+        if (!$is_lead_user) {
+            if ($first_territory) {
+                AutoTagTerritory::where('admin_id', $request->agent_id)
+                    ->where('territory_id', '!=', $first_territory->territory_id)
+                    ->delete();
+                $first_territory->is_lead_user = $is_lead_user;
+                $first_territory->save();
+            }
         } else {
-            $check_tagging = AutoTagTerritory::where('admin_id', $request->agent_id);
-            if (!$check_tagging->exists()) {
+            AutoTagTerritory::where('admin_id', $request->agent_id)->delete();
+            // Insert new records
+            foreach ($territory_ids as $territory_id) {
+                $auto_tagging = new AutoTagTerritory();
                 $auto_tagging->admin_id = $request->agent_id;
-                $auto_tagging->territory_id = $request->territory_id;
+                $auto_tagging->territory_id = $territory_id;
+                $auto_tagging->is_lead_user = $is_lead_user;
                 $auto_tagging->save();
-                return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
-            } else {
-                return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');
             }
         }
+        return redirect()->back()->with('success', 'Sales Person\'s Territories Updated!');
     }
 
     public function referral()
@@ -8636,7 +8733,7 @@ class GlobalSettingsController extends Controller
         foreach ($shipper_notification_ids as $notification_id) {
             $details = array();
             $notification_settings = NotificationSetting::join('notifications as n', 'n.id', '=', 'notification_settings.notification_id')
-                ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name')
+                ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name' ,'notification_settings.charged_sms_toggle','notification_settings.sending_frequency','notification_settings.charging_frequency')
                 ->where('notification_id', $notification_id);
 
             if ($notification_settings->exists()) {
@@ -8644,6 +8741,9 @@ class GlobalSettingsController extends Controller
                 $details['id'] = $notification_setting->notification_id;
                 $details['name'] = $notification_setting->notification_name;
                 $details['shipper_toggle'] = $notification_setting->shipper_toggle;
+                $details['charged_sms_toggle'] =  $notification_setting->charged_sms_toggle;
+                $details['sending_frequency'] =  $notification_setting->sending_frequency;
+                $details['charging_frequency'] =  $notification_setting->charging_frequency;
                 $notification_setting_shippers = NotificationSettingShipper::where('notification_setting_id', $notification_setting->id);
                 if ($notification_setting_shippers->exists()) {
                     $notification_setting_shippers = $notification_setting_shippers->pluck('shipper_id')->toArray();
@@ -8652,6 +8752,11 @@ class GlobalSettingsController extends Controller
                     $details['shippers'] = null;
                 }
 
+                if($notification_setting->shipper_toggle == 0) {
+                    $details['sms_enable_shippers'] = User::where('sms_charges_status', 1)->whereIn('id', $notification_setting_shippers)->pluck('id')->toArray();
+                } else {
+                    $details['sms_enable_shippers'] = null;
+                }
                 $notification_details[] = $details;
             } else {
                 $notification_setting = Notification::find($notification_id);
@@ -8660,13 +8765,16 @@ class GlobalSettingsController extends Controller
                     $details['name'] = $notification_setting->name;
                     $details['shipper_toggle'] = 1;
                     $details['shippers'] = null;
+                    $details['charged_sms_toggle'] = 0;
+                    $details['sending_frequency'] = null;
+                    $details['charging_frequency'] = null;
+                    $details['sms_enable_shippers'] = null;
                     $notification_details[] = $details;
                 }
             }
         }
 
         $shippers = User::select('id', 'name')->where('status', 3)->get();
-
         return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shippers, 'notification_details' => $notification_details]);
     }
 
@@ -8724,6 +8832,14 @@ class GlobalSettingsController extends Controller
                 $notification_setting->notification_id = $notification['id'];
                 $shippers = null;
                 $toggle = 0;
+
+                if (array_key_exists('charged_sms', $notification)) {
+                    if ($notification['charged_sms'] == 'on') {
+                        $notification_setting->charged_sms_toggle = 1;
+                        $notification_setting->sending_frequency  = $notification['sending_frequency'];
+                        $notification_setting->charging_frequency  = $notification['charging_frequency'];
+                    }
+                }
 
                 if (array_key_exists('all_shipper_toggle', $notification)) {
                     if ($notification['all_shipper_toggle'] == 'on') {
@@ -8931,6 +9047,7 @@ class GlobalSettingsController extends Controller
 
     public function rv_disable_shippers_store(Request $request)
     {
+
         ActivityTrailController::createActivityTrailLog(Auth::id(), 682);
 
         $all_shipper_settings = GlobalSettings::where('type', 'rv_disable_shippers_all_shippers');
@@ -8957,6 +9074,10 @@ class GlobalSettingsController extends Controller
             $settings->setting_value = 1;
             $settings->text = $excluded_users;
             $settings->save();
+
+            // Update disabled users in RV shipment tickets (Set disable_shipper to 0 of given shippers)
+            $shippers = explode(',', $excluded_users);
+            $this->updateDisabledUserInRvShipmentTickets($shippers, 0);
         } else {
             GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value' => 0, 'text' => NULL]);
         }
@@ -8975,12 +9096,35 @@ class GlobalSettingsController extends Controller
             $settings->save();
             GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->update(['setting_value' => 0, 'text' => NULL]);
             GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value' => 0, 'text' => NULL]);
+
+            // Update disabled users in RV shipment tickets (Set disable_shipper to 1 of given shippers)
+            $shippers = explode(',', $only_users);
+            $this->updateDisabledUserInRvShipmentTickets($shippers, 1);
         } else {
             GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->update(['setting_value' => 0, 'text' => NULL]);
         }
 
+        if (!($request->has('all_shipper_toggle') && $request->has('excluded_users')) && !(!$request->has('all_shipper_toggle') && $request->has('only_users'))) {
+            $this->updateDisabledUserInRvShipmentTickets(null, 1);
+        }
+
+        if (!($request->has('all_shipper_toggle') && $request->has('excluded_users')) && !(!$request->has('all_shipper_toggle') && $request->has('only_users'))) {
+            $this->updateDisabledUserInRvShipmentTickets(null, 1);
+        }
+
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    private function updateDisabledUserInRvShipmentTickets($shipperUserIds = null, $isDisabled = null)
+    {
+        if (!empty($shipperUserIds)) {
+            RvShipmentTicket::whereIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => $isDisabled]);
+            RvShipmentTicket::whereNotIn('shipment_user_id', $shipperUserIds)->update(['disabled_shipper' => !$isDisabled]);
+        } else {
+            RvShipmentTicket::where('disabled_shipper', $isDisabled ? 0 : 1)->update(['disabled_shipper' => $isDisabled]);
+        }
+    }
+
     public function get_hub(Request  $request)
     {
         if (isset($request->zone_id)) {
@@ -9165,7 +9309,7 @@ class GlobalSettingsController extends Controller
                 $count = count(explode(',', $hubs));
                 return '<button ref="' . $rider_id . '" class="btn btn-sm btn-outline-info align-middle hubs_count">' . $count . '</button>';
             })->addColumn('action', function ($data) {
-                if($data['main_category'] < 3){
+                if ($data['main_category'] < 3) {
                     $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -9174,14 +9318,12 @@ class GlobalSettingsController extends Controller
                     if (session('role_id') == 1 || in_array(896, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
-                    
-
-                }else{
+                } else {
                     $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
-                    '; 
+                    ';
                 }
                 return $dropdown;
             });
@@ -9612,6 +9754,36 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Admins have been assigned!');
     }
 
+    public function show_vendors()
+    {
+        $shippers = User::where('status', 3)->get();
+        $users = GlobalSettings::where('setting_value', 0)->where('type', 'brand_and_vendor_rights')->first();
+        return view('admin.settings.brand_and_vendor.index')->with(['users' => $users, 'shippers' => $shippers]);
+    }
+
+    public function store_vendors(Request $request)
+    {
+        if ($request->has('users')) {
+            $users = implode(',', $request->users);
+        } else {
+            $users = '';
+        }
+        $settings = GlobalSettings::where('setting_value', 0)->where('type', 'brand_and_vendor_rights')->first();
+        if ($settings) {
+            // Update the existing global setting
+            $settings->text = $users;
+            $settings->save();
+        } else {
+            $settings = new GlobalSettings();
+            $settings->type = 'brand_and_vendor_rights';
+            $settings->setting_value = 0;
+            $settings->text = $users;
+            $settings->save();
+        }
+
+        return redirect()->back()->with('success', 'Shippers have been assigned rights!');
+    }
+
     public function lead_progress_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 795);
@@ -9632,35 +9804,72 @@ class GlobalSettingsController extends Controller
                 'lead_progress_settings.updated_at as updated_at'
             );
         $datatable = Datatables::of($query)
-        ->addColumn('action', function($datatable){
-            $dropdown = '
+            ->addColumn('action', function ($datatable) {
+                $dropdown = '
             <div class="btn-group">
               <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
               <div class="dropdown-menu dropdown-menu-sm">
           ';
 
-          $dropdown .= '<button type="button" class="dropdown-item edit_color_percent" data-id="' . $datatable->id . '" data-color="' . $datatable->color . '" data-percent="' . $datatable->percent . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Color-Percent</div></button>';
-            
-          return $dropdown;        
-            
-        });
+                $dropdown .= '<button type="button" class="dropdown-item edit_color_percent" data-id="' . $datatable->id . '" data-color="' . $datatable->color . '" data-percent="' . $datatable->percent . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Color-Percent</div></button>';
+
+                return $dropdown;
+            });
         return $datatable->make(true);
     }
 
-    public function lead_progress_update(Request $request){
+    public function lead_progress_update(Request $request)
+    {
         $id = $request->id;
         $lead_progress_setting = LeadProgressSetting::find($id);
 
-        if($lead_progress_setting){
+        if ($lead_progress_setting) {
             $lead_progress_setting->color = $request->colorHex;
             $lead_progress_setting->percent = $request->percent;
             $lead_progress_setting->updated_at = now();
             $lead_progress_setting->updated_by = Auth::id();
-            $lead_progress_setting->save(); 
+            $lead_progress_setting->save();
 
             return redirect()->back()->with('success', 'Color/Percent Updated !!!');
-
         }
     }
 
+    public function faf_charges_index()
+    {
+        $faf_charges = FafChargesGlobal::orderby('id','desc')->first();
+
+        return view('admin.settings.faf_charges')->with(['faf_charges'=>$faf_charges]);
+    }
+
+    public function faf_charges_store(Request $request)
+    {
+        $applied_faf_charges = $request->faf_charges;
+
+        $date_range_start = Carbon::createFromFormat('d F, Y', $request->date_range_start)->format('Y-m-d');
+        $date_range_end = Carbon::createFromFormat('d F, Y', $request->date_range_end)->format('Y-m-d');
+
+        $faf_charges = FafChargesGlobal::orderby('id','desc');
+        if($faf_charges->exists()) {
+            $faf_charges = $faf_charges->first();
+            $faf_charges_history =  new FafChargesGlobalHistory();
+            $faf_charges_history->faf_charges = $faf_charges->faf_charges;
+            $faf_charges_history->date_range_start = $faf_charges->date_range_start;
+            $faf_charges_history->date_range_end = $faf_charges->date_range_end;
+            $faf_charges_history->admin_id = $faf_charges->admin_id;
+            $faf_charges_history->save();
+        }else{
+            $faf_charges = new FafChargesGlobal();
+        }
+        $faf_charges->faf_charges = $applied_faf_charges;
+        $faf_charges->date_range_start = $date_range_start;
+        $faf_charges->date_range_end = $date_range_end;
+        $faf_charges->admin_id = Auth::user()->id;
+        $faf_charges->save();
+
+
+
+        return redirect()->back()->with('success', 'FaF Percent Updated !!!');
+
+
+    }
 }

@@ -741,6 +741,7 @@ class ShipmentsWeightIssue1Seeder extends Seeder
                 $shipment_details->save();
                 ShipmentChargesController::weight($shipment_details->id);
                 ShipmentChargesController::fuel_surcharge($shipment_details->id);
+                ShipmentChargesController::faf_charges($shipment_details->id);
 
             }
         }
