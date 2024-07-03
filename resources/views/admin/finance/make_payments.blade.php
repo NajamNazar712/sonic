@@ -730,11 +730,60 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(60, session('permissions')))
 
-                    buttons: [{
+                    buttons: [
+                        // {
+                        //     text: 'Make Payment(s)',
+                        //     className: 'btn btn-primary make_payment',
+                        //     enabled: false,
+                        //     action: function(e, dt, node, config) {
+                        //         $('#make_payments #make_payments_form .total_amount').val(0);
+                        //         $('#make_payments #make_payments_form .total_charges').val(0);
+                        //         $('#make_payments #make_payments_form .total_gst').val(0);
+                        //         $('#make_payments #make_payments_form .total_deductable').val(0);
+                        //         $('#make_payments #make_payments_form .total_payable').val(0);
+                        //         $('#make_payments #make_payments_form .total_hold').val(0);
+                        //         $('#make_payments #make_payments_form .wht').val(0);
+
+
+                        //         $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                        //         $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
+                        //         $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+
+                        //         $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
+
+                        //         // Define an array to store IDs of selected rows with empty values
+                        //             table.rows({ selected: true }).every(function(index, element) {
+                        //             var rowData = this.data();
+                        //             var emptyRow = true;
+
+                        //             // selected_rows_shipments = [];
+                        //             // Check if all values in the row are empty
+                        //             for (var i = 0; i < rowData.length; i++) {
+                        //                 if (rowData[i] !== null && rowData[i] !== "") {
+                        //                     emptyRow = false;
+                        //                     break;
+                        //                 }
+                        //             }
+                        //             // If the row is selected and all values are empty, add its ID to the array
+                        //             if (emptyRow) {
+                        //                 selected_shippers_id.push(parseInt(rowData.user_id));
+                        //             }
+                        //         });
+
+                        //         console.log(selected_shippers_id);
+
+                        //         make_payments_table.clear().draw();
+
+                        //         $('#make_payments').modal('show');
+                        //     }
+                        // },
+
+                        {
                             text: 'Make Payment(s)',
                             className: 'btn btn-primary make_payment',
                             enabled: false,
                             action: function(e, dt, node, config) {
+                                // Reset all form fields and buttons
                                 $('#make_payments #make_payments_form .total_amount').val(0);
                                 $('#make_payments #make_payments_form .total_charges').val(0);
                                 $('#make_payments #make_payments_form .total_gst').val(0);
@@ -743,37 +792,27 @@
                                 $('#make_payments #make_payments_form .total_hold').val(0);
                                 $('#make_payments #make_payments_form .wht').val(0);
 
-
                                 $('#make_payments #make_payments_form button.make').prop('disabled', true);
                                 $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
 
                                 $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
 
-                                // Define an array to store IDs of selected rows with empty values
-                                    table.rows({ selected: true }).every(function(index, element) {
+                                var selected_shippers_id = [];
+                                table.rows({ selected: true }).every(function(index, element) {
                                     var rowData = this.data();
-                                    var emptyRow = true;
-
-                                    // selected_rows_shipments = [];
-                                    // Check if all values in the row are empty
-                                    for (var i = 0; i < rowData.length; i++) {
-                                        if (rowData[i] !== null && rowData[i] !== "") {
-                                            emptyRow = false;
-                                            break;
-                                        }
-                                    }
-                                    // If the row is selected and all values are empty, add its ID to the array
-                                    if (emptyRow) {
+                                    if (selected_shippers_id.indexOf(parseInt(rowData.user_id)) === -1) {
                                         selected_shippers_id.push(parseInt(rowData.user_id));
                                     }
                                 });
-
-                                make_payments_table.clear().draw();
-
-                                $('#make_payments').modal('show');
+                                var newTab = window.open('{{ route('admin.finance.make_payments.payment') }}', '_blank');
+                                newTab.onload = function() {
+                                    newTab.postMessage(selected_shippers_id, '*');
+                                };
                             }
                         },
+
+
                         {
                             extend: 'excel',
                             title: 'Make Payments',
@@ -2059,7 +2098,7 @@
                         if ($(row2.node().firstChild).hasClass('select-checkbox') && $(row2.node()).hasClass('selected')) {
                             var parent = $(row2.node());
                             if(parent.children('td.account_type_id').html() == 'Reimbursement'){
-                                console.log(parent.children('td.account_type_id').html());
+                                // console.log(parent.children('td.account_type_id').html());
                                 reimbursement_check = true;
                             }
                         }

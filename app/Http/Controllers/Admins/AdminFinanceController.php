@@ -19018,4 +19018,160 @@ class AdminFinanceController extends Controller
             'data' => $shipment_ledger
         ]);
     }
+
+    public function payment()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 29);
+        $banks = BanksList::all();
+        $payment_cycles = PaymentCycle::all();
+        $company_banks = BanksList::where('affiliate', 1)->get();
+        if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
+            $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
+        } else {
+            $shippers = User::select('id', 'name')->get();
+        }
+        $shipper_status = [1 => 'Active', 2 => 'Inactive'];
+        $total_amount = PendingPaymentShipment::sum('amount');
+        $total_charges = PendingPaymentShipment::sum('charges');
+        $total_payable = PendingPaymentShipment::sum('payable');
+        $shipper_cap = GeneralSetting::where('type', 'shipper_cap');
+        if ($shipper_cap->exists()) {
+            $shipper_cap = $shipper_cap->first();
+
+        } else {
+            $shipper_cap = 0;
+        }
+        return view('admin.finance.payment')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'shipper_cap' => $shipper_cap]);
+    }
+
+    public function payment_list(Request $request)
+    {
+        $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('users as u', 's.user_id', '=', 'u.id')
+            ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('shipment_fintech_charges as sfc', function ($join) {
+                $join->on('sfc.shipment_id', '=', 's.id')
+                    ->where('sfc.applied_to', '=', 1);
+            })
+            ->leftjoin('consolidation_shipments as consolidations', function ($join) {
+                $join->on('consolidations.shipment_id', '=', 's.id')
+                    ->where('consolidations.consolidation_id', '=',
+                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id', 'sj.created_at as arrival_date', 's.packaging_charges', 'u.id as shipper_id','u.account_type_id');
+
+        if ($request->has('ids')) {
+            $pending_payments = PendingPayment::whereIn('user_id', $request->ids)->get();
+            $pending_payment_ids = $pending_payments->pluck('id'); 
+            $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $pending_payment_ids);
+            // $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
+        } else {
+            $pending_payment_shipments->whereRaw('FALSE');
+        }
+        if ($request->has('pickup_address_id')) {
+            $pending_payment_shipments->where('s.pickup_address_id', $request->pickup_address_id);
+        }
+
+        $data = $pending_payment_shipments->get();
+        return response()->json([
+            'data' => $data
+        ]);
+
+        // $datatables = Datatables::of($pending_payment_shipments)
+        //     ->setRowAttr([
+        //         'consolidation_id' => function ($deliveries) {
+        //             if ($deliveries->consolidation_id != null) {
+        //                 return $deliveries->consolidation_id;
+        //             } else {
+        //                 return '';
+        //             }
+        //         },
+        //         'type_id' => function ($deliveries) {
+        //             return $deliveries->type;
+        //         },
+        //         'account_type' => function ($deliveries) {
+        //             return $deliveries->account_type_id;
+        //         }
+        //     ])
+        //     ->editColumn('fintech_charges', function ($pending_payment_shipments) {
+        //         // $fn_charges = $this->calculate_fintech_charges($pending_payment_shipments->ShipmentID);
+        //         return number_format($pending_payment_shipments->fintech_charges, 2);
+        //     })
+        //     ->editColumn('deductable', function ($pending_payment_shipments) {
+        //         // $fn_charges = $this->calculate_fintech_charges($pending_payment_shipments->ShipmentID);
+        //         return number_format($pending_payment_shipments->charges + $pending_payment_shipments->fintech_charges + $pending_payment_shipments->gst, 2);
+        //     })
+        //     ->addColumn('aging', function ($pending_payment_shipments) {
+        //         $now = Carbon::now()->startOfDay();
+
+        //         $created_at = Carbon::parse($pending_payment_shipments->created_at)->startOfDay();
+
+        //         return $created_at->diffInDays($now) . 'd';
+        //     })
+        //     ->editColumn('amount', function ($pending_payment_shipment) {
+
+        //         return number_format($pending_payment_shipment->amount, 2);
+        //     })
+        //     ->editColumn('charges', function ($pending_payment_shipment) {
+        //         return number_format($pending_payment_shipment->charges, 2);
+        //     })
+        //     ->editColumn('gst', function ($pending_payment_shipment) {
+        //         return number_format($pending_payment_shipment->gst, 2);
+        //     })
+        //     ->editColumn('wht', function ($pending_payment_shipment) {
+        //         return number_format($pending_payment_shipment->wht, 2);
+        //     })
+        //     ->editColumn('packaging_charges', function ($pending_payment_shipment) {
+        //         return number_format($pending_payment_shipment->packaging_charges, 2);
+        //     })
+        //     ->editColumn('payable', function ($pending_payment_shipment) {
+        //         // $fn_charges = $this->calculate_fintech_charges($pending_payment_shipment->ShipmentID);
+        //         return number_format($pending_payment_shipment->payable - $pending_payment_shipment->fintech_charges, 2);
+        //     })
+        //     ->editColumn('type', function ($pending_payment_shipment) {
+        //         if ($pending_payment_shipment->type == 0) {
+        //             return 'Delivered';
+        //         } else if ($pending_payment_shipment->type == 1) {
+        //             return 'Returned';
+        //         } else if ($pending_payment_shipment->type == 3) {
+        //             return 'Arrival';
+        //         } else {
+        //             return 'Adjusted';
+        //         }
+        //     })
+        //     ->filterColumn('type', function ($query, $keyword) {
+        //         if ($keyword == 0 || $keyword == 1 || $keyword == 2 || $keyword == 3) {
+        //             $query->where('pending_payment_shipments.type', '=', $keyword);
+        //         } else {
+        //             $query->whereIn('pending_payment_shipments.type', [0, 1, 2,3]);
+        //         }
+        //     })
+        //     ->filterColumn('deductable', function ($query, $keyword) {
+        //         $query->where(DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst'), '=', $keyword);
+        //     })
+        //     ->editColumn('account_type_id', function ($pending_payment_shipment) {
+        //         if ($pending_payment_shipment->account_type_id == 1) {
+        //             return 'Reimbursement';
+        //         } else{
+        //             return 'Corporate';
+        //         }
+        //     })
+        //     ->orderColumn('deductable', DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst') . ' $1');
+
+        // return $datatables->make(true);
+    }
+
+
+
+
+
+
+
 }
