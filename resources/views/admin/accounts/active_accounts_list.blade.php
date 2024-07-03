@@ -75,6 +75,7 @@
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
                                         {{-- <th class="border-primary border-darken-1">ESO Tagged</th> --}}
+                                        <th class="border-primary border-darken-1">SMS charges per shipment</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
                                         <th class="border-primary border-darken-1">Rate Added At</th>
@@ -1083,6 +1084,7 @@ function checkboxStatus() {
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
                         // head.push('ESO Tagged');
+                        head.push('SMS charges per shipment');
                         head.push('Request Date');
                         head.push('Rates Added By');
                         head.push('Rates Added At');
@@ -1136,6 +1138,7 @@ function checkboxStatus() {
                             row.push(values.kam);
                             row.push(values.ref);
                             // row.push(values.eso);
+                            row.push(values.sms_charges);
                             row.push(values.created_at);
                             row.push(values.added_by);
                             row.push(values.rates_added_at);
@@ -1755,6 +1758,7 @@ function checkboxStatus() {
                 {data: 'tagged_poc', name: 'poc.name', class: 'align-middle tagged_poc'},
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
+                {data: 'sms_charges', name: 'users.sms_charges', class: 'align-middle sms_charges'},
                 // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
@@ -1863,8 +1867,7 @@ function checkboxStatus() {
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        }
-                    else {
+                    } else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
                         }).wrap(td).after(icon);
@@ -1901,6 +1904,13 @@ function checkboxStatus() {
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'
                 });
+                $("#sms_charges_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                
                 var data1 = $.map({!! $products !!}, function (obj) {
                     obj.id = obj.id // replace pk with your identifier
 
