@@ -790,6 +790,7 @@ class ShipperFinanceController extends Controller
             $total_charges = 0;
             $total_adjustments = 0;
             $total_payable = 0;
+            $total_faf_charges = 0;
 
             foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
                 $shipment = $done_payment_shipment->shipment;
@@ -823,7 +824,7 @@ class ShipperFinanceController extends Controller
                 $pickup_address = $shipment->pickup_address;
 
                 $row = array();
-
+                $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
                 $row[] = $serial_number;
                 $row[] = $shipment->tracking_number;
                 $row[] = $shipment->created_at;
@@ -874,6 +875,7 @@ class ShipperFinanceController extends Controller
                             $total_fuel_surcharge += $shipment->fuel_surcharge;
                             $total_intercept_charges += $shipment->intercept_charges;
                             $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                            $total_faf_charges += $faf_charges;
                         } else if ($done_payment_shipment->type == 0) {
                             $total_collection_amount += $done_payment_shipment->amount;
                         }
@@ -898,7 +900,7 @@ class ShipperFinanceController extends Controller
 
             $total_columns = count($details[0]);
 
-            $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst,'Total WHT (Deductable)' => $total_wht, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments - $total_wht)];
+            $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Faf Charges' => $total_faf_charges, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst,'Total WHT (Deductable)' => $total_wht, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments - $total_wht)];
 
             $details[] = [];
 
