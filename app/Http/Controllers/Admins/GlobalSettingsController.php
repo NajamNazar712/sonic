@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\FafCharges;
+use App\FafChargesGlobal;
+use App\FafChargesGlobalHistory;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -9687,5 +9690,44 @@ class GlobalSettingsController extends Controller
 
             return redirect()->back()->with('success', 'Color/Percent Updated !!!');
         }
+    }
+
+    public function faf_charges_index()
+    {
+        $faf_charges = FafChargesGlobal::orderby('id','desc')->first();
+
+        return view('admin.settings.faf_charges')->with(['faf_charges'=>$faf_charges]);
+    }
+
+    public function faf_charges_store(Request $request)
+    {
+        $applied_faf_charges = $request->faf_charges;
+
+        $date_range_start = Carbon::createFromFormat('d F, Y', $request->date_range_start)->format('Y-m-d');
+        $date_range_end = Carbon::createFromFormat('d F, Y', $request->date_range_end)->format('Y-m-d');
+
+        $faf_charges = FafChargesGlobal::orderby('id','desc');
+        if($faf_charges->exists()) {
+            $faf_charges = $faf_charges->first();
+            $faf_charges_history =  new FafChargesGlobalHistory();
+            $faf_charges_history->faf_charges = $faf_charges->faf_charges;
+            $faf_charges_history->date_range_start = $faf_charges->date_range_start;
+            $faf_charges_history->date_range_end = $faf_charges->date_range_end;
+            $faf_charges_history->admin_id = $faf_charges->admin_id;
+            $faf_charges_history->save();
+        }else{
+            $faf_charges = new FafChargesGlobal();
+        }
+        $faf_charges->faf_charges = $applied_faf_charges;
+        $faf_charges->date_range_start = $date_range_start;
+        $faf_charges->date_range_end = $date_range_end;
+        $faf_charges->admin_id = Auth::user()->id;
+        $faf_charges->save();
+
+
+
+        return redirect()->back()->with('success', 'FaF Percent Updated !!!');
+
+
     }
 }

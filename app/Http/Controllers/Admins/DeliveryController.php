@@ -7909,6 +7909,7 @@ class DeliveryController extends Controller
                     $shipment->save();
                     ShipmentChargesController::weight($shipment->id);
                     ShipmentChargesController::fuel_surcharge($shipment->id);
+                    ShipmentChargesController::faf_charges($shipment->id);
                     ShipmentsJourneyController::add($shipment->id, 49, 49, NULL, NULL, NULL, Auth::id());
                 }
             }
@@ -8143,6 +8144,7 @@ class DeliveryController extends Controller
                     ShipmentChargesController::cash_handling($shipment_id);
                     ShipmentChargesController::weight($shipment_id);
                     ShipmentChargesController::fuel_surcharge($shipment_id);
+                    ShipmentChargesController::faf_charges($shipment_id);
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
