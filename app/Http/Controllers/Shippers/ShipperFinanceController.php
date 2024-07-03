@@ -3155,7 +3155,7 @@ class ShipperFinanceController extends Controller
             }
 
             $date = Carbon::parse($date)->format('Y-m-d');
-
+            $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
             $origin = $shipment->pickup_address->city->name;
 
             if (!in_array($origin, $origins)) {
@@ -3186,6 +3186,9 @@ class ShipperFinanceController extends Controller
 
             if (!isset($total_fuel_surcharge[$origin])) {
                 $total_fuel_surcharge[$origin] = 0;
+            }
+            if (!isset($total_faf_charges[$origin])) {
+                $total_faf_charges[$origin] = 0;
             }
 
             if (!isset($total_replacement_charges[$origin])) {
@@ -3244,6 +3247,7 @@ class ShipperFinanceController extends Controller
                 $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
                 $total_intercept_charges[$origin] += $shipment->intercept_charges;
                 $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                $total_faf_charges[$origin] += $faf_charges;
             }
             else {
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
@@ -3371,6 +3375,10 @@ class ShipperFinanceController extends Controller
                         <tr>
                             <td>Fuel Surcharge</td>
                             <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
+                        </tr>  
+                        <tr>
+                            <td>Faf Charges</td>
+                            <td>' . number_format($total_faf_charges[$origin], 2) . '</td>
                         </tr>
                         <tr>
                             <td>Cash Handling Charges</td>
