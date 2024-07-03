@@ -309,18 +309,21 @@ class NotificationsController extends Controller
                 }
             }
 
+            //Check to the block emails
+            if($to){
+                $mail = Mail::to($to);
 
-            $mail = Mail::to($to);
-
-            if ($cc) {
-                $mail->cc($cc);
+                if ($cc) {
+                    $mail->cc($cc);
+                }
+    
+                if ($bcc) {
+                    $mail->bcc($bcc);
+                }
+    
+                $mail->send(new Notifications($subject, $body, $from));
             }
 
-            if ($bcc) {
-                $mail->bcc($bcc);
-            }
-
-            $mail->send(new Notifications($subject, $body, $from));
         }
     }
 
