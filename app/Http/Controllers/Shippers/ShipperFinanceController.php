@@ -1906,7 +1906,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="14" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="15" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -2027,7 +2027,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="17">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="18">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -4708,7 +4708,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="14" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="15" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
