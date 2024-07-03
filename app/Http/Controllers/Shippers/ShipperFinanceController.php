@@ -13,6 +13,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\Zone;
+use App\ShipmentAdditionalCharges;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -1762,7 +1763,7 @@ class ShipperFinanceController extends Controller
             } else {
                 $date = $shipment->created_at;
             }
-
+            $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
             $date = Carbon::parse($date)->format('Y-m-d');
 
             $origin = $shipment->pickup_address->city->name;
@@ -1790,6 +1791,7 @@ class ShipperFinanceController extends Controller
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($faf_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
@@ -1820,6 +1822,9 @@ class ShipperFinanceController extends Controller
 
             if (!isset($total_fuel_surcharge[$origin])) {
                 $total_fuel_surcharge[$origin] = 0;
+            }
+            if (!isset($total_faf_charges[$origin])) {
+                $total_faf_charges[$origin] = 0;
             }
 
             if (!isset($total_replacement_charges[$origin])) {
@@ -1871,6 +1876,7 @@ class ShipperFinanceController extends Controller
                 $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
                 $total_intercept_charges[$origin] += $shipment->intercept_charges;
                 $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                $total_faf_charges[$origin] += $faf_charges;
             } else {
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
@@ -1884,7 +1890,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="13" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="14" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -1895,6 +1901,7 @@ class ShipperFinanceController extends Controller
                             <th class="color secondary">Try & Buy Charges (PKR)</th>
                             <th class="color secondary">Return Charges (PKR)</th>
                             <th class="color secondary">Fuel Surcharge (PKR)</th>
+                            <th class="color secondary">Faf Charges (PKR)</th>
                             <th class="color secondary">Intercept Charges (PKR)</th>
                             <th class="color secondary">OSA Charges (PKR)</th>
                             <th class="color secondary">Packaging Charges (PKR)</th>
@@ -1916,6 +1923,7 @@ class ShipperFinanceController extends Controller
                             <td>' . number_format($total_try_and_buy_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_return_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
+                            <td>' . number_format($total_faf_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_packaging_material_charges[$origin], 2) . '</td>
@@ -2001,7 +2009,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="16">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="17">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -2013,6 +2021,7 @@ class ShipperFinanceController extends Controller
                           <th class="color secondary">Weight (kg)</th>
                           <th class="color secondary">Weight Charges (PKR)</th>
                           <th class="color secondary">Fuel Surcharge (PKR)</th>
+                          <th class="color secondary">Faf Charges (PKR)</th>
                           <th class="color secondary">OSA Charges (PKR)</th>
                           <th class="color secondary">Adjustment Charges (PKR)</th>
                           <th class="color secondary">Packaging Charges (PKR)</th>
@@ -2235,7 +2244,7 @@ class ShipperFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)','Faf Charges (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
 
         $serial_number = 1;
 
@@ -2252,7 +2261,7 @@ class ShipperFinanceController extends Controller
             }
 
             $date = Carbon::parse($date)->format('Y-m-d');
-
+            $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
             $row = array();
 
             $row[] = $serial_number;
@@ -2263,6 +2272,7 @@ class ShipperFinanceController extends Controller
             $row[] = $shipment->actual_weight;
             $row[] = (($invoice_shipment->type != 2) ? $shipment->weight_charges : 0);
             $row[] = (($invoice_shipment->type != 2) ? $shipment->fuel_surcharge : 0);
+            $row[] = (($invoice_shipment->type != 2) ? $faf_charges : 0);
             $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
             $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
             $row[] = $invoice_shipment->charges;
@@ -2494,7 +2504,7 @@ class ShipperFinanceController extends Controller
                 } else {
                     $date = $shipment->created_at;
                 }
-
+                $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
                 $date = Carbon::parse($date)->format('Y-m-d');
 
                 $origin = $shipment->pickup_address->city->name;
@@ -2527,6 +2537,9 @@ class ShipperFinanceController extends Controller
 
                 if (!isset($total_fuel_surcharge[$origin])) {
                     $total_fuel_surcharge[$origin] = 0;
+                }
+                if (!isset($total_faf_charges[$origin])) {
+                    $total_faf_charges[$origin] = 0;
                 }
 
                 if (!isset($total_replacement_charges[$origin])) {
@@ -2589,6 +2602,7 @@ class ShipperFinanceController extends Controller
                     $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
                     $total_intercept_charges[$origin] += $shipment->intercept_charges;
                     $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                    $total_faf_charges[$origin] += $faf_charges;
                 } else {
                     $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
                 }
@@ -2750,6 +2764,11 @@ class ShipperFinanceController extends Controller
                         <tr>
                             <td>Fuel Surcharge</td>
                             <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                        <tr>
+                            <td>Faf Charges</td>
+                            <td>' . number_format($total_faf_charges[$origin], 2) . '</td>
                         </tr>
                         <tr>
                             <td>Cash Handling Charges</td>
@@ -4523,7 +4542,7 @@ class ShipperFinanceController extends Controller
                 if (!isset($serial_number[$origin])) {
                     $serial_number[$origin] = 1;
                 }
-
+                $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
                 $shipment_details[$origin] .= '
                         <tr>
                           <td>' . $serial_number[$origin] . '</td>
@@ -4535,6 +4554,7 @@ class ShipperFinanceController extends Controller
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($faf_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
@@ -4565,6 +4585,9 @@ class ShipperFinanceController extends Controller
 
                 if (!isset($total_fuel_surcharge[$origin])) {
                     $total_fuel_surcharge[$origin] = 0;
+                }
+                if (!isset($total_faf_charges[$origin])) {
+                    $total_faf_charges[$origin] = 0;
                 }
 
                 if (!isset($total_replacement_charges[$origin])) {
@@ -4616,6 +4639,7 @@ class ShipperFinanceController extends Controller
                     $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
                     $total_intercept_charges[$origin] += $shipment->intercept_charges;
                     $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                    $total_faf_charges[$origin] += $faf_charges;
                 } else {
                     $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
                 }
@@ -4629,7 +4653,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="13" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="14" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -4640,6 +4664,7 @@ class ShipperFinanceController extends Controller
                             <th class="color secondary">Try & Buy Charges (PKR)</th>
                             <th class="color secondary">Return Charges (PKR)</th>
                             <th class="color secondary">Fuel Surcharge (PKR)</th>
+                            <th class="color secondary">Faf Charges (PKR)</th>
                             <th class="color secondary">Intercept Charges (PKR)</th>
                             <th class="color secondary">OSA Charges (PKR)</th>
                             <th class="color secondary">Packaging Charges (PKR)</th>
@@ -4661,6 +4686,7 @@ class ShipperFinanceController extends Controller
                             <td>' . number_format($total_try_and_buy_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_return_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
+                            <td>' . number_format($total_faf_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_packaging_material_charges[$origin], 2) . '</td>
