@@ -172,7 +172,8 @@ class RetailAdminUserManagementController extends Controller
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->get();
         $products = Product::orderBy('product_name')->get();
         $product_percentage = RetailFranchiseProductPercentage::get();
-        $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
+        // $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
+        $shipping_modes = RetailShippingMode::get();
         $bank_list = BanksList::get();
         return view('admin.retail.franchise.index')->with(['hubs' => $hubs, 'products' => $products, 'product_percentage' => $product_percentage, 'shipping_modes' => $shipping_modes, 'bank_list' => $bank_list]);
     }

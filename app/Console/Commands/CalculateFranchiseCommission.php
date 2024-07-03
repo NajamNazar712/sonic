@@ -52,44 +52,59 @@ class CalculateFranchiseCommission extends Command
     private function franchise_commission_view()
     {
         $franchise_users = RetailUser::where('category', 1)->get();
-        $user_ids = $franchise_users->pluck('id')->toArray();
+        $user_ids = $franchise_users->pluck('category_id')->toArray();
         $month = str_pad(Carbon::now()->subMonth()->month, 2, "0", STR_PAD_LEFT);
-        $shipments = RetailShipment::query()
-            ->whereIn('retail_user_id', $user_ids)
-            ->whereMonth('retail_shipments.created_at', $month)
+
+        $baseQuery = RetailShipment::query()
             ->leftJoin('retail_users', 'retail_shipments.retail_user_id', '=', 'retail_users.id')
             ->leftJoin('retail_franchises', 'retail_users.category_id', '=', 'retail_franchises.id')
-            ->leftJoin('retail_franchise_product_percentages', function ($join) {
+            ->leftJoin('retail_franchise_product_percentages', function($join) {
                 $join->on('retail_franchise_product_percentages.franchise_id', '=', 'retail_franchises.id')
                     ->on('retail_franchise_product_percentages.retail_shipping_mode_id', '=', 'retail_shipments.shipping_mode');
             })
             ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id')
-            ->leftJoin('retail_franchise_charges', 'retail_franchises.id', '=', 'retail_franchise_charges.franchise_id')
+            ->leftJoin('retail_franchise_charges', 'retail_franchises.id', '=', 'retail_franchise_charges.franchise_id');
+
+        $shipments = $baseQuery
+            ->whereIn('retail_shipments.category_id', $user_ids)
+            ->whereMonth('retail_shipments.created_at', $month)
             ->select([
-                'retail_franchises.id as franchise_id',
-                'retail_franchises.code as franchise_code',
-                'retail_franchises.name as franchise_name',
-                'retail_franchises.cnic as franchise_cnic',
-                'retail_franchises.phone_no as franchise_phone',
-                'retail_users.address as franchise_address',
-                'retail_shipping_modes.id as retail_shipping_mode_id',
-                'retail_shipping_modes.name as shipping_mode_name',
-                'retail_shipments.product_type_id',
-                'retail_shipments.category_id',
-                'retail_shipments.category',
                 DB::raw('COUNT(retail_shipments.id) as shipment_count'),
                 DB::raw('SUM(retail_shipments.total_charges_without_gst) as total_charges_without_gst'),
                 DB::raw('SUM(retail_shipments.gst) as gst_amount'),
                 DB::raw('SUM(retail_shipments.total_charges) as total_charges'),
                 DB::raw('SUM(retail_shipments.weight_charges) as weight_charges'),
-                DB::raw('SUM(retail_franchise_product_percentages.product_percentage) as product_percentage'),
-                DB::raw('SUM(retail_franchise_charges.franchise_deduction) as franchise_deduction'),
-                DB::raw('SUM(retail_franchise_charges.franchise_gst) as gst_percentage'),
-                DB::raw('SUM(retail_franchise_charges.franchise_withholding) as withholding_percentage'),
+                
+                'retail_franchises.id as franchise_id',
+                'retail_franchises.code as franchise_code',
+                'retail_franchises.name as franchise_name',
+                'retail_franchises.cnic as franchise_cnic',
+                'retail_franchises.phone_no as franchise_phone',
+                
+                'retail_users.address as franchise_address',
+
+                'retail_franchise_product_percentages.product_percentage as product_percentage',
+
+                'retail_franchise_charges.franchise_deduction as franchise_deduction',
+                'retail_franchise_charges.franchise_gst as gst_percentage',
+                'retail_franchise_charges.franchise_withholding as withholding_percentage',
+
+                'retail_shipping_modes.id as retail_shipping_mode_id',
+                'retail_shipping_modes.name as shipping_mode_name',
             ])
             ->groupBy([
-                'retail_shipments.product_type_id',
-                'retail_shipments.retail_user_id',
+                'retail_franchises.id',
+                'retail_franchises.code',
+                'retail_franchises.name',
+                'retail_franchises.cnic',
+                'retail_franchises.phone_no',
+                'retail_users.address',
+                'retail_franchise_product_percentages.product_percentage',
+                'retail_franchise_charges.franchise_deduction',
+                'retail_franchise_charges.franchise_gst',
+                'retail_franchise_charges.franchise_withholding',
+                'retail_shipping_modes.id',
+                'retail_shipping_modes.name'
             ])
             ->get();
 
