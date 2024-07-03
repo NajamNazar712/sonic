@@ -65,10 +65,6 @@
                                 @endforeach
                             </select>
                         </fieldset>
-                        <fieldset class="form-group mt-1">
-                            <input type="checkbox" class="icheckbox" name="caution_checkbox" id="caution_checkbox" required>
-                            <label for="caution_checkbox">Selection of Closest Hub will override all previous Mapping Records!</label>
-                        </fieldset>
                     </div>
                 </div>
                 <div class="row" id="vehicles_list_div" style="display: none">
@@ -79,6 +75,10 @@
                                     <option value="{{$vehicle->id}}">{{$vehicle->reg_number}}</option>
                                 @endforeach
                             </select>
+                        </fieldset>
+                        <fieldset class="form-group mt-1">
+                            <input type="checkbox" class="icheckbox" name="caution_checkbox" id="caution_checkbox">
+                            <label for="caution_checkbox">Override All Mapping Records</label>
                         </fieldset>
                     </div>
                 </div>
@@ -360,11 +360,14 @@
             if ($(this).val() == '') {
                 $('#vehicles_list_div').hide();
                 $('#vehicles_list_div').attr('required',false);
+                $('#caution_checkbox').attr('required',false);
+
             }
             else
             {
                 $('#vehicles_list_div').show();
                 $('#vehicles_list_div').attr('required',true);
+                $('#caution_checkbox').attr('required',true);
             }
         });
 
