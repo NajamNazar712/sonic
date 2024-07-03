@@ -399,7 +399,12 @@ class ReturnController extends Controller
         $number_of_pending_first_call_percentage = ($reason_validation_required > 0) ? (($number_of_pending_first_call / $reason_validation_required) * 100) : 0;
 
         //Pending Second Call
-        $number_of_pending_second_call = $number_of_pending_tickets->pending_second_call_count;
+        // $number_of_pending_second_call = $number_of_pending_tickets->pending_second_call_count;
+        $number_of_pending_second_call = RvShipmentTicket::where('disabled_shipper',0)
+        ->where('in_progress',0)
+        ->where('call_count','>',0)
+        ->where('is_completed',0)
+        ->count();
         $number_of_pending_second_call_percentage = ($reason_validation_required > 0) ? (($number_of_pending_second_call / $reason_validation_required) * 100) : 0;
 
         //Total Agents Online Today
