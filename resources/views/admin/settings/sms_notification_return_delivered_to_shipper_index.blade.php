@@ -248,8 +248,8 @@
                     function(value, element) {
                         sending_value = parseFloat($("#sending_frequency_{{$notification_detail['id']}}").val()); 
 
-                        if (isNaN(sending_value)) {
-                            console.log(sending_value)
+                        if ($("#charged_sms_{{$notification_detail['id']}}").is(':checked') && isNaN(sending_value)) {
+                           //console.log(sending_value)
                             return false;
                         }
                         return true;
@@ -261,15 +261,21 @@
                     function(value, element) {
                         charging_value = parseFloat($("#charging_frequency_{{$notification_detail['id']}}").val());
                         sending_value = parseFloat($("#sending_frequency_{{$notification_detail['id']}}").val());
-                        if (isNaN(charging_value)) {
-                            return false;
+                        
+                        if ($("#charged_sms_{{$notification_detail['id']}}").is(':checked')) {
+                            //console.log(charging_value)  
+                            if(isNaN(charging_value)) {
+                                return false;
+                            }
+                            return charging_value <= sending_value;
+                        } else {
+                            return true;
                         }
-                        return charging_value <= sending_value;
+                        
                        
                     },
                     "Charging Frequency can't be greater than Sending Frequency and must be a valid number."
                 );
-
                 
             @endforeach
 
