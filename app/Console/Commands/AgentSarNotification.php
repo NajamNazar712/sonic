@@ -53,7 +53,8 @@ class AgentSarNotification extends Command
     public function handle()
     {
         try {
-            //Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Initiated');
+           
+            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Initiated');
             $currentDateTime1 = Carbon::now()->toDateTimeString();
             $currentDateTime = Carbon::parse($currentDateTime1);
 
@@ -66,21 +67,20 @@ class AgentSarNotification extends Command
                 ->where('rv_state_id', 2)
                 ->where('unresponsive_count', 2)
                 //selects older records, i.e., records that were updated more than 16 hours ago.            
-                ->where('updated_at', '>=', $nowSub16Hours)
+                // ->where('updated_at', '>=', $nowSub16Hours)
                 ->where('unresponsive_email_count', '<', 1);
-
+            
             // rv_assign_agent_status_id' 8 (Refusal on call) and Check If State Is 2 (Unassign Assigned)
             $sendEmailofRefusalShipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
-            ->where('updated_at', '>=', $nowSub24Hours)
+            // ->where('updated_at', '>=', $nowSub24Hours)
             ->where('rv_state_id', 2);
 
             //Combine the results for sending in single email
             $sendEmail = $sendEmails->union($sendEmailofRefusalShipments)->get();
-
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
-
+NotificationsController::send(220, $sendEmail);
+                return true;
             if ($sendEmail->isNotEmpty()) {
-                NotificationsController::send(220, $sendEmail);
 
                 foreach ($sendEmail as $shipment) {
                     // if shipment status is unresponsive Increment the unresponsive_email_count for each shipment after sending the email
@@ -90,6 +90,7 @@ class AgentSarNotification extends Command
                         $shipment->save();
                     }
                 }
+                
             }
 
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status being set on the shipment, 
@@ -102,12 +103,14 @@ class AgentSarNotification extends Command
                 ->where('rv_shipment_assign_agents.rv_state_id', 2)
                 ->where('rv_shipment_assign_agents.unresponsive_count', 2)
                 ->where('rv_shipment_assign_agents.unresponsive_email_count', '>', 0)
-                ->where('rv_shipment_assign_agents.unresponsive_email_time', '<=', $nowSub48Hours)
+                // ->where('rv_shipment_assign_agents.unresponsive_email_time', '<=', $nowSub48Hours)
                 ->select('rv_shipment_assign_agents.*') // Select only columns from rv_shipment_assign_agents
                 ->get();
-
+            
             if ($unresponsive_shipments->isNotEmpty()) {
                 foreach ($unresponsive_shipments as $shipment) {
+                    Log::channel('cronJobLog')->info('s ' . ' agent:sarnotification unresponsive_shipments:in');
+
                     // $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
                     $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
 
@@ -153,6 +156,7 @@ class AgentSarNotification extends Command
             if ($refusal_call_shipments->isNotEmpty()) {
                 foreach ($refusal_call_shipments as $refusal_call_shipment) {
                     $refusal_call_shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
+                    Log::channel('cronJobLog')->info('s ' . 'agent:sarnotification Completedagent:sarnotification Completed');
 
                     $request = (object) [
                         'shipment_id' => $refusal_call_shipment->shipment_id,
@@ -162,6 +166,7 @@ class AgentSarNotification extends Command
                     ];
                     $globalAdminId = 346;
                     $this->return_confirm($request,$globalAdminId);
+                    Log::channel('cronJobLog')->info('s ' . ' agent:sarnotification return_confirm');
 
                     $data = [
                         'rv_shipment_assign_agent_id' => $refusal_call_shipment->id,
@@ -185,10 +190,10 @@ class AgentSarNotification extends Command
                 }
             }
 
-            //Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completed');
+            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completedagent:sarnotification Completed');
 
         } catch (\Throwable $th) {
-            //Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Failed');
+            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Failed'. $th->getMessage());
             $this->createRvCronLog($th->getMessage());
         }
     }
