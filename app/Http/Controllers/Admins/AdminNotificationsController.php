@@ -95,6 +95,7 @@ class AdminNotificationsController extends Controller
         
         $attachments = array();
         $from_email = $request->notification_sender;
+        
         if ($request->get('receiver') == 1) {
             if($request->get('search_hub') == 0) {
                 $emails = Admin::all()->pluck('email')->toArray();
@@ -159,10 +160,12 @@ class AdminNotificationsController extends Controller
 
 
             $totalItems = count($emails);
-            $chunkSize = 30;
+            $chunkSize = 50;
             for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
                 $parsed_emails = array_slice($emails, $offset, $chunkSize);
+                
                 NotificationsController::custom(1, $subject, $body, $parsed_emails,$from_email);
+                
             }
             return redirect()->back()->with('success', 'Custom Email Sent');
         }

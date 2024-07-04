@@ -309,10 +309,9 @@ class NotificationsController extends Controller
                 }
             }
 
-            //Check to the block emails
             if($to){
                 $mail = Mail::to($to);
-
+    
                 if ($cc) {
                     $mail->cc($cc);
                 }
@@ -323,6 +322,7 @@ class NotificationsController extends Controller
     
                 $mail->send(new Notifications($subject, $body, $from));
             }
+
 
         }
     }
@@ -11296,9 +11296,8 @@ class NotificationsController extends Controller
     }
     static public function custom($type, $subject, $body, $to, $from = null)
     {
-
         if ($type == 1) {
-            self::email($subject, $body, $to, null, null, $from);
+            self::email($subject, $body, $from, null, $to, $from);
         }
     }
     static public function custom_sms($body, $to)
