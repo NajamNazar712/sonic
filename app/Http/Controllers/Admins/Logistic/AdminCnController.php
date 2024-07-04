@@ -469,9 +469,10 @@ class AdminCnController extends Controller
 
 
 
-        } catch (\Throwable $th){
+        } catch (\Exception $ex){
             DB::rollBack();
-            Log::channel('code_test_log')->error('cn-failed',json_encode($th->getMessage()),['trace' => json_encode($th->getTraceAsString())]);
+//            Log::channel('code_test_log')->error('failed'.json_encode($ex->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
+            Log::channel('code_test_log')->error('cn-failed',json_encode($ex->getMessage()),['trace' => json_encode($ex->getTraceAsString())]);
             return redirect()->back()->with('error','Failed CN issue to rider');
         }
     }

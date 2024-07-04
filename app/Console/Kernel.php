@@ -150,7 +150,7 @@ class Kernel extends ConsoleKernel
         // 'App\Console\Commands\AgentUnassignedTicket ',
         'App\Console\Commands\AgentSarNotification',
         'App\Console\Commands\SackBagStatusUpdate',
-        'App\Console\Commands\AutoAssignCrmAgentNew',
+        'App\Console\Commands\AutoAssignCrmAgentNew'
 //        'App\Console\Commands\ShipperLogisticBookingCron',
 //        'App\Console\Commands\HourlyShipperLogisticBookingEmailCron'
         ];
