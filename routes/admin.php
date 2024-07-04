@@ -3876,6 +3876,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('show_retail_commission', 'Admins\Retail\RetailAdminUserManagementController@show_retail_commission')->name('show_retail_commission');
             Route::post('retail_commission_payment', 'Admins\Retail\RetailAdminUserManagementController@retail_commission_payment')->name('retail_commission_payment');
 
+            Route::get('{id}/user_excel_sheet', 'Admins\Retail\RetailAdminUserManagementController@user_excel_sheet')->name('user_excel_sheet');
+
         });
 
         Route::prefix('international')->name('international.')->group(function () {

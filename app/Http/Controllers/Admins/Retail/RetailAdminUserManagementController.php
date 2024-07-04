@@ -39,6 +39,9 @@ use App\Http\Models\BanksList;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Admin;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -1478,7 +1481,19 @@ class RetailAdminUserManagementController extends Controller
                                 </div>
                             </a>
                         ';
-                    }                    
+                    }     
+                    $dropdown .= '
+                                <a href="' . route("admin.retail.users.user_excel_sheet", ["id" => $data->id]) . '" class="text-dark">
+                                    <div class="row no-gutters align-items-center ml-2">
+                                        <div class="col-2">
+                                            <i class="la la-file-excel-o"></i>
+                                        </div>
+                                        <div class="col-9" style="margin: 6px 0px 9px 5px;">
+                                            Excel
+                                        </div>
+                                    </div>
+                                </a>
+                            ';
 
                     //$dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     $dropdown .= '
@@ -3094,6 +3109,15 @@ class RetailAdminUserManagementController extends Controller
             'retail_user_history' => $retail_user_history,
             'retail_user' => $retail_user
         ]);
+    }
+
+    public function user_excel_sheet($id)
+    {
+        $user = RetailUser::where('id', $id)->first();
+        $retail_user = RetailUserProductPercentage::where('retail_user_id', $user->id)->get();
+
+        $spreadsheet = new Spreadsheet();
+
     }
 
     public function show_commission(Request $request) 
