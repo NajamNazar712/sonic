@@ -309,21 +309,20 @@ class NotificationsController extends Controller
                 }
             }
 
-            if(!isset($to)){
-                return false;
+            if($to){
+                $mail = Mail::to($to);
+    
+                if ($cc) {
+                    $mail->cc($cc);
+                }
+    
+                if ($bcc) {
+                    $mail->bcc($bcc);
+                }
+    
+                $mail->send(new Notifications($subject, $body, $from));
             }
 
-            $mail = Mail::to($to);
-
-            if ($cc) {
-                $mail->cc($cc);
-            }
-
-            if ($bcc) {
-                $mail->bcc($bcc);
-            }
-
-            $mail->send(new Notifications($subject, $body, $from));
 
         }
     }
@@ -11299,7 +11298,7 @@ class NotificationsController extends Controller
     {
        
         if ($type == 1) {
-            self::email($subject, $body, $from, null, $to, null);
+            self::email($subject, $body, $to, null, null, $from);
         }
     }
     static public function custom_sms($body, $to)
