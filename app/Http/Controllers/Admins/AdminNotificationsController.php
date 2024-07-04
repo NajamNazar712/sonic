@@ -95,6 +95,7 @@ class AdminNotificationsController extends Controller
         
         $attachments = array();
         $from_email = $request->notification_sender;
+        
         if ($request->get('receiver') == 1) {
             if($request->get('search_hub') == 0) {
                 $emails = Admin::all()->pluck('email')->toArray();

@@ -312,7 +312,7 @@ class NotificationsController extends Controller
             if(!isset($to)){
                 return false;
             }
-            
+
             $mail = Mail::to($to);
 
             if ($cc) {
@@ -11297,9 +11297,9 @@ class NotificationsController extends Controller
     }
     static public function custom($type, $subject, $body, $to, $from = null)
     {
-
+       
         if ($type == 1) {
-            self::email($subject, $body, $to, null, null, $from);
+            self::email($subject, $body, $from, null, $to, null);
         }
     }
     static public function custom_sms($body, $to)
