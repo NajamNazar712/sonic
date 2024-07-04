@@ -7832,7 +7832,6 @@ class APIController extends Controller
                 'retail_note_cash_collection_id' => ['required', 'integer', Rule::exists('retail_cash_deposits', 'id')]
             ];
             $validate = Validator::make($request->all(), $rules, $this->messages);
-            
             $validate->setAttributeNames($this->names);
 
             if ($validate->fails()) {
