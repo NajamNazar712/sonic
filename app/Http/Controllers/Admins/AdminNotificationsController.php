@@ -160,12 +160,12 @@ class AdminNotificationsController extends Controller
 
 
             $totalItems = count($emails);
-            $chunkSize = 1000;
+            $chunkSize = 50;
             for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
                 $parsed_emails = array_slice($emails, $offset, $chunkSize);
-                foreach($parsed_emails as $to){
-                    NotificationsController::custom(1, $subject, $body, $to,$from_email);
-                }
+                
+                NotificationsController::custom(1, $subject, $body, $parsed_emails,$from_email);
+                
             }
             return redirect()->back()->with('success', 'Custom Email Sent');
         }
