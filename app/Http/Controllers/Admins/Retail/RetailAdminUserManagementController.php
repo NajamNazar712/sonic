@@ -3125,8 +3125,11 @@ class RetailAdminUserManagementController extends Controller
         $city = City::where('id', $user->city_id)->first();
         $retail_shipping_modes = RetailShippingMode::whereIn('id', $retail_user_commissions->pluck('retail_shipping_mode_id'))->pluck('name');
         $family_info = RetailUserFamilyInformation::where('retail_user_id', $user->id)->get();
-        $spouse_dob = $family_info[3]->family_member_name;
-
+        if ($family_info->isNotEmpty()) {
+            $spouse_dob = $family_info[3]->family_member_name;
+        } else {
+            $spouse_dob = '';
+        }
         $userDetails = [
             [
                 'Retail Center',
@@ -3190,7 +3193,7 @@ class RetailAdminUserManagementController extends Controller
         foreach ($retail_user_commissions as $index => $commission) {
             $commissionDetailsWithName[] = [
                 $retail_shipping_modes[$index] ?? '',
-                $commission->product_percentage,
+                $commission->product_percentage . '%',
             ];
         }
 
@@ -3217,14 +3220,12 @@ class RetailAdminUserManagementController extends Controller
 
         $spreadsheet->setActiveSheetIndex(0);
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="retail_user_data.xlsx"');
+        header('Content-Disposition: attachment; filename="' . $user->name . '.xlsx"');
         header('Cache-Control: max-age=0');
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $writer->save('php://output');
         exit;
     }
-
-
 
     public function show_commission(Request $request) 
     {
