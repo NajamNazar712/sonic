@@ -309,7 +309,10 @@ class NotificationsController extends Controller
                 }
             }
 
-            //Check to the block emails
+            if(!isset($to)){
+                return false;
+            }
+            
             $mail = Mail::to($to);
 
             if ($cc) {
