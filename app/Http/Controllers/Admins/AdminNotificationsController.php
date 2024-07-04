@@ -159,7 +159,7 @@ class AdminNotificationsController extends Controller
 
 
             $totalItems = count($emails);
-            $chunkSize = 30;
+            $chunkSize = 1000;
             for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
                 $parsed_emails = array_slice($emails, $offset, $chunkSize);
                 NotificationsController::custom(1, $subject, $body, $parsed_emails,$from_email);
