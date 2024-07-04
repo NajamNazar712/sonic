@@ -214,6 +214,7 @@ class AdminInternationalShipmentsController extends Controller
                                     if($shipment_details->booking_type_id != 4){
                                         ShipmentChargesController::weight($shipment_id);
                                         ShipmentChargesController::international_fuel_surcharge($shipment_id);
+                                        ShipmentChargesController::international_faf_charges($shipment_id);
                                     }
                                 }
 
