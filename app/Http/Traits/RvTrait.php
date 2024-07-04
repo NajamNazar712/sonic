@@ -424,6 +424,11 @@ trait RvTrait
     // Description:
     protected function update_shipment_status($request)
     {
+        if (Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $request->shipment_id)->doesntExist()) {
+            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+            return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Reattempted!"];
+        }
+        
         if ($request->rv_assign_agent_status_id) {
             $rv_assign_agent_status = RvAssignAgentStatus::find($request->rv_assign_agent_status_id);
             $shipment_status_id = $rv_assign_agent_status->shipment_status_id; //replicate values from shipment_status table
@@ -554,6 +559,7 @@ trait RvTrait
         // if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52])) { old for rv
 
         if (in_array($parcel->shipper_status_id, [12, 52, 66]) || $globalAdminId) {
+            Log::channel('cronJobLog')->info('s ' . ' agent:sarnotification return_confirm:in');
 
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
             NotificationsController::send(15, 0, $request->shipment_id);
@@ -1274,14 +1280,21 @@ trait RvTrait
             foreach ($shipments as $shipment) {
                 $shipmentId = $shipment->shipment_id;
                 $ticketId = $shipment->id;
+                //Shipment table check the current status.
+                if (!Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $shipmentId)->exists()) {
+                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipmentId));
+                    $shipment = null;
+                    continue;
+                }
                 // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
-                $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('rv_state_id', 3);
+                $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('rv_state_id', 3);     
                 if ($shipment_assigned_unassigned_agent->exists()) {
                     $shipment_assigned_unassigned_agent->first();
 
                     // skip this shipment if already is in progress
                     if(RvShipmentTicket::where('shipment_id', $shipmentId)->where('in_progress', 1)->exists())
                     {
+                        $shipment = null;
                         continue;
                     }
                     //else update this shipment status in rv_shipment_tickets to in_progress = 1
@@ -1337,6 +1350,7 @@ trait RvTrait
                          // skip this shipment if already is in progress
                         if(RvShipmentTicket::where('shipment_id', $shipmentId)->where('in_progress', 1)->exists())
                         {
+                            $shipment = null;
                             continue;
                         }
                         //else update this shipment status in rv_shipment_tickets to in_progress = 1
@@ -1365,6 +1379,7 @@ trait RvTrait
                      // skip this shipment if already is in progress
                      if(RvShipmentTicket::where('shipment_id', $shipmentId)->where('in_progress', 1)->exists())
                      {
+                        $shipment = null;
                         continue;
                      }
                      //else update this shipment status in rv_shipment_tickets to in_progress = 1
@@ -1386,6 +1401,7 @@ trait RvTrait
                      // skip this shipment if already is in progress
                      if(RvShipmentTicket::where('shipment_id', $shipmentId)->where('in_progress', 1)->exists())
                      {
+                        $shipment = null;
                          continue;
                      }
                      //else update this shipment status in rv_shipment_tickets to in_progress = 1
@@ -1414,6 +1430,7 @@ trait RvTrait
                  // skip this shipment if already is in progress
                  if(RvShipmentTicket::where('shipment_id', $shipmentId)->where('in_progress', 1)->exists())
                  {
+                    $shipment = null;
                     continue;
                  }
                  //else update this shipment status in rv_shipment_tickets to in_progress = 1

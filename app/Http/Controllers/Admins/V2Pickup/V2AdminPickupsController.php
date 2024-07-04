@@ -1230,8 +1230,10 @@ class V2AdminPickupsController extends Controller
                                 ShipmentChargesController::cash_handling($shipment_id);
                                 ShipmentChargesController::insurance($shipment_id);
                                 ShipmentChargesController::fuel_surcharge($shipment_id);
+                                ShipmentChargesController::faf_charges($shipment_id);
                             } else {
                                 ShipmentChargesController::international_fuel_surcharge($shipment_id);
+                                ShipmentChargesController::international_faf_charges($shipment_id);
                             }
                         }
 
@@ -1609,8 +1611,10 @@ class V2AdminPickupsController extends Controller
                                 ShipmentChargesController::cash_handling($shipment_id);
                                 ShipmentChargesController::insurance($shipment_id);
                                 ShipmentChargesController::fuel_surcharge($shipment_id);
+                                ShipmentChargesController::faf_charges($shipment_id);
                             } else {
                                 ShipmentChargesController::international_fuel_surcharge($shipment_id);
+                                ShipmentChargesController::international_faf_charges($shipment_id);
                             }
                         }
 
@@ -2557,8 +2561,10 @@ class V2AdminPickupsController extends Controller
                                 ShipmentChargesController::cash_handling($shipment_id);
                                 ShipmentChargesController::insurance($shipment_id);
                                 ShipmentChargesController::fuel_surcharge($shipment_id);
+                                ShipmentChargesController::faf_charges($shipment_id);
                             } else {
                                 ShipmentChargesController::international_fuel_surcharge($shipment_id);
+                                ShipmentChargesController::international_faf_charges($shipment_id);
                             }
                         }
 

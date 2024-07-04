@@ -141,6 +141,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('user_fintech_charges', 'Admins\AdminDashboardController@user_fintech_charges')->name('user_fintech_charges');
         Route::post('add_rate_commission_corporate_reimb/{shippers}', 'Admins\AdminDashboardController@add_rate_commission_corporate_reimb')->name('add_rate_commission_corporate_reimb');
         Route::post('excluded_shippers', 'Admins\AdminDashboardController@excluded_shippers')->name('excluded_shippers');
+        Route::post('faf_charges/info', 'Admins\AdminDashboardController@faf_charges_info')->name('faf_charges.info');
+        Route::post('faf_charges/submit', 'Admins\AdminDashboardController@faf_charges_submit')->name('faf_charges.submit');
 
         Route::get('duplicate/info', 'Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function () {
@@ -3447,6 +3449,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('data', 'Admins\Settings\AgentSettingsController@agent_types_data')->name('data');
             Route::post('update', 'Admins\Settings\AgentSettingsController@agent_type_update')->name('update');
 
+        });
+
+        Route::prefix('faf_charges')->name('faf_charges.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@faf_charges_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@faf_charges_store')->name('store');
         });
 
 
