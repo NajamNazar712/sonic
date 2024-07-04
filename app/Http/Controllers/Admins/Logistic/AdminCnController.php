@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use function foo\func;
@@ -419,6 +420,7 @@ class AdminCnController extends Controller
                 {
                     if($request->cn_from >= $cn->cn_from  &&  $request->cn_to <= $cn->cn_to)
                     {
+                        Log::info( $cn->cn_from);
                         $cn_exist=1;
                         break;
                     }else{
