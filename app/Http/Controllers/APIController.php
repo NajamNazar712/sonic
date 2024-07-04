@@ -7832,7 +7832,7 @@ class APIController extends Controller
                 'retail_note_cash_collection_id' => ['required', 'integer', Rule::exists('retail_cash_deposits', 'id')]
             ];
             $validate = Validator::make($request->all(), $rules, $this->messages);
-
+            
             $validate->setAttributeNames($this->names);
 
             if ($validate->fails()) {
@@ -7852,6 +7852,11 @@ class APIController extends Controller
                     if ($error == 'Given delivery note id is of Invalid ID.') {
                         $errors[$index]['error_code'] = 3;
                         $errors[$index]['error_text'] = 'Given delivery note id is of Invalid ID.';
+                    }
+                    if($error == 'Given retail note cash collection id is of Invalid ID.'){
+                        $status_code = 13;
+                        $errors[$index]['error_code'] = 13;
+                        $errors[$index]['error_text'] = 'Given Retail Note Cash Collection Invalid ID.';
                     }
                 }
                 return response()->json(['status' => $status_code, 'message' => 'Error(s) in Input', 'errors' => $errors]);
