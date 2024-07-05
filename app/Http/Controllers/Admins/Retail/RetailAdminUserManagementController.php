@@ -211,27 +211,45 @@ class RetailAdminUserManagementController extends Controller
             ->addColumn('action', function ($data) {
                 if (session('role_id') == 1 || in_array(436, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">';
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">';
+                    
                     if ($data->status == 0) {
                         $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                     } else {
                         $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                     }
+                    
                     if ($data->discount != Null) {
                         $dropdown .= '<button type="button" class="dropdown-item edit_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit Discount</div></button>';
                     } else {
                         $dropdown .= '<button type="button" class="dropdown-item add_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Add Discount</div></button>';
                     }
-                    $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
-                    </div>
-                  </div>
-          ';
+                    
+                    $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+            
+                    // Adding Excel export dropdown item
+                    $dropdown .= '
+                            <a href="' . route("admin.retail.franchise.franchise_details_excel_sheet", ["id" => $data->id]) . '" class="text-dark">
+                                <div class="row no-gutters align-items-center ml-2">
+                                    <div class="col-2">
+                                        <i class="la la-file-excel-o"></i>
+                                    </div>
+                                    <div class="col-9" style="margin: 6px 0px 9px 5px;">
+                                        Excel
+                                    </div>
+                                </div>
+                            </a>
+                            ';
+            
+                    $dropdown .= '</div></div>';
+                    
                     return $dropdown;
                 } else {
                     return '';
                 }
             });
+            
         return $datatables->make(true);
     }
 
@@ -1164,17 +1182,48 @@ class RetailAdminUserManagementController extends Controller
             ->addColumn('action', function ($data) {
                 if (session('role_id') == 1 || in_array(435, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">';
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">';
+                    
                     if ($data->status == 0) {
-                        $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item enable">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2"><i class="ft-x-circle"></i></div>
+                                <div class="col-9 offset-1">Enable</div>
+                            </div>
+                        </button>';
                     } else {
-                        $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item disable">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2"><i class="ft-x-circle"></i></div>
+                                <div class="col-9 offset-1">Disable</div>
+                            </div>
+                        </button>';
                     }
-                    $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
-                    </div>
-                  </div>
-          ';
+            
+                    $dropdown .= '<button type="button" class="dropdown-item edit">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-2"><i class="ft-x-circle"></i></div>
+                            <div class="col-9 offset-1">Edit</div>
+                        </div>
+                    </button>';
+
+                    // Adding Excel export dropdown item
+                    $dropdown .= '
+                            <a href="' . route("admin.retail.trax_center.trax_center_details_excel_sheet", ["id" => $data->id]) . '" class="text-dark">
+                                <div class="row no-gutters align-items-center ml-2">
+                                    <div class="col-2">
+                                        <i class="la la-file-excel-o"></i>
+                                    </div>
+                                    <div class="col-9" style="margin: 6px 0px 9px 5px;">
+                                        Excel
+                                    </div>
+                                </div>
+                            </a>
+                            ';
+
+                    $dropdown .= '</div></div>';
+            
                     return $dropdown;
                 } else {
                     return '';
@@ -3250,6 +3299,7 @@ class RetailAdminUserManagementController extends Controller
         $franchise = RetailFranchise::where('id', $user->category_id)->first();
         $city = City::where('id', $user->city_id)->first();
         $agreement_date = RetailUserFamilyInformation::where('retail_user_id', $user->id)->first();
+        $family_info = RetailUserFamilyInformation::where('retail_user_id', $user->id)->get();
 
         $userDetails = [
             [
@@ -3262,7 +3312,13 @@ class RetailAdminUserManagementController extends Controller
                 'Agreement Start Date'
             ]
         ];
-
+    
+        $familyDetails = [
+            [
+                'Family Members',
+            ]
+        ];
+    
         $userDetails[] = [
             $franchise->name,
             $user->name,
@@ -3270,21 +3326,181 @@ class RetailAdminUserManagementController extends Controller
             $user->cnic,
             $user->address, 
             $city->name,
-            $agreement_date->agreement_start_date
+            $agreement_date ? $agreement_date->agreement_start_date : ''
         ];
-
+    
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-
+    
         // user details
         $currentRow = 1;
         foreach ($userDetails as $index => $detail) {
             $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
         }
-
+    
+        // family members
+        $currentRow += count($userDetails) + 1;
+        $familyCount = 0;
+        foreach ($family_info as $index => $family) {
+            if ($familyCount >= 2) {
+                break;
+            }
+    
+            $familyDetails[] = [
+                $family->family_member_name,
+            ];
+            $familyCount++;
+        }
+    
+        foreach ($familyDetails as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+    
         $spreadsheet->setActiveSheetIndex(0);
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $user->name . '.xlsx"');
+        header('Cache-Control: max-age=0');
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        exit;
+    }
+    
+
+    public function franchise_details_excel_sheet($id)
+    {
+        $retail_franchise = RetailFranchise::where('id', $id)->first() ?? new RetailFranchise();
+        $retail_franchise_commission = RetailFranchiseProductPercentage::where('franchise_id', $retail_franchise->id)->get();
+        $retail_franchise_charges = RetailFranchiseCharge::where('franchise_id', $retail_franchise->id)->first() ?? new RetailFranchiseCharge();
+        $retail_shipping_modes = RetailShippingMode::whereIn('id', $retail_franchise_commission->pluck('retail_shipping_mode_id'))->pluck('name')->toArray();
+        $default_hub = City::where('hub_id', $retail_franchise->default_hub)->first();
+
+        $franchiseDetails = [
+            [
+                'Franchise Name',
+                'Phone number',
+                'Email',
+                'CNIC',
+                'Hub',
+                'Latitude',
+                'Longitude',
+                'Insurance',
+                'Discount',
+                'Withholding Tax',
+                'Commission GST Deduction',
+            ],
+            [
+                $retail_franchise->name,
+                $retail_franchise->phone_no,
+                $retail_franchise->email,
+                $retail_franchise->cnic,
+                $default_hub->name,
+                $retail_franchise->location_latitude,
+                $retail_franchise->location_longitude,
+                ($retail_franchise->insurance ?? '0') . '%',
+                ($retail_franchise->discount ?? '0') . '%',
+                $retail_franchise_charges->franchise_withholding ? $retail_franchise_charges->franchise_withholding . '%' : '0%',
+                $retail_franchise_charges->franchise_deduction ? $retail_franchise_charges->franchise_deduction . '%' : '0%',
+            ],
+        ];
+        
+
+        $commissionDetails = [
+            [
+                'Product',
+                'Product Commission(%)'
+            ]
+        ];
+        
+        foreach ($retail_franchise_commission as $index => $commission) {
+            $commissionDetails[] = [
+                $retail_shipping_modes[$index] ?? '',
+                $commission->product_percentage . '%',
+            ];
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // franchise details
+        $currentRow = 1;
+        foreach ($franchiseDetails as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+
+        // commission details
+        $currentRow += count($franchiseDetails) + 1;
+        foreach ($commissionDetails as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $retail_franchise->name . '.xlsx"');
+        header('Cache-Control: max-age=0');
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function trax_center_details_excel_sheet($id)
+    {
+        $trax_center = RetailTraxCenter::where('id', $id)->first() ?? new RetailTraxCenter();
+        $trax_center_charges = TraxCenterAttachment::where('retail_trax_center_id', $trax_center->id)->first() ?? new RetailFranchiseCharge();
+        $default_hub = City::where('hub_id', $trax_center->default_hub)->first();
+
+        // dd($trax_center, $trax_center_charges);
+
+        $franchiseDetails = [
+            [
+                'Franchise Name',
+                'Phone number',
+                'Email',
+                'CNIC',
+                'Hub',
+                'Latitude',
+                'Longitude',
+                'Insurance',
+                'Discount',
+                'Advance Amount',
+                'Rental Amount',
+                'Landlord Name',
+                'Landlord Contact Number',
+                'Shop Address',
+                'Agreement Start Date',
+                'Agreement End Date',
+            ],
+            [
+                $trax_center->name,
+                $trax_center->phone_no,
+                $trax_center->email,
+                $trax_center->cnic,
+                $default_hub->name,
+                $trax_center->location_latitude,
+                $trax_center->location_longitude,
+                ($trax_center->insurance ?? '0') . '%',
+                ($trax_center->discount ?? '0') . '%',
+                $trax_center_charges->advance_amount,
+                $trax_center_charges->rental,
+                $trax_center_charges->landlord_name,
+                $trax_center_charges->landlord_contact_number,
+                $trax_center_charges->shop_address,
+                $trax_center_charges->agreement_start_date,
+                $trax_center_charges->agreement_end_date,
+            ],
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // franchise details
+        $currentRow = 1;
+        foreach ($franchiseDetails as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $trax_center->name . '.xlsx"');
         header('Cache-Control: max-age=0');
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $writer->save('php://output');

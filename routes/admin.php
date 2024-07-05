@@ -3831,6 +3831,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@franchise_edit')->name('edit');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@franchise_name')->name('name');
 
+            Route::get('{id}/franchise_details_excel_sheet', 'Admins\Retail\RetailAdminUserManagementController@franchise_details_excel_sheet')->name('franchise_details_excel_sheet');
+
             Route::get('/retail_product_percentage', 'Admins\Retail\RetailAdminUserManagementController@retail_product_percentage')->name('retail_product_percentage');
             Route::get('/retail_product_charges', 'Admins\Retail\RetailAdminUserManagementController@retail_product_charges')->name('retail_product_charges');
             Route::get('/retail_product_attachments', 'Admins\Retail\RetailAdminUserManagementController@retail_product_attachments')->name('retail_product_attachments');
@@ -3854,6 +3856,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@trax_center_name')->name('name');
 
             Route::get('/trax_center_edit_attachment', 'Admins\Retail\RetailAdminUserManagementController@trax_center_edit_attachment')->name('trax_center_edit_attachment');
+
+            Route::get('{id}/trax_center_details_excel_sheet', 'Admins\Retail\RetailAdminUserManagementController@trax_center_details_excel_sheet')->name('trax_center_details_excel_sheet');
         });
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@user_index')->name('index');
