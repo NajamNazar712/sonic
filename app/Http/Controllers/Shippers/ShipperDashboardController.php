@@ -675,7 +675,7 @@ class ShipperDashboardController extends Controller
         if(count($merged_account_sister_mapping) >  0){
             $masp = array_merge($masp,$merged_account_sister_mapping);
         }
-        $connection = 'reports';
+
         //  if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
         //     $connection = 'reports';
         //  }
@@ -683,7 +683,7 @@ class ShipperDashboardController extends Controller
         //      $connection = 'mysql';
         //  }
 
-        $connection = 'mysql';
+        $connection = 'reports';
         $shipments = DB::connection($connection)->table('shipments')
             ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
