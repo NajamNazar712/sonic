@@ -1497,6 +1497,21 @@ class RetailAdminUserManagementController extends Controller
                             </a>
                             ';
                     }
+                    if ($data->category == 1)
+                    {
+                        $dropdown .= '
+                            <a href="' . route("admin.retail.users.franchise_excel_sheet", ["id" => $data->id]) . '" class="text-dark">
+                                <div class="row no-gutters align-items-center ml-2">
+                                    <div class="col-2">
+                                        <i class="la la-file-excel-o"></i>
+                                    </div>
+                                    <div class="col-9" style="margin: 6px 0px 9px 5px;">
+                                        Excel
+                                    </div>
+                                </div>
+                            </a>
+                            ';
+                    }
 
                     //$dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     $dropdown .= '
@@ -3143,7 +3158,7 @@ class RetailAdminUserManagementController extends Controller
 
         $familyDetails = [
             [
-                'Agreement Start Date',
+                'Joining Date',
                 'Salary',
                 'Family Members',
                 'Spouse Date of Birth'
@@ -3215,6 +3230,55 @@ class RetailAdminUserManagementController extends Controller
         // commission details with names
         $currentRow += count($familyDetails) + 1;
         foreach ($commissionDetailsWithName as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $user->name . '.xlsx"');
+        header('Cache-Control: max-age=0');
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function franchise_excel_sheet($id)
+    {
+        $user = RetailUser::where('id', $id)
+            ->where('category', 1)
+            ->first();
+        $franchise = RetailFranchise::where('id', $user->category_id)->first();
+        $city = City::where('id', $user->city_id)->first();
+        $agreement_date = RetailUserFamilyInformation::where('retail_user_id', $user->id)->first();
+
+        $userDetails = [
+            [
+                'Franchise',
+                'Franchise User',
+                'Phone',
+                'CNIC',
+                'Address',
+                'City',
+                'Agreement Start Date'
+            ]
+        ];
+
+        $userDetails[] = [
+            $franchise->name,
+            $user->name,
+            $user->phone_no,
+            $user->cnic,
+            $user->address, 
+            $city->name,
+            $agreement_date->agreement_start_date
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // user details
+        $currentRow = 1;
+        foreach ($userDetails as $index => $detail) {
             $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
         }
 
