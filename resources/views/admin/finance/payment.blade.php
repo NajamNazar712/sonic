@@ -151,7 +151,6 @@
                             </div>
                         </div>
 
-
                         <div class="text-center">
                             <button type="button" class="btn btn-secondary mr-2" data-dismiss="modal">Close</button>
                             <button type="button" name="make_invoice" onclick="verify_make_invoice_payments()"
@@ -162,10 +161,6 @@
                 </div>
             </div>
         </div>
-
-        
-
-
     </div>
 
 @endsection
@@ -214,451 +209,11 @@
 
 
     <script>
-        // $(document).ready(function() {
-        //     window.addEventListener('message', function(event) {
-        //         var selectedData = event.data;
-        //         $.ajax({
-        //             url: "{{ route('admin.finance.make_payments.payment_list') }}",
-        //             data: { ids: selectedData },
-        //             success: function(response) {
-        //                 // Initialize DataTable
-        //                 var table = $('#make_payments_datatable').DataTable({
-        //                     dom: '<"pull-right"B>tr',
-        //                     data: response.data,
-        //                     select: {
-        //                         info: false,
-        //                         style: 'multi',
-        //                         selector: 'td.select-checkbox',
-        //                         className: 'selected bg-primary bg-lighten-5 primary'
-        //                     },
-        //                     columns: [
-        //                         {
-        //                             data: null,
-        //                             orderable: false,
-        //                             className: 'select-checkbox',
-        //                             render: function(data, type, row) {
-        //                                 return '<input type="checkbox" class="row-select-checkbox d-none" id="table_checkbox">';
-        //                             }
-        //                         },
-        //                         { 
-        //                             data: null,
-        //                             render: function (data, type, row, meta) {
-        //                                 return meta.row + 1;
-        //                             }
-        //                         },
-        //                         { data: 'account_type_text' },
-        //                         { data: 'shipper' },
-        //                         { data: 'shipment' },
-        //                         { data: 'origin' },
-        //                         { data: 'type' },
-        //                         { data: 'status' },
-        //                         { data: 'arrival_date' },
-        //                         { 
-        //                             data: null,
-        //                             render: function(data, type, row) {
-        //                                 return (parseFloat(row.charges) + parseFloat(row.gst)).toFixed(2);
-        //                             }
-        //                         },
-        //                         { data: 'amount' },
-        //                         { data: 'charges' },
-        //                         { data: 'gst' },
-        //                         { data: 'wht' },
-        //                         { data: 'fintech_charges' },
-        //                         { data: 'packaging_charges' },
-        //                         { 
-        //                             data: null,
-        //                             render: function(data, type, row) {
-        //                                 return (parseFloat(row.payable) - parseFloat(row.fintech_charges)).toFixed(2);
-        //                             }
-        //                         },
-        //                         { data: 'payable' },
-        //                         { data: 'arrival_date' }
-        //                     ],
-
-                            // buttons: [
-                            //     {
-                            //         text: 'Select All',
-                            //         className: 'btn btn-primary select_all',
-                            //         action: function () {
-                            //             table.rows().select();
-                            //             updateSelectNoneButtonState();
-                            //         }
-                            //     },
-                            //     {
-                            //         text: 'Select None',
-                            //         className: 'btn btn-primary select_none disabled',
-                            //         action: function () {
-                            //             table.rows().deselect();
-                            //             updateSelectNoneButtonState();
-                            //         }
-                            //     }
-                            // ],
-
-        //                     // Handle row selection via checkbox
-        //                     rowCallback: function(row, data, index) {
-        //                         var checkbox = $('input.row-select-checkbox', row);
-        //                         checkbox.prop('checked', $(row).hasClass('selected'));
-        //                     }
-        //                 });
-
-        //                 // checkbox
-        //                 $(document).ready(function() {
-        //                     $('#make_payments_datatable').on('click', '.select-checkbox', function () {
-        //                         var $row = $(this).closest('tr');
-        //                         var $checkbox = $row.find('.row-select-checkbox');
-                                
-        //                         var isChecked = $checkbox.prop('checked');
-        //                         $checkbox.prop('checked', !isChecked);
-        //                         console.log(!isChecked);
-                                
-        //                         if (!isChecked) {
-        //                             $('.select_none').removeClass('disabled');
-        //                         } else {
-        //                             $('.select_none').addClass('disabled');
-        //                         }
-        //                     });
-        //                 });
-
-                        // function updateSelectNoneButtonState() {
-                        //     var selectedRows = table.rows({ selected: true }).count();
-                        //     var selectNoneButton = $('.select_none');
-                        //     if (selectedRows > 0) {
-                        //         selectNoneButton.removeClass('disabled');
-                        //     } else {
-                        //         selectNoneButton.addClass('disabled');
-                        //     }
-                        // }
-
-                        // $('#make_payments_datatable tbody').on('change', '.row-select-checkbox', function() {
-                        //     var $row = $(this).closest('tr');
-                        //     var rowIndex = table.row($row).index();
-                        //     if (this.checked) {
-                        //         table.row($row).select();
-                        //     } else {
-                        //         table.row($row).deselect();  
-                        //     }
-                        //     updateSelectNoneButtonState();
-                        // });
-
-                        // $('#make_payments_datatable thead').on('click', 'input[type="checkbox"]', function(e) {
-                        //     if (this.checked) {
-                        //         $('#make_payments_datatable tbody input.row-select-checkbox:not(:checked)').prop('checked', true).trigger('change');
-                        //     } else {
-                        //         $('#make_payments_datatable tbody input.row-select-checkbox:checked').prop('checked', false).trigger('change');
-                        //     }
-                        //     updateSelectNoneButtonState();
-                        // });
-        //             }
-        //         });
-
-        //         function calculation(parent) {
-        //             total_payable_amt=0;
-        //             var id = parseInt(parent.attr('id'));
-        //             var payable = parent.children('td.payable').html();
-        //             var shipper_id = parent.children('td.shipper_id').html();
-        //             var index = $.inArray(id, selected_rows_shipments);
-
-        //             var total_amount_selector = $(' #make_payments_form .total_amount');
-        //             var total_charges_selector = $(' #make_payments_form .total_charges');
-        //             var total_gst_selector = $(' #make_payments_form .total_gst');
-        //             var total_deductable_selector = $(' #make_payments_form .total_deductable');
-        //             var total_payable_selector = $(' #make_payments_form .total_payable');
-        //             var total_hold_selector = $(' #make_payments_form .total_hold');
-        //             var total_wht_selector = $(' #make_payments_form .wht');
-
-        //             // Row Selected
-        //             if (index === -1) {
-        //                 selected_rows_shipments.push(id);
-        //                 // payable_list.push(parseFloat(payable),shipper_id); //adding payable in to array payable_list 
-        //                 payable_list.push({ payable, shipper_id }); //adding payable in to array payable_list 
-        //                 // console.log(payable_list);
-        //                 calculateShipperTotal(parent);
-
-        //                 var total_amount = ((total_amount_selector.val() != '') 
-        //                     ? parseInt(total_amount_selector.val()) : 0)
-        //                     + ((parent.children('td.amount').html() != '') 
-        //                     ? parseInt(parent.children('td.amount').html().replace(/,/g, '')) : 0);
-                        
-        //                 var total_charges = ((total_charges_selector.val() != '') ? parseFloat(total_charges_selector
-        //                     .val()) : 0) + ((parent.children('td.charges').html() != '') ? parseFloat(parent
-        //                     .children('td.charges').html().replace(/,/g, '')) : 0);
-                        
-        //                 var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) +
-        //                     ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html()
-        //                         .replace(/,/g, '')) : 0);
-                        
-        //                 var total_deductable = ((total_deductable_selector.val() != '') ? parseFloat(
-        //                     total_deductable_selector.val()) : 0) + ((parent.children('td.deductable').html() !=
-        //                     '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
-                        
-
-        //                     console.log(total_deductable);
-
-
-        //                 var total_wht = ((total_wht_selector.val() != '') ? parseFloat(total_wht_selector.val()) : 0) +
-        //                     ((parent.children('td.wht').html() != '') ? parseFloat(parent.children('td.wht').html()
-        //                         .replace(/,/g, '')) : 0);
-                        
-        //                 var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector
-        //                     .val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent
-        //                     .children('td.payable').html().replace(/,/g, '')) : 0);
-                        
-        //                 var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) :
-        //                     0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children(
-        //                         'td.payable').html().replace(/,/g, '')) : 0);
-
-        //                 // if selected row oayblae is less then 0 dipslay error
-        //                     // var payable = $(this).closest('tr').find('td.payable').text();
-        //                     if(payable < 0){
-        //                         var html = 'Negative payable detected for the shipper(s).<br/>';
-        //                             content = document.createElement('div');
-        //                             content.innerHTML = html;
-        //                             swal({
-        //                                 content: content,
-        //                                 icon: 'error',
-        //                                 buttons: {
-        //                                     cancel: {
-        //                                         text: 'Close',
-        //                                         value: null,
-        //                                         visible: true,
-        //                                         closeModal: true,
-        //                                     }
-        //                                 },
-        //                                 closeOnClickOutside: false,
-        //                                 closeOnEsc: false,
-        //                                 dangerMode: true
-        //                             });
-        //                     }        
-        //             } 
-
-        //             //Row UnSelected
-        //             else {
-        //                 selected_rows_shipments.splice(index, 1);
-        //                 const removedEntry = payable_list[index]; // Get the entry being removed
-        //                 const shipperId = removedEntry.shipper_id;
-        //                 const payable = parseFloat(removedEntry.payable.replace(/,/g, ''));
-        //                 // Remove the unselected entry from payable_list using splice
-        //                 payable_list.splice(index, 1);
-        //                 // Recalculate shipperTotal after removing the entry
-        //                 shipperTotal = {}; // Reset shipperTotal object
-        //                 calculateShipperTotal(parent);
-
-        //                 var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector
-        //                 .val()) : 0) - ((parent.children('td.amount').html() != '') ? parseInt(parent.children(
-        //                     'td.amount').html().replace(/,/g, '')) : 0);
-        //                 var total_charges = ((total_charges_selector.val() != '') ? parseFloat(total_charges_selector
-        //                     .val()) : 0) - ((parent.children('td.charges').html() != '') ? parseFloat(parent
-        //                     .children('td.charges').html().replace(/,/g, '')) : 0);
-        //                 var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) -
-        //                     ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html()
-        //                         .replace(/,/g, '')) : 0);
-        //                 var total_deductable = ((total_deductable_selector.val() != '') ? parseFloat(
-        //                     total_deductable_selector.val()) : 0) - ((parent.children('td.deductable').html() !=
-        //                     '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
-        //                 var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector
-        //                     .val()) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent
-        //                     .children('td.payable').html().replace(/,/g, '')) : 0);
-        //                 var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) :
-        //                     0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children(
-        //                         'td.payable').html().replace(/,/g, '')) : 0);
-        //             }
-        //             if (selected_rows_shipments.length > 0) {
-        //                 total_amount_selector.val(parseInt(total_amount));
-        //                 total_charges_selector.val(parseFloat(total_charges).toFixed(2));
-        //                 total_gst_selector.val(parseFloat(total_gst).toFixed(2));
-        //                 total_deductable_selector.val(parseFloat(total_deductable).toFixed(2));
-        //                 total_wht_selector.val(parseFloat(total_wht).toFixed(2));
-        //                 total_payable_selector.val(parseFloat(total_payable).toFixed(2));
-        //                 total_hold_selector.val(parseFloat(total_hold).toFixed(2));
-
-        //                 $('#make_payments #make_payments_form button.make').prop('disabled', false);
-        //                 $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
-        //                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
-
-        //                 //if total payable is grate than 0 it enable make and export bank order button
-        //                 if($('#make_payments #make_payments_form .total_payable').val() > 0){
-        //                         const isAnyNegative = Object.values(shipperTotal).some(total => total < 0);
-        //                         // Disable make and export bank order button if any shipper's total payable is negative
-        //                         if (isAnyNegative) {
-        //                             $('#make_payments #make_payments_form button.make').prop('disabled', true);
-        //                             $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
-        //                             $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
-        //                         } else {
-        //                             $('#make_payments #make_payments_form button.make').prop('disabled', false);
-        //                             $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
-        //                             $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
-        //                         }
-        //                         total_payable_amt+=total_payable;
-        //                 }
-        //                 else{
-        //                     $('#make_payments #make_payments_form button.make').prop('disabled', true);
-        //                     $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
-        //                     $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
-        //                 }
-
-        //             } else {
-                    
-        //                 total_amount_selector.val(0);
-        //                 total_charges_selector.val(0);
-        //                 total_gst_selector.val(0);
-        //                 total_deductable_selector.val(0);
-        //                 total_wht_selector.val(0);
-        //                 total_payable_selector.val(0);
-        //                 total_hold_selector.val(parseFloat(initial_total_hold).toFixed(2));
-
-        //                 $('#make_payments #make_payments_form button.make').prop('disabled', true);
-        //                 $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
-        //                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
-        //             }
-
-        //             $('#make_payments #make_payments_form .pending_payment_shipment_ids').val(selected_rows_shipments);
-        //         }
-        //     });
-        // });
-
-
-
-        // $(document).ready(function() {
-        //     window.addEventListener('message', function(event) {
-        //         var selectedData = event.data;
-        //         var ids = selectedData;
-        //         $.ajax({
-        //             url: '{{ route('admin.finance.make_payments.payment_list') }}',
-        //             method: 'GET',
-        //             data: {
-        //                 ids: ids,
-        //                 pickup_address_id: selectedData.pickup_address_id,
-        //                 _token: $('meta[name="csrf-token"]').attr('content')
-        //             },
-        //             success: function(data) {
-        //                 $('#make_payments_datatable').DataTable({
-        //                     dom: '<"pull-right"B>tr',
-        //                     data: data.data,
-        //                     select: {
-        //                         info: false,
-        //                         style: 'multi',
-        //                         selector: 'td.select-checkbox',
-        //                         className: 'selected bg-primary bg-lighten-5 primary'
-        //                     },
-
-        //                     buttons: [
-        //                         {
-        //                             text: 'Select All',
-        //                             className: 'btn btn-primary select_all',
-        //                             action: function () {
-        //                                 table.rows().select();
-        //                                 updateSelectNoneButtonState();
-        //                             }
-        //                         },
-        //                         {
-        //                             text: 'Select None',
-        //                             className: 'btn btn-primary select_none disabled',
-        //                             action: function () {
-        //                                 table.rows().deselect();
-        //                                 updateSelectNoneButtonState();
-        //                             }
-        //                         }
-        //                     ],
-
-        //                     columns: [
-        //                         { 
-        //                             data: null, 
-        //                             defaultContent: '', 
-        //                             orderable: false,
-        //                             className: 'select-checkbox', 
-        //                             render: function() {
-        //                                 return '<input type="checkbox" class="row-select-checkbox d-none" id="table_checkbox">';
-        //                             }
-        //                         },
-        //                         { data: null, render: function(data, type, row, meta) { return meta.row + 1; } },
-        //                         { data: 'account_type_id' },
-        //                         { data: 'shipper' },
-        //                         { data: 'shipment' },
-        //                         { data: 'origin' },
-        //                         { data: 'type' },
-        //                         { data: 'status' },
-        //                         { data: 'created_at' },
-        //                         { data: 'aging' },
-        //                         { data: 'amount' },
-        //                         { data: 'charges' },
-        //                         { data: 'gst' },
-        //                         { data: 'wht' },
-        //                         { data: 'fintech_charges' },
-        //                         { data: 'packaging_charges' },
-        //                         { data: 'deductable' },
-        //                         { data: 'payable' },
-        //                         { data: 'arrival_date' }
-        //                     ],
-        //                     rowCallback: function(row, data, index) {
-        //                         $(row).attr('consolidation_id', data.consolidation_id || '');
-        //                         $(row).attr('type_id', data.type);
-        //                         $(row).attr('account_type', data.account_type_id);
-
-        //                         var checkbox = $('input.row-select-checkbox', row);
-        //                         checkbox.prop('checked', $(row).hasClass('selected'));
-        //                     }
-        //                 });
-
-        //                 // checkbox
-        //                 $(document).ready(function() {
-        //                     $('#make_payments_datatable').on('click', '.select-checkbox', function () {
-        //                         var $row = $(this).closest('tr');
-        //                         var $checkbox = $row.find('.row-select-checkbox');
-                                
-        //                         var isChecked = $checkbox.prop('checked');
-        //                         $checkbox.prop('checked', !isChecked);
-        //                         console.log(!isChecked);
-                                
-        //                         if (!isChecked) {
-        //                             $('.select_none').removeClass('disabled');
-        //                         } else {
-        //                             $('.select_none').addClass('disabled');
-        //                         }
-        //                     });
-        //                 });
-
-        //                 function updateSelectNoneButtonState() {
-        //                     var selectedRows = table.rows({ selected: true }).count();
-        //                     var selectNoneButton = $('.select_none');
-        //                     if (selectedRows > 0) {
-        //                         selectNoneButton.removeClass('disabled');
-        //                     } else {
-        //                         selectNoneButton.addClass('disabled');
-        //                     }
-        //                 }
-
-        //                 $('#make_payments_datatable tbody').on('change', '.row-select-checkbox', function() {
-        //                     var $row = $(this).closest('tr');
-        //                     var rowIndex = table.row($row).index();
-        //                     if (this.checked) {
-        //                         table.row($row).select();
-        //                     } else {
-        //                         table.row($row).deselect();
-        //                     }
-        //                     updateSelectNoneButtonState();
-        //                 });
-
-        //                 $('#make_payments_datatable thead').on('click', 'input[type="checkbox"]', function(e) {
-        //                     if (this.checked) {
-        //                         $('#make_payments_datatable tbody input.row-select-checkbox:not(:checked)').prop('checked', true).trigger('change');
-        //                     } else {
-        //                         $('#make_payments_datatable tbody input.row-select-checkbox:checked').prop('checked', false).trigger('change');
-        //                     }
-        //                     updateSelectNoneButtonState();
-        //                 });
-        //             }
-        //         });
-        //     });
-        // });
-
-
         $(document).ready(function() {
-            var table; // Declare table variable outside to make it accessible
-
+            var table;
             window.addEventListener('message', function(event) {
                 var selectedData = event.data;
                 var ids = selectedData;
-                
                 $.ajax({
                     url: '{{ route('admin.finance.make_payments.payment_list') }}',
                     method: 'GET',
@@ -677,32 +232,15 @@
                                 selector: 'td.select-checkbox',
                                 className: 'selected bg-primary bg-lighten-5 primary'
                             },
-                            buttons: [
-                                {
-                                    text: 'Select All',
-                                    className: 'btn btn-primary select_all',
-                                    action: function () {
-                                        table.rows().select();
-                                        updateSelectNoneButtonState();
-                                    }
-                                },
-                                {
-                                    text: 'Select None',
-                                    className: 'btn btn-primary select_none disabled',
-                                    action: function () {
-                                        table.rows().deselect();
-                                        updateSelectNoneButtonState();
-                                    }
-                                }
-                            ],
+
                             columns: [
                                 { 
-                                    data: null, 
-                                    defaultContent: '', 
+                                    data: 'id',
+                                    defaultContent: '',
                                     orderable: false,
-                                    className: 'select-checkbox', 
+                                    className: 'select-checkbox',
                                     render: function() {
-                                        return '<input type="checkbox" class="row-select-checkbox d-none">';
+                                        return '';
                                     }
                                 },
                                 { data: null, render: function(data, type, row, meta) { return meta.row + 1; } },
@@ -724,30 +262,55 @@
                                 { data: 'payable' },
                                 { data: 'arrival_date' }
                             ],
+
+                            buttons: [
+                                {
+                                    text: 'Select All',
+                                    className: 'btn btn-primary select_all',
+                                    action: function () {
+                                        table.rows().select();
+                                        updateSelectNoneButtonState();
+
+                                        table.rows().nodes().each(function(index) {
+                                            var row = table.row(index);
+
+                                            row.select();
+                                            calculation($(row.node()));
+
+                                            if ($(row.node().firstChild).hasClass('select-checkbox') &&
+                                                !$(row.node()).hasClass('selected')) {
+                                                row.select();
+                                                calculation($(row.node()));
+                                            }
+                                        });
+                                    }
+                                },
+                                {
+                                    text: 'Select None',
+                                    className: 'btn btn-primary select_none disabled',
+                                    action: function () {
+                                        table.rows().deselect();
+                                        updateSelectNoneButtonState();
+                                    }
+                                }
+                            ],
                             rowCallback: function(row, data, index) {
                                 $(row).attr('consolidation_id', data.consolidation_id || '');
                                 $(row).attr('type_id', data.type);
                                 $(row).attr('account_type', data.account_type_id);
-
                                 var checkbox = $('input.row-select-checkbox', row);
                                 checkbox.prop('checked', $(row).hasClass('selected'));
                             }
                         });
 
-                        $('#make_payments_datatable').on('click', '.select-checkbox', function () {
+                        $('#make_payments_datatable').on('click', '.select-checkbox', function(){
+                            if ($(this).is(':checked')) {
+                                alert('ok');
                                 var $row = $(this).closest('tr');
-                                var $checkbox = $row.find('.row-select-checkbox');
-                                
-                                var isChecked = $checkbox.prop('checked');
-                                $checkbox.prop('checked', !isChecked);
-                                console.log(!isChecked);
-                                
-                                if (!isChecked) {
-                                    $('.select_none').removeClass('disabled');
-                                } else {
-                                    $('.select_none').addClass('disabled');
-                                }
-                            });
+                                updateSelectNoneButtonState()
+                                calculation($row);
+                            }
+                        });
 
                         $('#make_payments_datatable tbody').on('change', '.row-select-checkbox', function() {
                             var $row = $(this).closest('tr');
@@ -758,6 +321,7 @@
                                 table.row($row).deselect();
                             }
                             updateSelectNoneButtonState();
+                            calculation($row);
                         });
 
                         $('#make_payments_datatable thead').on('click', 'input[type="checkbox"]', function(e) {
@@ -778,14 +342,97 @@
                                 selectNoneButton.addClass('disabled');
                             }
                         }
+
+                        // Make Payments Modal Calculation
+                        function calculation(parent) {
+                            var total_amount_selector = $('#make_payments_form .total_amount');
+                            var total_charges_selector = $('#make_payments_form .total_charges');
+                            var total_gst_selector = $('#make_payments_form .total_gst');
+                            var total_deductable_selector = $('#make_payments_form .total_deductable');
+                            var total_payable_selector = $('#make_payments_form .total_payable');
+                            var total_hold_selector = $('#make_payments_form .total_hold');
+                            var total_wht_selector = $('#make_payments_form .wht');
+
+                            var total_amount = 0;
+                            var total_charges = 0;
+                            var total_gst = 0;
+                            var total_deductable = 0;
+                            var total_wht = 0;
+                            var total_payable = 0;
+                            var total_hold = 0;
+
+                            // Iterate through selected rows
+                            table.rows({ selected: true }).every(function () {
+                                var row = this;
+                                var rowData = row.data();
+                                
+                                var payable = parseFloat(rowData.payable.replace(/,/g, ''));
+                                var amount = parseFloat(rowData.amount.replace(/,/g, ''));
+                                var charges = parseFloat(rowData.charges.replace(/,/g, ''));
+                                var gst = parseFloat(rowData.gst.replace(/,/g, ''));
+                                var deductable = parseFloat(rowData.deductable.replace(/,/g, ''));
+                                var wht = parseFloat(rowData.wht.replace(/,/g, ''));
+
+                                // Calculate totals
+                                total_amount += amount;
+                                total_charges += charges;
+                                total_gst += gst;
+                                total_deductable += deductable;
+                                total_wht += wht;
+                                total_payable += payable;
+                                total_hold += payable;
+
+                                // Check for negative payable
+                                if (payable < 0) {
+                                    var html = 'Negative payable detected for the shipper(s).<br/>';
+                                    var content = document.createElement('div');
+                                    content.innerHTML = html;
+                                    swal({
+                                        content: content,
+                                        icon: 'error',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Close',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    });
+                                }
+                            });
+
+                            // Update UI elements
+                            total_amount_selector.val(total_amount.toFixed(2));
+                            total_charges_selector.val(total_charges.toFixed(2));
+                            total_gst_selector.val(total_gst.toFixed(2));
+                            total_deductable_selector.val(total_deductable.toFixed(2));
+                            total_wht_selector.val(total_wht.toFixed(2));
+                            total_payable_selector.val(total_payable.toFixed(2));
+                            total_hold_selector.val(total_hold.toFixed(2));
+
+                            // Enable/disable buttons based on conditions
+                            if (total_payable > 0) {
+                                $('#make_payments_form button.make').prop('disabled', false);
+                                $('#make_payments_form button.make_invoice').prop('disabled', false);
+                                $('#make_payments_form button.export_bank_order').prop('disabled', false);
+                            } else {
+                                $('#make_payments_form button.make').prop('disabled', true);
+                                $('#make_payments_form button.make_invoice').prop('disabled', true);
+                                $('#make_payments_form button.export_bank_order').prop('disabled', true);
+                            }
+
+                            // Store selected rows
+                            var selected_rows_shipments = table.rows({ selected: true }).ids().toArray();
+                            $('#make_payments_form .pending_payment_shipment_ids').val(selected_rows_shipments);
+                        }
                     }
                 });
             });
         });
-
-
-
-
     </script>
     
 
