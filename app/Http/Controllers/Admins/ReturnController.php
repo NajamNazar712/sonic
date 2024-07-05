@@ -448,7 +448,7 @@ class ReturnController extends Controller
             GROUP BY shipment_id
         ) first_rad'), 'rsa.shipment_id', '=', 'first_rad.shipment_id')
         ->join('rv_shipment_assign_agent_details as rad', 'rad.id', '=', 'first_rad.min_id')
-        ->select(DB::raw('AVG(TIMESTAMPDIFF(MINUTE, rsa.created_at, rad.created_at)) as average_minutes_diff'))
+        ->select(DB::raw('AVG(TIMESTAMPDIFF(MINUTE, rad.created_at, rsa.created_at)) as average_minutes_diff'))
         ->value('average_minutes_diff');
 
         $hours = floor($average_first_call_time / 60);
