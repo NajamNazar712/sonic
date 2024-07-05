@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\FafCharges;
+use App\FafChargesGlobal;
 use App\CorporateDefaultShipmentReturnDiscountCharges;
 use App\CorporateDefaultZeroCodDiscountCharges;
 use App\CorporateShipmentReturnDiscountCharges;
-use App\CorporateZeroCodDiscountCharges;
-use App\Http\Controllers\Controller;
+use App\CorporateZeroCodDiscountCharges;use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;
 use App\Http\Models\Admin\GlobalSettings;
@@ -66,9 +67,9 @@ use App\Http\Models\City;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
 
+use App\ShipmentAdditionalCharges;
 use App\ShipmentReturnDiscountCharges;
-use App\ZeroCodDiscountCharges;
-use Carbon\Carbon;
+use App\ZeroCodDiscountCharges;use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Http\Models\ShipmentsWeightType;
 use App\Http\Models\ShipmentServicesCharges;
@@ -2779,6 +2780,76 @@ class ShipmentChargesController extends Controller
         }
     }
 
+    static public function faf_charges($id) {
+        $shipment = Shipment::find($id);
+
+        $result = self::calculate_faf_charges($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->weight_charges);
+
+        if ($result) {
+            $shipment_Additional_charges=  ShipmentAdditionalCharges::where('shipment_id',$shipment->id);
+            $shipment_Additional_charges = ($shipment_Additional_charges->exists()) ? $shipment_Additional_charges->first() : new ShipmentAdditionalCharges();
+            $shipment_Additional_charges->shipment_id = $shipment->id;
+            $shipment_Additional_charges->faf_charges = $result['faf_charges'];
+            $shipment_Additional_charges->save();
+        }
+    }
+    static public function calculate_faf_charges($account_type_id, $user_id, $shipping_mode_id, $weight_charges) {
+        $faf_charges_status = 0;
+        $faf_charges = FafCharges::where('user_id',$user_id);
+        if($faf_charges->exists()){
+            $faf_charges= $faf_charges->first();
+            $faf_charges_status = $faf_charges->status;
+        }
+
+        if ($faf_charges_status) {
+            $today = date('Y-m-d');
+            $fuel_charge_global = FafChargesGlobal::where('date_range_start','<=',$today)->where('date_range_end','>=',$today);
+            if ($fuel_charge_global->exists()) {
+                $fuel_charge_global = $fuel_charge_global->first();
+
+                $result = array();
+                $result['faf_charges'] = ROUND((($fuel_charge_global->faf_charges / 100) * $weight_charges), 2, PHP_ROUND_HALF_DOWN);
+                return $result;
+            }
+        }
+        else {
+            return FALSE;
+        }
+    }
+
+    static public function international_faf_charges($id) {
+        $shipment = Shipment::find($id);
+
+        $faf_charges_status = 0;
+        $faf_charges = FafCharges::where('user_id',$shipment->id);
+        if($faf_charges->exists()){
+            $faf_charges= $faf_charges->first();
+            $faf_charges_status = $faf_charges->status;
+        }
+
+        if ($faf_charges_status) {
+            $today = date('Y-m-d');
+            $fuel_charge_global = FafChargesGlobal::where('date_range_start','<=',$today)->where('date_range_end','>=',$today);
+            if ($fuel_charge_global->exists()) {
+                $fuel_charge_global = $fuel_charge_global->first();
+
+                $result = array();
+                $result['faf_charges'] = ROUND((($fuel_charge_global->faf_charges / 100) * $shipment->weight_charges), 2, PHP_ROUND_HALF_DOWN);
+
+                if ($result) {
+                    $shipment_Additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment->id);
+                    $shipment_Additional_charges = ($shipment_Additional_charges->exists()) ? $shipment_Additional_charges->first() : new ShipmentAdditionalCharges();
+                    $shipment_Additional_charges->shipment_id = $shipment->id;
+                    $shipment_Additional_charges->faf_charges = $result['faf_charges'];
+                    $shipment_Additional_charges->save();
+
+                    self::international_credit_usage($shipment->user_id, $result['faf_charges']);
+                }
+            }
+        }
+
+    }
+
     static public function return_discount_charges($shipment){
         $id = $shipment->id;
         $account_type_id = $shipment->user->account_type_id;
@@ -2820,4 +2891,7 @@ class ShipmentChargesController extends Controller
             return false;
         }
     }
+
+
+
 }

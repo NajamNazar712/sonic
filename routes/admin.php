@@ -1,5 +1,6 @@
 <?php
 //Admin Routes Start
+Route::get('/{tiny_url}', 'ShortUrlController@get_actual_url');
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('admin.login');
@@ -140,6 +141,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('user_fintech_charges', 'Admins\AdminDashboardController@user_fintech_charges')->name('user_fintech_charges');
         Route::post('add_rate_commission_corporate_reimb/{shippers}', 'Admins\AdminDashboardController@add_rate_commission_corporate_reimb')->name('add_rate_commission_corporate_reimb');
         Route::post('excluded_shippers', 'Admins\AdminDashboardController@excluded_shippers')->name('excluded_shippers');
+        Route::post('faf_charges/info', 'Admins\AdminDashboardController@faf_charges_info')->name('faf_charges.info');
+        Route::post('faf_charges/submit', 'Admins\AdminDashboardController@faf_charges_submit')->name('faf_charges.submit');
 
         Route::get('duplicate/info', 'Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function () {
@@ -217,6 +220,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('report', 'Admins\AdminDashboardController@survey_report')->name('report');
             Route::get('report/list', 'Admins\AdminDashboardController@survey_report_list')->name('report.list');
             Route::get('report/submitresponse', 'Admins\AdminDashboardController@submitresponse_report')->name('report.submitresponse');
+        });
+
+        Route::prefix('kam_bulk_tagging')->name('kam_bulk_tagging.')->group(function () {
+            Route::get('', 'Admins\Shippers\Accounts\KAMBulkTaggingController@index')->name('index');
+            Route::post('update', 'Admins\Shippers\Accounts\KAMBulkTaggingController@update')->name('update');
         });
     });
 
@@ -1695,7 +1703,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('done_payments')->name('done_payments.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@done_payments_index')->name('index');
-            Route::get('list', 'Admins\AdminFinanceController@done_payments_list')->name('list');
+            Route::post('list', 'Admins\AdminFinanceController@done_payments_list')->name('list');
             Route::put('paid', 'Admins\AdminFinanceController@done_payments_paid')->name('paid');
             Route::put('reverted', 'Admins\AdminFinanceController@done_payments_reverted')->name('reverted');
             Route::post('delivered_shipments', 'Admins\AdminFinanceController@done_payments_delivered_shipments')->name('delivered_shipments');
@@ -2465,7 +2473,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('cargo_manifest')->name('cargo_manifest.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@cargo_manifest_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
+            Route::post('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
+        });
+
+        Route::prefix('sms')->name('sms.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@sms_report_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@sms_report_list')->name('list');
         });
         Route::prefix('ops')->name('ops_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ops_report_index')->name('index');
@@ -2519,6 +2532,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('settings')->name('settings.')->group(function () {
 
+        Route::prefix('show_vendor')->name('show_vendor.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@show_vendors')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@store_vendors')->name('store');
+            // Route::post('udpate', 'Admins\GlobalSettingsController@delivery_revert_access_update')->name('update');
+        });
+
         Route::prefix('delivery_revert_access')->name('delivery_revert_access.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@delivery_revert_access_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@delivery_revert_access_store')->name('store');
@@ -2536,6 +2555,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('shippers')->name('shippers.')->group(function () {
+
+            Route::prefix('base_rate_revisions')->name('base_rate_revisions.')->group(function () {
+                Route::get('', 'Admins\Settings\Shippers\BaseRateRivisionController@index')->name('index');
+                Route::get('list', 'Admins\Settings\Shippers\BaseRateRivisionController@base_rate_revisions_list')->name('list');
+                Route::post('store', 'Admins\Settings\Shippers\BaseRateRivisionController@add_bulk_shipper_rate_adjustment_store')->name('bulk_store');
+                Route::get('{base_rate_revision_id}/approval1_update/{action}','Admins\Settings\Shippers\BaseRateRivisionController@approval1_update')->name('approval1_update');
+                Route::get('{base_rate_revision_id}/approval2_update/{action}','Admins\Settings\Shippers\BaseRateRivisionController@approval2_update')->name('approval2_update');
+                Route::get('shippers_with_rates/{base_rate_revision_id}', 'Admins\Settings\Shippers\BaseRateRivisionController@shippersWithRates')->name('shippers_with_rates');
+            });
+
             Route::prefix('status_webhook')->name('status_webhook.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@status_webhook_index')->name('index');
                 Route::get('list', 'Admins\GlobalSettingsController@status_webhook_list')->name('list');
@@ -2552,6 +2581,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@bypass_weight_index')->name('index');
                 Route::post('update', 'Admins\GlobalSettingsController@bypass_weight_update')->name('update');
 
+            });
+
+            
+            Route::prefix('lead_progress')->name('lead_progress.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@lead_progress_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@lead_progress_list')->name('list');
+                Route::post('update', 'Admins\GlobalSettingsController@lead_progress_update')->name('update');
             });
         });
 
@@ -3402,6 +3438,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+
+        //Agents List
+        Route::prefix('agents_list')->name('agents_list.')->group(function () {
+            Route::get('', 'Admins\Settings\AgentSettingsController@agents_list_index')->name('index');
+            Route::get('list', 'Admins\Settings\AgentSettingsController@agents_list_list')->name('list');
+            Route::post('store', 'Admins\Settings\AgentSettingsController@agent_type_store')->name('store');
+            Route::post('data', 'Admins\Settings\AgentSettingsController@agent_data')->name('data');
+            Route::post('update', 'Admins\Settings\AgentSettingsController@admin_agent_type_update')->name('update');
+            Route::post('bulk-update', 'Admins\Settings\AgentSettingsController@admin_agent_type_update_bulk')->name('update.bulk');
+
+        });
+
+        //Agent Types
+        Route::prefix('agent_types')->name('agent_types.')->group(function () {
+            Route::get('', 'Admins\Settings\AgentSettingsController@agent_types_index')->name('index');
+            Route::get('list', 'Admins\Settings\AgentSettingsController@agent_types_list')->name('list');
+            Route::post('store', 'Admins\Settings\AgentSettingsController@agent_type_store')->name('store');
+            Route::post('data', 'Admins\Settings\AgentSettingsController@agent_types_data')->name('data');
+            Route::post('update', 'Admins\Settings\AgentSettingsController@agent_type_update')->name('update');
+
+        });
+
+        Route::prefix('faf_charges')->name('faf_charges.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@faf_charges_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@faf_charges_store')->name('store');
+        });
+
+
     });
 
     Route::prefix('shipment')->name('shipment.')->group(function () {
@@ -3800,6 +3864,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('info', 'Admins\LeadManagementController@info')->name('info');
         Route::post('edit', 'Admins\LeadManagementController@edit')->name('edit');
         Route::post('add', 'Admins\LeadManagementController@add')->name('add');
+        Route::get('edit_service_list', 'Admins\LeadManagementController@edit_service_list')->name('edit_service_list');
     });
 
     Route::prefix('pam_leads')->name('pam_leads.')->group(function () {
@@ -3847,6 +3912,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('/submit', 'Admins\AdminInternationalRatesController@retail_international_rates_margin_submit')->name('update');
                     Route::get('/list', 'Admins\AdminInternationalRatesController@retail_international_rates_margin_list')->name('list');
                 });
+            });
+
+            //International Economy Rates
+            Route::prefix('economy-rates')->name('economy_rates.')->group(function () {
+                Route::get('', 'Admins\InternationalEconomyStandardRatesController@index')->name('index');
+                Route::get('list', 'Admins\InternationalEconomyStandardRatesController@list')->name('list');
+                Route::post('excel', 'Admins\InternationalEconomyStandardRatesController@upload_excel')->name('excel');
             });
         });
 

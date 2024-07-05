@@ -12,6 +12,7 @@ use App\PendingShipmentReturnDiscountCharges;
 use App\PendingZeroCodDiscountCharges;
 use App\ShipmentReturnDiscountCharges;
 use App\ZeroCodDiscountCharges;
+use App\FafCharges;
 use Exception;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -153,6 +154,7 @@ use App\Http\Models\Rates\HistoryPackagingCharge;
 use App\Http\Models\Rates\PendingInsuranceCharge;
 use App\Http\Models\Rates\PendingPackagingCharge;
 use App\Http\Models\Admin\ShipementReceiveDetails;
+use App\Http\Models\Admin\ShipperInterceptExclude;
 use App\Http\Models\Admin\StandardInsuranceCharge;
 use App\Http\Models\Admin\StandardPackagingCharge;
 use App\Http\Models\InternationalUsersInformation;
@@ -195,9 +197,9 @@ use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
+
 use App\Http\Models\Commission\SalesCommissionExternalUser;
 use App\Http\Models\Operataions\OperationForecastShipments;
-
 use App\Http\Models\Shipper\SubstituteUserModulePermission;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Operataions\OperationForecastWeightRange;
@@ -210,8 +212,12 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Http\Models\Admin\ShipperInterceptExclude;
+use App\Http\Models\HistorySmsCharges;
+use App\Http\Models\PendingSmsCharges;
+use App\Http\Models\NotificationSetting;
+use App\Http\Models\NotificationSettingShipper;
 use App\Http\Traits\RateReusableTrait;
+
 class AdminDashboardController extends Controller
 {   use RateReusableTrait;
 
@@ -1336,7 +1342,7 @@ class AdminDashboardController extends Controller
                 'same_consignee' => $same_consignee,
             ]
         );
-        
+
         return redirect()->back()->with('success', 'Shipper exclude settings saved successfully.');
     }
 
@@ -1359,7 +1365,7 @@ class AdminDashboardController extends Controller
         }
         if ($status == 'activate') {
 
-            if ($user->status == 2) {
+            if ($user->status == 2) {   
                 $now = Carbon::now();
                 $action = User::where('id', $user->id)->update(['status' => 3, 'account_activated_by' => Auth::id(), 'activated_at' => $now, 'reactivated_at' => $now]);
                 if ($user->lead_id != null) {
@@ -1377,7 +1383,16 @@ class AdminDashboardController extends Controller
                     $lead->updated_by = Auth::id();
                     $lead->save();
                 }
-                if ($action == 1) {
+                if ($action == 1) { 
+                    if($user->sms_charges_status == 1) {
+                        $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                        foreach($notification_settings as $notification_setting ) {
+                            $notification_setting_shipper = new NotificationSettingShipper();
+                            $notification_setting_shipper->notification_setting_id = $notification_setting;
+                            $notification_setting_shipper->shipper_id = $user->id;
+                            $notification_setting_shipper->save();
+                        }
+                    }
                     NotificationsController::send(1, $user->id);
 
                     return redirect()->route('admin.accounts.active')->with('success', 'User is activated.');
@@ -1403,11 +1418,12 @@ class AdminDashboardController extends Controller
         if (AdminHub::where('admin_id', $tag_id)->where('hub_id', $shipper_hub_id)->exists()) {
             if (!SalePersonTag::where(['admin_id' => $tag_id, 'user_id' => $shipper_id, 'status' => 0])->exists()) {
                 $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
-                $old_sale_person_date = $old_sale_person->created_at;
                 if ($old_sale_person) {
                     $old_sale_person = $old_sale_person->sales_person;
+                    $old_sale_person_date = $old_sale_person->created_at;
                 } else {
                     $old_sale_person = null;
+                    $old_sale_person_date = null;
                 }
                 $new_sale_person = Admin::find($tag_id);
                 $shipper_data = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->get();
@@ -1440,7 +1456,6 @@ class AdminDashboardController extends Controller
         }
 
     }
-
     public function tagSubmitBulk(Request $request)
     {
         $tag_id = $request->admin_id;
@@ -1797,6 +1812,7 @@ class AdminDashboardController extends Controller
             $rate_origin_hubs = RateOriginHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = RateDestinationHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount_weight_rates = DiscountWeightCharge::all()->where('user_id',$id)->groupBy(['shipping_mode_id','destination_id']);
+            $sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->get();
 
             $zero_cod_discount = ZeroCodDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $return_discount_charges = ShipmentReturnDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1835,9 +1851,9 @@ class AdminDashboardController extends Controller
             $rate_origin_hubs = HistoryRateOriginHub::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             $rate_destination_hubs = HistoryRateDestinationHub::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             $discount_weight_rates = HistoryDiscountWeightCharge::all()->where('user_id',$id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy(['shipping_mode_id','destination_id']);
-            $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-            $return_discount_charges = HistoryShipmentReturnDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-        }
+            $sms_charge = HistorySmsCharges::where('user_id', $id)->get();
+$zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $return_discount_charges = HistoryShipmentReturnDiscountCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');        }
 
 
         $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
@@ -1930,13 +1946,13 @@ class AdminDashboardController extends Controller
         if (session('department_id') == 7) {
             if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
                 // return view('admin.accounts.view_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
-                return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
+                return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities, 'sms_charges' => $sms_charge,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
             } else {
                 return view('admin.access_denied');
             }
         } else {
             // return view('admin.accounts.view_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
-            return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
+            return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount,'discount_weight_rates' => $discount_weight_rates, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities, 'sms_charges' => $sms_charge,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
         }
     }
 
@@ -2056,7 +2072,7 @@ class AdminDashboardController extends Controller
 
         if ((($user['rate_status'] >= 0) && ($user['status'] == 1 || $user['status'] == 5)) || (($user['rate_status'] == 0) && $user['status'] == 3)) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-
+            $sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->first();
             $weight = WeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $bookingType = BookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = CashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -2160,12 +2176,12 @@ class AdminDashboardController extends Controller
             }
             if (session('department_id') == 7) {
                 if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
-                    return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
+                    return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities, 'sms_charge'=> $sms_charge,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
                 } else {
                     return view('admin.access_denied');
                 }
             } else {
-                return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
+                return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges' => $discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities, 'sms_charge' => $sms_charge,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges]);
             }
 
         } elseif (($user['rate_status'] >= 1) && ($user['status'] == 3)) {
@@ -2174,6 +2190,7 @@ class AdminDashboardController extends Controller
 //        var_dump(empty($switches));exit();
             $e_weight = WeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        $cash = '';
+            $e_sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->first();
             $e_bookingType = BookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_cash = CashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $e_insurance = InsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -2209,7 +2226,7 @@ class AdminDashboardController extends Controller
             $switches = PendingRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
             $weight = PendingWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-
+            $sms_charge = PendingSmsCharges::where('user_id', $id)->first();
             $bookingType = PendingBookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = PendingCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = PendingInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -2310,12 +2327,12 @@ class AdminDashboardController extends Controller
             $existing = 1;
             if (session('department_id') == 7) {
                 if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
-                    return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges,'e_zero_cod_discount'=>$e_zero_cod_discount,'e_return_discount_charges'=>$e_return_discount_charges]);
+                    return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities, 'sms_charge'=>$sms_charge ,'e_sms_charge'=>$e_sms_charge,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges,'e_zero_cod_discount'=>$e_zero_cod_discount,'e_return_discount_charges'=>$e_return_discount_charges]);
                 } else {
                     return view('admin.access_denied');
                 }
             } else {
-                return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges,'e_zero_cod_discount'=>$e_zero_cod_discount,'e_return_discount_charges'=>$e_return_discount_charges]);
+                return view('admin.accounts.edit_rates')->with(['riders_permanents'=>$riders_permanent,'sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount,'discount_weight_charges'=>$discount_weight_charges, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount,'e_discount_weight_charges'=>$e_discount_weight_charges, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities, 'sms_charge'=>$sms_charge, 'e_sms_charge'=>$e_sms_charge,'zero_cod_discount'=>$zero_cod_discount,'return_discount_charges'=>$return_discount_charges,'e_zero_cod_discount'=>$e_zero_cod_discount,'e_return_discount_charges'=>$e_return_discount_charges]);
             }
         } else {
             return redirect(route('admin.accounts.pending'));
@@ -2327,6 +2344,8 @@ class AdminDashboardController extends Controller
         $user = User::find($id);
         if ($user['status'] != 3) {
             $messages = [
+                'sms_charges.required' => 'The sms charges field is required.',
+                'sms_charges.gt' => 'The sms charges must be greater than 0.',
                 'on_wa_range_up.*.required' => 'The overnight range up field is required.',
                 'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
                 'on_wa_range_up.*.between' => 'The overnight range up field must be between 0 to 999.99',
@@ -2565,6 +2584,13 @@ class AdminDashboardController extends Controller
             $ol_validations = array();
             $detain_validations = array();
             $sameday_validations = array();
+            $sms_validations = array();
+
+            if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
+                $sms_validations = [
+                    'sms_charges' => 'required|gt:0'
+                ];
+            }
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
@@ -2737,7 +2763,7 @@ class AdminDashboardController extends Controller
                     'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
                 ];
             }
-            $validations = array_merge($on_validations, $ol_validations, $detain_validations, $sameday_validations);
+            $validations = array_merge($on_validations, $ol_validations, $detain_validations, $sameday_validations, $sms_validations);
 
             $validate = Validator::make($request->all(), $validations, $messages);
 
@@ -2747,6 +2773,18 @@ class AdminDashboardController extends Controller
                     ->withInput();
             }
 
+            if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
+                User::where('id', $id)->update([
+                    'sms_charges' => $request->sms_charges,
+                    'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
+                ]);
+            }
+            else{
+                User::where('id', $id)->update([
+                    'sms_charges' => null,
+                    'sms_charges_status' =>  0,
+                ]);
+            }
             if ($request->on_rate_record != null) {
                 RateStatus::where('id', $request->on_rate_record)
                     ->update([
@@ -4340,11 +4378,13 @@ class AdminDashboardController extends Controller
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
 
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->back()->with('success', 'All Rates are updateddd');
         }
 
         if ($user['status'] == 3) {
             $messages = [
+                'sms_charges.required' => 'The sms charges field is required.',
+                'sms_charges.gt' => 'The sms charges must be greater than 0.',
                 'on_wa_range_up.*.required' => 'The overnight range up field is required.',
                 'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
                 'on_wa_range_up.*.between' => 'The overnight range up field must be between 0 to 999.99',
@@ -4609,6 +4649,13 @@ class AdminDashboardController extends Controller
             $ol_validations = array();
             $detain_validations = array();
             $sameday_validations = array();
+            $sms_validations = array();
+
+            if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
+                $sms_validations = [
+                    'sms_charges' => 'required|gt:0'
+                ];
+            }
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
@@ -4782,7 +4829,7 @@ class AdminDashboardController extends Controller
                 ];
             }
 
-            $validations = array_merge($on_validations, $ol_validations, $detain_validations, $sameday_validations);
+            $validations = array_merge($on_validations, $ol_validations, $detain_validations, $sameday_validations,$sms_validations);
 
             $validate = Validator::make($request->all(), $validations, $messages);
             if ($validate->fails()) {
@@ -4790,6 +4837,13 @@ class AdminDashboardController extends Controller
                     ->withErrors($validate)
                     ->withInput();
             }
+            // if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
+            //     User::where('id', $id)->update([
+            //         'sms_charges_type_id' => $request->smsPostType,
+            //         'sms_charges' => $request->sms_charges,
+            //         'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
+            //     ]);
+            // }
 
             if ($request->has('on_default') && $request->on_default == 'on') {
                 $default_shipping_mode = User::where('id', $id)->update([
@@ -4812,6 +4866,7 @@ class AdminDashboardController extends Controller
                 ]);
             }
 
+            PendingSmsCharges::where('user_id', $id)->delete();
             PendingRateStatus::where('user_id', $id)->delete();
             PendingWeightCharge::where('user_id', $id)->delete();
             PendingBookingTypeCharges::where('user_id', $id)->delete();
@@ -4826,6 +4881,17 @@ class AdminDashboardController extends Controller
             PendingRateDestinationHub::where('user_id', $id)->delete();
             self::discounted_cod_and_return($request,$id,1,'default','delete');
 
+            if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
+                $smsRate = PendingSmsCharges::where('user_id' , $id)->get();
+                if ($smsRate->isEmpty()) {
+                    PendingSmsCharges::create([
+                        'user_id' => $id,
+                        'sms_charges' => $request->sms_charges,
+                        'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
+                    ]);
+                }
+
+            }
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $ONRateAlready = PendingRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
                 if ($ONRateAlready->isEmpty()) {
@@ -5829,6 +5895,14 @@ class AdminDashboardController extends Controller
                         $history_rate_destination_hub->save();
                     }
                 }
+                if($current_sms = User::where('id', $id)->where('sms_charges_status', 1)->first()){
+                    HistorySmsCharges::create([
+                        'user_id' => $id,
+                        'sms_charges' => $current_sms['sms_charges'],
+                        'sms_charges_status' => $current_sms['sms_charges_status']
+                        
+                    ]);
+                }
                 if ($switches = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
                     HistoryRateStatus::create([
@@ -6412,6 +6486,10 @@ class AdminDashboardController extends Controller
                 WmsPackingCharge::where('user_id', $id)->delete();
                 WmsLabellingCharge::where('user_id', $id)->delete();
 
+                User::where('id', $id)->update([
+                    'sms_charges'=> null,
+                    'sms_charges_status'=> 0,
+                ]);
                 RateStatus::where('user_id', $id)->delete();
                 WeightCharge::where('user_id', $id)->delete();
                 BookingTypeCharges::where('user_id', $id)->delete();
@@ -6445,6 +6523,12 @@ class AdminDashboardController extends Controller
                         $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
                         $rate_destination_hub->save();
                     }
+                }
+                if($pending_sms = PendingSmsCharges::where('user_id', $id)->first()){
+                    User::where('id', $id)->update([
+                        'sms_charges'=> $pending_sms->sms_charges,
+                        'sms_charges_status'=> $pending_sms->sms_charges_status,
+                    ]);
                 }
                 if ($pendingswitchs = PendingRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
                     RateStatus::create([
@@ -6990,7 +7074,7 @@ class AdminDashboardController extends Controller
                 WmsPendingStorageTypeCharge::where('user_id', $id)->delete();
                 WmsPendingPackingCharge::where('user_id', $id)->delete();
                 WmsPendingLabellingCharge::where('user_id', $id)->delete();
-
+                PendingSmsCharges::where('user_id', $id)->delete();
                 PendingRateStatus::where('user_id', $id)->delete();
                 PendingWeightCharge::where('user_id', $id)->delete();
                 PendingBookingTypeCharges::where('user_id', $id)->delete();
@@ -7015,8 +7099,17 @@ class AdminDashboardController extends Controller
 
                 }
 
+                $user = User::find($id);
+                if($user->sms_charges_status == 1) {
+                    $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                    foreach($notification_settings as $notification_setting ) {
+                        $notification_setting_shipper = new NotificationSettingShipper();
+                        $notification_setting_shipper->notification_setting_id = $notification_setting;
+                        $notification_setting_shipper->shipper_id = $id;
+                        $notification_setting_shipper->save();
+                    }
+                }
 
-                
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
@@ -7104,6 +7197,8 @@ class AdminDashboardController extends Controller
     public function addRates(Request $request, $id)
     {
         $messages = [
+            'sms_charges.required' => 'The sms charges field is required.',
+            'sms_charges.gt' => 'The sms charges must be greater than 0.',
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
             'on_wa_range_up.*.between' => 'The overnight range up field must be between 0 to 999.99',
@@ -7369,8 +7464,14 @@ class AdminDashboardController extends Controller
         $ol_validations = array();
         $detain_validations = array();
         $sameday_validations = array();
+        $sms_validations = array();
 
         $shipper_id = $id;
+        if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
+            $sms_validations = [
+                'sms_charges' => 'required|gt:0'
+            ];
+        }
         if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
             $on_validations = [
                 'on_wa_range_up.*' => 'required|numeric|between:0,100000',
@@ -7542,7 +7643,7 @@ class AdminDashboardController extends Controller
             ];
         }
 
-        $validations = array_merge($on_validations, $ol_validations, $detain_validations, $sameday_validations);
+        $validations = array_merge($on_validations, $ol_validations, $detain_validations, $sameday_validations, $sms_validations);
 
         $validate = Validator::make($request->all(), $validations, $messages);
 
@@ -7552,7 +7653,12 @@ class AdminDashboardController extends Controller
                 ->withInput();
         }
 
-
+        if($request->has('sms_main_switch') && $request->sms_main_switch == 'on') {
+            User::where('id', $id)->update([
+                'sms_charges' => $request->sms_charges,
+                'sms_charges_status' => ($request->has('sms_main_switch')) ? 1 : 0,
+            ]);
+        }
         if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
             if ($request->has('on_default') && $request->on_default == 'on') {
                 $default_shipping_mode = User::where('id', $id)->update([
@@ -8544,8 +8650,18 @@ class AdminDashboardController extends Controller
             }
         }
 
+        
 
-        User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+        if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
+            User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_authorized_by' => 346, 'rates_approved_at' => Carbon::now(), 'rates_added_at' => Carbon::now(), 'rate_status' => 0, 'request_custom_quotation' => 0, 'on_board_status' => 1]);
+        } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
+            User::where('id', $id)->update(['status' => 0, 'rate_status' => 0, 'request_custom_quotation' => 1, 'on_board_status' => 1]);
+            // NotificationsController::send(231, $id);
+        } else {
+            User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+        }
+        
+
         if ($request->has('rate_remarks') && $request->rate_remarks != null) {
             $rate_remark = new RateRemark();
             $rate_remark->user_id = $id;
@@ -9092,99 +9208,116 @@ class AdminDashboardController extends Controller
 
         if ($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0) {
             DwsWeightChargesController::approve($id);
-            User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => 32, 'rates_approved_at' => Carbon::now()]);
+
+            if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
+                User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_authorized_by' => 346, 'rates_approved_at' => Carbon::now(), 'rates_added_at' => Carbon::now(), 'rate_status' => 0, 'request_custom_quotation' => 0, 'on_board_status' => 1]);
+            } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
+                User::where('id', $id)->update(['status' => 0, 'rate_status' => 0, 'request_custom_quotation' => 1, 'on_board_status' => 1]);
+                NotificationsController::send(231, $id);
+
+            } else {
+                User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+            }
+            
         }
 
 
         //Sales Commisssion
-
-        if ($request->has('user_id')) {
-            $total_commission = $request->total_commission;
-            $users_count = count($request->user_id);
-
-            $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
-            if ($sales_commission->exists()) {
-                $sales_commission = $sales_commission->first();
-                $sales_commission->commission_users_count = $users_count;
-                $sales_commission->commission = $total_commission;
-                $sales_commission->updated_by = Auth::id();
-                $sales_commission->save();
-                $sales_commission_id = $sales_commission->id;
-                $actual_commission = 0;
-                SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
-                foreach ($request->tier_id as $row_id => $tier) {
-                    $sales_tier = SalesTier::find($tier);
-                    if ($sales_tier) {
-                        $sales_commission_user = new SalesCommissionUser();
-                        $sales_commission_user->sales_commission_id = $sales_commission_id;
-                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
-                        $sales_commission_user->tier_id = $tier;
-                        if ($sales_tier->tier_type == 1) {
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
-                                $sales_commission_user->user_type = "2";
-                            }  
-                            $sales_commission_user->user_id = $request->user_id[$row_id];
-                        }                        
-                        else if ($sales_tier->tier_type == 2) {
-                            $external_user = new SalesCommissionExternalUser();
-                            $external_user->name = $request->user_id[$row_id];
-                            $external_user->shipper_id = $shipper_id;
-                            $external_user->save();
-                            $sales_commission_user->user_id = $external_user->id;
+        if(!$request->has('wordpress_account')){
+            if ($request->has('user_id')) {
+                $total_commission = $request->total_commission;
+                $users_count = count($request->user_id);
+    
+                $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
+                if ($sales_commission->exists()) {
+                    $sales_commission = $sales_commission->first();
+                    $sales_commission->commission_users_count = $users_count;
+                    $sales_commission->commission = $total_commission;
+                    $sales_commission->updated_by = Auth::id();
+                    $sales_commission->save();
+                    $sales_commission_id = $sales_commission->id;
+                    $actual_commission = 0;
+                    SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
+                    foreach ($request->tier_id as $row_id => $tier) {
+                        $sales_tier = SalesTier::find($tier);
+                        if ($sales_tier) {
+                            $sales_commission_user = new SalesCommissionUser();
+                            $sales_commission_user->sales_commission_id = $sales_commission_id;
+                            $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                            $sales_commission_user->tier_id = $tier;
+                            if ($sales_tier->tier_type == 1) {
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
+                            }                        
+                            else if ($sales_tier->tier_type == 2) {
+                                $external_user = new SalesCommissionExternalUser();
+                                $external_user->name = $request->user_id[$row_id];
+                                $external_user->shipper_id = $shipper_id;
+                                $external_user->save();
+                                $sales_commission_user->user_id = $external_user->id;
+                            }
+                            $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                            $actual_commission += $request->commission_percentage[$row_id];
+                            $sales_commission_user->save();
                         }
-                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
-                        $actual_commission += $request->commission_percentage[$row_id];
-                        $sales_commission_user->save();
                     }
-                }
-                $sales_commission->commission = $actual_commission;
-                $sales_commission->save();
-
-            } else {
-                $sales_commission = new SalesCommission();
-                $sales_commission->shipper_id = $shipper_id;
-                $sales_commission->commission_users_count = $users_count;
-                $sales_commission->commission = $total_commission;
-                $sales_commission->updated_by = Auth::id();
-                $sales_commission->save();
-                $sales_commission_id = $sales_commission->id;
-                $actual_commission = 0;
-                foreach ($request->tier_id as $row_id => $tier) {
-                    $sales_tier = SalesTier::find($tier);
-                    if ($sales_tier) {
-                        $sales_commission_user = new SalesCommissionUser();
-                        $sales_commission_user->sales_commission_id = $sales_commission_id;
-                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
-                        $sales_commission_user->tier_id = $tier;
-                        if ($sales_tier->tier_type == 1) {
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
-                                $sales_commission_user->user_type = "2";
-                            }  
-                            $sales_commission_user->user_id = $request->user_id[$row_id];         
-                        } else if ($sales_tier->tier_type == 2) {
-                            $external_user = new SalesCommissionExternalUser();
-                            $external_user->name = $request->user_id[$row_id];
-                            $external_user->shipper_id = $shipper_id;
-                            $external_user->save();
-                            $sales_commission_user->user_id = $external_user->id;
+                    $sales_commission->commission = $actual_commission;
+                    $sales_commission->save();
+    
+                } else {
+                    $sales_commission = new SalesCommission();
+                    $sales_commission->shipper_id = $shipper_id;
+                    $sales_commission->commission_users_count = $users_count;
+                    $sales_commission->commission = $total_commission;
+                    $sales_commission->updated_by = Auth::id();
+                    $sales_commission->save();
+                    $sales_commission_id = $sales_commission->id;
+                    $actual_commission = 0;
+                    foreach ($request->tier_id as $row_id => $tier) {
+                        $sales_tier = SalesTier::find($tier);
+                        if ($sales_tier) {
+                            $sales_commission_user = new SalesCommissionUser();
+                            $sales_commission_user->sales_commission_id = $sales_commission_id;
+                            $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                            $sales_commission_user->tier_id = $tier;
+                            if ($sales_tier->tier_type == 1) {
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                $sales_commission_user->user_id = $request->user_id[$row_id];         
+                            } else if ($sales_tier->tier_type == 2) {
+                                $external_user = new SalesCommissionExternalUser();
+                                $external_user->name = $request->user_id[$row_id];
+                                $external_user->shipper_id = $shipper_id;
+                                $external_user->save();
+                                $sales_commission_user->user_id = $external_user->id;
+                            }
+                            $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                            $actual_commission += $request->commission_percentage[$row_id];
+                            $sales_commission_user->save();
                         }
-                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
-                        $actual_commission += $request->commission_percentage[$row_id];
-                        $sales_commission_user->save();
                     }
+                    $sales_commission->commission = $actual_commission;
+                    $sales_commission->save();
                 }
-                $sales_commission->commission = $actual_commission;
-                $sales_commission->save();
+    
             }
-
         }
+
+      
 
 
         //Sales Commissison End
 
-        NotificationsController::send(38, $id);
-
-        return redirect(route('admin.accounts.pending'))->with('success', 'All Rates are added');
+        if(!$request->has('wordpress_account')){
+            $user =  User::find($id);
+            if(!isset($user->on_board_status)){
+                NotificationsController::send(38, $id);
+            }
+            return redirect(route('admin.accounts.pending'))->with('success', 'All Rates are added');
+        }
     }
 
 
@@ -9377,7 +9510,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
             ->leftjoin('block_disable_reason_users as bdru', 'bdru.id', '=', 'users.disable_reason_1')
-            ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason'])
+            ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason','users.sms_charges'])
             ->whereIn('users.status', [3, 4])
             ->where('users.blacklist', 0)
             ->groupBy('users.id');
@@ -9590,39 +9723,6 @@ class AdminDashboardController extends Controller
                     return '-';
                 }
             })
-            ->editColumn('kam', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
-                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
-                
-                if (isset($shipper, $sales_tiers)) {
-                    $sales_commission_users = DB::table('sales_commission_users')
-                        ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-                        ->get();
-                
-                    if ($sales_commission_users->isNotEmpty()) {
-                        $array = [];
-                        foreach ($sales_commission_users as $sales_commission_user) {
-                            $type = $sales_commission_user->user_type;
-                            $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-                            if ($admins) {
-                                $array[] = $admins->name;
-                            } else {
-                                return '-';
-                            }
-                        }
-                        $old_kam = explode(', ', $users->kam);
-                        $new_array = array_unique(array_merge($array, $old_kam));
-                        $new_array = implode(', ', $new_array);
-                        
-                        $array = implode(', ', $array);
-                        return $array;
-                    } else {
-                        return $users->kam;
-                    }
-                } else {
-                    return $users->kam;
-                }
-            })
             ->filterColumn('r.name', function ($query, $keyword) {
                 $query->where('r.name', $keyword)
                 ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
@@ -9630,8 +9730,7 @@ class AdminDashboardController extends Controller
 
 
             ->filterColumn('k.name', function ($query, $keyword) {
-                $query->where('k.name', $keyword)
-                ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
+                $query->where('k.name', $keyword);
             })
 
   
@@ -9973,6 +10072,9 @@ class AdminDashboardController extends Controller
                     if (session('role_id') == 1 || in_array(619, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
                     }
+                    if (session('role_id') == 1 || in_array(998, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item faf_charges_status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Faf Charges</div></button>';
+                    }
 
                     if (session('role_id') == 1 || in_array(660, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item auto_cancel_days_setting"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Auto Cancel Days</div></button>';
@@ -10050,7 +10152,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as e', 'e.id', '=', 'st.eso')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)->groupBy('users.id');
+            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type' , 'users.sms_charges'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)->groupBy('users.id');
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -10115,6 +10217,8 @@ class AdminDashboardController extends Controller
                     return "Authorized";
                 } else if ($users->rate_status == 0 && $users->status == 1) {
                     return "Requested";
+                } else if ($users->rate_status == 0 && $users->status == 0) {
+                    return "Requested For Custom Quotation";
                 }
             })
             ->editColumn('documents_status', function ($users) {
@@ -10233,38 +10337,6 @@ class AdminDashboardController extends Controller
                 }
 
             })
-            
-            ->editColumn('kam', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
-                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
-                
-                if (isset($shipper, $sales_tiers)) {
-                    $sales_commission_users = DB::table('sales_commission_users')
-                    ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-                    ->get();
-
-                    if ($sales_commission_users->isNotEmpty()) {
-                        $array = [];
-                        foreach ($sales_commission_users as $sales_commission_user) {
-                            $type = $sales_commission_user->user_type;
-                            $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-                            if ($admins) {
-                                $array[] = $admins->name;
-                            } else {
-                                return '-';
-                            }
-                        }
-                        $array = implode(', ', $array);
-                        return $array;
-                    } else {
-                        return $users->kam;
-                    }
-                } else {
-                    return $users->kam;
-                }
-
-            })
-
 
             ->filterColumn('r.name', function ($query, $keyword) {
                 $query->where('r.name', $keyword)
@@ -10273,8 +10345,7 @@ class AdminDashboardController extends Controller
 
 
             ->filterColumn('k.name', function ($query, $keyword) {
-                $query->where('k.name', $keyword)
-                ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
+                $query->where('k.name', $keyword);
             })
 
   
@@ -10569,7 +10640,9 @@ class AdminDashboardController extends Controller
                 if (session('role_id') == 1 || in_array(619, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
                 }
-
+                if (session('role_id') == 1 || in_array(998, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item faf_charges_status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Faf Charges</div></button>';
+                }
 
                 if (session('role_id') == 1 || in_array(856, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
@@ -14594,6 +14667,25 @@ class AdminDashboardController extends Controller
             }
             AdminHub::insert($data);
         }
+    }
+
+    public function faf_charges_info(Request $request)
+    {
+        $faf_charges = FafCharges::where('user_id',$request->user_id)->first();
+        return response()->json(['status' => !empty($faf_charges->status) ? $faf_charges->status : 0]);
+    }
+    public function faf_charges_submit(Request $request)
+    {
+        $faf_charges_checkbox = isset($request->faf_charges_checkbox) ? 1 : 0;
+        $faf_charges = FafCharges::where('user_id',$request->user_id)->first();
+        if(empty($faf_charges)){
+            $faf_charges = new FafCharges();
+        }
+        $faf_charges->user_id =$request->user_id;
+        $faf_charges->status =$faf_charges_checkbox;
+        $faf_charges->save();
+
+        return redirect()->back()->with('success', 'FAF Charges Status Updated');
     }
     
 }

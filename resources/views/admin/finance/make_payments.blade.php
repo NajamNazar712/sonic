@@ -171,6 +171,7 @@
                                         <th class="border-primary border-darken-1">Total WHT</th>
                                         {{--										<th class="border-primary border-darken-1">Packing Charges</th> --}}
                                         {{--										<th class="border-primary border-darken-1">Fintech Charges</th> --}}
+                                        <th class="border-primary border-darken-1">Total Per SMS Charges</th>
                                         <th class="border-primary border-darken-1">Total Deductable</th>
                                         <th class="border-primary border-darken-1">Total Payable</th>
                                         <th class="border-primary border-darken-1">Bank</th>
@@ -354,6 +355,7 @@
                                                         <th class="border-primary border-darken-1">Charges</th>
                                                         <th class="border-primary border-darken-1">GST</th>
                                                         <th class="border-primary border-darken-1">WHT</th>
+                                                        <th class="border-primary border-darken-1">SMS Charges</th>
                                                         <th class="border-primary border-darken-1">Fintech Charges</th>
                                                         <th class="border-primary border-darken-1">Packing Charges</th>
                                                         <th class="border-primary border-darken-1">Deductible</th>
@@ -669,6 +671,7 @@
                             head.push('Total Charges');
                             head.push('Total GST');
                             head.push('Total WHT');
+                            head.push('Total Per SMS Charges');
                             // head.push('Packing Charges');
                             head.push('Total Deductable');
                             head.push('Total Payable');
@@ -700,6 +703,7 @@
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
                                 row.push(values.total_wht);
+                                row.push(values.total_sms_charges);
                                 // row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
                                 row.push(values.total_payable);
@@ -1025,6 +1029,12 @@
                     // {data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
                     // {data:'fintech_charges', name: 's.fintech_charges', class: 'align-middle text-center fintech_charges'},
                     {
+                        data: 'total_sms_charges',
+                        name: 'ppc.sms_charges',
+                        class: 'align-middle text-center total_sms_charges',
+                        orderable: false
+                    },
+                    {
                         data: 'total_deductable',
                         name: 'total_deductable',
                         class: 'align-middle text-center total_deductable',
@@ -1142,7 +1152,7 @@
                             '.total_adjustments') || $(header).is(
                                 '.return_shipments_average_aging') || $(header).is('.action') ||
                             $(header).is('.total_pending_shipments') || $(header).is(
-                                '.packaging_charges') || $(header).is('.total_wht')) {
+                                '.packaging_charges') || $(header).is('.total_wht') || $(header).is('.total_sms_charges') ) {
                             $(td).appendTo($(search));
                         } else if ($(header).is('.bank')) {
                             $(bank_select).appendTo($(search))
@@ -1438,6 +1448,11 @@
                         class: 'align-middle wht'
                     },
                     {
+                        data: 'sms_charges',
+                        name: 'pending_payment_shipments.sms_charges',
+                        class: 'align-middle sms_charges'
+                    },
+                    {
                         data: 'fintech_charges',
                         name: 'fintech_charges',
                         class: 'align-middle fintech_charges'
@@ -1496,7 +1511,7 @@
                         var header = column.header();
 
                         if ($(header).is('.select') || $(header).is('.serial_number') || $(
-                                header).is('.aging')) {
+                                header).is('.aging') ) {
                             $(td).appendTo($(search));
                         } else if ($(header).is('.type')) {
                             $(drop_select).appendTo($(search))
@@ -1748,7 +1763,7 @@
                         })
                         .done(function(data) {
                             var details =
-                                '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Packing Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
+                                '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">SMS Charges</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Packing Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
 
                             $.each(data, function(index, detail) {
                                 details += '<tr>';
@@ -1762,6 +1777,8 @@
                                     .charges + '</td>';
                                 details += '<td class="align-middle text-center">' + detail
                                     .gst + '</td>';
+                                details += '<td class="align-middle text-center">' + detail
+                                    .sms_charges + '</td>';
                                 details += '<td class="align-middle text-center">' + detail
                                     .fintech_charges + '</td>';
                                 details += '<td class="align-middle text-center">' + detail

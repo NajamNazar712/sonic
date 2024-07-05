@@ -71,6 +71,7 @@
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
                                         {{-- <th class="border-primary border-darken-1">ESO Tagged</th> --}}
+                                        <th class="border-primary border-darken-1">SMS charges per shipment</th>
                                         <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
@@ -574,6 +575,36 @@
 </div>
 {{-- End --}}
 
+    <div class="modal fade text-left" id="faf_charges_modal" data-backdrop="static" role="dialog" aria-labelledby=""
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">FaF Charges</h4>
+                </div>
+                <form id="faf_charges_form" class="form" novalidate="novalidate" method="post" action="{{ route('admin.accounts.faf_charges.submit') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="col text-center">
+                            <label class="font-medium-2 font-weight-bold block">Apply FAF Charges</label>
+                            <div class="form-group">
+                                <input type="hidden" name="user_id" id="faf_charges_user_id">
+                                <label for="" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                <input type="checkbox" name="faf_charges_checkbox" id="faf_charges_checkbox" class="switchery faf_charges_checkbox" data-size="sm" data-switchery="true">
+                                <label for="" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="faf_charges_submit">Submit</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
 
 
 
@@ -747,7 +778,21 @@
             $('#user_commission').attr('disabled', true)
         } else {
             $('#user_commission').val('');
-            $('#user_commission').attr('disabled', false)
+            if($('#sales_tier_select').val() == 3){
+                $('#user_commission').attr('disabled', true)
+                $('#user_commission').val('0');
+            }
+            else
+            {
+                $('#user_commission').attr('disabled', false)
+                $('#user_commission').val('');
+            }
+
+            if($('#user_select').val() != '')
+            {
+                $('#commission_add_button').attr('disabled', false);
+            }
+            
         }
         var index = $.inArray(id, selected_users);
         if (index !== -1) {
@@ -777,6 +822,17 @@
             $('#user_select').attr('disabled', false);
         } else {
             $('#external_person_name').attr('disabled', false);
+        }
+
+        if($(this).val() == 3)
+        {
+            $('#user_commission').attr('disabled', true);
+            $('#user_commission').val('0');
+        }
+        else
+        {
+            $('#user_commission').attr('disabled', false);
+            $('#user_commission').val('');
         }
 
     });
@@ -906,6 +962,20 @@
                     if(is_kam == 'KAM'){
                         kam_count+=1;
                     }
+
+                    if(tier_id == 3)
+                    {
+                        if($('#user_select').val() == '')
+                        {
+                            var error = 'Please select user!';
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                                });
+                                return 0;
+                        }
+                    }
+
                     add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
                     $('#sales_tier_select').val(null).trigger('change');
                     $('#user_select').val(null).trigger('change');
@@ -1115,6 +1185,7 @@
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
                         // head.push('ESO Tagged');
+                        head.push('SMS charges per shipment');
                         head.push('Rate Status');
                         head.push('Rates Status Remarks');
                         head.push('Rates Added By');
@@ -1160,6 +1231,7 @@
                             row.push(values.kam);
                             row.push(values.ref+' - ' + values.rider_id);
                             // row.push(values.eso);
+                            row.push(values.sms_charges);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);
                             row.push(values.rates_added_by);
@@ -1635,6 +1707,7 @@
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
                 // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
+                {data: 'sms_charges', name: 'users.sms_charges', class: 'align-middle sms_charges'},
                 {data: 'rate_status', name: 'users.rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
@@ -1726,8 +1799,7 @@
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        }
-                    else {
+                    } else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
                         }).wrap(td).after(icon);
@@ -1744,6 +1816,12 @@
                     dropdownCssClass: 'form-control-sm p-0'
                 });
                 $("#status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $("#sms_charges_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
                     width:'100%',
                     containerCssClass: 'select-xs',
@@ -2083,7 +2161,6 @@
                     .done(function(data) {
                         if(data.status){
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
                         }
                         else {
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -2095,7 +2172,7 @@
                     });
             }else{
                 var error = "Sales Person Not Selected!";
-                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                toastr.error('error', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
             }
 
         });
@@ -2352,6 +2429,32 @@
                             }
                             $('#restrict_user_id').val(id);
                             $('#RestrictOrderIDModal').modal('show');
+                        });
+                }
+            }
+        });
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            var id = $(this).parents('tr').attr('id');
+            if($(this).hasClass('faf_charges_status')){
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.accounts.faf_charges.info') !!}',
+                        method: 'POST',
+                        data: {
+                            'user_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            $('#faf_charges_checkbox').prop('checked',false);
+                            if (data.status == 1) {
+                                $('#faf_charges_checkbox').click();
+                            }
+                            $('#faf_charges_user_id').val(id);
+                            $('#faf_charges_modal').modal('show');
+
+
                         });
                 }
             }

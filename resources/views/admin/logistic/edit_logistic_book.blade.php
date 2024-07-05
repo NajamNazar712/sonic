@@ -57,7 +57,7 @@
                                                         <div class="form-group">
                                                             <label>Customer</label>
                                                             <select class="select select2 mb-1" name="shipper_id" id="shipper_select">
-                                                                @foreach ($shippers as $shipper)
+                                                                @foreach ($shipper as $single_shipper)
                                                                     <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
                                                                 @endforeach
                                                             </select>
@@ -113,7 +113,7 @@
                                                     <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Total Pieces</label>
-                                                            <input type="text" name="total_pieces" class="form-control" value="{{$logistic_booking->total_pieces}}" readonly>
+                                                            <input type="text" name="total_pieces" class="form-control" value="{{$logistic_booking->total_pieces}}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-3">
@@ -139,6 +139,12 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-group">
+                                                        <label>Order ID</label>
+                                                        <input type="text" name="shipper_reference" class="form-control" value="{{$logistic_booking->shipper_reference}}" >
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
                                                         <label>Pay Mode</label>
                                                         <select class="select select2 mb-1" name="payment_mode_id" id="payment_mode_select">
                                                             @foreach ($payment_modes as $paymentmode)
@@ -157,7 +163,7 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Handling Instructions</label>
                                                         <input type="text" name="handling_inst" class="form-control "  value="{{$logistic_booking->handling_inst}}" >
@@ -775,7 +781,7 @@
         $('#service_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
             width: '100%',
             placeholder: 'Select Service'
-        }).val(bookings.product_id).trigger('change');
+        }).val(bookings.service_id).trigger('change');
         {{--.bind('change',function(){--}}
         {{--    var product_id = parseInt($(this).val());--}}
         {{--    $.ajax({--}}
@@ -826,6 +832,7 @@
            width: '100%',
            placeholder: 'Select Rider'
         }).val(bookings.rider_id).trigger('change');
+
 
 
 
