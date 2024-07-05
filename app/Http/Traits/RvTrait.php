@@ -355,6 +355,12 @@ trait RvTrait
             }
 
             $shipment_assign_agent_table_columns['call_count'] = (($shipment_assign_agent->call_count ?? 0) + 1);
+            
+            if($shipment_assign_agent_table_columns['call_count'] == 1)
+            {
+                $timeDifferenceInMinutes = Carbon::now()->diffInMinutes($shipment_assign_agent->created_at);
+                $shipment_assign_agent_table_columns['first_call_time_mins'] = $timeDifferenceInMinutes;
+            }
 
             $shipment_assign_agent->update($shipment_assign_agent_table_columns);
 
