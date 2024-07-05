@@ -26,7 +26,7 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //Only use for the marked as delivered....
         $shipmentId = [
-            20220238042545
+            202341037969013, 20220237923714
         ];
         echo count($shipmentId);
         if ($shipmentId) {
@@ -62,7 +62,7 @@ class JourneyMissingEntrySeeder extends Seeder
                         $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
                         $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
 
-                        // $pending_payment->save();
+                        $pending_payment->save();
                     } else {
                         $pending_payment = new PendingPayment();
 
