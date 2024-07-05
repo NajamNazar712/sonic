@@ -696,7 +696,7 @@ class ShipperDashboardController extends Controller
             ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1) and created_at'))
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'))
                         ->where('shipments_journey.created_at', '>=', Carbon::now()->subMonth(6)) // Add created_at condition here
                         ->where('shipments_journey.created_at', '<=', Carbon::now()); // Assuming you have these variables set
  
