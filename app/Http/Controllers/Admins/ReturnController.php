@@ -437,9 +437,19 @@ class ReturnController extends Controller
 
 
         //Average First Call Time
-        $average_first_call_time = ShipmentsJourney::join('rv_shipment_assign_agents', 'shipments_journey.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
-            ->where('shipments_journey.shipper_status_id', 12)
-            ->avg(DB::raw('TIMESTAMPDIFF(MINUTE, shipments_journey.created_at, rv_shipment_assign_agents.created_at)'));
+        // $average_first_call_time = ShipmentsJourney::join('rv_shipment_assign_agents', 'shipments_journey.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+        // ->where('shipments_journey.shipper_status_id', 12)
+        // ->avg(DB::raw('TIMESTAMPDIFF(MINUTE, shipments_journey.created_at, rv_shipment_assign_agents.created_at)'));
+        $average_first_call_time = DB::table('rv_shipment_assign_agents as rsa')
+        ->join(DB::raw('(
+            SELECT MIN(id) as min_id, shipment_id
+            FROM rv_shipment_assign_agent_details
+            WHERE call_count = 1
+            GROUP BY shipment_id
+        ) first_rad'), 'rsa.shipment_id', '=', 'first_rad.shipment_id')
+        ->join('rv_shipment_assign_agent_details as rad', 'rad.id', '=', 'first_rad.min_id')
+        ->select(DB::raw('AVG(TIMESTAMPDIFF(MINUTE, rsa.created_at, rad.created_at)) as average_minutes_diff'))
+        ->value('average_minutes_diff');
 
         $hours = floor($average_first_call_time / 60);
         $minutes = ($average_first_call_time % 60);
