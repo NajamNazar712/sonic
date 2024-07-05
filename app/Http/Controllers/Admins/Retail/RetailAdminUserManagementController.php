@@ -984,13 +984,13 @@ class RetailAdminUserManagementController extends Controller
 
             // Withholding tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Withholding Income Tax ' . $data->withholding_tax_percent . '%</td>';
+            $html .= '<td class="text-center" colspan="6">Withholding Income Tax ' . ($data->withholding_tax_percent ?? 0) . '%</td>';
             $html .= '<td>' . $withholding_amount . '</td>';
             $html .= '</tr>';
 
             // Deduction GST tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Commission GST Deduction ' . $data->commission_gst_deduction_percent . '%</td>';
+            $html .= '<td class="text-center" colspan="6">Commission GST Deduction ' . ($data->commission_gst_deduction_percent ?? 0) . '%</td>';
             $html .= '<td>' . $deduction_amount . '</td>';
             $html .= '</tr>';
 
@@ -1017,12 +1017,13 @@ class RetailAdminUserManagementController extends Controller
             $html .= '</tr>';
             $html .= '</thead>';
             $html .= '<tbody>';
-            $html .= '<tr><td>Security Deposit</td><td>' . $franchise_charges->security_deposit . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->security_cheque_number . '</td></tr>';
-            $html .= '<tr><td>License Fees</td><td>' . $franchise_charges->license_fees . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->license_cheque_number . '</td></tr>';
+            $html .= '<tr><td>Security Deposit</td><td>' . ($franchise_charges->security_deposit ?? 0) . '</td><td>' . ($franchise_charges->bank_name ?? '') . '</td><td>' . ($franchise_charges->security_cheque_number ?? '') . '</td></tr>';
+            $html .= '<tr><td>License Fees</td><td>' . ($franchise_charges->license_fees ?? 0) . '</td><td>' . ($franchise_charges->bank_name ?? '') . '</td><td>' . ($franchise_charges->license_cheque_number ?? '') . '</td></tr>';
             $html .= '</tbody>';
             $html .= '</table>';
             $html .= '</div>';
             $html .= '</div>';
+
 
             // Fourth table: Pending Sales
             $html .= '<div class="row align-items-start justify-content-between summary">';

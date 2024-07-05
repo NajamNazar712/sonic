@@ -191,7 +191,7 @@
                                             action: function () {
                                                 var selectedFranchiseNames = [];
                                                 $('#datatable > tbody > .selected').each(function(index){
-                                                    var franchiseCode = $(this).find('td:eq(1)').text().trim();
+                                                    var franchiseCode = $(this).find('.hidden-id').val().trim();
                                                     if (franchiseCode) {
                                                         selectedFranchiseNames.push(franchiseCode);
                                                     }
@@ -227,16 +227,24 @@
                                     searching: false,
                                     columns: [
                                         {
-                                            data: '',
+                                            data: 'id',
                                             defaultContent: '',
                                             orderable: false,
                                             searchable: false,
                                             class: 'text-center align-middle select select-checkbox',
                                             render: function (data, type, row) {
-                                                return '<input type="checkbox" class="select-checkbox d-none" />';
+                                                return '<input type="checkbox" class="select-checkbox d-none" /><input type="hidden" class="hidden-id" value="' + data + '" />';
                                             }
                                         },
-                                        { data: 'id' },
+                                        {
+                                            data: null,
+                                            orderable: false,
+                                            searchable: false,
+                                            class: 'text-center align-middle',
+                                            render: function (data, type, row, meta) {
+                                                return meta.row + 1;
+                                            }
+                                        },
                                         { data: 'retail_shipping_mode_name' },
                                         { data: 'franchise_name' },
                                         { data: 'franchise_address' },
@@ -339,7 +347,7 @@
                                             action: function () {
                                                 var selectedFranchiseNames = [];
                                                 $('#datatable > tbody > .selected').each(function(index){
-                                                    var franchiseName = $(this).find('td:eq(1)').text().trim();
+                                                    var franchiseName = $(this).find('.hidden-id').val().trim();
                                                     if (franchiseName) {
                                                         selectedFranchiseNames.push(franchiseName);
                                                     }
@@ -377,16 +385,24 @@
                                     searching: false,
                                     columns: [
                                         {
-                                            data: '',
+                                            data: 'id',
                                             defaultContent: '',
                                             orderable: false,
                                             searchable: false,
                                             class: 'text-center align-middle select select-checkbox',
                                             render: function (data, type, row) {
-                                                return '<input type="checkbox" class="select-checkbox d-none" />';
+                                                return '<input type="checkbox" class="select-checkbox d-none" /><input type="hidden" class="hidden-id" value="' + data + '" />';
                                             }
                                         },
-                                        { data: 'id' },
+                                        {
+                                            data: null,
+                                            orderable: false,
+                                            searchable: false,
+                                            class: 'text-center align-middle',
+                                            render: function (data, type, row, meta) {
+                                                return meta.row + 1;
+                                            }
+                                        },
                                         { data: 'trax_center_name' },
                                         { data: 'franchise_code' },
                                         { data: 'trax_center_cnic' },

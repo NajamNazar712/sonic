@@ -398,8 +398,8 @@
                                     action: function () {
                                         var selectedFranchiseCodes = [];
                                         var selectedProductName = [];
-                                        $('#datatable > tbody > .selected').each(function(index){
-                                            var franchiseCode = $(this).find('td:eq(1)').text().trim();
+                                        $('#datatable > tbody > .selected').each(function(index) {
+                                            var franchiseCode = $(this).find('.hidden-id').val().trim();
                                             var productName = $(this).find('td:eq(1)').text().trim();
                                             if (franchiseCode) {
                                                 selectedFranchiseCodes.push(franchiseCode);
@@ -439,16 +439,23 @@
                             searching: false,
                             columns: [
                                 {
-                                    data: '',
-                                    defaultContent: '',
+                                    data: 'id',
                                     orderable: false,
                                     searchable: false,
                                     class: 'text-center align-middle select select-checkbox',
                                     render: function (data, type, row) {
-                                        return '<input type="checkbox" class="select-checkbox d-none" />';
+                                        return '<input type="checkbox" class="select-checkbox d-none" /><input type="hidden" class="hidden-id" value="' + data + '" />';
                                     }
                                 },
-                                { data: 'id' },
+                                {
+                                    data: null,
+                                    orderable: false,
+                                    searchable: false,
+                                    class: 'text-center align-middle',
+                                    render: function (data, type, row, meta) {
+                                        return meta.row + 1;
+                                    }
+                                },
                                 { data: 'retail_shipping_mode_name' },
                                 { data: 'franchise_name' },
                                 { data: 'franchise_address' },

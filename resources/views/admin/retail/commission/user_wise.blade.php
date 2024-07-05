@@ -341,16 +341,23 @@
                             searching: false,
                             columns: [
                                 {
-                                    data: '',
-                                    defaultContent: '',
+                                    data: 'id',
                                     orderable: false,
                                     searchable: false,
                                     class: 'text-center align-middle select select-checkbox',
                                     render: function (data, type, row) {
-                                        return '<input type="checkbox" class="select-checkbox d-none" />';
+                                        return '<input type="checkbox" class="select-checkbox d-none" /><input type="hidden" class="hidden-id" value="' + data + '" />';
                                     }
                                 },
-                                { data: 'id' },
+                                {
+                                    data: null,
+                                    orderable: false,
+                                    searchable: false,
+                                    class: 'text-center align-middle',
+                                    render: function (data, type, row, meta) {
+                                        return meta.row + 1;
+                                    }
+                                },
                                 { data: 'trax_center_name' },
                                 { data: 'franchise_code' },
                                 { data: 'trax_center_cnic' },
