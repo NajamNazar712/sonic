@@ -19044,69 +19044,6 @@ class AdminFinanceController extends Controller
         return view('admin.finance.payment')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'shipper_cap' => $shipper_cap]);
     }
 
-
-
-
-
-
-    // public function payment_list(Request $request)
-    // {
-    //     $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
-    //         ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-    //         ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-    //         ->join('users as u', 's.user_id', '=', 'u.id')
-    //         ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
-    //         ->leftjoin('shipment_fintech_charges as sfc', function ($join) {
-    //             $join->on('sfc.shipment_id', '=', 's.id')
-    //                 ->where('sfc.applied_to', '=', 1);
-    //         })
-    //         ->leftjoin('consolidation_shipments as consolidations', function ($join) {
-    //             $join->on('consolidations.shipment_id', '=', 's.id')
-    //                 ->where('consolidations.consolidation_id', '=',
-    //                     DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
-    //         })
-    //         ->leftJoin('shipments_journey as sj', function ($join) {
-    //             $join->on('sj.shipment_id', '=', 's.id')
-    //                 ->where('sj.id', '=',
-    //                     DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
-    //         })
-    //         ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id', 'sj.created_at as arrival_date', 's.packaging_charges', 'u.id as shipper_id','u.account_type_id');
-
-    //     if ($request->has('ids')) {
-    //         $pending_payments = PendingPayment::whereIn('user_id', $request->ids)->get();
-    //         $pending_payment_ids = $pending_payments->pluck('id'); 
-    //         $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $pending_payment_ids);
-    //         // $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
-    //     } else {
-    //         $pending_payment_shipments->whereRaw('FALSE');
-    //     }
-    //     if ($request->has('pickup_address_id')) {
-    //         $pending_payment_shipments->where('s.pickup_address_id', $request->pickup_address_id);
-    //     }
-
-    //     $data = $pending_payment_shipments->get();
-
-    //     // showing account type names based on id
-    //     $data->transform(function($item) {
-    //         if ($item->account_type_id == 1) {
-    //             $item->account_type_text = 'Reimbursement Account';
-    //         } else if ($item->account_type_id == 2) {
-    //             $item->account_type_text = 'Corporate Invoicing Account';
-    //         }
-    //         return $item;
-    //     });
-
-    //     return response()->json([
-    //         'data' => $data
-    //     ]);
-    // }
-
-
-
-
-
-
-
     public function payment_list(Request $request)
     {
         $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
@@ -19128,7 +19065,30 @@ class AdminFinanceController extends Controller
                     ->where('sj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id', 'sj.created_at as arrival_date', 's.packaging_charges', 'u.id as shipper_id','u.account_type_id');
+            // ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id', 'sj.created_at as arrival_date', 's.packaging_charges', 'u.id as shipper_id','u.account_type_id');
+            ->select(
+                'sfc.fintech_charges as fintech_charges',
+                'pending_payment_shipments.id',
+                'u.name as shipper',
+                's.tracking_number as shipment',
+                's.id as ShipmentID',
+                'pending_payment_shipments.type',
+                'ss.name as status',
+                'pending_payment_shipments.created_at',
+                'pending_payment_shipments.amount',
+                'pending_payment_shipments.charges',
+                'pending_payment_shipments.gst',
+                'pending_payment_shipments.wht',
+                'pending_payment_shipments.payable',
+                'consolidations.consolidation_id',
+                'oc.name as origin',
+                'u.account_type_id',
+                's.pickup_address_id',
+                'sj.created_at as arrival_date',
+                's.packaging_charges',
+                'u.id as shipper_id',
+                'u.account_type_id'
+            );
 
         if ($request->ajax() && $request->has('ids')) {
             $pending_payments = PendingPayment::whereIn('user_id', $request->ids)->get();
@@ -19213,11 +19173,84 @@ class AdminFinanceController extends Controller
         return $datatables->make(true);
     }
 
+    public function fetch_shipper_ibft_charges_new(Request $request)
+    {
+        $shipper_ids = $request->selected_shippers_id;
+        $total_ibft_charges = 0;
+        foreach ($shipper_ids as $shipper_id) {
+            $fetch_ibft_charges = UserIbftCharge::where('user_id', $shipper_id)->first();
+            if ($fetch_ibft_charges && $fetch_ibft_charges->current_charges > 0) {
+                $ibft_charges = $fetch_ibft_charges->current_charges;
+                $total_ibft_charges += $ibft_charges;
+            } else {
+                $user_ibft_charges = GlobalSettings::where('type', 'ibft_charges')->select('setting_value')->first();
+                $ibft_charges = $user_ibft_charges->setting_value ?? 0;
+                $total_ibft_charges += $ibft_charges;
+            }
+        }
+        return $total_ibft_charges;
+    }
 
+    public function make_payments_shipment_export_selected_new(Request $request)
+    {
+        $pending_payment_shipment_ids = explode(',', $request->ids);
+        $filename = 'sonic_pending_payment_shipments';
+        $details = array();
+        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin', 'Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'WHT', 'Packing Charges', 'Deductable', 'Payable', 'Arrival Date'];
+        $serial_number = 1;
 
+        foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
+            $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
+            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+            $shipment = $pending_payment_shipment->shipment;
+            if ($pending_payment_shipment->type == 0) {
+                $type = 'Delivered';
+            } else if ($pending_payment_shipment->type == 1) {
+                $type = 'Returned';
+            } else {
+                $type = 'Adjusted';
+            }
 
+            $now = Carbon::now()->startOfDay();
+            $created_at = Carbon::parse($pending_payment_shipment->created_at)->startOfDay();
+            $aging = $created_at->diffInDays($now) . 'd';
+            $arrival_date = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2)->first();
 
+            $row = array();
+            $row[] = $serial_number;
+            $row[] = $shipment->user->name;
+            $row[] = $shipment->tracking_number;
+            $row[] = $shipment->pickup_address->city->name;
+            $row[] = $type;
+            $row[] = $shipment->status_shipper->name;
+            $row[] = $pending_payment_shipment->created_at;
+            $row[] = $aging;
+            $row[] = $pending_payment_shipment->amount;
+            $row[] = $pending_payment_shipment->charges;
+            $row[] = $pending_payment_shipment->gst;
+            $row[] = $pending_payment_shipment->wht;
+            $row[] = $shipment->packaging_charges;
+            $row[] = ($pending_payment_shipment->charges + $pending_payment_shipment->gst);
+            $row[] = $pending_payment_shipment->payable;
+            $row[] = ($arrival_date) ? $arrival_date->created_at : '';
+            $serial_number++;
+            $details[] = $row;
+        }
 
+        $filename .= '.xlsx';
+        $spreadsheet = new Spreadsheet();
 
-
+        $spreadsheet->getActiveSheet()->getStyle('C')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->fromArray($details);
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+    }
 }

@@ -731,6 +731,8 @@
                 @if (session('role_id') == 1 || in_array(60, session('permissions')))
 
                     buttons: [
+
+
                         // {
                         //     text: 'Make Payment(s)',
                         //     className: 'btn btn-primary make_payment',
@@ -775,6 +777,9 @@
                         //     }
                         // },
 
+
+
+
                         {
                             text: 'Make Payment(s)',
                             className: 'btn btn-primary make_payment',
@@ -809,12 +814,17 @@
                             }
                         },
 
+
+
+
                         {
                             extend: 'excel',
                             title: 'Make Payments',
                             className: 'btn btn-primary',
                             text: '<i class="la la-file-excel-o"></i> Excel',
-                        }, {
+                        }, 
+                        
+                        {
                             extend: 'selectAll',
                             text: 'Select All',
                             className: 'select_all',
@@ -840,7 +850,9 @@
                                     }
                                 });
                             }
-                        }, {
+                        }, 
+                        
+                        {
                             extend: 'selectNone',
                             text: 'Select None',
                             className: 'select_none',
@@ -1253,78 +1265,80 @@
             //Make Payment Modal Datatable
             var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
                 dom: '<"pull-right"B>tr',
-                buttons: [{
-                    text: 'Export Selected',
-                    className: 'export_selected',
-                    action: function(e) {
-                        e.preventDefault();
+                buttons: [
+                    {
+                        text: 'Export Selected',
+                        className: 'export_selected',
+                        action: function(e) {
+                            e.preventDefault();
 
-                        if (selected_rows_shipments.length != 0) {
-                            window.open('{!! route('admin.finance.make_payments.shipment_export_selected') !!}?ids=' +
-                                selected_rows_shipments, '_blank');
-                        }
-                    }
-                }, {
-                    extend: 'selectAll',
-                    text: 'Select All',
-                    className: 'select_all',
-                    action: function(e) {
-                        e.preventDefault();
-                      
-                        make_payments_table.rows().nodes().each(function(index) {
-                            var row = make_payments_table.row(index);
-
-                            if ($(row.node().firstChild).hasClass('select-checkbox') &&
-                                !$(row.node()).hasClass('selected')) {
-                                row.select();
-
-                                var parent = $(row.node());
-
-                                calculation(parent);
-
+                            if (selected_rows_shipments.length != 0) {
+                                window.open('{!! route('admin.finance.make_payments.shipment_export_selected') !!}?ids=' +
+                                    selected_rows_shipments, '_blank');
                             }
-                           
-                        });
-
-                      shipper_limit = parseFloat(shipper_limit).toFixed(2);
-                      shipper_limit = parseFloat(shipper_limit);
-                      total_payable_amt = total_payable_amt.toFixed(2);
-
-                        if(total_payable_amt > shipper_limit)
-                        {
-                            scan_sound(2);
-                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            $('#make_payments #make_payments_form button.make').prop('disabled', true);
-                            $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                         }
-                        if(total_payable_amt < 0){
-                            $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
-                        }
-                        check_reimbursement();
-                        
-                    }
-                }, {
-                    extend: 'selectNone',
-                    text: 'Select None',
-                    className: 'select_none',
-                    action: function(e) {
-                        e.preventDefault();
+                    },
 
-                        make_payments_table.rows().nodes().each(function(index) {
-                            var row = make_payments_table.row(index);
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action: function(e) {
+                            e.preventDefault();
+                            make_payments_table.rows().nodes().each(function(index) {
+                                var row = make_payments_table.row(index);
 
-                            if ($(row.node().firstChild).hasClass('select-checkbox') &&
-                                $(row.node()).hasClass('selected')) {
-                                row.deselect();
+                                if ($(row.node().firstChild).hasClass('select-checkbox') &&
+                                    !$(row.node()).hasClass('selected')) {
+                                    row.select();
+                                    var parent = $(row.node());
+                                    calculation(parent);
+                                }
+                            
+                            });
 
-                                var parent = $(row.node());
+                            shipper_limit = parseFloat(shipper_limit).toFixed(2);
+                            shipper_limit = parseFloat(shipper_limit);
+                            total_payable_amt = total_payable_amt.toFixed(2);
 
-                                calculation(parent);
+                            if(total_payable_amt > shipper_limit)
+                            {
+                                scan_sound(2);
+                                toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                                $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                             }
-                        });
-                        check_reimbursement();
+                            if(total_payable_amt < 0){
+                                $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
+                            }
+                            check_reimbursement();
+                            
+                        }
+                    },
+
+                    {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action: function(e) {
+                            e.preventDefault();
+
+                            make_payments_table.rows().nodes().each(function(index) {
+                                var row = make_payments_table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') &&
+                                    $(row.node()).hasClass('selected')) {
+                                    row.deselect();
+
+                                    var parent = $(row.node());
+
+                                    calculation(parent);
+                                }
+                            });
+                            check_reimbursement();
+                        }
                     }
-                }],
+                ],
                 scrollX: true,
                 paging: false,
                 select: {
