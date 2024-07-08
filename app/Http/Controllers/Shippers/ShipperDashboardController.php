@@ -226,7 +226,6 @@ class ShipperDashboardController extends Controller
                 return view('client.special_dashboard')->with(['stats' => $stats, 'cities' => $cities, 'today' => $today, 'thirtyday' => $thirtyDays, 'user' => $user, 'sister_users' => $sister_users]);
             }
             else{
-                var_dump('data');
                 $sales_person_tag = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
                 if($sales_person_tag){
                     $sales_person_tag = Admin::find($sales_person_tag->admin_id);
@@ -296,7 +295,7 @@ class ShipperDashboardController extends Controller
 
                     $description = "Your account is $percentage% completed";
 
-                }else if (isset($user->rates_added_by) && $user->documents_status != 2 && $user->request_custom_quotation != NULL){
+                }else if (isset($user->rates_added_by) && $user->documents_status != 2){
                     $lead_progress_setting = LeadProgressSetting::find(3);
                     $percentage = $lead_progress_setting->percent;
                     $color = $lead_progress_setting->color;
