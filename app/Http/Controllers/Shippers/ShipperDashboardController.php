@@ -311,7 +311,6 @@ class ShipperDashboardController extends Controller
                     $description = "Your account is $percentage% completed";
 
                 }else if ($user->status == 3){
-                    var_dump(5);
                     $lead_progress_setting = LeadProgressSetting::find(5);
                     $percentage = $lead_progress_setting->percent;
                     $color = $lead_progress_setting->color;
