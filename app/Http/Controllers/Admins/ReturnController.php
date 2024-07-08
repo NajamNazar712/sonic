@@ -384,10 +384,10 @@ class ReturnController extends Controller
 
 
         //Pending First And Second Call Tickets Count
-        $number_of_pending_tickets = Shipment::join('rv_agent_call_histories as rvcsa', 'rvcsa.shipment_id', 'shipments.id')
-            ->where('shipments.shipper_status_id', 12)
-            ->selectRaw('COUNT(CASE WHEN rvcsa.id IS NOT NULL  THEN 1 END) AS pending_second_call_count')
-            ->first();
+        // $number_of_pending_tickets = Shipment::join('rv_agent_call_histories as rvcsa', 'rvcsa.shipment_id', 'shipments.id')
+        //     ->where('shipments.shipper_status_id', 12)
+        //     ->selectRaw('COUNT(CASE WHEN rvcsa.id IS NOT NULL  THEN 1 END) AS pending_second_call_count')
+        //     ->first();
 
         //Pending First Call
         // $number_of_pending_first_call = $reason_validation_required - $number_of_pending_tickets->pending_second_call_count;
@@ -436,20 +436,8 @@ class ReturnController extends Controller
         $average_ticket_per_agent = (count($number_of_available_agents) > 0) ? ($total_tickets_today / count($number_of_available_agents)) : 0;
 
 
-        //Average First Call Time
-        // $average_first_call_time = ShipmentsJourney::join('rv_shipment_assign_agents', 'shipments_journey.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
-        // ->where('shipments_journey.shipper_status_id', 12)
-        // ->avg(DB::raw('TIMESTAMPDIFF(MINUTE, shipments_journey.created_at, rv_shipment_assign_agents.created_at)'));
-        $average_first_call_time = DB::table('rv_shipment_assign_agents as rsa')
-        ->join(DB::raw('(
-            SELECT MIN(id) as min_id, shipment_id
-            FROM rv_shipment_assign_agent_details
-            WHERE call_count = 1
-            GROUP BY shipment_id
-        ) first_rad'), 'rsa.shipment_id', '=', 'first_rad.shipment_id')
-        ->join('rv_shipment_assign_agent_details as rad', 'rad.id', '=', 'first_rad.min_id')
-        ->select(DB::raw('AVG(TIMESTAMPDIFF(MINUTE, rad.created_at, rsa.created_at)) as average_minutes_diff'))
-        ->value('average_minutes_diff');
+        //Average First Call Time of Last 30 days records
+        $average_first_call_time = RvShipmentAssignAgent::where('created_at','>=',now()->subDays(30))->avg('first_call_time_mins');
 
         $hours = floor($average_first_call_time / 60);
         $minutes = ($average_first_call_time % 60);
