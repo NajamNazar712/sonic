@@ -164,6 +164,7 @@ class AdminTrackingController extends Controller
 
                     $details['pickup']['person_of_contact'] = $pickup->poc;
                     $details['pickup']['vendor'] = $pickup->vendor;
+                    $details['pickup']['pickup_brand_name'] = $pickup->pickup_brand_name;
                     $details['pickup']['phone_number'] = $pickup->phone;
                     $details['pickup']['email'] = $pickup->email;
                     $details['pickup']['origin'] = $pickup->city->name;
@@ -1026,24 +1027,8 @@ class AdminTrackingController extends Controller
                             $sales_person_name = null;
                         }
 
-                        $tagged_persons = [];
                         $tagged_kae = SaleTierTag::where('user_id', $shipper->id);
-                        $sale_commissions = SalesCommission::with('users')->where('shipper_id', $shipper->id);
-                        $sales_tier = SalesTier::where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
-                        if($sale_commissions->exists()){
-                            $sale_commissions = $sale_commissions->latest()->first();
-                            foreach($sale_commissions->users as $sale_commission){
-                                if($sale_commission->tier_id == $sales_tier){
-                                    if($sale_commission->user_type == 1){
-                                        $tagged_persons[] = $sale_commission->sales_person->name;
-                                    }else{
-                                        $tagged_persons[] = $sale_commission->rider_person->name;
-                                    }
-                                }
-                            }
-                            $tagged_persons = implode(' ,', $tagged_persons);
-                            $tagged_kae_name = $tagged_persons ?? '-';
-                        }else if($tagged_kae->exists()){
+                        if($tagged_kae->exists()){
                             $tagged_kae = $tagged_kae->first();
                             if ($tagged_kae->kam)
                                 $tagged_kae_name = $tagged_kae->kam_admin->name;
@@ -1138,6 +1123,7 @@ class AdminTrackingController extends Controller
 
                         $details['pickup']['person_of_contact'] = $pickup->poc;
                         $details['pickup']['vendor'] = $pickup->vendor;
+                        $details['pickup']['pickup_brand_name'] = $pickup->pickup_brand_name;
                         $details['pickup']['phone_number'] = $pickup->phone;
                         $details['pickup']['email'] = $pickup->email;
                         $details['pickup']['origin'] = $pickup->city->name;

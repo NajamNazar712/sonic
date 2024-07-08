@@ -5,11 +5,16 @@
 | Web Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register web routes for your application. These
+| Here is where you can changepickupstatus web routes for your application. These
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+
+
+
+
 
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
 
@@ -23,6 +28,9 @@ Route::prefix('survey_form')->name('survey.')->group(function () {
     Route::get('submit/email/{ids}', 'Survey\DisabledAccountIntimationSurveyController@feedback_index')->name('feedback.index');
     Route::post('submit', 'Survey\DisabledAccountIntimationSurveyController@submit_survey')->name('submit');
 });
+
+Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
+
 
 
 Auth::routes();
@@ -47,6 +55,15 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('rate/daily_visit', 'Shippers\ShipperDashboardController@rate_daily_visit')->name('rate_daily_visit');
 
     Route::get('/login', 'Auth\LoginController@showLoginForm')->name('login');
+    
+    //Wordpress Register Via Leads (Trax.pk)
+    Route::get('/wp_register/{id}/{token}', 'Auth\LoginController@showLeadWordPressLoginForm')->name('signup');
+    Route::get('/wp_register/wordpress', 'Shippers\ShipperDashboardController@wordpressLeadRegistration')->name('wordpress.register');
+    Route::post('/wp_register/wordpress/salesPerson', 'Shippers\ShipperDashboardController@sales_person')->name('wordpress.salesPerson');
+    Route::post('/wp_register/wordpress/get_sub_segment', 'Shippers\ShipperDashboardController@get_sub_segment')->name('wordpress.get_sub_segment');
+    Route::get('/address1', 'Shippers\ShipperDashboardController@wordpressAddressView')->name('wordpress.new.address');
+    Route::get('/bank1', 'Shippers\ShipperDashboardController@wordpressBankView')->name('wordpress.new.bank');
+
     Route::post('/login', 'Auth\LoginController@login')->name('login.submit');
     //    Route::get('/register/','Auth\GetStartedController@index')->name('register');
     //    Route::get('/get-started', 'Auth\GetStartedController@index')->name('getstarted');
@@ -56,6 +73,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('/register', 'Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address', 'Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank', 'Auth\RegisterController@bankView')->name('new.bank');
+
+ 
+
+
     Route::get('/email/verified/{id?}', 'Auth\RegisterController@email_verified')->name('email.verified');
     Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
     Route::post('/territory', 'Auth\RegisterController@territory')->name('territory');
@@ -63,6 +84,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('update/agreement_status', 'Shippers\ShipperDashboardController@agreement_status')->name('update.agreement_status');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
+    Route::get('access_denied', 'Shippers\ShipperDashboardController@wordpress_access_denied')->name('wordpress_access_denied');
+
     Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');
     Route::get('ledger/list', 'Shippers\ShipperDashboardController@ledger_list')->name('ledger.list');
 

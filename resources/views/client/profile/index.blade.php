@@ -92,7 +92,7 @@
                                             </tr>
                                             <tr>
                                                 <td><b>Product Type</b></td>
-                                                <td>{{$product_name}}</td>
+                                                <td>{{isset($product_name) ? $product_name->product_name : ''}}</td>
                                             </tr>
                                             @if($user->product_id == 24)
                                                 <tr>
