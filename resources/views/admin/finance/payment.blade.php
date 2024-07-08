@@ -159,7 +159,8 @@
                         <div class="text-center">
                             <button type="button" name="make_invoice" onclick="verify_make_invoice_payments()"
                                 class="btn btn-primary mr-2 make_invoice">Corporate Invoice for Negative Payable</button>
-                            <button type="submit" name="make" class="btn btn-primary make">Make & Export Bank Order</button>
+                            <button type="submit" name="make" class="btn btn-primary make">Make & Export Bank
+                                Order</button>
                         </div>
                     </form>
                 </div>
@@ -256,8 +257,7 @@
                 //Make Payment Modal Datatable
                 var make_payments_table = $('#make_payments_datatable').DataTable({
                     dom: '<"pull-right"B>tr',
-                    buttons: [
-                        {
+                    buttons: [{
                             text: 'Export Selected',
                             className: 'export_selected',
                             action: function(e) {
@@ -277,7 +277,9 @@
                                 e.preventDefault();
                                 make_payments_table.rows().nodes().each(function(index) {
                                     var row = make_payments_table.row(index);
-                                    if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+                                    if ($(row.node().firstChild).hasClass(
+                                            'select-checkbox') && !$(row.node())
+                                        .hasClass('selected')) {
                                         row.select();
                                         var parent = $(row.node());
                                         calculation(parent);
@@ -288,15 +290,22 @@
                                 shipper_limit = parseFloat(shipper_limit);
                                 total_payable_amt = total_payable_amt.toFixed(2);
 
-                                if(total_payable_amt > shipper_limit)
-                                {
+                                if (total_payable_amt > shipper_limit) {
                                     scan_sound(2);
-                                    toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    $('#make_payments_form button.make').prop('disabled', true);
-                                    $('#make_payments_form button.export_bank_order').prop('disabled', true);
+                                    toastr.error(
+                                        "Payable amount should be less than shipper Cap!",
+                                        'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    $('#make_payments_form button.make').prop('disabled',
+                                        true);
+                                    $('#make_payments_form button.export_bank_order').prop(
+                                        'disabled', true);
                                 }
-                                if(total_payable_amt < 0){
-                                    $('#make_payments_form button.make_invoice').prop('disabled', true);
+                                if (total_payable_amt < 0) {
+                                    $('#make_payments_form button.make_invoice').prop(
+                                        'disabled', true);
                                 }
                                 check_reimbursement();
                             }
@@ -310,7 +319,8 @@
                                 e.preventDefault();
                                 make_payments_table.rows().nodes().each(function(index) {
                                     var row = make_payments_table.row(index);
-                                    if ($(row.node().firstChild).hasClass('select-checkbox') &&
+                                    if ($(row.node().firstChild).hasClass(
+                                            'select-checkbox') &&
                                         $(row.node()).hasClass('selected')) {
                                         row.deselect();
                                         var parent = $(row.node());
@@ -740,6 +750,90 @@
                         selected_rows_shipments);
                 }
 
+                $(document).on('click', '.toggle-details', function() {
+                    var parentRow = $(this).closest('tr');
+                    var userId = parentRow.attr('id').split('-')[1];
+
+                    $('.row-' + userId).toggle();
+                    $(this).text($(this).text() === 'Show Details' ? 'Hide Details' : 'Show Details');
+                });
+
+
+                $('#make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                    var parent = $(this).parent('tr');
+                    var selected_id = $(this).parent('tr').attr('id');
+                    var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
+
+                    if (con_id) {
+                        var count = 0;
+                        make_payments_table.rows().nodes().each(function(index) {
+                            var row = make_payments_table.row(index);
+                            var consolidation_id = $(row.node()).attr('consolidation_id');
+                            var row_id = $(row.node()).attr('id');
+                            if (con_id == consolidation_id) {
+                                if ($(row.node().firstChild).hasClass('select-checkbox') &&
+                                    !$(row
+                                        .node()).hasClass('selected')) {
+                                    var parent = $(row.node());
+
+                                    calculation(parent);
+                                    if (selected_id != row_id) {
+                                        row.select();
+                                    }
+                                    count++;
+                                } else {
+                                    var parent = $(row.node());
+
+                                    calculation(parent);
+                                    if (selected_id != row_id) {
+                                        row.deselect();
+                                    }
+                                    count++;
+                                }
+                            }
+
+                        });
+                        if (total_payable_amt > shipper_limit) {
+                            scan_sound(2);
+                            toastr.error("Payable amount should be less than shipper Cap!",
+                                'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            $('#make_payments #make_payments_form button.make').prop('disabled',
+                                true);
+                            $('#make_payments #make_payments_form button.export_bank_order').prop(
+                                'disabled', true);
+                        }
+                        if (total_payable_amt < 0) {
+                            $('#make_payments #make_payments_form button.make_invoice').prop(
+                                'disabled', false);
+                        }
+
+                    } 
+                    else{
+
+                        calculation(parent);
+                        if (total_payable_amt > shipper_limit) {
+                            scan_sound(2);
+                            toastr.error("Payable amount should be less than shipper Cap!",
+                                'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            $('#make_payments #make_payments_form button.make').prop('disabled',
+                                true);
+                            $('#make_payments #make_payments_form button.export_bank_order').prop(
+                                'disabled', true);
+                        }
+                        if (total_payable_amt < 0) {
+                            $('#make_payments #make_payments_form button.make_invoice').prop(
+                                'disabled', false);
+                        }
+                    }
+                    check_reimbursement();
+                });
+
                 function check_reimbursement() {
                     setTimeout(function() {
                         var reimbursement_check = false;
@@ -784,7 +878,6 @@
                     });
                     // if(total_payable_amt > shipper_limit)
                     // {
-                    //     // alert("nikal ba");
                     //     calculation(tr);
                     //      var tr_index=$(tr).index();
                     //       setTimeout(() => {
