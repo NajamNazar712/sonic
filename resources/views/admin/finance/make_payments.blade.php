@@ -731,8 +731,7 @@
                 @if (session('role_id') == 1 || in_array(60, session('permissions')))
 
                     buttons: [
-
-
+                        // Modal
                         // {
                         //     text: 'Make Payment(s)',
                         //     className: 'btn btn-primary make_payment',
@@ -777,9 +776,7 @@
                         //     }
                         // },
 
-
-
-
+                        // New tab
                         {
                             text: 'Make Payment(s)',
                             className: 'btn btn-primary make_payment',
@@ -813,9 +810,6 @@
                                 };
                             }
                         },
-
-
-
 
                         {
                             extend: 'excel',
@@ -1841,8 +1835,6 @@
             function calculation(parent) {
                 total_payable_amt=0;
                 var id = parseInt(parent.attr('id'));
-
-                console.log(id);
 
                 var payable = parent.children('td.payable').html();
                 var shipper_id = parent.children('td.shipper_id').html();

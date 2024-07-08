@@ -83,7 +83,7 @@
                     </div>
 
                     <form id="make_payments_form" class="form-inline my-1 justify-content-center" novalidate="novalidate"
-                        method="POST" action="{{ route('admin.finance.make_payments.store') }}">
+                        method="POST" action="{{ route('admin.finance.make_payments.make_payments_store_new') }}">
                         {{ csrf_field() }}
                         <input type="hidden" name="pending_payment_shipment_ids" class="pending_payment_shipment_ids">
 
@@ -157,11 +157,9 @@
                         </div>
 
                         <div class="text-center">
-                            <button type="button" class="btn btn-secondary mr-2" data-dismiss="modal">Close</button>
                             <button type="button" name="make_invoice" onclick="verify_make_invoice_payments()"
                                 class="btn btn-primary mr-2 make_invoice">Corporate Invoice for Negative Payable</button>
-                            <button type="submit" name="make" class="btn btn-primary make">Make & Export Bank
-                                Order</button>
+                            <button type="submit" name="make" class="btn btn-primary make">Make & Export Bank Order</button>
                         </div>
                     </form>
                 </div>
@@ -182,14 +180,11 @@
     <style>
         .card-body {
             overflow-x: auto;
-            /* Enable horizontal scrolling */
         }
 
         .table-responsive {
             overflow-x: auto;
-            /* Ensure table is scrollable horizontally */
             max-width: 100%;
-            /* Adjust max-width as needed */
         }
 
         .readonly_section {
@@ -240,6 +235,14 @@
                         $('#make_payments_form .total_ibft').val(charges);
                     }
                 });
+
+                $('#make_payments_form .total_amount').val(0);
+                $('#make_payments_form .total_charges').val(0);
+                $('#make_payments_form .total_gst').val(0);
+                $('#make_payments_form .total_deductable').val(0);
+                $('#make_payments_form .total_payable').val(0);
+                $('#make_payments_form .total_hold').val(0);
+                $('#make_payments_form .wht').val(0);
 
                 var total_payable_amt = 0;
                 var shipper_cap = @json($shipper_cap);
@@ -463,7 +466,6 @@
                     ],
                     rowCallback: function(row, data, index) {
                         $('td:eq(1)', row).html(index + 1);
-
                         if (selected_rows_shipments.length != 0) {
                             if ($.inArray(data.id, selected_rows_shipments) !== -1) {
                                 make_payments_table.row(row).select();
@@ -533,7 +535,7 @@
                                         parseFloat(b
                                             .toString().replace(/,/g, ''));
                                 }, 0);
-                            $('#make_payments #make_payments_form .total_hold').val(parseFloat(
+                            $('#make_payments_form .total_hold').val(parseFloat(
                                 initial_total_hold).toFixed(2));
                         }
                     }
@@ -551,14 +553,14 @@
                     var shipper_id = parent.children('td.shipper_id').html();
                     var index = $.inArray(id, selected_rows_shipments);
 
-                    var total_amount_selector = $('#make_payments #make_payments_form .total_amount');
-                    var total_charges_selector = $('#make_payments #make_payments_form .total_charges');
-                    var total_gst_selector = $('#make_payments #make_payments_form .total_gst');
+                    var total_amount_selector = $('#make_payments_form .total_amount');
+                    var total_charges_selector = $('#make_payments_form .total_charges');
+                    var total_gst_selector = $('#make_payments_form .total_gst');
                     var total_deductable_selector = $(
-                        '#make_payments #make_payments_form .total_deductable');
-                    var total_payable_selector = $('#make_payments #make_payments_form .total_payable');
-                    var total_hold_selector = $('#make_payments #make_payments_form .total_hold');
-                    var total_wht_selector = $('#make_payments #make_payments_form .wht');
+                        '#make_payments_form .total_deductable');
+                    var total_payable_selector = $('#make_payments_form .total_payable');
+                    var total_hold_selector = $('#make_payments_form .total_hold');
+                    var total_wht_selector = $('#make_payments_form .wht');
 
                     // Row Selected
                     if (index === -1) {
@@ -686,35 +688,35 @@
                         total_payable_selector.val(parseFloat(total_payable).toFixed(2));
                         total_hold_selector.val(parseFloat(total_hold).toFixed(2));
 
-                        $('#make_payments #make_payments_form button.make').prop('disabled', false);
-                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
-                        $('#make_payments #make_payments_form button.export_bank_order').prop('disabled',
+                        $('#make_payments_form button.make').prop('disabled', false);
+                        $('#make_payments_form button.make_invoice').prop('disabled', false);
+                        $('#make_payments_form button.export_bank_order').prop('disabled',
                             false);
 
                         //if total payable is grate than 0 it enable make and export bank order button
-                        if ($('#make_payments #make_payments_form .total_payable').val() > 0) {
+                        if ($('#make_payments_form .total_payable').val() > 0) {
                             const isAnyNegative = Object.values(shipperTotal).some(total => total < 0);
                             // Disable make and export bank order button if any shipper's total payable is negative
 
                             if (isAnyNegative) {
-                                $('#make_payments #make_payments_form button.make').prop('disabled', true);
-                                $('#make_payments #make_payments_form button.export_bank_order').prop(
+                                $('#make_payments_form button.make').prop('disabled', true);
+                                $('#make_payments_form button.export_bank_order').prop(
                                     'disabled', true);
-                                $('#make_payments #make_payments_form button.make_invoice').prop('disabled',
+                                $('#make_payments_form button.make_invoice').prop('disabled',
                                     false);
                             } else {
-                                $('#make_payments #make_payments_form button.make').prop('disabled', false);
-                                $('#make_payments #make_payments_form button.export_bank_order').prop(
+                                $('#make_payments_form button.make').prop('disabled', false);
+                                $('#make_payments_form button.export_bank_order').prop(
                                     'disabled', false);
-                                $('#make_payments #make_payments_form button.make_invoice').prop('disabled',
+                                $('#make_payments_form button.make_invoice').prop('disabled',
                                     true);
                             }
                             total_payable_amt += total_payable;
                         } else {
-                            $('#make_payments #make_payments_form button.make').prop('disabled', true);
-                            $('#make_payments #make_payments_form button.export_bank_order').prop(
+                            $('#make_payments_form button.make').prop('disabled', true);
+                            $('#make_payments_form button.export_bank_order').prop(
                                 'disabled', true);
-                            $('#make_payments #make_payments_form button.make_invoice').prop('disabled',
+                            $('#make_payments_form button.make_invoice').prop('disabled',
                                 false);
                         }
 
@@ -728,13 +730,13 @@
                         total_payable_selector.val(0);
                         total_hold_selector.val(parseFloat(initial_total_hold).toFixed(2));
 
-                        $('#make_payments #make_payments_form button.make').prop('disabled', true);
-                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
-                        $('#make_payments #make_payments_form button.export_bank_order').prop('disabled',
+                        $('#make_payments_form button.make').prop('disabled', true);
+                        $('#make_payments_form button.make_invoice').prop('disabled', true);
+                        $('#make_payments_form button.export_bank_order').prop('disabled',
                             true);
                     }
 
-                    $('#make_payments #make_payments_form .pending_payment_shipment_ids').val(
+                    $('#make_payments_form .pending_payment_shipment_ids').val(
                         selected_rows_shipments);
                 }
 
@@ -756,10 +758,10 @@
                         });
 
                         if (reimbursement_check) {
-                            $('#make_payments #make_payments_form button.make_invoice').prop(
+                            $('#make_payments_form button.make_invoice').prop(
                                 'disabled', true);
                         } else {
-                            $('#make_payments #make_payments_form button.make_invoice').prop(
+                            $('#make_payments_form button.make_invoice').prop(
                                 'disabled', false);
                         }
                     }, 200);
@@ -786,7 +788,7 @@
                     //     calculation(tr);
                     //      var tr_index=$(tr).index();
                     //       setTimeout(() => {
-                    //           $("#make_payments #make_payments_datatable tbody tr").eq(tr_index).removeClass('selected bg-primary bg-lighten-5 primary');
+                    //           $("#make_payments_datatable tbody tr").eq(tr_index).removeClass('selected bg-primary bg-lighten-5 primary');
                     //       }, 150);
                     // }
                 }

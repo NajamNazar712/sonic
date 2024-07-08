@@ -1674,11 +1674,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('stats_calculate', 'Admins\AdminFinanceController@make_payments_stats_calculate')->name('stats_calculate');
             Route::post('fetch_shipper_ibft_charges', 'Admins\AdminFinanceController@fetch_shipper_ibft_charges')->name('fetch_shipper_ibft_charges');
 
+            Route::post('make_payments_store_new', 'Admins\AdminFinanceController@make_payments_store_new')->name('make_payments_store_new');
             Route::get('payment', 'Admins\AdminFinanceController@payment')->name('payment');
             Route::get('payment_list', 'Admins\AdminFinanceController@payment_list')->name('payment_list');
-
             Route::post('fetch_shipper_ibft_charges_new', 'Admins\AdminFinanceController@fetch_shipper_ibft_charges_new')->name('fetch_shipper_ibft_charges_new');
-            Route::get('make_payments_shipment_export_selected_new', 'Admins\AdminFinanceController@make_payments_make_payments_shipment_export_selected_new')->name('make_payments_shipment_export_selected_new');
+            Route::get('make_payments_shipment_export_selected_new', 'Admins\AdminFinanceController@make_payments_shipment_export_selected_new')->name('make_payments_shipment_export_selected_new');
         });
 
         Route::prefix('make_payments_pickup_wise')->name('make_payments_pickup_wise.')->group(function () {
