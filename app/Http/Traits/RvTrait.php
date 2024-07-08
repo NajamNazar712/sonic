@@ -358,7 +358,9 @@ trait RvTrait
             
             if($shipment_assign_agent_table_columns['call_count'] == 1)
             {
-                $shipmentJourney = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id',12)->latest()->first();
+                $shipmentJourney = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id',12)->latest()
+                ->select('created_at')
+                ->first();
                 if($shipmentJourney)
                 {
                     $timeDifferenceInMinutes = Carbon::now()->diffInMinutes($shipmentJourney->created_at);
@@ -2138,7 +2140,7 @@ trait RvTrait
 
     protected function rv_shipment_assign_agent_by_admin($data)
     {
-        $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->whereIn('shipper_status_id', [12, 65, 66, 52])->first();
+        $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->whereIn('shipper_status_id', [12, 65, 66, 52])->select('id','created_at')->first();
 
         if ($shipments_journey) {
 
