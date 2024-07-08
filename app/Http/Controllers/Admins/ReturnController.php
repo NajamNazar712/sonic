@@ -437,7 +437,7 @@ class ReturnController extends Controller
 
 
         //Average First Call Time of Last 30 days records
-        $average_first_call_time = RvShipmentAssignAgent::where('created_at','>=',now()->subDays(30))->avg('first_call_time_mins');
+        $average_first_call_time = RvShipmentAssignAgent::whereNotNull('first_call_time_mins')->where('created_at','>=',now()->subDays(30))->avg('first_call_time_mins');
 
         $hours = floor($average_first_call_time / 60);
         $minutes = ($average_first_call_time % 60);
