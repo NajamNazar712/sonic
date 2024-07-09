@@ -650,7 +650,7 @@
                                 }
 
                                 if (item.shipper == shipper) {
-                                    detailsHtml += '<tr class="details-row" id="' + item.id + '">';
+                                    detailsHtml += '<tr consolidation_id class="details-row" id="' + item.id + '">';
                                     detailsHtml += '<td class="select-checkbox"></td>';
                                     detailsHtml += '<td></td>';
                                     detailsHtml += '<td class="account_type">' + item.account_type + '</td>';
@@ -683,10 +683,6 @@
                         }
                     });
                 });
-
-
-
-
 
                 var payable_list = [];
                 let shipperTotal = {};
