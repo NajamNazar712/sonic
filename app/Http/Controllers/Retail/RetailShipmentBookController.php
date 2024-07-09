@@ -2505,10 +2505,10 @@ class RetailShipmentBookController extends Controller
                 $html .= '</tr>';
     
                 // Summing up totals
-                $total_shipments = $data->sum_of_shipments;
-                $total_charges = $data->sum_of_total_charges;
-                $total_gst = $data->sum_of_gst;
-                $total_weight_charges = $data->sum_of_weight_charges;
+                $total_shipments += $record->number_of_shipments;
+                $total_charges += $record->total_charges;
+                $total_gst += $record->franchise_gst_amount;
+                $total_weight_charges += $record->weight_charges;
                 $total_commission += $record->net_commission;
             }
     
@@ -2535,24 +2535,24 @@ class RetailShipmentBookController extends Controller
             $html .= '</div>';
         
             // Third table: Deposits
-            $html .= '<div class="row align-items-start justify-content-between summary">';
-            $html .= '<div class="col-12">';
-            $html .= '<table class="table table-sm table-bordered border">';
-            $html .= '<thead>';
-            $html .= '<tr>';
-            $html .= '<th class="color primary">Deposits</th>';
-            $html .= '<th class="color primary">Amount</th>';
-            $html .= '<th class="color primary">Bank Name</th>';
-            $html .= '<th class="color primary">Cheque #</th>';
-            $html .= '</tr>';
-            $html .= '</thead>';
-            $html .= '<tbody>';
-            $html .= '<tr><td>Security Deposit</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
-            $html .= '<tr><td>License Fees</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-12">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<thead>';
+            // $html .= '<tr>';
+            // $html .= '<th class="color primary">Deposits</th>';
+            // $html .= '<th class="color primary">Amount</th>';
+            // $html .= '<th class="color primary">Bank Name</th>';
+            // $html .= '<th class="color primary">Cheque #</th>';
+            // $html .= '</tr>';
+            // $html .= '</thead>';
+            // $html .= '<tbody>';
+            // $html .= '<tr><td>Security Deposit</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
+            // $html .= '<tr><td>License Fees</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
         
             // // Fourth table: Pending Sales
             // $html .= '<div class="row align-items-start justify-content-between summary">';
@@ -2569,57 +2569,57 @@ class RetailShipmentBookController extends Controller
             // $html .= '</div>';
     
             // Prepared by and Checked by
-            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
-            $html .= '<div class="col-6 d-flex justify-content-between">';
-            $html .= '<strong>Prepared By:</strong>';
-            $html .= '<strong>Checked By:</strong>';
-            $html .= '</div>';
-            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
-            $html .= '<strong>Verified By:</strong>';
-            $html .= '<strong>Approved By:</strong>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Prepared By:</strong>';
+            // $html .= '<strong>Checked By:</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
+            // $html .= '<strong>Verified By:</strong>';
+            // $html .= '<strong>Approved By:</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
     
-            $html .= '<div class="row col-6">';
-            $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
-            $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
-            $html .= '</div>';
+            // $html .= '<div class="row col-6">';
+            // $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
+            // $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
+            // $html .= '</div>';
     
-            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
-            $html .= '<div class="col-6 d-flex justify-content-between">';
-            $html .= '<strong>Retail Team</strong>';
-            $html .= '<strong>Finance Team</strong>';
-            $html .= '</div>';
-            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
-            $html .= '<strong>Head of Retail</strong>';
-            $html .= '<strong>COO</strong>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Retail Team</strong>';
+            // $html .= '<strong>Finance Team</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
+            // $html .= '<strong>Head of Retail</strong>';
+            // $html .= '<strong>COO</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
     
-            // Empty tables
-            $html .= '<div class="row align-items-start summary">';
-            $html .= '<div class="col-3">';
-            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
-            $html .= '<tbody>';
-            $html .= '<tr>';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
-            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
+            // // Empty tables
+            // $html .= '<div class="row align-items-start summary">';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
     
-            $html .= '<div class="col-3">';
-            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
-            $html .= '<tbody>';
-            $html .= '<tr>';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
-            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
     
             // Disclaimer after empty tables with page break
             $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
@@ -2746,11 +2746,11 @@ class RetailShipmentBookController extends Controller
                 $html .= '<td>' . $record->commission . '</td>';
                 $html .= '</tr>';
 
-                $total_shipments = $data->sum_of_all_shipments;
-                $total_charges = $data->sum_of_total_charges;
-                $total_gst = $data->sum_of_gst;
-                $total_weight_charges = $data->sum_of_weight_charges;
-                $total_commission = $data->sum_of_commission;
+                $total_shipments += $record->number_of_shipments;
+                $total_charges += $record->total_charges;
+                $total_gst += $record->franchise_gst_amount;
+                $total_weight_charges += $record->weight_charges;
+                $total_commission += $record->commission;
             }
 
             // Totals row
@@ -2763,8 +2763,8 @@ class RetailShipmentBookController extends Controller
             $html .= '<td>' . $total_commission . '</td>';
             $html .= '</tr>';
 
-            $withholding_amount = $data->withholding_amount;
-            $deduction_amount = $data->deduction_amount;
+            $withholding_amount = ($record->franchise_withholding_percentage / 100) * $total_commission;
+            $deduction_amount = ($record->deduction_percentage / 100) * $total_commission;
             $gross_commission = $total_commission - ($withholding_amount + $deduction_amount);
 
             // Withholding tax row
@@ -2790,92 +2790,92 @@ class RetailShipmentBookController extends Controller
             $html .= '</div>';
 
             // Third table: Deposits
-            $html .= '<div class="row align-items-start justify-content-between summary">';
-            $html .= '<div class="col-12">';
-            $html .= '<table class="table table-sm table-bordered border">';
-            $html .= '<thead>';
-            $html .= '<tr>';
-            $html .= '<th class="color primary">Deposits</th>';
-            $html .= '<th class="color primary">Amount</th>';
-            $html .= '<th class="color primary">Bank Name</th>';
-            $html .= '<th class="color primary">Cheque #</th>';
-            $html .= '</tr>';
-            $html .= '</thead>';
-            $html .= '<tbody>';
-            $html .= '<tr><td>Security Deposit</td><td>' . $franchise_charges->security_deposit . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->security_cheque_number . '</td></tr>';
-            $html .= '<tr><td>License Fees</td><td>' . $franchise_charges->license_fees . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->license_cheque_number . '</td></tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-12">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<thead>';
+            // $html .= '<tr>';
+            // $html .= '<th class="color primary">Deposits</th>';
+            // $html .= '<th class="color primary">Amount</th>';
+            // $html .= '<th class="color primary">Bank Name</th>';
+            // $html .= '<th class="color primary">Cheque #</th>';
+            // $html .= '</tr>';
+            // $html .= '</thead>';
+            // $html .= '<tbody>';
+            // $html .= '<tr><td>Security Deposit</td><td>' . $franchise_charges->security_deposit . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->security_cheque_number . '</td></tr>';
+            // $html .= '<tr><td>License Fees</td><td>' . $franchise_charges->license_fees . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->license_cheque_number . '</td></tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
 
             // Fourth table: Pending Sales
-            $html .= '<div class="row align-items-start justify-content-between summary">';
-            $html .= '<div class="col-3">';
-            $html .= '<table class="table table-sm table-bordered border">';
-            $html .= '<tbody>';
-            $html .= '<tr>';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
-            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
+            // $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
 
-            // Prepared by and Checked by
-            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
-            $html .= '<div class="col-6 d-flex justify-content-between">';
-            $html .= '<strong>Prepared By:</strong>';
-            $html .= '<strong>Checked By:</strong>';
-            $html .= '</div>';
-            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
-            $html .= '<strong>Verified By:</strong>';
-            $html .= '<strong>Approved By:</strong>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // // Prepared by and Checked by
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Prepared By:</strong>';
+            // $html .= '<strong>Checked By:</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
+            // $html .= '<strong>Verified By:</strong>';
+            // $html .= '<strong>Approved By:</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
 
-            $html .= '<div class="row col-6">';
-            $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
-            $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
-            $html .= '</div>';
+            // $html .= '<div class="row col-6">';
+            // $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
+            // $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
+            // $html .= '</div>';
 
-            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
-            $html .= '<div class="col-6 d-flex justify-content-between">';
-            $html .= '<strong>Retail Team</strong>';
-            $html .= '<strong>Finance Team</strong>';
-            $html .= '</div>';
-            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
-            $html .= '<strong>Head of Retail</strong>';
-            $html .= '<strong>COO</strong>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Retail Team</strong>';
+            // $html .= '<strong>Finance Team</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
+            // $html .= '<strong>Head of Retail</strong>';
+            // $html .= '<strong>COO</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
 
-            // Empty tables
-            $html .= '<div class="row align-items-start summary">';
-            $html .= '<div class="col-3">';
-            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
-            $html .= '<tbody>';
-            $html .= '<tr>';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
-            $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
+            // // Empty tables
+            // $html .= '<div class="row align-items-start summary">';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
 
-            $html .= '<div class="col-3">';
-            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
-            $html .= '<tbody>';
-            $html .= '<tr>';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
-            $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
             
             $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
             $html .= '<div style="page-break-after: always;"></div>';
