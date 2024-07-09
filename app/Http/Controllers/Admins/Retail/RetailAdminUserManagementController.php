@@ -653,6 +653,22 @@ class RetailAdminUserManagementController extends Controller
         }
     
         foreach ($grouped_data as $franchise_name => $records) {
+            $monthNumber = $records[0]->month;
+            $monthNames = [
+                '01' => 'January',
+                '02' => 'February',
+                '03' => 'March',
+                '04' => 'April',
+                '05' => 'May',
+                '06' => 'June',
+                '07' => 'July',
+                '08' => 'August',
+                '09' => 'September',
+                '10' => 'October',
+                '11' => 'November',
+                '12' => 'December',
+            ];
+            $monthName = isset($monthNames[$monthNumber]) ? $monthNames[$monthNumber] : '';
 
             // Start the main container for a franchise
             $html .= '<div class="row align-items-start justify-content-between summary my-4">';
@@ -673,7 +689,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<tr><td>Code:</td><td>' . $records[0]->franchise_code . '</td></tr>';
             $html .= '<tr><td>CNIC:</td><td>' . $records[0]->trax_center_cnic . '</td></tr>';
             $html .= '<tr><td>Phone #:</td><td>' . $records[0]->trax_center_phone . '</td></tr>';
-            $html .= '<tr><td><strong>Payment Month:</strong></td><td>' . $records[0]->month . '</td></tr>';
+            $html .= '<tr><td><strong>Payment Month:</strong></td><td>' . $monthName . '</td></tr>';
             $html .= '</tbody>';
             $html .= '</table>';
             $html .= '</div>';
@@ -895,6 +911,23 @@ class RetailAdminUserManagementController extends Controller
         foreach ($grouped_data as $franchise_name => $records) {
             $franchise_charges = RetailFranchiseCharge::where('franchise_id', $records[0]->franchise_id)->first();
 
+            $monthNumber = $records[0]->month;
+            $monthNames = [
+                '01' => 'January',
+                '02' => 'February',
+                '03' => 'March',
+                '04' => 'April',
+                '05' => 'May',
+                '06' => 'June',
+                '07' => 'July',
+                '08' => 'August',
+                '09' => 'September',
+                '10' => 'October',
+                '11' => 'November',
+                '12' => 'December',
+            ];
+            $monthName = isset($monthNames[$monthNumber]) ? $monthNames[$monthNumber] : '';
+
             // Start the main container for a franchise
             $html .= '<div class="row align-items-start justify-content-between summary my-4">';
             $html .= '<div class="col-12">';
@@ -915,7 +948,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<tr><td>Code:</td><td>' . $records[0]->franchise_code . '</td></tr>';
             $html .= '<tr><td>CNIC:</td><td>' . $records[0]->franchise_cnic . '</td></tr>';
             $html .= '<tr><td>Phone #</td><td>' . $records[0]->franchise_phone . '</td></tr>';
-            $html .= '<tr><td><strong>Payment Month:</strong></td><td>' . $records[0]->month_name . '</td></tr>';
+            $html .= '<tr><td><strong>Payment Month:</strong></td><td>' . $monthName . '</td></tr>';
             $html .= '</tbody>';
             $html .= '</table>';
             $html .= '</div>';
