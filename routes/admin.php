@@ -1685,6 +1685,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('make_payments_store_new', 'Admins\AdminFinanceController@make_payments_store_new')->name('make_payments_store_new');
             Route::get('payment', 'Admins\AdminFinanceController@payment')->name('payment');
             Route::get('payment_list', 'Admins\AdminFinanceController@payment_list')->name('payment_list');
+            Route::get('payment_list_remaining', 'Admins\AdminFinanceController@payment_list_remaining')->name('payment_list_remaining');
             Route::post('fetch_shipper_ibft_charges_new', 'Admins\AdminFinanceController@fetch_shipper_ibft_charges_new')->name('fetch_shipper_ibft_charges_new');
             Route::get('make_payments_shipment_export_selected_new', 'Admins\AdminFinanceController@make_payments_shipment_export_selected_new')->name('make_payments_shipment_export_selected_new');
         });

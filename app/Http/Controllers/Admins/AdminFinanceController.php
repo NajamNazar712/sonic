@@ -19360,6 +19360,113 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
         return $datatables->make(true);
     }
 
+    public function payment_list_remaining(Request $request)
+    {
+        $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('users as u', 's.user_id', '=', 'u.id')
+            ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('shipment_fintech_charges as sfc', function ($join) {
+                $join->on('sfc.shipment_id', '=', 's.id')
+                    ->where('sfc.applied_to', '=', 1);
+            })
+            ->leftjoin('consolidation_shipments as consolidations', function ($join) {
+                $join->on('consolidations.shipment_id', '=', 's.id')
+                    ->where('consolidations.consolidation_id', '=',
+                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->select(
+                'sfc.fintech_charges as fintech_charges',
+                'pending_payment_shipments.id',
+                'u.name as shipper',
+                's.tracking_number as shipment',
+                's.id as ShipmentID',
+                'pending_payment_shipments.type',
+                'ss.name as status',
+                'pending_payment_shipments.created_at',
+                'pending_payment_shipments.amount',
+                'pending_payment_shipments.charges',
+                'pending_payment_shipments.gst',
+                'pending_payment_shipments.wht',
+                'pending_payment_shipments.payable',
+                'consolidations.consolidation_id',
+                'oc.name as origin',
+                'u.account_type_id',
+                's.pickup_address_id',
+                'sj.created_at as arrival_date',
+                's.packaging_charges',
+                'u.id as shipper_id',
+                'u.account_type_id'
+            );
+
+        if ($request->ajax() && $request->has('ids')) {
+            $pending_payments = PendingPayment::whereIn('user_id', $request->ids)->get();
+            $pending_payment_ids = $pending_payments->pluck('id'); 
+            $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $pending_payment_ids);
+        } else {
+            $pending_payment_shipments->whereRaw('FALSE');
+        }
+        
+        if ($request->has('pickup_address_id')) {
+            $pending_payment_shipments->where('s.pickup_address_id', $request->pickup_address_id);
+        }
+
+        $results = $pending_payment_shipments->get();
+        // Transform account_type_id
+        foreach ($results as $result) {
+            if ($result->account_type_id == 1) {
+                $result->account_type = 'Reimbursement Account';
+            } elseif ($result->account_type_id == 2) {
+                $result->account_type = 'Corporate Invoicing Account';
+            }
+        }
+
+        foreach ($results as $result) {
+            switch ($result->type) {
+                case 0:
+                    $result->type_text = 'Delivered';
+                case 1:
+                    $result->type_text = 'Returned';
+                case 3:
+                    $result->type_text = 'Arrival';
+                default:
+                    $result->type_text = 'Adjusted';
+            }
+        }
+
+        // Calculate aging
+        foreach ($results as $result) {
+            $now = Carbon::now()->startOfDay();
+            $created_at = Carbon::parse($result->created_at)->startOfDay();
+            $result->aging = $created_at->diffInDays($now) . 'd';
+        }
+
+        // Calculate deductable
+        foreach ($results as $result) {
+            $result->deductable = number_format($result->charges + $result->fintech_charges + $result->gst, 2);
+        }
+
+        // Calculate fintech charges
+        foreach ($results as $result) {
+            $result->fintech_charges = number_format($result->fintech_charges, 2);
+        }
+
+        // Calculate packaging charges
+        foreach ($results as $result) {
+            $result->packaging_charges = number_format($result->packaging_charges, 2);
+        }
+
+        return response()->json([
+            'data' => $results
+        ]);
+    }
+
     public function fetch_shipper_ibft_charges_new(Request $request)
     {
         $shipper_ids = $request->selected_shippers_id;

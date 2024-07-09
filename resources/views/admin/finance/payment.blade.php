@@ -76,7 +76,8 @@
                                     <th class="border-primary border-darken-1">Deductible</th>
                                     <th class="border-primary border-darken-1">Payable</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
-                                    <th class="d-none">Shipper</th>
+                                    <th class="border-primary border-darken-1">Action</th>
+                                    <th class="d-none"></th>
                                 </tr>
                             </thead>
                         </table>
@@ -255,9 +256,11 @@
                 var initial_ibft_charges = 0;
 
                 //Make Payment Modal Datatable
+               
                 var make_payments_table = $('#make_payments_datatable').DataTable({
                     dom: '<"pull-right"B>tr',
-                    buttons: [{
+                    buttons: [
+                        {
                             text: 'Export Selected',
                             className: 'export_selected',
                             action: function(e) {
@@ -358,7 +361,8 @@
                     order: [
                         [3, 'desc']
                     ],
-                    columns: [{
+                    columns: [
+                        {
                             data: 'id',
                             orderable: false,
                             searchable: false,
@@ -379,6 +383,7 @@
                                 return '';
                             }
                         },
+
                         {
                             data: 'account_type_id',
                             name: 'u.account_type_id',
@@ -389,7 +394,7 @@
                         {
                             data: 'shipper',
                             name: 'u.name',
-                            class: 'align-middle shipper'
+                            class: 'align-middle shipper',
                         },
                         {
                             data: 'shipment',
@@ -467,13 +472,18 @@
                             name: 'sj.created_at',
                             class: 'align-middle arrival_date'
                         },
+                        {data: 'shipper_id', name: 'u.id', class: 'align-middle shipper_id d-none', searchable: false},
+                        // Accordion button
                         {
-                            data: 'shipper_id',
-                            name: 'u.id',
-                            class: 'align-middle shipper_id d-none',
+                            class: 'align-middle shipper_id',
+                            orderable: false,
                             searchable: false,
+                            render: function(data, type, row) {
+                                return '<button type="button" class="btn btn-sm btn-primary view-details" data-id="' + row.id + '" data-shipper="' + row.shipper + '">View Details</button>';
+                            }
                         },
                     ],
+
                     rowCallback: function(row, data, index) {
                         $('td:eq(1)', row).html(index + 1);
                         if (selected_rows_shipments.length != 0) {
@@ -482,6 +492,7 @@
                             }
                         }
                     },
+
                     initComplete: function() {
                         var search = $(
                                 '<tr role="row" class="bg-primary bg-lighten-1 search"></tr>')
@@ -536,21 +547,102 @@
                             });
                         this.api().table().columns.adjust();
                     },
+
                     drawCallback: function() {
-                        if (selected_rows_shipments.length == 0) {
-                            initial_total_hold = this.api().column('.payable').data().reduce(
-                                function(a,
-                                    b) {
-                                    return parseFloat(a.toString().replace(/,/g, '')) +
-                                        parseFloat(b
-                                            .toString().replace(/,/g, ''));
-                                }, 0);
-                            $('#make_payments_form .total_hold').val(parseFloat(
-                                initial_total_hold).toFixed(2));
-                        }
+                        var api = this.api();
+                        var userRowCount = {};
+                        api.rows().every(function(rowIdx, tableLoop, rowLoop) {
+                            var userId = this.data().shipper_id;
+                            if (userRowCount[userId]) {
+                                userRowCount[userId]++;
+                                $(this.node()).hide();
+                            } else {
+                                userRowCount[userId] = 1;
+                                $(this.node()).show();
+                            }
+                        });
+                        $('#make_payments_datatable tbody').on('click', 'tr.details-control', function() {
+                            var tr = $(this).prev('tr');
+                            var row = api.row(tr);
+                            var userId = row.data().shipper_id;
+
+                            api.rows().every(function() {
+                                if (this.data().shipper_id === userId) {
+                                    $(this.node()).toggle();
+                                }
+                            });
+                            $(this).remove();
+                        });
                     }
                 });
                 //End Make Payment Modal Datatable
+
+                $('#make_payments_datatable').on('click', '.details-row td.select-checkbox', function(event) {
+                    var $row = $(this).closest('tr');
+                    var isChecked = $(this).prop('checked');
+                    $row.toggleClass('selected', isChecked);
+                });
+
+                // Click event for 'View Details' button
+                $('#make_payments_datatable').on('click', '.view-details', function(event) {
+                    var shipper = $(this).closest('tr').find('.shipper').text();
+                    var api = make_payments_table;
+                    var $clickedRow = $(this).closest('tr');
+
+                    // Remove any existing details rows if they exist
+                    if ($(api.row($clickedRow).node()).next().hasClass('details-row')) {
+                        $(api.row($clickedRow).node()).nextUntil(':not(.details-row)').remove();
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '{{ route('admin.finance.make_payments.payment_list_remaining') }}',
+                        method: 'GET',
+                        data: { ids: ids },
+                        success: function(response) {
+                            var detailsHtml = '';
+                            response.data.forEach(function(item) {
+                                if (item.shipper == shipper) {
+                                    detailsHtml += '<tr class="details-row">';
+                                    detailsHtml += '<td class="text-center align-middle select select-checkbox p-1"><input type="checkbox" class="d-none"></td>';
+                                    detailsHtml += '<td></td>';
+                                    detailsHtml += '<td class="account_type">' + item.account_type + '</td>';
+                                    detailsHtml += '<td class="shipper">' + item.shipper + '</td>';
+                                    detailsHtml += '<td class="shipment">' + item.shipment + '</td>';
+                                    detailsHtml += '<td class="origin">' + item.origin + '</td>';
+                                    detailsHtml += '<td class="type_text">' + item.type_text + '</td>';
+                                    detailsHtml += '<td class="status">' + item.status + '</td>';
+                                    detailsHtml += '<td class="created_at">' + item.created_at + '</td>';
+                                    detailsHtml += '<td class="aging">' + item.aging + '</td>';
+                                    detailsHtml += '<td class="amount">' + item.amount + '</td>';
+                                    detailsHtml += '<td class="charges">' + item.charges + '</td>';
+                                    detailsHtml += '<td class="gst">' + item.gst + '</td>';
+                                    detailsHtml += '<td class="wht">' + item.wht + '</td>';
+                                    detailsHtml += '<td class="fintech_charges">' + item.fintech_charges + '</td>';
+                                    detailsHtml += '<td class="packaging_charges">' + item.packaging_charges + '</td>';
+                                    detailsHtml += '<td class="deductable">' + item.deductable + '</td>';
+                                    detailsHtml += '<td class="payable">' + item.payable + '</td>';
+                                    detailsHtml += '<td class="arrival_date">' + item.arrival_date + '</td>';
+                                    detailsHtml += '<td></td>'; // Placeholder for additional columns
+                                    detailsHtml += '<td class="d-none shipper_id">' + item.shipper_id + '</td>';
+                                    detailsHtml += '</tr>';
+                                }
+                            });
+
+                            $(api.row($clickedRow).node()).after(detailsHtml);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error fetching details:', error);
+                        }
+                    });
+                });
+
+
+
+
+
+
+
 
                 var payable_list = [];
                 let shipperTotal = {};
@@ -753,11 +845,9 @@
                 $(document).on('click', '.toggle-details', function() {
                     var parentRow = $(this).closest('tr');
                     var userId = parentRow.attr('id').split('-')[1];
-
                     $('.row-' + userId).toggle();
                     $(this).text($(this).text() === 'Show Details' ? 'Hide Details' : 'Show Details');
                 });
-
 
                 $('#make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
                     var parent = $(this).parent('tr');
@@ -859,15 +949,13 @@
                                 'disabled', false);
                         }
                     }, 200);
-
                 }
 
                 function calculateShipperTotal() {
                     shipperTotal = {}; // Reset shipperTotal object
                     // total_payable_amt = 0; // Reset total_payable_amt
-
                     payable_list.forEach(entry => {
-                        const shipperId = entry.shipper_id;
+                        const shipperId = entry.user_id;
                         const payable = parseFloat(entry.payable.replace(/,/g, ''));
                         // total_payable_amt +=payable;
                         if (shipperTotal[shipperId]) {
@@ -885,6 +973,75 @@
                     //       }, 150);
                     // }
                 }
+
+                // Accordion
+                function formatAccordion(data) {
+                    var html = '<div class="accordion" id="accordionExample">';                    
+                    // Iterate through each row of data and display them in a table format
+                    html += '<table class="table table-bordered">';
+                    html += '<thead>';
+                    html += '<tr>';
+                    html += '<th>ID</th>';
+                    html += '<th>Serial Number</th>';
+                    html += '<th>Account Type ID</th>';
+                    html += '<th>Shipper</th>';
+                    html += '<th>Shipment</th>';
+                    html += '<th>Origin</th>';
+                    html += '<th>Type</th>';
+                    html += '<th>Status</th>';
+                    html += '<th>Created At</th>';
+                    html += '<th>Aging</th>';
+                    html += '<th>Amount</th>';
+                    html += '<th>Charges</th>';
+                    html += '<th>GST</th>';
+                    html += '<th>WHT</th>';
+                    html += '<th>Fintech Charges</th>';
+                    html += '<th>Packaging Charges</th>';
+                    html += '<th>Deductable</th>';
+                    html += '<th>Payable</th>';
+                    html += '<th>Arrival Date</th>';
+                    html += '</tr>';
+                    html += '</thead>';
+                    html += '<tbody>';
+                    
+                    // Display data for each row
+                    html += '<tr>';
+                    html += '<td>' + data.id + '</td>';
+                    html += '<td>' + data.serial_number + '</td>';
+                    html += '<td>' + data.account_type_id + '</td>';
+                    html += '<td>' + data.shipper + '</td>';
+                    html += '<td>' + data.shipment + '</td>';
+                    html += '<td>' + data.origin + '</td>';
+                    html += '<td>' + data.type + '</td>';
+                    html += '<td>' + data.status + '</td>';
+                    html += '<td>' + data.created_at + '</td>';
+                    html += '<td>' + data.aging + '</td>';
+                    html += '<td>' + data.amount + '</td>';
+                    html += '<td>' + data.charges + '</td>';
+                    html += '<td>' + data.gst + '</td>';
+                    html += '<td>' + data.wht + '</td>';
+                    html += '<td>' + data.fintech_charges + '</td>';
+                    html += '<td>' + data.packaging_charges + '</td>';
+                    html += '<td>' + data.deductable + '</td>';
+                    html += '<td>' + data.payable + '</td>';
+                    html += '<td>' + data.arrival_date + '</td>';
+                    html += '</tr>';
+                    
+                    html += '</tbody>';
+                    html += '</table>';
+
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+
+                    html += '</div>';
+
+                    return html;
+                }
+
+
+
+
             });
         });
     </script>
