@@ -152,10 +152,10 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\SackBagStatusUpdate',
         'App\Console\Commands\AutoAssignCrmAgentNew',
 
-        'App\Console\Commands\ServiceLedger'
+        'App\Console\Commands\ServiceLedger',
         'App\Console\Commands\AutoAssignCrmAgentNew'
-//        'App\Console\Commands\ShipperLogisticBookingCron',
-//        'App\Console\Commands\HourlyShipperLogisticBookingEmailCron'
+        // 'App\Console\Commands\ShipperLogisticBookingCron',
+        // 'App\Console\Commands\HourlyShipperLogisticBookingEmailCron'
         ];
 
     /**
