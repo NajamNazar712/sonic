@@ -2633,7 +2633,7 @@ class RetailShipmentBookController extends Controller
 
     public function franchise_commission_invoice_print(Request $request)
     {
-        $franchise_code = $request->franchise_code;
+        $franchise_code = $request->franchise;
         $franchise = explode(', ', $franchise_code);
         $franchise_names = RetailFranchiseCommission::whereIn('id', $franchise)->get();
 
