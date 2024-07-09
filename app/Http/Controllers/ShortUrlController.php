@@ -54,7 +54,21 @@ class ShortUrlController extends Controller
             $long_url = $long_url->long_url;
             return redirect()->away($long_url);
         } else {
-            return redirect()->away('https://trax.pk');
+            if($tiny_url == 'admin') {
+                return redirect()->route('admin.login');
+            } 
+            if($tiny_url == 'cod') {
+                return redirect()->route('cod.login');
+            } 
+            if($tiny_url == 'agent') {
+                return redirect()->route('agent.login');
+            } 
+            if($tiny_url == 'retail') {
+                return redirect()->route('retail.login');
+            } 
+            else {
+                return redirect()->away('https://trax.pk');
+            }
         }
     }
 }

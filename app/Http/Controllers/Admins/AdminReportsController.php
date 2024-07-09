@@ -7422,9 +7422,9 @@ class AdminReportsController extends Controller
                         '=',
                         DB::connection($connection)->raw("(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $sj_to_id)")
                     );
-            })->join('sale_person_tags as st', function ($join) {
+            })->leftJoin('sale_person_tags as st', function ($join) {
                 $join->on('st.user_id', '=', 'shipments.user_id')->where('st.status', 0);
-            })->join('admins as sd', 'sd.id', '=', 'st.admin_id')
+            })->leftJoin('admins as sd', 'sd.id', '=', 'st.admin_id')
             ->join('shipment_items as siq', 'siq.shipment_id', '=', 'shipments.id')
 
             ->select(['ssr.name as reason', 'sjr.remarks as remark', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'ss.name as current_status', 'sps.name as payment_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper','u.id as shipper_id', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone1', 'shipments.consignee_phone_number_2 as phone2', 'shipments.consignee_address', 'shipments.created_at as booking_date', 'usi.vendor', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'h.name as hub', 'sju.created_at as last_status_date', 'sjfa.created_at as first_attempt_date', 'sjrp.created_at as rider_picked_status_date', 'u.sub_segment_id as sub_segment','shipments.pieces','shipments.actual_weight','sm.mode as shipping_mode','sd.name as sales_person_name','siq.quantity as shipment_quantity']);
@@ -12628,7 +12628,9 @@ class AdminReportsController extends Controller
         'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date',
         'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 'add.id as agent_id', 'rv_reason.name as rv_reason')
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
-        ->groupBy('rv_shipment_assign_agent_details.created_at');
+        ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
+        ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
+        ->groupBy('rv_shipment_assign_agent_details.created_at','rv_shipment_assign_agent_details.shipment_id');
 
         $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
@@ -13905,7 +13907,7 @@ class AdminReportsController extends Controller
 
         $from = Carbon::parse($search_date)->subMonths(8)->setTime(21, 00, 00)->toDateTimeString();
         $to = Carbon::parse($search_date)->setTime(8, 59, 59)->toDateTimeString();
-        $to_2 = Carbon::parse($search_date)->setTime(8, 59, 59);
+        // $to_2 = Carbon::parse($search_date)->setTime(8, 59, 59);
 
         $regions = DB::connection('reports_2')->table('regions')->select('id','name')->get();
         $ops_data = [];
@@ -13934,19 +13936,19 @@ class AdminReportsController extends Controller
             })
             ->whereBetween('sj.created_at', [$from, $to])->get();
 
-        $shipments_2 = DB::connection('reports_2')->table('shipments')
-            ->leftJoin('shipments_journey as sj', function ($join) {
+        // $shipments_2 = DB::connection('reports_2')->table('shipments')
+        //     ->leftJoin('shipments_journey as sj', function ($join) {
         
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->where(
-                    'sj.id',
-                    '=',
-                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (14,30,36,12,20))')
-                );
+        //         $join->on('sj.shipment_id', '=', 'shipments.id')
+        //         ->where(
+        //             'sj.id',
+        //             '=',
+        //             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (14,30,36,12,20))')
+        //         );
             
                 
-            })
-            ->whereBetween('sj.created_at', [$from, $to_2])->get();
+        //     })
+        //     ->whereBetween('sj.created_at', [$from, $to_2])->get();
 
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
         $re_attempt_and_intercept_status = array(52,55);
@@ -14043,19 +14045,19 @@ class AdminReportsController extends Controller
                 }
 
 
-                foreach ($shipments_2 as $shipment_key => $shipment_data) {
+                // foreach ($shipments_2 as $shipment_key => $shipment_data) {
                     
-                    if(in_array($shipment_data->consignee_city_id,$zone_cities))
-                    {
-                        $created_date = Carbon::parse($shipment_data->updated_at);
+                //     if(in_array($shipment_data->consignee_city_id,$zone_cities))
+                //     {
+                //         $created_date = Carbon::parse($shipment_data->updated_at);
                         
-                        if(in_array($shipment_data->consignee_status_id, [14,30,36,12,20]) && $created_date->diffInDays($to_2) >= 1)
-                        {
-                            $data['ready_for_delivery'] -= 1;
-                        }
+                //         if(in_array($shipment_data->consignee_status_id, [14,30,36,12,20]) && $created_date->diffInDays($to_2) >= 1)
+                //         {
+                //             $data['ready_for_delivery'] -= 1;
+                //         }
                        
-                    }
-                }
+                //     }
+                // }
 
                 foreach ($route_distribution_summary as $rds_key => $rds_value) {
                     if($rds_value->zone_id == $zone->id)
@@ -14493,7 +14495,13 @@ class AdminReportsController extends Controller
         $date_to = $date_to->format('Y-m-d');
 
         // $Query = "SELECT * FROM manifest_report2 WHERE origin_zonecode = :origin_value AND booking_date >= :date_from AND booking_date <= :date_to";
-        $Query = "SELECT * FROM manifest_report2 WHERE booking_date >= :date_from AND booking_date <= :date_to";
+        if($request->get('excel') && $request->get('excel') == true) {
+            $Query = "SELECT * FROM manifest_report2_excel WHERE booking_date >= :date_from AND booking_date <= :date_to";
+
+        } else{
+            $Query = "SELECT * FROM manifest_report2 WHERE booking_date >= :date_from AND booking_date <= :date_to";
+            
+        }
         
         $bindings = [
             // 'origin_value' => $origin,
@@ -14518,70 +14526,104 @@ class AdminReportsController extends Controller
         }
 
         $results = DB::select($Query,$bindings);
+        if($request->get('excel') && $request->get('excel') == true) {
 
-        $transformedData = collect($results)->map(function ($item) { // mapping for datatable
-            $segment = $item->sub_prod_name . ' (' . $item->parent_prod_name . ')';
-            return [
-                'origin' => $item->origin_zonecode,
-                'destination' => $item->destination_zonecode,
-                'booking_date' => $item->booking_date,
-                // 'segment' => $item->parent_prod_name,
-                'sub_segment' => $item->sub_prod_name,
-                'segment' => $segment,
-                'arrival' => $item->arrival,
-                'manifest' => $item->manifest,
-                'misroute' => $item->misroute,
-                'withoutmanifest' => $item->withoutmanifest,
-            ];
-        });
+            $headers = ['Booking Date', 'Origin Zone', 'Destination Zone', 'Destination' , 'Segment', 'Tracking Number', 'Receiving City', 'Without Manifest', 'Misroute', 'Status' ,'Remarks'];
 
-        $datatable = Datatables::of($transformedData)
-            ->editColumn('manifest', function ($transformedData) {
-                if ($transformedData['manifest'] == null) {
-                    return '-';
-                } else {
-                    return $transformedData['manifest'];
-                }
-            })
-            ->editColumn('manifest_percentage', function ($transformedData) {
-                if ($transformedData['manifest'] == null) {
-                    return '-';
-                } else {
-                    $result = ($transformedData['manifest'] / $transformedData['arrival']) * 100;
-                    return number_format($result, 2) . ' %';
-                }
-            })
-            ->editColumn('withoutmanifest', function ($transformedData) {
-                if ($transformedData['withoutmanifest'] == null) {
-                    return '-';
-                } else {
-                    return $transformedData['withoutmanifest'];
-                }
-            })
-            ->editColumn('withoutmanifest_percentage', function ($transformedData) {
-                if ($transformedData['withoutmanifest'] == null) {
-                    return '-';
-                } else {
-                    $result = ($transformedData['withoutmanifest'] / $transformedData['arrival']) * 100;
-                    return number_format($result, 2) . ' %';
-                }
-            })
-            ->editColumn('misroute', function ($transformedData) {
-                if ($transformedData['misroute'] == null) {
-                    return '-';
-                } else {
-                    return $transformedData['misroute'];
-                }
-            })
-            ->editColumn('misroute_percentage', function ($transformedData) {
-                if ($transformedData['misroute'] == null) {
-                    return '-';
-                } else {
-                    $result = ($transformedData['misroute'] / $transformedData['arrival']) * 100;
-                    return number_format($result, 2) . ' %';
-                }
+            header('Content-Type: text/csv; charset=utf-8');  
+            header('Content-Disposition: attachment; filename=data.csv');  
+            $output = fopen("php://output", "w");  
+            fputcsv($output, $headers);
+
+            foreach ($results as $key => $row) {
+
+                $row = (array) $row;
+                $new_array = [];
+
+                $new_array['booking_date'] = date('d-M-Y',strtotime($row['booking_date']));
+                $new_array['origin_zonecode'] = $row['origin_zonecode'];
+                $new_array['destination_zonecode'] = $row['destination_zonecode'];
+                $new_array['destination_name'] = $row['destination_name'];
+                $new_array['segment'] = $row['sub_prod_name'] . ' ' . $row['parent_prod_name'];
+                $new_array['tracking_number'] = $row['tracking_number'];
+                $new_array['receiving_city'] = $row['receiving_city'];
+                $new_array['withoutmanifest'] = $row['withoutmanifest'] == null ? 0 : $row['withoutmanifest'];
+                $new_array['misroute'] = $row['misroute'] == null ? 0 : $row['misroute'];
+                $new_array['shipper_status_id'] = $row['shipper_status_id'];
+                $new_array['Remarks'] = $row['Remarks'];
+                
+                fputcsv($output, $new_array);
+
+            }
+        } else {
+            $transformedData = collect($results)->map(function ($item) { // mapping for datatable
+                $segment = $item->sub_prod_name . ' (' . $item->parent_prod_name . ')';
+                return [
+                    'origin' => $item->origin_zonecode,
+                    'destination' => $item->destination_zonecode,
+                    'booking_date' => $item->booking_date,
+                    // 'segment' => $item->parent_prod_name,
+                    'sub_segment' => $item->sub_prod_name,
+                    'segment' => $segment,
+                    'arrival' => $item->arrival,
+                    'manifest' => $item->manifest,
+                    'misroute' => $item->misroute,
+                    'withoutmanifest' => $item->withoutmanifest,
+                ];
             });
-        return $datatable->make(true);
+    
+            $datatable = Datatables::of($transformedData)
+                ->editColumn('manifest', function ($transformedData) {
+                    if ($transformedData['manifest'] == null) {
+                        return '-';
+                    } else {
+                        return $transformedData['manifest'];
+                    }
+                })
+                ->editColumn('manifest_percentage', function ($transformedData) {
+                    if ($transformedData['manifest'] == null) {
+                        return '-';
+                    } else {
+                        $result = ($transformedData['manifest'] / $transformedData['arrival']) * 100;
+                        return number_format($result, 2) . ' %';
+                    }
+                })
+                ->editColumn('booking_date', function ($transformedData) {
+                    return date('d-M-Y',strtotime($transformedData['booking_date']));
+                })
+                ->editColumn('withoutmanifest', function ($transformedData) {
+                    if ($transformedData['withoutmanifest'] == null) {
+                        return '-';
+                    } else {
+                        return $transformedData['withoutmanifest'];
+                    }
+                })
+                ->editColumn('withoutmanifest_percentage', function ($transformedData) {
+                    if ($transformedData['withoutmanifest'] == null) {
+                        return '-';
+                    } else {
+                        $result = ($transformedData['withoutmanifest'] / $transformedData['arrival']) * 100;
+                        return number_format($result, 2) . ' %';
+                    }
+                })
+                ->editColumn('misroute', function ($transformedData) {
+                    if ($transformedData['misroute'] == null) {
+                        return '-';
+                    } else {
+                        return $transformedData['misroute'];
+                    }
+                })
+                ->editColumn('misroute_percentage', function ($transformedData) {
+                    if ($transformedData['misroute'] == null) {
+                        return '-';
+                    } else {
+                        $result = ($transformedData['misroute'] / $transformedData['arrival']) * 100;
+                        return number_format($result, 2) . ' %';
+                    }
+                });
+            return $datatable->make(true);
+        }
+       
     }
 
     public function qsr_index(Request $request)

@@ -228,7 +228,7 @@
                                                 <h3 class="text-white">
                                                     <span id="average_first_call_time">-</span>
                                                 </h3>
-                                                <span>Average First Call Time</span>
+                                                <span>Average First Call Time (Last 30 Days)</span>
                                             </div>
                                         </div>
                                     </div>

@@ -210,12 +210,12 @@
             @endif
 
             {{--Add Logistic routes not create permission yet--}}
-            @if (session('role_id') == 1 || count(array_intersect([952, 953, 954, 955, 956, 957, 958, 959, 960, 972, 961, 962, 963, 964, 965, 966, 967, 968, 969, 970, 971], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([952, 953, 954, 955, 956, 957, 958, 959, 960, 972, 961, 962, 963, 964, 965, 966, 967, 968, 969, 970, 971,985,986,987,988], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                     class="la la-cubes"></i>Logistic</span></a>
                     <ul class="menu-content">
 
-                        @if(session('role_id') == 1 || count(array_intersect([952, 953, 954, 955, 956, 957, 958, 959, 960], session('permissions'))) !== 0)
+                        @if(session('role_id') == 1 || count(array_intersect([952, 953, 954, 955, 956, 957, 958, 959, 960,973,974,975], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Setup</span></a>
                             <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(952, session('permissions')))
@@ -707,7 +707,7 @@
                         @endif
 
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,849,885,903,927, 943], session('permissions'))) !== 0)
+                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,849,885,903,927, 943, 951], session('permissions'))) !== 0)
 
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Reason Validation</span></a>
@@ -732,6 +732,14 @@
                                                 href="{{ route('admin.return.index') }}">Shipment - Reason Validation Required</a>
                                         </li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(951, session('permissions')))
+                                        <li>
+                                            <a class="menu-item" href="{{ route('admin.settings.agents_list.index') }}">RVR Caller Agents List</a>
+                                        </li>
+                                    @endif
+
+
                                 </ul>
                             </li>
                             <li class=" nav-item"><a href="#"><span class="menu-title"
@@ -1886,7 +1894,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 388, 375, 377, 378, 379, 380, 387, 384, 385, 394, 417, 418, 425, 438, 443, 447, 462, 477, 488, 491, 494, 498, 499, 526, 544, 558, 565, 580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674, 682, 683, 689, 697, 701, 708, 710, 714, 716, 747, 761, 788, 820, 826, 836, 846, 861, 887, 904, 889, 910,932,938,942,978,990,992], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 388, 375, 377, 378, 379, 380, 387, 384, 385, 394, 417, 418, 425, 438, 443, 447, 462, 477, 488, 491, 494, 498, 499, 526, 544, 558, 565, 580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674, 682, 683, 689, 697, 701, 708, 710, 714, 716, 747, 761, 788, 820, 826, 836, 846, 861, 887, 904, 889, 910,932,938,942,951,978,990,992,997], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
@@ -2550,6 +2558,11 @@
                                         </li>
                                     @endif
 
+                                    @if (session('role_id') == 1 || in_array(997, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.settings.faf_charges.index') }}">FAF Charges</a></li>
+                                    @endif
+
                                 </ul>
                             </li>
                         @endif
@@ -3011,6 +3024,7 @@
                                 </ul>
                             </li>
                         @endif
+
                         @if (session('role_id') == 1 || in_array(697, session('permissions')))
                             <li><a class="menu-item"
                                     href="{{ route('admin.settings.auto_tag_territories.index') }}">Auto Tag

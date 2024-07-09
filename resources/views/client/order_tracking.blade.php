@@ -396,7 +396,8 @@
                                         shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
                                     }
                                 } else {
-                                    shipment += '<td>' + details.shipper.name + '</td>';
+                                    // shipment += '<td>' + details.shipper.name + '</td>';
+                                    shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
                                 }
 
                                 shipment += '<td><strong>Account No.</strong></td>';
@@ -440,11 +441,13 @@
                                 shipment += '<td>' + details.pickup.person_of_contact + '</td>';
 
                                 if (isMatch){
-                                    shipment += '<td><strong>Vendor</strong></td>';
                                     if (details.pickup.vendor) {
-                                        shipment += '<td>' + details.pickup.vendor + '</td>';
-                                    } else {
                                         shipment += '<td></td>'
+                                        // shipment += '<td>' + details.pickup.vendor + '</td>';
+                                        } else {
+                                        shipment += '<td><strong>Vendor</strong></td>';
+                                        shipment += '<td>' + details.pickup.vendor + '</td>';
+                                        // shipment += '<td></td>'
                                     }
                                 } 
                                 else {

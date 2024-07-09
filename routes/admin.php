@@ -141,6 +141,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('user_fintech_charges', 'Admins\AdminDashboardController@user_fintech_charges')->name('user_fintech_charges');
         Route::post('add_rate_commission_corporate_reimb/{shippers}', 'Admins\AdminDashboardController@add_rate_commission_corporate_reimb')->name('add_rate_commission_corporate_reimb');
         Route::post('excluded_shippers', 'Admins\AdminDashboardController@excluded_shippers')->name('excluded_shippers');
+        Route::post('faf_charges/info', 'Admins\AdminDashboardController@faf_charges_info')->name('faf_charges.info');
+        Route::post('faf_charges/submit', 'Admins\AdminDashboardController@faf_charges_submit')->name('faf_charges.submit');
 
         Route::get('duplicate/info', 'Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function () {
@@ -2462,7 +2464,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('cargo_manifest')->name('cargo_manifest.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@cargo_manifest_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
+            Route::post('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
         });
 
         Route::prefix('sms')->name('sms.')->group(function () {
@@ -3432,6 +3434,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\Settings\GeneralSettingController@shipper_cap_update')->name('update');
 
         });
+
+
+        //Agents List
+        Route::prefix('agents_list')->name('agents_list.')->group(function () {
+            Route::get('', 'Admins\Settings\AgentSettingsController@agents_list_index')->name('index');
+            Route::get('list', 'Admins\Settings\AgentSettingsController@agents_list_list')->name('list');
+            Route::post('store', 'Admins\Settings\AgentSettingsController@agent_type_store')->name('store');
+            Route::post('data', 'Admins\Settings\AgentSettingsController@agent_data')->name('data');
+            Route::post('update', 'Admins\Settings\AgentSettingsController@admin_agent_type_update')->name('update');
+            Route::post('bulk-update', 'Admins\Settings\AgentSettingsController@admin_agent_type_update_bulk')->name('update.bulk');
+
+        });
+
+        //Agent Types
+        Route::prefix('agent_types')->name('agent_types.')->group(function () {
+            Route::get('', 'Admins\Settings\AgentSettingsController@agent_types_index')->name('index');
+            Route::get('list', 'Admins\Settings\AgentSettingsController@agent_types_list')->name('list');
+            Route::post('store', 'Admins\Settings\AgentSettingsController@agent_type_store')->name('store');
+            Route::post('data', 'Admins\Settings\AgentSettingsController@agent_types_data')->name('data');
+            Route::post('update', 'Admins\Settings\AgentSettingsController@agent_type_update')->name('update');
+
+        });
+
+        Route::prefix('faf_charges')->name('faf_charges.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@faf_charges_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@faf_charges_store')->name('store');
+        });
+
 
     });
 

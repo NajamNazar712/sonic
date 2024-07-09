@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\ReturnController;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\RvCronLog;
 use App\RVDashboardDailyCount;
+use App\RvShipmentTicket;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -58,6 +59,9 @@ class AgentChangeStatus extends Command
             ->where('rv_state_id', 2)
             ->where('unresponsive_attempt_time', '<', Carbon::today()) // if current day has passed
             ->update(['rv_state_id' => 3]);
+
+            //Query for Making Shipments Enable again in Get Tickets After their "Unresponsive" Status is Submitted.
+            RvShipmentTicket::where('in_progress', 1)->update(['in_progress' => 0]);
 
 
             //Make record of return/dashboard cards count daily to mantain history
