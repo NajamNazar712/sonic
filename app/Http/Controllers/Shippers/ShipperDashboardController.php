@@ -275,7 +275,13 @@ class ShipperDashboardController extends Controller
                 $user = User::find($shipper_id);
                 
                 $weight_charges = WeightCharge::where('user_id' , $shipper_id);
-                if($user->status == 0 && !$weight_charges->exists() && (!isset($user->request_custom_quotation) || $user->request_custom_quotation != 1)){
+                if(($user->on_board_status < 1 && $user->created_at > '2024-06-13 00:00:00')){
+                    $lead_progress_setting = LeadProgressSetting::find(1);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
+
+                    $description = "Your account is $percentage% completed";
+                }elseif($user->status == 0 && !$weight_charges->exists() && (!isset($user->request_custom_quotation) || $user->request_custom_quotation != 1)){
                     $lead_progress_setting = LeadProgressSetting::find(1);
                     $percentage = $lead_progress_setting->percent;
                     $color = $lead_progress_setting->color;
