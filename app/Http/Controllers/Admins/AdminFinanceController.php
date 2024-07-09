@@ -19462,6 +19462,16 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
             $result->packaging_charges = number_format($result->packaging_charges, 2);
         }
 
+        // Calculate amount
+        foreach ($results as $result) {
+            $result->amount = number_format($result->amount, 2);
+        }
+
+        // Calculate wth
+        foreach ($results as $result) {
+            $result->amount = number_format($result->wht, 2);
+        }
+
         return response()->json([
             'data' => $results
         ]);

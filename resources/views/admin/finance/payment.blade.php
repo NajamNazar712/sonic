@@ -64,8 +64,7 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Type</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Delivery / Return
-                                        Datetime</th>
+                                    <th class="border-primary border-darken-1">Delivery / Return Datetime</th>
                                     <th class="border-primary border-darken-1">Aging</th>
                                     <th class="border-primary border-darken-1">Amount</th>
                                     <th class="border-primary border-darken-1">Charges</th>
@@ -77,7 +76,8 @@
                                     <th class="border-primary border-darken-1">Payable</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
                                     <th class="border-primary border-darken-1">Action</th>
-                                    <th class="d-none"></th>
+                                    <th class="border-primary border-darken-1"></th>
+                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                             </thead>
                         </table>
@@ -256,7 +256,6 @@
                 var initial_ibft_charges = 0;
 
                 //Make Payment Modal Datatable
-               
                 var make_payments_table = $('#make_payments_datatable').DataTable({
                     dom: '<"pull-right"B>tr',
                     buttons: [
@@ -276,39 +275,38 @@
                             extend: 'selectAll',
                             text: 'Select All',
                             className: 'select_all',
-                            action: function(e) {
+                            action: function(e, dt, node, config) {
                                 e.preventDefault();
-                                make_payments_table.rows().nodes().each(function(index) {
-                                    var row = make_payments_table.row(index);
-                                    if ($(row.node().firstChild).hasClass(
-                                            'select-checkbox') && !$(row.node())
-                                        .hasClass('selected')) {
-                                        row.select();
-                                        var parent = $(row.node());
-                                        calculation(parent);
+                                dt.rows({ search: 'applied' }).select();
+                                dt.rows({ search: 'applied', selected: true }).every(function() {
+                                    var $row = $(this.node());
+                                    var $checkbox = $row.find('td.select-checkbox input[type="checkbox"]');
+                                    if ($checkbox.length > 0) {
+                                        $checkbox.prop('checked', true);
+                                        $row.addClass('selected bg-primary bg-lighten-5 primary');
+                                        $checkbox.parent().addClass('selected');
+                                    } else {
+                                        $row.nextUntil(':not(.details-row)').find('td.select-checkbox input[type="checkbox"]')
+                                            .prop('checked', true);
+                                        $row.nextUntil(':not(.details-row)').addClass('selected bg-primary bg-lighten-5 primary');
+                                        $row.nextUntil(':not(.details-row)').find('input[type="checkbox"]').parent().addClass('selected');
                                     }
+                                    calculation($row);
                                 });
 
                                 shipper_limit = parseFloat(shipper_limit).toFixed(2);
-                                shipper_limit = parseFloat(shipper_limit);
                                 total_payable_amt = total_payable_amt.toFixed(2);
-
                                 if (total_payable_amt > shipper_limit) {
                                     scan_sound(2);
-                                    toastr.error(
-                                        "Payable amount should be less than shipper Cap!",
-                                        'Error!', {
-                                            positionClass: 'toast-top-center',
-                                            containerId: 'toast-top-center'
-                                        });
-                                    $('#make_payments_form button.make').prop('disabled',
-                                        true);
-                                    $('#make_payments_form button.export_bank_order').prop(
-                                        'disabled', true);
+                                    toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                    $('#make_payments_form button.make').prop('disabled', true);
+                                    $('#make_payments_form button.export_bank_order').prop('disabled', true);
                                 }
                                 if (total_payable_amt < 0) {
-                                    $('#make_payments_form button.make_invoice').prop(
-                                        'disabled', true);
+                                    $('#make_payments_form button.make_invoice').prop('disabled', true);
                                 }
                                 check_reimbursement();
                             }
@@ -318,21 +316,24 @@
                             extend: 'selectNone',
                             text: 'Select None',
                             className: 'select_none',
-                            action: function(e) {
+                            action: function(e, dt, node, config) {
                                 e.preventDefault();
-                                make_payments_table.rows().nodes().each(function(index) {
-                                    var row = make_payments_table.row(index);
-                                    if ($(row.node().firstChild).hasClass(
-                                            'select-checkbox') &&
-                                        $(row.node()).hasClass('selected')) {
-                                        row.deselect();
-                                        var parent = $(row.node());
-                                        calculation(parent);
-                                    }
+                                dt.rows({ selected: true }).deselect();
+                                dt.rows().every(function() {
+                                    var $row = $(this.node());
+                                    $row.removeClass('selected bg-primary bg-lighten-5 primary');
+                                    $row.find('td.select-checkbox input[type="checkbox"]').prop('checked', false);
+                                    $row.find('td.select-checkbox').removeClass('selected');
+                                    // Handle details rows (dynamically added)
+                                    $row.nextUntil(':not(.details-row)').removeClass('selected bg-primary bg-lighten-5 primary');
+                                    $row.nextUntil(':not(.details-row)').find('td.select-checkbox input[type="checkbox"]').prop('checked', false);
+                                    $row.nextUntil(':not(.details-row)').find('td.select-checkbox').removeClass('selected');
+                                    calculation($row);
                                 });
                                 check_reimbursement();
                             }
-                        },
+                        }
+
                     ],
                     scrollX: true,
                     paging: false,
@@ -472,12 +473,17 @@
                             name: 'sj.created_at',
                             class: 'align-middle arrival_date'
                         },
-                        {data: 'shipper_id', name: 'u.id', class: 'align-middle shipper_id d-none', searchable: false},
+                        
+                        {
+                            data: 'shipper_id',
+                            name: 'u.id',
+                            class: 'align-middle shipper_id d-none',
+                            searchable: false
+                        },
+
                         // Accordion button
                         {
                             class: 'align-middle shipper_id',
-                            orderable: false,
-                            searchable: false,
                             render: function(data, type, row) {
                                 return '<button type="button" class="btn btn-sm btn-primary view-details" data-id="' + row.id + '" data-shipper="' + row.shipper + '">View Details</button>';
                             }
@@ -578,9 +584,42 @@
                 //End Make Payment Modal Datatable
 
                 $('#make_payments_datatable').on('click', '.details-row td.select-checkbox', function(event) {
-                    var $row = $(this).closest('tr');
-                    var isChecked = $(this).prop('checked');
-                    $row.toggleClass('selected', isChecked);
+                    var $checkbox = $(this);
+                    var isChecked = $checkbox.hasClass('selected');
+                    var $row = $checkbox.closest('tr');
+                    $checkbox.toggleClass('selected', !isChecked);
+                    $row.find('td').toggleClass('bg-primary bg-lighten-5 primary', !isChecked);
+                    $row.toggleClass('selected', !isChecked);
+                    if (!isChecked) {
+                        var make_payments_table = $('#make_payments_datatable').DataTable();
+                        var parent = $row;
+                        var selected_id = $row.attr('id');
+                        var con_id = parseInt($row.attr('consolidation_id'));
+                        if (con_id) {
+                            var total_payable_amt = 0;
+                            var shipper_limit = 0;
+                            make_payments_table.rows().nodes().each(function(index) {
+                                var row = make_payments_table.row(index);
+                                var consolidation_id = $(row.node()).attr('consolidation_id');
+                                if (con_id === consolidation_id && $(row.node()).find('.select-checkbox').hasClass('selected')) {
+                                    total_payable_amt += parseFloat($(row.node()).find('.payable').text());
+                                }
+                            });
+                            if (total_payable_amt > shipper_limit) {
+                                scan_sound(2);
+                                toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                                $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                                $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                            }
+                            if (total_payable_amt < 0) {
+                                $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
+                            }
+                        }
+                        check_reimbursement();
+                    }
                 });
 
                 // Click event for 'View Details' button
@@ -601,10 +640,18 @@
                         data: { ids: ids },
                         success: function(response) {
                             var detailsHtml = '';
-                            response.data.forEach(function(item) {
+                            // Flag to skip the first iteration
+                            var firstItemSkipped = false;
+
+                            response.data.forEach(function(item, index) {
+                                if (index === 0) {
+                                    // Skip the first item
+                                    return;
+                                }
+
                                 if (item.shipper == shipper) {
-                                    detailsHtml += '<tr class="details-row">';
-                                    detailsHtml += '<td class="text-center align-middle select select-checkbox p-1"><input type="checkbox" class="d-none"></td>';
+                                    detailsHtml += '<tr class="details-row" id="' + item.id + '">';
+                                    detailsHtml += '<td class="select-checkbox"></td>';
                                     detailsHtml += '<td></td>';
                                     detailsHtml += '<td class="account_type">' + item.account_type + '</td>';
                                     detailsHtml += '<td class="shipper">' + item.shipper + '</td>';
@@ -636,9 +683,6 @@
                         }
                     });
                 });
-
-
-
 
 
 
@@ -853,7 +897,6 @@
                     var parent = $(this).parent('tr');
                     var selected_id = $(this).parent('tr').attr('id');
                     var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
-
                     if (con_id) {
                         var count = 0;
                         make_payments_table.rows().nodes().each(function(index) {
@@ -899,10 +942,8 @@
                             $('#make_payments #make_payments_form button.make_invoice').prop(
                                 'disabled', false);
                         }
-
                     } 
                     else{
-
                         calculation(parent);
                         if (total_payable_amt > shipper_limit) {
                             scan_sound(2);
@@ -1038,10 +1079,6 @@
 
                     return html;
                 }
-
-
-
-
             });
         });
     </script>
