@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rider\Logistic\Api;
 
 use App\Http\Controllers\Admins\Logistic\AdminBatchController;
 use App\Http\Controllers\Admins\Logistic\LogisticToShipmentSyncController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Logistic\TraxBookingBatch;
 use App\Http\Models\Admin\Logistic\TraxBookingPiece;
 use App\Http\Models\Admin\Logistic\TraxChildCnIssueToRider;
@@ -143,6 +144,8 @@ class RiderLogisticApiController extends Controller
             $already_used_cns =[];
             $un_inserted_cns=[];
             $already_used_child_cns =[];
+            $book_Shipments=[];
+
             try {
 
                 if (!empty($bookig_data))
@@ -357,7 +360,11 @@ class RiderLogisticApiController extends Controller
                                             AdminBatchController::booking_batch_detail_store($batch_id,$logistic_booking->id);
                                         }
 
+
                                         DB::commit();
+
+                                        // add bookings detail for send email to shipper
+                                        $book_Shipments[$booking['shipper_id']][] = $logistic_booking->id;
 
 //                                    } else{
 //                                        $old_booking = $old_booking->first();
@@ -375,6 +382,11 @@ class RiderLogisticApiController extends Controller
 //                                    ];
                                 }
 
+                        }
+
+                        if(!empty($book_Shipments))
+                        {
+                            NotificationsController::send(232,$book_Shipments);
                         }
 
 //                        if(!empty($already_exists_bookings) || !empty($un_inserted_cns) || !empty($already_used_child_cns))
