@@ -583,6 +583,11 @@
                 });
                 //End Make Payment Modal Datatable
 
+                // $('#make_payments_datatable').on('click', '.details-row td.select-checkbox', function(event) {
+                //     var $row = $(this).closest('tr');
+                //     var isChecked = $(this).prop('checked');
+                //     $row.toggleClass('selected', isChecked);
+                // });
                 $('#make_payments_datatable').on('click', '.details-row td.select-checkbox', function(event) {
                     var $checkbox = $(this);
                     var isChecked = $checkbox.hasClass('selected');
