@@ -446,7 +446,6 @@ class ReturnController extends Controller
         //-----------x--------x-------aging------x-----------x-----------x---------
         //Average Hours
         $aging = ShipmentsJourney::join('rv_shipment_assign_agents', 'shipments_journey.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
-        ->where('shipments_journey.shipment_id', 34)
         ->whereIn('shipments_journey.shipper_status_id', [2,12])
         ->orderBy('shipments_journey.shipment_id')
         ->orderBy('shipments_journey.created_at')
