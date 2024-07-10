@@ -37,7 +37,7 @@
                                 </div>
                                 <div class="col-4">
                                     <fieldset class="form-group">
-                                        <select name="search_shipper" id="search_shipper" class="form-control select2" required data-rule-required="true" data-msg-required="This field is required">
+                                        <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple>
                                             @foreach($shippers as $shipper)
                                                 <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                             @endforeach
@@ -1057,10 +1057,11 @@ function checkboxStatus() {
             placeholder:"Select Sale Persons",
             allowClear:true,
         });
-        $('#search_shipper').prepend('<option value="" selected></option>').select2({
+        $('#search_shipper').select2({
             width:'100%',
             placeholder:"Select Shipper",
             allowClear:true,
+            multiple: true
          });
 
          $('#block_disable_reason').prepend('<option value="" selected></option>').select2({

@@ -443,16 +443,42 @@ class ReturnController extends Controller
         $minutes = ($average_first_call_time % 60);
         $average_first_call_time = $hours . " h : " . $minutes . " m";
 
+        //-----------x--------x-------aging------x-----------x-----------x---------
         //Average Hours
         $aging = ShipmentsJourney::join('rv_shipment_assign_agents', 'shipments_journey.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
-            ->where('shipments_journey.shipper_status_id', 2)->get(['shipments_journey.created_at']);
-        $totalSeconds = 0;
+        ->whereIn('shipments_journey.shipper_status_id', [2,12])
+        ->orderBy('shipments_journey.shipment_id')
+        ->orderBy('shipments_journey.created_at')
+        ->where('shipments_journey.created_at','>=',now()->subDays(30))
+        ->get(['shipments_journey.shipment_id','shipments_journey.shipper_status_id','shipments_journey.created_at'])
+        ->groupBy('shipments_journey.shipment_id');
+        $totalMinutes = 0;
         $count = count($aging);
-        foreach ($aging as $record) {
-            $totalSeconds += now()->diffInSeconds($record->created_at);
+
+        foreach ($aging as $shipment) {
+            $createdAt12 = null;
+            $createdAt2 = null;
+
+            foreach ($shipment as $record) {
+                if ($record->shipper_status_id == 12) {
+                    $createdAt12 = Carbon::parse($record->created_at);
+                } elseif ($record->shipper_status_id == 2) {
+                    $createdAt2 = Carbon::parse($record->created_at);
+                }
+
+                // Calculate the difference when both statuses are found
+                if ($createdAt12 && $createdAt2) {
+                    $totalMinutes += $createdAt12->diffInMinutes($createdAt2);
+                    break;
+                }
+            }
+
         }
-        $averageSeconds = ($count > 0) ? $totalSeconds / $count : 0;
-        $averageHours = ($averageSeconds > 0) ? $averageSeconds / 3600 : 0; // 1 hour = 3600 seconds
+
+        $averageMinutes = $count > 0 ? $totalMinutes / $count : 0;
+        $averageHours = $averageMinutes / 60; // Convert minutes to hours
+
+        //----------x---------x-----!aging!--------x---------x----------
 
         $stats = array();
         $stats['total_of_shipments'] = $total_of_shipments;
