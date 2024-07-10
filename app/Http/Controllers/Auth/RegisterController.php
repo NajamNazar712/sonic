@@ -524,7 +524,7 @@ class RegisterController extends Controller
 
                 
                 $adminDashboardController = new AdminDashboardController();
-                $adminDashboardController->addRates($request, User::max('id'));
+                $adminDashboardController->addRates($request, $newUser->id);
 
                 $lead = Lead::find($data['lead_id']);
                 $lead->status_id = 9;
