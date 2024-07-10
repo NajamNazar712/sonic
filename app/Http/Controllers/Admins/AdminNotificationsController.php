@@ -95,6 +95,7 @@ class AdminNotificationsController extends Controller
         
         $attachments = array();
         $from_email = $request->notification_sender;
+        
         if ($request->get('receiver') == 1) {
             if($request->get('search_hub') == 0) {
                 $emails = Admin::all()->pluck('email')->toArray();
@@ -156,12 +157,16 @@ class AdminNotificationsController extends Controller
                 // $body_attachment_message =  $body_attachment_message. PHP_EOL . 'NOTE: the attachments will be removed after 7 days(s)';
                 $body = $body . PHP_EOL . $body_attachment_message;
             }
-         
-         
-            foreach ($emails as $to) {
-                NotificationsController::custom(1, $subject, $body, $to,$from_email);
-            }
 
+
+            $totalItems = count($emails);
+            $chunkSize = 50;
+            for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
+                $parsed_emails = array_slice($emails, $offset, $chunkSize);
+                
+                NotificationsController::custom(1, $subject, $body, $parsed_emails,$from_email);
+                
+            }
             return redirect()->back()->with('success', 'Custom Email Sent');
         }
         else {
@@ -260,7 +265,7 @@ class AdminNotificationsController extends Controller
         else if ($id == 12) {
             $details['receiver'] = ['Consignee Phone Number'];
 
-            $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'consignee_name', 'consignee_address', 'order_id', 'amount', 'payment_mode', 'tracking_number', 'refusal_otp','online_payment_link'];
+            $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'consignee_name', 'consignee_address', 'order_id', 'amount', 'payment_mode', 'tracking_number', 'refusal_otp','online_payment_link', 'tracking_link'];
         }
         else if ($id == 13) {
              $details['receiver'] = ['Shipper Email'];
@@ -1199,6 +1204,12 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = ['shipments_count','tracking_number','return_notes_id'];
         }
+        else if ($id == 217)
+        {
+            $details['receiver'] = ['Rider'];
+
+            $details['fields'] = ['rider','amount','tip','tracking_number'];
+        }
         else if ($id == 218)
         {
             $details['receiver'] = ['Admin Email'];
@@ -1245,6 +1256,13 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = ['employee_name', 'employee_type', 'depatment', 'updated_by'];
         }
+        else if ($id == 232 || $id == 233)
+        {
+            $details['receiver'] = ['Shipper Email'];
+
+            $details['fields'] = ['Booking_at','preview'];
+        }
+
         return $details;
     }
 

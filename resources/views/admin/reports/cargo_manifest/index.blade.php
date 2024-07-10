@@ -16,7 +16,7 @@
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
-                                    <select name="select_origin" id="select_origin" class="form-control select2">
+                                    <select name="select_origin" id="select_origin" class="form-control select2" data-rule-required="true" data-msg-required="Origin is Required">
                                             @foreach($origins as $origin)
                                             <option value="{{$origin->origin_name}}">{{$origin->origin_name}}</option>
                                         @endforeach
@@ -25,7 +25,7 @@
                             </div>
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
-                                    <select name="select_destination" id="select_destination" class="form-control select2">
+                                    <select name="select_destination" id="select_destination" class="form-control select2" >
                                         @foreach($destinations as $destination)
                                             <option value="{{$destination->destination_name}}">{{$destination->destination_name}}</option>
                                         @endforeach
@@ -320,66 +320,79 @@
             //     }
             // });
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    // blockPagePermanently();
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.cargo_manifest.list') }}',
-                        data: params,
-                        success: function (result) {
-                            head = [];
-                        
-                            head.push('S. No');
-                            head.push('Booking Date');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Segment');
-                            head.push('Arrival');
-                            head.push('Manifest');
-                            head.push('Manifest Percentage');
-                            head.push('Without Manifest');
-                            head.push('Without Manifest Percentage');
-                            head.push('Misroute');
-                            head.push('Misroute Percentage');
-                            $.each(result.data, function(index, values) {
-                                row = [];
-                        
-                                row.push(index + 1);
-                                row.push(values.booking_date);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.segment);
-                                row.push(values.arrival);
-                                row.push(values.manifest);
-                                row.push(values.manifest_percentage);
-                                row.push(values.withoutmanifest);
-                                row.push(values.withoutmanifest_percentage);
-                                row.push(values.misroute);
-                                row.push(values.misroute_percentage);
-                        
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
-                    return {body: body, header: head};
-                }
-            });
-
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
-                        extend: 'excelHtml5',
-                        className: 'btn btn-primary d-none',
+                        extend: 'excel',
                         title: 'Cargo Manifest Report',
+                        className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
+                        action: function(e){
+                                    if ( !$('#search_form #select_origin').val() && !$('input[name="search_date_from_formatted"]').val() && ! $('input[name="search_date_to_formatted"]').val() ) {
+                                        swal({
+                                            text: 'Please select Origin & Booking Dates',
+                                            title: 'Validation error !',
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'OK',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                }
+                                            },
+                                            dangerMode: true
+                                        })
+                                        return;
+                                    }
+                                    $.ajax({
+                                        url: "{{ route('admin.reports.cargo_manifest.list') }}",
+                                        method: "POST",
+                                        data: {
+                                            excel: true,
+                                            _token: $('meta[name="csrf-token"]').attr('content'),
+                                            select_origin : $('#search_form #select_origin').val(),
+                                            select_destination : $('#search_form #select_destination').val(),
+                                            select_segment_value : $('#search_form #selected_segment_name').val(),
+                                            select_sub_segment_value : $('#search_form #selected_sub_segment_name').val(),
+                                            search_date_from : $('input[name="search_date_from_formatted"]').val(),
+                                            search_date_to : $('input[name="search_date_to_formatted"]').val(),
+                                        },
+                                        
+                                        beforeSend: function() {
+                                            swal({
+                                                title: 'Please Wait!',
+                                                text: 'Downloading is in progress',
+                                                icon: 'info',
+                                                buttons: false,
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
+                                            });
+                                        },
+                                        complete: function() {
+                                            // Hide loader
+                                            swal.close();
+                                        },
+                                        success: function(response) {
+                                            var blob = new Blob([response], {
+                                                type: 'text/csv'
+                                            });
+                                            var url = window.URL.createObjectURL(blob);
+                                            var a = document.createElement('a');
+                                            a.href = url;
+                                            a.download = 'Cargo Manifest Report.csv';
+                                            document.body.appendChild(a);
+                                            a.click();
+                                            window.URL.revokeObjectURL(url);
+                                            document.body.removeChild(a);
+                                        },
+                                        error: function(xhr, status, error) {
+                                            console.error('Failed to fetch CSV data:', status, error);
+                                        }
+                                    });
+                                }
                     },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -394,6 +407,10 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.cargo_manifest.list') }}',
+                    method: 'POST',
+                    headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                     data: function (d) {
                         d.select_origin = $('#search_form #select_origin').val();
                         d.select_destination = $('#search_form #select_destination').val();

@@ -40,6 +40,44 @@
                                     <input type="hidden" id="packaging_invoice" name="packaging_invoice">
                                     <input type="hidden" name="_method" value="PUT"/>
 
+                                    <div class="card-header border-success">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h3 class="display-inline card-title lead success">SMS Charges</h3>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <a href="javascript:void(0);" class="pull-right" id="sms_main_switch"><input name="sms_main_switch" type="checkbox" id="" class="switchery sms-main-switch" data-size="sm" {{ ((isset($sms_charge['sms_charges']) && $sms_charge->sms_charges_status == 1) ? 'checked' : '') }}/></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="sms" class="border-success no-border-top card {{ ((isset($sms_charge['sms_charges']) && $sms_charge->sms_charges_status == 1) ? '' : 'hide') }}"
+                                        aria-expanded="true">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <h4>Do you want to charge SMS? (Applied Per Shipment)</h4>
+                                                    </div>
+                                                </div>
+                                                <div class="row mt-2">
+                                                        <div class="col-md-3 text-center">
+                                                            <fieldset>
+                                                                <div class="input-group form-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text">SMS Charges</span>
+                                                                    </div>
+                                                                    <input type="text" class="form-control @if(isset($e_sms_charge['sms_charges']) && ($sms_charge['sms_charges']) && $e_sms_charge->sms_charges != $sms_charge->sms_charges) changed @elseif(!isset($e_sms_charge['sms_charges']) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_sms_charge['sms_charges']) && isset($sms_charge['sms_charges']) && $e_sms_charge->sms_charges !=$sms_charge->sms_charges) {{$e_sms_charge->sms_charges}} @endif" data-rule-required="true" data-msg-required="This field is required" data-rule-range="[0.01,100000]" data-msg-range="Charges needs to be from 0.01 to 100000" name="sms_charges" value="{{ (isset($sms_charge['sms_charges']) && $sms_charge->sms_charges != '')? $sms_charge->sms_charges : ''}}">
+                                                                    <div class="input-group-append">
+                                                                        <span class="input-group-text">PKR</span>
+                                                                    </div>
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div id="headingCollapse61" class="card-header border-success">
                                         <div class="row">
                                             <div class="col-md-6">
@@ -4560,7 +4598,7 @@
                                     </div>
                                 </form>
 
-                                <form id="ratesAdditionForm" class="card-body card-dashboard"  action="{{route('admin.accounts.add_rate_commission_corporate_reimb',['shippers'=>$shipper->id])}}" method="post" novalidate>
+                                {{-- <form id="ratesAdditionForm" class="card-body card-dashboard"  action="{{route('admin.accounts.add_rate_commission_corporate_reimb',['shippers'=>$shipper->id])}}" method="post" novalidate>
                                     @csrf
                                     <input type="hidden" name="edit" value="edit">
                                     <div class="modal-body">
@@ -4648,7 +4686,7 @@
                                         <button type="submit" class="btn btn-success" style="margin-right:680px;">Submit</button>
 
                                     </div>
-                                </form>
+                                </form> --}}
                         
                     </div>
                 </div>
@@ -4858,20 +4896,36 @@
         function add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission){
             var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove"><i class="la la-close"></i></a>';
             var tier = '<div><input type="hidden" name="tier_id['+ row +']"  value="'+ tier_id +'">'+ tier_name +'</div>';
+            var name;
+
             if(tier_type == 1){
-                var name = '<div><input type="hidden" name="user_id['+ row +']"  value="'+ user_id +'">'+ user_name +'</div>';
+                name = '<div><input type="hidden" name="user_id['+ row +']"  value="'+ user_id +'">'+ user_name +'</div>';
             }else{
-                var name = '<div><input type="hidden" name="user_id['+ row +']"  value="'+ user_name +'">'+ user_name +'</div>';
+                name = '<div><input type="hidden" name="user_id['+ row +']"  value="'+ user_name +'">'+ user_name +'</div>';
             }
             var commission_percentage = '<div><input type="hidden" name="commission_percentage['+ row +']"  value="'+ commission +'">'+ commission +'%</div>';
-            table.row.add([row,name,tier,commission_percentage,remove]).node().id = row;
+
+            // Add debug statement
+            console.log('Adding row:', row, name, tier, commission_percentage, remove);
+
+            var addedRow = table.row.add([row, name, tier, commission_percentage, remove]).node();
+
+            if (!addedRow) {
+                console.error('Failed to add row:', row);
+                return;
+            }
+
+            addedRow.id = row;
             table.draw(false);
-            if(tier_type == 1){
+
+            if (tier_type == 1) {
                 selected_users.push(user_id.toString());
             }
+
             $('#commission_add_button').attr('disabled', false);
             $('#total_commission_value').html(selected_commission);
             $('#total_commission').val(selected_commission);
+
             row++;
         }
 
@@ -5106,6 +5160,16 @@
                     $('#overnight').slideUp('slow');
 
 
+                }
+            });
+            $('#sms_main_switch').on('change',function(){
+
+                var smsmainswitch = document.querySelector('.switchery.sms-main-switch');
+                if (smsmainswitch.checked === true) {
+                    $('#sms').slideDown('slow');
+
+                } else if (smsmainswitch.checked === false) {
+                    $('#sms').slideUp('slow');
                 }
             });
             $('#ol_main_switch').on('change',function(){
@@ -7969,5 +8033,6 @@
             return timeRepeated === 1 || timeRepeated === 0;
 
         }, "Destination Can Not Be Duplicate");
+
     </script>
 @endsection

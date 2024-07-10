@@ -14,7 +14,7 @@ class AddParcelAmountToRetailShipmentsTable extends Migration
     public function up()
     {
         Schema::table('retail_shipments', function (Blueprint $table) {
-            $table->string('parcel_amount')->nullable();
+            $table->integer('parcel_amount')->nullable();
         });
     }
 

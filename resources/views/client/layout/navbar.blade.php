@@ -22,18 +22,21 @@
           </ul>
           <ul class="nav navbar-nav float-right">
             <li class="dropdown dropdown-user nav-item">
+              @if(session('status') === 3)
+
                 <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('cod.order.index') }}" target="_blank">
                     <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
                         <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Order ID</span>
                         <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-circle-o-notch m-0"></i></h2>
                     </div>
                 </a>
-                <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('cod.tracking.index') }}" target="_blank">
-                  <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
-                      <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Tracking</span>
-                      <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-crosshairs m-0"></i></h2>
-                  </div>
-              </a>
+                  <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('cod.tracking.index') }}" target="_blank">
+                    <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
+                        <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Tracking</span>
+                        <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-crosshairs m-0"></i></h2>
+                    </div>
+                  </a>
+                @endif
               <a class="nav-link d-inline-flex align-middle p-0" href="http://bit.ly/sonic_video_tutorial" target="_blank">
                   <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
                       <span class ="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">HELP</span>
@@ -55,13 +58,15 @@
                 <i class="ft-chevron-down"></i>
               </a>
               <div class="dropdown-menu dropdown-menu-right">
-                  @if(session('user_type') == 1)
-                    <a class="dropdown-item" href="{{ route('cod.edit.profile') }}"><span class="menu-title"><i class="ft-user"></i>Profile</span></a>
-                  @endif
-                  <a class="dropdown-item" href="{{ route('cod.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
-                  @if(session('sale_person_status') == 1)
-                      <a class="dropdown-item" href="{{ route('cod.contacts') }}"><span class="menu-title"><i class="ft-phone"></i>Contacts</span></a>
-                  @endif
+                @if(session('status') == 3)
+                      @if(session('user_type') == 1)
+                        <a class="dropdown-item" href="{{ route('cod.edit.profile') }}"><span class="menu-title"><i class="ft-user"></i>Profile</span></a>
+                      @endif
+                      <a class="dropdown-item" href="{{ route('cod.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
+                      @if(session('sale_person_status') == 1)
+                          <a class="dropdown-item" href="{{ route('cod.contacts') }}"><span class="menu-title"><i class="ft-phone"></i>Contacts</span></a>
+                      @endif
+                @endif
                   <a class="dropdown-item" href="{{route('cod.logout')}}" onclick="event.preventDefault();
 
 

@@ -2,10 +2,11 @@
 
 namespace App\Http\Middleware;
 
-use App\Http\Models\Admin\GlobalSettings;
-use Illuminate\Support\Facades\Auth;
-use Session;
+use Route;
 use Closure;
+use Session;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\Admin\GlobalSettings;
 
 class Permission
 {
@@ -50,6 +51,8 @@ class Permission
             'accounts.receiving_sheet.index' => 364,
             'accounts.restrict_order_id.info' => 619,
             'accounts.restrict_order_id.submit' => 619,
+            'accounts.kam_bulk_tagging.index' => 991,
+            'accounts.kam_bulk_tagging.update' => 991,
 
             'corporate.reimbursement_setting.index' => 598,
             'corporate.reimbursement_setting.store' => 598,
@@ -388,6 +391,7 @@ class Permission
             'return.rider_request.approve' => 833,
             'return.rider_request.reject' => 834,
             'return.rider_request.update' => 835,
+            'settings.agents_list.index' => 951,
 
 
             'finance.outstanding_sdn.index' => 52,
@@ -788,6 +792,13 @@ class Permission
             'crm.dashboard.index' => 869,
             'crm.dashboard.list' => 869,
 
+            'settings.shippers.base_rate_revisions.index' => 990,
+            'settings.shippers.base_rate_revisions.list' => 990,
+            'settings.shippers.base_rate_revisions.bulk_store' => 990,
+            'settings.shippers.base_rate_revisions.approval1_update' => 990,
+            'settings.shippers.base_rate_revisions.approval2_update' => 990,
+            'settings.shippers.base_rate_revisions.shippers_with_rates' => 990,
+
             'settings.shippers.status_webhook.index' => 646,
             'settings.shippers.status_webhook.list' => 646,
             'settings.shippers.status_webhook.edit' => 646,
@@ -1020,6 +1031,7 @@ class Permission
             'settings.shipper_ibft_charges_settings.list' => 917,
 
             'settings.shipper_negative_payable.index' => 982,
+            'settings.faf_charges.index'=>997,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -1235,6 +1247,8 @@ class Permission
             'retail.users.index' => 474,
             'retail.users.list' => 474,
 
+            'retail.international.economy_rates.index' => 992,
+            'retail.international.economy_rates.excel' => 992,
 
             'debriefing.supervisor.index' => 495,
             'debriefing.supervisor.list' => 495,
@@ -1448,6 +1462,72 @@ class Permission
 
             'settings.mms_excel_booking_setting.index' => 938,
 			'reports.cargo_manifest.index' => 933,
+            'reports.sms.index' => 945,
+
+            'logistic.master_product.index' =>952,
+            'logistic.master_product.list' =>952,
+            'logistic.master_product.store' =>953,
+            'logistic.master_product.edit' =>954,
+            'logistic.master_product.update' =>954,
+
+            'logistic.product.index' =>955,
+            'logistic.product.list' =>955,
+            'logistic.product.store' =>956,
+            'logistic.product.edit' =>957,
+            'logistic.product.update' =>957,
+
+            'logistic.service.index' =>958,
+            'logistic.service.list' =>958,
+            'logistic.service.store' =>959,
+            'logistic.service.edit' =>960,
+            'logistic.service.update' =>960,
+
+            'logistic.shipper_tagging.index' =>973,
+            'logistic.shipper_tagging.list' =>973,
+            'logistic.shipper_tagging.store' =>974,
+            'logistic.shipper_tagging.edit' =>975,
+            'logistic.shipper_tagging.update' =>975,
+
+            'logistic.batch.index' => 976,
+            'logistic.batch.assign_batch' =>977,
+            'logistic.batch.batch_bookings' =>985,
+
+            'logistic.index' => 986,
+            'logistic.list' => 986,
+            'logistic.store' => 988,
+            'logistic.edit' => 987,
+            'logistic.update' => 987,
+
+            'logistic.shipper_tagging.index' =>973,
+            'logistic.shipper_tagging.list' =>973,
+            'logistic.shipper_tagging.store' =>974,
+            'logistic.shipper_tagging.edit' =>975,
+            'logistic.shipper_tagging.update' =>975,
+
+            'logistic.cn.receive_admin_store.index' => 972,
+            'logistic.cn.receive_admin_store.list' => 972,
+            'logistic.cn.receive_admin_store.store' => 961,
+            'logistic.cn.receive_admin_store.edit' => 962,
+            'logistic.cn.receive_admin_store.update' => 962,
+
+            'logistic.cn.issue_to_rider.index' => 963,
+            'logistic.cn.issue_to_rider.list' => 963,
+            'logistic.cn.issue_to_rider.store' => 964,
+            'logistic.cn.issue_to_rider.edit' => 965,
+            'logistic.cn.issue_to_rider.update' => 965,
+
+            'logistic.cn.child_receive_admin_store.index' => 966,
+            'logistic.cn.child_receive_admin_store.list' => 966,
+            'logistic.cn.child_receive_admin_store.store' => 967,
+            'logistic.cn.child_receive_admin_store.edit' => 968,
+            'logistic.cn.child_receive_admin_store.update' =>968,
+
+            'logistic.cn.child_issue_to_rider.index' => 969,
+            'logistic.cn.child_issue_to_rider.list' => 969,
+            'logistic.cn.child_issue_to_rider.store' => 970,
+            'logistic.cn.child_issue_to_rider.edit' => 971,
+            'logistic.cn.child_issue_to_rider.update' => 971,
+
         ],
         'shipper' => [
             'shipment.book.index' => 1,
@@ -1574,7 +1654,6 @@ class Permission
                 session(['sale_users_bypass' => []]);
             }
 
-
             if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions')) || (substr($action, 0, 4) == 'crm.' && session('role_id') == 6)) {
                 return $next($request);
             } else {
@@ -1582,13 +1661,41 @@ class Permission
             }
         } else if (Auth::guard('substitute_users')->check()) {
             $action = str_replace('cod.', '', $request->route()->getName());
-
             if (session('user_type') == 1 || !isset($this->actions['shipper'][$action]) || in_array($this->actions['shipper'][$action], session('permissions'))) {
                 return $next($request);
             } else {
                 return redirect()->route('cod.access_denied');
             }
-        } else {
+        } else if (in_array(session('status'), [0,1,2,5]) ) {
+            
+            $action = str_replace('cod.', '', $request->route()->getName());
+
+            $allowedRoutes = [
+                'register.submit',
+                'orders.index',
+                'update.agreement_status',
+                'get_agreement',
+                'welcome',
+                'orders.list',
+
+            ];
+            
+            $wordpressRoutes = collect(Route::getRoutes())->filter(function ($route) {
+                return strpos($route->uri(), 'wordpress') !== false;
+            })->map(function ($route) {
+                return str_replace('cod.', '', $route->action['as'] ?? '');
+            })->toArray();
+            
+            $allowedRoutes = array_merge($allowedRoutes, $wordpressRoutes);
+            
+            if (!in_array($action, $allowedRoutes)){
+                return redirect()->route('cod.wordpress_access_denied');
+            }
+            
+            return $next($request);
+            
+            
+        }else{
             return $next($request);
         }
     }
