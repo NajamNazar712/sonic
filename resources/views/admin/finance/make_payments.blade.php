@@ -360,6 +360,7 @@
                                                         <th class="border-primary border-darken-1">Packing Charges</th>
                                                         <th class="border-primary border-darken-1">Deductible</th>
                                                         <th class="border-primary border-darken-1">Payable</th>
+                                                        <th class="border-primary border-darken-1">Faf Charges</th>
                                                         <th class="border-primary border-darken-1">Arrival Date</th>
                                                         <th class="d-none">Shipper</th>
                                                     </tr>
@@ -1513,6 +1514,11 @@
                         class: 'align-middle payable'
                     },
                     {
+                        data: 'faf_charges',
+                        name: 'sac.faf_charges',
+                        class: 'align-middle faf_charges'
+                    },
+                    {
                         data: 'arrival_date',
                         name: 'sj.created_at',
                         class: 'align-middle arrival_date'
@@ -1803,7 +1809,7 @@
                         })
                         .done(function(data) {
                             var details =
-                                '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">SMS Charges</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Packing Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
+                                '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">SMS Charges</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Packing Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th><th class="border-primary border-darken-1 align-middle text-center">Faf Charges</th></tr></thead><tbody>';
 
                             $.each(data, function(index, detail) {
                                 details += '<tr>';
@@ -1827,6 +1833,8 @@
                                     .deductable + '</td>';
                                 details += '<td class="align-middle text-center">' + detail
                                     .payable + '</td>';
+                                details += '<td class="align-middle text-center">' + detail
+                                    .faf_charges + '</td>';
                                 details += '</tr>';
                             });
 

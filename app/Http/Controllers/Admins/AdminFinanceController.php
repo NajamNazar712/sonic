@@ -6770,6 +6770,7 @@ class AdminFinanceController extends Controller
 
         foreach ($pending_payment_shipments as $pending_payment_shipment) {
             $shipment = $pending_payment_shipment->shipment;
+            $faf_charges = isset($pending_payment_shipment->shipment->faf_charges_data->faf_charges) ?$pending_payment_shipment->shipment->faf_charges_data->faf_charges : 0;
             $fn_charges = $this->calculate_fintech_charges($shipment->id);
             $detail = array();
             if ($request->has('pickup_address_id')) {
@@ -6784,6 +6785,7 @@ class AdminFinanceController extends Controller
                         $detail['type'] = 'Arrival';
                     } else {
                         $detail['type'] = 'Adjusted';
+                        $faf_charges = 0;
                     }
 
                     $detail['amount'] = number_format($pending_payment_shipment->amount);
@@ -6793,6 +6795,7 @@ class AdminFinanceController extends Controller
                     $detail['fintech_charges'] = number_format($fn_charges, 2);
                     $detail['deductable'] = number_format(($pending_payment_shipment->charges + $fn_charges +$pending_payment_shipment->gst + $pending_payment_shipment->sms_charges), 2);
                     $detail['payable'] = number_format($pending_payment_shipment->payable - $fn_charges, 2);
+                    $detail['faf_charges'] = number_format($faf_charges, 2);
 
                     $details[] = $detail;
                 }
@@ -6808,6 +6811,7 @@ class AdminFinanceController extends Controller
                     $detail['type'] = 'Arrival';
                 } else {
                     $detail['type'] = 'Adjusted';
+                    $faf_charges = 0;
                 }
 
                 $detail['amount'] = number_format($pending_payment_shipment->amount);
@@ -6817,7 +6821,7 @@ class AdminFinanceController extends Controller
                 $detail['fintech_charges'] = number_format($fn_charges, 2);
                 $detail['deductable'] = number_format(($pending_payment_shipment->charges + $fn_charges +$pending_payment_shipment->gst +$pending_payment_shipment->sms_charges ), 2);
                 $detail['payable'] = number_format($pending_payment_shipment->payable - $fn_charges, 2);
-
+                $detail['faf_charges'] = number_format($faf_charges, 2);
                 $details[] = $detail;
             }
 
@@ -6884,7 +6888,8 @@ class AdminFinanceController extends Controller
                     ->where('sj.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date','s.packaging_charges','u.id as shipper_id', 'pending_payment_shipments.sms_charges as sms_charges','u.account_type_id');
+            ->leftjoin('shipment_additional_charges as sac','sac.shipment_id','s.id')
+            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date','s.packaging_charges','u.id as shipper_id', 'pending_payment_shipments.sms_charges as sms_charges','sac.faf_charges');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -6971,15 +6976,24 @@ class AdminFinanceController extends Controller
             ->filterColumn('deductable', function ($query, $keyword) {
                 $query->where(DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst + pending_payment_shipments.sms_charges'), '=', $keyword);
             })
-            ->editColumn('account_type_id', function ($pending_payment_shipment) {
+            ->editColumn('faf_charges', function ($pending_payment_shipment) {
+                $faf_charges = $pending_payment_shipment->faf_charges;
+                if ($pending_payment_shipment->type == 0) {
+                    return $faf_charges;
+                } else if ($pending_payment_shipment->type == 1) {
+                    return $faf_charges;
+                } else {
+                    return 0;
+                }
+            })
+->editColumn('account_type_id', function ($pending_payment_shipment) {
                 if ($pending_payment_shipment->account_type_id == 1) {
                     return 'Reimbursement';
                 } else{
                     return 'Corporate';
                 }
             })
-           ->orderColumn('deductable', DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst + pending_payment_shipments.sms_charges') . ' $1');
-
+ 			->orderColumn('deductable', DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst + pending_payment_shipments.sms_charges') . ' $1');
         return $datatables->make(true);
     }
 

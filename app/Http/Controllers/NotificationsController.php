@@ -11207,32 +11207,22 @@ class NotificationsController extends Controller
                     }
 
                 }
-                else if($id == 232 || $id == 233) {
+                else if($id == 232) {
                     $subject = $notification->subject;
                     $body = $notification->body;
-                    $shipper_ids=$reference_1_id;
-                    $date=$reference_2_id;
-                    $booking_ids=[];
-
-                    foreach ($shipper_ids as $user_email=>$shipper_id) {
+                    $booking_details=$reference_1_id;
+                    $logistic_booking_ids=[];
+                    $date=Carbon::now()->toDateString();
+                    $user_email=null;
+                    foreach ($booking_details as $user_id=>$booking_ids)
+                    {
                         $current_body = $body;
-
-                        if($id == 232)
-                        {
-                                $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
+                        $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
                                 ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
                                 ->select('trax_logistic_bookings.id as booking_id','u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
-                                ->where('trax_logistic_bookings.booking_date',$date)->where('trax_logistic_bookings.shipper_id',$shipper_id)->get();
-
-                        } else{
-                                $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
-                                ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
-                                ->select('trax_logistic_bookings.id as booking_id','u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
-                                ->where('trax_logistic_bookings.booking_date',$date)
+                                    ->whereIn('trax_logistic_bookings.id',$booking_ids)
                                     ->where('trax_logistic_bookings.is_email',0)
-                                    ->where('trax_logistic_bookings.shipper_id',$shipper_id)->get();
-
-                        }
+                                    ->where('trax_logistic_bookings.shipper_id',$user_id)->get();
 
                         $html = '<table style="width:100%;border-collapse: collapse;">';
                         $html .= '<thead><tr>
@@ -11246,8 +11236,8 @@ class NotificationsController extends Controller
                                                <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">PCS</th>';
                         $html .= '</tr></thead><tbody>';
                         $serial = 1;
-                        foreach ($logisticbookings as $booking) {
 
+                        foreach ($logisticbookings as $booking) {
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->shipper_id . '</td>';
@@ -11259,10 +11249,11 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->total_pieces . '</td>';
                             $html .= '</tr>';
                             $serial++;
-                            $booking_ids[]=$booking->booking_id;
+                            $logistic_booking_ids[]=$booking->booking_id;
+                            $user_email=$booking->shipper_email;
+                            $date=$booking->booking_date;
                         }
                         $html .= '</tbody></table>';
-
                         if (strpos($current_body, '[Booking_at]') !== FALSE) {
                             $current_body = str_replace('[Booking_at]', $date, $current_body);
                         }
@@ -11271,22 +11262,21 @@ class NotificationsController extends Controller
                             $current_body = str_replace('[preview]', $html, $current_body);
                         }
 
-                        try {
-                            DB::transaction(function () use ($shipper_id, $date, $subject, $current_body, $user_email){
-
-                                if($user_email)
-                                {
-                                    TraxLogisticBooking::where('shipper_id',$shipper_id)
-                                        ->where('booking_date',$date)->update(['is_email'=>1]);
+                        if($user_email)
+                        {
+                            try {
+                                DB::transaction(function () use ($logistic_booking_ids,$subject, $current_body, $user_email){
+                                    TraxLogisticBooking::whereIn('id',$logistic_booking_ids)->update(['is_email'=>1]);
                                     self::email($subject, $current_body, $user_email);
-                                }
-
-                            });
-
-                        } catch (\Throwable $th){
-                            DB::rollBack();
-                            Log::channel('cronJobLog')->error('failed-logisticbooking-email'.json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
+                                });
+                            }
+                            catch (\Throwable $th)
+                            {
+                                DB::rollBack();
+                                Log::channel('cronJobLog')->error('failed-logisticbooking-email'.json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
+                            }
                         }
+
                     }
 
                 }
