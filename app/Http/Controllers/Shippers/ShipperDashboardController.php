@@ -275,7 +275,13 @@ class ShipperDashboardController extends Controller
                 $user = User::find($shipper_id);
                 
                 $weight_charges = WeightCharge::where('user_id' , $shipper_id);
-                if($user->status == 0 && !$weight_charges->exists() && (!isset($user->request_custom_quotation) || $user->request_custom_quotation != 1)){
+                if(($user->on_board_status < 1 && $user->created_at > '2024-06-13 00:00:00')){
+                    $lead_progress_setting = LeadProgressSetting::find(1);
+                    $percentage = $lead_progress_setting->percent;
+                    $color = $lead_progress_setting->color;
+
+                    $description = "Your account is $percentage% completed";
+                }elseif($user->status == 0 && !$weight_charges->exists() && (!isset($user->request_custom_quotation) || $user->request_custom_quotation != 1)){
                     $lead_progress_setting = LeadProgressSetting::find(1);
                     $percentage = $lead_progress_setting->percent;
                     $color = $lead_progress_setting->color;
@@ -676,14 +682,14 @@ class ShipperDashboardController extends Controller
             $masp = array_merge($masp,$merged_account_sister_mapping);
         }
 
-         if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
-            $connection = 'reports';
-         }
-         else {
-             $connection = 'mysql';
-         }
+        //  if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
+        //     $connection = 'reports';
+        //  }
+        //  else {
+        //      $connection = 'mysql';
+        //  }
 
-        $connection = 'mysql';
+        $connection = 'reports';
         $shipments = DB::connection($connection)->table('shipments')
             ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -696,7 +702,10 @@ class ShipperDashboardController extends Controller
             ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'))
+                        ->where('shipments_journey.created_at', '>=', Carbon::now()->subMonth(6)) // Add created_at condition here
+                        ->where('shipments_journey.created_at', '<=', Carbon::now()); // Assuming you have these variables set
+ 
             })
             ->leftJoin('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
@@ -1103,7 +1112,14 @@ class ShipperDashboardController extends Controller
     }
     public function get_shipment_charges(Request $request){
         $shipment_id = $request->shipment_id;
-        $shipment = Shipment::find($shipment_id);
+        //$shipment = Shipment::find($shipment_id);
+        $shipment = Shipment::leftJoin('pending_payment_shipments as pps','shipments.id','=','pps.shipment_id')
+        ->leftJoin('done_payment_shipments as dps','shipments.id','=','dps.shipment_id')
+        ->leftJoin('pending_invoice_shipments as pis','shipments.id','=','pis.shipment_id')
+        ->leftJoin('invoice_shipments as is','shipments.id','=','is.shipment_id')
+        ->leftJoin('users as users','shipments.user_id' ,'=','users.id')
+        ->where('shipments.id', $shipment_id)
+        ->select(['shipments.packaging_material_request','shipments.cash_handling_charges', 'shipments.return_charges', 'shipments.insurance_charges', 'shipments.fuel_surcharge', 'shipments.replacement_charges', 'shipments.try_and_buy_charges', 'shipments.intercept_charges', 'shipments.nsa_osa_charges', 'shipments.weight_charges','pps.sms_charges as pps_sms_charge' , 'dps.sms_charges as dps_sms_charge','pis.sms_charges as pis_sms_charge', 'is.sms_charges as is_sms_charge','users.account_type_id as account_type'])->first();
         $returnHTML = view('client/components/shipment_charges')->with(['shipment'=>$shipment])->render();
         return response()->json($returnHTML);
     }
@@ -1754,6 +1770,7 @@ class ShipperDashboardController extends Controller
         $id = session('user_id');
         
         $user = User::find($id);
+        $sms_charge = User::where('id', $id)->select(['id','sms_charges','sms_charges_status'])->get();
         if(session('account_type') == 1){
             $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $weight = WeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
@@ -1853,7 +1870,7 @@ class ShipperDashboardController extends Controller
 
                 }
             }
-            return view('client.rates.view')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'discount_weight_rates'=>$discount_weight_rates]);
+            return view('client.rates.view')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'discount_weight_rates'=>$discount_weight_rates, 'sms_charges' => $sms_charge]);
         }
         else {
             if ($user->corporate_rate_type_id != 3) {
@@ -1959,7 +1976,7 @@ class ShipperDashboardController extends Controller
 
                     }
                 }
-                return view('client.rates.corporate.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                return view('client.rates.corporate.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities, 'sms_charges' => $sms_charge]);
 
             } else {
                 $switches = CorporateDefaultRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -2058,7 +2075,7 @@ class ShipperDashboardController extends Controller
 
                     }
                 }
-                return view('client.rates.default.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'discount_weight_rates'=>$discount_weight_rates]);
+                return view('client.rates.default.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'discount_weight_rates'=>$discount_weight_rates, 'sms_charges' => $sms_charge]);
 
             }
         }

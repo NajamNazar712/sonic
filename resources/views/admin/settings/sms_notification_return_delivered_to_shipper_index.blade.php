@@ -55,10 +55,28 @@
                                                 <h3 class="form-section white"><b>ID:</b> {{$notification_detail['id']}} | <b>Name:</b> {{$notification_detail['name']}}</h3>
                                             </div>
                                             <div class="col-12 mb-5">
-                                                <div class="col-12 form-group">
-                                                    <input type="hidden" name="notifications[{{$notification_detail['id']}}][id]" value="{{$notification_detail['id']}}">
-                                                    <label class="mr-2 font-small-3"><b>All Shippers: </b></label>
-                                                    <input type="checkbox" name="notifications[{{$notification_detail['id']}}][all_shipper_toggle]" id="all_shipper_toggle_{{$notification_detail['id']}}" class="switchery all_shipper_toggle_{{$notification_detail['id']}}" data-size="sm" data-switchery="true" @if($notification_detail['shipper_toggle'] == 1) checked @endif>
+                                                <div class= "row"> 
+                                                    <div class="col-3 form-group">
+                                                        
+                                                        <label class="mr-2 font-small-3"><b>Sending Frequency: </b></label>
+                                                        <input type="text" name="notifications[{{$notification_detail['id']}}][sending_frequency]" id="sending_frequency_{{$notification_detail['id']}}"value="{{$notification_detail['sending_frequency']}}"  class="sending_frequency_{{$notification_detail['id']}} form-control " placeholder="Sending Frequency*">
+                                                        
+                                                    </div>
+                                                    <div class="col-3 form-group">
+                                                        
+                                                        <label class="mr-2 font-small-3"><b>Charging Frequency: </b></label>
+                                                        <input type="text" name="notifications[{{$notification_detail['id']}}][charging_frequency]" id="charging_frequency_{{$notification_detail['id']}}" value="{{$notification_detail['charging_frequency']}}" class="charging_frequency_{{$notification_detail['id']}} form-control " placeholder="Charging Frequency*" >
+                                                    </div>
+                                                    <div class="col-3 form-group mt-3">
+                                                        <input type="hidden" name="notifications[{{$notification_detail['id']}}][id]" value="{{$notification_detail['id']}}">
+                                                        <label class="mr-2 font-small-3"><b>All Shippers: </b></label>
+                                                        <input type="checkbox" name="notifications[{{$notification_detail['id']}}][all_shipper_toggle]" id="all_shipper_toggle_{{$notification_detail['id']}}" class="switchery all_shipper_toggle_{{$notification_detail['id']}}" data-size="sm" data-switchery="true" @if($notification_detail['shipper_toggle'] == 1) checked @endif>
+                                                    </div>
+                                                    <div class="col-3 form-group mt-3">
+                                                       
+                                                        <label class="mr-2 font-small-3"><b>Charged SMS: </b></label>
+                                                        <input type="checkbox" name="notifications[{{$notification_detail['id']}}][charged_sms]" id="charged_sms_{{$notification_detail['id']}}" class="switchery charged_sms_{{$notification_detail['id']}}" data-size="sm" data-switchery="true" @if($notification_detail['charged_sms_toggle'] == 1) checked @endif>
+                                                    </div>
                                                 </div>
 
                                                 <div class="col-12 form-group d-none" id="excluded_users_container_{{$notification_detail['id']}}">
@@ -159,6 +177,14 @@
                     @endif
                 @endif
 
+                @if($notification_detail['charged_sms_toggle'] == 1)
+                    $("#charging_frequency_{{$notification_detail['id']}}").prop('readonly', false);
+                    $("#sending_frequency_{{$notification_detail['id']}}").prop('readonly', false);
+                @else
+                    $("#charging_frequency_{{$notification_detail['id']}}").prop('readonly', true);
+                    $("#sending_frequency_{{$notification_detail['id']}}").prop('readonly', true);
+                @endif
+
                 $("#excluded_users_{{$notification_detail['id']}}").select2({
                     placeholder: 'Select Excluded Shippers',
                     width: '100%',
@@ -171,6 +197,20 @@
                     allowClear: true
                 });
 
+                $("#only_users_{{$notification_detail['id']}}").on('select2:unselecting', function(event) {
+                    var users_to_keep = @json($notification_detail['sms_enable_shippers']);
+                    var unselectedItemId = Number(event.params.args.data.id);
+                    if (users_to_keep.includes(unselectedItemId)) {
+                        event.preventDefault();
+                        swal({
+                            text: 'You can not remove shipper' + ' ' +  event.params.args.data.text + ' ' + 'as its sms charges status is enable.',
+                            title: 'Cannot Remove',
+                            icon: 'warning',
+                            dangerMode: true
+                        })
+                    }
+                });
+
                 $("#all_shipper_toggle_{{$notification_detail['id']}}").change(function () {
                     if ($("#all_shipper_toggle_{{$notification_detail['id']}}").is(':checked')) {
                         $("#excluded_users_container_{{$notification_detail['id']}}").removeClass('d-none');
@@ -180,6 +220,63 @@
                         $("#only_users_container_{{$notification_detail['id']}}").removeClass('d-none');
                     }
                 });
+
+                $("#charged_sms_{{$notification_detail['id']}}").change(function () {
+                    if ($("#charged_sms_{{$notification_detail['id']}}").is(':checked')) {
+                        $("#charging_frequency_{{$notification_detail['id']}}").prop('readonly', false);
+                        $("#sending_frequency_{{$notification_detail['id']}}").prop('readonly', false);
+                    } else {
+                        $("#charging_frequency_{{$notification_detail['id']}}").val('');
+                        $("#sending_frequency_{{$notification_detail['id']}}").val('');
+                        $("#charging_frequency_{{$notification_detail['id']}}").prop('readonly', true);
+                        $("#sending_frequency_{{$notification_detail['id']}}").prop('readonly', true);
+                    }
+                });
+
+                $("#charging_frequency_{{$notification_detail['id']}}").inputmask({
+                    'alias': 'integer',
+                    'allowMinus': false,
+                    'allowPlus': false
+                });
+                $("#sending_frequency_{{$notification_detail['id']}}").inputmask({
+                    'alias': 'integer',
+                    'allowMinus': false,
+                    'allowPlus': false
+                });
+
+                $.validator.addMethod("sending_frequency_{{$notification_detail['id']}}",
+                    function(value, element) {
+                        sending_value = parseFloat($("#sending_frequency_{{$notification_detail['id']}}").val()); 
+
+                        if ($("#charged_sms_{{$notification_detail['id']}}").is(':checked') && isNaN(sending_value)) {
+                           //console.log(sending_value)
+                            return false;
+                        }
+                        return true;
+                    },
+                    "Sending Frequency and must be a valid number."
+                );
+
+                $.validator.addMethod("charging_frequency_{{$notification_detail['id']}}",
+                    function(value, element) {
+                        charging_value = parseFloat($("#charging_frequency_{{$notification_detail['id']}}").val());
+                        sending_value = parseFloat($("#sending_frequency_{{$notification_detail['id']}}").val());
+                        
+                        if ($("#charged_sms_{{$notification_detail['id']}}").is(':checked')) {
+                            //console.log(charging_value)  
+                            if(isNaN(charging_value)) {
+                                return false;
+                            }
+                            return charging_value <= sending_value;
+                        } else {
+                            return true;
+                        }
+                        
+                       
+                    },
+                    "Charging Frequency can't be greater than Sending Frequency and must be a valid number."
+                );
+                
             @endforeach
 
             $('#settings_form').validate({

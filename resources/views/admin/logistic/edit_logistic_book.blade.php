@@ -139,6 +139,12 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-group">
+                                                        <label>Order ID</label>
+                                                        <input type="text" name="shipper_reference" class="form-control" value="{{$logistic_booking->shipper_reference}}" >
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
                                                         <label>Pay Mode</label>
                                                         <select class="select select2 mb-1" name="payment_mode_id" id="payment_mode_select">
                                                             @foreach ($payment_modes as $paymentmode)
@@ -157,7 +163,7 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Handling Instructions</label>
                                                         <input type="text" name="handling_inst" class="form-control "  value="{{$logistic_booking->handling_inst}}" >
@@ -826,6 +832,7 @@
            width: '100%',
            placeholder: 'Select Rider'
         }).val(bookings.rider_id).trigger('change');
+
 
 
 

@@ -1632,6 +1632,7 @@ class AdminPickupsController extends Controller
           ShipmentChargesController::cash_handling($shipment_id);
           ShipmentChargesController::insurance($shipment_id);
           ShipmentChargesController::fuel_surcharge($shipment_id);
+          ShipmentChargesController::faf_charges($shipment_id);
 
           if ($shipment->charges_mode_id == 2) {
             $shipment = Shipment::find($shipment_id);
@@ -2914,6 +2915,7 @@ class AdminPickupsController extends Controller
           ShipmentChargesController::cash_handling($shipment_id);
           ShipmentChargesController::insurance($shipment_id);
           ShipmentChargesController::fuel_surcharge($shipment_id);
+          ShipmentChargesController::faf_charges($shipment_id);
 
           if ($shipment->charges_mode_id == 2) {
             $shipment = Shipment::find($shipment_id);

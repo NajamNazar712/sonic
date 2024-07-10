@@ -1,0 +1,297 @@
+@extends('admin.layout.master')
+
+@section('title', 'Agent Types')
+
+@section('content')
+    <div class="app-content content">
+        <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
+            <div class="content-body">
+                <h1 class="mb-1">
+                    Agent Types
+                </h1>
+
+                <div class="card">
+                    <div class="card-content" aria-expanded="true">
+                        <div class="card-body">
+                            @include('admin.inc.messages')
+
+                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                <thead>
+                                <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Agent Type Name</th>
+                                    <th class="border-primary border-darken-1">Action</th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade text-left" id="AddAgentTypeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddAgentTypeModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Add Agent Type</h4>
+                </div>
+                <form method="post" id="add_agent_type" action="{{route('admin.settings.agent_types.store')}}">
+                    @csrf
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="text" name="name" class="form-control" placeholder="Name*" maxlength="50" data-rule-required="true" data-msg-required="Agent Type Name is required">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Add</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade text-left" id="editAgentTypeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editAgentTypeModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Edit Agent Type</h4>
+                </div>
+                <form method="post" id="agent_type_edit" action="{{route('admin.settings.agent_types.update')}}" novalidate="novalidate">
+                    @csrf
+
+                <div class="modal-body">
+                    <input type="hidden" name="agent_type_id" id="edit_agent_type_id">
+                    
+                    <div class="form-group">
+                        <input type="text" name="name" id="edit_agent_type_name" class="form-control" placeholder="Name*" maxlength="50" data-rule-required="true" data-msg-required="Agent Type Name is required">
+                    </div>
+                    
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" id="edit_agent_typeSubmit">Update</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+
+            </div>
+        </div>
+    </div>
+    </div>
+@endsection
+
+@section('css')
+    <style>
+        input.select2-search__field {
+            width: 140px !important;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+
+
+@endsection
+
+@section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+
+
+    <script>
+        $(document).ready(function() {
+
+            $('#AddAgentTypeModal').on('hidden.bs.modal', function () {
+                
+                $("agent_id").select2('val', '')
+                $('#zone_id').val('').trigger('change.select2');
+                
+            });
+           
+            $('#agent_id').select2({
+                width:'100%',
+                placeholder:"Select Sales Person",
+                allowClear:true,
+                dropdownParent:$('#add_agent_type')
+            });
+            
+
+            var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons:[
+                    @if (session('role_id') == 1 || in_array(665, session('permissions')))
+                    
+                    {
+                        text: '<i class="la la-plus"></i> Add',
+                        className: 'btn btn-primary tag_agents',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $('#AddAgentTypeModal').modal('show');
+                            
+                        }
+                    },
+                    @endif
+                    'reset'
+                    ],
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                serverSide: true,
+                language: {
+                    processing: data_table_loader
+                },
+                ajax: '{{ route('admin.settings.agent_types.list') }}',
+                rowId: 'id',
+                columns: [
+                    {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data: 'name', name: 'name', class: 'align-middle name'},
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var departments_select = '<select name="departments_select" id="departments_select" class="select2 form-control"></select>';
+                   
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                            $(td).appendTo($(search));
+                        }else if ($(header).is('.status')) {
+                            $(status).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                    
+
+                    $('#status').prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    this.api().table().columns.adjust();
+                }
+            });
+
+            
+            
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url:'{!! route("admin.settings.agent_types.data") !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    $('#edit_agent_type_id').val(data.agent_type_id);
+                    $('#edit_agent_type_name').val(data.name);
+                    $('#editAgentTypeModal').modal('show');
+                })
+                
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.delete', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                swal({
+                                text: 'Are you sure, you want to Delete?',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function(confirm) {
+                                         $.ajax({
+                                            url:'{!! route("admin.settings.auto_tagging.delete") !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'id': id,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        }).done(function (data) {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                            table.draw();
+                                        });
+                            });
+
+                
+            });
+
+            
+            $( "#add_agent_type" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    form.submit();    
+                }
+                
+                });
+
+                $( "#agent_type_edit" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    form.submit();    
+                }
+                
+                });
+        });
+    </script>
+@endsection

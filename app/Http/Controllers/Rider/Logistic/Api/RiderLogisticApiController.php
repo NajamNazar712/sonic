@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rider\Logistic\Api;
 
 use App\Http\Controllers\Admins\Logistic\AdminBatchController;
 use App\Http\Controllers\Admins\Logistic\LogisticToShipmentSyncController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Logistic\TraxBookingBatch;
 use App\Http\Models\Admin\Logistic\TraxBookingPiece;
 use App\Http\Models\Admin\Logistic\TraxChildCnIssueToRider;
@@ -19,6 +20,7 @@ use App\Http\Models\Admin\Logistic\TraxShipperDetail;
 use App\Http\Models\Admin\Logistic\TraxSpecialHandlingList;
 use App\Http\Models\Admin\Logistic\TraxStation;
 use App\Http\Models\Admin\Settings\GeneralSetting;
+use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateDefaultWeightCharge;
@@ -48,6 +50,12 @@ class RiderLogisticApiController extends Controller
     {
         $rider_id = $request->rider_id;
         $hub_id=$request->rider_hub;
+
+        $city_ids=City::where('hub_id',$hub_id);
+        if($city_ids->exists())
+        {
+            $hub_id=$city_ids->pluck('id');
+        }
 
 
             $shipper_list=[];
@@ -97,7 +105,7 @@ class RiderLogisticApiController extends Controller
                     ->where('usi.status', 1)
                     ->where('trax_shipper_details.status', 1)
                     ->where('trax_shipper_details.rider_id', $rider_id)
-                    ->where('usi.city_id',$hub_id)
+                    ->whereIn('usi.city_id',$hub_id)
                     ->get();
 
 
@@ -143,6 +151,8 @@ class RiderLogisticApiController extends Controller
             $already_used_cns =[];
             $un_inserted_cns=[];
             $already_used_child_cns =[];
+            $book_Shipments=[];
+
             try {
 
                 if (!empty($bookig_data))
@@ -158,7 +168,7 @@ class RiderLogisticApiController extends Controller
                         foreach ($bookig_data as $booking)
                         {
                             $cn=TraxCnIssueToRider::join('trax_rider_cn_details as rd','rd.cn_issue_id','trax_cn_issue_to_riders.id')
-                                ->where('trax_cn_issue_to_riders.area_code',$hub_id)
+//                                ->where('trax_cn_issue_to_riders.area_code',$hub_id)
                                 ->where('rd.cn_number',$booking['cn_number'])
                                 ->where('rd.is_used',0)
                                 ->where('rd.is_hold',0);
@@ -236,7 +246,7 @@ class RiderLogisticApiController extends Controller
                                             }
 
                                             //send data to shipments table
-                                            $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Consignee Address','03100112321',$booking['booking_date'],$booking_weight,0,0,$booking['shipping_mode_id'],0,1,1,1,$charges_mode_id, 1,1,0.0,null,2,$rider_id,$origin_id);
+                                            $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Consignee Address','03100112321',$booking['booking_date'],$booking_weight,$booking['shipper_reference'],0,$booking['shipping_mode_id'],0,1,1,1,$charges_mode_id, 1,1,0.0,null,2,$rider_id,$origin_id);
 
                                             //insert shipment item
                                             if(isset($shipment_id))
@@ -357,7 +367,11 @@ class RiderLogisticApiController extends Controller
                                             AdminBatchController::booking_batch_detail_store($batch_id,$logistic_booking->id);
                                         }
 
+
                                         DB::commit();
+
+                                        // add bookings detail for send email to shipper
+                                        $book_Shipments[$booking['shipper_id']][] = $logistic_booking->id;
 
 //                                    } else{
 //                                        $old_booking = $old_booking->first();
@@ -375,6 +389,11 @@ class RiderLogisticApiController extends Controller
 //                                    ];
                                 }
 
+                        }
+
+                        if(!empty($book_Shipments))
+                        {
+                            NotificationsController::send(232,$book_Shipments);
                         }
 
 //                        if(!empty($already_exists_bookings) || !empty($un_inserted_cns) || !empty($already_used_child_cns))
@@ -404,6 +423,12 @@ class RiderLogisticApiController extends Controller
                 $shipper_id = $request->shipper_id;
                 $pickup_address_list='';
                 $shipper_list=[];
+
+                $city_ids=City::where('hub_id',$hub_id);
+                if($city_ids->exists())
+                {
+                    $hub_id=$city_ids->pluck('id');
+                }
                 if(isset($shipper_id))
                 {
                     $shipper = User::join('trax_parent_products as pp','pp.segment_id','=','users.segment_id')
@@ -428,7 +453,7 @@ class RiderLogisticApiController extends Controller
                         
                             // $shipper = $shipper->get();
                             $pickup_address_list = UserShippingInfo::select('id as pickup_address_id', 'pickup_address', 'poc as contact_person', 'phone as contact_number', 'email as contact_email', 'user_id as shipper_id')
-                                ->where('user_id',$shipper_id)->where('city_id',$hub_id)->get();
+                                ->where('user_id',$shipper_id)->whereIn('city_id',$hub_id)->get();
 
                             $shipper->shipper_shipping_modes=$shipper_shipping_modes;
 
