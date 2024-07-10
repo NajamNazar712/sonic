@@ -267,7 +267,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null)
+    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null, $id = null)
     {
         $block_email = BlockEmail::select('email')->pluck('email')->toArray();
         $filterBlockedEmails = function ($emails) use ($block_email) {
@@ -320,7 +320,11 @@ class NotificationsController extends Controller
                     $mail->bcc($bcc);
                 }
     
-                $mail->send(new Notifications($subject, $body, $from));
+                if($id = 230){
+                    $mail->sendNow(new Notifications($subject, $body, $from));
+                }else{
+                    $mail->send(new Notifications($subject, $body, $from));
+                }
             }
 
 
@@ -11178,7 +11182,7 @@ class NotificationsController extends Controller
                         if (strpos($subject, '[Company Name]') !== FALSE) {
                             $subject = str_replace('[Company Name]', $lead->company_name, $subject);
                         }
-                        self::email($subject, $body, $lead->email_address); // Send email with $body
+                        self::email($subject, $body, $lead->email_address, null, null, null, 230); // Send email with $body
                     }                    
                 } else if ($id == 231){
                     $subject = $notification->subject;

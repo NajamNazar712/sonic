@@ -145,7 +145,10 @@ class WebsiteLead extends Command
         if(count($old_leads) > 0){
             self::old_api_request_delete($base_uri, $old_leads);
             NotificationsController::send(203, $leads_added, Carbon::today());
-            UserLeadEmail::dispatchNow($leads_added);
+            // UserLeadEmail::dispatchNow($leads_added);
+
+
+            NotificationsController::send(230, $leads_added, Carbon::today());
         }
 
         Log::channel('cronJobLog')->info('s ' .'website:leads Running');
