@@ -95,6 +95,7 @@ class AdminNotificationsController extends Controller
         
         $attachments = array();
         $from_email = $request->notification_sender;
+        
         if ($request->get('receiver') == 1) {
             if($request->get('search_hub') == 0) {
                 $emails = Admin::all()->pluck('email')->toArray();
@@ -159,10 +160,12 @@ class AdminNotificationsController extends Controller
 
 
             $totalItems = count($emails);
-            $chunkSize = 1000;
+            $chunkSize = 50;
             for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
                 $parsed_emails = array_slice($emails, $offset, $chunkSize);
+                
                 NotificationsController::custom(1, $subject, $body, $parsed_emails,$from_email);
+                
             }
             return redirect()->back()->with('success', 'Custom Email Sent');
         }
@@ -1253,12 +1256,13 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = ['employee_name', 'employee_type', 'depatment', 'updated_by'];
         }
-        else if ($id == 232)
+        else if ($id == 232 || $id == 233)
         {
             $details['receiver'] = ['Shipper Email'];
 
             $details['fields'] = ['Booking_at','preview'];
         }
+
         return $details;
     }
 

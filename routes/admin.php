@@ -141,6 +141,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('user_fintech_charges', 'Admins\AdminDashboardController@user_fintech_charges')->name('user_fintech_charges');
         Route::post('add_rate_commission_corporate_reimb/{shippers}', 'Admins\AdminDashboardController@add_rate_commission_corporate_reimb')->name('add_rate_commission_corporate_reimb');
         Route::post('excluded_shippers', 'Admins\AdminDashboardController@excluded_shippers')->name('excluded_shippers');
+        Route::post('faf_charges/info', 'Admins\AdminDashboardController@faf_charges_info')->name('faf_charges.info');
+        Route::post('faf_charges/submit', 'Admins\AdminDashboardController@faf_charges_submit')->name('faf_charges.submit');
 
         Route::get('duplicate/info', 'Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function () {
@@ -425,6 +427,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('check_zone_name/{id?}', 'Admins\AdminZonalManagementController@check_zone_name')->name('check_zone_name');
 
             Route::post('update_zone_cities_gst', 'Admins\AdminZonalManagementController@update_zone_cities_gst')->name('update_zone_cities_gst');
+            Route::post('add_cities','Admins\AdminZonalManagementController@add_cities')->name('add_cities');
+            Route::post('search_cities','Admins\AdminZonalManagementController@search_cities')->name('search_cities');
         });
 
         Route::prefix('territory')->name('territory.')->group(function () {
@@ -2462,7 +2466,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('cargo_manifest')->name('cargo_manifest.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@cargo_manifest_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
+            Route::post('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
         });
 
         Route::prefix('sms')->name('sms.')->group(function () {
@@ -3427,6 +3431,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+
+        //Agents List
+        Route::prefix('agents_list')->name('agents_list.')->group(function () {
+            Route::get('', 'Admins\Settings\AgentSettingsController@agents_list_index')->name('index');
+            Route::get('list', 'Admins\Settings\AgentSettingsController@agents_list_list')->name('list');
+            Route::post('store', 'Admins\Settings\AgentSettingsController@agent_type_store')->name('store');
+            Route::post('data', 'Admins\Settings\AgentSettingsController@agent_data')->name('data');
+            Route::post('update', 'Admins\Settings\AgentSettingsController@admin_agent_type_update')->name('update');
+            Route::post('bulk-update', 'Admins\Settings\AgentSettingsController@admin_agent_type_update_bulk')->name('update.bulk');
+
+        });
+
+        //Agent Types
+        Route::prefix('agent_types')->name('agent_types.')->group(function () {
+            Route::get('', 'Admins\Settings\AgentSettingsController@agent_types_index')->name('index');
+            Route::get('list', 'Admins\Settings\AgentSettingsController@agent_types_list')->name('list');
+            Route::post('store', 'Admins\Settings\AgentSettingsController@agent_type_store')->name('store');
+            Route::post('data', 'Admins\Settings\AgentSettingsController@agent_types_data')->name('data');
+            Route::post('update', 'Admins\Settings\AgentSettingsController@agent_type_update')->name('update');
+
+        });
+
+        Route::prefix('faf_charges')->name('faf_charges.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@faf_charges_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@faf_charges_store')->name('store');
+        });
+
+
     });
 
     Route::prefix('shipment')->name('shipment.')->group(function () {
@@ -3842,6 +3874,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@franchise_add')->name('add');
             Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@franchise_edit')->name('edit');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@franchise_name')->name('name');
+
+            Route::get('{id}/franchise_details_excel_sheet', 'Admins\Retail\RetailAdminUserManagementController@franchise_details_excel_sheet')->name('franchise_details_excel_sheet');
+
+            Route::get('/retail_product_percentage', 'Admins\Retail\RetailAdminUserManagementController@retail_product_percentage')->name('retail_product_percentage');
+            Route::get('/retail_product_charges', 'Admins\Retail\RetailAdminUserManagementController@retail_product_charges')->name('retail_product_charges');
+            Route::get('/retail_product_attachments', 'Admins\Retail\RetailAdminUserManagementController@retail_product_attachments')->name('retail_product_attachments');
+
+            Route::get('commission', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_view')->name('franchise_wise_commission');
+            Route::get('franchise_commission/ajax', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_view_ajax_list')->name('commission.list');
+            Route::get('user_commission', 'Admins\Retail\RetailAdminUserManagementController@user_commission_view')->name('user_wise_commission');
+            Route::get('user_commission/ajax', 'Admins\Retail\RetailAdminUserManagementController@user_commission_view_ajax_list')->name('user_commission.list');
+
+            Route::post('print', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_invoice_print')->name('franchise_commission_invoice_print');
+
+            Route::post('show_commission', 'Admins\Retail\RetailAdminUserManagementController@show_commission')->name('show_commission');
+            Route::post('commission_payment', 'Admins\Retail\RetailAdminUserManagementController@commission_payment')->name('commission_payment');
         });
         Route::prefix('trax_center')->name('trax_center.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');
@@ -3850,6 +3898,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@trax_center_add')->name('add');
             Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@trax_center_edit')->name('edit');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@trax_center_name')->name('name');
+
+            Route::get('/trax_center_edit_attachment', 'Admins\Retail\RetailAdminUserManagementController@trax_center_edit_attachment')->name('trax_center_edit_attachment');
+
+            Route::get('{id}/trax_center_details_excel_sheet', 'Admins\Retail\RetailAdminUserManagementController@trax_center_details_excel_sheet')->name('trax_center_details_excel_sheet');
         });
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@user_index')->name('index');
@@ -3860,6 +3912,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('update/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_update')->name('update');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@user_name')->name('name');
             Route::get('edit/name/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_edit_name')->name('edit.name');
+
+            Route::get('/retail_user_percentage', 'Admins\Retail\RetailAdminUserManagementController@retail_user_percentage')->name('retail_user_percentage');
+
+            Route::post('print', 'Admins\Retail\RetailAdminUserManagementController@user_commission_invoice_print')->name('user_commission_invoice_print');
+
+            Route::get('/retail_user_attachments', 'Admins\Retail\RetailAdminUserManagementController@retail_user_attachments')->name('retail_user_attachments');
+
+            Route::get('{id}/retail_history', 'Admins\Retail\RetailAdminUserManagementController@retail_history')->name('retail_history');
+
+            Route::post('show_retail_commission', 'Admins\Retail\RetailAdminUserManagementController@show_retail_commission')->name('show_retail_commission');
+            Route::post('retail_commission_payment', 'Admins\Retail\RetailAdminUserManagementController@retail_commission_payment')->name('retail_commission_payment');
+
+            Route::get('{id}/retail_user_excel_sheet', 'Admins\Retail\RetailAdminUserManagementController@retail_user_excel_sheet')->name('retail_user_excel_sheet');
+            Route::get('{id}/franchise_excel_sheet', 'Admins\Retail\RetailAdminUserManagementController@franchise_excel_sheet')->name('franchise_excel_sheet');
+
         });
 
         Route::prefix('international')->name('international.')->group(function () {

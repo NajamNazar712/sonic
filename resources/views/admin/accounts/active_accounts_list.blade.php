@@ -604,6 +604,34 @@
     </div>
 
 
+    <div class="modal fade text-left" id="faf_charges_modal" data-backdrop="static" role="dialog" aria-labelledby=""
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">FaF Charges</h4>
+                </div>
+                <form id="faf_charges_form" class="form" novalidate="novalidate" method="post" action="{{ route('admin.accounts.faf_charges.submit') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="col text-center">
+                            <label class="font-medium-2 font-weight-bold block">Apply FAF Charges</label>
+                            <div class="form-group">
+                                <input type="hidden" name="user_id" id="faf_charges_user_id">
+                                <label for="" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                <input type="checkbox" name="faf_charges_checkbox" id="faf_charges_checkbox" class="switchery faf_charges_checkbox" data-size="sm" data-switchery="true">
+                                <label for="" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="faf_charges_submit">Submit</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -2931,6 +2959,32 @@ function checkboxStatus() {
                     $("#auto_cancelation_days_form #cancelation_days").val(auto_shipment_cancellation_days);
                     $("#auto_cancelation_days_form #user_id").val(id);
                     $("#AutoCancelationDaysModal").modal('show');
+                }
+            }
+        });
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            var id = $(this).parents('tr').attr('id');
+            if($(this).hasClass('faf_charges_status')){
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.accounts.faf_charges.info') !!}',
+                        method: 'POST',
+                        data: {
+                            'user_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            $('#faf_charges_checkbox').prop('checked',false);
+                            if (data.status == 1) {
+                                $('#faf_charges_checkbox').click();
+                            }
+                            $('#faf_charges_user_id').val(id);
+                            $('#faf_charges_modal').modal('show');
+
+
+                        });
                 }
             }
         });

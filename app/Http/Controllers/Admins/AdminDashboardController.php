@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\FafCharges;
 use Exception;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -185,8 +186,12 @@ use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
+use App\Http\Models\Admin\CargoManifest\V2JunctionMapping;
+use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
+use App\Http\Models\Admin\CargoManifest\V2Junctions;
+use App\Http\Models\Admin\CargoManifest\V2JunctionVehicles;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
-
+use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Commission\SalesCommissionExternalUser;
 use App\Http\Models\Operataions\OperationForecastShipments;
 use App\Http\Models\Shipper\SubstituteUserModulePermission;
@@ -203,6 +208,9 @@ use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\Http\Models\HistorySmsCharges;
 use App\Http\Models\PendingSmsCharges;
+use App\Http\Models\NotificationSetting;
+use App\Http\Models\NotificationSettingShipper;
+
 
 class AdminDashboardController extends Controller
 {
@@ -1329,7 +1337,7 @@ class AdminDashboardController extends Controller
                 'same_consignee' => $same_consignee,
             ]
         );
-        
+
         return redirect()->back()->with('success', 'Shipper exclude settings saved successfully.');
     }
 
@@ -1352,7 +1360,7 @@ class AdminDashboardController extends Controller
         }
         if ($status == 'activate') {
 
-            if ($user->status == 2) {
+            if ($user->status == 2) {   
                 $now = Carbon::now();
                 $action = User::where('id', $user->id)->update(['status' => 3, 'account_activated_by' => Auth::id(), 'activated_at' => $now, 'reactivated_at' => $now]);
                 if ($user->lead_id != null) {
@@ -1370,7 +1378,16 @@ class AdminDashboardController extends Controller
                     $lead->updated_by = Auth::id();
                     $lead->save();
                 }
-                if ($action == 1) {
+                if ($action == 1) { 
+                    if($user->sms_charges_status == 1) {
+                        $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                        foreach($notification_settings as $notification_setting ) {
+                            $notification_setting_shipper = new NotificationSettingShipper();
+                            $notification_setting_shipper->notification_setting_id = $notification_setting;
+                            $notification_setting_shipper->shipper_id = $user->id;
+                            $notification_setting_shipper->save();
+                        }
+                    }
                     NotificationsController::send(1, $user->id);
 
                     return redirect()->route('admin.accounts.active')->with('success', 'User is activated.');
@@ -6968,8 +6985,17 @@ class AdminDashboardController extends Controller
 
                 }
 
+                $user = User::find($id);
+                if($user->sms_charges_status == 1) {
+                    $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                    foreach($notification_settings as $notification_setting ) {
+                        $notification_setting_shipper = new NotificationSettingShipper();
+                        $notification_setting_shipper->notification_setting_id = $notification_setting;
+                        $notification_setting_shipper->shipper_id = $id;
+                        $notification_setting_shipper->save();
+                    }
+                }
 
-                
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
@@ -8481,14 +8507,13 @@ class AdminDashboardController extends Controller
         }
 
         
-
         if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
             User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_authorized_by' => 346, 'rates_approved_at' => Carbon::now(), 'rates_added_at' => Carbon::now(), 'rate_status' => 0, 'request_custom_quotation' => 0, 'on_board_status' => 1]);
         } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
             User::where('id', $id)->update(['status' => 0, 'rate_status' => 0, 'request_custom_quotation' => 1, 'on_board_status' => 1]);
             // NotificationsController::send(231, $id);
         } else {
-            User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+            User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now(), 'on_board_status' => 1]);
         }
         
 
@@ -9046,7 +9071,7 @@ class AdminDashboardController extends Controller
                 NotificationsController::send(231, $id);
 
             } else {
-                User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+                User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now(), 'on_board_status' => 1]);
             }
             
         }
@@ -9902,6 +9927,9 @@ class AdminDashboardController extends Controller
                     if (session('role_id') == 1 || in_array(619, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
                     }
+                    if (session('role_id') == 1 || in_array(998, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item faf_charges_status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Faf Charges</div></button>';
+                    }
 
                     if (session('role_id') == 1 || in_array(660, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item auto_cancel_days_setting"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Auto Cancel Days</div></button>';
@@ -10467,7 +10495,9 @@ class AdminDashboardController extends Controller
                 if (session('role_id') == 1 || in_array(619, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
                 }
-
+                if (session('role_id') == 1 || in_array(998, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item faf_charges_status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Faf Charges</div></button>';
+                }
 
                 if (session('role_id') == 1 || in_array(856, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
@@ -10894,7 +10924,8 @@ class AdminDashboardController extends Controller
         $zones = Zone::where('business_category_id', 1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::where('id', '!=', 4)->get();
-        return view('admin.management.add_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking]);
+        $vehicles = Fleet::where('status', 1)->select(['id', 'reg_number'])->get();
+        return view('admin.management.add_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'vehicles' => $vehicles]);
     }
 
     public function getEditCityForm($id)
@@ -10922,11 +10953,12 @@ class AdminDashboardController extends Controller
         $walk_in_city = WalkInCities::where('city_id', $city['id'])->get();
         $walk_in_delivery = array();
         $osa_list = CityOsaRate::where('city_id', $city->id)->get();
+        $vehicles = Fleet::where('status', 1)->select(['id', 'reg_number'])->get();
 
         foreach ($walk_in_city as $walk_in_detail) {
             $walk_in_delivery[$walk_in_detail['delivery']] = $walk_in_detail['delivery'];
         }
-        return view('admin.management.edit_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'isHub' => $isHub, 'city' => $city, 'delivery' => $delivery, 'cityhub' => $cityhub, 'walk_in_city' => $walk_in_delivery, 'osa_list' => $osa_list]);
+        return view('admin.management.edit_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'isHub' => $isHub, 'city' => $city, 'delivery' => $delivery, 'cityhub' => $cityhub, 'walk_in_city' => $walk_in_delivery, 'osa_list' => $osa_list, 'vehicles' => $vehicles]);
 
     }
 
@@ -11078,6 +11110,31 @@ class AdminDashboardController extends Controller
                     $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
                     self::addManagementHubUser($admin_ids, $id);
 
+                    //Check if Closest Hub is Selected then auto assign mappings according to the selected hub to the new newly created hub and delete all current mappings
+                    if ($request->closest_hub) {
+                        $closestHubId = $request->closest_hub;
+
+                        // get all mappings ids of the edited hub
+                        $mappings = V2JunctionMapping::where('origin_id', $id)->orWhere('destination_id', $id)->pluck('id')->toArray();
+
+                        //delete current junctions
+                        V2Junctions::whereIn('junction_mapping_id', $mappings)->delete();
+
+                        //delete current junction_routes
+                        $v2JunctionRoutes = V2JunctionRoutes::whereIn('junction_mapping_id', $mappings)->pluck('id')->toArray();
+
+                        //delete current junction_vehicles
+                        V2JunctionVehicles::whereIn('junction_route_id', $v2JunctionRoutes)->delete();
+
+                        V2JunctionRoutes::whereIn('id', $v2JunctionRoutes)->delete();
+                        V2JunctionMapping::whereIn('id', $mappings)->delete();
+                        //All current mappings of this city are removed now
+                        //--------x------------x-------------x-------------x----------------
+
+                        //now create new mappings according to the selected hub
+                        $city = City::find($id);
+                        $this->makeDynamicHubsMapping($request->vehicles, $closestHubId, $city);
+                    }
                 
                     return redirect()->back()->with('success', 'Hub/city updated successfully');
                 }
@@ -11278,8 +11335,208 @@ class AdminDashboardController extends Controller
             $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
             self::addManagementHubUser($admin_ids, $city->id);
 
-            return redirect()->back()->with('success', 'Hub city added successfully');
+            //Check if Closest Hub is Selected then auto assign mappings according to the selected hub to the new newly created hub.
+            if ($request->closest_hub) {
+                $closestHubId = $request->closest_hub;
+                $this->makeDynamicHubsMapping($request->vehicles, $closestHubId, $city);
+            }
+   
         }
+
+        return redirect()->back()->with('success', 'Hub city added successfully');
+
+    }
+
+    private function makeDynamicHubsMapping($requestVehicles, $closestHubId, $city)
+    {
+            //take this hub as reference hub
+            $authId = Auth::id();
+
+            DB::beginTransaction();
+
+            try {
+
+                // for creating mappings from origin to destination (1st way)
+                $closestHubOriginMappings = V2JunctionMapping::where('origin_id', $closestHubId)->get();
+
+                $closestHubDestinationMappings = V2JunctionMapping::where('destination_id', $closestHubId)->get();
+
+                $newJunctions1 = [];
+                $newRouteVehicles1 = [];
+
+                foreach ($closestHubOriginMappings as  $closestHubMapping) {
+                    
+                    $mapping = new V2JunctionMapping();
+
+                    $mapping->origin_id = $city->id; //here origin will be the newly created hub for all mappings
+                    $mapping->destination_id = $closestHubMapping->destination_id;//destinations will be of the closest hub
+                    $mapping->status = $closestHubMapping->status;
+                    $mapping->updated_by = $authId;
+                    $mapping->save();
+
+                    $junctions = V2Junctions::where('junction_mapping_id', $closestHubMapping->id)->get();
+
+                    foreach ($junctions as $j) {
+                        $newJunctions1[] = [
+                            'junction_mapping_id' => $mapping->id,
+                            'junction_id' => $j->junction_id,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+                    }
+
+                    $previous = $mapping->origin_id;
+
+                    $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
+
+                    foreach ($routeJunctions as $rj) {
+                        $route_junction = new V2JunctionRoutes();
+                        $route_junction->junction_mapping_id = $mapping->id;
+                        $route_junction->starting_hub_id = $previous;
+                        $route_junction->ending_hub_id = $rj->ending_hub_id;
+                        $route_junction->save();
+            
+                        $previous = $rj->ending_hub_id;
+
+                        $vehicles = V2JunctionVehicles::where('junction_route_id', $rj->id)->get();
+            
+                        foreach ($vehicles as $vehicle) {
+                            $newRouteVehicles1[] = [
+                                'junction_route_id' => $route_junction->id,
+                                'vehicle_id' => $vehicle->vehicle_id,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ];
+                        }
+                    }
+                    
+                }
+
+                V2Junctions::insert($newJunctions1);
+                V2JunctionVehicles::insert($newRouteVehicles1);
+
+                //for creating mapping between the newly created hub and the closest hub
+                $mapping1 = new V2JunctionMapping();
+
+                $mapping1->origin_id = $city->id;
+                $mapping1->destination_id = $closestHubId;
+                $mapping1->updated_by = Auth::id();
+                $mapping1->save();
+
+                $route_junction1 = new V2JunctionRoutes();
+                $route_junction1->junction_mapping_id = $mapping1->id;
+                $route_junction1->starting_hub_id = $mapping1->origin_id;
+                $route_junction1->ending_hub_id = $mapping1->destination_id;
+                $route_junction1->save();
+
+                $singleRouteVehicles1 = [];
+                foreach ($requestVehicles as $vehicle) {
+                    $singleRouteVehicles1[] = [
+                        'junction_route_id' => $route_junction1->id,
+                        'vehicle_id' => $vehicle,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
+                }
+                V2JunctionVehicles::insert($singleRouteVehicles1);
+
+                // --------------x-------------------x-------------x---------------
+
+                // --------------x-------------------x-------------x---------------
+
+                // for creating mappings from destination to origin (2nd way)
+
+                $newJunctions2 = [];
+                $newRouteVehicles2 = [];
+
+                foreach ($closestHubDestinationMappings as  $closestHubMapping) {
+                    
+                    $mapping = new V2JunctionMapping();
+
+                    $mapping->origin_id = $closestHubMapping->origin_id; //here origin will be the closest hub for all mappings
+                    $mapping->destination_id = $city->id;//here destination will be the newly created hub for all mappings
+                    $mapping->status = $closestHubMapping->status;
+                    $mapping->updated_by = $authId;
+                    $mapping->save();
+
+                    $junctions = V2Junctions::where('junction_mapping_id', $closestHubMapping->id)->get();
+
+                    foreach ($junctions as $j) {
+                        $newJunctions2[] = [
+                            'junction_mapping_id' => $mapping->id,
+                            'junction_id' => $j->junction_id,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+                    }
+
+                    $previous = $mapping->destination_id;
+
+                    $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
+
+                    foreach ($routeJunctions as $rj) {
+                        $route_junction = new V2JunctionRoutes();
+                        $route_junction->junction_mapping_id = $mapping->id;
+                        $route_junction->starting_hub_id = $previous;
+                        $route_junction->ending_hub_id = $rj->ending_hub_id;
+                        $route_junction->save();
+            
+                        $previous = $rj->ending_hub_id;
+
+                        $vehicles = V2JunctionVehicles::where('junction_route_id', $rj->id)->get();
+            
+                        foreach ($vehicles as $vehicle) {
+                            $newRouteVehicles2[] = [
+                                'junction_route_id' => $route_junction->id,
+                                'vehicle_id' => $vehicle->vehicle_id,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ];
+                        }
+                    }
+                    
+                }
+
+                V2Junctions::insert($newJunctions2);
+                V2JunctionVehicles::insert($newRouteVehicles2);
+
+                //for creating second way mapping between the newly created hub and the closest hub
+                $mapping2 = new V2JunctionMapping();
+
+                $mapping2->origin_id = $closestHubId;
+                $mapping2->destination_id = $city->id;
+                $mapping2->updated_by = Auth::id();
+                $mapping2->save();
+
+                $route_junction2 = new V2JunctionRoutes();
+                $route_junction2->junction_mapping_id = $mapping2->id;
+                $route_junction2->starting_hub_id = $mapping2->origin_id;
+                $route_junction2->ending_hub_id = $mapping2->destination_id;
+                $route_junction2->save();
+
+                $singleRouteVehicles2 = [];
+                foreach ($requestVehicles as $vehicle) {
+                    $singleRouteVehicles2[] = [
+                        'junction_route_id' => $route_junction2->id,
+                        'vehicle_id' => $vehicle,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
+                }
+                V2JunctionVehicles::insert($singleRouteVehicles2);
+
+                // --------------x-------------------x-------------x---------------
+
+                // --------------x-------------------x-------------x----------
+
+                // Commit the transaction
+                DB::commit();
+
+            } catch (\Exception $e) {
+                // Rollback the transaction if any error occurs
+                DB::rollBack();
+                throw $e;
+            }
     }
 
     public function CityStatus(Request $request)
@@ -14492,6 +14749,25 @@ class AdminDashboardController extends Controller
             }
             AdminHub::insert($data);
         }
+    }
+
+    public function faf_charges_info(Request $request)
+    {
+        $faf_charges = FafCharges::where('user_id',$request->user_id)->first();
+        return response()->json(['status' => !empty($faf_charges->status) ? $faf_charges->status : 0]);
+    }
+    public function faf_charges_submit(Request $request)
+    {
+        $faf_charges_checkbox = isset($request->faf_charges_checkbox) ? 1 : 0;
+        $faf_charges = FafCharges::where('user_id',$request->user_id)->first();
+        if(empty($faf_charges)){
+            $faf_charges = new FafCharges();
+        }
+        $faf_charges->user_id =$request->user_id;
+        $faf_charges->status =$faf_charges_checkbox;
+        $faf_charges->save();
+
+        return redirect()->back()->with('success', 'FAF Charges Status Updated');
     }
     
 }
