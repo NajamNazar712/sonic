@@ -29,7 +29,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">FAF Charges</span>
                                                 </div>
-                                                <input data-rule-min="0" data-rule-max="100" type="text" name="faf_charges" class="form-control faf_charges" placeholder="FAF Charges*" data-rule-required="true" data-msg-required="FAF Charges is required" value="{{!empty($faf_charges) ? $faf_charges->faf_charges : 0}}">
+                                                <input data-rule-min="0" data-rule-max="100" step="0.001"  type="number" name="faf_charges" class="form-control faf_charges" placeholder="FAF Charges*" data-rule-required="true" data-msg-required="FAF Charges is required" value="{{!empty($faf_charges) ? $faf_charges->faf_charges : 0}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
@@ -134,13 +134,6 @@
 
     <script>
         $(document).ready(function() {
-            $('#settings_form input.faf_charges').inputmask({
-                'alias': 'integer',
-                'allowMinus': true,
-                'allowPlus': false,
-                'max':100
-            });
-
             var date_range_start = $('#date_range_start').pickadate({
                 firstDay: 1,
                 clear: '',
