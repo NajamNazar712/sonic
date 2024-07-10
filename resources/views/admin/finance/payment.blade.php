@@ -8,7 +8,6 @@
         <h1 class="mb-1">
             Make Payments
         </h1>
-
         <div class="card">
             <div class="card-content" aria-expanded="true">
                 <div class="card-body">
@@ -120,6 +119,21 @@
                                             placeholder="Total IBFT" readonly="readonly">
                                     </div>
                                 </div>
+                                <div class="col-2 mt-2">
+                                    <div class="form-group">
+                                        <fieldset class="form-group">
+                                            <select name="company_bank_id" id="company_bank"
+                                                class="form-control select2 company_bank"
+                                                data-rule-required="true"
+                                                data-msg-required="Bank is required">
+                                                @foreach ($company_banks as $bank)
+                                                    <option value="{{ $bank->id }}">
+                                                        {{ $bank->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="row mt-3 readonly_section">
@@ -215,7 +229,6 @@
 
     <script>
         $(document).ready(function() {
-
             $('#make_payments_form button.make').prop('disabled', true);
             $('#make_payments_form button.make_invoice').prop('disabled', true);
             $('#make_payments_form button.export_bank_order').prop('disabled', true);
@@ -223,20 +236,6 @@
             window.addEventListener('message', function(event) {
                 var selectedData = event.data;
                 var ids = selectedData;
-                $.ajax({
-                    url: '{{ route('admin.finance.make_payments.fetch_shipper_ibft_charges_new') }}',
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    data: {
-                        selected_shippers_id: ids
-                    },
-                    success: function(response) {
-                        var charges = response;
-                        $('#make_payments_form .total_ibft').val(charges);
-                    }
-                });
 
                 $('#make_payments_form .total_amount').val(0);
                 $('#make_payments_form .total_charges').val(0);
@@ -579,22 +578,53 @@
                             });
                             $(this).remove();
                         });
+
+                        if (selected_rows_shipments.length == 0) {
+                        initial_total_hold = this.api().column('.payable').data().reduce(function(a,
+                        b) {
+                            return parseFloat(a.toString().replace(/,/g, '')) + parseFloat(b
+                                .toString().replace(/,/g, ''));
+                        }, 0);
+
+                        $('#make_payments_form .total_hold').val(parseFloat(
+                            initial_total_hold).toFixed(2));
+                            
+                    }
+
                     }
                 });
                 //End Make Payment Modal Datatable
 
-                // $('#make_payments_datatable').on('click', '.details-row td.select-checkbox', function(event) {
-                //     var $row = $(this).closest('tr');
-                //     var isChecked = $(this).prop('checked');
-                //     $row.toggleClass('selected', isChecked);
-                // });
+                $.ajax({
+                    url: '{{ route('admin.finance.make_payments.fetch_shipper_ibft_charges_new') }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    data: {
+                        selected_shippers_id: ids
+                    },
+                    success: function(response) {
+                        var charges = response;
+                        $('#make_payments_form .total_ibft').val(charges);
+                    }
+                });
+
+
+
+
+
+
+
                 $('#make_payments_datatable').on('click', '.details-row td.select-checkbox', function(event) {
                     var $checkbox = $(this);
                     var isChecked = $checkbox.hasClass('selected');
                     var $row = $checkbox.closest('tr');
                     $checkbox.toggleClass('selected', !isChecked);
+
                     $row.find('td').toggleClass('bg-primary bg-lighten-5 primary', !isChecked);
                     $row.toggleClass('selected', !isChecked);
+
                     if (!isChecked) {
                         var make_payments_table = $('#make_payments_datatable').DataTable();
                         var parent = $row;
@@ -653,7 +683,6 @@
                                     // Skip the first item
                                     return;
                                 }
-
                                 if (item.shipper == shipper) {
                                     detailsHtml += '<tr consolidation_id class="details-row" id="' + item.id + '">';
                                     detailsHtml += '<td class="select-checkbox"></td>';
@@ -675,13 +704,22 @@
                                     detailsHtml += '<td class="deductable">' + item.deductable + '</td>';
                                     detailsHtml += '<td class="payable">' + item.payable + '</td>';
                                     detailsHtml += '<td class="arrival_date">' + item.arrival_date + '</td>';
-                                    detailsHtml += '<td></td>'; // Placeholder for additional columns
+                                    detailsHtml += '<td></td>';
                                     detailsHtml += '<td class="d-none shipper_id">' + item.shipper_id + '</td>';
                                     detailsHtml += '</tr>';
                                 }
                             });
-
                             $(api.row($clickedRow).node()).after(detailsHtml);
+
+                            $('#make_payments_datatable').on('click', '.select-checkbox', function() {
+                                var $checkboxes = $('#make_payments_datatable').find('.select-checkbox');
+                                var anyChecked = $checkboxes.hasClass('selected');
+                                if (anyChecked) {
+                                    $('.select_none').removeClass('disabled');
+                                } else {
+                                    $('.select_none').addClass('disabled');
+                                }
+                            });
                         },
                         error: function(xhr, status, error) {
                             console.error('Error fetching details:', error);
@@ -703,8 +741,7 @@
                     var total_amount_selector = $('#make_payments_form .total_amount');
                     var total_charges_selector = $('#make_payments_form .total_charges');
                     var total_gst_selector = $('#make_payments_form .total_gst');
-                    var total_deductable_selector = $(
-                        '#make_payments_form .total_deductable');
+                    var total_deductable_selector = $('#make_payments_form .total_deductable');
                     var total_payable_selector = $('#make_payments_form .total_payable');
                     var total_hold_selector = $('#make_payments_form .total_hold');
                     var total_wht_selector = $('#make_payments_form .wht');
@@ -718,7 +755,6 @@
                             shipper_id
                         }); //adding payable in to array payable_list 
                         calculateShipperTotal(parent);
-
                         var total_amount = ((total_amount_selector.val() != '') ? parseInt(
                             total_amount_selector
                             .val()) : 0) + ((parent.children('td.amount').html() != '') ? parseInt(
@@ -1081,6 +1117,12 @@
                     return html;
                 }
             });
+        });
+
+        $('#make_payments_form #company_bank').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder: 'Select Company Bank',
+            width: '100%',
+            dropdownParent: $('#make_payments_form')
         });
 
         function verify_make_invoice_payments() {

@@ -1218,11 +1218,15 @@
                 }
             });
 
-            $('#datatable').on('click', '.dropdown-item.make_payment_new_tab', function(){
-                openNewTabWithData()
+            $('#datatable').on('click', '.dropdown-item.make_payment_new_tab', function() {
+                var table = $('#datatable').DataTable();
+                var closestRow = $(this).closest('tr');
+                var rowData = table.row(closestRow).data();
+                var userId = rowData.user_id;
+                openNewTabWithData(userId);
             });
 
-            function openNewTabWithData() {
+            function openNewTabWithData(userId) {
                 $('#make_payments #make_payments_form .total_amount').val(0);
                 $('#make_payments #make_payments_form .total_charges').val(0);
                 $('#make_payments #make_payments_form .total_gst').val(0);
@@ -1236,15 +1240,9 @@
                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                 
                 $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
-                
-                var selected_shippers_id = [];
-                table.rows({ selected: true }).every(function(index, element) {
-                    var rowData = this.data();
-                    if (selected_shippers_id.indexOf(parseInt(rowData.user_id)) === -1) {
-                        selected_shippers_id.push(parseInt(rowData.user_id));
-                    }
-                });
 
+                var selected_shippers_id = [];
+                selected_shippers_id.push(parseInt(userId));
                 var newTab = window.open('{{ route('admin.finance.make_payments.payment') }}', '_blank');
                 newTab.onload = function() {
                     newTab.postMessage({
