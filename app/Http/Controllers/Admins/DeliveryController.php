@@ -5506,7 +5506,7 @@ class DeliveryController extends Controller
                     $delivery_note->update();
 
                     //StationDepositeNoteActionLog
-                    self::sdn_action_logs($request->sdn_id, 1, Auth::id());
+                    self::sdn_action_logs($request->sdn_id, 1, Auth::id(),'added', $delivery_note->id, $delivery_note->received_cod_amount);
 
                     return back()->with(['success' => 'DNCC added to SDN']);
                 } else {
@@ -5568,6 +5568,9 @@ class DeliveryController extends Controller
                             $delivery_note->update();
 
                             DeliveryNoteStationDepositNote::where('station_deposit_note_id', $sdn->id)->where('delivery_note_id', $delivery_note->id)->delete();
+
+                            //StationDepositeNoteActionLog
+                            self::sdn_action_logs($request->sdn_id, 1, Auth::id(),'removed', $delivery_note->id, $delivery_note->received_cod_amount);
                         }
 
                         $sdn->dncc_count = $sdn->dncc_count - $total_dncc;
@@ -9555,12 +9558,15 @@ class DeliveryController extends Controller
         }
     }
 
-    static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
+    static public function sdn_action_logs($sdn_id, $status_id, $admin_id, $action = null, $dncc_id = null, $dncc_amount = null)
     {
         $sdn_log = new StationDepositeNoteActionLog();
         $sdn_log->sdn_id = $sdn_id;
         $sdn_log->status_id = $status_id;
         $sdn_log->admin_id = $admin_id;
+        $sdn_log->dncc_id = $dncc_id;
+        $sdn_log->dncc_amount = $dncc_amount;
+        $sdn_log->action = $action;
         $sdn_log->save();
     }
 
@@ -9585,6 +9591,11 @@ class DeliveryController extends Controller
                     } else if ($log->status_id == 5) {
                         $sdn_actions_logs[$log->id]['status'] = 'Reverted from Resolved to Deposited';
                     }
+
+                    //add padding 6 0 to dncc_id
+                    $sdn_actions_logs[$log->id]['dncc_no'] = $log->dncc_id ? str_pad(strval($log->dncc_id),6,0,STR_PAD_LEFT) : '-';
+                    $sdn_actions_logs[$log->id]['dncc_amount'] = $log->dncc_amount ?? '-';
+                    $sdn_actions_logs[$log->id]['action'] = $log->action ? title_case($log->action) : '-';
                     $sdn_actions_logs[$log->id]['updated_by'] = $log->updated_by->name;
                     $sdn_actions_logs[$log->id]['date'] = Carbon::parse($log->updated_at)->toDateTimeString();
                 }

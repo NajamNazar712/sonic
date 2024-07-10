@@ -2781,7 +2781,10 @@
                                             '<table class="table table-sm table-bordered border">' +
                                             '<thead>' +
                                             '<tr>' +
+                                            '<th class="color primary">DNCC No</th>' +
+                                            '<th class="color primary">DNCC Amount</th>' +
                                             '<th class="color primary text-center">Action</th>' +
+                                            '<th class="color primary text-center">Status</th>' +
                                             '<th class="color primary">Updated By</th>' +
                                             '<th class="color primary">Updated At</th>' +
                                             '</tr>' +
@@ -2790,6 +2793,9 @@
                             if (data.logs) {
                                 $.each(data.logs, function (index, value) {
                                     html += '<tr>' +
+                                            '<td>' + value.dncc_no + '</td>' +
+                                            '<td>' + value.dncc_amount + '</td>' +
+                                            '<td>' + value.action + '</td>' +
                                             '<td>' + value.status + '</td>' +
                                             '<td>' + value.updated_by + '</td>' +
                                             '<td>' + value.date + '</td>' +
