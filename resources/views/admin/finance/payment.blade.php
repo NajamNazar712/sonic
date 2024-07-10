@@ -1077,6 +1077,20 @@
                 }
             });
         });
+
+        function verify_make_invoice_payments() {
+            $.ajax({
+                url: '{!! route('admin.finance.make_payments.invoice') !!}',
+                method: 'POST',
+                data: {
+                    '_token': '{{ csrf_token() }}',
+                    'pending_payment_shipment_ids': $('#make_payments #make_payments_form .pending_payment_shipment_ids').val()
+                }
+            })
+            .done(function(data) {
+
+            });
+        }
     </script>
 
 
