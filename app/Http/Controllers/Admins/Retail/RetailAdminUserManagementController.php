@@ -18,20 +18,43 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\Product;
+use App\Http\Models\RetailFranchiseProductPercentage;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\RetailFranchiseProductAttachment;
+use App\Http\Models\RetailFranchiseCharge;
+use App\Http\Models\RetailFranchiseCommission;
+use App\Http\Models\RetailUserCommission;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\TraxCenterAttachment;
+use App\Http\Models\RetailUserFamilyInformation;
+use App\Http\Models\RetailUserProductPercentage;
+use App\Http\Models\RetailUserAttachment;
+use App\Http\Models\RetailUserHistory;
+use App\Http\Models\TotalSumFranchiseCommission;
+use App\Http\Models\TotalSumRetailTraxCenter;
+use App\Http\Models\BanksList;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\Admin;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class RetailAdminUserManagementController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth:admin')->except('cancel');
-
         $this->middleware('Permission');
     }
 
-    public static function add_user($name, $password, $phone_number, $hub, $cnic, $address, $category, $category_id)
+    public static function add_user($name, $password, $phone_number, $hub, $cnic, $address, $category, $category_id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages, $attachment_1, $attachment_2, $attachment_3, $attachment_4, $attachment_5, $file_1, $file_2, $file_3, $file_4, $file_5, $joining_date)
     {
         $user = new RetailUser();
-//        $user->trax_id = null;
+        $user->trax_id = $traxId;
         $user->city_id = $hub;
         $user->hub_id = $hub;
         $user->name = $name;
@@ -44,7 +67,85 @@ class RetailAdminUserManagementController extends Controller
         $user->status = 1;
         $user->created_by = Auth::id();
         $user->updated_by = Auth::id();
-        $user->save();
+        $user->save();   
+
+        // retail user histroy
+        if ($category == 2){
+            $trax_center = RetailTraxCenter::where('id', $category_id)->first();
+            if ($trax_center){
+                $data = [
+                    'retail_user_id' => $user->id,
+                    'trax_center_id' => $category_id,
+                    'trax_center_name' => $trax_center->name,
+                    'trax_center_code' => $trax_center->code,
+                    'joining_date' => $joining_date,
+                ];
+                RetailUserHistory::create($data);
+            }
+        }
+
+        // retail user commission
+        $retailShippingModeNames = is_array($retailShippingModeNames) ? $retailShippingModeNames : [];
+        $productPercentages = is_array($productPercentages) ? $productPercentages : [];
+        $retailShippingModes = RetailShippingMode::whereIn('name', $retailShippingModeNames)->get();
+        $matchingRetailShippingModeIds = $retailShippingModes->pluck('id')->toArray();
+
+        foreach ($retailShippingModeNames as $key => $retailShippingModeName){
+            $retailShippingModeName = ($retailShippingModeName !== null) ? $retailShippingModeName : null;
+            $productPercentage = ($productPercentages[$key] !== null) ? $productPercentages[$key] : null;
+            $retailShippingModeId = $matchingRetailShippingModeIds[$key] ?? null;
+
+            $retail_user_product_percentage = new RetailUserProductPercentage();
+            $retail_user_product_percentage->retail_user_id = $user->id;
+            $retail_user_product_percentage->retail_shipping_mode_id = $retailShippingModeId;
+            $retail_user_product_percentage->product_percentage = $productPercentage;
+            $retail_user_product_percentage->created_by = Auth::id();
+            $retail_user_product_percentage->save();
+        }
+
+        // retail user family info
+        foreach ($familyMemberNames as $key => $familyMemberName) {
+            $family_member_type = null;
+            if ($key === 0) {
+                $family_member_type = 3; // Father
+            } elseif ($key === 1) {
+                $family_member_type = 4; // Mother
+            } elseif ($key === 2) {
+                $family_member_type = 1; // Spouse
+            } 
+            elseif ($key == 3) {
+                $family_member_type = 5; // Spouse DOB
+            } else {
+                $family_member_type = 2; // children
+            }
+            $retail_user_family_information = new RetailUserFamilyInformation();
+            $retail_user_family_information->retail_user_id = $user->id;
+            $retail_user_family_information->family_member_name = $familyMemberName;
+            $retail_user_family_information->family_member_type = $family_member_type;
+            $retail_user_family_information->agreement_start_date = $joining_date;
+            $retail_user_family_information->save();
+        }
+
+        $retail_user_attachment = new RetailUserAttachment();
+        $retail_user_attachment->retail_user_id = $user->id;
+        $baseDirectory = 'retail_user_attachments';
+
+        if (!Storage::disk('public')->exists($baseDirectory)) {
+            Storage::disk('public')->makeDirectory($baseDirectory);
+        }
+        for ($i = 1; $i <= 5; $i++) {
+            $file = ${"file_" . $i};
+            if ($file) {
+                $filename = 'attachment_' . $i . '_' . Carbon::now()->format('YmdHis') . '.' . $file->getClientOriginalExtension();
+                $attachmentDirectory = $baseDirectory . '/attachment_' . $i;
+                if (!Storage::disk('public')->exists($attachmentDirectory)) {
+                    Storage::disk('public')->makeDirectory($attachmentDirectory);
+                }
+                Storage::disk('public')->putFileAs($attachmentDirectory, $file, $filename);                
+                $retail_user_attachment->{'attachment_' . $i} = $attachmentDirectory . '/' . $filename;
+            }
+        }
+        $retail_user_attachment->save();
 
         return $user->id;
     }
@@ -72,7 +173,12 @@ class RetailAdminUserManagementController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 377);
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->get();
-        return view('admin.retail.franchise.index')->with(['hubs' => $hubs]);
+        $products = Product::orderBy('product_name')->get();
+        $product_percentage = RetailFranchiseProductPercentage::get();
+        // $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
+        $shipping_modes = RetailShippingMode::get();
+        $bank_list = BanksList::get();
+        return view('admin.retail.franchise.index')->with(['hubs' => $hubs, 'products' => $products, 'product_percentage' => $product_percentage, 'shipping_modes' => $shipping_modes, 'bank_list' => $bank_list]);
     }
 
     public function franchise_list(Request $request)
@@ -105,27 +211,45 @@ class RetailAdminUserManagementController extends Controller
             ->addColumn('action', function ($data) {
                 if (session('role_id') == 1 || in_array(436, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">';
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">';
+                    
                     if ($data->status == 0) {
                         $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                     } else {
                         $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                     }
+                    
                     if ($data->discount != Null) {
                         $dropdown .= '<button type="button" class="dropdown-item edit_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit Discount</div></button>';
                     } else {
                         $dropdown .= '<button type="button" class="dropdown-item add_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Add Discount</div></button>';
                     }
-                    $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
-                    </div>
-                  </div>
-          ';
+                    
+                    $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+            
+                    // Adding Excel export dropdown item
+                    $dropdown .= '
+                            <a href="' . route("admin.retail.franchise.franchise_details_excel_sheet", ["id" => $data->id]) . '" class="text-dark">
+                                <div class="row no-gutters align-items-center ml-2">
+                                    <div class="col-2">
+                                        <i class="la la-file-excel-o"></i>
+                                    </div>
+                                    <div class="col-9" style="margin: 6px 0px 9px 5px;">
+                                        Excel
+                                    </div>
+                                </div>
+                            </a>
+                            ';
+            
+                    $dropdown .= '</div></div>';
+                    
                     return $dropdown;
                 } else {
                     return '';
                 }
             });
+            
         return $datatables->make(true);
     }
 
@@ -158,6 +282,28 @@ class RetailAdminUserManagementController extends Controller
 
     public function franchise_add(Request $request)
     {
+        $request->validate([
+            'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
+            'franchise_deduction' => 'required|numeric',
+            'franchise_withholding' => 'required|numeric',
+            'name' => 'required',
+            'phone_number' => 'required',
+            'email' => 'required',
+            'cnic' => 'required',
+            'hub' => 'required',
+            'lat' => 'required',
+            'long' => 'required',
+            'insurance' => 'required',
+            'retail_shipping_mode_id' => 'required',
+            'security_deposit' => 'required',
+            'license_fees' => 'required',
+            'bank_id' => 'required',
+            'security_cheque_number' => 'required',
+            'license_cheque_number' => 'required',
+        ]);
+
+        $admin = $request->user();
+        $date = Carbon::now()->format('Y_m_d');
         $hub_count = RetailFranchise::where('default_hub', $request->hub)->count() + 1;
 
         $franchise = new RetailFranchise();
@@ -182,6 +328,81 @@ class RetailAdminUserManagementController extends Controller
         $franchise->code = $code;
         $franchise->save();
 
+        $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);
+        $productPercentages = json_decode($request->product_percentage, true);
+        
+        $retailShippingModeNames = is_array($retailShippingModeNames) ? $retailShippingModeNames : [];
+        $productPercentages = is_array($productPercentages) ? $productPercentages : [];
+        
+        // Fetch retail shipping modes matching the names
+        $retailShippingModes = RetailShippingMode::whereIn('name', $retailShippingModeNames)->get();
+        
+        // Store the IDs of matching retail shipping modes in an array
+        $matchingRetailShippingModeIds = $retailShippingModes->pluck('id')->toArray();
+        
+        foreach ($retailShippingModeNames as $key => $retailShippingModeName) {
+            // Handle null values in the arrays
+            $retailShippingModeName = ($retailShippingModeName !== null) ? $retailShippingModeName : null;
+            $productPercentage = ($productPercentages[$key] !== null) ? $productPercentages[$key] : null;
+        
+            // Retrieve the corresponding retail shipping mode ID from the array
+            $retailShippingModeId = $matchingRetailShippingModeIds[$key] ?? null;
+            $franchiseRetailProduct = new RetailFranchiseProductPercentage();
+            $franchiseRetailProduct->franchise_id = $franchise->id;
+            $franchiseRetailProduct->retail_shipping_mode_id = $retailShippingModeId;
+            $franchiseRetailProduct->product_percentage = $productPercentage;
+            $franchiseRetailProduct->created_by = $admin->id;
+            $franchiseRetailProduct->save();
+        }
+
+        $franchise_product_charges = new RetailFranchiseCharge();
+        $franchise_product_charges->franchise_id = $franchise->id;
+        $franchise_product_charges->franchise_gst = $request->franchise_gst;
+        $franchise_product_charges->franchise_withholding = $request->franchise_withholding;
+        $franchise_product_charges->franchise_deduction = $request->franchise_deduction;
+        $franchise_product_charges->security_deposit = $request->security_deposit;
+        $franchise_product_charges->license_fees = $request->license_fees;
+        $franchise_product_charges->bank_id = $request->bank_id;
+        $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
+        $franchise_product_charges->bank_name = $bank_name;
+        $franchise_product_charges->security_cheque_number = $request->security_cheque_number;
+        $franchise_product_charges->license_cheque_number = $request->license_cheque_number;
+        $franchise_product_charges->save();
+
+        $franchise_retail_product_attachment = new RetailFranchiseProductAttachment();
+        $franchise_retail_product_attachment->franchise_id = $franchise->id;
+        if ($request->hasFile('attachment_1')) {
+            $file = $request->file('attachment_1');
+            $filename = 'attachment_1_' . $date . '_' . Carbon::now()->format('His') . $file->getClientOriginalExtension();
+            Storage::disk('public')->putFileAs('franchise_product_attachment_1/' . Carbon::now()->format('His') . '_', $file, $filename);
+            $franchise_retail_product_attachment->attachment_1 = $filename;
+        } 
+        if ($request->hasFile('attachment_2')) {
+            $file = $request->file('attachment_2');
+            $filename = 'attachment_2_' . $date . '_' . Carbon::now()->format('His') . $file->getClientOriginalExtension();
+            Storage::disk('public')->putFileAs('franchise_product_attachment_2/' . Carbon::now()->format('His') . '_', $file, $filename);
+            $franchise_retail_product_attachment->attachment_2 = $filename;
+        }
+        if ($request->hasFile('attachment_3')) {
+            $file = $request->file('attachment_3');
+            $filename = 'attachment_3_' . $date . '_' . Carbon::now()->format('His') . $file->getClientOriginalExtension();
+            Storage::disk('public')->putFileAs('franchise_product_attachment_3/' . Carbon::now()->format('His') . '_', $file, $filename);
+            $franchise_retail_product_attachment->attachment_3 = $filename;
+        }
+        if ($request->hasFile('attachment_4')) {
+            $file = $request->file('attachment_4');
+            $filename = 'attachment_4_' . $date . '_' . Carbon::now()->format('His') . $file->getClientOriginalExtension();
+            Storage::disk('public')->putFileAs('franchise_product_attachment_4/' . Carbon::now()->format('His') . '_', $file, $filename);
+            $franchise_retail_product_attachment->attachment_4 = $filename;
+        }
+        if ($request->hasFile('attachment_5')) {
+            $file = $request->file('attachment_5');
+            $filename = 'attachment_5_' . $date . '_' . Carbon::now()->format('His') . $file->getClientOriginalExtension();
+            Storage::disk('public')->putFileAs('franchise_product_attachment_5/' . Carbon::now()->format('His') . '_', $file, $filename);
+            $franchise_retail_product_attachment->attachment_5 = $filename;
+        }
+        $franchise_retail_product_attachment->save();
+
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $shipper_user_id = $setting->setting_value;
 
@@ -189,17 +410,34 @@ class RetailAdminUserManagementController extends Controller
 
         $franchise->pickup_address_id = $pickup_address_id;
         $franchise->save();
-
         return redirect()->back()->with('success', 'Franchise Added Successfully!');
     }
 
     public function franchise_edit(Request $request)
     {
+        $request->validate([
+            'franchise_deduction' => 'required|numeric',
+            'franchise_withholding' => 'required|numeric',
+            'name' => 'required',
+            'phone_number' => 'required',
+            'email' => 'required',
+            'cnic' => 'required',
+            'lat' => 'required',
+            'long' => 'required',
+            'edit_insurance' => 'required',
+            'retail_shipping_mode_id' => 'required',
+            'security_deposit' => 'required',
+            'license_fees' => 'required',
+            'bank_id' => 'required',
+            'security_cheque_number' => 'required',
+            'license_cheque_number' => 'required',
+        ]);
+        $date = Carbon::now()->format('Y_m_d');
+        $admin = $request->user();
         $id = $request->franchise_id;
         $existing_franchise = RetailUser::where('name', $request->name)->where('category_id', '!=', $id);
         if (!$existing_franchise->exists()) {
             $franchise = RetailFranchise::find($request->franchise_id);
-
             $franchise->name = $request->name;
             $franchise->phone_no = $request->phone_number;
             $franchise->email = $request->email;
@@ -211,6 +449,101 @@ class RetailAdminUserManagementController extends Controller
             $franchise->updated_by = Auth::id();
             $franchise->save();
 
+            $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get();
+            if ($retail_franchise_product_percentage->isNotEmpty()) {
+                RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->delete();
+            }
+            $new_retail_shipping_mode_names = json_decode($request->input('retail_shipping_mode_id'));
+            $new_product_percentages = json_decode($request->input('product_percentage'));
+
+            $new_retail_shipping_mode_ids = [];
+            foreach ($new_retail_shipping_mode_names as $name) {
+                $retailShippingMode = RetailShippingMode::where('name', $name)->first();
+                if ($retailShippingMode) {
+                    $new_retail_shipping_mode_ids[] = $retailShippingMode->id;
+                }
+            }
+
+            // Insert or update data
+            foreach ($new_retail_shipping_mode_ids as $key => $retail_shipping_mode_id) {
+                $retail_franchise_product_percentage = new RetailFranchiseProductPercentage();
+                $retail_franchise_product_percentage->franchise_id = $franchise->id;
+                $retail_franchise_product_percentage->retail_shipping_mode_id = $retail_shipping_mode_id;
+                $retail_franchise_product_percentage->product_percentage = $new_product_percentages[$key];
+                $retail_franchise_product_percentage->updated_by = $admin->id;
+                $retail_franchise_product_percentage->save();
+            }
+
+            $franchise_retail_product_charges = RetailFranchiseCharge::where('franchise_id', $franchise->id)->first();
+            if ($franchise_retail_product_charges != null){
+                $franchise_retail_product_charges->delete();
+                $new_charges = new RetailFranchiseCharge();
+                $new_charges->franchise_id = $franchise->id;
+                $new_charges->franchise_gst = $request->franchise_gst;
+                $new_charges->franchise_withholding = $request->franchise_withholding;
+                $new_charges->franchise_deduction = $request->franchise_deduction;
+                $new_charges->security_deposit = $request->security_deposit;
+                $new_charges->license_fees = $request->license_fees;
+                $new_charges->bank_id = $request->bank_id;
+                $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
+                $new_charges->bank_name = $bank_name;
+                $new_charges->security_cheque_number = $request->security_cheque_number;
+                $new_charges->license_cheque_number = $request->license_cheque_number;
+                $new_charges->save();
+            } else {
+                $new_charges = new RetailFranchiseCharge();
+                $new_charges->franchise_id = $franchise->id;
+                $new_charges->franchise_gst = $request->franchise_gst;
+                $new_charges->franchise_withholding = $request->franchise_withholding;
+                $new_charges->franchise_deduction = $request->franchise_deduction;
+                $new_charges->security_deposit = $request->security_deposit;
+                $new_charges->license_fees = $request->license_fees;
+                $new_charges->bank_id = $request->bank_id;
+                $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
+                $new_charges->bank_name = $bank_name;
+                $new_charges->security_cheque_number = $request->security_cheque_number;
+                $new_charges->license_cheque_number = $request->license_cheque_number;
+                $new_charges->save();
+            }
+
+            $franchise_retail_product_attachment_edit = RetailFranchiseProductAttachment::where('franchise_id', $franchise->id)->first();
+            if ($franchise_retail_product_attachment_edit != null) {
+                // Loop through each attachment
+                for ($i = 1; $i <= 5; $i++) {
+                    $attachment_name = 'attachment_' . $i;
+                    if ($request->hasFile($attachment_name)) {
+                        // Delete old attachment if it exists
+                        $old_attachment = $franchise_retail_product_attachment_edit->$attachment_name;
+                        if ($old_attachment) {
+                            Storage::disk('public')->delete('franchise_product_attachment_' . $i . '/' . $old_attachment);
+                        }
+                        // Store new attachment
+                        $file = $request->file($attachment_name);
+                        $filename = 'attachment_' . $i . '_' . $date . '_' . Carbon::now()->format('His') . '.' . $file->getClientOriginalExtension();
+                        Storage::disk('public')->putFileAs('franchise_product_attachment_' . $i, $file, $filename);
+                        // Update attachment field in the database
+                        $franchise_retail_product_attachment_edit->$attachment_name = $filename;
+                    }
+                }
+            } else {
+                // Create a new record if none exists
+                $franchise_retail_product_attachment_edit = new RetailFranchiseProductAttachment();
+                $franchise_retail_product_attachment_edit->franchise_id = $franchise->id;
+                // Loop through each attachment
+                for ($i = 1; $i <= 5; $i++) {
+                    $attachment_name = 'attachment_' . $i;
+                    if ($request->hasFile($attachment_name)) {
+                        // Store new attachment
+                        $file = $request->file($attachment_name);
+                        $filename = 'attachment_' . $i . '_' . $date . '_' . Carbon::now()->format('His') . '.' . $file->getClientOriginalExtension();
+                        Storage::disk('public')->putFileAs('franchise_product_attachment_' . $i, $file, $filename);
+                        // Update attachment field in the database
+                        $franchise_retail_product_attachment_edit->$attachment_name = $filename;
+                    }
+                }
+            }
+            $franchise_retail_product_attachment_edit->updated_by = $admin->id;
+            $franchise_retail_product_attachment_edit->save();
             return redirect()->back()->with('success', 'Franchise Updated Successfully!');
         } else {
             return redirect()->back()->with('error', 'Name must be unique!');
@@ -230,6 +563,621 @@ class RetailAdminUserManagementController extends Controller
         } else {
             return 'false';
         }
+    }
+
+    public function retail_product_percentage(Request $request){
+        $franchiseId = $request->franchise_id;
+        $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchiseId)->get();
+        $data = [];
+        foreach ($retail_franchise_product_percentage as $percentage) {
+            $selectedOption = RetailShippingMode::find($percentage->retail_shipping_mode_id)->name;
+            $data[] = [
+                'selected_option' => $selectedOption,
+                'product_percentage' => $percentage->product_percentage,
+            ];
+        }
+        return response()->json(['data' => $data]);
+    }
+
+    public function retail_product_charges(Request $request){
+        $franchiseId = $request->franchise_id;
+        $retail_franchise_product_percentage = RetailFranchiseCharge::where('franchise_id', $franchiseId)->first();
+        
+        if ($retail_franchise_product_percentage != null){
+            $data = $retail_franchise_product_percentage;
+        } else {
+            $data = null;
+        }
+        
+        return response()->json(['data' => $data]);
+    }
+
+    public function retail_product_attachments(Request $request){
+        $franchiseId = $request->franchise_id;
+        $retail_franchise_product_attachment = RetailFranchiseProductAttachment::where('franchise_id', $franchiseId)->first();
+        if ($retail_franchise_product_attachment != null){
+            $data = $retail_franchise_product_attachment;
+        } else {
+            $data = null;
+        }
+        
+        return response()->json(['data' => $data]);
+    }
+
+    public function franchise_commission_view(){
+        // $franchises = RetailUser::where('category', 1)->get();
+        $franchises = RetailFranchise::get();
+        $finance_department = AdminDepartment::where('id', 4)->first();
+        $admin_roles = AdminRole::where('department_id', $finance_department->id)->get();
+        $allowed_users = Admin::whereIn('role_id', $admin_roles->pluck('id'))->get();
+        return view('admin.retail.commission.franchise_wise', [
+            'franchises' => $franchises,
+            'allowed_users' => $allowed_users
+        ]);
+    }
+
+
+
+    public function user_commission_invoice_print(Request $request)
+    {
+        $trax_user = $request->trax_users;
+        $data = explode(', ', $trax_user);
+        $retail_commissions = RetailUserCommission::whereIn('id', $data)->get();
+    
+        $html = '';
+        $html .= '<!doctype html>';
+        $html .= '<html lang="en">';
+        $html .= '<head>';
+        $html .= '<meta charset="utf-8">';
+        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">';
+        $html .= '<title>Invoice</title>';
+        
+        $html .= '<style>';
+        $html .= file_get_contents(public_path('app-assets/css/bootstrap.min.css'));
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}';
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{margin-top: 1rem; margin-bottom: 1rem;}.summary_header .header{width: 10%;}.summary_header .heading{width: 15%;}.summary_footer .footer{width: 75%;}';
+        $html .= '</style>';
+        
+        $html .= '</head>';
+        $html .= '<body style="padding:98px;">';
+    
+        $grouped_data = [];
+        foreach ($retail_commissions as $record) {
+            $grouped_data[$record->trax_center_name][] = $record;
+        }
+    
+        foreach ($grouped_data as $franchise_name => $records) {
+            $monthNumber = $records[0]->month;
+            $monthNames = [
+                '01' => 'January',
+                '02' => 'February',
+                '03' => 'March',
+                '04' => 'April',
+                '05' => 'May',
+                '06' => 'June',
+                '07' => 'July',
+                '08' => 'August',
+                '09' => 'September',
+                '10' => 'October',
+                '11' => 'November',
+                '12' => 'December',
+            ];
+            $monthName = isset($monthNames[$monthNumber]) ? $monthNames[$monthNumber] : '';
+
+            // Start the main container for a franchise
+            $html .= '<div class="row align-items-start justify-content-between summary my-4">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<tbody>';
+
+            $html .= '<tr>';
+            $html .= '<td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>';
+            $html .= '<td class="text-center align-middle color primary"><strong>User Details</strong></td>';
+            $html .= '<td class="text-center align-middle color secondary">Created at ' . $records[0]->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '</tr>';
+            
+            // Franchise details
+            $html .= '<tr><td>Retail User Name:</td><td>' . $franchise_name . '</td></tr>';
+            $html .= '<tr><td>Address:</td><td>' . $records[0]->franchise_address . '</td></tr>';
+            $html .= '<tr><td>Code:</td><td>' . $records[0]->franchise_code . '</td></tr>';
+            $html .= '<tr><td>CNIC:</td><td>' . $records[0]->trax_center_cnic . '</td></tr>';
+            $html .= '<tr><td>Phone #:</td><td>' . $records[0]->trax_center_phone . '</td></tr>';
+            $html .= '<tr><td><strong>Payment Month:</strong></td><td>' . $monthName . '</td></tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+        
+            // Start the table for product details
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th class="color primary">Product</th>';
+            $html .= '<th class="color primary">Approved Percentage (Commission)</th>';
+            $html .= '<th class="color primary">Shipments</th>';
+            $html .= '<th class="color primary">Total Charges</th>';
+            $html .= '<th class="color primary">GST</th>';
+            $html .= '<th class="color primary">Weight Charges</th>';
+            $html .= '<th class="color primary">Commission</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+    
+            // Product records
+            $total_shipments = 0;
+            $total_charges = 0;
+            $total_gst = 0;
+            $total_weight_charges = 0;
+            $total_commission = 0;
+    
+            foreach ($records as $record) {
+                $data = TotalSumRetailTraxCenter::where('retail_user_id', $record->franchise_id)->first();
+
+                $html .= '<tr>';
+                $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
+                $html .= '<td>' . ($record->commission ?? '0') . '%</td>';
+                $html .= '<td>' . $record->number_of_shipments . '</td>';
+                $html .= '<td>' . $record->total_charges . '</td>';
+                $html .= '<td>' . $record->franchise_gst_amount . '</td>';
+                $html .= '<td>' . $record->weight_charges . '</td>';
+                $html .= '<td>' . $record->net_commission . '</td>';
+                $html .= '</tr>';
+    
+                // Summing up totals
+                $total_shipments += $record->number_of_shipments;
+                $total_charges += $record->total_charges;
+                $total_gst += $record->franchise_gst_amount;
+                $total_weight_charges += $record->weight_charges;
+                $total_commission += $record->net_commission;
+            }
+    
+            // Totals row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="2">Total</td>';
+            $html .= '<td>' . $total_shipments . '</td>';
+            $html .= '<td>' . $total_charges . '</td>';
+            $html .= '<td>' . $total_gst . '</td>';
+            $html .= '<td>' . $total_weight_charges . '</td>';
+            $html .= '<td>' . $total_commission . '</td>';
+            $html .= '</tr>';
+    
+            $gross_commission = $total_commission;
+    
+            // Gross commission row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
+            $html .= '<td>' . $gross_commission . '</td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+        
+            // // Third table: Deposits
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-12">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<thead>';
+            // $html .= '<tr>';
+            // $html .= '<th class="color primary">Deposits</th>';
+            // $html .= '<th class="color primary">Amount</th>';
+            // $html .= '<th class="color primary">Bank Name</th>';
+            // $html .= '<th class="color primary">Cheque #</th>';
+            // $html .= '</tr>';
+            // $html .= '</thead>';
+            // $html .= '<tbody>';
+            // $html .= '<tr><td>Security Deposit</td><td>' . $franchise_charges->security_deposit . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->security_cheque_number . '</td></tr>';
+            // $html .= '<tr><td>License Fees</td><td>' . $franchise_charges->license_fees . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->license_cheque_number . '</td></tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
+        
+            // Fourth table: Pending Sales
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
+            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+    
+            // Prepared by and Checked by
+            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            $html .= '<div class="col-6 d-flex justify-content-between">';
+            $html .= '<strong>Prepared By:</strong>';
+            $html .= '<strong>Checked By:</strong>';
+            $html .= '</div>';
+            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
+            $html .= '<strong>Verified By:</strong>';
+            $html .= '<strong>Approved By:</strong>';
+            $html .= '</div>';
+            $html .= '</div>';
+    
+            $html .= '<div class="row col-6">';
+            $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
+            $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
+            $html .= '</div>';
+    
+            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            $html .= '<div class="col-6 d-flex justify-content-between">';
+            $html .= '<strong>Retail Team</strong>';
+            $html .= '<strong>Finance Team</strong>';
+            $html .= '</div>';
+            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
+            $html .= '<strong>Head of Retail</strong>';
+            $html .= '<strong>COO</strong>';
+            $html .= '</div>';
+            $html .= '</div>';
+    
+            // Empty tables
+            $html .= '<div class="row align-items-start summary">';
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+    
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+    
+            // Disclaimer after empty tables with page break
+            $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
+            $html .= '<div style="page-break-after: always;"></div>';
+        }
+
+        $html .= '</body>';
+        $html .= '</html>';
+        return $html;
+    }
+
+    public function franchise_commission_invoice_print(Request $request)
+    {
+        $franchise_code = $request->franchise_code;
+        $franchise = explode(', ', $franchise_code);
+        $franchise_names = RetailFranchiseCommission::whereIn('id', $franchise)->get();
+
+        $html = '';
+        $html .= '<!doctype html>';
+        $html .= '<html lang="en">';
+        $html .= '<head>';
+        $html .= '<meta charset="utf-8">';
+        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">';
+        $html .= '<title>Invoice</title>';
+        
+        $html .= '<style>';
+        $html .= file_get_contents(public_path('app-assets/css/bootstrap.min.css'));
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}';
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{margin-top: 1rem; margin-bottom: 1rem;}.summary_header .header{width: 10%;}.summary_header .heading{width: 15%;}.summary_footer .footer{width: 75%;}';
+        $html .= '</style>';
+        
+        $html .= '</head>';
+        $html .= '<body>';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $grouped_data = [];
+        foreach ($franchise_names as $data) {
+            $grouped_data[$data->franchise_name][] = $data;
+        }
+
+        foreach ($grouped_data as $franchise_name => $records) {
+            $franchise_charges = RetailFranchiseCharge::where('franchise_id', $records[0]->franchise_id)->first();
+
+            $monthNumber = $records[0]->month;
+            $monthNames = [
+                '01' => 'January',
+                '02' => 'February',
+                '03' => 'March',
+                '04' => 'April',
+                '05' => 'May',
+                '06' => 'June',
+                '07' => 'July',
+                '08' => 'August',
+                '09' => 'September',
+                '10' => 'October',
+                '11' => 'November',
+                '12' => 'December',
+            ];
+            $monthName = isset($monthNames[$monthNumber]) ? $monthNames[$monthNumber] : '';
+
+            // Start the main container for a franchise
+            $html .= '<div class="row align-items-start justify-content-between summary my-4">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<tbody>';
+
+            $html .= '<tr>';
+            $html .= '<td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>';
+            $html .= '<td class="text-center align-middle color primary"><strong>Franchsie Details</strong></td>';
+            $html .= '<td class="text-center align-middle color secondary">Created at ' . $records[0]->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '</tr>';
+            
+            
+            // Franchise details
+            $html .= '<tr><td>Franchise Name:</td><td>' . $franchise_name . '</td></tr>';
+            $html .= '<tr><td>Address:</td><td>' . $records[0]->franchise_address . '</td></tr>';
+            $html .= '<tr><td>Code:</td><td>' . $records[0]->franchise_code . '</td></tr>';
+            $html .= '<tr><td>CNIC:</td><td>' . $records[0]->franchise_cnic . '</td></tr>';
+            $html .= '<tr><td>Phone #</td><td>' . $records[0]->franchise_phone . '</td></tr>';
+            $html .= '<tr><td><strong>Payment Month:</strong></td><td>' . $monthName . '</td></tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Start the table for product details
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th class="color primary">Product</th>';
+            $html .= '<th class="color primary">Approved Percentage (Commission)</th>';
+            $html .= '<th class="color primary">Shipments</th>';
+            $html .= '<th class="color primary">Total Charges</th>';
+            $html .= '<th class="color primary">GST</th>';
+            $html .= '<th class="color primary">Weight Charges</th>';
+            $html .= '<th class="color primary">Commission</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+
+            // Product records
+            $total_shipments = 0;
+            $total_charges = 0;
+            $total_gst = 0;
+            $total_weight_charges = 0;
+            $total_commission = 0;
+
+            foreach ($records as $record) {
+                $data = TotalSumFranchiseCommission::where('franchise_id', $record->franchise_id)->first();
+
+                $html .= '<tr>';
+                $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
+                $html .= '<td>' . ($record->product_percentage ?? '0') . '%</td>';
+                $html .= '<td>' . $record->number_of_shipments . '</td>';
+                $html .= '<td>' . $record->total_charges . '</td>';
+                $html .= '<td>' . $record->franchise_gst_amount . '</td>';
+                $html .= '<td>' . $record->weight_charges . '</td>';
+                $html .= '<td>' . $record->commission . '</td>';
+                $html .= '</tr>';
+
+                $total_shipments += $record->number_of_shipments;
+                $total_charges += $record->total_charges;
+                $total_gst += $record->franchise_gst_amount;
+                $total_weight_charges += $record->weight_charges;
+                $total_commission += $record->commission;
+            }
+
+            // Totals row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="2">Total</td>';
+            $html .= '<td>' . $total_shipments . '</td>';
+            $html .= '<td>' . $total_charges . '</td>';
+            $html .= '<td>' . $total_gst . '</td>';
+            $html .= '<td>' . $total_weight_charges . '</td>';
+            $html .= '<td>' . $total_commission . '</td>';
+            $html .= '</tr>';
+
+            // $withholding_amount = $data->withholding_amount;
+            // $deduction_amount = $data->deduction_amount;
+
+            $withholding_amount = ($record->franchise_withholding_percentage / 100) * $total_commission;
+            $deduction_amount = ($record->deduction_percentage / 100) * $total_commission;
+            $gross_commission = $total_commission - ($withholding_amount + $deduction_amount);
+
+            // Withholding tax row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6">Withholding Income Tax ' . ($data->withholding_tax_percent ?? 0) . '%</td>';
+            $html .= '<td>' . $withholding_amount . '</td>';
+            $html .= '</tr>';
+
+            // Deduction GST tax row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6">Commission GST Deduction ' . ($data->commission_gst_deduction_percent ?? 0) . '%</td>';
+            $html .= '<td>' . $deduction_amount . '</td>';
+            $html .= '</tr>';
+
+            // Gross commission row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
+            $html .= '<td>' . $gross_commission . '</td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Third table: Deposits
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th class="color primary">Deposits</th>';
+            $html .= '<th class="color primary">Amount</th>';
+            $html .= '<th class="color primary">Bank Name</th>';
+            $html .= '<th class="color primary">Cheque #</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+            $html .= '<tr><td>Security Deposit</td><td>' . ($franchise_charges->security_deposit ?? 0) . '</td><td>' . ($franchise_charges->bank_name ?? '') . '</td><td>' . ($franchise_charges->security_cheque_number ?? '') . '</td></tr>';
+            $html .= '<tr><td>License Fees</td><td>' . ($franchise_charges->license_fees ?? 0) . '</td><td>' . ($franchise_charges->bank_name ?? '') . '</td><td>' . ($franchise_charges->license_cheque_number ?? '') . '</td></tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+
+            // Fourth table: Pending Sales
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
+            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Prepared by and Checked by
+            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            $html .= '<div class="col-6 d-flex justify-content-between">';
+            $html .= '<strong>Prepared By:</strong>';
+            $html .= '<strong>Checked By:</strong>';
+            $html .= '</div>';
+            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
+            $html .= '<strong>Verified By:</strong>';
+            $html .= '<strong>Approved By:</strong>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            $html .= '<div class="row col-6">';
+            $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
+            $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
+            $html .= '</div>';
+
+            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            $html .= '<div class="col-6 d-flex justify-content-between">';
+            $html .= '<strong>Retail Team</strong>';
+            $html .= '<strong>Finance Team</strong>';
+            $html .= '</div>';
+            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
+            $html .= '<strong>Head of Retail</strong>';
+            $html .= '<strong>COO</strong>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Empty tables
+            $html .= '<div class="row align-items-start summary">';
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+
+            $html .= '<div class="col-3">';
+            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            $html .= '<tbody>';
+            $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+            
+            $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
+            $html .= '<div style="page-break-after: always;"></div>';
+        }
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        $html .= '</body>';
+        $html .= '</html>';
+        return $html;
+    }
+
+    public function franchise_commission_view_ajax_list(Request $request)
+    {
+        $month = $request->month;
+        $franchise = $request->franchise;
+        $query = RetailFranchiseCommission::where('month', $month);
+        if (!empty($franchise)) {
+            $query->where('franchise_id', $franchise);
+        }
+        $retail_franchise_commission = $query->get();
+        $results = $retail_franchise_commission;
+        return response()->json([
+            'data' => $results,
+        ]);
+    }
+    
+
+    public function user_commission_view(){
+        $franchises = RetailUser::where('category', 2)->get();
+        $finance_department = AdminDepartment::where('id', 4)->first();
+        $admin_roles = AdminRole::where('department_id', $finance_department->id)->get();
+        $allowed_users = Admin::whereIn('role_id', $admin_roles->pluck('id'))->get();
+        return view('admin.retail.commission.user_wise', [
+            'franchises' => $franchises,
+            'allowed_users' => $allowed_users
+        ]);
+    }
+
+    public function user_commission_view_ajax_list(Request $request)
+    {
+        $month = $request->month;
+        $franchise = $request->franchise;
+        $query = RetailUserCommission::where('month', $month);
+        if (!empty($franchise)) {
+            $query->where('franchise_id', $franchise);
+        }
+        $retail_trax_center_commission = $query->get();
+        $results = $retail_trax_center_commission;
+        return response()->json([
+            'data' => $results,
+        ]);
     }
 
     public function trax_center_index()
@@ -268,17 +1216,48 @@ class RetailAdminUserManagementController extends Controller
             ->addColumn('action', function ($data) {
                 if (session('role_id') == 1 || in_array(435, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">';
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">';
+                    
                     if ($data->status == 0) {
-                        $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item enable">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2"><i class="ft-x-circle"></i></div>
+                                <div class="col-9 offset-1">Enable</div>
+                            </div>
+                        </button>';
                     } else {
-                        $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item disable">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-2"><i class="ft-x-circle"></i></div>
+                                <div class="col-9 offset-1">Disable</div>
+                            </div>
+                        </button>';
                     }
-                    $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
-                    </div>
-                  </div>
-          ';
+            
+                    $dropdown .= '<button type="button" class="dropdown-item edit">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-2"><i class="ft-x-circle"></i></div>
+                            <div class="col-9 offset-1">Edit</div>
+                        </div>
+                    </button>';
+
+                    // Adding Excel export dropdown item
+                    $dropdown .= '
+                            <a href="' . route("admin.retail.trax_center.trax_center_details_excel_sheet", ["id" => $data->id]) . '" class="text-dark">
+                                <div class="row no-gutters align-items-center ml-2">
+                                    <div class="col-2">
+                                        <i class="la la-file-excel-o"></i>
+                                    </div>
+                                    <div class="col-9" style="margin: 6px 0px 9px 5px;">
+                                        Excel
+                                    </div>
+                                </div>
+                            </a>
+                            ';
+
+                    $dropdown .= '</div></div>';
+            
                     return $dropdown;
                 } else {
                     return '';
@@ -316,6 +1295,10 @@ class RetailAdminUserManagementController extends Controller
 
     public function trax_center_add(Request $request)
     {
+        $request->validate([
+            'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
+        ]);
+        $date = Carbon::now()->format('Y_m_d');
         $hub_count = RetailTraxCenter::where('default_hub', $request->hub)->count() + 1;
 
         $trax_center = new RetailTraxCenter();
@@ -346,11 +1329,34 @@ class RetailAdminUserManagementController extends Controller
         $pickup_address_id = $this->add_pickup_address($shipper_user_id, $trax_center->name . ' - ' . $hub_name, $trax_center->name, $trax_center->phone_no, $trax_center->email, $trax_center->default_hub, 0, $trax_center->location_latitude, $trax_center->location_longitude);
         $trax_center->pickup_address_id = $pickup_address_id;
         $trax_center->save();
+
+        $trax_center_attachment = new TraxCenterAttachment();
+        $trax_center_attachment->retail_trax_center_id = $trax_center->id;
+        $trax_center_attachment->advance_amount = (int) str_replace(',', '', $request->advance_amount);
+        $trax_center_attachment->rental = (int) str_replace(',', '', $request->rental);
+        $trax_center_attachment->landlord_name = $request->landlord_name;
+        $trax_center_attachment->landlord_contact_number = $request->landlord_contact_number;
+        $trax_center_attachment->shop_address = $request->shop_address;
+        $trax_center_attachment->agreement_start_date = $request->agreement_start_date;
+        $trax_center_attachment->agreement_end_date = $request->agreement_end_date;
+
+        for ($i = 1; $i <= 5; $i++) {
+            if ($request->hasFile('attachment_' . $i)) {
+                $file = $request->file('attachment_' . $i);
+                $fileName = $file->getClientOriginalName() . '_' . $date . '_' . Carbon::now()->format('His');
+                $folderName = 'trax_center_attachment_' . $i;
+                $filePath = $file->storeAs('trax_center_attachments/' . $folderName, $fileName, 'public');
+                $trax_center_attachment->{'attachment_' . $i} = $fileName;
+            }
+        }
+
+        $trax_center_attachment->save();
         return redirect()->back()->with('success', 'Trax Center Added Successfully!');
     }
 
     public function trax_center_edit(Request $request)
     {
+        $date = Carbon::now()->format('Y_m_d');
         $existing_trax_center = RetailTraxCenter::where('name', $request->name)->where('id', '!=', $request->trax_center_id);
         if (!$existing_trax_center->exists()) {
             $trax_center = RetailTraxCenter::find($request->trax_center_id);
@@ -366,6 +1372,56 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->updated_by = Auth::id();
             $trax_center->save();
 
+            $trax_center_attachment = TraxCenterAttachment::where('retail_trax_center_id', $request->trax_center_id)->first();
+            if ($trax_center_attachment != null) {
+                $trax_center_attachment->advance_amount = (int) str_replace(',', '', $request->advance_amount);
+                $trax_center_attachment->rental = (int) str_replace(',', '', $request->rental);
+                $trax_center_attachment->landlord_name = $request->landlord_name;
+                $trax_center_attachment->landlord_contact_number = $request->landlord_contact_number;
+                $trax_center_attachment->shop_address = $request->shop_address;
+                if ($request->agreement_start_date != null){
+                    $trax_center_attachment->agreement_start_date = $request->agreement_start_date;
+                }
+                if ($request->agreement_end_date != null){
+                    $trax_center_attachment->agreement_end_date = $request->agreement_end_date;
+                }
+                // Handle file uploads
+                for ($i = 1; $i <= 5; $i++) {
+                    $attachment_name = 'attachment_' . $i;
+                    if ($request->hasFile($attachment_name)) {
+                        $file = $request->file($attachment_name);
+                        $fileName = $file->getClientOriginalName() . '_' . $date . '_' . Carbon::now()->format('His');
+                        $folderName = 'trax_center_attachment_' . $i;
+                        $filePath = $file->storeAs('trax_center_attachments' . DIRECTORY_SEPARATOR . $folderName, $fileName, 'public');
+                        $trax_center_attachment->{$attachment_name} = $fileName;
+                    }
+                }
+            
+                // Save the changes
+                $trax_center_attachment->save();
+            } else {
+                $new_trax_center_attachments = new TraxCenterAttachment();
+                $new_trax_center_attachments->retail_trax_center_id = $request->trax_center_id;
+                $new_trax_center_attachments->advance_amount = $request->advance_amount;
+                $new_trax_center_attachments->rental = $request->rental;
+                $new_trax_center_attachments->landlord_name = $request->landlord_name;
+                $new_trax_center_attachments->landlord_contact_number = $request->landlord_contact_number;
+                $new_trax_center_attachments->shop_address = $request->shop_address;
+                $new_trax_center_attachments->agreement_start_date = $request->agreement_start_date;
+                $new_trax_center_attachments->agreement_end_date = $request->agreement_end_date;
+
+                for ($i = 1; $i <= 5; $i++) {
+                    $attachment_name = 'attachment_' . $i;
+                    if ($request->hasFile($attachment_name)) {
+                        $file = $request->file($attachment_name);
+                        $fileName = $file->getClientOriginalName() . '_' . $date . '_' . Carbon::now()->format('His');
+                        $folderName = 'trax_center_attachment_' . $i;
+                        $filePath = $file->storeAs('trax_center_attachments' . DIRECTORY_SEPARATOR . $folderName, $fileName, 'public');
+                        $new_trax_center_attachments->{$attachment_name} = $fileName;
+                    }
+                }
+                $new_trax_center_attachments->save();
+            }
             return redirect()->back()->with('success', 'Trax Center Updated Successfully!');
         } else {
             return redirect()->back()->with('error', 'Trax Center Name must be unique!');
@@ -387,20 +1443,53 @@ class RetailAdminUserManagementController extends Controller
         }
     }
 
+    public function trax_center_edit_attachment(Request $request){
+        $trax_center_id = $request->trax_center_id;
+        $trax_center_attachment = TraxCenterAttachment::where('retail_trax_center_id', $trax_center_id)->first();
+        return response()->json([
+            'data' => $trax_center_attachment
+        ]);
+    }
+
     public function user_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 372);
         $trax_centers = RetailTraxCenter::where('status', 1)->get();
         $franchises = RetailFranchise::where('status', 1)->get();
-        return view('admin.retail.users.index')->with(['trax_centers' => $trax_centers, 'franchises' => $franchises]);
+        $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
+        return view('admin.retail.users.index')->with(['trax_centers' => $trax_centers, 'franchises' => $franchises, 'shipping_modes' => $shipping_modes]);
     }
 
     public function user_edit($id)
     {
+        $retail_user_family_names = [];
+        $retail_user_salary = [];
+        $agreement_start_date = null;
         $retail_user = RetailUser::find($id);
+        $retail_user_id = $retail_user->id;
         $trax_centers = RetailTraxCenter::where('status', 1)->get();
         $franchises = RetailFranchise::where('status', 1)->get();
-        return view('admin.retail.users.edit')->with(['retail_user' => $retail_user, 'trax_centers' => $trax_centers, 'franchises' => $franchises]);
+        $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
+        $retail_user_family_names_query = RetailUserFamilyInformation::where('retail_user_id', $retail_user_id);
+        $old_trax_center = RetailUserHistory::where('retail_user_id', $id);
+
+        if ($retail_user_family_names_query->exists()) {
+            $retail_user_family_names_query = $retail_user_family_names_query->get();
+            $retail_user_family_names = $retail_user_family_names_query->pluck('family_member_name')->toArray();
+            $retail_user_salary = $retail_user_family_names_query->pluck('salary')->toArray();
+            $agreement_start_date = $retail_user_family_names_query->first()->agreement_start_date;
+        }
+        $jsonAgreementStartDate = $agreement_start_date ? json_encode($agreement_start_date) : null;
+        return view('admin.retail.users.edit')->with([
+            'retail_user' => $retail_user, 
+            'trax_centers' => $trax_centers, 
+            'franchises' => $franchises, 
+            'shipping_modes' => $shipping_modes, 
+            'retail_user_id' => $retail_user_id, 
+            'retail_user_family_names' => $retail_user_family_names,
+            'retail_user_salary' => $retail_user_salary,
+            'jsonAgreementStartDate' => $jsonAgreementStartDate
+        ]);
     }
 
     public function user_list(Request $request)
@@ -462,8 +1551,52 @@ class RetailAdminUserManagementController extends Controller
                     }
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $data->id . ' rel="editretailuser" data-toggle="modal" data-target="#editRetailUser"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
-//                    $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
-                    //          ';
+                    if ($data->category != 1){
+                        $dropdown .= '
+                            <a href="' . route("admin.retail.users.retail_history", ["id" => $data->id]) . '" class="text-dark" target="_blank">
+                                <div class="row no-gutters align-items-center ml-2">
+                                    <div class="col-2">
+                                        <i class="ft-x-circle"></i>
+                                    </div>
+                                    <div class="col-9" style="margin: 6px 0px 9px 5px;">
+                                        History
+                                    </div>
+                                </div>
+                            </a>
+                        ';
+                    }  
+                    if ($data->category == 2)
+                    {
+                        $dropdown .= '
+                            <a href="' . route("admin.retail.users.retail_user_excel_sheet", ["id" => $data->id]) . '" class="text-dark">
+                                <div class="row no-gutters align-items-center ml-2">
+                                    <div class="col-2">
+                                        <i class="la la-file-excel-o"></i>
+                                    </div>
+                                    <div class="col-9" style="margin: 6px 0px 9px 5px;">
+                                        Excel
+                                    </div>
+                                </div>
+                            </a>
+                            ';
+                    }
+                    if ($data->category == 1)
+                    {
+                        $dropdown .= '
+                            <a href="' . route("admin.retail.users.franchise_excel_sheet", ["id" => $data->id]) . '" class="text-dark">
+                                <div class="row no-gutters align-items-center ml-2">
+                                    <div class="col-2">
+                                        <i class="la la-file-excel-o"></i>
+                                    </div>
+                                    <div class="col-9" style="margin: 6px 0px 9px 5px;">
+                                        Excel
+                                    </div>
+                                </div>
+                            </a>
+                            ';
+                    }
+
+                    //$dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     $dropdown .= '
                     </div>
                   </div>
@@ -502,7 +1635,6 @@ class RetailAdminUserManagementController extends Controller
     public function user_add(Request $request)
     {
         $retail_user = RetailUser::where('name', $request->name);
-
         if (!$retail_user->exists()) {
             $password = $request->password;
             if ($request->store == 1) {
@@ -510,8 +1642,38 @@ class RetailAdminUserManagementController extends Controller
             } else {
                 $store = RetailTraxCenter::find($request->trax_center);
             }
+            $request->validate([
+                'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
+                'name' => 'required',
+                'phone_number' => 'required',
+                'password' => 'required',
+                'cnic' => 'required',
+                'address' => 'required',
+                'store' => 'required',
+                'trax_id' => [
+                    'nullable',
+                    'required_unless:store,1',
+                    'regex:/^[0-9]*$/',
+                ],
+            ]);
 
-            $this->add_user($request->name, $password, $request->phone_number, $store->default_hub, $request->cnic, $request->address, $request->store, $store->id);
+            $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);
+            $productPercentages = json_decode($request->product_percentage, true);
+            $familyMemberNames = $request->family_member_name;
+            $joining_date = $request->agreement_start_date;
+            $traxId = $request->trax_id;
+            $attachment_1 = $request->hasFile('attachment_1');
+            $attachment_2 = $request->hasFile('attachment_2');
+            $attachment_3 = $request->hasFile('attachment_3');
+            $attachment_4 = $request->hasFile('attachment_4');
+            $attachment_5 = $request->hasFile('attachment_5');
+            $file_1 = $request->file('attachment_1');
+            $file_2 = $request->file('attachment_2');
+            $file_3 = $request->file('attachment_3');
+            $file_4 = $request->file('attachment_4');
+            $file_5 = $request->file('attachment_5');
+
+            $this->add_user($request->name, $password, $request->phone_number, $store->default_hub, $request->cnic, $request->address, $request->store, $store->id, $familyMemberNames, $traxId, $retailShippingModeNames, $productPercentages, $attachment_1, $attachment_2, $attachment_3, $attachment_4, $attachment_5, $file_1, $file_2, $file_3, $file_4, $file_5, $joining_date);
 
             return redirect()->back()->with('success', 'Retail User Added Successfully!');
         } else {
@@ -519,9 +1681,31 @@ class RetailAdminUserManagementController extends Controller
         }
     }
 
+    public function retail_user_percentage(Request $request){
+        $franchiseId = $request->retail_user_id;
+        $retail_franchise_product_percentage = RetailUserProductPercentage::where('retail_user_id', $franchiseId)->get();
+        $data = [];
+        foreach ($retail_franchise_product_percentage as $percentage) {
+            $selectedOption = RetailShippingMode::find($percentage->retail_shipping_mode_id)->name;
+            $data[] = [
+                'selected_option' => $selectedOption,
+                'product_percentage' => $percentage->product_percentage,
+            ];
+        }
+        return response()->json(['data' => $data]);
+    }
+
     public function user_update(Request $request, $id)
     {
+        $request->validate([
+            'trax_id' => [
+                'nullable',
+                'required_unless:store,1',
+                'regex:/^[0-9]*$/',
+            ],
+        ]);
         $retail_user = RetailUser::find($id);
+        $admin = $request->user();
         $retail_user->name = $request->name;
         $retail_user->category = $request->store;
         if ($request->store == 1) {
@@ -529,15 +1713,224 @@ class RetailAdminUserManagementController extends Controller
         } else {
             $retail_user->category_id = $request->trax_center;
         }
-        $retail_user->password = Hash::make($request->password);
+        if (!empty($request->password)){
+            $retail_user->password = Hash::make($request->password);
+        }
         $retail_user->phone_no = $request->phone_number;
         $retail_user->cnic = $request->cnic;
         $retail_user->address = $request->address;
         $retail_user->updated_by = Auth::id();
+        $retail_user->trax_id = $request->trax_id;
         $retail_user->save();
+        
+        // if ($retail_user->category == 2){
+        //     // retail user history
+        //     $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->first();
+        //     $trax_center = RetailTraxCenter::where('code', $retail_user->store->code)->first();
+        //     $new_trax_center_code = $trax_center->code;
+        //     $new_trax_center_name = $trax_center->name;
+        //     if ($retail_user_history){
+        //         $old_trax_center_code = $retail_user_history->trax_center_code;
+        //         if ($old_trax_center_code != $new_trax_center_code){
+        //             $data = [
+        //                 'retail_user_id' => $retail_user->id,
+        //                 'trax_center_id' => $trax_center->id,
+        //                 'trax_center_name' => $new_trax_center_name,
+        //                 'trax_center_code' => $new_trax_center_code,
+        //                 'joining_date' => $request->agreement_start_date,
+        //             ];
+        //             RetailUserHistory::create($data);
+        //             $retail_user_history->update(['last_date' => $request->agreement_start_date]);
+        //         }
+        //     } else {
+        //         $data = [
+        //             'retail_user_id' => $retail_user->id,
+        //             'trax_center_id' => $trax_center->id,
+        //             'trax_center_name' => $new_trax_center_name,
+        //             'trax_center_code' => $new_trax_center_code,
+        //             'joining_date' => $request->agreement_start_date,
+        //         ];
+        //         RetailUserHistory::create($data);
+        //     }
+        // }
 
+
+        if ($retail_user->category == 2) {
+            // retail user history
+            $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->latest()->first();
+            $trax_center = RetailTraxCenter::where('code', $retail_user->store->code)->first();
+        
+            if ($trax_center) {
+                $new_trax_center_code = $trax_center->code;
+                $new_trax_center_name = $trax_center->name;
+        
+                if ($retail_user_history) {
+                    $old_trax_center_code = $retail_user_history->trax_center_code;
+        
+                    if ($old_trax_center_code != $new_trax_center_code) {
+                        // Create a new entry with the new Trax center code and name
+                        $data = [
+                            'retail_user_id' => $retail_user->id,
+                            'trax_center_id' => $trax_center->id,
+                            'trax_center_name' => $new_trax_center_name,
+                            'trax_center_code' => $new_trax_center_code,
+                            'joining_date' => $request->agreement_start_date,
+                        ];
+                        RetailUserHistory::create($data);
+        
+                        // Update the last_date of the old history record
+                        $retail_user_history->update(['last_date' => $request->agreement_start_date]);
+                    }
+                } else {
+                    // No previous history, create the first entry
+                    $data = [
+                        'retail_user_id' => $retail_user->id,
+                        'trax_center_id' => $trax_center->id,
+                        'trax_center_name' => $new_trax_center_name,
+                        'trax_center_code' => $new_trax_center_code,
+                        'joining_date' => $request->agreement_start_date,
+                    ];
+                    RetailUserHistory::create($data);
+                }
+            }
+        }
+
+        // retail user commission
+        $retailShippingModeNames = json_decode($request->retail_shipping_mode_id, true);
+        $productPercentages = json_decode($request->product_percentage, true);
+        
+        $retailShippingModeNames = is_array($retailShippingModeNames) ? $retailShippingModeNames : [];
+        $productPercentages = is_array($productPercentages) ? $productPercentages : [];
+        
+        $retailShippingModes = RetailShippingMode::whereIn('name', $retailShippingModeNames)->get();
+        $matchingRetailShippingModeIds = $retailShippingModes->pluck('id')->toArray();
+        
+        $retail_user_old_product_percentages = RetailUserProductPercentage::where('retail_user_id', $retail_user->id)->get();
+        
+        if ($request->has('retail_shipping_mode_id')) {
+            // Delete old records not present in the new request
+            foreach ($retail_user_old_product_percentages as $oldPercentage) {
+                if (!in_array($oldPercentage->retail_shipping_mode_id, $matchingRetailShippingModeIds)) {
+                    $oldPercentage->delete();
+                }
+            }
+        
+            // Update or create new records
+            foreach ($retailShippingModeNames as $key => $retailShippingModeName) {
+                $retailShippingModeId = $matchingRetailShippingModeIds[$key] ?? null;
+                $productPercentage = $productPercentages[$key] ?? null;
+        
+                $existingRecord = $retail_user_old_product_percentages->firstWhere('retail_shipping_mode_id', $retailShippingModeId);
+        
+                if ($existingRecord) {
+                    if ($existingRecord->product_percentage != $productPercentage) {
+                        $existingRecord->product_percentage = $productPercentage;
+                        $existingRecord->save();
+                    }
+                } else {
+                    $retail_user_product_percentage = new RetailUserProductPercentage();
+                    $retail_user_product_percentage->retail_user_id = $retail_user->id;
+                    $retail_user_product_percentage->retail_shipping_mode_id = $retailShippingModeId;
+                    $retail_user_product_percentage->product_percentage = $productPercentage;
+                    $retail_user_product_percentage->created_by = Auth::id();
+                    $retail_user_product_percentage->save();
+                }
+            }
+        }
+
+        // retail user family info
+        $familyMemberNames = $request->family_member_name;
+        foreach ($familyMemberNames as $key => $familyMemberName) {
+            // Delete existing records for the retail user only if new family member information is present
+            RetailUserFamilyInformation::where('retail_user_id', $retail_user->id)->delete();
+            foreach ($familyMemberNames as $key => $familyMemberName) {
+                $family_member_type = null;
+                if ($key == 0) {
+                    $family_member_type = 3; // Father
+                } elseif ($key == 1) {
+                    $family_member_type = 4; // Mother
+                } elseif ($key == 2) {
+                    $family_member_type = 1; // Spouse
+                } elseif ($key == 3) {
+                    $family_member_type = 5; // Spouse DOB
+                } else {
+                    $family_member_type = 2; // Children
+                }
+
+                $family_member_new_data = new RetailUserFamilyInformation();
+                $family_member_new_data->retail_user_id = $retail_user->id;
+                $family_member_new_data->family_member_name = $familyMemberName;
+                $family_member_new_data->family_member_type = $family_member_type;
+                $family_member_new_data->salary = $request->salary;
+                $family_member_new_data->agreement_start_date = $request->agreement_start_date;
+                $family_member_new_data->save();
+            }
+        }
+
+        $baseDirectory = 'retail_user_attachments';
+        if (!Storage::disk('public')->exists($baseDirectory)) {
+            Storage::disk('public')->makeDirectory($baseDirectory);
+        }
+        $old_attachments = RetailUserAttachment::where('retail_user_id', $retail_user->id)->first();
+        if ($old_attachments) {
+            // Update existing attachments
+            for ($i = 1; $i <= 5; $i++) {
+                $attachment_name = 'attachment_' . $i;
+                if ($request->hasFile($attachment_name)) {
+                    $file = $request->file($attachment_name);
+                    $filename = 'attachment_' . $i . '_' . Carbon::now()->format('YmdHis') . '.' . $file->getClientOriginalExtension();
+                    
+                    // Delete old attachment if it exists
+                    $old_attachment = $old_attachments->$attachment_name;
+                    if ($old_attachment) {
+                        Storage::disk('public')->delete($old_attachment);
+                    }
+                    
+                    // Store new attachment
+                    $attachmentDirectory = $baseDirectory . '/' . $attachment_name;
+                    Storage::disk('public')->putFileAs($attachmentDirectory, $file, $filename);
+                    
+                    // Update attachment field in the database
+                    $old_attachments->$attachment_name = $attachmentDirectory . '/' . $filename;
+                }
+            }
+            $old_attachments->updated_by = $admin->id;
+            $old_attachments->save();
+        } else {
+            // Create new attachments
+            $new_attachments = new RetailUserAttachment();
+            $new_attachments->retail_user_id = $retail_user->id;
+            
+            for ($i = 1; $i <= 5; $i++) {
+                $attachment_name = 'attachment_' . $i;
+                if ($request->hasFile($attachment_name)) {
+                    $file = $request->file($attachment_name);
+                    $filename = 'attachment_' . $i . '_' . Carbon::now()->format('YmdHis') . '.' . $file->getClientOriginalExtension();
+                    
+                    // Store new attachment
+                    $attachmentDirectory = $baseDirectory . '/' . $attachment_name;
+                    Storage::disk('public')->putFileAs($attachmentDirectory, $file, $filename);
+                    
+                    // Update attachment field in the database
+                    $new_attachments->$attachment_name = $attachmentDirectory . '/' . $filename;
+                }
+            }
+            $new_attachments->updated_by = $admin->id;
+            $new_attachments->save();
+        }
         return redirect()->back()->with('success', 'Retail User Updated Successfully!');
+    }
 
+    public function retail_user_attachments(Request $request){
+        $retailUserId = $request->retail_user_id;
+        $retail_user_attachment = RetailUserAttachment::where('retail_user_id', $retailUserId)->first();
+        if ($retail_user_attachment != null){
+            $data = $retail_user_attachment;
+        } else {
+            $data = null;
+        }
+        
+        return response()->json(['data' => $data]);
     }
 
     public function user_name(Request $request)
@@ -1801,5 +3194,448 @@ class RetailAdminUserManagementController extends Controller
         return redirect()->route('admin.retail.rates.edit')->with('success', 'Rates Updated');
 
 
+    }
+
+    public function retail_history($id){
+        $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->get();
+        $retail_user_data = RetailUser::whereIn('id', $retail_user_history->pluck('retail_user_id'))->first();
+
+        if ($retail_user_data != null) {
+            $retail_user = $retail_user_data->name;
+        } else {
+            $retail_user = RetailUser::where('id', $id)->first()->name;
+        }
+
+        return view('admin.retail.users.history', [
+            'retail_user_history' => $retail_user_history,
+            'retail_user' => $retail_user
+        ]);
+    }
+
+    public function retail_user_excel_sheet($id)
+    {
+        $user = RetailUser::where('id', $id)
+            ->where('category', 2)
+            ->first();
+
+        $retail_center = RetailTraxCenter::where('id', $user->category_id)->first();
+        $retail_user_commissions = RetailUserProductPercentage::where('retail_user_id', $user->id)->get();
+        $city = City::where('id', $user->city_id)->first();
+        $retail_shipping_modes = RetailShippingMode::whereIn('id', $retail_user_commissions->pluck('retail_shipping_mode_id'))->pluck('name');
+        $family_info = RetailUserFamilyInformation::where('retail_user_id', $user->id)->get();
+        if ($family_info->isNotEmpty()) {
+            $spouse_dob = $family_info[3]->family_member_name;
+        } else {
+            $spouse_dob = '';
+        }
+        $userDetails = [
+            [
+                'Retail Center',
+                'Retail User',
+                'Phone',
+                'CNIC',
+                'Address',
+                'City'
+            ]
+        ];
+
+        $familyDetails = [
+            [
+                'Joining Date',
+                'Salary',
+                'Family Members',
+                'Spouse Date of Birth'
+            ]
+        ];
+
+        $commissionDetailsWithName = [
+            [
+                'Product',
+                'Commission Percentage',
+            ]
+        ];
+
+        $userDetails[] = [
+            $retail_center->name,
+            $user->name,
+            $user->phone_no,
+            $user->cnic,
+            $user->address, 
+            $city->name,
+        ];
+
+        $isFirstFamilyMember = true;
+        foreach ($family_info as $index => $family) {
+            if ($index === 3) {
+                // Skip adding the spouse's date of birth here
+                continue;
+            }
+
+            if ($isFirstFamilyMember) {
+                $familyDetails[] = [
+                    $family->agreement_start_date,
+                    $family->salary,
+                    $family->family_member_name,
+                    $spouse_dob
+                ];
+                $isFirstFamilyMember = false;
+            } else {
+                $familyDetails[] = [
+                    '',
+                    '',
+                    $family->family_member_name,
+                ];
+            }
+        }
+
+        foreach ($retail_user_commissions as $index => $commission) {
+            $commissionDetailsWithName[] = [
+                $retail_shipping_modes[$index] ?? '',
+                $commission->product_percentage . '%',
+            ];
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // user details
+        $currentRow = 1;
+        foreach ($userDetails as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+
+        // family details
+        $currentRow += count($userDetails) + 1;
+        foreach ($familyDetails as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+
+        // commission details with names
+        $currentRow += count($familyDetails) + 1;
+        foreach ($commissionDetailsWithName as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $user->name . '.xlsx"');
+        header('Cache-Control: max-age=0');
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function franchise_excel_sheet($id)
+    {
+        $user = RetailUser::where('id', $id)
+            ->where('category', 1)
+            ->first();
+        $franchise = RetailFranchise::where('id', $user->category_id)->first();
+        $city = City::where('id', $user->city_id)->first();
+        $agreement_date = RetailUserFamilyInformation::where('retail_user_id', $user->id)->first();
+        $family_info = RetailUserFamilyInformation::where('retail_user_id', $user->id)->get();
+
+        $userDetails = [
+            [
+                'Franchise',
+                'Franchise User',
+                'Phone',
+                'CNIC',
+                'Address',
+                'City',
+                'Agreement Start Date'
+            ]
+        ];
+    
+        $familyDetails = [
+            [
+                'Family Members',
+            ]
+        ];
+    
+        $userDetails[] = [
+            $franchise->name,
+            $user->name,
+            $user->phone_no,
+            $user->cnic,
+            $user->address, 
+            $city->name,
+            $agreement_date ? $agreement_date->agreement_start_date : ''
+        ];
+    
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+    
+        // user details
+        $currentRow = 1;
+        foreach ($userDetails as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+    
+        // family members
+        $currentRow += count($userDetails) + 1;
+        $familyCount = 0;
+        foreach ($family_info as $index => $family) {
+            if ($familyCount >= 2) {
+                break;
+            }
+    
+            $familyDetails[] = [
+                $family->family_member_name,
+            ];
+            $familyCount++;
+        }
+    
+        foreach ($familyDetails as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+    
+        $spreadsheet->setActiveSheetIndex(0);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $user->name . '.xlsx"');
+        header('Cache-Control: max-age=0');
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        exit;
+    }
+    
+
+    public function franchise_details_excel_sheet($id)
+    {
+        $retail_franchise = RetailFranchise::where('id', $id)->first() ?? new RetailFranchise();
+        $retail_franchise_commission = RetailFranchiseProductPercentage::where('franchise_id', $retail_franchise->id)->get();
+        $retail_franchise_charges = RetailFranchiseCharge::where('franchise_id', $retail_franchise->id)->first() ?? new RetailFranchiseCharge();
+        $retail_shipping_modes = RetailShippingMode::whereIn('id', $retail_franchise_commission->pluck('retail_shipping_mode_id'))->pluck('name')->toArray();
+        $default_hub = City::where('hub_id', $retail_franchise->default_hub)->first();
+
+        $franchiseDetails = [
+            [
+                'Franchise Name',
+                'Phone number',
+                'Email',
+                'CNIC',
+                'Hub',
+                'Latitude',
+                'Longitude',
+                'Insurance',
+                'Discount',
+                'Withholding Tax',
+                'Commission GST Deduction',
+            ],
+            [
+                $retail_franchise->name,
+                $retail_franchise->phone_no,
+                $retail_franchise->email,
+                $retail_franchise->cnic,
+                $default_hub->name,
+                $retail_franchise->location_latitude,
+                $retail_franchise->location_longitude,
+                ($retail_franchise->insurance ?? '0') . '%',
+                ($retail_franchise->discount ?? '0') . '%',
+                $retail_franchise_charges->franchise_withholding ? $retail_franchise_charges->franchise_withholding . '%' : '0%',
+                $retail_franchise_charges->franchise_deduction ? $retail_franchise_charges->franchise_deduction . '%' : '0%',
+            ],
+        ];
+        
+
+        $commissionDetails = [
+            [
+                'Product',
+                'Product Commission(%)'
+            ]
+        ];
+        
+        foreach ($retail_franchise_commission as $index => $commission) {
+            $commissionDetails[] = [
+                $retail_shipping_modes[$index] ?? '',
+                $commission->product_percentage . '%',
+            ];
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // franchise details
+        $currentRow = 1;
+        foreach ($franchiseDetails as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+
+        // commission details
+        $currentRow += count($franchiseDetails) + 1;
+        foreach ($commissionDetails as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $retail_franchise->name . '.xlsx"');
+        header('Cache-Control: max-age=0');
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function trax_center_details_excel_sheet($id)
+    {
+        $trax_center = RetailTraxCenter::where('id', $id)->first() ?? new RetailTraxCenter();
+        $trax_center_charges = TraxCenterAttachment::where('retail_trax_center_id', $trax_center->id)->first() ?? new RetailFranchiseCharge();
+        $default_hub = City::where('hub_id', $trax_center->default_hub)->first();
+
+        // dd($trax_center, $trax_center_charges);
+
+        $franchiseDetails = [
+            [
+                'Franchise Name',
+                'Phone number',
+                'Email',
+                'CNIC',
+                'Hub',
+                'Latitude',
+                'Longitude',
+                'Insurance',
+                'Discount',
+                'Advance Amount',
+                'Rental Amount',
+                'Landlord Name',
+                'Landlord Contact Number',
+                'Shop Address',
+                'Agreement Start Date',
+                'Agreement End Date',
+            ],
+            [
+                $trax_center->name,
+                $trax_center->phone_no,
+                $trax_center->email,
+                $trax_center->cnic,
+                $default_hub->name,
+                $trax_center->location_latitude,
+                $trax_center->location_longitude,
+                ($trax_center->insurance ?? '0') . '%',
+                ($trax_center->discount ?? '0') . '%',
+                $trax_center_charges->advance_amount,
+                $trax_center_charges->rental,
+                $trax_center_charges->landlord_name,
+                $trax_center_charges->landlord_contact_number,
+                $trax_center_charges->shop_address,
+                $trax_center_charges->agreement_start_date,
+                $trax_center_charges->agreement_end_date,
+            ],
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // franchise details
+        $currentRow = 1;
+        foreach ($franchiseDetails as $index => $detail) {
+            $sheet->fromArray($detail, null, 'A' . ($currentRow + $index));
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $trax_center->name . '.xlsx"');
+        header('Cache-Control: max-age=0');
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function show_commission(Request $request) 
+    {
+        $request->validate([
+            'id' => 'required'
+        ]);
+        $ids = explode(',', $request->id);
+        $ids = array_map('trim', $ids);
+        $data = RetailFranchiseCommission::whereIn('id', $ids)->get();
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+
+    public function commission_payment(Request $request) 
+    {
+        $request->validate([
+            'id' => 'required'
+        ]);
+        $ids = explode(',', $request->id);
+        $ids = array_map('trim', $ids);
+        $data = RetailFranchiseCommission::whereIn('id', $ids)->get();
+        if ($data->isEmpty()) {
+            return response()->json([
+                'error' => 'No data found for the provided IDs.'
+            ], 404);
+        }
+        $franchiseIds = $data->pluck('franchise_id')->unique();
+        if ($franchiseIds->count() > 1) {
+            return response()->json([
+                'error' => 'Selected IDs do not belong to the same franchise.',
+                'status' => 1
+            ], 400);
+        }
+        foreach($data as $record){
+            if ($record->is_paid == 1){
+                return response()->json([
+                    'error' => 'Payment for this franchise has already been made.',
+                    'status' => 2,
+                    'error_data' => $record->franchise_name
+                ], 400);
+            }
+            $record->is_paid = 1;
+            $record->save();
+        }
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+
+    public function show_retail_commission(Request $request) 
+    {
+        $request->validate([
+            'id' => 'required'
+        ]);
+        $ids = explode(',', $request->id);
+        $ids = array_map('trim', $ids);
+        $data = RetailUserCommission::whereIn('id', $ids)->get();
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+
+    public function retail_commission_payment(Request $request) 
+    {
+        $request->validate([
+            'id' => 'required'
+        ]);
+        $ids = explode(',', $request->id);
+        $ids = array_map('trim', $ids);
+        $data = RetailUserCommission::whereIn('id', $ids)->get();
+        if ($data->isEmpty()) {
+            return response()->json([
+                'error' => 'No data found for the provided IDs.'
+            ], 404);
+        }
+        $franchiseIds = $data->pluck('franchise_id')->unique();
+        if ($franchiseIds->count() > 1) {
+            return response()->json([
+                'error' => 'Selected data does not belong to the same User.',
+                'status' => 1
+            ], 400);
+        }
+        foreach($data as $record){
+            if ($record->is_paid == 1){
+                return response()->json([
+                    'error' => 'Payment for this User has already been made.',
+                    'status' => 2,
+                    'error_data' => $record->trax_center_name
+                ], 400);
+            }
+            $record->is_paid = 1;
+            $record->save();
+        }
+        return response()->json([
+            'data' => $data
+        ]);
     }
 }
