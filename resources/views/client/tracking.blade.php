@@ -1157,7 +1157,6 @@
                         },
                         success: function(response) {
                             var $remarksDropdown = $('#case_nature_remarks');
-                            $remarksDropdown.empty().append('<option value="">Select Remarks</option>');
                             $.each(response.data, function(index, item) {
                                 $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
                             });
@@ -1172,11 +1171,12 @@
                 } else {
                     $('#case_nature_remarks').empty().append('<option value="" selected="selected">Select Remarks</option>');
                     $('#case_nature_remarks_div').addClass('d-none');
-                    $('#complaint_description_textarea').addClass('d-none'); // Hide the textarea if no complaint is selected
+                    $('#complaint_description_textarea').addClass('d-none');
                 }
             });
 
             $('#case_nature_remarks').on('change', function() {
+                // Important to stop recursive action
                 if (isComplainChange) {
                     isComplainChange = false;
                     return;
@@ -1184,25 +1184,23 @@
 
                 var selectedValues = $(this).val();
                 var $textareaDiv = $('#complaint_description_textarea');
+                console.log(selectedValues);
 
                 if (selectedValues && selectedValues.includes('0')) {
-                    // If "Others" is selected, deselect other options and select only "Others"
-                    isComplainChange = true;
-                    $(this).val(['0']).trigger('change');
-                    $textareaDiv.removeClass('d-none');
+                    // "Others" ('0') is selected
+                    if (selectedValues.length > 1) {
+                        // If "Others" is selected along with other options, deselect "Others"
+                        selectedValues = selectedValues.filter(value => value !== '0');
+                        $(this).val(selectedValues).trigger('change');
+                        $textareaDiv.addClass('d-none'); // Hide the textarea
+                    } else {
+                        $textareaDiv.removeClass('d-none'); // Only "Others" is selected, show the textarea
+                    }
                 } else {
+                    // No "Others" selected, hide the textarea
                     $textareaDiv.addClass('d-none');
                 }
             });
-
-            // Clear textarea and remarks dropdown on clear button click
-            $('#case_nature_remarks').on('select2:unselecting', function() {
-                var $textareaDiv = $('#complaint_description_textarea');
-                $textareaDiv.addClass('d-none');
-            });
-
-
-
 
             // service request
 
