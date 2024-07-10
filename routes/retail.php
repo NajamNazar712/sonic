@@ -41,6 +41,16 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::get('/list', 'Retail\RetailShipmentBookController@other_booking_list')->name('list');
         });
     });
+
+
+    Route::prefix('retail_commission')->name('retail_commission.')->group(function () {
+        Route::get('', 'Retail\RetailShipmentBookController@retail_commission_index')->name('index');
+        Route::get('/list', 'Retail\RetailShipmentBookController@retail_commission_list')->name('list');
+
+        Route::post('user_commission_invoice_print', 'Retail\RetailShipmentBookController@user_commission_invoice_print')->name('user_commission_invoice_print');
+        Route::post('franchise_commission_invoice_print', 'Retail\RetailShipmentBookController@franchise_commission_invoice_print')->name('franchise_commission_invoice_print');
+    });
+
     Route::prefix('cash_deposit')->name('cash_deposit.')->group(function () {
         Route::get('', 'Retail\RetailCashDepositController@index')->name('index');
         Route::get('/list', 'Retail\RetailCashDepositController@list')->name('list');

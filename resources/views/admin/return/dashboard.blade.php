@@ -228,7 +228,7 @@
                                                 <h3 class="text-white">
                                                     <span id="average_first_call_time">-</span>
                                                 </h3>
-                                                <span>Average First Call Time</span>
+                                                <span>Average First Call Time (Last 30 Days)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -245,7 +245,7 @@
                                                 <h3 class="text-white">
                                                     <span id="average_aging">-</span>
                                                 </h3>
-                                                <span>Average Aging</span>
+                                                <span>Average Aging (Last 30 Days)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -371,7 +371,7 @@
                             $('#average_first_call_time').text(data.stats.average_first_call_time);
 
                             var averageAging = parseFloat(data.stats.average_aging);
-                            var content = averageAging > 24 ? (Math.round(averageAging / 60 * 100) / 100) + ' days' : Math.round(averageAging * 100) / 100 + ' hrs';
+                            var content = averageAging > 24 ? (Math.round(averageAging / 24 * 100) / 100) + ' days' : Math.round(averageAging * 100) / 100 + ' hrs';
                             $('#average_aging').text(content);
 
                             //var average_response_time = parseFloat(data.stats.average_response_time);

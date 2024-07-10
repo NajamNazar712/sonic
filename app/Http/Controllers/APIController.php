@@ -7860,7 +7860,6 @@ class APIController extends Controller
                 }
                 return response()->json(['status' => $status_code, 'message' => 'Error(s) in Input', 'errors' => $errors]);
             } else {
-                
                 $retail_note_cash_collection_id = $request->retail_note_cash_collection_id;
                 $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);              
                 if ($retail_note->exists()) {
