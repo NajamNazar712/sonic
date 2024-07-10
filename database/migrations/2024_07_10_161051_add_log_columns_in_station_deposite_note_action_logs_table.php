@@ -28,7 +28,9 @@ class AddLogColumnsInStationDepositeNoteActionLogsTable extends Migration
     public function down()
     {
         Schema::table('station_deposite_note_action_logs', function (Blueprint $table) {
-            //
+            $table->dropColumn('dncc_id');
+            $table->dropColumn('dncc_amount');
+            $table->dropColumn('action');
         });
     }
 }
