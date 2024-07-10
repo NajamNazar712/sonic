@@ -355,6 +355,18 @@ trait RvTrait
             }
 
             $shipment_assign_agent_table_columns['call_count'] = (($shipment_assign_agent->call_count ?? 0) + 1);
+            
+            if($shipment_assign_agent_table_columns['call_count'] == 1)
+            {
+                $shipmentJourney = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id',12)->latest()
+                ->select('created_at')
+                ->first();
+                if($shipmentJourney)
+                {
+                    $timeDifferenceInMinutes = Carbon::now()->diffInMinutes($shipmentJourney->created_at);
+                    $shipment_assign_agent_table_columns['first_call_time_mins'] = $timeDifferenceInMinutes;
+                }
+            }
 
             $shipment_assign_agent->update($shipment_assign_agent_table_columns);
 
@@ -2128,7 +2140,7 @@ trait RvTrait
 
     protected function rv_shipment_assign_agent_by_admin($data)
     {
-        $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->whereIn('shipper_status_id', [12, 65, 66, 52])->first();
+        $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->whereIn('shipper_status_id', [12, 65, 66, 52])->select('id','created_at')->first();
 
         if ($shipments_journey) {
 
@@ -2150,6 +2162,13 @@ trait RvTrait
                     $agent_unassign_shipment->updated_by_id = $data['updated_by_id'];
                     $agent_unassign_shipment->remarks = isset($data['remarks']) ? $data['remarks'] : null;
                     $agent_unassign_shipment->call_to_id  = 1;
+
+                    if($agent_unassign_shipment->call_count == 1)
+                    {
+                        $timeDifferenceInMinutes = Carbon::now()->diffInMinutes($shipments_journey->created_at);
+                        $agent_unassign_shipment->first_call_time_mins = $timeDifferenceInMinutes;
+                    }
+
                     $agent_unassign_shipment->save();
 
                     $updated_data = [
@@ -2196,6 +2215,13 @@ trait RvTrait
                     $rv_customer_experience_agent->updated_by_id = $data['updated_by_id'];
                     $rv_customer_experience_agent->remarks = isset($data['remarks']) ? $data['remarks'] : null;
                     $rv_customer_experience_agent->call_to_id  = 1;
+
+                    if($rv_customer_experience_agent->call_count == 1)
+                    {
+                        $timeDifferenceInMinutes = Carbon::now()->diffInMinutes($shipments_journey->created_at);
+                        $rv_customer_experience_agent->first_call_time_mins = $timeDifferenceInMinutes;
+                    }
+
                     $rv_customer_experience_agent->save();
 
                     $updated_data = [
@@ -2237,6 +2263,13 @@ trait RvTrait
                     $existing_completed_shipment->updated_by_id = $data['updated_by_id'];
                     $existing_completed_shipment->remarks = isset($data['remarks']) ? $data['remarks'] : null;
                     $existing_completed_shipment->call_to_id  = 1;
+
+                    if($existing_completed_shipment->call_count == 1)
+                    {
+                        $timeDifferenceInMinutes = Carbon::now()->diffInMinutes($shipments_journey->created_at);
+                        $existing_completed_shipment->first_call_time_mins = $timeDifferenceInMinutes;
+                    }
+
                     $existing_completed_shipment->save();
 
                     $updated_data = [
@@ -2292,6 +2325,13 @@ trait RvTrait
                 $rv_shipment_assign_agent->unresponsive_email_count  = 0;
                 $rv_shipment_assign_agent->unresponsive_attempt_time  = null;
                 $rv_shipment_assign_agent->assigned_to_type_id  = 0;
+
+                if($rv_shipment_assign_agent->call_count == 1)
+                {
+                    $timeDifferenceInMinutes = Carbon::now()->diffInMinutes($shipments_journey->created_at);
+                    $rv_shipment_assign_agent->first_call_time_mins = $timeDifferenceInMinutes;
+                }
+
                 $rv_shipment_assign_agent->save();
 
                 $updated_data = [
@@ -2349,6 +2389,13 @@ trait RvTrait
             $rv_shipment_assign_agent->updated_type_id = 1;
             $rv_shipment_assign_agent->updated_by_id = $data['updated_by_id'];
             $rv_shipment_assign_agent->remarks = isset($data['remarks']) ? $data['remarks'] : null;
+            
+            if($rv_shipment_assign_agent->call_count == 0)
+            {
+                $timeDifferenceInMinutes = Carbon::now()->diffInMinutes($shipments_journey->created_at);
+                $rv_shipment_assign_agent->first_call_time_mins = $timeDifferenceInMinutes;
+            }
+
             $rv_shipment_assign_agent->increment('call_count');
             $rv_shipment_assign_agent->save();
 
