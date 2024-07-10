@@ -42,6 +42,18 @@
         </div>
     </div>
 
+
+
+
+
+
+
+
+
+
+    
+
+    {{-- Add Request --}}
     <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog"
         aria-labelledby="AddRequestModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -79,6 +91,10 @@
                                     </fieldset>
                                 </div>
                             </div>
+
+
+
+                            
                             <div class="complaints d-none" id="request_complaints">
                                 <div class="row justify-content-center">
                                     <div class="col-10">
@@ -92,14 +108,26 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-10">
+
+                                    <div class="col-10 d-none" id="case_nature_remarks_div">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5"
+                                            <select name="complaint_description[]" id="case_nature_remarks" class="form-control select2" multiple="multiple">
+                                                
+                                            </select>
+                                        </fieldset>
+                                    </div>
+
+                                    <div class="col-10 d-none" id="complaint_description_textarea">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="complaint_description[]" id="complaint_description" rows="5"
                                                 placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
                             </div>
+
+
+
                             <div class="service d-none" id="request_service">
                                 <div class="row justify-content-center">
                                     <div class="col-10">
@@ -158,7 +186,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-10">
+                                    <div class="col-10 d-none" id="service_description_div">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
                                         </fieldset>
@@ -341,6 +369,16 @@
             </div>
         </div>
     </div>
+
+
+
+
+
+
+
+
+
+
 
     {{-- Call History Modal --}}
     <div class="modal fade" id="call_history_modal" role="dialog" aria-labelledby="call_history_modal_title"
@@ -1093,8 +1131,81 @@
                     $('#request_service').addClass('d-none');
                     $('#AddNewRequest').addClass('d-none');
                     $('#request_claims').addClass('d-none');
+                    $('#case_nature_remarks_div').addClass('d-none');
                 }
             });
+
+            // complaints
+            var isComplainChange = false;
+            $('#case_nature_remarks').select2({
+                width: '100%',
+                placeholder: "Select Remarks",
+                allowClear: true,
+                dropdownParent: $('#add_request_form')
+            });
+
+            $('#case_nature_complaints').on('change', function() {
+                var complaintId = $(this).val();
+                if (complaintId) {
+                    $.ajax({
+                        url: '{{ route('cod.tracking.case_nature_remarks') }}',
+                        type: 'POST',
+                        data: { complaint_id: complaintId },
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            var $remarksDropdown = $('#case_nature_remarks');
+                            $remarksDropdown.empty().append('<option value="">Select Remarks</option>');
+                            $.each(response.data, function(index, item) {
+                                $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
+                            });
+                            $remarksDropdown.append('<option value="0">Others</option>');
+                            $('#case_nature_remarks_div').removeClass('d-none');
+                            $('#complaint_description_textarea').addClass('d-none');
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('An error occurred while fetching remarks:', textStatus, errorThrown);
+                        }
+                    });
+                } else {
+                    $('#case_nature_remarks').empty().append('<option value="" selected="selected">Select Remarks</option>');
+                    $('#case_nature_remarks_div').addClass('d-none');
+                    $('#complaint_description_textarea').addClass('d-none'); // Hide the textarea if no complaint is selected
+                }
+            });
+
+            $('#case_nature_remarks').on('change', function() {
+                if (isComplainChange) {
+                    isComplainChange = false;
+                    return;
+                }
+
+                var selectedValues = $(this).val();
+                var $textareaDiv = $('#complaint_description_textarea');
+
+                if (selectedValues && selectedValues.includes('0')) {
+                    // If "Others" is selected, deselect other options and select only "Others"
+                    isComplainChange = true;
+                    $(this).val(['0']).trigger('change');
+                    $textareaDiv.removeClass('d-none');
+                } else {
+                    $textareaDiv.addClass('d-none');
+                }
+            });
+
+            // Clear textarea and remarks dropdown on clear button click
+            $('#case_nature_remarks').on('select2:unselecting', function() {
+                var $textareaDiv = $('#complaint_description_textarea');
+                $textareaDiv.addClass('d-none');
+            });
+
+
+
+
+            // service request
+
             var lost_flag = true;
             $('#case_nature_claim').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -1166,8 +1277,6 @@
 
             });
 
-
-
             var max_char_request = 245;
             $('#feedback_description').on('keypress copy paste', function(e) {
                 if ($(this).val().length == max_char_request) {
@@ -1205,6 +1314,7 @@
                 allowClear: true,
                 dropdownParent: $('#add_request_form')
             });
+
             $('body').on('change', '#add_request_form textarea', function() {
                 $(this).val($(this).val().trim());
             });

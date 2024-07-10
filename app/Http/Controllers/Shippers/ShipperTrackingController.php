@@ -33,6 +33,7 @@ use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use DB;
+use App\Http\Models\CrmCaseNatureRemark;
 
 class ShipperTrackingController extends Controller
 {
@@ -43,9 +44,7 @@ class ShipperTrackingController extends Controller
     }
 
     public function index() {
-        // dd(session()->all());
         $permission = session('permissions');
-
         $case_nature = CrmRequestCaseNature::where('id','!=',3)->get();
         $row = array();
         if(session('user_type') !== 1){
@@ -68,7 +67,22 @@ class ShipperTrackingController extends Controller
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
-      return view('client.tracking')->with([ 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims,'case_permission'=>$permission]);
+        return view('client.tracking')->with([ 
+            'case_nature' => $case_nature, 
+            'case_nature_complaints' => $case_nature_type_complaints, 
+            'case_nature_service_requests' => $case_nature_type_service_requests, 
+            'case_nature_type_claims' => $case_nature_type_claims,
+            'case_permission'=>$permission,
+        ]);
+    }
+
+    public function case_nature_remarks(Request $request)
+    {
+        $complaintId = $request->input('complaint_id');
+        $case_nature_remarks = CrmCaseNatureRemark::where('case_nature_id', $complaintId)->get();
+        return response()->json([
+            'data' => $case_nature_remarks
+        ]);
     }
 
     public function track(Request $request) {
