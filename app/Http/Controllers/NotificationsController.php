@@ -267,7 +267,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null)
+    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null, $id = null)
     {
         $block_email = BlockEmail::select('email')->pluck('email')->toArray();
         $filterBlockedEmails = function ($emails) use ($block_email) {
@@ -320,7 +320,11 @@ class NotificationsController extends Controller
                     $mail->bcc($bcc);
                 }
     
-                $mail->send(new Notifications($subject, $body, $from));
+                if($id = 230){
+                    $mail->sendNow(new Notifications($subject, $body, $from));
+                }else{
+                    $mail->send(new Notifications($subject, $body, $from));
+                }
             }
 
 
@@ -11157,35 +11161,29 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 } else if ($id == 230){
-                    // $subject = $notification->subject;
-                    // $body = $notification->body;
                     $lead_ids = $reference_1_id;
-                    $tokens = $reference_2_id;
-
                     foreach ($lead_ids as $key => $lead_id) {
                         $lead = Lead::find($lead_id);
-                        // if(isset($tokens[$key])){
-                            $route = route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]);
-                            $link = '<a href="' . $route . '">Click here to sign up</a>';
+                        $route = route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]);
+                        $link = '<a href="' . $route . '">Click here to sign up</a>';
+                    
+                        $body = $notification->body; // Reset $body to its original state
+                        $subject = $notification->subject;  // Reset $subject to its original state
 
-                            $body = $notification->body; // Reset $body to its original state
-                            $subject = $notification->subject;  // Reset $subject to its original state
-
-                            if (strpos($body, '[Link]') !== FALSE) {
-                                $body = str_replace('[Link]', $link, $body); // Use $body instead of $old_body
-                            }
-                            if (strpos($body, '[Company Name]') !== FALSE) {
-                                $body = str_replace('[Company Name]', $lead->company_name, $body); // Use $body instead of $old_body
-                            }
-                            if (strpos($body, '[Full Name]') !== FALSE) {
-                                $body = str_replace('[Full Name]', $lead->contact_person, $body); // Use $body instead of $old_body
-                            }
-                            if (strpos($subject, '[Company Name]') !== FALSE) {
-                                $subject = str_replace('[Company Name]', $lead->company_name, $subject);
-                            }
-                            self::email($subject, $body, $lead->email_address); // Send email with $body
-                        // }
-                    }
+                        if (strpos($body, '[Link]') !== FALSE) {
+                            $body = str_replace('[Link]', $link, $body); // Use $body instead of $old_body
+                        }
+                        if (strpos($body, '[Company Name]') !== FALSE) {
+                            $body = str_replace('[Company Name]', $lead->company_name, $body); // Use $body instead of $old_body
+                        }
+                        if (strpos($body, '[Full Name]') !== FALSE) {
+                            $body = str_replace('[Full Name]', $lead->contact_person, $body); // Use $body instead of $old_body
+                        }
+                        if (strpos($subject, '[Company Name]') !== FALSE) {
+                            $subject = str_replace('[Company Name]', $lead->company_name, $subject);
+                        }
+                        self::email($subject, $body, $lead->email_address, null, null, null, 230); // Send email with $body
+                    }                    
                 } else if ($id == 231){
                     $subject = $notification->subject;
                     $body = $notification->body;
