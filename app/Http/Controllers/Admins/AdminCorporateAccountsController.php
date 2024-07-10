@@ -1114,8 +1114,8 @@ class AdminCorporateAccountsController extends Controller
                     'insurance_charges' => ($request->has('ol_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
                     'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
-                    'zero_cod_discount' => ($request->has('on_zero_cod_switch')) ? 1 : 0,
-                    'return_discount' => ($request->has('on_return_discount_switch')) ? 1 : 0,
+                    'zero_cod_discount' => ($request->has('ol_zero_cod_switch')) ? 1 : 0,
+                    'return_discount' => ($request->has('ol_return_discount_switch')) ? 1 : 0,
                 ]);
                 $wa_switch = array();
                 foreach ($request->ol_door_range_up as $index => $ol_door_range_up) {
@@ -1337,8 +1337,8 @@ class AdminCorporateAccountsController extends Controller
                     'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
                     'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
-                    'zero_cod_discount' => ($request->has('on_zero_cod_switch')) ? 1 : 0,
-                    'return_discount' => ($request->has('on_return_discount_switch')) ? 1 : 0,
+                    'zero_cod_discount' => ($request->has('detain_zero_cod_switch')) ? 1 : 0,
+                    'return_discount' => ($request->has('detain_return_discount_switch')) ? 1 : 0,
                 ]);
                 $wa_switch = array();
                 foreach ($request->detain_door_range_up as $index => $detain_door_range_up) {
@@ -1561,8 +1561,8 @@ class AdminCorporateAccountsController extends Controller
                     'insurance_charges' => ($request->has('sameday_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
                     'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
-                    'zero_cod_discount' => ($request->has('on_zero_cod_switch')) ? 1 : 0,
-                    'return_discount' => ($request->has('on_return_discount_switch')) ? 1 : 0,
+                    'zero_cod_discount' => ($request->has('sameday_zero_cod_switch')) ? 1 : 0,
+                    'return_discount' => ($request->has('sameday_return_discount_switch')) ? 1 : 0,
                 ]);
                 $wa_switch = array();
 

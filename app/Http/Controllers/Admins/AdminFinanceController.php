@@ -126,7 +126,7 @@ use Illuminate\Support\Facades\Response;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\NotificationSetting;
 use App\Http\Models\ShipmentLedger;
-
+use Illuminate\Support\Str;
 class AdminFinanceController extends Controller
 {
     static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
@@ -4546,9 +4546,9 @@ class AdminFinanceController extends Controller
         ShipmentChargesController::weight($shipment_id);
         ShipmentChargesController::fuel_surcharge($shipment_id);
         ShipmentChargesController::faf_charges($shipment_id);
-
+        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
         $shipment = Shipment::find($shipment_id);
-        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
+        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges;
 
         $change_shipment_weight = new ChangeShipmentWeightLog();
 
@@ -4703,12 +4703,12 @@ class AdminFinanceController extends Controller
                         $shipment = Shipment::where('tracking_number', $tracking)->first();
                         $shipment_id = $shipment->id;
                         $replacement_weight = null;
-
+                        $faf_charges_old = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
                         if ($shipment->booking_type_id == 2) {
                             continue;
                         }
 
-                        $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
+                        $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges_old;
 
                         if ($shipment->actual_weight == null) {
                             return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
@@ -4724,9 +4724,9 @@ class AdminFinanceController extends Controller
                         ShipmentChargesController::weight($shipment_id);
                         ShipmentChargesController::fuel_surcharge($shipment_id);
                         ShipmentChargesController::faf_charges($shipment_id);
-
+                        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
                         $shipment = $shipment->refresh();
-                        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
+                        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges;
 
                         $change_shipment_weight = new ChangeShipmentWeightLog();
 
@@ -5072,8 +5072,9 @@ class AdminFinanceController extends Controller
     }
 
 
-    static public function add_adjustment($shipment_id, $payable, $payable_remarks = '', $adjustment_type = NULL, $charges = NULL)
+    static public function add_adjustment($shipment_id, $payable, $payable_remarks = '', $adjustment_type = NULL, $charges = NULL,$transaction_id = null)
     {
+        $transaction_id = !empty($transaction_id) ? $transaction_id : $transaction_id =  (string) Str::uuid();
         $shipment = Shipment::find($shipment_id);
         $amount = 0;
         $charges = 0;
@@ -5110,7 +5111,7 @@ class AdminFinanceController extends Controller
             $pending_payment_shipment->charges = $charges;
             $pending_payment_shipment->gst = $gst;
             $pending_payment_shipment->payable = $payable;
-
+            $pending_payment_shipment->transaction_id = $transaction_id;
             $pending_payment_shipment->save();
             self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable);
             if ($adjustment_type) {
@@ -5830,9 +5831,9 @@ class AdminFinanceController extends Controller
     }
 
     private static function adjust_payment($payment_id, $shipment_id, $payment_type, $adjustment_type = NULL)
-    {
+    {   $transaction_id =  (string) Str::uuid();
         $shipment = Shipment::find($shipment_id);
-        $return_discount_per = $shipment->return_cod_discount_applied;
+        $return_discount_per = ShipmentAdditionalCharges::check_additional_charges($shipment_id,false,false,true);
         if(!$return_discount_per) {
             if ($shipment->shipment_type == 1) {
                 if ($payment_type == 0) {
@@ -5924,7 +5925,7 @@ class AdminFinanceController extends Controller
                     $pending_payment_shipment->charges = $charges;
                     $pending_payment_shipment->gst = $gst;
                     $pending_payment_shipment->payable = $payable;
-
+                    $pending_payment_shipment->transaction_id = $transaction_id;
                     $pending_payment_shipment->save();
 
                     self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable);
@@ -6018,15 +6019,15 @@ class AdminFinanceController extends Controller
                 }
             }
         }else{
-            self::adjust_payment_for_return_discount($payment_id, $shipment, $payment_type, $adjustment_type);
+            self::adjust_payment_for_return_discount($payment_id, $shipment, $payment_type, $adjustment_type);;
         }
 
     }
 
     private static function adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, $adjustment_type = NULL)
-    {
+    {   $transaction_id =  (string) Str::uuid();
         $shipment = Shipment::find($shipment_id);
-        $return_discount_per = $shipment->return_cod_discount_applied;
+        $return_discount_per = ShipmentAdditionalCharges::check_additional_charges($shipment_id,false,false,true);
         if(!$return_discount_per) {
             if ($shipment->shipment_type == 1) {
                 if ($payment_shipment_id) {
@@ -6113,7 +6114,7 @@ class AdminFinanceController extends Controller
                             $pending_payment_shipment->charges = $charges;
                             $pending_payment_shipment->gst = $gst;
                             $pending_payment_shipment->payable = $payable;
-
+                            $pending_payment_shipment->transaction_id = $transaction_id;
                             $pending_payment_shipment->save();
                             if ($adjustment_type) {
                                 self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, NULL, $pending_payment_shipment->id, 1);
@@ -6169,7 +6170,7 @@ class AdminFinanceController extends Controller
                             $pending_payment_shipment->charges = $charges;
                             $pending_payment_shipment->gst = $gst;
                             $pending_payment_shipment->payable = $payable;
-
+                            $pending_payment_shipment->transaction_id = $transaction_id;
                             $pending_payment_shipment->save();
                             if ($adjustment_type) {
                                 self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, NULL, $pending_payment_shipment->id, 1);
@@ -7011,6 +7012,8 @@ class AdminFinanceController extends Controller
                 $type = 'Delivered';
             } else if ($pending_payment_shipment->type == 1) {
                 $type = 'Returned';
+            } else if ($pending_payment_shipment->type == 3) {
+                $type = 'Arrival';
             } else {
                 $type = 'Adjusted';
             }
@@ -8726,7 +8729,8 @@ class AdminFinanceController extends Controller
             } else {
                 $service_charges = 0;
             }
-            $faf_chagres = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
+            $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
+            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
 
@@ -8749,6 +8753,8 @@ class AdminFinanceController extends Controller
                 $type = 'Delivered';
             } else if ($done_payment_shipment->type == 1) {
                 $type = 'Returned';
+            }else if ($done_payment_shipment->type == 3) {
+                $type = 'Arrival';
             } else {
                 $type = 'Adjusted';
             }
@@ -8798,19 +8804,23 @@ class AdminFinanceController extends Controller
                             $total_return_charges += $shipment->return_charges;
                         }
 
-                        $total_weight_charges += $weight_charges;
-
-                        if ($shipment->packaging_material_request) {
-                            $total_packaging_material_charges += $shipment->packaging_material_charges;
+                        if($done_payment_shipment->type == 3) {
+                            $total_weight_charges += $shipment->weight_charges;
+                            $total_fuel_surcharge += $shipment->fuel_surcharge;
+                            $total_faf_charges += $faf_charges;
+                        }else{
+                            if ($shipment->packaging_material_request) {
+                                $total_packaging_material_charges += $shipment->packaging_material_charges;
+                            }
+                            $total_insurance_charges += $shipment->insurance_charges;
+                            $total_intercept_charges += $shipment->intercept_charges;
+                            $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                            if(!$arrival_charges_applied){
+                                $total_weight_charges += $shipment->weight_charges;
+                                $total_fuel_surcharge += $shipment->fuel_surcharge;
+                                $total_faf_charges += $faf_charges;
+                            }
                         }
-                        if ($shipment->packaging_charges != null) {
-                            $total_packing_charges += $shipment->packaging_charges;
-                        }
-                        $total_insurance_charges += $shipment->insurance_charges;
-                        $total_fuel_surcharge += $shipment->fuel_surcharge;
-                        $total_intercept_charges += $shipment->intercept_charges;
-                        $total_nsa_osa_charges += $shipment->nsa_osa_charges;
-                        $total_faf_charges += $faf_chagres;
                     } else if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
                     }
@@ -9106,6 +9116,8 @@ class AdminFinanceController extends Controller
                 $type = 'Delivered';
             } else if ($done_payment_shipment->type == 1) {
                 $type = 'Returned';
+            }else if ($done_payment_shipment->type == 3) {
+                $type = 'Arrival';
             } else {
                 $type = 'Adjusted';
             }
@@ -9857,7 +9869,7 @@ class AdminFinanceController extends Controller
         if ($invoice->invoice_type == 1) {
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
-                $arrival_charges_applied = $shipment->arrival_charges_applied;
+                $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
                 $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
                 if ($service_charges->exists()) {
                     $service_charges = $service_charges->first();
@@ -9902,7 +9914,7 @@ class AdminFinanceController extends Controller
                           <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($service_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($faf_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($faf_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
@@ -9991,6 +10003,7 @@ class AdminFinanceController extends Controller
                     if($invoice_shipment->type == 3) {
                         $total_weight_charges[$origin] += $shipment->weight_charges;
                         $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                        $total_faf_charges[$origin] += $faf_charges;
                     }else{
                         if ($shipment->packaging_material_request) {
                             $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
@@ -10001,10 +10014,11 @@ class AdminFinanceController extends Controller
                         if(!$arrival_charges_applied){
                             $total_weight_charges[$origin] += $shipment->weight_charges;
                             $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                            $total_faf_charges[$origin] += $faf_charges;
                         }
 						$total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     }
-                    $total_faf_charges[$origin] += $faf_charges;
+
                 } else {
                     $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
                 }
@@ -10544,7 +10558,7 @@ class AdminFinanceController extends Controller
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied)))  ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($faf_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($faf_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
@@ -10618,6 +10632,7 @@ class AdminFinanceController extends Controller
                 if($invoice_shipment->type == 3) {
                     $total_weight_charges[$origin] += $shipment->weight_charges;
                     $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                    $total_faf_charges[$origin] += $faf_charges;
                 }else{
                     if ($shipment->packaging_material_request) {
                         $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
@@ -10628,9 +10643,10 @@ class AdminFinanceController extends Controller
                     if(!$arrival_charges_applied){
                         $total_weight_charges[$origin] += $shipment->weight_charges;
                         $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                        $total_faf_charges[$origin] += $faf_charges;
                     }
                 }
-                $total_faf_charges[$origin] += $faf_charges;
+
             } else {
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
@@ -10866,7 +10882,7 @@ class AdminFinanceController extends Controller
         if ($invoice->invoice_type == 1) {
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
-                $arrival_charges_applied = $shipment->arrival_charges_applied;
+                $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
                 $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
                 if ($service_charges->exists()) {
                     $service_charges = $service_charges->first();
@@ -10987,6 +11003,7 @@ class AdminFinanceController extends Controller
                     if($invoice_shipment->type == 3) {
                         $total_weight_charges[$origin] += $shipment->weight_charges;
                         $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                        $total_faf_charges[$origin] += $faf_charges;
                     }else{
                         if ($shipment->packaging_material_request) {
                             $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
@@ -10997,10 +11014,11 @@ class AdminFinanceController extends Controller
                         if(!$arrival_charges_applied){
                             $total_weight_charges[$origin] += $shipment->weight_charges;
                             $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                            $total_faf_charges[$origin] += $faf_charges;
                         }
-$total_sms_charges[$origin] += $invoice_shipment->sms_charges;
+                        $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     }
-                    $total_faf_charges[$origin] += $faf_charges;
+
                 } else {
                     $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
                 }
@@ -11546,7 +11564,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
-  $arrival_charges_applied = $shipment->arrival_charges_applied;
+            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
             if ($shipment_journey->exists()) {
@@ -11643,6 +11661,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                 if($invoice_shipment->type == 3) {
                     $total_weight_charges[$origin] += $shipment->weight_charges;
                     $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                    $total_faf_charges[$origin] += $faf_charges;
                 }else{
                     if ($shipment->packaging_material_request) {
                         $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
@@ -11653,9 +11672,10 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     if(!$arrival_charges_applied){
                         $total_weight_charges[$origin] += $shipment->weight_charges;
                         $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                        $total_faf_charges[$origin] += $faf_charges;
                     }
                 }
-                $total_faf_charges[$origin] += $faf_charges;
+
             } else {
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
@@ -11965,7 +11985,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
 
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
-            $arrival_charges_applied = $shipment->arrival_charges_applied;
+            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
             if ($service_charges->exists()) {
                 $service_charges = $service_charges->first();
@@ -12029,7 +12049,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                           <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied)))  ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($service_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($faf_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($faf_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
@@ -12129,6 +12149,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                 if($invoice_shipment->type == 3) {
                     $total_weight_charges[$origin] += $shipment->weight_charges;
                     $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                    $total_faf_charges[$origin] += $faf_charges;
                 }else{
                     if ($shipment->packaging_material_request) {
                         $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
@@ -12139,10 +12160,11 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     if(!$arrival_charges_applied){
                         $total_weight_charges[$origin] += $shipment->weight_charges;
                         $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                        $total_faf_charges[$origin] += $faf_charges;
                     }
-$total_sms_charges[$origin] += $invoice_shipment->sms_charges;
+                    $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                 }
-                $total_faf_charges[$origin] += $faf_charges;
+
             } else {
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
@@ -12733,7 +12755,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
-  $arrival_charges_applied = $shipment->arrival_charges_applied;
+            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
             if ($shipment_journey->exists()) {
@@ -12778,7 +12800,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied)))  ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($faf_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($faf_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
@@ -12864,6 +12886,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                 if($invoice_shipment->type == 3) {
                     $total_weight_charges[$origin] += $shipment->weight_charges;
                     $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                    $total_faf_charges[$origin] += $faf_charges;
                 }else{
                     if ($shipment->packaging_material_request) {
                         $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
@@ -12874,9 +12897,10 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     if(!$arrival_charges_applied){
                         $total_weight_charges[$origin] += $shipment->weight_charges;
                         $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                        $total_faf_charges[$origin] += $faf_charges;
                     }
                 }
-                $total_faf_charges[$origin] += $faf_charges;
+
             } else {
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
@@ -13892,7 +13916,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
 
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
-            $arrival_charges_applied = $shipment->arrival_charges_applied;
+            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
             if ($shipment_journey->exists()) {
@@ -13913,7 +13937,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
             $row[] = $shipment->actual_weight;
             $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
             $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
-            $row[] = (($invoice_shipment->type != 2) ? $faf_charges : 0);
+            $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $faf_charges : 0);
             $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
             $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
             $row[] = $invoice_shipment->charges;
@@ -13965,6 +13989,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
+            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
             if ($shipment_journey->exists()) {
@@ -13983,9 +14008,9 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
             $row[] = $shipment->consignee_city->name;
             $row[] = $shipment->created_at;
             $row[] = $shipment->actual_weight;
-            $row[] = (($invoice_shipment->type != 2) ? $shipment->weight_charges : 0);
-            $row[] = (($invoice_shipment->type != 2) ? $shipment->fuel_surcharge : 0);
-            $row[] = (($invoice_shipment->type != 2) ? $faf_charges : 0);
+            $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
+            $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
+            $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $faf_charges : 0);
             $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
             $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
             $row[] = $invoice_shipment->charges;
@@ -14179,6 +14204,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
             $total_gst = 0;
             $total_invoice_amount = 0;
             $total_ibft_charges = 0;
+            $total_faf_charges = 0;
 
             foreach ($payments as $payment) {
                 if ($payment_type == 0) {
@@ -14191,8 +14217,8 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
 
                 foreach ($payment_shipments as $invoice_shipment) {
                     $shipment = $invoice_shipment->shipment;
-                    $arrival_charges_applied = $shipment->arrival_charges_applied;
-
+                    $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
+                    $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
                     $shipment_weight = $shipment->actual_weight;
                     $weight_charges = $shipment->weight_charges;
 
@@ -14233,6 +14259,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                                       <td>' . $shipment_weight . '</td>
                                       <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied)))  ? number_format($weight_charges, 2) : '0') . '</td>
                                       <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
+                                      <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($faf_charges, 2) : '0') . '</td>
                                       <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                                       <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->payable, 2) : '0') . '</td>
                                       <td>' . number_format($invoice_shipment->charges, 2) . '</td>
@@ -14258,6 +14285,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                             if($invoice_shipment->type == 3) {
                                 $total_weight_charges += $weight_charges;
                                 $total_fuel_surcharge += $shipment->fuel_surcharge;
+                                $total_faf_charges += $faf_charges;
                             }else{
                                 if ($shipment->packaging_material_request) {
                                     $total_packaging_material_charges += $shipment->packaging_material_charges;
@@ -14268,6 +14296,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                                 if(!$arrival_charges_applied){
                                     $total_weight_charges += $weight_charges;
                                     $total_fuel_surcharge += $shipment->fuel_surcharge;
+                                    $total_faf_charges += $faf_charges;
                                 }
                             }
                         } else {
@@ -14374,6 +14403,10 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                           <td class="text-right">' . number_format($total_fuel_surcharge, 2) . '</td>
                         </tr>
                         <tr>
+                          <td class="text-left">Faf Charges</td>
+                          <td class="text-right">' . number_format($total_faf_charges, 2) . '</td>
+                        </tr>
+                        <tr>
                           <td class="text-left">Intercept Charges</td>
                           <td class="text-right">' . number_format($total_intercept_charges, 2) . '</td>
                         </tr>
@@ -14470,7 +14503,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="15">Shipment(s) Summary</th>
+                            <th class="color primary text-center" colspan="16">Shipment(s) Summary</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -14482,6 +14515,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                           <th class="color secondary">Weight (kg)</th>
                           <th class="color secondary">Weight Charges (PKR)</th>
                           <th class="color secondary">Fuel Surcharge (PKR)</th>
+                          <th class="color secondary">Faf Charges (PKR)</th>
                           <th class="color secondary">OSA Charges (PKR)</th>
                           <th class="color secondary">Adjustment Charges (PKR)</th>
                           <th class="color secondary">Total Charges (PKR)</th>
@@ -15019,6 +15053,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
         $total_delivered_shipments = 0;
         $total_returned_shipments = 0;
         $total_adjusted_shipments = 0;
+        $total_arrival_shipments = 0;
         $total_charges = 0;
         $total_gst = 0;
         $total_invoice_amount = 0;
@@ -15042,6 +15077,8 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                 $total_delivered_shipments++;
             } else if ($pending_invoice_shipment->type == 1) {
                 $total_returned_shipments++;
+            }else if ($pending_invoice_shipment->type == 3) {
+                $total_arrival_shipments++;
             } else {
                 $total_adjusted_shipments++;
             }
@@ -15059,6 +15096,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
         $invoice->total_shipments = $total_shipments;
         $invoice->total_delivered_shipments = $total_delivered_shipments;
         $invoice->total_returned_shipments = $total_returned_shipments;
+        $invoice->total_arrival_shipments = $total_arrival_shipments;
         $invoice->total_adjusted_shipments = $total_adjusted_shipments;
         $invoice->total_charges = $total_charges;
         $invoice->total_gst = $total_gst;
@@ -17264,7 +17302,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
             $shipment = $invoice_shipment->shipment;
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
-
+            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             if ($shipment_journey->exists()) {
                 $date = $shipment_journey->first()->created_at;
             } else {
@@ -17338,21 +17376,31 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                     $total_replacement_charges[$origin] += $shipment->replacement_charges;
                     $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
-                } else {
+                }else if($invoice_shipment->type == 3) {
+
+                }
+                else {
                     $total_return_charges[$origin] += $shipment->return_charges;
                 }
 
-                $total_weight_charges[$origin] += $shipment->weight_charges;
-
-                if ($shipment->packaging_material_request) {
-                    $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                if($invoice_shipment->type == 3) {
+                    $total_weight_charges[$origin] += $shipment->weight_charges;
+                    $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                    $total_faf_charges[$origin] += $faf_charges;
+                }else{
+                    if ($shipment->packaging_material_request) {
+                        $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                    }
+                    $total_insurance_charges[$origin] += $shipment->insurance_charges;
+                    $total_intercept_charges[$origin] += $shipment->intercept_charges;
+                    $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                    if(!$arrival_charges_applied){
+                        $total_weight_charges[$origin] += $shipment->weight_charges;
+                        $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                        $total_faf_charges[$origin] += $faf_charges;
+                    }
                 }
 
-                $total_insurance_charges[$origin] += $shipment->insurance_charges;
-                $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
-                $total_intercept_charges[$origin] += $shipment->intercept_charges;
-                $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
-                $total_faf_charges[$origin] += $faf_charges;
             } else {
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
@@ -17775,7 +17823,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
         if ($invoice->invoice_type == 1) {
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
-                $arrival_charges_applied = $shipment->arrival_charges_applied;
+                $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
                 $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
                 if ($service_charges->exists()) {
                     $service_charges = $service_charges->first();
@@ -17819,7 +17867,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($faf_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($faf_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
@@ -17912,7 +17960,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                             $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
                         }
                         $total_insurance_charges[$origin] += $shipment->insurance_charges;
-                    $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
+                        $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     
 
                         $total_intercept_charges[$origin] += $shipment->intercept_charges;
@@ -18455,8 +18503,10 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
         if (empty($shipment)) {
             $shipment = Shipment::find($shipment_id);
         }
-        $check_arrival = $shipment->arrival_charges_applied;
+        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
+        $check_arrival = ShipmentAdditionalCharges::check_additional_charges($shipment_id,true);
         $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
+        $transaction_id =  (string) Str::uuid();
         if ($service_charges->exists()) {
             $service_charges = $service_charges->first();
             $service_charges = $service_charges->reverse_pickup_charges;
@@ -18478,7 +18528,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     if ($check_arrival) {
                         $charges = $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges + $service_charges;
                     } else {
-                        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges + $service_charges;
+                        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges + $service_charges + $faf_charges;
                     }
                     if ($shipment->business_category_id == 1) {
                         $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
@@ -18493,7 +18543,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     }
                     $payable = $amount - ($charges + $gst - $wht);
                 } else if ($type == 3) {
-                    $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
+                    $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
                     if ($shipment->business_category_id == 1) {
                         $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
                     } else {
@@ -18512,7 +18562,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     if ($check_arrival) {
                         $charges = $shipment->insurance_charges + $shipment->return_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges;
                     } else {
-                        $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges + $shipment->nsa_osa_charges;
+                        $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges + $shipment->nsa_osa_charges+$faf_charges;
                     }
                     if ($shipment->business_category_id == 1) {
                         $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
@@ -18556,7 +18606,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
 
             if ($valid) {
                 if($type == 1){
-                    self::adjust_return_discount_charges($shipment,17);
+                    self::adjust_return_discount_charges($shipment,17,$transaction_id);
                 }
                 if ($account_type_id == 1 || ($account_type_id == 2 && !$shipment->packaging_material_request) || $crs) {
                     $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
@@ -18619,7 +18669,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                         $pending_payment_shipment->gst = $gst;
                         $pending_payment_shipment->wht = 0;
                         $pending_payment_shipment->payable = $payable;
-
+                        $pending_payment_shipment->transaction_id = $transaction_id;
                         $pending_payment_shipment->save();
 
                         self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht);
@@ -18641,7 +18691,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                                 $pending_payment_shipment->wht = 0;
                                 $pending_payment_shipment->payable = $amount;
                             }
-
+                            $pending_payment_shipment->transaction_id = $transaction_id;
                             $pending_payment_shipment->save();
 
                             if ($crs) {
@@ -18657,7 +18707,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                             $pending_invoice_shipment->charges = $charges;
                             $pending_invoice_shipment->gst = $gst;
                             $pending_invoice_shipment->invoice_amount = $charges + $gst;
-
+                            $pending_invoice_shipment->transaction_id = $transaction_id;
                             $pending_invoice_shipment->save();
                         } else {
                             if ($crs) {
@@ -18666,6 +18716,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                                 $pending_payment_shipment->type = $type;
                                 $pending_payment_shipment->amount = $amount;
                                 $pending_payment_shipment->payable = $payable;
+                                $pending_payment_shipment->transaction_id = $transaction_id;
                                 $pending_payment_shipment->save();
 
                                 self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht);
@@ -18678,7 +18729,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                             $pending_invoice_shipment->charges = $charges;
                             $pending_invoice_shipment->gst = $gst;
                             $pending_invoice_shipment->invoice_amount = $charges + $gst;
-
+                            $pending_invoice_shipment->transaction_id = $transaction_id;
                             $pending_invoice_shipment->save();
                         }
                     }
@@ -18695,7 +18746,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                                 $pending_invoice_shipment->charges = $charges;
                                 $pending_invoice_shipment->gst = $gst;
                                 $pending_invoice_shipment->invoice_amount = $charges + $gst;
-
+                                $pending_invoice_shipment->transaction_id = $transaction_id;
                                 $pending_invoice_shipment->save();
                             }
                         }
@@ -18707,7 +18758,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                         $pending_invoice_shipment->charges = $charges;
                         $pending_invoice_shipment->gst = $gst;
                         $pending_invoice_shipment->invoice_amount = $charges + $gst;
-
+                        $pending_invoice_shipment->transaction_id = $transaction_id;
                         $pending_invoice_shipment->save();
                     }
                 }
@@ -18794,14 +18845,14 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
         }
     }
 
-    static public function adjust_return_discount_charges($shipment, $adjustment_type)
+    static public function adjust_return_discount_charges($shipment, $adjustment_type,$transaction_id = null)
     {
         $shipment_id = $shipment->id;
         if ($shipment->booking_type_id == 4) {
 
         } else {
             $account_type_id = $shipment->user->account_type_id;
-            $return_discount_per = $shipment->return_cod_discount_applied;
+            $return_discount_per = ShipmentAdditionalCharges::check_additional_charges($shipment_id,false,false,true);
             if($return_discount_per) {
                 $payable = 0;
                 $weight_charges = $shipment->weight_charges;
@@ -18809,13 +18860,13 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                     $payable = $weight_charges - ($weight_charges * ($return_discount_per / 100));
                     $payable = ($payable > 0) ? $payable : 0;
                 }
-                self::add_adjustment($shipment->id, $payable, 'Return Discount Weight Charges', $adjustment_type);
+                self::add_adjustment($shipment->id, $payable, 'Return Discount Weight Charges', $adjustment_type,null,$transaction_id);
             }
         }
     }
 
     static function adjust_payment_for_return_discount($payment_id, $shipment, $payment_type, $adjustment_type = NULL)
-    {
+    {   $transaction_id =  (string) Str::uuid();
         $shipment_id =  $shipment->id;
         if ($shipment->shipment_type == 1) {
             if ($payment_type == 0) {
@@ -18860,7 +18911,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                         $pending_payment_shipment->charges = -$payment_shipment->charges;
                         $pending_payment_shipment->gst = -$payment_shipment->gst;
                         $pending_payment_shipment->payable = -$payment_shipment->payable;
-
+                        $pending_payment_shipment->transaction_id = $transaction_id;
                         $pending_payment_shipment->save();
 
                         if ($adjustment_type) {
@@ -18879,35 +18930,20 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                         if ($pending_payment->exists()) {
                             $pending_payment = $pending_payment->first();
 
-                            $total_shipments = $pending_payment->total_shipments + 1;
-                            $pending_payment->total_shipments = $total_shipments;
-                            if ($payment_shipment->type == 0) {
-                                $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
-                            } elseif ($payment_shipment->type == 1) {
-                                $returned_shipments = $pending_payment->returned_shipments + 1;
-
-                                $pending_payment->returned_shipments = $returned_shipments;
-                            } elseif ($payment_shipment->type == 2) {
-                                $adjusted_shipments = $pending_payment->adjusted_shipments + 1;
-                                $pending_payment->adjusted_shipments = $adjusted_shipments;
-                            }
+                            $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+                            $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
 
                             $pending_payment->save();
-
                         } else {
                             $pending_payment = new PendingPayment();
 
                             $pending_payment->user_id = $shipment->user_id;
-                            if ($payment_shipment->type == 0) {
-                                $pending_payment->delivered_shipments = 1;
-                            } elseif ($payment_shipment->type == 1) {
-                                $pending_payment->returned_shipments = 1;
-                            } elseif ($payment_shipment->type == 2) {
-                                $pending_payment->adjusted_shipments = 1;
-                            } elseif ($payment_shipment->type == 3) {
-                                $pending_payment->arrival_shipment = 1;
-                            }
                             $pending_payment->total_shipments = 1;
+                            $pending_payment->delivered_shipments = 0;
+                            $pending_payment->returned_shipments = 0;
+                            $pending_payment->adjusted_shipments = 1;
+                            $pending_payment->arrival_shipment = 0;
+
                             $pending_payment->save();
                         }
 
@@ -18920,7 +18956,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                         $pending_payment_shipment->charges = -$payment_shipment->charges;
                         $pending_payment_shipment->gst = -$payment_shipment->gst;
                         $pending_payment_shipment->payable = -$payment_shipment->payable;
-
+                        $pending_payment_shipment->transaction_id = $transaction_id;
                         $pending_payment_shipment->save();
 
 
@@ -18954,7 +18990,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
     }
 
      private static function adjust_invoice_for_return_discount($shipment, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, $adjustment_type = NULL)
-     {
+     {   $transaction_id =  (string) Str::uuid();
          $shipment_id = $shipment->id;
          if ($shipment->shipment_type == 1) {
              if ($payment_shipment_id) {
@@ -18999,7 +19035,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                                  $pending_payment_shipment->charges = -$payment_shipment->charges;
                                  $pending_payment_shipment->gst = -$payment_shipment->gst;
                                  $pending_payment_shipment->payable = -$payment_shipment->payable;
-
+                                 $pending_payment_shipment->transaction_id = $transaction_id;
                                  $pending_payment_shipment->save();
 
                                  if ($adjustment_type) {
@@ -19047,7 +19083,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                              $pending_payment_shipment->charges = -$payment_shipment->charges;
                              $pending_payment_shipment->gst = -$payment_shipment->gst;
                              $pending_payment_shipment->payable = -$payment_shipment->payable;
-
+                             $pending_payment_shipment->transaction_id = $transaction_id;
                              $pending_payment_shipment->save();
 
 
@@ -19129,7 +19165,7 @@ $total_sms_charges[$origin] += $invoice_shipment->sms_charges;
                              $pending_payment_shipment->charges = $invoice_shipment->charges;
                              $pending_payment_shipment->gst = $invoice_shipment->gst;
                              $pending_payment_shipment->payable = $invoice_shipment->invoice_amount;
-
+                             $pending_payment_shipment->transaction_id = $transaction_id;
                              $pending_payment_shipment->save();
 
 

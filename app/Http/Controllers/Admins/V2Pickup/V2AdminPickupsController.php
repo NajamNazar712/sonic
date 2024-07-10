@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins\V2Pickup;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Traits\RateReusableTrait;
+use App\ShipmentAdditionalCharges;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -1277,7 +1278,7 @@ class V2AdminPickupsController extends Controller
             }
         }
         if(count($arrival_charges_shipment) > 0){
-            Shipment::whereIn('id',$arrival_charges_shipment)->update(['arrival_charges_applied'=>1]);
+            ShipmentAdditionalCharges::additional_charges_apply($arrival_charges_shipment,true);
         }
 
         foreach ($shipment_ids as $shipment_id) {
@@ -1666,7 +1667,7 @@ class V2AdminPickupsController extends Controller
             }
         }
         if(count($arrival_charges_shipment) > 0){
-            Shipment::whereIn('id',$arrival_charges_shipment)->update(['arrival_charges_applied'=>1]);
+            ShipmentAdditionalCharges::additional_charges_apply($arrival_charges_shipment,true);
         }
 
         foreach ($shipments as $shipment_id) {
@@ -2628,7 +2629,7 @@ class V2AdminPickupsController extends Controller
             }
         }
         if(count($arrival_charges_shipment) > 0){
-            Shipment::whereIn('id',$arrival_charges_shipment)->update(['arrival_charges_applied'=>1]);
+            ShipmentAdditionalCharges::additional_charges_apply($arrival_charges_shipment,true);
         }
         $pickup_note_ids = array();
         foreach ($pickup_request_ids as $pickup_request_id) {

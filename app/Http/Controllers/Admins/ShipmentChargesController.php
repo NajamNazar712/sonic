@@ -1459,7 +1459,7 @@ class ShipmentChargesController extends Controller
                     if($return_discount_per && $return_discount_per > 0){
                         $charges = $charges - ($charges*($return_discount_per/100));
                         $charges = ($charges > 0) ? $charges : 0;
-                        $shipment->return_cod_discount_applied = 1;
+                        ShipmentAdditionalCharges::additional_charges_apply([$shipment->id],false,false,true);
                     }
 
 
