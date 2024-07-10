@@ -21,7 +21,7 @@
                         <div style="text-align: left; flex-grow: 1;">
                             <h2>Your Account Status: Signed Up</h2>
                             <p style="margin-top:20px;">{{ $description }}</p>
-                            @if($user->on_board_status < 1)
+                            @if(isset($user->on_board_status) && $user->on_board_status < 1 && session('request_custom_quotation') != 1)
                                 <a href="{{ route('cod.wordpress.register') }}" style="display: inline-block; padding: 10px 20px; color: white; background-color: #007bff; border-radius: 5px; text-decoration: none;">Start Onboarding</a>
                             @endif
                         </div>
