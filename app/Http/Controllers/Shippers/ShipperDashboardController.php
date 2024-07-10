@@ -275,7 +275,7 @@ class ShipperDashboardController extends Controller
                 $user = User::find($shipper_id);
                 
                 $weight_charges = WeightCharge::where('user_id' , $shipper_id);
-                if((isset($user->on_board_status) && $user->on_board_status < 1 && $user->created_at > '2024-06-13 00:00:00')){
+                if(($user->on_board_status < 1 && $user->created_at > '2024-06-13 00:00:00')){
                     $lead_progress_setting = LeadProgressSetting::find(1);
                     $percentage = $lead_progress_setting->percent;
                     $color = $lead_progress_setting->color;
