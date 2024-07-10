@@ -125,15 +125,21 @@ use App\Http\Models\ShipmentSmsLogs;
 use Illuminate\Support\Facades\Response;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\NotificationSetting;
+use Illuminate\Support\Facades\Log;
 
 class AdminFinanceController extends Controller
 {
-    static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
+    static public function sdn_action_logs($sdn_id, $status_id, $admin_id, $previous_bank_id = null, $new_bank_id = null, $previous_amount = null, $new_amount = null, $deposit_slip_image = null)
     {
         $sdn_log = new StationDepositeNoteActionLog();
         $sdn_log->sdn_id = $sdn_id;
         $sdn_log->status_id = $status_id;
         $sdn_log->admin_id = $admin_id;
+        $sdn_log->previous_bank_id = $previous_bank_id;
+        $sdn_log->new_bank_id = $new_bank_id;
+        $sdn_log->new_amount = $new_amount;
+        $sdn_log->previous_amount = $previous_amount;
+        $sdn_log->updated_deposit_slip_image = $deposit_slip_image;
         $sdn_log->save();
     }
 
@@ -1506,8 +1512,11 @@ class AdminFinanceController extends Controller
         $deposit_ids = explode(',', $request->deposit_rows);
         $total_amount = 0;
         foreach ($deposit_ids as $deposit_id) {
+            $oldData = null;
             $total_amount += $request->amount[$deposit_id];
             $slip = StationDepositNoteSlip::find($deposit_id);
+            $previous_bank_id = $slip->bank_id;
+            $previous_amount = $slip->amount;
             $slip->deposit_date = $request->date[$deposit_id];
             $slip->bank_id = $request->bank[$deposit_id];
             $slip->amount = $request->amount[$deposit_id];
@@ -1526,6 +1535,15 @@ class AdminFinanceController extends Controller
                 $slip->image = $slip_name;
             }
             $slip->save();
+
+            // Debugging statements to verify old and new values
+    Log::debug('Old Bank ID: ' . $previous_bank_id);
+    Log::debug('New Bank ID: ' . $slip->bank_id);
+    Log::debug('Old Amount: ' . $previous_amount);
+    Log::debug('New Amount: ' . $slip->amount);
+
+            //StationDepositeNoteActionLog
+            self::sdn_action_logs($sdn_id, 4, Auth::id(), $previous_bank_id, $slip->bank_id, $previous_amount, $slip->amount, $slip->image);
 
         }
 
