@@ -1300,7 +1300,7 @@ class AdminCargoManifestController extends Controller
                 }
 
 
-                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 68, 69, 72, 70, 73])) {
+                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 68, 69, 72, 70, 73,75,76])) {
                     if ($shipment->shipper_status_id == 2) {
                         $hub_id = $shipment->pickup_address->city->hub_id;
                     } else if ($shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 70 || $shipment->shipper_status_id == 73 ) {
@@ -1336,10 +1336,10 @@ class AdminCargoManifestController extends Controller
                             }
 
                             if ($request->bag_type != 0) {
-                                if (in_array($shipment->shipper_status_id, [2, 49, 55, 68])) {
+                                if (in_array($shipment->shipper_status_id, [2, 49, 55, 68, 69,70,72,73])) {
                                     $hub_id = $shipment->consignee_city->hub_id;
                                 } else {
-                                    if (in_array($shipment->shipper_status_id, [20])) {
+                                    if (in_array($shipment->shipper_status_id, [20,75,76])) {
                                         if ($shipment->return_address_id != null) {
                                             $hub_id = $shipment->return_address->city->hub_id;
                                         } else {
@@ -1359,13 +1359,13 @@ class AdminCargoManifestController extends Controller
 
                                 if ($request->bag_type != 0) {
                                     if ($request->bag_type == 1) {
-                                        if (!in_array($shipment->shipper_status_id, [2, 49, 55,68])) {
+                                        if (!in_array($shipment->shipper_status_id, [2, 49, 55,68,69,70,72,73])) {
                                             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
                                         }
 
                                         $bag_type = 1;
                                     } else {
-                                        if (!in_array($shipment->shipper_status_id, [20, 30, 37])) {
+                                        if (!in_array($shipment->shipper_status_id, [20, 30, 37, 75, 76])) {
                                             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Normal Type while the Cargo is Return Type'];
                                         }
 
@@ -2131,7 +2131,7 @@ class AdminCargoManifestController extends Controller
                 }
 
 
-                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 68, 69, 70, 72, 73])) {
+                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 68, 69, 70, 72, 73,75,76 ])) {
                     $shipments++;
                     $shipments_weight += $shipment->actual_weight;
                     $quantity = $quantity + count($shipment->items);
@@ -2952,14 +2952,17 @@ class AdminCargoManifestController extends Controller
                         $bag->status_id = 6;
                         foreach ($bag->shipment as $shipment) {
                             $shipment_table = Shipment::find($shipment->shipment_id);
-                            if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 11, 69, 72])) {
-
-                                if($shipment_table->booking_type_id == 2) {
-                                    $status = 73;
-                                } elseif($shipment_table->booking_type_id == 3) {
-                                    $status = 69;
-                                } else {
-                                    $status = 68;
+                            if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 11, 69, 72,75])) {
+                                if($bag->type == 1) {
+                                    if($shipment_table->booking_type_id == 2) {
+                                        $status = 73;
+                                    } elseif($shipment_table->booking_type_id == 3) {
+                                        $status = 70;
+                                    } else {
+                                        $status = 49;
+                                    }
+                                } elseif($bag->type == 2) {
+                                    $status = 76;
                                 }
 
                                 ShipmentsJourneyController::add($shipment->shipment_id, $status, $status, null, null, null, Auth::id(), $bag->seal_number);
@@ -4316,12 +4319,16 @@ class AdminCargoManifestController extends Controller
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
                                     if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76])) {
-                                        if($shipment_table->booking_type_id == 2) {
-                                            $status = 72;
-                                        } elseif($shipment_table->booking_type_id == 3) {
-                                            $status = 69;
-                                        } else {
-                                            $status = 11;
+                                        if($bag->type == 1) {
+                                            if($shipment_table->booking_type_id == 2) {
+                                                $status = 72;
+                                            } elseif($shipment_table->booking_type_id == 3) {
+                                                $status = 69;
+                                            } else {
+                                                $status = 11;
+                                            }
+                                        } elseif($bag->type == 2) {
+                                            $status = 75;
                                         }
                                         
                                         ShipmentsJourneyController::add($shipment->shipment_id, $status, $status, null, null, null, Auth::id(), $bag->seal_number);
@@ -4383,13 +4390,17 @@ class AdminCargoManifestController extends Controller
                                 $bag->junction_mapping_id = null;
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
-                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73])) {
-                                        if($shipment_table->booking_type_id == 2) {
-                                            $status = 72;
-                                        } elseif($shipment_table->booking_type_id == 3) {
-                                            $status = 69;
-                                        } else {
-                                            $status = 11;
+                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76])) {
+                                        if($bag->type == 1) {
+                                            if($shipment_table->booking_type_id == 2) {
+                                                $status = 72;
+                                            } elseif($shipment_table->booking_type_id == 3) {
+                                                $status = 69;
+                                            } else {
+                                                $status = 11;
+                                            }
+                                        } elseif($bag->type == 2) {
+                                            $status = 75;
                                         }
                                         ShipmentsJourneyController::add($shipment->shipment_id, $status, $status, null, null, null, Auth::id(), $bag->seal_number);
                                         $shipment_table->shipper_status_id = $status;
@@ -4451,13 +4462,17 @@ class AdminCargoManifestController extends Controller
                                 $bag->junction_mapping_id = null;
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
-                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73])) {
-                                        if($shipment_table->booking_type_id == 2) {
-                                            $status = 72;
-                                        } elseif($shipment_table->booking_type_id == 3) {
-                                            $status = 69;
-                                        } else {
-                                            $status = 11;
+                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76])) {
+                                        if($bag->type == 1) {
+                                            if($shipment_table->booking_type_id == 2) {
+                                                $status = 72;
+                                            } elseif($shipment_table->booking_type_id == 3) {
+                                                $status = 69;
+                                            } else {
+                                                $status = 11;
+                                            }
+                                        } elseif($bag->type == 2) {
+                                            $status = 75;
                                         }
                                         ShipmentsJourneyController::add($shipment->shipment_id,  $status,  $status, null, null, null, Auth::id(), $bag->seal_number);
                                         $shipment_table->shipper_status_id =  $status;
@@ -5275,14 +5290,14 @@ class AdminCargoManifestController extends Controller
 
                 $bag_type = $request->bag_type;
                 $shipment_status = $shipment->shipper_status_id;
-//dd($bag_type,$shipment_status);
                 // validate bag n shipment type
+                
                 if ($bag_type == 1) {
-                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
+                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48, 75, 76])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
                     }
                 } else {
-                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
+                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48, 75, 76])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
                     }
                 }
@@ -5291,7 +5306,6 @@ class AdminCargoManifestController extends Controller
                 if ($bag_shipment->exists()) {
                     $bag_shipment = $bag_shipment->latest()->first();
                     $bag = $bag_shipment->bag;
-//dd($bag_shipment,$bag_shipment->bag);
                     if ($bag) {
 
                         if ($bag->type != $request->bag_type) {
@@ -5327,7 +5341,7 @@ class AdminCargoManifestController extends Controller
                     $details['tracking_number'] = $shipment->tracking_number;
                     $details['bag_number'] = $bag->seal_number;
 
-                    if ($shipment->shipper_status_id == 21) {
+                    if (in_array($shipment->shipper_status_id, [21,75,76])) {
                         $details['origin'] = $shipment->consignee_city->name;
                         if ($shipment->return_address_id != NULL) {
                             $details['destination'] = $shipment->return_address->city->name;
@@ -5371,7 +5385,7 @@ class AdminCargoManifestController extends Controller
                     $details['tracking_number'] = $shipment->tracking_number;
                     $details['bag_number'] = 'N/A';
 
-                    if ($shipment->shipper_status_id == 21) {
+                    if (in_array($shipment->shipper_status_id, [21,75,76])) {
                         $details['origin'] = $shipment->consignee_city->name;
                         if ($shipment->return_address_id != NULL) {
                             $details['destination'] = $shipment->return_address->city->name;
@@ -5401,7 +5415,7 @@ class AdminCargoManifestController extends Controller
 
                 // validate bag n shipment type
                 if ($bag_type == 1) {
-                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
+                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48, 75, 76])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
                     }
 
@@ -5419,7 +5433,7 @@ class AdminCargoManifestController extends Controller
                     // check that is shipment return reattempt or not end
 
                 } else {
-                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
+                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48, 75, 76])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
                     }
                 }
@@ -5595,7 +5609,7 @@ class AdminCargoManifestController extends Controller
             if ($shipment_status != 11) // agr status 11 h to masla h q k forwarding and return dono p same 11 lagta h ispe sochna h, lekin koshish ki h niche is resolve krne ki ($return_confirm_journey,$return_reattampt)
             {
                 if ($bag_type == 1) {
-                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
+                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48, 75, 76])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
                     }
                 } else {
@@ -5619,7 +5633,7 @@ class AdminCargoManifestController extends Controller
                     }
                     // check that is shipment return reattempt or not end
 
-                    if ((!in_array($shipment_status, [20, 21, 22, 24, 44, 47, 48,49,26,27,29])) && ($return_reattempt_flag == 1)) {
+                    if ((!in_array($shipment_status, [20, 21, 22, 24, 44, 47, 48,49,26,27,29,75,76])) && ($return_reattempt_flag == 1)) {
                         return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
                     }
                 }
@@ -5635,7 +5649,6 @@ class AdminCargoManifestController extends Controller
             //     return ['status' => 1, 'error' => 'Given Tracking Number has already been modified!'];
             // }
             $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment->id);
-
             if ($bag_shipment->exists()) {
                 $bag_shipment = $bag_shipment->latest()->take(1)->first();
 
@@ -5660,7 +5673,7 @@ class AdminCargoManifestController extends Controller
                     $details['tracking_number'] = $shipment->tracking_number;
                     $details['bag_number'] = 'N/A';
 
-                    if ($shipment->shipper_status_id == 21) {
+                    if (in_array($shipment->shipper_status_id, [21,75,76])) {
                         $details['origin'] = $shipment->consignee_city->name;
                         if ($shipment->return_address_id != NULL) {
                             $details['destination'] = $shipment->return_address->city->name;
@@ -5720,7 +5733,7 @@ class AdminCargoManifestController extends Controller
                     $details['tracking_number'] = $shipment->tracking_number;
                     $details['bag_number'] = $bag->seal_number;
 
-                    if ($shipment->shipper_status_id == 21) {
+                    if (in_array($shipment->shipper_status_id, [21,75,76])) {
                         $details['origin'] = $shipment->consignee_city->name;
                         if ($shipment->return_address_id != NULL) {
                             $details['destination'] = $shipment->return_address->city->name;
@@ -5745,7 +5758,7 @@ class AdminCargoManifestController extends Controller
             } else // no previous exists
             {
                 //return ['status' => 1, 'error' => 'Given Tracking Number is not in any Bag'];
-
+                dd('test');
                 if (!$request->has('pieces_confirm')) {
                     if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                         $details = array();
@@ -6011,7 +6024,7 @@ class AdminCargoManifestController extends Controller
             DB::beginTransaction();
             Log::channel('cronJobLog')->info('cargo:check_1');
 
-        $shipment_status_array = [2,3,11,20,21,26,32,49,68,69,70,72,73];
+        $shipment_status_array = [2,3,11,20,21,26,32,49,68,69,70,72,73,75,76];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $open_box_ids = explode(',', $request->open_box_ids);
         $bag_ids = array();
@@ -6401,12 +6414,12 @@ class AdminCargoManifestController extends Controller
                                 $shipment->consignee_status_id = 22;
                                 $shipment->save();
 
-                                ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without bag/manifest status
+                                ShipmentsJourneyController::add($shipment_id, 77, 77, NULL, NULL, NULL, Auth::id()); // without bag/manifest status
                                 ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, Auth::id()); // received at origin
                                 array_push($shipment_ids_array, $shipment->tracking_number);
                             } else {
-                                $shipment->shipper_status_id = 11;
-                                $shipment->consignee_status_id = 11;
+                                $shipment->shipper_status_id = 75;
+                                $shipment->consignee_status_id = 75;
                                 $shipment->save();
                                 $last_scanned = ShipmentsJourney::where('shipment_id', $shipment_id)->select('city_id');
                                 if ($last_scanned->exists()) {
@@ -6415,8 +6428,8 @@ class AdminCargoManifestController extends Controller
                                 } else {
                                     $remarks = '--';
                                 }
-                                ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without manifest status
-                                ShipmentsJourneyController::add($shipment_id, 11, 11, NULL, $remarks, NULL, Auth::id()); // new misrouted
+                                ShipmentsJourneyController::add($shipment_id, 77, 77, NULL, NULL, NULL, Auth::id()); // without manifest status
+                                ShipmentsJourneyController::add($shipment_id, 75, 75, NULL, $remarks, NULL, Auth::id()); // new misrouted
                                 array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
                             }
                         } else {
@@ -6483,8 +6496,8 @@ class AdminCargoManifestController extends Controller
                                             $shipper_status_id = 22;
                                             $consignee_status_id = 22;
                                         } else {
-                                            $shipper_status_id = 11;
-                                            $consignee_status_id = 11;
+                                            $shipper_status_id = 75;
+                                            $consignee_status_id = 75;
                                         }
                                     } else if ($shipment->booking_type_id == 2) {
                                         if ($shipment->shipper_status_id == 21) {
@@ -6492,16 +6505,16 @@ class AdminCargoManifestController extends Controller
                                                 $shipper_status_id = 22;
                                                 $consignee_status_id = 22;
                                             } else {
-                                                $shipper_status_id = 11;
-                                                $consignee_status_id = 11;
+                                                $shipper_status_id = 75;
+                                                $consignee_status_id = 75;
                                             }
                                         } else {
                                             if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                                 $shipper_status_id = 27;
                                                 $consignee_status_id = 27;
                                             } else {
-                                                $shipper_status_id = 11;
-                                                $consignee_status_id = 11;
+                                                $shipper_status_id = 75;
+                                                $consignee_status_id = 75;
                                             }
                                         }
                                     } else if ($shipment->booking_type_id == 3) {
@@ -6509,24 +6522,24 @@ class AdminCargoManifestController extends Controller
                                             $shipper_status_id = 33;
                                             $consignee_status_id = 33;
                                         } else {
-                                            $shipper_status_id = 11;
-                                            $consignee_status_id = 11;
+                                            $shipper_status_id = 75;
+                                            $consignee_status_id = 75;
                                         }
                                     } else if ($shipment->booking_type_id == 4) {
                                         if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs)) || ($omni_return_city_hub == $default_hub_id) || (in_array($omni_return_city_hub,$admin_assigned_hubs))) {
                                             $shipper_status_id = 22;
                                             $consignee_status_id = 22;
                                         } else {
-                                            $shipper_status_id = 11;
-                                            $consignee_status_id = 11;
+                                            $shipper_status_id = 75;
+                                            $consignee_status_id = 75;
                                         }
                                     } else {
                                         if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs)) || ($omni_return_city_hub == $default_hub_id) || (in_array($omni_return_city_hub,$admin_assigned_hubs))) {
                                             $shipper_status_id = 22;
                                             $consignee_status_id = 22;
                                         } else {
-                                            $shipper_status_id = 11;
-                                            $consignee_status_id = 11;
+                                            $shipper_status_id = 75;
+                                            $consignee_status_id = 75;
                                         }
                                     }
                                 }
@@ -6535,10 +6548,10 @@ class AdminCargoManifestController extends Controller
 
                                 $shipment->save();
 
-                                if ($shipper_status_id != 11)
+                                if ($shipper_status_id != 75)
                                     array_push($shipment_ids_array, $shipment->tracking_number);
 
-                                if ($shipper_status_id == 11)
+                                if ($shipper_status_id == 75)
                                     array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
 
                                 ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
@@ -6570,14 +6583,14 @@ class AdminCargoManifestController extends Controller
                             $shipment->consignee_status_id = 22;
                             $shipment->save();
 
-                            ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without manifest status
+                            ShipmentsJourneyController::add($shipment_id, 77, 77, NULL, NULL, NULL, Auth::id()); // without manifest status
                             ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, Auth::id()); // received at destination
                             array_push($shipment_ids_array, $shipment->tracking_number);
                         }
                         else
                         {
-                            $shipment->shipper_status_id = 68;
-                            $shipment->consignee_status_id = 68;
+                            $shipment->shipper_status_id = 75;
+                            $shipment->consignee_status_id = 75;
                             $shipment->save();
 
                             $last_scanned = ShipmentsJourney::where('shipment_id', $shipment_id)->select('city_id');
@@ -6587,8 +6600,8 @@ class AdminCargoManifestController extends Controller
                             } else {
                                 $remarks = '--';
                             }
-                            ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without manifest status
-                            ShipmentsJourneyController::add($shipment_id, 68, 68, NULL, $remarks, NULL, Auth::id());// new misrouted
+                            ShipmentsJourneyController::add($shipment_id, 77, 77, NULL, NULL, NULL, Auth::id()); // without manifest status
+                            ShipmentsJourneyController::add($shipment_id, 75, 75, NULL, $remarks, NULL, Auth::id());// new misrouted
                             array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
                         }
                     }
@@ -6677,7 +6690,7 @@ class AdminCargoManifestController extends Controller
             }
             Log::channel('cronJobLog')->info('cargo:check_7');
             //remove misrouted shipment ids from $short_received_shipments_array
-            $exclude_from_short_received = Shipment::whereIn('tracking_number',$short_received_shipments_array)->whereIn('shipper_status_id',[11,68,69,72])->pluck('tracking_number')->toArray();
+            $exclude_from_short_received = Shipment::whereIn('tracking_number',$short_received_shipments_array)->whereIn('shipper_status_id',[11,68,69,72,75])->pluck('tracking_number')->toArray();
             $short_received_shipments_array = array_diff($short_received_shipments_array, $exclude_from_short_received);
             //remove misrouted shipment ids from $short_received_shipments_array end
 
