@@ -6560,7 +6560,19 @@ class AdminFinanceController extends Controller
             })
             ->addColumn('action', function ($pending_payment) {
                 $view_details_button = '<button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
-                $make_payments_button = '<button type="button" class="dropdown-item make_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-credit-card"></i></div><div class="col-9 offset-1">Make Payment</div></button>';
+                // $make_payments_button = '<button type="button" class="dropdown-item make_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-credit-card"></i></div><div class="col-9 offset-1">Make Payment</div></button>';
+                $make_payments_button = '
+                    <button type="button" class="dropdown-item make_payment_new_tab">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-2">
+                                <i class="ft-credit-card"></i>
+                            </div>
+                            <div class="col-9 offset-1">
+                                Make Payment
+                            </div>
+                        </div>
+                    </button>
+                ';
 
                 $dropdown = '
               <div class="btn-group">

@@ -583,6 +583,11 @@
                 });
                 //End Make Payment Modal Datatable
 
+                // $('#make_payments_datatable').on('click', '.details-row td.select-checkbox', function(event) {
+                //     var $row = $(this).closest('tr');
+                //     var isChecked = $(this).prop('checked');
+                //     $row.toggleClass('selected', isChecked);
+                // });
                 $('#make_payments_datatable').on('click', '.details-row td.select-checkbox', function(event) {
                     var $checkbox = $(this);
                     var isChecked = $checkbox.hasClass('selected');
@@ -1077,6 +1082,20 @@
                 }
             });
         });
+
+        function verify_make_invoice_payments() {
+            $.ajax({
+                url: '{!! route('admin.finance.make_payments.invoice') !!}',
+                method: 'POST',
+                data: {
+                    '_token': '{{ csrf_token() }}',
+                    'pending_payment_shipment_ids': $('#make_payments #make_payments_form .pending_payment_shipment_ids').val()
+                }
+            })
+            .done(function(data) {
+
+            });
+        }
     </script>
 
 
