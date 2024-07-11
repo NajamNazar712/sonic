@@ -407,8 +407,8 @@ class ReturnController extends Controller
         ->count();
         $number_of_pending_second_call_percentage = ($reason_validation_required > 0) ? (($number_of_pending_second_call / $reason_validation_required) * 100) : 0;
 
-        //Total Agents Online Today
-        $number_of_available_agents = Employee::join('employee_attendances', 'employees.id', 'employee_attendances.employee_id')
+        
+        $number_of_agents = Employee::join('employee_attendances', 'employees.id', 'employee_attendances.employee_id')
             ->whereDate('employee_attendances.attendance_date', '=', now()->format('Y-m-d'))
             ->whereNotNull('employee_attendances.clock_in')
             ->where('employees.employee_type_id', 1)
@@ -416,13 +416,20 @@ class ReturnController extends Controller
             ->where('employees.is_line_manager', 0)
             ->where('employees.status_id', '!=', 2)
             ->pluck('employees.id')->toArray();
-
-
+        
+        //Total Agents Online Today
+        $number_of_available_agents = RvShipmentAssignAgentDetails::whereDate('rv_shipment_assign_agent_details.created_at', now()->format('Y-m-d'))
+        ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
+        ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
+        ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
+        ->where('rv_shipment_assign_agent_details.updated_type_id', 2)
+        ->distinct('rv_shipment_assign_agent_details.agent_id')
+        ->count('rv_shipment_assign_agent_details.agent_id');
         //Online Available Agents
         $online_agents = EmployeeAttendance::join('admins', 'admins.employee_id', 'employee_attendances.employee_id')
             ->join('rv_shipment_assign_agents as rvsa', 'rvsa.agent_id', 'admins.id') //Agent will be considered as logged out if it's latest record in rv_shipment_assign_agent is older 30 minutes
             ->where('rvsa.updated_at', '>', now()->subMinutes(30))
-            ->whereIn('employee_attendances.employee_id', $number_of_available_agents)
+            ->whereIn('employee_attendances.employee_id', $number_of_agents)
             ->whereIn('employee_attendances.id', function ($query) {
                 $query->select(DB::raw('MAX(id)'))
                     ->from('employee_attendances')
@@ -433,7 +440,7 @@ class ReturnController extends Controller
             ->get(['employee_attendances.employee_id'])->count();
 
         //Average Ticket Per Agent
-        $average_ticket_per_agent = (count($number_of_available_agents) > 0) ? ($total_tickets_today / count($number_of_available_agents)) : 0;
+        $average_ticket_per_agent = ($number_of_available_agents > 0) ? ($total_tickets_today / $number_of_available_agents) : 0;
 
 
         //Average First Call Time of Last 30 days records
@@ -492,7 +499,7 @@ class ReturnController extends Controller
         $stats['number_of_pending_first_call_percentage'] = round($number_of_pending_first_call_percentage);
         $stats['number_of_pending_second_call'] = $number_of_pending_second_call;
         $stats['number_of_pending_second_call_percentage'] = round($number_of_pending_second_call_percentage);
-        $stats['number_of_available_agents'] = count($number_of_available_agents);
+        $stats['number_of_available_agents'] = $number_of_available_agents;
         $stats['online_agents'] = $online_agents;
         $stats['total_tickets_today'] = $total_tickets_today;
         $stats['average_ticket_per_agent'] = round($average_ticket_per_agent);
