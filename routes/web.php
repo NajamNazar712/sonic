@@ -259,6 +259,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('call_status_history', 'Shippers\ShipperTrackingController@call_status_history')->name('call_status_history');
 
         Route::post('case_nature_remarks', 'Shippers\ShipperTrackingController@case_nature_remarks')->name('case_nature_remarks');
+        Route::post('case_nature_service_remarks', 'Shippers\ShipperTrackingController@case_nature_service_remarks')->name('case_nature_service_remarks');
+        Route::post('case_nature_claim_remarks', 'Shippers\ShipperTrackingController@case_nature_claim_remarks')->name('case_nature_claim_remarks');
     });
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('{order_id?}', 'Shippers\ShipperTrackingController@order_index')->name('index');

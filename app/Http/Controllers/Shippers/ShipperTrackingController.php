@@ -85,6 +85,24 @@ class ShipperTrackingController extends Controller
         ]);
     }
 
+    public function case_nature_service_remarks(Request $request)
+    {
+        $serviceId = $request->input('service_id');
+        $case_nature_service_remarks = CrmCaseNatureRemark::where('case_nature_id', $serviceId)->get();
+        return response()->json([
+            'data' => $case_nature_service_remarks
+        ]);
+    }
+
+    public function case_nature_claim_remarks(Request $request)
+    {
+        $claimId = $request->input('claim_id');
+        $case_nature_claim_remarks = CrmCaseNatureRemark::where('case_nature_id', $claimId)->get();
+        return response()->json([
+            'data' => $case_nature_claim_remarks
+        ]);
+    }
+
     public function track(Request $request) {
     	$tracking_numbers = explode(',', $request->tracking_numbers);
 

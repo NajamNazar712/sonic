@@ -42,17 +42,6 @@
         </div>
     </div>
 
-
-
-
-
-
-
-
-
-
-    
-
     {{-- Add Request --}}
     <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog"
         aria-labelledby="AddRequestModal" aria-hidden="true">
@@ -92,8 +81,6 @@
                                 </div>
                             </div>
 
-
-
                             
                             <div class="complaints d-none" id="request_complaints">
                                 <div class="row justify-content-center">
@@ -108,15 +95,24 @@
                                             </select>
                                         </fieldset>
                                     </div>
-
-                                    <div class="col-10 d-none" id="case_nature_remarks_div">
-                                        <fieldset class="form-group">
-                                            <select name="complaint_description[]" id="case_nature_remarks" class="form-control select2" multiple="multiple">
-                                                
-                                            </select>
-                                        </fieldset>
-                                    </div>
-
+                                    @foreach($case_nature_complaints as $complaint)
+                                        @if($complaint->remarks_visibility == 1)
+                                            <div class="col-10 d-none" id="case_nature_remarks_div">
+                                                <fieldset class="form-group">
+                                                    <select name="complaint_description[]" id="case_nature_remarks" class="form-control select2" multiple="multiple">
+                                                    
+                                                    </select>
+                                                </fieldset>
+                                            </div>
+                                        @else
+                                            <div class="col-10" id="">
+                                                <fieldset class="form-group">
+                                                    <textarea class="form-control" name="complaint_description[]" id="" rows="5"
+                                                        placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                                </fieldset>
+                                            </div>
+                                        @endif
+                                    @endforeach
                                     <div class="col-10 d-none" id="complaint_description_textarea">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="complaint_description[]" id="complaint_description" rows="5"
@@ -125,8 +121,6 @@
                                     </div>
                                 </div>
                             </div>
-
-
 
                             <div class="service d-none" id="request_service">
                                 <div class="row justify-content-center">
@@ -149,6 +143,7 @@
                                                 data-msg-required="Alternate Number is required">
                                         </fieldset>
                                     </div>
+
                                     <div  class="col-10 d-none" id="cod_change">
                                         <div class="row justify-content-center">
                                             <div class="col-6">
@@ -186,11 +181,30 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-10 d-none" id="service_description_div">
+                                    @foreach ($case_nature_service_requests as $service)
+                                        @if ($service->remarks_visibility == 1)
+                                            <div class="col-10 d-none" id="case_nature_service_remarks_div">
+                                                <fieldset class="form-group">
+                                                    <select name="service_description[]" id="case_nature_service_remarks" class="form-control select2" multiple="multiple">
+                                                        
+                                                    </select>
+                                                </fieldset>
+                                            </div>
+                                        @else
+                                            <div class="col-10">
+                                                <fieldset class="form-group">
+                                                    <textarea class="form-control" name="service_description[]" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                                </fieldset>
+                                            </div>
+                                        @endif
+                                    @endforeach
+
+                                    <div class="col-10 d-none" id="service_description_textarea">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                            <textarea class="form-control" name="service_description[]" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
                                         </fieldset>
                                     </div>
+                                    
                                 </div>
                             </div>
                             <div class="feedback d-none" id="request_feedback">
@@ -349,9 +363,28 @@
                                         </fieldset>
                                     </div>
 
-                                    <div class="col-10">
+                                    @foreach ($case_nature_type_claims as $claim)
+                                        @if ($claim->remarks_visibility == 1)
+                                            <div class="col-10 d-none" id="case_nature_claim_remarks_div">
+                                                <fieldset class="form-group">
+                                                    <select name="description[]" id="case_nature_claim_remarks" class="form-control select2" multiple="multiple">
+                                                        
+                                                    </select>
+                                                </fieldset>
+                                            </div>
+                                        @else
+                                            <div class="col-10">
+                                                <fieldset class="form-group">
+                                                    <textarea class="form-control" name="description[]" rows="5"
+                                                        placeholder="Enter Description Here..."></textarea>
+                                                </fieldset>
+                                            </div>
+                                        @endif
+                                    @endforeach
+
+                                    <div class="col-10 d-none" id="claim_description_div">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="description" id="claim_description" rows="5"
+                                            <textarea class="form-control" name="description[]" id="claim_description" rows="5"
                                                 placeholder="Enter Description Here..."></textarea>
                                         </fieldset>
                                     </div>
@@ -369,16 +402,6 @@
             </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-
-
 
     {{-- Call History Modal --}}
     <div class="modal fade" id="call_history_modal" role="dialog" aria-labelledby="call_history_modal_title"
@@ -1184,7 +1207,6 @@
 
                 var selectedValues = $(this).val();
                 var $textareaDiv = $('#complaint_description_textarea');
-                console.log(selectedValues);
 
                 if (selectedValues && selectedValues.includes('0')) {
                     // "Others" ('0') is selected
@@ -1203,6 +1225,130 @@
             });
 
             // service request
+            var isServiceChange = false;
+            $('#case_nature_service_remarks').select2({
+                width: '100%',
+                placeholder: "Select Remarks",
+                allowClear: true,
+                dropdownParent: $('#add_request_form')
+            });
+
+            $('#case_nature_requests').on('change', function() {
+                var serviceId = $(this).val();
+                if (serviceId) {
+                    $.ajax({
+                        url: '{{ route('cod.tracking.case_nature_service_remarks') }}',
+                        type: 'POST',
+                        data: { service_id: serviceId },
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            var $remarksDropdown = $('#case_nature_service_remarks');
+                            $.each(response.data, function(index, item) {
+                                $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
+                            });
+                            $remarksDropdown.append('<option value="0">Others</option>');
+                            $('#case_nature_service_remarks_div').removeClass('d-none');
+                            $('#service_description_textarea').addClass('d-none');
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('An error occurred while fetching remarks:', textStatus, errorThrown);
+                        }
+                    });
+                } 
+                else {
+                    $('#case_nature_service_remarks').empty().append('<option value="" selected="selected">Select Remarks</option>');
+                    $('#case_nature_service_remarks_div').addClass('d-none');
+                    $('#service_description_textarea').addClass('d-none');
+                }
+            });
+
+            $('#case_nature_service_remarks').on('change', function() {
+                // Important to stop recursive action
+                if (isServiceChange) {
+                    isServiceChange = false;
+                    return;
+                }
+
+                var selectedValues = $(this).val();
+                var $textareaDiv = $('#service_description_textarea');
+
+                if (selectedValues && selectedValues.includes('0')) {
+                    if (selectedValues.length > 1) {
+                        selectedValues = selectedValues.filter(value => value !== '0');
+                        $(this).val(selectedValues).trigger('change');
+                        $textareaDiv.addClass('d-none');
+                    } else {
+                        $textareaDiv.removeClass('d-none');
+                    }
+                } else {
+                    $textareaDiv.addClass('d-none');
+                }
+            });
+
+            // claim
+            var isClaimChange = false;
+            $('#case_nature_claim_remarks').select2({
+                width: '100%',
+                placeholder: "Select Remarks",
+                allowClear: true,
+                dropdownParent: $('#add_request_form')
+            });
+
+            $('#case_nature_claim').on('change', function() {
+                var claimId = $(this).val();
+                if (claimId) {
+                    $.ajax({
+                        url: '{{ route('cod.tracking.case_nature_claim_remarks') }}',
+                        type: 'POST',
+                        data: { claim_id: claimId },
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            var $remarksDropdown = $('#case_nature_claim_remarks');
+                            $.each(response.data, function(index, item) {
+                                $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
+                            });
+                            $remarksDropdown.append('<option value="0">Others</option>');
+                            $('#case_nature_claim_remarks_div').removeClass('d-none');
+                            $('#claim_description_div').addClass('d-none');
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('An error occurred while fetching remarks:', textStatus, errorThrown);
+                        }
+                    });
+                } 
+                else {
+                    $('#case_nature_claim_remarks').empty().append('<option value="" selected="selected">Select Remarks</option>');
+                    $('#case_nature_claim_remarks_div').addClass('d-none');
+                    $('#claim_description_div').addClass('d-none');
+                }
+            });
+
+            $('#case_nature_claim_remarks').on('change', function() {
+                // Important to stop recursive action
+                if (isClaimChange) {
+                    isClaimChange = false;
+                    return;
+                }
+                var selectedValues = $(this).val();
+                var $textareaDiv = $('#claim_description_div');
+                if (selectedValues && selectedValues.includes('0')) {
+                    if (selectedValues.length > 1) {
+                        selectedValues = selectedValues.filter(value => value !== '0');
+                        $(this).val(selectedValues).trigger('change');
+                        $textareaDiv.addClass('d-none');
+                    } else {
+                        $textareaDiv.removeClass('d-none');
+                    }
+                } else {
+                    $textareaDiv.addClass('d-none');
+                }
+            });
 
             var lost_flag = true;
             $('#case_nature_claim').prepend('<option value="" selected="selected"></option>').select2({
