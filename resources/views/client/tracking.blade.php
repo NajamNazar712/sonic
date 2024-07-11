@@ -107,7 +107,7 @@
                                         @else
                                             <div class="col-10" id="">
                                                 <fieldset class="form-group">
-                                                    <textarea class="form-control" name="complaint_description[]" id="" rows="5"
+                                                    <textarea class="form-control" name="complaint_description[]" id="complaint_description" rows="5"
                                                         placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
                                                 </fieldset>
                                             </div>
@@ -193,7 +193,7 @@
                                         @else
                                             <div class="col-10">
                                                 <fieldset class="form-group">
-                                                    <textarea class="form-control" name="service_description[]" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                                    <textarea class="form-control" name="service_description[]" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
                                                 </fieldset>
                                             </div>
                                         @endif
@@ -375,7 +375,7 @@
                                         @else
                                             <div class="col-10">
                                                 <fieldset class="form-group">
-                                                    <textarea class="form-control" name="description[]" rows="5"
+                                                    <textarea class="form-control" name="description[]" id="claim_description" rows="5"
                                                         placeholder="Enter Description Here..."></textarea>
                                                 </fieldset>
                                             </div>
@@ -1487,6 +1487,8 @@
 
                 }
             });
+
+            // Form submit
             $("#add_request_form").validate({
                 errorClass: "danger",
                 errorPlacement: function(error, element) {
