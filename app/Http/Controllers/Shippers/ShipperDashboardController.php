@@ -281,13 +281,6 @@ class ShipperDashboardController extends Controller
                     $color = $lead_progress_setting->color;
 
                     $description = "Your account is $percentage% completed";
-                }elseif($user->status == 0 && !$weight_charges->exists() && (!isset($user->request_custom_quotation) || $user->request_custom_quotation != 1)){
-                    $lead_progress_setting = LeadProgressSetting::find(1);
-                    $percentage = $lead_progress_setting->percent;
-                    $color = $lead_progress_setting->color;
-
-                    $description = "Your account is $percentage% completed";
-                    
                 }else if(($weight_charges->exists() || $user->request_custom_quotation == 1) && !isset($user->rates_added_by)){
                     $lead_progress_setting = LeadProgressSetting::find(2);
                     $percentage = $lead_progress_setting->percent;
