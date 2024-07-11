@@ -1536,12 +1536,6 @@ class AdminFinanceController extends Controller
             }
             $slip->save();
 
-            // Debugging statements to verify old and new values
-    Log::debug('Old Bank ID: ' . $previous_bank_id);
-    Log::debug('New Bank ID: ' . $slip->bank_id);
-    Log::debug('Old Amount: ' . $previous_amount);
-    Log::debug('New Amount: ' . $slip->amount);
-
             //StationDepositeNoteActionLog
             self::sdn_action_logs($sdn_id, 4, Auth::id(), $previous_bank_id, $slip->bank_id, $previous_amount, $slip->amount, $slip->image);
 

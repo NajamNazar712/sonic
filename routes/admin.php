@@ -848,6 +848,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::post('sdn_actions', 'Admins\DeliveryController@sdn_actions')->name('sdn_actions');
 
+            Route::post('sdn_deposit_slip_logs', 'Admins\DeliveryController@sdn_deposit_slip_logs')->name('sdn_deposit_slip_logs');
+
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('{id}/details', 'Admins\Retail\RetailCompletedDeliveries@sdn_details')->name('details');
                 Route::get('{id}/ajax', 'Admins\Retail\RetailCompletedDeliveries@sdn_details_ajax')->name('ajax');

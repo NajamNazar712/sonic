@@ -2818,6 +2818,66 @@
                     });
 
             });
+
+            $('#datatable tbody').on('click', 'tr td button.view_sdn_deposit_slip_log', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('admin.delivery.sdn.sdn_deposit_slip_logs') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'sdn_id': id
+                    }
+                })
+                    .done(function (data) {
+                        if (data.status == 1) {
+                            $('#sdn_action_log .modal-body').html('');
+                            $('#sdn_action_log').modal('show');
+                            $('#sdn_action_log_title span').text(data.sdn_id);
+                                var html = '<div class="row">' +
+                                            '<div class="col">' +
+                                            '<table class="table table-sm table-bordered border">' +
+                                            '<thead>' +
+                                            '<tr>' +
+                                            '<th class="color primary text-center">Status</th>' +
+                                            '<th class="color primary">Previous Bank</th>' +
+                                            '<th class="color primary">New Bank</th>' +
+                                            '<th class="color primary">Previous Amount</th>' +
+                                            '<th class="color primary">New Amount</th>' +
+                                            '<th class="color primary">Updated By</th>' +
+                                            '<th class="color primary">Updated At</th>' +
+                                            '</tr>' +
+                                            '</thead>' +
+                                            '<tbody>';
+                            if (data.logs) {
+                                $.each(data.logs, function (index, value) {
+                                    html += '<tr>' +
+                                            '<td>' + value.status + '</td>' +
+                                            '<td>' + value.previous_bank + '</td>' +
+                                            '<td>' + value.new_bank + '</td>' +
+                                            '<td>' + value.previous_amount + '</td>' +
+                                            '<td>' + value.new_amount + '</td>' +
+                                            '<td>' + value.updated_by + '</td>' +
+                                            '<td>' + value.date + '</td>' +
+                                            '</tr>';
+                                });
+                            }
+                            html += '</tbody>' + 
+                                    '</table>' + 
+                                    '</div>' + 
+                                    '</div>';
+                            $('#sdn_action_log .modal-body').html(html);
+                        }
+
+                        else{
+                            toastr.error(data.message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
+            });
         });
     </script>
 @endsection

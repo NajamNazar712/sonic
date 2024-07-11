@@ -6020,7 +6020,8 @@ class DeliveryController extends Controller
                 $view_logs = '<button type="button" class="dropdown-item view_logs"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">View Status History</div></button>';
 
                 if(session('role_id') == 1 || in_array(941, session('permissions'))){
-                    $sdn_action_log = '<button type="button" class="dropdown-item view_sdn_action_log"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">SDN action log</div></button>';
+                    $sdn_action_log = '<button type="button" class="dropdown-item view_sdn_action_log"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">SDN Action Log</div></button>';
+                    $sdn_deposit_slip_log = '<button type="button" class="dropdown-item view_sdn_deposit_slip_log"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">SDN Deposit Slip Log</div></button>';
                 }
 
                 $dropdown = '
@@ -6081,6 +6082,7 @@ class DeliveryController extends Controller
                 $dropdown .= $view_logs;
                 if(session('role_id') == 1 || in_array(941, session('permissions'))){
                     $dropdown .= $sdn_action_log;
+                    $dropdown .= $sdn_deposit_slip_log;
                 }
                 $dropdown .= '
                     </div>
@@ -9597,6 +9599,44 @@ class DeliveryController extends Controller
                     $sdn_actions_logs[$log->id]['dncc_amount'] = $log->dncc_amount ?? '-';
                     $sdn_actions_logs[$log->id]['action'] = $log->action ? title_case($log->action) : '-';
                     $sdn_actions_logs[$log->id]['updated_by'] = $log->updated_by->name;
+                    $sdn_actions_logs[$log->id]['date'] = Carbon::parse($log->updated_at)->toDateTimeString();
+                }
+
+                return response()->json(['status' => 1, 'sdn_id' => str_pad($sdn_id, 6, '0', STR_PAD_LEFT), 'logs' => $sdn_actions_logs]);
+            }
+            return response()->json(['status' => 0, 'message' => 'No logs found!']);
+        }
+    }
+
+    public function sdn_deposit_slip_logs(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 751);
+        $sdn_id = $request->sdn_id;
+        if ($sdn_id) {
+            $sdn_actions_logs = array();
+            $logs = StationDepositeNoteActionLog::where('sdn_id', $sdn_id)
+            ->whereNull('dncc_id')
+            ->whereNotNull('new_bank_id')
+            ->whereNotNull('new_amount');
+            if ($logs->exists()) {
+                $logs = $logs->get();
+                foreach ($logs as $log) {
+                    if ($log->status_id == 1) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited SDN amount';
+                    } else if ($log->status_id == 2) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited deposit slips';
+                    } else if ($log->status_id == 3) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Added SDN adjustment';
+                    } else if ($log->status_id == 4) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited SDN adjustment';
+                    } else if ($log->status_id == 5) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Reverted from Resolved to Deposited';
+                    }
+                    $sdn_actions_logs[$log->id]['updated_by'] = $log->updated_by->name;
+                    $sdn_actions_logs[$log->id]['previous_bank'] = $log->previous_bank->name;
+                    $sdn_actions_logs[$log->id]['new_bank'] = $log->new_bank->name;
+                    $sdn_actions_logs[$log->id]['previous_amount'] = $log->previous_amount;
+                    $sdn_actions_logs[$log->id]['new_amount'] = $log->new_amount;
                     $sdn_actions_logs[$log->id]['date'] = Carbon::parse($log->updated_at)->toDateTimeString();
                 }
 
