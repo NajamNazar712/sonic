@@ -2695,7 +2695,17 @@ class V2AdminPickupsController extends Controller
                 }
             }
         }
-        NotificationsController::send(4, $shipment_ids);
+
+        //check if shipper segment general logistic than email not send
+        $user = User::find($shipment->user_id);
+        if($user)
+        {
+          if($user->segment_id!=1)
+          {
+              NotificationsController::send(4, $shipment_ids);
+          }
+        }
+
 
         //todo: send sms for self collection!
         foreach ($shipment_ids as $shipment_id) {
