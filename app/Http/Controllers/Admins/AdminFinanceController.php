@@ -1524,7 +1524,7 @@ class AdminFinanceController extends Controller
             $file_name = 'deposit_slip_' . $deposit_id;
             if ($request->has($file_name)) {
                 $image = $request->file($file_name);
-//                $extension = $image->getClientOriginalExtension();
+                //$extension = $image->getClientOriginalExtension();
                 $extension = 'png';
                 $random = rand(1000, 100000);
                 $now = Carbon::now();
@@ -1567,14 +1567,15 @@ class AdminFinanceController extends Controller
                 }
             }
 
+            
+            //StationDepositeNoteActionLog
+            self::sdn_action_logs($sdn_id, 4, Auth::id());
+
         }
 
         $sdn_detail = StationDepositNote::find($sdn_id);
         $sdn_detail->sdn_deposit_amount = $total_amount;
         $sdn_detail->save();
-
-        //StationDepositeNoteActionLog
-        self::sdn_action_logs($sdn_id, 4, Auth::id());
 
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip edited successfully!']);
     }

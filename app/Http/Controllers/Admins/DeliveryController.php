@@ -9578,7 +9578,8 @@ class DeliveryController extends Controller
         $sdn_id = $request->sdn_id;
         if ($sdn_id) {
             $sdn_actions_logs = array();
-            $logs = StationDepositeNoteActionLog::where('sdn_id', $sdn_id);
+            $logs = StationDepositeNoteActionLog::where('sdn_id', $sdn_id)
+            ->whereNull('previous_bank_id');
             if ($logs->exists()) {
                 $logs = $logs->get();
                 foreach ($logs as $log) {
