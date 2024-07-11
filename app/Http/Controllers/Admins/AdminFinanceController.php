@@ -6559,7 +6559,7 @@ class AdminFinanceController extends Controller
             })
             ->addColumn('action', function ($pending_payment) {
                 $view_details_button = '<button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
-                // $make_payments_button = '<button type="button" class="dropdown-item make_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-credit-card"></i></div><div class="col-9 offset-1">Make Payment</div></button>';
+                $make_payments_button_modal = '<button type="button" class="dropdown-item make_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-credit-card"></i></div><div class="col-9 offset-1">Make Payment (modal)</div></button>';
                 $make_payments_button = '
                     <button type="button" class="dropdown-item make_payment_new_tab">
                         <div class="row no-gutters align-items-center">
@@ -6567,7 +6567,7 @@ class AdminFinanceController extends Controller
                                 <i class="ft-credit-card"></i>
                             </div>
                             <div class="col-9 offset-1">
-                                Make Payment
+                                Make Payment (new tab)
                             </div>
                         </div>
                     </button>
@@ -6583,6 +6583,7 @@ class AdminFinanceController extends Controller
 
                 if (($pending_payment->documents_status == 2) && (session('role_id') == 1 || in_array(60, session('permissions')))) {
                     $dropdown .= $make_payments_button;
+                    $dropdown .= $make_payments_button_modal;
                 }
 
                 $dropdown .= '
