@@ -9638,6 +9638,7 @@ class DeliveryController extends Controller
                     $sdn_actions_logs[$log->id]['new_bank'] = $log->new_bank->name;
                     $sdn_actions_logs[$log->id]['previous_amount'] = $log->previous_amount;
                     $sdn_actions_logs[$log->id]['new_amount'] = $log->new_amount;
+                    $sdn_actions_logs[$log->id]['image'] = $log->updated_deposit_slip_image;
                     $sdn_actions_logs[$log->id]['date'] = Carbon::parse($log->updated_at)->toDateTimeString();
                 }
 
