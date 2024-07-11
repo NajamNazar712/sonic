@@ -1226,6 +1226,7 @@
                 openNewTabWithData(userId);
             });
 
+
             function openNewTabWithData(userId) {
                 $('#make_payments #make_payments_form .total_amount').val(0);
                 $('#make_payments #make_payments_form .total_charges').val(0);
@@ -1241,6 +1242,7 @@
                 
                 $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
 
+
                 var selected_shippers_id = [];
                 selected_shippers_id.push(parseInt(userId));
                 var newTab = window.open('{{ route('admin.finance.make_payments.payment') }}', '_blank');
@@ -1250,6 +1252,8 @@
                     }, '*');
                 };
             }
+
+
 
             $('#make_payments').on('shown.bs.modal', function() {
                 $.ajaxSetup({
