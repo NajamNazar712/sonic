@@ -7,6 +7,7 @@ use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\Blacklist\ConsigneeInformationLog;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\InternationalShipment;
+use App\Http\Models\RetailDonePaymentShipment;
 use DB;
 use Validator;
 use App\SubReason;
@@ -14887,6 +14888,7 @@ class RiderAPIController extends Controller
             if ($rider->exists()) {
                 $rider = $rider->first();
                 if ($rider->status) {
+
                     $rPin = $rider->pin;
                     $results = Hash::check($pin,$rider->pin);
                     $user = Auth::user();
@@ -14895,8 +14897,15 @@ class RiderAPIController extends Controller
                         $apiToken = hash('sha256', $token);;
                         $rider->api_token = $apiToken;
                         $rider->save();
+                        $bank_id = $rider->bank_id;
+                        $bankInfo = BanksList::where('id',$bank_id)->first();
+                        $bank_name = '';
+                        try{
+                            $bank_name = $bankInfo->name;
+                        }catch(\Exception $exc){
 
-                        return response()->json(['status' => 0, 'message' => 'Shipper login successfully','profile_data'=>$rider]);
+                        }
+                        return response()->json(['status' => 0, 'message' => 'Shipper login successfully','profile_data'=>$rider,'bank_name'=>$bank_name]);
                     }else {
                         return response()->json(['status' => 1, 'message' => 'Invalid Pin','pin 1'=>$pin,'Pin 2 '=>$rPin,'Results '=>$results]);
       
@@ -15084,6 +15093,7 @@ class RiderAPIController extends Controller
                 $packagingMaterialTypeSizes = PackagingMaterialTypeSizes::all();
                 $retail_shipping_modes = RetailShippingMode::all();
                 $consigneeInfos = ConsigneeInfo::where('shipper_id',$shipper_id)->get();
+                $bank_list = BanksList::where('status',1)->get();
                 return response()->json(['status' => 0, 'message' => 'Record Found',
                 'products'=>$products,
                 'cities'=>$cities,
@@ -15091,7 +15101,8 @@ class RiderAPIController extends Controller
                 'packaging_material_types'=>$packagingMaterialTypes,
                 'packaging_material_type_sizes'=>$packagingMaterialTypeSizes,
                 'retail_shipping_modes'=>$retail_shipping_modes,
-                'consignee_infos'=>$consigneeInfos
+                'consignee_infos'=>$consigneeInfos,
+                'bank_list'=>$bank_list
             ]); //RetailTraxStoreId bind for users table booking
             }else {
                 return response()->json(['status' => 1, 'message' => 'Record not found', 'errors' => 'not Exist']);
@@ -15296,6 +15307,376 @@ class RiderAPIController extends Controller
 
     }
 
+    public function shipper_booked_status(Request $request){
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $rules = [
+            'shipper_id' => ['required', 'integer']
+            
+
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipper_id = $request->shipper_id;
+            $booked = DB::table('retail_shipments as rsh')
+            ->join('shipments as sp', 'sp.id', '=', 'rsh.shipment_id')
+            ->select(DB::raw('count(rsh.retail_user_id) as count'))
+            ->where('rsh.retail_user_id', $shipper_id)
+            ->groupBy('rsh.retail_user_id')
+            ->first();
+
+            $booked_delivered = DB::table('retail_shipments as rsh')
+            ->join('shipments as sp', 'sp.id', '=', 'rsh.shipment_id')
+            ->select(DB::raw('count(rsh.retail_user_id) as count'))
+            ->where('rsh.retail_user_id', $shipper_id)
+            ->where('sp.shipper_status_id', 14)
+            ->groupBy('rsh.retail_user_id')
+            ->first();
+
+            $booked_advice_pending = DB::table('retail_shipments as rsh')
+            ->join('shipments as sp', 'sp.id', '=', 'rsh.shipment_id')
+            ->select(DB::raw('count(rsh.retail_user_id) as count'))
+            ->where('rsh.retail_user_id', $shipper_id)
+            ->where('sp.shipper_status_id', 65)
+            ->groupBy('rsh.retail_user_id')
+            ->first();
+
+
+            $results = DB::table('retail_done_payments as rdp')
+    ->join('retail_done_payment_shipments as rdps', 'rdps.retail_done_payment_id', '=', 'rdp.id')
+    ->select('rdp.user_id', 'rdps.retail_done_payment_id', 'rdps.shipment_id', 'rdps.amount')
+    ->where('rdp.user_id', 111)
+    ->get();
+
+// Calculate the total sum of the amounts
+$totalSum = $results->sum('amount');
+
+$delivery = $booked_delivered->count.'('.$booked->count/$booked_delivered->count.'%)';
+$advice = $booked_advice_pending->count;
+
+            return response()->json(['status' => 0, 'message' => 'Success', 'data' => [
+                'booked'=>$booked->count,
+                'payment'=>$totalSum,
+                'delivery'=>$delivery,
+                'advice'=>$advice
+                ]]);
+      
+
+        }
+    }
+
+    public function shipper_booking_list(Request $request){
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $rules = [
+            'shipper_id' => ['required', 'integer']
+            
+
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipper_id = $request->shipper_id;
+            $result = DB::table('retail_shipments as rs')
+    ->join('shipments as sp', 'sp.id', '=', 'rs.shipment_id')
+    ->join('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.retail_user_id')
+    ->join('shipment_status as sst','sst.id','=','sp.shipper_status_id')
+    ->join('cities as ct1', 'ct1.id', '=', 'rsi.city_id')
+    ->join('cities as ct2', 'ct2.id', '=', 'rs.destination')
+    ->where('rs.retail_user_id', $shipper_id)
+    ->select(
+        'rs.shipment_id',
+        'sp.tracking_number',
+        'rs.created_at as date',
+        'rsi.shipper_name',
+        'ct1.name as origin_city_name',
+        'ct2.name as destination_city_name',
+        'sp.shipper_status_id as shipper_status_id',
+        'sst.name as status_name'
+    )
+    ->get();
+
+    foreach ($result as $row) {
+        $carbonDate = Carbon::parse($row->date);
+        $row->date = $carbonDate->format('d M, Y H:i:s');
+    }
+    
+
+// Format the Carbon instance into the desired format
+// Calculate the total sum of the amounts
+
+            return response()->json(['status' => 0, 'message' => 'Success', 'data' => $result]);
+      
+
+        }
+    }
+
+    public function shipper_shipment_history(Request $request){
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $rules = [
+            'shipment_id' => ['required', 'integer'],
+
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment_id = $request->shipment_id;
+            /*
+            select sps.name as status_name,sp.created_at as date from sonic5.shipments as sp 
+inner join sonic5.shipment_status as sps on sps.id = sp.shipper_status_id
+where  sp.id=66;
+            */
+            $shipment_results = DB::table('shipments as sp')
+            ->join('shipment_status as sps', 'sps.id', '=', 'sp.shipper_status_id')
+            ->where('sp.id', $shipment_id)
+            ->select(
+                'sps.name as status_name',
+                'sp.created_at as date'
+            )
+            ->get();
+
+            $result = DB::table('shipments_journey as spj')
+    ->join('shipment_status as sps', 'sps.id', '=', 'spj.shipper_status_id')
+    ->leftJoin('shipment_status_reason as spsr', 'spsr.id', '=', 'spj.status_reason_id')
+    ->where('spj.shipment_id', $shipment_id)
+    ->select(
+        'sps.name as status_name',
+        'spsr.name as reason_name',
+        'sps.description as description',
+        'spj.created_at as date'
+    )
+    ->get();
+
+    foreach ($result as $row) {
+        $carbonDate = Carbon::parse($row->date);
+        $row->date = $carbonDate->format('d M, Y H:i:s');
+    }
+
+    foreach ($shipment_results as $row) {
+        $carbonDate = Carbon::parse($row->date);
+        $row->date = $carbonDate->format('d M, Y H:i:s');
+    }
+    
+
+// Format the Carbon instance into the desired format
+// Calculate the total sum of the amounts
+
+            return response()->json(['status' => 0, 'message' => 'Success', 'data' => $result,'summary'=>$shipment_results]);
+      
+
+        }
+    }
+
+    public function shipper_shipment_detail(Request $request){
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $rules = [
+            'shipment_id' => ['required', 'integer'],
+
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment_id = $request->shipment_id;
+          
+            $shipment_results = DB::table('shipments as sp')
+            ->join('shipment_status as sps', 'sps.id', '=', 'sp.shipper_status_id')
+            ->where('sp.id', $shipment_id)
+            ->select(
+                'sp.tracking_number as tracking_number',
+                'sps.name as status_name',
+                'sp.order_id as order_id'
+            )
+            ->get();
+
+            // pickup information
+            $pickupInfo = DB::table('retail_shipments as rs')
+    ->join('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.retail_user_id')
+    ->join('cities as cty', 'cty.id', '=', 'rsi.city_id')
+    
+    ->where('rs.shipment_id', $shipment_id)
+    ->select(
+        'rs.shipper_name as shipper_name',
+        'rs.shipper_phone_no as shipper_phone',
+        'rs.shipper_cnic as cnic',
+        'rs.shipper_address as address',
+        'cty.name as city_name'
+    )
+    ->get();
+
+
+    //Consignee Info
+    $consigneeInfo = DB::table('shipments as sp')
+    ->join('cities as cty', 'cty.id', '=', 'sp.consignee_city_id')
+    ->where('sp.id', $shipment_id)
+    ->select(
+        'sp.consignee_name as consignee_name',
+        'sp.consignee_phone_number_1 as phone',
+        'sp.consignee_address as address',
+        'cty.name as city_name'
+    )
+    ->get();
+
+    //Consignee Info
+    $orderDetail = DB::table('retail_shipments as rs')
+    ->join('shipments as sp', 'sp.id', '=', 'rs.shipment_id')
+    ->join('shipment_items as si', 'si.shipment_id', '=', 'sp.id')
+    ->join('products as pdt', 'pdt.id', '=', 'rs.product_type_id')
+    ->where('sp.id', $shipment_id)
+    ->select(
+        'pdt.product_name as p_name',
+        'si.description as p_description',
+        'si.quantity as qty',
+        'sp.amount as cod',
+        'sp.parcel_value as parcel',
+        'sp.pieces as pieces',
+        'sp.estimated_weight as weight',
+        'rs.delivery_type as d_type'
+    )
+    ->get();
+
+
+
+   
+
+    
+
+// Format the Carbon instance into the desired format
+// Calculate the total sum of the amounts
+
+            return response()->json(['status' => 0, 'message' => 'Success', 'order' => $shipment_results,'pickup_info'=>$pickupInfo,'consignee_info'=>$consigneeInfo,'order_detail'=>$orderDetail]);
+      
+
+        }
+    }
+
+    public function shipper_payment_detail(Request $request){
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $rules = [
+            'payment_id' => ['required', 'integer'],
+
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $payment_id = $request->payment_id;
+          
+            $results = RetailDonePaymentShipment::where('retail_done_payment_id', $payment_id)
+    ->join('retail_shipments as rs', 'rs.shipment_id', '=', 'retail_done_payment_shipments.shipment_id')
+    ->join('shipments as sp', 'sp.id', '=', 'retail_done_payment_shipments.shipment_id')
+    ->join('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.retail_user_id')
+    ->join('products as pdt', 'pdt.id', '=', 'rs.product_type_id')
+    ->join('cities as p_cty', 'p_cty.id', '=', 'rsi.city_id')
+    ->join('cities as d_cty', 'd_cty.id', '=', 'rs.destination')
+    ->select([
+        'retail_done_payment_shipments.created_at as date',
+        'sp.id as shipment_id',
+        'sp.tracking_number',
+        'retail_done_payment_shipments.amount',
+        'p_cty.name as pickup_city',
+        'd_cty.name as destination_city',
+        'pdt.product_name as product_name',
+        'sp.consignee_address as c_address',
+        'rsi.shipper_address'
+    ])
+    ->get();
+    foreach ($results as $row) {
+        $carbonDate = Carbon::parse($row->date);
+        $row->date = $carbonDate->format('d M, Y');
+    }
+// Format the Carbon instance into the desired format
+// Calculate the total sum of the amounts
+
+            return response()->json(['status' => 0, 'message' => 'Success', 'payment_detail' => $results]);
+      
+
+        }
+    }
+
+    public function shipper_payment_list(Request $request){
+        $token = $request->bearerToken();
+        
+        if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+           return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $rules = [
+            'shipper_id' => ['required', 'integer']
+            
+
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipper_id = $request->shipper_id;
+            $result = DB::table('retail_done_payments as rdp')
+    ->join('retail_done_payment_shipments as rdps', 'rdps.retail_done_payment_id', '=', 'rdp.id')
+    ->where('rdp.user_id', $shipper_id)
+    ->groupBy('rdps.retail_done_payment_id', 'rdp.created_at', 'rdp.total_shipments')
+    ->select(
+        'rdp.created_at as date',
+        'rdps.retail_done_payment_id',
+        DB::raw('SUM(rdps.amount) as amount'),
+        'rdp.total_shipments'
+    )
+    ->get();
+    $totalSum = $result->sum('amount');
+    foreach ($result as $row) {
+        $carbonDate = Carbon::parse($row->date);
+        $row->date = $carbonDate->format('d M, Y');
+    }
+    
+
+// Format the Carbon instance into the desired format
+// Calculate the total sum of the amounts
+
+            return response()->json(['status' => 0, 'message' => 'Success', 'data' => ['total'=>$totalSum,'all'=>$result]]);
+      
+
+        }
+    }
+
 
     public function shippment_book_retail(Request $request){
 
@@ -15315,7 +15696,8 @@ class RiderAPIController extends Controller
         // }
 
         $rules = [
-            'order_id' => ['nullable', 'string', 'max:255'],
+            'order_id' => ['nullable', 'string', 'max:100'],
+            'consignee_id' =>  ['nullable','integer'],
             'consignee_name' =>  ['required'],
             'consignee_address' =>['required'],
             'consignee_phone_no' => ['required'],
@@ -15323,22 +15705,16 @@ class RiderAPIController extends Controller
             'special_instructions' => ['nullable', 'string', 'max:255'],
             'business_category' => ['required','integer'],
             'shipping_mode' => ['required','integer','min:1'],
-            'domestic_overland_destination' => ['required','integer'],
-
-            'international_destination' => ['required','integer'],
+            'international_destination' => ['nullable'],
             'domestic_destination' => ['required','integer'],
             'charges_mode' => ['required','integer'],
             'parcel_amount' => ['required','integer'],
-
+            'cod_amount' => ['required','integer'],
             'quantity' => ['required','integer'],
             'product_type_id' => ['required','integer'],
             'tracking_number' => ['nullable','string'],
             'shipper_id'=>['required','integer'],
-            'city_id'=>['required','integer'],
-            'city_id'=>['required'],
-            'shipper_name'=>['required'],
-            'shipper_cnic'=>['required'],
-            'shipper_address'=>['required']
+            'delivery_type'=>['required','integer']
             
 
         ];
@@ -15349,6 +15725,17 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
         }
+
+        try{
+        $tracking_number = $request->tracking_number;
+        if($tracking_number!=''){
+            $trackingRecord = Shipment::where('tracking_number',$tracking_number);
+            if($trackingRecord->exists()){
+                return response()->json(['status' => 1, 'message' => 'Tracking Number already exist']);
+            }
+        }
+        $shipper_id = $request->shipper_id;
+        $retail_shipper_info = RetailShipperInfo::where('id',$shipper_id);
         $order_id = $request->input('order_id');
         $consignee_name = $request->input('consignee_name');
         $consignee_address = $request->input('consignee_address');
@@ -15356,14 +15743,8 @@ class RiderAPIController extends Controller
         $packaging_amount = $request->packaging_amount;
         $special_instructions = $request->special_instructions;
         $business_category_id = $request->input('business_category');
-        $shipper_phone_no = $request->shipper_phone_no;
-        $shipper_name = $request->shipper_name;
-        $shipper_cnic = $request->shipper_cnic;
-        $shipper_address = $request->shipper_cnic;
-    
-        $retail_shipper_id = $request->shipper_id;
         $city_id = $request->city_id;
-        
+        $consignee_id = $request->consignee_id;
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $shipper_user_id = $setting->setting_value;
         $user_id = $shipper_user_id;
@@ -15392,34 +15773,13 @@ class RiderAPIController extends Controller
 
        
         $shipping_mode_check = $request->input('shipping_mode');
-        if ($shipping_mode_check == 1) {
             if($request->input('business_category') == 1)
             {
-                $consignee_city_id = $request->input('domestic_overland_destination');
-            }
-            else{
-                $consignee_city_id = $request->input('international_destination');
-            }
-            $shipping_mode_id = 2;
-        }
-        elseif ($shipping_mode_check == 4){
-            if($request->input('business_category') == 1) {
                 $consignee_city_id = $request->input('domestic_destination');
             }
             else{
                 $consignee_city_id = $request->input('international_destination');
             }
-            $shipping_mode_id = 3;
-        }
-        else{
-            if($request->input('business_category') == 1) {
-                $consignee_city_id = $request->input('domestic_destination');
-            }
-            else{
-                $consignee_city_id = $request->input('international_destination');
-            }
-            $shipping_mode_id = 1;
-        }
         $same_day_timing_id = NULL;
 
             $estimated_weight = 1; // by default hardcoded weight of flyer
@@ -15443,20 +15803,11 @@ class RiderAPIController extends Controller
 
         
         $charges_mode_id = $request->input('charges_mode');
-        if($shipping_mode_check == 3){
-            $amount = str_replace(',', '', $request->input('cod'));
-            $r_amount = 0;
-            if($charges_mode_id == 2){
-                $amount = $amount + $rates['total_charges'];
-            }
-        }
-        else{
             $amount = 0;
             if($charges_mode_id == 2){
-                $amount = $rates['total_charges'];
+                $amount = $rates['cod_amount'];
             }
             $r_amount = 0;
-        }
         $payment_mode_id = 1;
         $try_and_buy_charges = NULL;
 
@@ -15467,13 +15818,18 @@ class RiderAPIController extends Controller
         $parcelAmount = trim($parcelAmount);
         $parcelAmount = str_replace(',', '', $parcelAmount);
         $parcelAmoutInShipment = (float)$parcelAmount;
-
+        
+        $codAmount = $request->input('cod_amount');
+        $codAmount = trim($codAmount);
+        $codAmount = str_replace(',', '', $codAmount);
+        $codAmoutInShipment = (float)$codAmount;
+        
         $quantity = $request->input('quantity');
         $quantity = trim($quantity);
         $quantity = str_replace(',', '', $quantity);
         $quantityForShipmentItem = (int)$quantity;
 
-        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height, $parcelAmoutInShipment);
+        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_check, $same_day_timing_id, $codAmoutInShipment, $codAmoutInShipment, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height, $parcelAmoutInShipment);
 
         if($request->input('business_category') == 2) {
             $international_shipment_booking = new InternationalShipment();
@@ -15504,32 +15860,18 @@ class RiderAPIController extends Controller
             $this->create_shipment_pieces($shipment_id, $pieces_quantity);
         }
 
-        if($request->shipping_mode == 1){
-            if($request->input('business_category') == 1) {
-                $destination = $request->domestic_overland_destination;
-            }
-            else{
-                $destination = $request->input('international_destination');
-            }
-        }
-        else{
             if($request->input('business_category') == 1) {
                 $destination = $request->domestic_destination;
             }
             else{
-            $destination = $request->input('international_destination');
+                $destination = $request->input('international_destination');
             }
-        }
+       
 
-        $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no);
-        if($shipper_info->exists()){
-            $shipper_info = $shipper_info->first();
-            $shipper_info->shipper_phone_no = $request->shipper_phone_no;
-            $shipper_info->shipper_name = $request->shipper_name;
-            $shipper_info->shipper_cnic = $request->shipper_cnic;
-            $shipper_info->shipper_address = $request->shipper_address;
-            $shipper_info->city_id = $city_id;
-
+        if($retail_shipper_info->exists()){
+            $retail_shipper_info = $retail_shipper_info->first();
+            $shipper_info = $retail_shipper_info->first();
+         
             if (!$shipper_info->iban_no && (!$request->iban_no || $request->iban_no == '')) {
                
                 return response()->json(['status' => 1, 'message' => 'Please provide the IBAN number']);
@@ -15540,9 +15882,9 @@ class RiderAPIController extends Controller
             if (!$shipper_info->bank && (!$request->bank || $request->bank == '')) {
                 return response()->json(['status' => 1, 'message' => 'Please choose a bank']);
             }
-            if (!$shipper_info->cheque_image && !$request->hasFile('cheque_image')) {
-                return response()->json(['status' => 1, 'message' => 'Please provide the cheque image']);
-            }
+            // if (!$shipper_info->cheque_image && !$request->hasFile('cheque_image')) {
+            //     return response()->json(['status' => 1, 'message' => 'Please provide the cheque image']);
+            // }
 
             if ($request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $shipper_info->bank_id = $request->bank;
@@ -15560,49 +15902,7 @@ class RiderAPIController extends Controller
             }
             $shipper_info->save();
         }
-        else{
-            $shipper_info = new RetailShipperInfo();
-            $shipper_info->shipper_phone_no = $request->shipper_phone_no;
-            $shipper_info->shipper_name = $request->shipper_name;
-            $shipper_info->shipper_cnic = $request->shipper_cnic;
-            $shipper_info->shipper_address = $request->shipper_address;
-            $shipper_info->city_id = $city_id;
-           // return response()->json(['status' => 1, 'message' => $shipper_info]);
-            $shipper_info->save();
-
-            if ($request->iban_no == null || $request->iban_no == ''){
-                return response()->json(['status' => 1, 'message' => 'Please provide the IBAN number']);
-            } 
-            if ($request->account_no == null || $request->account_no == '') {
-                return response()->json(['status' => 1, 'message' => 'Please provide the account number']);
-            } 
-            if ($request->bank == null || $request->bank == ''){
-                return response()->json(['status' => 1, 'message' => 'Please choose a bank']);
-            } 
-            if (!$request->hasFile('cheque_image')){
-                return response()->json(['status' => 1, 'message' => 'Please provide the cheque image']);
      
-            } 
-
-            if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
-                $shipper_info->bank_id = $request->bank;
-                $shipper_info->iban = $request->iban_no;
-                $shipper_info->account_number = $request->account_no;
-                if ($request->hasFile('cheque_image')) {
-                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
-
-                    $file = $request->file('cheque_image');
-
-                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
-                    $shipper_info->cheque_image = $filename;
-                    $shipper_info->completed_status = 1;
-                }
-            }
-            return response()->json(['status' => 1, 'message' => $shipper_info]);
-     
-            $shipper_info->save();
-        }
-
         $admin_id = Auth::id();
         $center_n_franchise = RetailUser::where('id',$admin_id)->select('category','category_id');
         if ($center_n_franchise->exists())
@@ -15616,6 +15916,25 @@ class RiderAPIController extends Controller
             $cat = $center_n_franchise = null;
             $cat_id = $center_n_franchise = null;
         }
+
+        if($consignee_id==''){
+            $consignee_info = ConsigneeInfo::where('phone_number_1',$consignee_phone_number_1);
+            if(!$consignee_info->exists()){
+                $consignee = new ConsigneeInfo();
+                $consignee->shipper_id = $shipper_id;
+                $consignee->city_id = $city_id;
+                $consignee->name = $consignee_name;
+                $consignee->address = $consignee_address;
+                $consignee->consignee_phone_number_1 = $consignee_phone_number_1;
+                $consignee->save();
+            }
+            
+        }
+
+        // $consignee_name = $request->input('consignee_name');
+        // $consignee_address = $request->input('consignee_address');
+        // $consignee_phone_number_1 = $request->input('consignee_phone_no');
+        // $consignee_id = $request->consignee_id;
 
         $retail_shipment = new RetailShipment();
         $retail_shipment->shipment_id = $shipment_id;
@@ -15641,9 +15960,10 @@ class RiderAPIController extends Controller
         $retail_shipment->length = $length;
         $retail_shipment->breadth = $breadth;
         $retail_shipment->height = $height;
-        $retail_shipment->retail_user_id = Auth::id();
+        $retail_shipment->retail_user_id = $shipper_id;
         $retail_shipment->category = $cat;
         $retail_shipment->category_id = $cat_id;
+        $retail_shipment->delivery_type = $request->delivery_type;
         if($request->has('admin_discount'))
         {
             $retail_shipment->admin_discount = $request->admin_discount;
@@ -15665,6 +15985,7 @@ class RiderAPIController extends Controller
 
         $shipment = Shipment::find($shipment_id);
         if($shipment->charges_mode_id != 2){
+            
             $date = Carbon::today()->toDateString();
             //RetailUser::where();
             $retail_user_id = 1;
@@ -15705,12 +16026,15 @@ class RiderAPIController extends Controller
         $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address, $shipper_info->id);
 
         if($request->book_button == 0){
-            return response()->json(['status' => 0, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);
+            return response()->json(['status' => 0, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id,'shipper_id'=>$shipper_id,'destination'=>$destination]);
         }
         else{
             $print = $shipment_id;
             return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
         }
+    }catch(\Exception $e){
+        return response()->json(['status' => 1, 'Error' => $e->getMessage()]);
+    }
     }
 
 

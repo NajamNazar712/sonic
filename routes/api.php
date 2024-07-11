@@ -156,8 +156,17 @@ use App\Http\Models\Shippers\ShipperPickupController;
                 Route::post('shipper_trax_city_center', 'Rider\RiderAPIController@shipper_trax_city_center')->name('shipper_trax_city_center');
                 Route::post('shipper_flyer_request', 'Rider\RiderAPIController@shipper_flyer_request')->name('shipper_flyer_request');
                 Route::post('shipper_all', 'Rider\RiderAPIController@shipper_all')->name('shipper_all');
-                Route::post('shipper_booking', 'Rider\RiderAPIController@shippment_book_retail')->name('shipper_booking');
+                Route::post('shipper_booking', 'Rider\RiderAPIController@shippment_book_retail')->name('shippment_book_retail');
+                Route::post('shipper_booked_status', 'Rider\RiderAPIController@shipper_booked_status')->name('shipper_booked_status');
         
+                Route::post('shipper_booking_list', 'Rider\RiderAPIController@shipper_booking_list')->name('shipper_booking_list');
+                Route::post('shipper_payment_list', 'Rider\RiderAPIController@shipper_payment_list')->name('shipper_payment_list');
+                Route::post('shipper_shipment_history', 'Rider\RiderAPIController@shipper_shipment_history')->name('shipper_shipment_history');
+        
+                Route::post('shipper_shipment_detail', 'Rider\RiderAPIController@shipper_shipment_detail')->name('shipper_shipment_detail');
+                Route::post('shipper_payment_detail', 'Rider\RiderAPIController@shipper_payment_detail')->name('shipper_payment_detail');
+        
+
             });
         });
         
