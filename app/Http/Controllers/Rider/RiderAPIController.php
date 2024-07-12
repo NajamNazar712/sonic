@@ -15379,7 +15379,7 @@ $advice = 0;
 
     $booked = 0;
     try{
-        $booked->count
+        $booked = $booked->count;
     }catch(\Exception $ex){
     
     }
