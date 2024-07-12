@@ -102,7 +102,6 @@ class AgentSarNotification extends Command
                 ->where('rv_shipment_assign_agents.unresponsive_count', 2)
                 ->where('rv_shipment_assign_agents.unresponsive_email_count', '>', 0)
                 ->where('rv_shipment_assign_agents.unresponsive_email_time', '<=', $nowSub48Hours)
-                ->whereIn('shipments.tracking_number',[])
                 ->select('rv_shipment_assign_agents.*') // Select only columns from rv_shipment_assign_agents
                 ->get();
             
