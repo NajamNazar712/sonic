@@ -15434,7 +15434,7 @@ $advice = $booked_advice_pending->count;
         }
 
         $rules = [
-            'shipment_id' => ['required', 'integer'],
+            'tracking_number' => ['required', 'integer'],
 
         ];
 
@@ -15443,7 +15443,7 @@ $advice = $booked_advice_pending->count;
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $shipment_id = $request->shipment_id;
+            $tracking_number = $request->tracking_number;
             /*
             select sps.name as status_name,sp.created_at as date from sonic5.shipments as sp 
 inner join sonic5.shipment_status as sps on sps.id = sp.shipper_status_id
@@ -15451,12 +15451,20 @@ where  sp.id=66;
             */
             $shipment_results = DB::table('shipments as sp')
             ->join('shipment_status as sps', 'sps.id', '=', 'sp.shipper_status_id')
-            ->where('sp.id', $shipment_id)
+            ->where('sp.tracking_number', $tracking_number)
             ->select(
                 'sps.name as status_name',
-                'sp.created_at as date'
-            )
-            ->get();
+                'sp.created_at as date',
+                'sp.id as shipment_id'
+            );
+            $shipment_id = "";
+            if($shipment_results->exists()){
+                $shipment_results = $shipment_results->get();
+                $shipment_id = $shipment_results[0]->shipment_id;
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Record Not found']);
+      
+            }
 
             $result = DB::table('shipments_journey as spj')
     ->join('shipment_status as sps', 'sps.id', '=', 'spj.shipper_status_id')
