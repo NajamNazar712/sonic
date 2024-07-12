@@ -15085,7 +15085,6 @@ class RiderAPIController extends Controller
                 $user = User::where('id',1381)->first();
                 $api_token = $user->api_token;
                 $products = Product::all();
-                $cities = City::where('status', 1)->get();
                 $city_id = $retailShipperInfo->city_id;
                 $retailTraxCenter = RetailTraxCenter::where('status',1)->where('default_hub', $city_id)->get();
                 //trax metarial types
@@ -15096,7 +15095,6 @@ class RiderAPIController extends Controller
                 $bank_list = BanksList::where('status',1)->get();
                 return response()->json(['status' => 0, 'message' => 'Record Found',
                 'products'=>$products,
-                'cities'=>$cities,
                 'retail_trax_centre'=>$retailTraxCenter,
                 'packaging_material_types'=>$packagingMaterialTypes,
                 'packaging_material_type_sizes'=>$packagingMaterialTypeSizes,
