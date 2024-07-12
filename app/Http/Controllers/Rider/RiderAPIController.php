@@ -15364,7 +15364,7 @@ $totalSum = $results->sum('amount');
 }catch(\Exception $ex){
 
 }
-$delivery = 0;
+$delivery = "";
 try{
 $delivery = $booked_delivered->count.'('.$booked->count/$booked_delivered->count.'%)';
 }catch(\Exception $ex){
