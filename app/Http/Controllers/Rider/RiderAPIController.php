@@ -15374,16 +15374,16 @@ $advice = 0;
     
     }
 
-    $booked = 0;
+    $book = 0;
     try{
-        $booked = $booked->count;
+        $book = $booked->count;
     }catch(\Exception $ex){
-    
+        
     }
 
 
             return response()->json(['status' => 0, 'message' => 'Success', 'data' => [
-                'booked'=>$booked,
+                'booked'=>$book,
                 'payment'=>$totalSum,
                 'delivery'=>$delivery,
                 'advice'=>$advice
