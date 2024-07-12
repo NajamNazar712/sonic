@@ -15084,7 +15084,7 @@ class RiderAPIController extends Controller
                 $retailShipperInfo = $retailShipperInfo->first();
                 $user = User::where('id',1381)->first();
                 $api_token = $user->api_token;
-               // $products = Product::all();
+                $products = Product::all();
                 $city_id = $retailShipperInfo->city_id;
                 $retailTraxCenter = RetailTraxCenter::where('status',1)->where('default_hub', $city_id)->get();
                 //trax metarial types
@@ -15092,14 +15092,15 @@ class RiderAPIController extends Controller
                 $packagingMaterialTypeSizes = PackagingMaterialTypeSizes::all();
                 $retail_shipping_modes = RetailShippingMode::all();
                 $consigneeInfos = ConsigneeInfo::where('shipper_id',$shipper_id)->get();
-                //$bank_list = BanksList::where('status',1)->get();
+                $bank_list = BanksList::where('status',1)->get();
                 return response()->json(['status' => 0, 'message' => 'Record Found',
-               // 'products'=>$products,
+                'products'=>$products,
                 'retail_trax_centre'=>$retailTraxCenter,
                 'packaging_material_types'=>$packagingMaterialTypes,
                 'packaging_material_type_sizes'=>$packagingMaterialTypeSizes,
                 'retail_shipping_modes'=>$retail_shipping_modes,
-                'consignee_infos'=>$consigneeInfos
+                'consignee_infos'=>$consigneeInfos,
+                'bank_list'=>$bank_list
             ]); //RetailTraxStoreId bind for users table booking
             }else {
                 return response()->json(['status' => 1, 'message' => 'Record not found', 'errors' => 'not Exist']);
