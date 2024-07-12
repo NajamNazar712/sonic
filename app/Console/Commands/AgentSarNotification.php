@@ -61,7 +61,7 @@ class AgentSarNotification extends Command
             $nowSub16Hours = Carbon::now()->subHours(16)->toDateTimeString();
             $nowSub24Hours = Carbon::now()->subHours(24)->toDateTimeString();
             $nowSub48Hours = Carbon::now()->subHours(48)->toDateTimeString();
-        
+
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
@@ -78,18 +78,18 @@ class AgentSarNotification extends Command
             //Combine the results for sending in single email
             $sendEmail = $sendEmails->union($sendEmailofRefusalShipments)->get();
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
-            // if ($sendEmail->isNotEmpty()) {
+            if ($sendEmail->isNotEmpty()) {
 
-            //     foreach ($sendEmail as $shipment) {
-            //         // if shipment status is unresponsive Increment the unresponsive_email_count for each shipment after sending the email
-            //         if($shipment->rv_assign_agent_status_id == 7){
-            //             $shipment->increment('unresponsive_email_count');
-            //             $shipment->unresponsive_email_time = $currentDateTime;
-            //             $shipment->save();
-            //         }
-            //     }
-            //     NotificationsController::send(220, $sendEmail);
-            // }
+                foreach ($sendEmail as $shipment) {
+                    // if shipment status is unresponsive Increment the unresponsive_email_count for each shipment after sending the email
+                    if($shipment->rv_assign_agent_status_id == 7){
+                        $shipment->increment('unresponsive_email_count');
+                        $shipment->unresponsive_email_time = $currentDateTime;
+                        $shipment->save();
+                    }
+                }
+                NotificationsController::send(220, $sendEmail);
+            }
 
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status being set on the shipment, 
             // the system will automatically update the shipment status to "Return Confirm."
@@ -107,6 +107,7 @@ class AgentSarNotification extends Command
             
             if ($unresponsive_shipments->isNotEmpty()) {
                 foreach ($unresponsive_shipments as $shipment) {
+
                     // $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
                     $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
 
