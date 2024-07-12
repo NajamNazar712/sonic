@@ -15157,8 +15157,11 @@ class RiderAPIController extends Controller
             'trax_centre_id' =>['required'],
             'qty' => ['required','integer','min:1'],
             'amount' => ['required','integer','min:1'],
-            'trax_centre_name_verification_id'=>['required','integer']
-           
+            'trax_centre_name_verification_id'=>['nullable'],
+            'trax_shipper_name'=>['nullable'],
+            'trax_shipper_phone'=>['nullable'],
+            'trax_shipper_cnic'=>['nullable'],
+            'trax_shipper_address'=>['nullable']
 
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -15171,7 +15174,27 @@ class RiderAPIController extends Controller
             $trax_centre_id = $request->trax_centre_id;
             $qty = $request->qty;
             $amount = $request->amount;
+            
             $trax_centre_name_verification_id = $request->trax_centre_name_verification_id;
+            try{
+            if($trax_centre_name_verification_id==0){
+                $trax_shipper_name = $request->trax_shipper_name;
+                $trax_shipper_phone = $request->trax_shipper_phone;
+                $trax_shipper_cnic = $request->trax_shipper_cnic;
+                $trax_shipper_address = $request->trax_shipper_address;
+                $retail_shipper = new RetailShipperNameVerification();
+                $retail_shipper->phone_number = $trax_shipper_phone;
+                $retail_shipper->shipper_name = $trax_shipper_name;
+                $retail_shipper->shipper_cnic = $trax_shipper_cnic;
+                $retail_shipper->shipper_address = $trax_shipper_address;
+                $retail_shipper->retail_shipper_info_id = $retail_shipper_id;
+                $retail_shipper->save();
+                $trax_centre_name_verification_id = $retail_shipper->id;
+                
+            }
+        }catch(\Exception $ex){
+            return response()->json(['status' => 1, 'create_message' => 'Error','exception'=>$ex->getMessage()]);
+        }
             $status = 0;
             
                 $result = TraxRetailShipperFlyerRequest::create([
