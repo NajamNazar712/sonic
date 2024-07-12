@@ -15094,7 +15094,7 @@ class RiderAPIController extends Controller
                 $consigneeInfos = ConsigneeInfo::where('shipper_id',$shipper_id)->get();
                 $bank_list = BanksList::where('status',1)->get();
                 return response()->json(['status' => 0, 'message' => 'Record Found',
-                'products'=>$products,
+               // 'products'=>$products,
                 'retail_trax_centre'=>$retailTraxCenter,
                 'packaging_material_types'=>$packagingMaterialTypes,
                 'packaging_material_type_sizes'=>$packagingMaterialTypeSizes,
