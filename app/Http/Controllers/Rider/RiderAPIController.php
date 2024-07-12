@@ -15358,13 +15358,35 @@ class RiderAPIController extends Controller
     ->get();
 
 // Calculate the total sum of the amounts
+$totalSum = 0;
+try{
 $totalSum = $results->sum('amount');
+}catch(\Exception $ex){
 
+}
+$delivery = 0;
+try{
 $delivery = $booked_delivered->count.'('.$booked->count/$booked_delivered->count.'%)';
-$advice = $booked_advice_pending->count;
+}catch(\Exception $ex){
+
+}
+$advice = 0;
+    try{
+    $advice = $booked_advice_pending->count;
+    }catch(\Exception $ex){
+    
+    }
+
+    $booked = 0;
+    try{
+        $booked->count
+    }catch(\Exception $ex){
+    
+    }
+
 
             return response()->json(['status' => 0, 'message' => 'Success', 'data' => [
-                'booked'=>$booked->count,
+                'booked'=>$booked,
                 'payment'=>$totalSum,
                 'delivery'=>$delivery,
                 'advice'=>$advice
