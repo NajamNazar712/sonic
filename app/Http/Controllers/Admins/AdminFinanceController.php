@@ -19573,6 +19573,8 @@ class AdminFinanceController extends Controller
                 $type = 'Delivered';
             } else if ($pending_payment_shipment->type == 1) {
                 $type = 'Returned';
+            }else if ($pending_payment_shipment->type == 3) {
+                $type = 'Arrival';
             } else {
                 $type = 'Adjusted';
             }
