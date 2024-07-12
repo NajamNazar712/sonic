@@ -697,9 +697,9 @@ class RegisterController extends Controller
                         if(count($user_bank_infos) > 0){
                             $html .='<table style="width:100%;">';
                             $html .= '<thead><tr>
-                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account #</th>
-                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account Title</th>
-                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Branch Name</th></tr></thead><tbody>';
+                                            <td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account #</td>
+                                            <td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account Title</td>
+                                            <td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Branch Name</td></tr></thead><tbody>';
                             foreach($user_bank_infos as $banks_info){
                                 $html .='<tr>';
                                 $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$banks_info->account_no.'</td>';
