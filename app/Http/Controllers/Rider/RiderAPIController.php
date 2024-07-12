@@ -15234,10 +15234,7 @@ class RiderAPIController extends Controller
     {
 
        
-        $cities = City::where('status', 1)->where('business_category_id',1)->select(
-            'id',
-            'name'
-        );
+        $cities = City::where('status', 1)->where('business_category_id',1);
 
         if ($cities->exists()) {
             $cities = $cities->get();
