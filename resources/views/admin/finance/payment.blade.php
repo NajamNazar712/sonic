@@ -229,6 +229,43 @@
 
     <script>
         $(document).ready(function() {
+
+            $('#requested_from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                // format: 'dd mmmm, yyyy',
+                format: 'yyyy-mm-dd',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#requested_to_date').pickadate('picker').set('min', $('#requested_from_date')
+                            .pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            $('#requested_to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                // format: 'dd mmmm, yyyy',
+                format: 'yyyy-mm-dd',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#requested_from_date').pickadate('picker').set('max', $('#requested_to_date')
+                            .pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             $('#make_payments_form button.make').prop('disabled', true);
             $('#make_payments_form button.make_invoice').prop('disabled', true);
             $('#make_payments_form button.export_bank_order').prop('disabled', true);
