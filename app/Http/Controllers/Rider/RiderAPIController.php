@@ -15973,20 +15973,19 @@ where  sp.id=66;
             //     return response()->json(['status' => 1, 'message' => 'Please provide the cheque image']);
             // }
 
-            if ($request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $shipper_info->bank_id = $request->bank;
                 $shipper_info->iban = $request->iban_no;
                 $shipper_info->account_number = $request->account_no;
-                if ($request->hasFile('cheque_image')){
-                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+                // if ($request->hasFile('cheque_image')){
+                //     $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
 
-                    $file = $request->file('cheque_image');
+                //     $file = $request->file('cheque_image');
 
-                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
-                    $shipper_info->cheque_image = $filename;
-                    $shipper_info->completed_status = 1;
-                }
-            }
+                //     Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                //     $shipper_info->cheque_image = $filename;
+                //     $shipper_info->completed_status = 1;
+                // }
+            
             $shipper_info->save();
         }
      
