@@ -165,6 +165,7 @@ use App\Http\Models\Shippers\ShipperPickupController;
         
                 Route::post('shipper_shipment_detail', 'Rider\RiderAPIController@shipper_shipment_detail')->name('shipper_shipment_detail');
                 Route::post('shipper_payment_detail', 'Rider\RiderAPIController@shipper_payment_detail')->name('shipper_payment_detail');
+                Route::post('shipment_tracking_validation', 'Rider\RiderAPIController@shipment_tracking_number_validation')->name('shipment_tracking_number_validation');
         
 
             });

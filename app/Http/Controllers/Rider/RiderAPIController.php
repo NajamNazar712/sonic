@@ -15728,6 +15728,42 @@ where  sp.id=66;
         }
     }
 
+    public function shipment_tracking_number_validation(Request $request){
+   // add validation array for requested parameters
+        // $refs = ['Social Media','Website','Signages','Existing Customer','Others'];
+       
+        // if($request->ref == 'Others'){
+        //   $ref = $request->ref_name;
+        // }else{
+            $token = $request->bearerToken();
+        
+            if (!$token || !RetailShipperInfo::where('api_token', $token)->first()) {
+               return response()->json(['message' => 'Unauthorized'], 401);
+            }
+
+            $rules = [
+                'tracking_number' => ['required','integer']
+                
+    
+            ];
+    
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+            $validate->setAttributeNames($this->names);
+            if ($validate->fails()) {
+                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+            } else {
+            }
+        $tracking_number = $request->tracking_number;
+        if($tracking_number!=''){
+            $trackingRecord = Shipment::where('tracking_number',$tracking_number);
+            if($trackingRecord->exists()){
+                return response()->json(['status' => 0, 'message' => 'Tracking Number already exist']);
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Tracking Number exist in record']);
+            }
+        }
+    }
+
 
     public function shippment_book_retail(Request $request){
 
@@ -15968,9 +16004,17 @@ where  sp.id=66;
             $cat_id = $center_n_franchise = null;
         }
 
-        if($consignee_id==''){
+        if($consignee_id==0){
             $consignee_info = ConsigneeInfo::where('phone_number_1',$consignee_phone_number_1);
             if(!$consignee_info->exists()){
+                $consignee = new ConsigneeInfo();
+                $consignee->shipper_id = $shipper_id;
+                $consignee->city_id = $city_id;
+                $consignee->name = $consignee_name;
+                $consignee->address = $consignee_address;
+                $consignee->consignee_phone_number_1 = $consignee_phone_number_1;
+                $consignee->save();
+            }else{
                 $consignee = new ConsigneeInfo();
                 $consignee->shipper_id = $shipper_id;
                 $consignee->city_id = $city_id;
