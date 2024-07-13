@@ -14898,9 +14898,12 @@ class RiderAPIController extends Controller
                         $rider->api_token = $apiToken;
                         $rider->save();
                         $bank_id = $rider->bank_id;
-                        $bank_name = '';
+                        $bank_name = 0;
                         try{
                             $bank_name = $bank_id;
+                            if(is_null($bank_name)){
+                                $bank_name = 0;
+                            }
                         }catch(\Exception $exc){
 
                         }
