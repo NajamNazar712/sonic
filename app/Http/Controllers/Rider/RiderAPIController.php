@@ -15956,9 +15956,8 @@ where  sp.id=66;
        
 
         if($retail_shipper_info->exists()){
-            $retail_shipper_info = $retail_shipper_info->first();
             $shipper_info = $retail_shipper_info->first();
-         
+           
             if (!$shipper_info->iban_no && (!$request->iban_no || $request->iban_no == '')) {
                
                 return response()->json(['status' => 1, 'message' => 'Please provide the IBAN number']);
@@ -15973,9 +15972,11 @@ where  sp.id=66;
             //     return response()->json(['status' => 1, 'message' => 'Please provide the cheque image']);
             // }
 
+            
                 $shipper_info->bank_id = $request->bank;
                 $shipper_info->iban = $request->iban_no;
                 $shipper_info->account_number = $request->account_no;
+                $shipper_info->save();
                 // if ($request->hasFile('cheque_image')){
                 //     $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
 
@@ -15986,7 +15987,7 @@ where  sp.id=66;
                 //     $shipper_info->completed_status = 1;
                 // }
             
-            $shipper_info->save();
+            
         }
      
         $admin_id = Auth::id();
