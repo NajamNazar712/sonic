@@ -16012,7 +16012,7 @@ where  sp.id=66;
                 $consignee->city_id = $city_id;
                 $consignee->name = $consignee_name;
                 $consignee->address = $consignee_address;
-                $consignee->consignee_phone_number_1 = $consignee_phone_number_1;
+                $consignee->phone_number_1 = $consignee_phone_number_1;
                 $consignee->save();
             }else{
                 $consignee = new ConsigneeInfo();
@@ -16020,7 +16020,7 @@ where  sp.id=66;
                 $consignee->city_id = $city_id;
                 $consignee->name = $consignee_name;
                 $consignee->address = $consignee_address;
-                $consignee->consignee_phone_number_1 = $consignee_phone_number_1;
+                $consignee->phone_number_1 = $consignee_phone_number_1;
                 $consignee->save();
             }
             
