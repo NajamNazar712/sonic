@@ -14898,10 +14898,9 @@ class RiderAPIController extends Controller
                         $rider->api_token = $apiToken;
                         $rider->save();
                         $bank_id = $rider->bank_id;
-                        $bankInfo = BanksList::where('id',$bank_id)->first();
                         $bank_name = '';
                         try{
-                            $bank_name = $bankInfo->name;
+                            $bank_name = $bank_id;
                         }catch(\Exception $exc){
 
                         }
