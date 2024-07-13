@@ -79,27 +79,36 @@ class ShipperTrackingController extends Controller
     public function case_nature_remarks(Request $request)
     {
         $complaintId = $request->input('complaint_id');
+        $case_nature = CrmRequestCaseNatureType::where('id', $complaintId)->first();
+        $remarks_visibility = $case_nature->remarks_visibility;
         $case_nature_remarks = CrmCaseNatureRemark::where('case_nature_id', $complaintId)->get();
         return response()->json([
-            'data' => $case_nature_remarks
+            'data' => $case_nature_remarks,
+            'remarks_visibility' => $remarks_visibility
         ]);
     }
 
     public function case_nature_service_remarks(Request $request)
     {
         $serviceId = $request->input('service_id');
+        $case_nature = CrmRequestCaseNatureType::where('id', $serviceId)->first();
+        $remarks_visibility = $case_nature->remarks_visibility;
         $case_nature_service_remarks = CrmCaseNatureRemark::where('case_nature_id', $serviceId)->get();
         return response()->json([
-            'data' => $case_nature_service_remarks
+            'data' => $case_nature_service_remarks,
+            'remarks_visibility' => $remarks_visibility
         ]);
     }
 
     public function case_nature_claim_remarks(Request $request)
     {
         $claimId = $request->input('claim_id');
+        $case_nature = CrmRequestCaseNatureType::where('id', $claimId)->first();
+        $remarks_visibility = $case_nature->remarks_visibility;
         $case_nature_claim_remarks = CrmCaseNatureRemark::where('case_nature_id', $claimId)->get();
         return response()->json([
-            'data' => $case_nature_claim_remarks
+            'data' => $case_nature_claim_remarks,
+            'remarks_visibility' => $remarks_visibility
         ]);
     }
 
