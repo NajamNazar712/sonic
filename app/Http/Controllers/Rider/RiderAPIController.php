@@ -15953,7 +15953,7 @@ where  sp.id=66;
             else{
                 $destination = $request->input('international_destination');
             }
-       
+        
 
         if($retail_shipper_info->exists()){
             $shipper_info = $retail_shipper_info->first();
@@ -16121,7 +16121,7 @@ where  sp.id=66;
         $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address, $shipper_info->id);
 
         if($request->book_button == 0){
-            return response()->json(['status' => 0, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id,'shipper_id'=>$shipper_id,'destination'=>$destination]);
+            return response()->json(['status' => 0, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id,'shipper_id'=>$shipper_id,'destination'=>$destination,'shipper_info'=>$shipper_info]);
         }
         else{
             $print = $shipment_id;
