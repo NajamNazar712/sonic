@@ -44,6 +44,7 @@ use App\Http\Models\ShipmentStatusReason;
 use App\Jobs\ProcessRemoveShipmentFromRvShipmentTicket;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentTicket;
+use App\RvShipmentTicketDeleteTable;
 use Illuminate\Support\Facades\Log;
 
 trait RvTrait
@@ -1299,6 +1300,7 @@ trait RvTrait
         // check if shipments exist or if admin is assign shipment to agent
         //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
         if ($shipments->count()) {
+            $shipment_data = [];
             foreach ($shipments as $shipment) {
                 $shipmentId = $shipment->shipment_id;
                 $ticketId = $shipment->id;
@@ -1306,7 +1308,7 @@ trait RvTrait
                 if (!Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $shipmentId)->exists()) {
                     // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipmentId));
                     RvShipmentTicket::where('shipment_id', $shipmentId)->delete();
-
+                    // $shipment_data['shipment_id'][] = $shipmentId;
                     $shipment = null;
                     continue;
                 }
@@ -1469,6 +1471,7 @@ trait RvTrait
 
                 break;
             }
+            // self::rvshipmentDelete($shipment_data);
         }
 
         return $shipment;
@@ -2501,5 +2504,11 @@ trait RvTrait
             return false;
         }
 
+    }
+
+    static function rvshipmentDelete($shipment_data = array()){
+        if(count($shipment_data) > 0){
+            RvShipmentTicketDeleteTable::insert($shipment_data);
+        }
     }
 }
