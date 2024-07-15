@@ -25,6 +25,7 @@
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Territory</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Other territories</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -43,30 +44,40 @@
                 </div>
                 <form method="post" id="agent_assign" action="{{route('admin.settings.auto_tag_territories.submit')}}">
                     @csrf
+                    <div class="modal-body">
+                        <div class="form-group" id="city_select">
+                            <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                            </select>
+                        </div>
+                        <div class="form-group" id="territory_select">
+                            <select name="territory_id[]" id="territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" id="agent_select">
+                            <select name="agent_id" id="agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
+                                @foreach($agents as $agent)
+                                    <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                <div class="modal-body">
-                    <div class="form-group" id="city_select">
-                        <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
-                        </select>
+                        <div class="form-check d-none" id="lead_agent_div">
+                            <label class="form-check-label mr-1" for="is_lead_user" style="margin: 0px 5px 0px 0px;">Lead User</label>
+                            <input type="checkbox" name="is_lead_user" id="is_lead_user">
+                        </div>
+
+                        <div class="form-group mt-2 d-none" id="remaining_territory_select_div">
+                            <select name="territory_id[]" id="remaining_territory_id" class="form-control select2" multiple="multiple">
+                            </select>
+                            <span class="text-danger d-none" id="remaining_territory_error">Assign at least 1 territory</span>
+                        </div>
                     </div>
-                    <div class="form-group" id="territory_select">
-                        <select name="territory_id" id="territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
-                        </select>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="assign_agentSubmit">Tag</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                     </div>
-                    
-                    <div class="form-group" id="agent_select">
-                        <select name="agent_id" id="agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
-                            @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Tag</button>
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                </div>
-            </form>
+                </form>
 
             </div>
         </div>
@@ -82,44 +93,51 @@
                 </div>
                 <form method="post" id="agent_edit" action="{{route('admin.settings.auto_tag_territories.update')}}" novalidate="novalidate">
                     @csrf
+                    <div class="modal-body">
+                        <input type="hidden" name="auto_tagging_id" id="auto_tagging_id">
+                        
+                        <div class="form-group" id="edit_city_select">
+                            <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                                @foreach($cities as $city)
+                                    <option value="{{ $city->id }}" > {{ $city->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                <div class="modal-body">
-                    <input type="hidden" name="auto_tagging_id" id="auto_tagging_id">
-                    
-                   
+                        <div class="form-group" id="edit_territory_select">
+                            <select name="territory_id[]" id="edit_territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                                @foreach($territories as $territory)
+                                    <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                    <div class="form-group" id="edit_city_select">
-                        <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
-                            @endforeach
-                        </select>
+                        
+                        <div class="form-group">
+                            <select name="agent_id" id="edit_agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
+                                @foreach($agents as $agent)
+                                    <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group d-flex" id="edit_lead_agent_div">
+                            <label class="form-check-label mr-1" for="edit_is_lead_user" style="margin: 0px 5px 0px 0px;">Lead User</label>
+                            <input type="checkbox" name="is_lead_user" id="edit_is_lead_user">
+                        </div>
+
+                        <div class="form-group mt-2" id="edit_remaining_territory_select_div">
+                            <select name="territory_id[]" id="edit_remaining_territory_id" class="form-control select2" multiple="multiple">
+                            </select>
+                            <span class="text-danger d-none" id="edit_remaining_territory_error">Assign at least 1 territory</span>
+                        </div>
+                        
                     </div>
-
-                    <div class="form-group" id="edit_territory_select">
-                        <select name="territory_id" id="edit_territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
-                            @foreach($territories as $territory)
-                                <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
-                            @endforeach
-                        </select>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="edit_agentSubmit">Tag</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                     </div>
-
-                    
-                    <div class="form-group">
-                        <select name="agent_id" id="edit_agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
-                            @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="edit_agentSubmit">Tag</button>
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                </div>
-            </form>
+                </form>
 
             </div>
         </div>
@@ -151,11 +169,112 @@
                 $('#agent_id').val('').trigger('change.select2');
                 $('#city_id').val('').trigger('change.select2');
                 $('#territory_id').val('').trigger('change.select2');
-                
+
+                $('#is_lead_user').prop('checked', false);
+                $('#remaining_territory_id').val('').trigger('change.select2');
+                $('#remaining_territory_select_div').addClass('d-none');
+
+                $('#city_id-error, #agent_id-error, #territory_id-error').hide();
+                citySelectedOnce = false;
+                agentSelectedOnce = false;
+                territorySelectedOnce = false;
+                remaining_territory_error_once = false;
             });
+
+            var citySelectedOnce = false;
+            var agentSelectedOnce = false;
+            var territorySelectedOnce = false;
+            var remaining_territory_error_once = false;
+
+            $('#city_id').on('change', function () {
+                $('#is_lead_user').prop('checked', false);
+                if ($(this).val()) {
+                    $('#city_id-error').hide();
+                    citySelectedOnce = true;
+                } else if (!citySelectedOnce) {
+                    $('#city_id-error').show();
+                }
+            });
+
+            $('#agent_id').on('change', function () {
+                $('#is_lead_user').prop('checked', false);
+                if ($(this).val()) {
+                    $('#agent_id-error').hide();
+                    agentSelectedOnce = true;
+                } else if (!agentSelectedOnce) {
+                    $('#agent_id-error').show();
+                }
+            });
+
+            $('#territory_id').on('change', function () {
+                $('#is_lead_user').prop('checked', false);
+                if ($(this).val()) {
+                    $('#territory_id-error').hide();
+                    territorySelectedOnce = true;
+                } else if (!territorySelectedOnce) {
+                    $('#territory_id-error').show();
+                }
+            });
+
+            $('#remaining_territory_id').on('change', function () {
+                if ($(this).val()) {
+                    $('#remaining_territory_error').hide();
+                    remaining_territory_error_once = true;
+                } else if (!remaining_territory_error_once) {
+                    $('#remaining_territory_error').show();
+                }
+            });
+
+            var editCitySelectedOnce = false;
+            var editAgentSelectedOnce = false;
+            var editTerritorySelectedOnce = false;
+            var edit_remaining_territory_error_once = false;
+
+            $('#edit_city_id').on('change', function () {
+                $('#edit_is_lead_user').prop('checked', false);
+                $('#edit_remaining_territory_id').val('').trigger('change');
+                if ($(this).val()) {
+                    $('#edit_city_id-error').hide();
+                    editCitySelectedOnce = true;
+                } else if (!editCitySelectedOnce) {
+                    $('#edit_city_id-error').show();
+                }
+            });
+
+            $('#edit_agent_id').on('change', function () {
+                $('#edit_is_lead_user').prop('checked', false);
+                $('#edit_remaining_territory_id').val('').trigger('change');
+                if ($(this).val()) {
+                    $('#edit_agent_id-error').hide();
+                    agentSelectedOnce = true;
+                } else if (!agentSelectedOnce) {
+                    $('#edit_agent_id-error').show();
+                }
+            });
+
+            $('#edit_territory_id').on('change', function () {
+                $('#edit_is_lead_user').prop('checked', false);
+                $('#edit_remaining_territory_id').val('').trigger('change');
+                if ($(this).val()) {
+                    $('#edit_territory_id-error').hide();
+                    territorySelectedOnce = true;
+                } else if (!territorySelectedOnce) {
+                    $('#edit_territory_id-error').show();
+                }
+            });
+
+            $('#edit_remaining_territory_id').on('change', function () {
+                if ($(this).val()) {
+                    $('#edit_remaining_territory_error').hide();
+                    edit_remaining_territory_error_once = true;
+                } else if (!edit_remaining_territory_error_once) {
+                    $('#edit_remaining_territory_error').show();
+                }
+            });
+
             $('#territory_select').css('display','none');
-                    $('#agent_select').css('display','none');
-           
+            $('#agent_select').css('display','none');
+
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Sales Person",
@@ -182,15 +301,20 @@
 
                     $('#territory_select').css('display','block');
                     $('#agent_select').css('display','block');
+                    $('#lead_agent_div').removeClass('d-none');
+                    $('#lead_agent_div').addClass('d-flex');
 
                     $('#territory_id').children().remove()
 
-                        var territory_obj  = [];
-                        territory_obj.length = 0
+                    var territory_obj  = [];
+                    var remaining_territory_obj  = [];
+                    territory_obj.length = 0
+                    remaining_territory_obj.length = 0
 
                     $.map({!! $territories !!}, function (obj) {
                             if(id == obj.city_id){
                                 territory_obj.push({id: obj.id, text: obj.name});
+                                remaining_territory_obj.push({id: obj.id, text: obj.name});
                             }
                     });
 
@@ -202,8 +326,45 @@
                             data:territory_obj
                     });
 
-                });
+                    $('#is_lead_user').unbind('change').change(function() {
+                        if ($(this).is(':checked')) {
+                            var selectedTerritoryId = $('#territory_id').val();
+                            var filteredTerritories = remaining_territory_obj.filter(function(item) {
+                                return item.id != selectedTerritoryId;
+                            });
 
+                            $('#remaining_territory_select_div').removeClass('d-none');
+                            $('#remaining_territory_id').empty().prepend('<option></option>').select2({
+                                width: '100%',
+                                placeholder: "Select Territory",
+                                allowClear: true,
+                                dropdownParent: $('#agent_assign'),
+                                data: filteredTerritories
+                            });
+                        } else {
+                            $('#remaining_territory_select_div').addClass('d-none');
+                            $('#remaining_territory_id').val(null).trigger('change');
+                            $('#remaining_territory_id').empty();
+                        }
+                    });
+
+                    $('#territory_id').change(function() {
+                        if ($('#is_lead_user').is(':checked')) {
+                            var selectedTerritoryId = $(this).val();
+                            var filteredTerritories = remaining_territory_obj.filter(function(item) {
+                                return item.id != selectedTerritoryId;
+                            });
+                            $('#remaining_territory_id').empty().prepend('<option selected></option>').select2({
+                                width: '100%',
+                                placeholder: "Select Territory",
+                                allowClear: true,
+                                dropdownParent: $('#agent_assign'),
+                                data: filteredTerritories
+                            });
+                        }
+                    }); 
+
+                });
 
             $('#edit_agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
@@ -211,60 +372,110 @@
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
-           
+
             $('#edit_city_id').select2({
                 width:'100%',
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
+
             $('#edit_territory_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Territory",
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
+
+            $('#edit_remaining_territory_id').prepend('<option selected></option>').select2({
+                width:'100%',
+                placeholder:"Other Territory",
+                allowClear:true,
+                dropdownParent:$('#agent_edit')
+            });
+            
+            var city_obj = [];
+            city_obj.length = 0
+            $.map({!! $cities !!}, function (obj, index) {
+                city_obj.push({id: obj.id, text: obj.name});
+            });    
+
+            $('#edit_city_id').select2({
+                width: '100%',
+                allowClear: true,
+                dropdownParent: $('#agent_edit'),
+                data: city_obj
+            }).bind('change', function() {
+                var id = parseInt($(this).val());
+                $('#edit_territory_select').css('display', 'block');
+                $('#edit_territory_id').children().remove();
+                $('#edit_remaining_territory_id').children().remove();
+
+                var territory_obj = [];
+                var edit_remaining_territory_obj = [];
                 
-                
-                    var city_obj = [];
-                    city_obj.length = 0
+                $.map({!! $territories !!}, function (obj) {
+                    if (id == obj.city_id) {
+                        territory_obj.push({ id: obj.id, text: obj.name });
+                    }
+                });
 
-                $.map({!! $cities !!}, function (obj, index) {
-                    
-                    city_obj.push({id: obj.id, text: obj.name});
-                });    
-                $('#edit_city_id').select2({
-                        width:'100%',
-                        allowClear:true,
-                        dropdownParent:$('#agent_edit'),
-                        data:city_obj
-                    }).bind('change', function() {
-                
-                        var id = parseInt($(this).val());
-                            console.log('change_city');
-                            $('#edit_territory_select').css('display','block');
+                $('#edit_territory_id').prepend('<option selected></option>').select2({
+                    width: '100%',
+                    placeholder: "Select Territory",
+                    allowClear: true,
+                    dropdownParent: $('#agent_edit'),
+                    data: territory_obj
+                });
 
+                function updateRemainingTerritories() {
+                    var selectedTerritoryId = $('#edit_territory_id').val();
+                    edit_remaining_territory_obj = [];
 
-                            $('#edit_territory_id').children().remove();
-                            var territory_obj = [];
-                            territory_obj.length = 0
-
-                        $.map({!! $territories !!}, function (obj) {
-                                if(id == obj.city_id){
-                                    territory_obj.push({id: obj.id, text: obj.name});
-                                }
-                        });
-
-                        $('#edit_territory_id').prepend('<option selected></option>').select2({
-                                width:'100%',
-                                placeholder:"Select Territory",
-                                allowClear:true,
-                                dropdownParent:$('#agent_edit'),
-                                data:territory_obj
-                            });
-                        
-                        
+                    $.map({!! $territories !!}, function (obj) {
+                        if (id == obj.city_id && obj.id != selectedTerritoryId) {
+                            edit_remaining_territory_obj.push({ id: obj.id, text: obj.name });
+                        }
                     });
 
+                    $('#edit_remaining_territory_id').select2({
+                        width: '100%',
+                        placeholder: "Other Territory",
+                        allowClear: true,
+                        dropdownParent: $('#agent_edit'),
+                        data: edit_remaining_territory_obj
+                    });
+                }
+
+                updateRemainingTerritories();
+
+                $('#edit_territory_id').on('change', function() {
+                    updateRemainingTerritories();
+                });
+
+                $('#EditAgentModal').on('show.bs.modal', function() {
+                    var selectedTerritoryIdModal = $('#edit_territory_id').val();
+                    var filteredTerritoriesModal = edit_remaining_territory_obj.filter(function(item) {
+                        return item.id != selectedTerritoryIdModal;
+                    });
+                    $('#edit_remaining_territory_select_div').removeClass('d-none');
+                    $('#edit_remaining_territory_id').select2({
+                        width: '100%',
+                        placeholder: "Other Territory",
+                        allowClear: true,
+                        dropdownParent: $('#agent_edit'),
+                        data: filteredTerritoriesModal
+                    });
+                });
+
+                $('#edit_is_lead_user').unbind('change').change(function() {
+                    if ($(this).is(':checked')) {
+                        updateRemainingTerritories();
+                        $('#edit_remaining_territory_select_div').removeClass('d-none');
+                    } else {
+                        $('#edit_remaining_territory_select_div').addClass('d-none');
+                    }
+                });
+            });
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -300,6 +511,7 @@
                     {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
                     {data: 'territory_name', name: 't.name', class: 'align-middle territory_name'},
                     {data: 'status', name: 'auto_tag_territories.status', class: 'align-middle status'},
+                    {data: 'territory_names', name: 'territory_names', class: 'align-middle territory_names'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -361,8 +573,6 @@
                 }
             });
 
-            
-            
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $.ajax({
@@ -373,106 +583,224 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
-
                     $('#auto_tagging_id').val(data.auto_tagging_id);
+                    $('#edit_territory_select').css('display','block');
+                    $('#edit_territory_id').css('display','block');
+                    $('#edit_agent_id').val(data.agent_id).change();
+                    $('#edit_city_id').val(data.city_id).change();
+                    $('#edit_territory_id').val(data.territory_id).change();
 
+                    if (data.is_lead_user == 0) {
+                        $('#EditAgentModal').on('show.bs.modal', function(){
+                            $('#edit_is_lead_user').prop('checked', false);
+                            $('#edit_remaining_territory_select_div').addClass('d-none');
+                        });
+                    } 
+                    else if (data.is_lead_user == 1) {
+                        $('#EditAgentModal').on('show.bs.modal', function(){
+                            $('#edit_is_lead_user').prop('checked', true);
+                            $('#edit_remaining_territory_select_div').removeClass('d-none');
+                        });
+                    }
 
-                            $('#edit_territory_select').css('display','block');
-                            $('#edit_territory_id').css('display','block');
-                            console.log(data.agent_id);
-                            $('#edit_agent_id').val(data.agent_id).change();
-                            $('#edit_city_id').val(data.city_id).change();
-                            $('#edit_territory_id').val(data.territory_id).change();
-                    
+                    $('#edit_remaining_territory_id').empty();
+                    if (data.other_territory_names && data.other_territory_names.length > 0) {
+                        data.other_territory_names.forEach(function(territory) {
+                            $('#edit_remaining_territory_id').append('<option value="' + territory.id + '" selected>' + territory.name + '</option>');
+                        });
+                    }
+
+                    $('#edit_agent_id').on('change', function() {
+                        var selectedAgentId = $(this).val();
+                        if (selectedAgentId != data.agent_id) {
+                            $('#edit_is_lead_user').prop('checked', false);
+                            $('#edit_remaining_territory_id').empty();
+                            $('#edit_remaining_territory_select_div').addClass('d-none');
+                        } else{
+                            $('#edit_remaining_territory_id').empty();
+                            if (data.other_territory_names && data.other_territory_names.length > 0) {
+                                data.other_territory_names.forEach(function(territory) {
+                                    $('#edit_remaining_territory_id').append('<option value="' + territory.id + '" selected>' + territory.name + '</option>');
+                                });
+                            }
+                        }
+                    });
+
                     $('#EditAgentModal').modal('show');
-
                 })
-                
-            });
-
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.delete', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                swal({
-                                text: 'Are you sure, you want to Delete?',
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function(confirm) {
-                                         $.ajax({
-                                            url:'{!! route("admin.settings.auto_tagging.delete") !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'id': id,
-                                                '_token': '{{ csrf_token() }}'
-                                            }
-                                        }).done(function (data) {
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                            table.draw();
-                                        });
-                            });
-
-                
-            });
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                                         $.ajax({
-                                            url:'{!! route("admin.settings.auto_tag_territories.enable_disable") !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'id': id,
-                                                '_token': '{{ csrf_token() }}'
-                                            }
-                                        }).done(function (data) {
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                            table.draw();
-                                        });
-
-                
             });
 
             
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.delete', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                swal({
+                    text: 'Are you sure, you want to Delete?',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    $.ajax({
+                        url:'{!! route("admin.settings.auto_tagging.delete") !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-bottom-center',
+                            containerId: 'toast-bottom-center'
+                        });
+                        table.draw();
+                    });
+                });
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_tag_territories.enable_disable") !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    toastr.success(data.success, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    table.draw();
+                });
+            });
+
+            $('#edit_agent_id').on('change', function(){
+                if ($('#edit_agent_id').val() == ''){
+                    $('#edit_is_lead_user').prop('checked', false);
+                    $('#edit_lead_agent_div').removeClass('d-flex');
+                    $('#edit_lead_agent_div').addClass('d-none');
+                    $('#edit_remaining_territory_select_div').addClass('d-none');
+                } else if ($('#edit_agent_id').val() != ''){
+                    $('#edit_is_lead_user').prop('checked', true);
+                    $('#edit_lead_agent_div').removeClass('d-none');
+                    $('#edit_remaining_territory_select_div').removeClass('d-none');
+                    $('#edit_lead_agent_div').addClass('d-flex');
+                }
+            });
+
+            $('#AssignAgentModal').on('show.bs.modal', function(){
+                toggleLeadUserCheckbox();
+            });
+
+            function toggleLeadUserCheckbox() {
+                var disableLeadUser = !$('#agent_id').val() || !$('#city_id').val() || !$('#territory_id').val();
+                $('#is_lead_user').prop('disabled', disableLeadUser);
+                $('#remaining_territory_id').val('').trigger('change');
+                $('#remaining_territory_select_div').addClass('d-none');
+                if(disableLeadUser) {
+                    $('#is_lead_user').prop('checked', false);
+                    $('#remaining_territory_id').val('').trigger('change');
+                    $('#remaining_territory_select_div').addClass('d-none');
+                }
+            }
+
+            $('#agent_id, #city_id, #territory_id').change(function() {
+                toggleLeadUserCheckbox();
+            });
+
+
+            $('#EditAgentModal').on('show.bs.modal', function(){
+                toggleEditLeadUserCheckbox();
+            });
+
+            function toggleEditLeadUserCheckbox() {
+                var disableLeadUser = !$('#edit_agent_id').val() || !$('#edit_city_id').val() || !$('#edit_territory_id').val();
+                $('#edit_is_lead_user').prop('disabled', disableLeadUser);
+                $('#edit_remaining_territory_select_div').addClass('d-none');
+                if(disableLeadUser) {
+                    $('#edit_is_lead_user').prop('checked', false);
+                    $('#edit_remaining_territory_id').val('').trigger('change');
+                    $('#edit_remaining_territory_select_div').addClass('d-none');
+                }
+            }
+
+            $('#edit_agent_id, #edit_city_id, #edit_territory_id').change(function() {
+                toggleEditLeadUserCheckbox();
+            });
+
+
+            // $( "#agent_assign" ).validate({
+            //         errorClass:"danger",
+            //         errorPlacement: function(error, element) {
+            //             error.addClass('w-100').appendTo(element.parent('.form-group'));
+            //         },
+            //         submitHandler: function(form) {
+            //             form.submit();    
+            //         }
+            // });
+
             $( "#agent_assign" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    form.submit();    
+                    if ($('#is_lead_user').is(':checked') && $('#remaining_territory_id').val() == '') {
+                        $('#remaining_territory_error').removeClass('d-none').show();
+                    } else {
+                        $('#remaining_territory_error').addClass('d-none');
+                        form.submit();
+                    }
                 }
-                
-                });
+            });
+            $('#assign_agentSubmit').on('click', function() {
+                $('#agent_assign').submit();
+            });
 
-                $( "#agent_edit" ).validate({
+            // $( "#agent_edit" ).validate({
+            //     errorClass:"danger",
+            //     errorPlacement: function(error, element) {
+            //         error.addClass('w-100').appendTo(element.parent('.form-group'));
+            //     },
+            //     submitHandler: function(form) {
+            //         form.submit();    
+            //     }
+            
+            // });
+
+            $( "#agent_edit" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    form.submit();    
+                    if ($('#edit_is_lead_user').is(':checked') && $('#edit_remaining_territory_id').val() == ''){
+                        $('#edit_remaining_territory_error').removeClass('d-none');
+                    } else {
+                        $('#edit_remaining_territory_error').addClass('d-none');
+                        form.submit();
+                    }
                 }
-                
-                });
+            
+            });
+            $('#edit_agentSubmit').on('click', function() {
+                $('#agent_edit').submit();
+            });
         });
     </script>
 @endsection

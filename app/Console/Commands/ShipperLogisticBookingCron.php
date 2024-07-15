@@ -46,9 +46,9 @@ class ShipperLogisticBookingCron extends Command
 //            ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
 //            ->select('u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
 //            ->where('trax_logistic_bookings.booking_date',$date);
-        $shipper_ids=TraxLogisticBooking::where('trax_logistic_bookings.booking_date',$date)->groupBy('trax_logistic_bookings.shipper_id');
+        $shipper_ids=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')->where('trax_logistic_bookings.booking_date',$date)->groupBy('trax_logistic_bookings.shipper_id');
         if($shipper_ids->exists()){
-            $shipper_ids=$shipper_ids->pluck('trax_logistic_bookings.shipper_id');
+            $shipper_ids=$shipper_ids->pluck('trax_logistic_bookings.shipper_id','u.email');
             NotificationsController::send(232,$shipper_ids,$date);
         }
     }

@@ -17,7 +17,7 @@ use App\Http\Models\Shippers\ShipperPickupController;
 
     Route::name('api.')->group(function () {
 
-
+    Route::get('fetch_complaints', 'APIController@fetch_complaints')->name('fetch_complaints');
     Route::post('shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
     Route::post('login', 'APIController@login')->name('login');
     Route::post('user_login', 'APIController@bolt_login')->name('user_login');
@@ -699,6 +699,7 @@ use App\Http\Models\Shippers\ShipperPickupController;
                 Route::post('shipping_modes', 'ShipperAPIController@reimbursement_shipping_modes')->name('shipping_modes');
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
+
         });
     });
 

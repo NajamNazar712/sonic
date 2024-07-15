@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Retail;
 use App\Http\Controllers\Controller;
 use App\Http\Models\City;
 use App\Http\Models\InternationalDhlZone;
+use App\Http\Models\InternationalEconomyStandardRetailRate;
 use App\Http\Models\InternationalStandardRetailRates;
 use App\Http\Models\RetailStandardRates;
 use App\Http\Models\Zone;
@@ -184,15 +185,27 @@ class RetailRatesCalculationController extends Controller
             $total_charges = round($charges_with_discount_and_gst + $packaging_and_insurance_charges, 0, PHP_ROUND_HALF_UP);
         } elseif ($business_category_id == 2) {
 
+            $InternationalEconomyStandardRetailRateCheck = false;
+
             if ($shipping_mode_id == 8) {
                 $shipping_mode_id = 1;
             } else if ($shipping_mode_id == 9) {
+                $shipping_mode_id = 2;
+            } else if ($shipping_mode_id == 11) {
+                $InternationalEconomyStandardRetailRateCheck = true;
                 $shipping_mode_id = 2;
             } else {
                 $shipping_mode_id = 3;
             }
 
-            $weight_charge = InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+            if($InternationalEconomyStandardRetailRateCheck)
+            {
+                $weight_charge = InternationalEconomyStandardRetailRate::where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);    
+            }
+            else
+            {
+                $weight_charge = InternationalStandardRetailRates::where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+            }
             if ($weight_charge->exists()) {
                 $weight_charge = $weight_charge->first();
                 $consignee_city = City::find($destination_id);

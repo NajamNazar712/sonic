@@ -306,6 +306,7 @@ class AdminNsaAccountShipmentController extends Controller
                                     ShipmentChargesController::cash_handling($nsa_shipment->id);
                                     ShipmentChargesController::insurance($nsa_shipment->id);
                                     ShipmentChargesController::fuel_surcharge($nsa_shipment->id);
+                                    ShipmentChargesController::faf_charges($nsa_shipment->id);
                                     $valid_shipments[] = $nsa_shipment->id;
                                 }
                             }
@@ -1207,6 +1208,7 @@ class AdminNsaAccountShipmentController extends Controller
                                     ShipmentChargesController::cash_handling($carrefour_shipment->id);
                                     ShipmentChargesController::insurance($carrefour_shipment->id);
                                     ShipmentChargesController::fuel_surcharge($carrefour_shipment->id);
+                                    ShipmentChargesController::faf_charges($carrefour_shipment->id);
                                     $valid_shipments[] = $carrefour_shipment->id;
                                 }
                             }

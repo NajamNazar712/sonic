@@ -401,9 +401,9 @@
                                 row.push(values.from);
                                 row.push(values.from_area);
                                 row.push(values.from_dept_area_desg);
+                                row.push(values.to_area);
                                 row.push(values.to);
                                 row.push(values.user_type);
-                                row.push(values.to_area);
                                 row.push(values.to_dept_area_desg);
                                 row.push(values.hub);
                                 row.push(values.status);

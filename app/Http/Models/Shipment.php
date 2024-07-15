@@ -155,4 +155,7 @@ class Shipment extends Model
     public function shipment_assign_agent() {
         return $this->hasOne('App\Http\Models\ShipmentAssignAgent');
     }
+    public function faf_charges_data() {
+        return $this->belongsTo('App\ShipmentAdditionalCharges', 'id', 'shipment_id');
+    }
 }

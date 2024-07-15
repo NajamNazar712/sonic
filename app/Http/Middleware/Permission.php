@@ -391,6 +391,7 @@ class Permission
             'return.rider_request.approve' => 833,
             'return.rider_request.reject' => 834,
             'return.rider_request.update' => 835,
+            'settings.agents_list.index' => 951,
 
 
             'finance.outstanding_sdn.index' => 52,
@@ -1030,6 +1031,7 @@ class Permission
             'settings.shipper_ibft_charges_settings.list' => 917,
 
             'settings.shipper_negative_payable.index' => 982,
+            'settings.faf_charges.index'=>997,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -1245,6 +1247,8 @@ class Permission
             'retail.users.index' => 474,
             'retail.users.list' => 474,
 
+            'retail.international.economy_rates.index' => 992,
+            'retail.international.economy_rates.excel' => 992,
 
             'debriefing.supervisor.index' => 495,
             'debriefing.supervisor.list' => 495,
@@ -1458,6 +1462,7 @@ class Permission
 
             'settings.mms_excel_booking_setting.index' => 938,
 			'reports.cargo_manifest.index' => 933,
+            'reports.sms.index' => 945,
 
             'logistic.master_product.index' =>952,
             'logistic.master_product.list' =>952,
@@ -1662,6 +1667,7 @@ class Permission
                 return redirect()->route('cod.access_denied');
             }
         } else if (in_array(session('status'), [0,1,2,5]) ) {
+            
             $action = str_replace('cod.', '', $request->route()->getName());
 
             $allowedRoutes = [
