@@ -64,9 +64,9 @@ class ShipperTrackingController extends Controller
             }
             $case_nature = $row;
         }
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->where('shipper_visibility', 1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->where('shipper_visibility', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->where('shipper_visibility', 1)->get();
         return view('client.tracking')->with([ 
             'case_nature' => $case_nature, 
             'case_nature_complaints' => $case_nature_type_complaints, 
@@ -75,6 +75,19 @@ class ShipperTrackingController extends Controller
             'case_permission'=>$permission,
         ]);
     }
+
+    public function shipper_visibility(Request $request)
+    {
+        $nature_id = $request->input('nature_id');
+        $case_nature_types = CrmRequestCaseNatureType::where('nature_id', '=', $nature_id)
+            ->where('status_id', 1)
+            ->where('shipper_visibility', 1)
+            ->get();
+        return response()->json([
+            'case_nature_types' => $case_nature_types,
+        ]);
+    }
+    
 
     public function case_nature_remarks(Request $request)
     {

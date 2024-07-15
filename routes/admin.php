@@ -3524,6 +3524,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/lost/claim', 'Admins\AdminCRMController@lost_claim')->name('lost.claim');
             Route::post('request', 'Admins\AdminCRMController@special_request_appvove')->name('special_request_appvove');
             Route::post('request_adjusted', 'Admins\AdminCRMController@special_request_adjusted')->name('special_request_adjusted');
+
+            Route::post('case_nature_remarks', 'Admins\AdminTrackingController@case_nature_remarks')->name('case_nature_remarks');
+            Route::post('case_nature_service_remarks', 'Admins\AdminTrackingController@case_nature_service_remarks')->name('case_nature_service_remarks');
+            Route::post('case_nature_claim_remarks', 'Admins\AdminTrackingController@case_nature_claim_remarks')->name('case_nature_claim_remarks');
         });
         Route::prefix('feedback')->name('feedback.')->group(function () {
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
