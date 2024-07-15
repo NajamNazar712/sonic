@@ -356,21 +356,6 @@ class V2AdminPickupsController extends Controller
             })
             ->addColumn('all_remarks', function ($pickup_requests) {
                 return '<button class="btn btn-sm btn-outline-info align-middle all_remarks_btn" rel="' . $pickup_requests->id . '"><span class="align-middle">View Remarks</span></button>';
-            })   
-            ->addColumn('sale_person', function ($pickup_requests) {
-                $sale_person = SalePersonTag::where(['user_id' => $pickup_requests->user_id, 'status' => '0']);
-                if($sale_person->exists()){
-                    $sale_person = $sale_person->latest()->first();
-                    $admin = Admin::find($sale_person->admin_id);
-                    if ($admin){
-                        return $admin->name;
-                    }else{
-                        return '-';
-                    }
-                }else{
-                    return '-';                    
-                }
-
             });
         if ($legend_filter = $request->get('legend_filter')) {
             if ($legend_filter == 8) {
