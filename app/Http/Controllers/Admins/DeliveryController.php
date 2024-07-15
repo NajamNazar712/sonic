@@ -125,8 +125,8 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\StationDepositeNoteActionLog;
 
 use App\Http\Traits\RvTrait;
-use App\Jobs\ProcessRemoveShipmentFromRvShipmentTicket;
 use App\Jobs\ProcessRvShipmentTicket;
+use App\RvShipmentTicket;
 
 class DeliveryController extends Controller
 {
@@ -4307,7 +4307,9 @@ class DeliveryController extends Controller
                             ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
 
                             //Remove Shipment from RV Shipment Ticket
-                            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment));
+                            RvShipmentTicket::where('shipment_id', $shipment)->delete();
+
+                            // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment));
                             
                         }
                     }
