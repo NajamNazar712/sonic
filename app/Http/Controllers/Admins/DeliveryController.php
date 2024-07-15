@@ -329,6 +329,7 @@ class DeliveryController extends Controller
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status)
+            ->whereNotNull('shipments.tracking_number')
             ->groupBy('shipments.id');
 
 
