@@ -1350,9 +1350,6 @@
                                 $('#make_payments #make_payments_form button.make').prop('disabled', true);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                             }
-                            if(total_payable_amt < 0){
-                                $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
-                            }
                             check_reimbursement();
                             
                         }
@@ -2030,7 +2027,6 @@
                             } else {
                                 $('#make_payments #make_payments_form button.make').prop('disabled', false);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
-                                $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
                             }
                             total_payable_amt+=total_payable;
                             // console.log(total_payable_amt);
@@ -2038,11 +2034,10 @@
                     else{
                         $('#make_payments #make_payments_form button.make').prop('disabled', true);
                         $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
-                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
                     }
 
                 } else {
-                  
+
                     total_amount_selector.val(0);
                     total_charges_selector.val(0);
                     total_gst_selector.val(0);
@@ -2054,6 +2049,7 @@
                     $('#make_payments #make_payments_form button.make').prop('disabled', true);
                     $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
                     $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+
                 }
 
                 $('#make_payments #make_payments_form .pending_payment_shipment_ids').val(selected_rows_shipments);
@@ -2099,7 +2095,6 @@
                 var parent = $(this).parent('tr');
                 var selected_id = $(this).parent('tr').attr('id');
                 var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
-               
                 if (con_id) {
                     var count = 0;
                     make_payments_table.rows().nodes().each(function(index) {
@@ -2135,12 +2130,8 @@
                          $('#make_payments #make_payments_form button.make').prop('disabled', true);
                          $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                     }
-                    if(total_payable_amt < 0){
-                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
-                    }
 
                 } else {
-
                     calculation(parent);
                      if(total_payable_amt > shipper_limit)
                      {
@@ -2149,9 +2140,6 @@
                          $('#make_payments #make_payments_form button.make').prop('disabled', true);
                          $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                     }
-                    if(total_payable_amt < 0){
-                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
-                    }
                 }
                 check_reimbursement();
             });
@@ -2159,24 +2147,34 @@
             function check_reimbursement(){
                 setTimeout(function() {
                     var reimbursement_check = false;
+                    var make_invoice = true;
+                    var rows_selected = false;
                     make_payments_table.rows().nodes().each(function(index) {
                         var row2 = make_payments_table.row(index);
 
-                        if ($(row2.node().firstChild).hasClass('select-checkbox') && $(row2.node()).hasClass('selected')) {
-                            var parent = $(row2.node());
-                            if(parent.children('td.account_type_id').html() == 'Reimbursement'){
-                                // console.log(parent.children('td.account_type_id').html());
-                                reimbursement_check = true;
+                        if ($(row2.node().firstChild).hasClass('select-checkbox')) {
+                            if($(row2.node()).hasClass('selected')) {
+                                rows_selected = true;
+                                var parent = $(row2.node());
+                                if (parent.children('td.account_type_id').html() == 'Reimbursement') {
+                                    reimbursement_check = true;
+                                }
+                                if (parseFloat(parent.children('td.payable').html()) >= 0) {
+                                    make_invoice = false;
+                                }
                             }
                         }
 
                     });
-
-                    if(reimbursement_check){
+                    if(!rows_selected){
+                        make_invoice = false;
+                    }
+                    if(reimbursement_check || !make_invoice){
                         $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
                     }else{
                         $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
                     }
+
                 }, 200);
 
             }

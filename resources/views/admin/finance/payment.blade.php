@@ -73,6 +73,7 @@
                                     <th class="border-primary border-darken-1">Packing Charges</th>
                                     <th class="border-primary border-darken-1">Deductible</th>
                                     <th class="border-primary border-darken-1">Payable</th>
+                                    <th class="border-primary border-darken-1">Faf Charges</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
                                     {{-- <th class="border-primary border-darken-1">Action</th> --}}
                                     {{-- <th class="border-primary border-darken-1"></th> --}}
@@ -523,6 +524,11 @@
                             class: 'align-middle payable'
                         },
                         {
+                            data: 'faf_charges',
+                            name: 'sac.faf_charges',
+                            class: 'align-middle faf_charges'
+                        },
+                        {
                             data: 'arrival_date',
                             name: 'sj.created_at',
                             class: 'align-middle arrival_date'
@@ -789,11 +795,11 @@
                     // Row Selected
                     if (index === -1) {
                         selected_rows_shipments.push(id);
-                        // payable_list.push(parseFloat(payable),shipper_id); //adding payable in to array payable_list 
+                        // payable_list.push(parseFloat(payable),shipper_id); //adding payable in to array payable_list
                         payable_list.push({
                             payable,
                             shipper_id
-                        }); //adding payable in to array payable_list 
+                        }); //adding payable in to array payable_list
                         calculateShipperTotal(parent);
                         var total_amount = ((total_amount_selector.val() != '') ? parseInt(
                             total_amount_selector
@@ -923,24 +929,16 @@
 
                             if (isAnyNegative) {
                                 $('#make_payments_form button.make').prop('disabled', true);
-                                $('#make_payments_form button.export_bank_order').prop(
-                                    'disabled', true);
-                                $('#make_payments_form button.make_invoice').prop('disabled',
-                                    false);
+                                $('#make_payments_form button.export_bank_order').prop('disabled', true);
+                                $('#make_payments_form button.make_invoice').prop('disabled', false);
                             } else {
                                 $('#make_payments_form button.make').prop('disabled', false);
-                                $('#make_payments_form button.export_bank_order').prop(
-                                    'disabled', false);
-                                $('#make_payments_form button.make_invoice').prop('disabled',
-                                    true);
+                                $('#make_payments_form button.export_bank_order').prop('disabled', false);
                             }
                             total_payable_amt += total_payable;
                         } else {
                             $('#make_payments_form button.make').prop('disabled', true);
-                            $('#make_payments_form button.export_bank_order').prop(
-                                'disabled', true);
-                            $('#make_payments_form button.make_invoice').prop('disabled',
-                                false);
+                            $('#make_payments_form button.export_bank_order').prop('disabled', true);
                         }
 
                     } else {
@@ -955,8 +953,7 @@
 
                         $('#make_payments_form button.make').prop('disabled', true);
                         $('#make_payments_form button.make_invoice').prop('disabled', true);
-                        $('#make_payments_form button.export_bank_order').prop('disabled',
-                            true);
+                        $('#make_payments_form button.export_bank_order').prop('disabled', true);
                     }
 
                     $('#make_payments_form .pending_payment_shipment_ids').val(
@@ -1015,11 +1012,7 @@
                             $('#make_payments #make_payments_form button.export_bank_order').prop(
                                 'disabled', true);
                         }
-                        if (total_payable_amt < 0) {
-                            $('#make_payments #make_payments_form button.make_invoice').prop(
-                                'disabled', false);
-                        }
-                    } 
+                    }
                     else{
                         calculation(parent);
                         if (total_payable_amt > shipper_limit) {
@@ -1034,40 +1027,44 @@
                             $('#make_payments #make_payments_form button.export_bank_order').prop(
                                 'disabled', true);
                         }
-                        if (total_payable_amt < 0) {
-                            $('#make_payments #make_payments_form button.make_invoice').prop(
-                                'disabled', false);
-                        }
                     }
                     check_reimbursement();
                 });
 
-                function check_reimbursement() {
-                    setTimeout(function() {
-                        var reimbursement_check = false;
-                        make_payments_table.rows().nodes().each(function(index) {
-                            var row2 = make_payments_table.row(index);
+                function check_reimbursement(){
+                        setTimeout(function() {
+                            var reimbursement_check = false;
+                            var make_invoice = true;
+                            var rows_selected = false;
+                            make_payments_table.rows().nodes().each(function(index) {
+                                var row2 = make_payments_table.row(index);
 
-                            if ($(row2.node().firstChild).hasClass('select-checkbox') && $(
-                                    row2.node()).hasClass('selected')) {
-                                var parent = $(row2.node());
-                                if (parent.children('td.account_type_id').html() ==
-                                    'Reimbursement') {
-                                    reimbursement_check = true;
+                                if ($(row2.node().firstChild).hasClass('select-checkbox')) {
+                                    if($(row2.node()).hasClass('selected')) {
+                                        rows_selected = true;
+                                        var parent = $(row2.node());
+                                        if (parent.children('td.account_type_id').html() == 'Reimbursement') {
+                                            reimbursement_check = true;
+                                        }
+                                        if (parseFloat(parent.children('td.payable').html()) >= 0) {
+                                            make_invoice = false;
+                                        }
+                                    }
                                 }
+
+                            });
+                            if(!rows_selected){
+                                make_invoice = false;
+                            }
+                            if(reimbursement_check || !make_invoice){
+                                $('#make_payments_form button.make_invoice').prop('disabled', true);
+                            }else{
+                                $('#make_payments_form button.make_invoice').prop('disabled', false);
                             }
 
-                        });
+                        }, 200);
 
-                        if (reimbursement_check) {
-                            $('#make_payments_form button.make_invoice').prop(
-                                'disabled', true);
-                        } else {
-                            $('#make_payments_form button.make_invoice').prop(
-                                'disabled', false);
-                        }
-                    }, 200);
-                }
+                    }
 
                 function calculateShipperTotal() {
                     shipperTotal = {}; // Reset shipperTotal object
