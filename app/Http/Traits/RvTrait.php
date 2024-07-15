@@ -1300,7 +1300,7 @@ trait RvTrait
         // check if shipments exist or if admin is assign shipment to agent
         //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
         if ($shipments->count()) {
-            $shipment_data = [];
+            // $shipment_data = [];
             foreach ($shipments as $shipment) {
                 $shipmentId = $shipment->shipment_id;
                 $ticketId = $shipment->id;
