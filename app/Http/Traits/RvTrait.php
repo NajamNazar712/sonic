@@ -437,7 +437,9 @@ trait RvTrait
     protected function update_shipment_status($request)
     {
         if (Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $request->shipment_id)->doesntExist()) {
-            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+            RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
+
+            // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
             return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Reattempted!"];
         }
         
@@ -485,7 +487,8 @@ trait RvTrait
         }
 
         //Remove Shipment from RV Shipment Ticket
-        dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+        // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+        RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
 
         if (in_array($parcel->shipper_status_id, [12, 52, 66])) {
             $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52,  66])->latest('id')->first();
@@ -556,9 +559,10 @@ trait RvTrait
         if ($parcel->booking_type_id == 5) {
             return ['status' => 0, 'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
         }
-        
-         //Remove Shipment from RV Shipment Ticket
-         dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+
+        //Remove Shipment from RV Shipment Ticket
+        //  dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+        RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
 
         // if current shipment statuses are following update the shipment status in shipments table
         // 7 = Shipment - Not Attempted
@@ -608,8 +612,9 @@ trait RvTrait
         $remark = $request->remarks;
         if ($shipmentId) {
 
-             //Remove Shipment from RV Shipment Ticket
-             dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipmentId));
+            //Remove Shipment from RV Shipment Ticket
+            //  dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipmentId));
+            RvShipmentTicket::where('shipment_id', $shipmentId)->delete();
 
             if (Shipment::where('id', $shipmentId)->where('shipper_status_id', '!=', 15)->exists()) {
                 $consolidated_shipments = ConsolidationShipments::where('shipment_id', $shipmentId);
@@ -660,7 +665,8 @@ trait RvTrait
             }
 
             //Remove Shipment from RV Shipment Ticket
-            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+            // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+            RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
 
             if (in_array($shipment->shipper_status_id, [12, 52, 66]) || $crm == true) {
                 if (
@@ -816,7 +822,8 @@ trait RvTrait
                     //get the shipment journey table in reason validation id
 
                     //Remove Shipment from RV Shipment Ticket
-                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+                    // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+                    RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
 
                     // //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
                     ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id());
@@ -897,7 +904,9 @@ trait RvTrait
                     //get the shipment journey table in reason validation id
 
                     //Remove Shipment from RV Shipment Ticket
-                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data->shipment_id));
+                    // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data->shipment_id));
+                    RvShipmentTicket::where('shipment_id', $data->shipment_id)->delete();
+
                     // //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
                     ShipmentsJourneyController::add($data->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($data->shipment_id), NULL, $user_id, 346);
                     return ['status' => 1, 'success' => 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
@@ -947,7 +956,8 @@ trait RvTrait
                 Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
 
                 //Remove Shipment from RV Shipment Ticket
-                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+                // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+                RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
 
                 //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
                 ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id());
@@ -1294,7 +1304,9 @@ trait RvTrait
                 $ticketId = $shipment->id;
                 //Shipment table check the current status.
                 if (!Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $shipmentId)->exists()) {
-                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipmentId));
+                    // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipmentId));
+                    RvShipmentTicket::where('shipment_id', $shipmentId)->delete();
+
                     $shipment = null;
                     continue;
                 }
@@ -2123,7 +2135,9 @@ trait RvTrait
                     if($updated_rv_state_id != 3)
                     {
                         //Remove Shipment from RV Shipment Ticket
-                        dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+                        // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+                        RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
+
                     }
 
                     DB::commit();
@@ -2194,7 +2208,9 @@ trait RvTrait
                     if ($updated_data['rv_state_id'] != 3)
                     {
                         //Remove Shipment from RV Shipment Ticket
-                        dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
+                        // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
+                        RvShipmentTicket::where('shipment_id', $data['shipment_id'])->delete();
+
                     }
 
                     $this->data_rv_shipment_assign_agent_details($updated_data);
@@ -2247,7 +2263,9 @@ trait RvTrait
                     if ($updated_data['rv_state_id'] != 3)
                     {
                         //Remove Shipment from RV Shipment Ticket
-                        dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
+                        // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
+                        RvShipmentTicket::where('shipment_id', $data['shipment_id'])->delete();
+
                     }
                     
                     $this->data_rv_shipment_assign_agent_details($updated_data);
@@ -2295,7 +2313,8 @@ trait RvTrait
                     if ($updated_data['rv_state_id'] != 3)
                     {
                         //Remove Shipment from RV Shipment Ticket
-                        dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
+                        // dispatch(new ProcessRemoveShipmentFromRvSh            
+                        RvShipmentTicket::where('shipment_id', $data['shipment_id'])->delete();                        
                     }
 
                     $this->data_rv_shipment_assign_agent_details($updated_data);
@@ -2357,7 +2376,9 @@ trait RvTrait
                 if ($updated_data['rv_state_id'] != 3)
                 {
                     //Remove Shipment from RV Shipment Ticket
-                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
+                    // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
+                    RvShipmentTicket::where('shipment_id', $data['shipment_id'])->delete();
+
                 }
 
                 $this->data_rv_shipment_assign_agent_details($updated_data);
@@ -2423,7 +2444,9 @@ trait RvTrait
             if ($updated_data['rv_state_id'] != 3)
             {
                 //Remove Shipment from RV Shipment Ticket
-                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
+                // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($data['shipment_id']));
+                RvShipmentTicket::where('shipment_id', $data['shipment_id'])->delete();
+
             }
 
             $this->data_rv_shipment_assign_agent_details($updated_data);

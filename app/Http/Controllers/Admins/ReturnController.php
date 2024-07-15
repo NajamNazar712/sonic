@@ -391,10 +391,11 @@ class ReturnController extends Controller
 
         //Pending First Call
         // $number_of_pending_first_call = $reason_validation_required - $number_of_pending_tickets->pending_second_call_count;
-        $number_of_pending_first_call = RvShipmentTicket::where('disabled_shipper',0)
+        $number_of_pending_first_call = RvShipmentTicket::join('shipments', 'shipments.id', 'rv_shipment_tickets.shipment_id')->where('disabled_shipper',0)
         ->where('in_progress',0)
         ->where('call_count',0)
         ->where('is_completed',0)
+        ->whereIn('shipper_status_id',[12, 52, 66])
         ->count();
         $number_of_pending_first_call_percentage = ($reason_validation_required > 0) ? (($number_of_pending_first_call / $reason_validation_required) * 100) : 0;
 
