@@ -4328,7 +4328,13 @@ class AdminCargoManifestController extends Controller
                                                 $status = 11;
                                             }
                                         } elseif($bag->type == 2) {
-                                            $status = 75;
+                                            if($shipment_table->booking_type_id == 2) {
+                                                $status = 72;
+                                            } elseif($shipment_table->booking_type_id == 3) {
+                                                $status = 69;
+                                            } else {
+                                                $status = 75;
+                                            }
                                         }
                                         
                                         ShipmentsJourneyController::add($shipment->shipment_id, $status, $status, null, null, null, Auth::id(), $bag->seal_number);
@@ -4400,7 +4406,13 @@ class AdminCargoManifestController extends Controller
                                                 $status = 11;
                                             }
                                         } elseif($bag->type == 2) {
-                                            $status = 75;
+                                            if($shipment_table->booking_type_id == 2) {
+                                                $status = 72;
+                                            } elseif($shipment_table->booking_type_id == 3) {
+                                                $status = 69;
+                                            } else {
+                                                $status = 75;
+                                            }
                                         }
                                         ShipmentsJourneyController::add($shipment->shipment_id, $status, $status, null, null, null, Auth::id(), $bag->seal_number);
                                         $shipment_table->shipper_status_id = $status;
@@ -6500,21 +6512,21 @@ class AdminCargoManifestController extends Controller
                                             $consignee_status_id = 75;
                                         }
                                     } else if ($shipment->booking_type_id == 2) {
-                                        if ($shipment->shipper_status_id == 21) {
+                                        if ($shipment->shipper_status_id == 21) { //najam
                                             if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))  || ($omni_return_city_hub == $default_hub_id) || (in_array($omni_return_city_hub,$admin_assigned_hubs)) ) {
                                                 $shipper_status_id = 22;
                                                 $consignee_status_id = 22;
                                             } else {
-                                                $shipper_status_id = 75;
-                                                $consignee_status_id = 75;
+                                                $shipper_status_id = 72;
+                                                $consignee_status_id = 72;
                                             }
                                         } else {
                                             if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                                 $shipper_status_id = 27;
                                                 $consignee_status_id = 27;
                                             } else {
-                                                $shipper_status_id = 75;
-                                                $consignee_status_id = 75;
+                                                $shipper_status_id = 72;
+                                                $consignee_status_id = 72;
                                             }
                                         }
                                     } else if ($shipment->booking_type_id == 3) {
@@ -6522,8 +6534,8 @@ class AdminCargoManifestController extends Controller
                                             $shipper_status_id = 33;
                                             $consignee_status_id = 33;
                                         } else {
-                                            $shipper_status_id = 75;
-                                            $consignee_status_id = 75;
+                                            $shipper_status_id = 69;
+                                            $consignee_status_id = 69;
                                         }
                                     } else if ($shipment->booking_type_id == 4) {
                                         if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs)) || ($omni_return_city_hub == $default_hub_id) || (in_array($omni_return_city_hub,$admin_assigned_hubs))) {
@@ -6548,10 +6560,10 @@ class AdminCargoManifestController extends Controller
 
                                 $shipment->save();
 
-                                if ($shipper_status_id != 75)
+                                if ($shipper_status_id != 75 || $shipper_status_id != 72 || $shipper_status_id != 69)
                                     array_push($shipment_ids_array, $shipment->tracking_number);
 
-                                if ($shipper_status_id == 75)
+                                if ($shipper_status_id == 75 || $shipper_status_id == 72 || $shipper_status_id == 69 )
                                     array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
 
                                 ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
