@@ -41,7 +41,7 @@ class CrmClosedReasonCron extends Command
      */
     public function handle()
     {
-        $closed_reason = CrmRequest::join('crm_request_feedbacks', 'crm_requests.id', '=', 'crm_request_feedbacks.crm_request_id')
+        $closed_reason = CrmRequest::leftJoin('crm_request_feedbacks', 'crm_requests.id', '=', 'crm_request_feedbacks.crm_request_id')
         ->whereNull('crm_request_feedbacks.crm_request_id')
         ->where('crm_requests.status_id', 4)
         ->where('crm_requests.case_nature_id', '!=', 1)
