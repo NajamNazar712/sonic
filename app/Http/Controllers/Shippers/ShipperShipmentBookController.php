@@ -6169,17 +6169,17 @@ class ShipperShipmentBookController extends Controller
                     $rows[$key]['return_address_id'] = $row['return_address_id'];
                 }
 
-//                if (array_key_exists("amount", $row))
-//                {
-//                    if ($row['amount'] == 0) {
-//
-//                        $rules['parcel_value'] = [
-//                            'required_if:amount,0',
-//                            'numeric',
-//                            'digits_between:1,20',
-//                            'min:1'];
-//                    }
-//                }
+                //                if (array_key_exists("amount", $row))
+                //                {
+                //                    if ($row['amount'] == 0) {
+                //
+                //                        $rules['parcel_value'] = [
+                //                            'required_if:amount,0',
+                //                            'numeric',
+                //                            'digits_between:1,20',
+                //                            'min:1'];
+                //                    }
+                //                }
 
                 $parcel_bypass = 0;
                 $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
@@ -6250,7 +6250,7 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
 
-//                        dd($errors[$row_id]['amount']);
+                    //                        dd($errors[$row_id]['amount']);
                     if ($service_type_check_id != 5) {
                         if ($row['delivery_type_id'] == 2) {
                             $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
@@ -8760,5 +8760,15 @@ class ShipperShipmentBookController extends Controller
         $user_shipping_info = UserShippingInfo::find($pickup_address_id);
         self::consignee_address_area($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
         self::shipper_address_area($user_shipping_info->city_id,$user_shipping_info->pickup_address,$user_shipping_info->id);
+    }
+
+    static function checkDuplicateTracking($order_id)
+    {
+        if(Shipment::where('tracking_number', $order_id)->exists())
+        {
+            return false;
+        } else {
+            return true;
+        }
     }
 }
