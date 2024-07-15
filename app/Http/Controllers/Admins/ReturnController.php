@@ -395,7 +395,7 @@ class ReturnController extends Controller
         ->where('in_progress',0)
         ->where('call_count',0)
         ->where('is_completed',0)
-        ->whereIn('shipper_status_id',[12, 52, 66])
+        ->whereIn('shipments.shipper_status_id',[12, 52, 66])
         ->count();
         $number_of_pending_first_call_percentage = ($reason_validation_required > 0) ? (($number_of_pending_first_call / $reason_validation_required) * 100) : 0;
 
