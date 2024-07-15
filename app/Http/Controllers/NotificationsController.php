@@ -10745,8 +10745,8 @@ class NotificationsController extends Controller
                             $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
                             $type = CrmRequestCaseNatureType::where('id', $item["case_nature_type_id"])->value('type');
 
-                            $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first();
-                            $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"])->latest()->first();
+                            $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first() ?? null;
+                            $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"] ?? null)->latest()->first() ?? null;
 
                             $html .= '<tr>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $item["id"] . '</td>';
