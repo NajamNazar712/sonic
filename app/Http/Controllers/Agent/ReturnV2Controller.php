@@ -153,21 +153,20 @@ class ReturnV2Controller extends Controller
                             $this->mark_attendance($admin);
                         }
                         //$assigned_shipments by admin
-                        $assigned_shipment = RvShipmentAssignAgent::
-                        // join('shipments as s', 'rv_shipment_assign_agents.shipment_id', '=', 's.id')
-                        // ->whereRaw('NOT EXISTS (
-                        //     SELECT sj.id
-                        //     FROM shipments_journey AS sj
-                        //     WHERE sj.status_reason_id IN (12, 27, 35)
-                        //     AND sj.shipment_id = s.id
-                        //     AND sj.id = (
-                        //         SELECT MAX(id)
-                        //         FROM shipments_journey
-                        //         WHERE shipment_id = s.id
-                        //     )
-                        // )')
-                        // ->whereIn('s.shipper_status_id', [12,66,52])
-                        where('agent_id', $agent_id)
+                        $assigned_shipment = RvShipmentAssignAgent::join('shipments as s', 'rv_shipment_assign_agents.shipment_id', '=', 's.id')
+                        ->whereRaw('NOT EXISTS (
+                            SELECT sj.id
+                            FROM shipments_journey AS sj
+                            WHERE sj.status_reason_id IN (12, 27, 35)
+                            AND sj.shipment_id = s.id
+                            AND sj.id = (
+                                SELECT MAX(id)
+                                FROM shipments_journey
+                                WHERE shipment_id = s.id
+                            )
+                        )')
+                        ->whereIn('s.shipper_status_id', [12,66,52])
+                        ->where('agent_id', $agent_id)
                         ->where('rv_state_id', 1)
                         ->where('rv_assign_agent_status_id', null)
                         ->where('rv_assign_agent_sub_status_id', null)
@@ -177,22 +176,21 @@ class ReturnV2Controller extends Controller
                         
                         // If no shipment is assigned and shipment status is (12,66,52) and no reasons id 12, 27, 35 on shipment journey, find an unassigned one
                         if (!$assigned_shipment) {
-                            $already_assigned_shipment = RvShipmentAssignAgent::
-                            // join('shipments as s', 'rv_shipment_assign_agents.shipment_id', '=', 's.id')
-                            // ->whereRaw('NOT EXISTS (
-                            //     SELECT sj.id
-                            //     FROM shipments_journey AS sj
-                            //     WHERE sj.status_reason_id IN (12, 27, 35)
-                            //     AND sj.shipment_id = s.id
-                            //     AND sj.id = (
-                            //         SELECT MAX(id)
-                            //         FROM shipments_journey
-                            //         WHERE shipment_id = s.id
-                            //     )
-                            // )')
-                            where('agent_id', $agent_id)
+                            $already_assigned_shipment = RvShipmentAssignAgent::join('shipments as s', 'rv_shipment_assign_agents.shipment_id', '=', 's.id')
+                            ->whereRaw('NOT EXISTS (
+                                SELECT sj.id
+                                FROM shipments_journey AS sj
+                                WHERE sj.status_reason_id IN (12, 27, 35)
+                                AND sj.shipment_id = s.id
+                                AND sj.id = (
+                                    SELECT MAX(id)
+                                    FROM shipments_journey
+                                    WHERE shipment_id = s.id
+                                )
+                            )')
+                            ->where('agent_id', $agent_id)
                             ->where('rv_state_id', 1)
-                            // ->whereIn('s.shipper_status_id', [12,66,52])
+                            ->whereIn('s.shipper_status_id', [12,66,52])
                             ->whereNull('rv_assign_agent_status_id')
                             ->whereNull('rv_assign_agent_sub_status_id')
                             ->first();
