@@ -10700,7 +10700,7 @@ class NotificationsController extends Controller
                     $body = str_replace('[preview]', $preview, $body);
 
                     self::email($subject, $body, $to, $cc);
-                } else if ($id == 222) {
+                // } else if ($id == 222) {
                     $array = array();
                     $crm_case_closeds = $reference_1_id;
 
@@ -10734,7 +10734,7 @@ class NotificationsController extends Controller
                         $html .= '<tr style="background-color: #f2f2f2;">';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Request #</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Type</th>';
-                        // $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolution</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolution</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Status</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolved Within</th>';
                         $html .= '</tr>';
@@ -10751,7 +10751,7 @@ class NotificationsController extends Controller
                             $html .= '<tr>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $item["id"] . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($type ?? '-') . '</td>';
-                            // $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolution['name'] ?? '-') . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolution['name'] ?? '-') . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">Closed</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
                             $html .= '</tr>';

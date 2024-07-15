@@ -44,7 +44,6 @@ class CrmClosedReasonCron extends Command
         $closed_reason = CrmRequest::leftJoin('crm_request_feedbacks', 'crm_requests.id', '=', 'crm_request_feedbacks.crm_request_id')
         ->whereNull('crm_request_feedbacks.crm_request_id')
         ->where('crm_requests.status_id', 4)
-        ->where('crm_requests.case_nature_id', '!=', 1)
         ->whereDate('crm_requests.updated_at', now()->format('Y-m-d'))
         ->select('crm_requests.*')
         ->get();
