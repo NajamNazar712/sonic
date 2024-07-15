@@ -13793,6 +13793,7 @@ class AdminReportsController extends Controller
         $formula_value = explode(',', $csat_formula->text ?? '');
         $csat_score = CrmRequest::leftJoin('crm_request_feedbacks', 'crm_requests.id', 'crm_request_feedbacks.crm_request_id')
             ->where('crm_requests.status_id', 4)
+            ->where('crm_requests.case_nature_id', '!=', 1)
             ->whereIn('crm_request_feedbacks.rating_id', $formula_value ?? [])
             ->count();
         $csat_score = $csat_score / ((CrmRequestFeedback::count() != 0 ? CrmRequestFeedback::count() : 1)) * 100;
