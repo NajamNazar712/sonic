@@ -69,6 +69,7 @@
                                     <th class="border-primary border-darken-1">Consignee Address</th>
                                     <th class="border-primary border-darken-1">Actual Weight</th>
                                     <th class="border-primary border-darken-1">Aging (Arrival)</th>
+                                    <th class="border-primary border-darken-1">Aging (Destination)</th>
                                     <th class="border-primary border-darken-1">Aging (Last Scanned At)</th>
 
 
@@ -216,6 +217,7 @@
                             head.push('Consignee Address');
                             head.push('Actual Weight');
                             head.push('Aging (Arrival)');
+                            head.push('Aging (Destination)');
                             head.push('Aging (Last Scan At Aging)');
                          	
 							
@@ -252,6 +254,7 @@
                                 row.push(values.consignee_address);
                                 row.push(values.actual_weight);
                                 row.push(values.arrival_aging);
+                                row.push(values.destination_aging);
                                 row.push(values.last_scanned_at_aging);
 
                                 body.push(row);
@@ -318,6 +321,7 @@
                     {data: 'consignee_address', name: 's.consignee_address', class: 'align-middle action'},
                     {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle action'},
                     {data: 'arrival_aging', name: 'arrival_aging', class: 'align-middle action'},
+                    {data: 'destination_aging', name: 'destination_aging', class: 'align-middle action'},
                     {data: 'last_scanned_at_aging', name: 'last_scanned_at_aging', class: 'align-middle action'},
 
                 ],
