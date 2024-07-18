@@ -28,11 +28,12 @@
                                 <div class="col-6">
                                     <fieldset class="form-group">
                                         <label for="case_nature">Case Nature*</label>
-                                        <select name="case_nature" id="edit_case_nature" class="form-control select2" required data-rule-required="true" data-msg-required="Case Nature is required">
+                                        <select name="case_nature" id="edit_case_nature" class="form-control select2" required data-rule-required="true" data-msg-required="Case Nature is required*">
                                             @foreach($case_nature as $nature)
                                                 <option value="{{$nature->id}}">{{$nature->name}}</option>
                                             @endforeach
                                         </select>
+                                        <label for="" id="edit_case_nature_error" class="text-danger d-none">Case Nature is required*</label>
                                     </fieldset>
                 
                                     <fieldset class="form-group">
@@ -62,7 +63,7 @@
                                 <div class="col-6">
                                     <fieldset class="form-group">
                                         <label for="case_nature_type">Case Nature Type*</label>
-                                        <input type="text" name="case_nature_type" id="edit_case_nature_type" class="form-control" placeholder="Enter Case Nature Type" required data-rule-required="true" data-msg-required="Please enter case nature type">
+                                        <input type="text" name="case_nature_type" id="edit_case_nature_type" class="form-control" placeholder="Enter Case Nature Type" required data-rule-required="true" data-msg-required="Please enter case nature type*">
                                     </fieldset>
     
                                     <fieldset class="form-group">
@@ -275,6 +276,17 @@
                         populateRemarks();
                     });
 
+                    // Toggling error message
+                    var edit_case_nature = $('#edit_case_nature');
+                    var edit_case_nature_error = $('#edit_case_nature_error');
+                    edit_case_nature.on('change', function(){
+                        if (edit_case_nature.val() == null){
+                            edit_case_nature_error.removeClass('d-none');
+                            return false;
+                        } else {
+                            edit_case_nature_error.addClass('d-none');
+                        }
+                    });
                 }
             });
         });

@@ -22,7 +22,7 @@
                                 <div class="col-6">
                                     <fieldset class="form-group">
                                         <label for="case_nature">Case Nature*</label>
-                                        <select name="case_nature" id="case_nature" class="form-control select2" required data-rule-required="true" data-msg-required="Case Nature is required">
+                                        <select name="case_nature" id="case_nature" class="form-control select2" required data-rule-required="true" data-msg-required="Case Nature is required*">
                                             @foreach($case_nature as $nature)
                                                 <option value="{{$nature->id}}">{{$nature->name}}</option>
                                             @endforeach
@@ -56,7 +56,7 @@
                                 <div class="col-6">
                                     <fieldset class="form-group">
                                         <label for="case_nature_type">Case Nature Type*</label>
-                                        <input type="text" name="case_nature_type" id="case_nature_type" class="form-control" placeholder="Enter Case Nature Type" required data-rule-required="true" data-msg-required="Please enter case nature type">
+                                        <input type="text" name="case_nature_type" id="case_nature_type" class="form-control" placeholder="Enter Case Nature Type" required data-rule-required="true" data-msg-required="Please enter case nature type*">
                                     </fieldset>
     
                                     <fieldset class="form-group">
@@ -118,7 +118,6 @@
         function toggleRemarksVisibility() {
             var isRemarksVisible = $('#remarks_visibility').is(':checked');
             if (isRemarksVisible) {
-                // Show all remark fields
                 $('#remarks_section .remark-field').show();
                 // Ensure at least one remark field is present
                 if ($('#remarks_section .remark-field').length === 0) {
@@ -133,7 +132,6 @@
 
         function addRemarkField() {
             var currentRemarksCount = $('#remarks_section .remark-field').length;
-
             if (currentRemarksCount < maxRemarks) {
                 $('#remarks_section').append(`
                     <div class="remark-field d-flex mb-2">
@@ -143,7 +141,6 @@
                         </div>
                     </div>
                 `);
-
                 if (currentRemarksCount >= maxRemarks - 1) {
                     $('#add_remarks_section').attr('disabled', 'disabled');
                 }
@@ -155,7 +152,6 @@
         function toggleFirstRemarkRemoveButton() {
             var isRemarksVisible = $('#remarks_visibility').is(':checked');
             var firstRemoveButton = $('#remarks_section .remark-field:first .remove-remark');
-
             if (isRemarksVisible) {
                 firstRemoveButton.hide();
             } else {
@@ -194,7 +190,6 @@
             e.preventDefault();
             addRemarkField();
         });
-
         $('#remarks_section').on('click', '.remove-remark', function(e) {
             e.preventDefault();
             $(this).closest('.remark-field').remove();
@@ -216,10 +211,8 @@
 
         $('#select_all_status').change(function() {
             if ($(this).is(':checked')) {
-                // Select all options
                 $('#shipment_status > option').prop('selected', true).trigger('change');
             } else {
-                // Deselect all options
                 $('#shipment_status > option').prop('selected', false).trigger('change');
             }
         });
@@ -248,6 +241,7 @@
             dropdownParent:$('#add_form')
         });
 
+        // Toggling error message
         var case_nature = $('#case_nature');
         case_nature.on('change', function () {
             var case_nature_error = $('#case_nature-error');
