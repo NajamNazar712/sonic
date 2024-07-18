@@ -20,7 +20,7 @@ class shipmentAndJounrneyUpdateSeeder extends Seeder
             ];
         echo count($shipmentId);
         if ($shipmentId) {
-            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id', 60)->get();
+            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id', 21)->get();
             foreach ($shipmentId as $shipment) {
                 $shipment->shipper_status_id = 60;
                 $shipment->consignee_status_id = 60;
