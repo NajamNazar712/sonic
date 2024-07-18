@@ -68,6 +68,8 @@
                                     <th class="border-primary border-darken-1">Last Action Performed</th>
                                     <th class="border-primary border-darken-1">Consignee Address</th>
                                     <th class="border-primary border-darken-1">Actual Weight</th>
+                                    <th class="border-primary border-darken-1">Aging (Arrival)</th>
+                                    <th class="border-primary border-darken-1">Aging (Last Scanned At)</th>
 
 
                                 </tr>
@@ -213,6 +215,8 @@
                             head.push('Last Action Performed');
                             head.push('Consignee Address');
                             head.push('Actual Weight');
+                            head.push('Aging (Arrival)');
+                            head.push('Aging (Last Scan At Aging)');
                          	
 							
                     
@@ -247,6 +251,8 @@
                                 row.push(values.last_action);
                                 row.push(values.consignee_address);
                                 row.push(values.actual_weight);
+                                row.push(values.arrival_aging);
+                                row.push(values.last_scanned_at_aging);
 
                                 body.push(row);
                             });
@@ -311,6 +317,8 @@
                     {data: 'last_action', name: 'shipment_positions.last_action', class: 'align-middle action'},
                     {data: 'consignee_address', name: 's.consignee_address', class: 'align-middle action'},
                     {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle action'},
+                    {data: 'arrival_aging', name: 'arrival_aging', class: 'align-middle action'},
+                    {data: 'last_scanned_at_aging', name: 'last_scanned_at_aging', class: 'align-middle action'},
 
                 ],
                 rowCallback: function(row, data, index) {
