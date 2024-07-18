@@ -117,17 +117,25 @@
         var maxRemarks = 5;
         function toggleRemarksVisibility() {
             var isRemarksVisible = $('#remarks_visibility').is(':checked');
+            var add_remarks_section = $('#add_remarks_section');
             if (isRemarksVisible) {
                 $('#remarks_section .remark-field').show();
-                // Ensure at least one remark field is present
-                if ($('#remarks_section .remark-field').length === 0) {
-                    addRemarkField();
+                if ($('#remarks_section .remark-field').length >= 0) {
+                    add_remarks_section.prop('disabled', false);
+                    $('#remarks_section').show();
+                    if ($('#remarks_section .remark-field').length > 4){
+                        add_remarks_section.prop('disabled', true);
+                    } else {
+                        add_remarks_section.prop('disabled', false);
+                    }
+                    // addRemarkField();
                 }
             } else {
-                // Hide all remark fields
+                $('#remarks_section').hide();
                 $('#remarks_section .remark-field').hide();
+                add_remarks_section.prop('disabled', true);
             }
-            toggleFirstRemarkRemoveButton();
+            // toggleFirstRemarkRemoveButton();
         }
 
         function addRemarkField() {
@@ -145,8 +153,7 @@
                     $('#add_remarks_section').attr('disabled', 'disabled');
                 }
             }
-
-            toggleFirstRemarkRemoveButton();
+            // toggleFirstRemarkRemoveButton();
         }
 
         function toggleFirstRemarkRemoveButton() {
@@ -190,6 +197,7 @@
             e.preventDefault();
             addRemarkField();
         });
+
         $('#remarks_section').on('click', '.remove-remark', function(e) {
             e.preventDefault();
             $(this).closest('.remark-field').remove();
@@ -197,7 +205,7 @@
             if (currentRemarksCount < maxRemarks) {
                 $('#add_remarks_section').removeAttr('disabled');
             }
-            toggleFirstRemarkRemoveButton();
+            // toggleFirstRemarkRemoveButton();
         });
 
         toggleRemarksVisibility();
