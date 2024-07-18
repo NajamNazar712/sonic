@@ -1484,17 +1484,18 @@ trait RvTrait
                 ->when($agent, function ($query, $agent) {
                     if($agent->agent_caller_type == 1) //These Agents will get shipments pending with first call only
                     {
-                        return $query->where('call_count' , 0)->where('in_progress', 0);
+                        return $query->where('call_count' , 0);
                     }
                     else if($agent->agent_caller_type == 2)//These Agents will get shipments pending with second call only
                     {
-                        return $query->where('call_count' , '>', 0)->whereIn('in_progress',[0,1]);
+                        return $query->where('call_count' , '>', 0);
                     }
                     else
                     {
                         return $query->orderBy('call_count','ASC');//These Agents will get shipments in order of call count to Agent of Both Call Type
                     }
                 })
+            ->where('in_progress', 0)
                 ->where('is_completed',0)
                 ->orderBy('updated_at','ASC')
                 ->get(['id','shipment_id']);
