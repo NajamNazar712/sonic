@@ -2487,17 +2487,49 @@
         });
 
         function verify_make_invoice_payments() {
-            $.ajax({
-                url: '{!! route('admin.finance.make_payments.invoice') !!}',
-                method: 'POST',
-                data: {
-                    '_token': '{{ csrf_token() }}',
-                    'pending_payment_shipment_ids': $('#make_payments #make_payments_form .pending_payment_shipment_ids').val()
-                }
-            })
-            .done(function(data) {
 
+            swal({
+                title: 'Are You Sure?',
+                content: content,
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function(confirm) {
+                if (confirm) {
+                    $.ajax({
+                        url: '{!! route('admin.finance.make_payments.invoice') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'pending_payment_shipment_ids': $('#make_payments #make_payments_form .pending_payment_shipment_ids').val()
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            toastr.success("Invoice Generated", 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }else{
+                            toastr.error("Error!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
             });
+
+
         }
     </script>
 @endsection

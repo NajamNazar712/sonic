@@ -19229,13 +19229,24 @@ class AdminFinanceController extends Controller
 
      public function make_payments_invoice(Request $request){
          if(isset($request->pending_payment_shipment_ids)){
-             $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', explode(',', $request->pending_payment_shipment_ids))->select('pending_payment_id')->pluck('pending_payment_id')->toArray();
-             foreach ($pending_payment_shipment_ids as $pending_payment_id) {
-                 $pending_payment = PendingPayment::find($pending_payment_id);
+             $pending_payment = PendingPaymentShipment::whereIn('id', explode(',', $request->pending_payment_shipment_ids))->get();
+             $transaction_id =  (string) Str::uuid();
+             $pending_invoice_shipments = array();
+             $date = date('Y-m-d H:i:s');
+             foreach ($pending_payment as $key=> $value) {
 
-                 if ($pending_payment) {
+                 $pending_invoice_shipments[$key]['shipment_id'] = $value->shipment_id;
+                 $pending_invoice_shipments[$key]['created_at'] = $date;
+                 $pending_invoice_shipments[$key]['updated_at'] = $date;
+                 $pending_invoice_shipments[$key]['type'] = 2;
+                 $pending_invoice_shipments[$key]['charges'] = -$value->charges;
+                 $pending_invoice_shipments[$key]['gst'] = -$value->gst;
+                 $pending_invoice_shipments[$key]['invoice_amount'] = -$value->payable;
+                 $pending_invoice_shipments[$key]['transaction_id'] = $transaction_id;
 
-                 }
+             }
+             if(count($pending_invoice_shipments) > 0){
+                 PendingInvoiceShipment::insert($pending_invoice_shipments);
              }
              return ['status' => 1];
          }else{
