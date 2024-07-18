@@ -5820,7 +5820,7 @@ class DeliveryController extends Controller
                         'station_deposit_note_id' => $sdn->id,
                         'delivery_note_id' => $dncc
                     ]);
-                    DeliveryNote::where('id', $dncc)->update(['expense' => $request->expense[$dncc], 'net_amount' => $request->net_amount[$dncc], 'remarks' => $request->remarks[$dncc], 'dncc_status' => 1]);
+                    DeliveryNote::where('id', $dncc)->update(['expense' => $request->expense[$dncc] ?? null, 'net_amount' => $request->net_amount[$dncc] ?? null, 'remarks' => $request->remarks[$dncc] ?? null, 'dncc_status' => 1]);
                 }
 
                 self::add_sdn_logs($sdn->id, 0, $created_by);
