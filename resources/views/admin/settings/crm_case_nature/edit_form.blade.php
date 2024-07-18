@@ -196,20 +196,33 @@
 
                     // remarks section
                     var remarksContainer = $('#edit_remarks_section');
+                    var edit_add_remark_btn = $('#edit_add_remark_btn');
+                    var errorMessage = '<span id="remarks_error" class="text-danger">At least one remark is required.</span>';
+                    var remarks_visibility = $('#edit_remarks_visibility').is(':checked');
+                    var edit_case_nature_btn = $('#edit_case_nature_btn');
+
+                    function toggleErrorMessage() {
+                        if (remarks_visibility && remarksContainer.children().length === 0) {
+                            if ($('#remarks_error').length === 0) {
+                                remarksContainer.after(errorMessage);
+                            }
+                            edit_case_nature_btn.prop('disabled', true);
+                        } else {
+                            $('#remarks_error').remove();
+                            edit_case_nature_btn.prop('disabled', false);
+                        }
+                    }
 
                     function populateRemarks() {
                         remarksContainer.empty();
                         remarks.forEach(function(remark, index) {
-                            // Limit to maximum 5 remarks
                             if (index < 5) {
                                 var inputHtml = `
                                     <div class="form-group" id="remark_${remark.id}_container">
                                         <div class="input-group">
-                                            <input type="text" id="remark_${remark.id}" name="remarks[]" class="form-control" value="${remark.remarks}">
+                                            <input type="text" id="remark_${remark.id}" name="remarks[]" class="form-control edit_remarks_new" value="${remark.remarks}">
                                             <div class="input-group-append mx-1">
-                                                ${index === 0 && $('#edit_remarks_visibility').is(':checked') ? '' : `
                                                 <button class="btn btn-danger remove-remark-btn" data-remark-id="${remark.id}" type="button">Remove</button>
-                                                `}
                                             </div>
                                         </div>
                                     </div>
@@ -218,27 +231,29 @@
                             }
                         });
 
-                        // Disable "Add Remark" button if there are 5 remarks
-                        if (remarks.length >= 5) {
+                        $('#edit_add_remark_btn').prop('disabled', remarks.length >= 5);
+
+                        if (!remarks_visibility) {
+                            remarksContainer.hide();
                             $('#edit_add_remark_btn').prop('disabled', true);
                         } else {
+                            remarksContainer.show();
                             $('#edit_add_remark_btn').prop('disabled', false);
                         }
+
+                        toggleErrorMessage();
                     }
 
-                    // Initial population of remarks
                     populateRemarks();
 
-                    // Add Remark button functionality
                     $('#edit_add_remark_btn').on('click', function() {
                         if (remarks.length < 5) {
                             var newIndex = remarks.length + 1;
-                            var newRemark = { id: newIndex, case_nature_id: 44, remarks: '', created_at: '', updated_at: '' };
-
+                            var newRemark = { id: newIndex, case_nature_id: '', remarks: '', created_at: '', updated_at: '' };
                             var newInputHtml = `
                                 <div class="form-group" id="remark_${newRemark.id}_container">
                                     <div class="input-group">
-                                        <input type="text" id="remark_${newRemark.id}" name="remarks[]" class="form-control">
+                                        <input type="text" id="remark_${newRemark.id}" name="remarks[]" class="form-control edit_remarks_new" placeholder="Add Remark">
                                         <div class="input-group-append mx-1">
                                             <button class="btn btn-danger remove-remark-btn" data-remark-id="${newRemark.id}" type="button">Remove</button>
                                         </div>
@@ -249,15 +264,10 @@
                             remarks.push(newRemark);
 
                             // Disable "Add Remark" button if there are now 5 remarks
-                            if (remarks.length >= 5) {
-                                $('#edit_add_remark_btn').prop('disabled', true);
-                            }
-                        } else {
-                            alert('You can add maximum 5 remarks.');
+                            $('#edit_add_remark_btn').prop('disabled', remarks.length >= 5);
                         }
                     });
 
-                    // Remove Remark button functionality
                     $(document).on('click', '.remove-remark-btn', function() {
                         var remarkId = $(this).data('remark-id');
                         $('#remark_' + remarkId + '_container').remove();
@@ -266,14 +276,30 @@
                         });
 
                         // Enable "Add Remark" button if remarks count is less than 5
-                        if (remarks.length < 5) {
-                            $('#edit_add_remark_btn').prop('disabled', false);
+                        $('#edit_add_remark_btn').prop('disabled', remarks.length >= 5);
+                    });
+
+                    $('#edit_remarks_visibility').on('change', function() {
+                        remarks_visibility = $(this).is(':checked');
+                        populateRemarks();
+                    });
+
+                    var remove_remark_btn = $('.remove-remark-btn');
+                    remove_remark_btn.on('click', function() {
+                        var remark_length = $('.edit_remarks_new').length - 1;
+                        if (remark_length == 0 && remarks_visibility) {
+                            $('#edit_case_nature_btn').prop('disabled', true);
+                        } else {
+                            $('#edit_case_nature_btn').prop('disabled', false);
                         }
                     });
 
-                    // Check edit_remarks_visibility checkbox state
-                    $('#edit_remarks_visibility').on('change', function() {
-                        populateRemarks();
+                    $('#edit_add_remark_btn').on('click', function() {
+                        if ($('.edit_remarks_new').length > 0) {
+                            $('#edit_case_nature_btn').prop('disabled', false);
+                        } else {
+                            $('#edit_case_nature_btn').prop('disabled', true);
+                        }
                     });
 
                     // Toggling error message

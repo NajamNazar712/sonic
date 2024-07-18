@@ -1696,7 +1696,8 @@ class GlobalSettingsController extends Controller
     {
         $case_nature_types = CrmRequestCaseNatureType::leftjoin('crm_request_case_nature as crcs', 'crcs.id', '=', 'crm_request_case_nature_types.nature_id')
             ->select('crm_request_case_nature_types.id', 'crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type', 'crm_request_case_nature_types.status_id as status')
-            ->where('crm_request_case_nature_types.id', '<>', 34);
+            ->where('crm_request_case_nature_types.id', '<>', 34)
+            ->orderBy('crm_request_case_nature_types.id', 'desc');
         $datatable = Datatables::of($case_nature_types)
             ->editColumn('status', function ($case_nature_types) {
                 if ($case_nature_types->status == 1) {
