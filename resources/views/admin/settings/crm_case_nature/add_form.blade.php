@@ -248,6 +248,16 @@
             dropdownParent:$('#add_form')
         });
 
+        var case_nature = $('#case_nature');
+        case_nature.on('change', function () {
+            var case_nature_error = $('#case_nature-error');
+            if (case_nature.val() != '') {
+                case_nature_error.hide();
+            } else {
+                case_nature_error.show();
+            }
+        });
+
         $( "#add_form" ).validate({
             errorClass:"danger",
             errorPlacement: function(error, element) {
@@ -262,5 +272,4 @@
         });
     });
     </script>
-
 @endsection
