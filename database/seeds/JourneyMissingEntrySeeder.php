@@ -26,7 +26,7 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //Only use for the marked as delivered....
         $shipmentId = [
-            22328438903134
+            22320237845723
         ];
         echo count($shipmentId);
         if ($shipmentId) {

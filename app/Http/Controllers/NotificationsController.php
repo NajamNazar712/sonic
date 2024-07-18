@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
-use App\BlockEmail;
 use Carbon\Carbon;
+use App\BlockEmail;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Client;
 use App\Http\Models\SMS;
@@ -19,7 +18,6 @@ use Illuminate\Support\Str;
 use App\Http\Models\Dispute;
 use App\Http\Models\Invoice;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Excel;
 use App\Http\Models\Shipment;
 use App\Jobs\ProcessOTPSMSITS;
@@ -44,6 +42,8 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\ShipmentStatus;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\CrmSmsLog;
@@ -51,6 +51,7 @@ use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\AppNotification;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\DailyFakeStatus;
+use App\Http\Models\ShipmentSmsLogs;
 use App\Jobs\ProcessOTPSMSForBotSMS;
 use App\ReturnDeliveredToShipperSms;
 use Illuminate\Support\Facades\Auth;
@@ -63,6 +64,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\Jobs\ProcessPushNotification;
 use App\Http\Models\RetailDonePayment;
 use App\Http\Models\ReturnNoteRequest;
+use App\Mail\NotificationsDispatchNow;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\DeliveryNoteOtpSms;
@@ -75,6 +77,7 @@ use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\MultipleSaleTagging;
 use App\Http\Models\NotificationSetting;
+use App\Http\Models\ShipmentsWeightType;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\ShipmentStatusReason;
@@ -89,6 +92,7 @@ use GuzzleHttp\Exception\RequestException;
 use App\Http\Models\Admin\ActivityTrailLog;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Controllers\ShortUrlController;
 use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Excel_reports\KaeNumber;
 use App\Http\Models\ShipmentsPaymentJourney;
@@ -119,6 +123,7 @@ use App\Http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminReportsController;
+use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Controllers\Admins\GlobalSettingsController;
@@ -126,11 +131,8 @@ use App\Http\Models\Excel_reports\MonthAverageDestination;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
-use App\Http\Models\ShipmentSmsLogs;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
-use App\Http\Models\ShipmentsWeightType;
-use App\Http\Controllers\ShortUrlController;
 
 
 class NotificationsController extends Controller
@@ -310,10 +312,33 @@ class NotificationsController extends Controller
             }
 
             if($to){
-                $mail = Mail::to($to);
-    
-                if ($cc) {
-                    $mail->cc($cc);
+
+                if($id = 230){
+
+                    $mail = new NotificationsDispatchNow($subject, $body);
+
+                    if ($cc) {
+                        $mail->cc($cc);
+                    }
+        
+                    if ($bcc) {
+                        $mail->bcc($bcc);
+                    }
+
+                    $mail = Mail::to($to)->send($mail);
+                    
+                }else{
+                    $mail = Mail::to($to);
+                
+                    if ($cc) {
+                        $mail->cc($cc);
+                    }
+        
+                    if ($bcc) {
+                        $mail->bcc($bcc);
+                    }
+
+                    $mail->send(new Notifications($subject, $body, $from));
                 }
     
                 if ($bcc) {
