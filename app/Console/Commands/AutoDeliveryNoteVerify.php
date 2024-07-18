@@ -11,7 +11,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
-use App\Jobs\ProcessRemoveShipmentFromRvShipmentTicket;
+use App\RvShipmentTicket;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Auth;
@@ -125,9 +125,11 @@ class AutoDeliveryNoteVerify extends Command
                                 }
                                 
                                 ShipmentsJourneyController::add($shipment->id, 20, 20, $shipments_journey->status_reason_id, $shipments_journey->remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
-                                
+
                                 //Remove Shipment from RV Shipment Ticket
-                                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment->id));
+                                RvShipmentTicket::where('shipment_id', $shipment->id)->delete();
+
+                                // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment->id));
                             }
 
                         }
