@@ -31,7 +31,7 @@ class deliveredUnsuccessfull extends Seeder
                 // if ($delivertNote->request_note_id) {
                 //     $rider_for_delivery = RiderDeliveryNoteRequest::find($delivertNote->request_note_id);
                 // }
-                ShipmentsJourneyController::add($shipment->id, 24, null, null, null, null, 346, $deliveryNoteId->delivery_note_id, null);
+                ShipmentsJourneyController::add($shipment->id, 8, 8, null, null, null, 346, $deliveryNoteId->delivery_note_id, null);
             }
         }
     }
