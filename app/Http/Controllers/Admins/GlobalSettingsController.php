@@ -1720,17 +1720,45 @@ class GlobalSettingsController extends Controller
                     
 
                     $dropdown .= '
-                                    <a href="' . route('admin.settings.crm_case_nature_types.edit', ['id' => $data->id]) . '" target="_blank" class="dropdown-item text-dark">
-                                        <div class="row no-gutters align-items-center">
-                                            <div class="col-2">
-                                                <i class="ft-edit-2"></i>
-                                            </div>
-                                            <div class="col-9 offset-1">
-                                                Edit
-                                            </div>
-                                        </div>
-                                    </a>
-                                ';
+                            <a href="' . route('admin.settings.crm_case_nature_types.edit', ['id' => $data->id]) . '" target="_blank" class="dropdown-item text-dark">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2">
+                                        <i class="ft-edit-2"></i>
+                                    </div>
+                                    <div class="col-9 offset-1">
+                                        Edit
+                                    </div>
+                                </div>
+                            </a>
+                        ';
+
+                    // if ($data->status == 0){
+                    //     $dropdown .= '
+                    //         <a href="#" class="dropdown-item text-dark disabled-link" onclick="event.preventDefault(); return false;">
+                    //         <div class="row no-gutters align-items-center">
+                    //             <div class="col-2">
+                    //                 <i class="ft-edit-2"></i>
+                    //             </div>
+                    //             <div class="col-9 offset-1">
+                    //                 Edit
+                    //             </div>
+                    //         </div>
+                    //     </a>
+                    //     ';
+                    // } else {
+                    //     $dropdown .= '
+                    //         <a href="' . route('admin.settings.crm_case_nature_types.edit', ['id' => $data->id]) . '" target="_blank" class="dropdown-item text-dark">
+                    //             <div class="row no-gutters align-items-center">
+                    //                 <div class="col-2">
+                    //                     <i class="ft-edit-2"></i>
+                    //                 </div>
+                    //                 <div class="col-9 offset-1">
+                    //                     Edit
+                    //                 </div>
+                    //             </div>
+                    //         </a>
+                    //     ';
+                    // }
 
                     $dropdown .= '
                     </div>
@@ -1801,6 +1829,11 @@ class GlobalSettingsController extends Controller
         $request->validate([
             'case_nature' => 'required',
             'case_nature_type' => 'required',
+            'remarks.*' => 'required_if:remarks_visibility,on',
+            'shipment_status' => 'required|array|min:1',
+            'admin_departments' => 'required|array|min:1'
+        ], [
+            'remarks.*.required_if' => 'Remarks are required when the remarks visibility checkbox is checked.',
         ]);
 
         $nature = $request->case_nature;
@@ -1857,6 +1890,15 @@ class GlobalSettingsController extends Controller
 
     public function crm_case_nature_types_update(Request $request)
     {
+        $request->validate([
+            'case_nature' => 'required',
+            'case_nature_type' => 'required',
+            'remarks.*' => 'required_if:remarks_visibility,on',
+            'shipment_status' => 'required|array|min:1',
+            'admin_departments' => 'required|array|min:1',
+        ], [
+            'remarks.*.required_if' => 'Remarks are required when the remarks visibility checkbox is checked.',
+        ]);
         $type = $request->input('case_nature_type');
         $case_nature_id = $request->input('case_nature_id');
         $case_nature = $request->input('case_nature');
@@ -1867,6 +1909,10 @@ class GlobalSettingsController extends Controller
         $remarks = $request->input('remarks');
     
         $caseNatureType = CrmRequestCaseNatureType::findOrFail($case_nature_id);
+
+        if ($caseNatureType->status_id == 0){
+            return redirect()->back()->with('error', 'Please enable the case nature first');
+        }
     
         if ($type !== $caseNatureType->type) {
             $existingCaseNatureType = CrmRequestCaseNatureType::where('type', $type)->first();
@@ -1892,28 +1938,25 @@ class GlobalSettingsController extends Controller
                 $existingRemark->delete();
             }
         }
-    
-        // Add or update remarks
-        foreach ($remarks as $remark) {
-            $existingRemark = CrmCaseNatureRemark::where('case_nature_id', $caseNatureType->id)
-                                                 ->where('remarks', $remark)
-                                                 ->first();
-    
-            if ($existingRemark) {
-                $existingRemark->remarks = $remark;
-                $existingRemark->save();
-            } else {
-                $crm_remark = new CrmCaseNatureRemark();
-                $crm_remark->case_nature_id = $caseNatureType->id;
-                $crm_remark->remarks = $remark;
-                $crm_remark->save();
+
+        if ($remarks != null){
+            // Add or update remarks
+            foreach ($remarks as $remark) {
+                $existingRemark = CrmCaseNatureRemark::where('case_nature_id', $caseNatureType->id)->where('remarks', $remark)->first();
+                if ($existingRemark) {
+                    $existingRemark->remarks = $remark;
+                    $existingRemark->save();
+                } else {
+                    $crm_remark = new CrmCaseNatureRemark();
+                    $crm_remark->case_nature_id = $caseNatureType->id;
+                    $crm_remark->remarks = $remark;
+                    $crm_remark->save();
+                }
             }
         }
     
         return redirect()->route('admin.settings.crm_case_nature_types.index')->with('success', 'Case Nature Type Updated successfully!');
     }
-    
-
 
     public function return_delivered_to_shipper_email_cut_off_time_index()
     {

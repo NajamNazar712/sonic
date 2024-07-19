@@ -38,7 +38,7 @@
                 
                                     <fieldset class="form-group">
                                         <label class="d-flex">Shipment status visibility (<input type="checkbox" name="select_all_status" id="select_all_status"> select all) </label>
-                                        <select name="shipment_status[]" id="edit_shipment_status" class="form-control select2" multiple="multiple">
+                                        <select name="shipment_status[]" id="edit_shipment_status" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Select At least 1 shipment status">
                                             @foreach($shipment_status as $status)
                                                 <option value="{{$status->id}}">{{$status->name}}</option>
                                             @endforeach
@@ -54,7 +54,7 @@
                                     <div class="mt-4">
                                         <label for="">Add remarks (you can add maximum 5 remarks)</label>
                                         <fieldset class="form-group">
-                                            <div id="edit_remarks_section" class="my-2"></div>
+                                            <div id="edit_remarks_section" class="mb-2"></div>
                                             <button class="btn btn-success" type="button" id="edit_add_remark_btn">Add Remark</button>
                                         </fieldset>
                                     </div>
@@ -68,7 +68,7 @@
     
                                     <fieldset class="form-group">
                                         <label class="d-flex">Admin departments visibility (<input type="checkbox" name="select_all_admin_department" id="edit_select_all_admin_department"> select all) </label>
-                                        <select name="admin_departments[]" id="edit_admin_department_visibility" class="form-control select2" multiple="multiple">
+                                        <select name="admin_departments[]" id="edit_admin_department_visibility" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Select At least 1 department">
                                             @foreach($admin_departments as $department)
                                                 <option value="{{$department->id}}">{{$department->name}}</option>
                                             @endforeach
@@ -204,7 +204,7 @@
                     function toggleErrorMessage() {
                         if (remarks_visibility && remarksContainer.children().length === 0) {
                             if ($('#remarks_error').length === 0) {
-                                remarksContainer.after(errorMessage);
+                                // remarksContainer.after(errorMessage);
                             }
                             edit_case_nature_btn.prop('disabled', true);
                         } else {
@@ -240,10 +240,8 @@
                             remarksContainer.show();
                             $('#edit_add_remark_btn').prop('disabled', false);
                         }
-
                         toggleErrorMessage();
                     }
-
                     populateRemarks();
 
                     $('#edit_add_remark_btn').on('click', function() {
@@ -273,7 +271,7 @@
                         if (remark_length === 0 && $('#edit_remarks_visibility').is(':checked')) {
                             $('#edit_case_nature_btn').prop('disabled', true);
                             $('#remarks_error').remove();
-                            $('#edit_remarks_section').after(errorMessage);
+                            // $('#edit_remarks_section').after(errorMessage);
                         } else {
                             $('#edit_case_nature_btn').prop('disabled', false);
                             $('#remarks_error').remove();
@@ -294,7 +292,7 @@
                         } else {
                             $('#edit_case_nature_btn').prop('disabled', true);
                             $('#remarks_error').remove();
-                            $('#edit_remarks_section').after(errorMessage);
+                            // $('#edit_remarks_section').after(errorMessage);
                         }
                     });
 
@@ -322,6 +320,22 @@
                     $('#edit_remarks_visibility').on('change', function() {
                         remarks_visibility = $(this).is(':checked');
                         populateRemarks();
+                    });
+
+                    edit_case_nature_btn.on('click', function() {
+                        var edit_remarks_new = $('.edit_remarks_new');
+                        var isEmpty = false;
+                        edit_remarks_new.each(function() {
+                            if ($(this).val().trim() == '') {
+                                isEmpty = true;
+                                return false;
+                            }
+                        });
+                        if (isEmpty) {
+                            $('#remarks_error').remove();
+                            remarksContainer.before(errorMessage);
+                            return false;
+                        }
                     });
 
                     // Toggling error message

@@ -30,8 +30,8 @@
                                     </fieldset>
                 
                                     <fieldset class="form-group">
-                                        <label class="d-flex">Shipment status visibility (<input type="checkbox" name="select_all_status" id="select_all_status"> select all) </label>
-                                        <select name="shipment_status[]" id="shipment_status" class="form-control select2" multiple="multiple">
+                                        <label class="d-flex">Shipment status visibility* (<input type="checkbox" name="select_all_status" id="select_all_status"> select all) </label>
+                                        <select name="shipment_status[]" id="shipment_status" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Select At least 1 shipment status">
                                             @foreach($shipment_status as $status)
                                                 <option value="{{$status->id}}">{{$status->name}}</option>
                                             @endforeach
@@ -60,8 +60,8 @@
                                     </fieldset>
     
                                     <fieldset class="form-group">
-                                        <label class="d-flex">Admin departments visibility (<input type="checkbox" name="select_all_admin_department" id="select_all_admin_department"> select all) </label>
-                                        <select name="admin_departments[]" id="admin_department_visibility" class="form-control select2" multiple="multiple">
+                                        <label class="d-flex">Admin departments visibility* (<input type="checkbox" name="select_all_admin_department" id="select_all_admin_department"> select all) </label>
+                                        <select name="admin_departments[]" id="admin_department_visibility" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Select At least 1 department">
                                             @foreach($admin_departments as $department)
                                                 <option value="{{$department->id}}">{{$department->name}}</option>
                                             @endforeach
@@ -269,7 +269,7 @@
             dropdownParent:$('#add_form')
         });
 
-        // Toggling error message
+        // Toggling error messages
         var case_nature = $('#case_nature');
         case_nature.on('change', function () {
             var case_nature_error = $('#case_nature-error');
@@ -277,6 +277,26 @@
                 case_nature_error.hide();
             } else {
                 case_nature_error.show();
+            }
+        });
+
+        var shipment_status = $('#shipment_status');
+        shipment_status.on('change', function () {
+            var shipment_status_error = $('#shipment_status-error');
+            if (shipment_status.val() != '') {
+                shipment_status_error.hide();
+            } else {
+                shipment_status_error.show();
+            }
+        });
+
+        var admin_department = $('#admin_department_visibility');
+        admin_department.on('change', function () {
+            var admin_department_error = $('#admin_department_visibility-error');
+            if (admin_department.val() != '') {
+                admin_department_error.hide();
+            } else {
+                admin_department_error.show();
             }
         });
 
