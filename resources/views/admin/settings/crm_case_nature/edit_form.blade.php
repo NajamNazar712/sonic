@@ -268,6 +268,46 @@
                         }
                     });
 
+                    var updateRemarksLength = function() {
+                        var remark_length = $('.edit_remarks_new').length;
+                        if (remark_length === 0 && $('#edit_remarks_visibility').is(':checked')) {
+                            $('#edit_case_nature_btn').prop('disabled', true);
+                            $('#remarks_error').remove();
+                            $('#edit_remarks_section').after(errorMessage);
+                        } else {
+                            $('#edit_case_nature_btn').prop('disabled', false);
+                            $('#remarks_error').remove();
+                        }
+                    };
+
+                    var remove_remark_btn = $('.remove-remark-btn');
+                    remove_remark_btn.on('click', function() {
+                        $(this).closest('.form-group').remove();
+                        updateRemarksLength();
+                    });
+
+                    $('#edit_add_remark_btn').on('click', function() {
+                        var newRemarkLength = $('.edit_remarks_new').length;
+                        if (newRemarkLength > 0) {
+                            $('#edit_case_nature_btn').prop('disabled', false);
+                            $('#remarks_error').remove();
+                        } else {
+                            $('#edit_case_nature_btn').prop('disabled', true);
+                            $('#remarks_error').remove();
+                            $('#edit_remarks_section').after(errorMessage);
+                        }
+                    });
+
+                    $(document).on('click', '.remove-remark-btn', function() {
+                        $(this).closest('.form-group').remove();
+                        updateRemarksLength();
+                    });
+
+                    $('#edit_remarks_visibility').on('change', function() {
+                        updateRemarksLength();
+                    });
+                    updateRemarksLength();
+
                     $(document).on('click', '.remove-remark-btn', function() {
                         var remarkId = $(this).data('remark-id');
                         $('#remark_' + remarkId + '_container').remove();
@@ -282,24 +322,6 @@
                     $('#edit_remarks_visibility').on('change', function() {
                         remarks_visibility = $(this).is(':checked');
                         populateRemarks();
-                    });
-
-                    var remove_remark_btn = $('.remove-remark-btn');
-                    remove_remark_btn.on('click', function() {
-                        var remark_length = $('.edit_remarks_new').length - 1;
-                        if (remark_length == 0 && remarks_visibility) {
-                            $('#edit_case_nature_btn').prop('disabled', true);
-                        } else {
-                            $('#edit_case_nature_btn').prop('disabled', false);
-                        }
-                    });
-
-                    $('#edit_add_remark_btn').on('click', function() {
-                        if ($('.edit_remarks_new').length > 0) {
-                            $('#edit_case_nature_btn').prop('disabled', false);
-                        } else {
-                            $('#edit_case_nature_btn').prop('disabled', true);
-                        }
                     });
 
                     // Toggling error message

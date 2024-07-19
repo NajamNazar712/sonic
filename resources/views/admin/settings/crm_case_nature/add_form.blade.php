@@ -114,6 +114,7 @@
 
     <script>
         $(document).ready(function() {
+        var errorMessage = '<span id="remarks_error" class="text-danger">At least one remark is required.</span>';
         var maxRemarks = 5;
         function toggleRemarksVisibility() {
             var isRemarksVisible = $('#remarks_visibility').is(':checked');
@@ -134,26 +135,43 @@
                 $('#remarks_section').hide();
                 $('#remarks_section .remark-field').hide();
                 add_remarks_section.prop('disabled', true);
+                $('#remarks_error').remove();
             }
             // toggleFirstRemarkRemoveButton();
         }
 
         function addRemarkField() {
             var currentRemarksCount = $('#remarks_section .remark-field').length;
+            
             if (currentRemarksCount < maxRemarks) {
                 $('#remarks_section').append(`
                     <div class="remark-field d-flex mb-2">
-                        <input type="text" class="form-control me-2" name="remarks[]" placeholder="Enter remark">
+                        <input type="text" class="form-control me-2 case_remarks" name="remarks[]" placeholder="Enter remark">
                         <div class="mx-1">
                             <button class="btn btn-danger remove-remark">Remove</button>
                         </div>
                     </div>
                 `);
+                
+                var newInput = $('#remarks_section .remark-field:last-child input');
+                
+                newInput.on('input', function() {
+                    if ($(this).val().trim() !== '') {
+                        $('#add_remarks_section').removeAttr('disabled');
+                    } else {
+                        $('#add_remarks_section').attr('disabled', 'disabled');
+                    }
+                });
+
+                // Initially disable the add button if the new input is empty
+                if (newInput.val().trim() === '') {
+                    $('#add_remarks_section').attr('disabled', 'disabled');
+                }
+
                 if (currentRemarksCount >= maxRemarks - 1) {
                     $('#add_remarks_section').attr('disabled', 'disabled');
                 }
             }
-            // toggleFirstRemarkRemoveButton();
         }
 
         function toggleFirstRemarkRemoveButton() {
@@ -181,9 +199,10 @@
                     }
                 });
                 if (filledRemarkCount === 0) {
-                    var errorMessage = '<span id="remarks_error" class="text-danger">At least one remark is required.</span>';
                     $('#remarks_section').append(errorMessage);
                     return false;
+                } else {
+                    $('#remarks_error').remove();
                 }
             }
             return true;
@@ -207,8 +226,9 @@
             }
             // toggleFirstRemarkRemoveButton();
         });
-
         toggleRemarksVisibility();
+
+        var remarks_visibility = $('#remarks_visibility').is(':checked');
 
         $('#shipment_status').select2({
             width:'100%',
