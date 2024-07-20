@@ -105,21 +105,13 @@ class CalculateFranchiseCommission extends Command
                 'retail_shipping_modes.name'
             ])
             ->get();
-        $total_commission = 0;
-        $amount_minus_withholding = 0;
-        $amout_minus_deduction = 0;
-
-        // store sum data
 
         foreach ($shipments as $shipment) {
             $product_percentage_amount = $shipment->product_percentage / 100;
             $weight_charges = $shipment->total_charges - $shipment->gst_amount;
             $commission = $product_percentage_amount * $weight_charges;
 
-            $withholding_amount = $shipment->withholding_percentage / 100;
-            $deduction_amount = $shipment->franchise_deduction / 100;
-
-            RetailFranchiseCommission::create([
+            $retail_franchise_commission = RetailFranchiseCommission::create([
                 'franchise_id' => $shipment->franchise_id,
                 'franchise_code' => $shipment->franchise_code,
                 'franchise_name' => $shipment->franchise_name,
@@ -135,14 +127,13 @@ class CalculateFranchiseCommission extends Command
                 'weight_charges' => $weight_charges,
                 'gst_percentage' => $shipment->gst_percentage,
                 'franchise_gst_amount' => $shipment->gst_amount,
-                'franchise_withholding_percentage' => $shipment->withholding_percentage,
                 'product_percentage' => $shipment->product_percentage,
                 'commission' => $commission,
-                'franchise_withholding_amout' => $withholding_amount,
-                'deduction_percentage' => $shipment->franchise_deduction,
-                'deduction_amount' => $deduction_amount,
             ]);
         }
+
+        // store summed data
+        
     }
 
 
