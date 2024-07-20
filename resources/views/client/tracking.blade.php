@@ -617,7 +617,8 @@
                                         }
                                     }
                                 } else {
-                                    shipment += '<td>' + details.shipper.name + '</td>';
+                                    // shipment += '<td>' + details.shipper.name + '</td>';
+                                    shipment += '<td>' + details.shipper.name + ' (' + details.pickup.vendor + ')' + '</td>';
                                 }
 
                                 shipment += '<td><strong>Account No.</strong></td>';
