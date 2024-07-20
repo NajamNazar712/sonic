@@ -256,7 +256,7 @@ class RetailAdminUserManagementController extends Controller
     {
         $request->validate([
             'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
-            'franchise_gst' => 'required|numeric',
+            'franchise_deduction' => 'required|numeric',
             'franchise_withholding' => 'required|numeric',
             'name' => 'required',
             'phone_number' => 'required',
@@ -266,7 +266,6 @@ class RetailAdminUserManagementController extends Controller
             'lat' => 'required',
             'long' => 'required',
             'insurance' => 'required',
-            'franchise_gst' => 'required',
             'retail_shipping_mode_id' => 'required',
             'security_deposit' => 'required',
             'license_fees' => 'required',
@@ -381,7 +380,7 @@ class RetailAdminUserManagementController extends Controller
     public function franchise_edit(Request $request)
     {
         $request->validate([
-            'franchise_gst' => 'required|numeric',
+            'franchise_deduction' => 'required|numeric',
             'franchise_withholding' => 'required|numeric',
             'name' => 'required',
             'phone_number' => 'required',
@@ -390,7 +389,6 @@ class RetailAdminUserManagementController extends Controller
             'lat' => 'required',
             'long' => 'required',
             'edit_insurance' => 'required',
-            'franchise_gst' => 'required',
             'retail_shipping_mode_id' => 'required',
             'security_deposit' => 'required',
             'license_fees' => 'required',

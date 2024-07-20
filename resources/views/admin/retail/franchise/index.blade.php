@@ -106,12 +106,12 @@
                                         </div>
                                     </div>
             
-                                    <div class="input-group mb-2">
+                                    {{-- <div class="input-group mb-2">
                                         <input type="text" name="franchise_gst" id="commission_percentage" class="form-control commission_percentage" placeholder="GST*"  value="" max="100" data-rule-required="true" data-msg-required="GST is required">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
-                                    </div>
+                                    </div> --}}
             
                                     <div class="input-group mb-2">
                                         <input type="text" name="franchise_withholding" id="withholding_tax_percentage" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-rule-required="true" data-msg-required="Withholding Tax is required">
@@ -120,12 +120,12 @@
                                         </div>
                                     </div>
             
-                                    {{-- <div class="input-group mb-2">
-                                        <input type="text" name="franchise_deduction" id="deduction_percentage" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100">
+                                    <div class="input-group mb-2">
+                                        <input type="text" name="franchise_deduction" id="deduction_percentage" class="form-control deduction_percentage" placeholder="Commission GST Deduction*"  value="" max="100" data-rule-required="true" data-msg-required="Commission GST Deduction is required">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
-                                    </div> --}}
+                                    </div>
                                 </div>
 
                                 <div class="col-6">
@@ -271,12 +271,12 @@
                                     </div>
                                 </div>
 
-                                <div class="input-group mb-2">
+                                {{-- <div class="input-group mb-2">
                                     <input type="text" name="franchise_gst" id="commission_percentage_edit" class="form-control commission_percentage" placeholder="GST*"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="GST">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>
-                                </div>
+                                </div> --}}
 
                                 <div class="input-group mb-2">
                                     <input type="text" name="franchise_withholding" id="withholding_tax_percentage_edit" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Withholding Tax">
@@ -285,12 +285,12 @@
                                     </div>
                                 </div>
 
-                                {{-- <div class="input-group mb-2">
-                                    <input type="text" name="franchise_deduction" id="deduction_percentage_edit" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Deduction">
+                                <div class="input-group mb-2">
+                                    <input type="text" name="franchise_deduction" id="deduction_percentage_edit" class="form-control deduction_percentage" placeholder="Commission GST Deduction*"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Deduction">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>
-                                </div> --}}
+                                </div>
                             </div>
 
                             <div class="col-6">
@@ -687,7 +687,7 @@
                     url: '{{ route('admin.retail.franchise.retail_product_charges') }}',
                     data: { franchise_id: id },
                     success: function (response) {
-                        $('#commission_percentage_edit').val(response.data.franchise_gst);
+                        $('#deduction_percentage_edit').val(response.data.franchise_deduction);
                         $('#withholding_tax_percentage_edit').val(response.data.franchise_withholding);
                         $('#edit_security_deposit').val(response.data.security_deposit);
                         $('#edit_license_fees').val(response.data.license_fees);

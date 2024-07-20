@@ -44,7 +44,7 @@ class CalculateFranchiseCommission extends Command
     public function handle()
     {
         $this->franchise_commission_view();
-        $this->user_commission_view();
+        // $this->user_commission_view();
     }
 
     private function franchise_commission_view()
@@ -54,56 +54,70 @@ class CalculateFranchiseCommission extends Command
         $month = str_pad(Carbon::now()->subMonth()->month, 2, "0", STR_PAD_LEFT);
 
         $baseQuery = RetailShipment::query()
-        ->leftJoin('retail_users', 'retail_shipments.retail_user_id', '=', 'retail_users.id')
-        ->leftJoin('retail_franchises', 'retail_users.category_id', '=', 'retail_franchises.id')
-        // ->leftJoin('retail_franchise_product_percentages', 'retail_franchise_product_percentages.franchise_id', '=', 'retail_franchises.id')
-        ->leftJoin('retail_franchise_product_percentages', function($join) {
-            $join->on('retail_franchise_product_percentages.franchise_id', '=', 'retail_franchises.id')
-                ->on('retail_franchise_product_percentages.retail_shipping_mode_id', '=', 'retail_shipments.shipping_mode');
-        })
-        ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id')
-        ->leftJoin('retail_franchise_charges', 'retail_franchises.id', '=', 'retail_franchise_charges.franchise_id');
+            ->leftJoin('retail_users', 'retail_shipments.retail_user_id', '=', 'retail_users.id')
+            ->leftJoin('retail_franchises', 'retail_users.category_id', '=', 'retail_franchises.id')
+            ->leftJoin('retail_franchise_product_percentages', function($join) {
+                $join->on('retail_franchise_product_percentages.franchise_id', '=', 'retail_franchises.id')
+                    ->on('retail_franchise_product_percentages.retail_shipping_mode_id', '=', 'retail_shipments.shipping_mode');
+            })
+            ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id')
+            ->leftJoin('retail_franchise_charges', 'retail_franchises.id', '=', 'retail_franchise_charges.franchise_id');
 
         $shipments = $baseQuery
-        ->whereIn('retail_shipments.category_id', $user_ids)
-        ->whereMonth('retail_shipments.created_at', $month)
-        ->select([
-            'retail_shipments.created_at as shipment_month',
-            'retail_shipments.total_charges_without_gst as total_charges_without_gst',
-            'retail_shipments.gst as gst_amount',
-            'retail_shipments.total_charges as total_charges',
-            'retail_shipments.weight_charges as weight_charges',
+            ->whereIn('retail_shipments.category_id', $user_ids)
+            ->whereMonth('retail_shipments.created_at', $month)
+            ->select([
+                DB::raw('COUNT(retail_shipments.id) as shipment_count'),
+                DB::raw('SUM(retail_shipments.total_charges_without_gst) as total_charges_without_gst'),
+                DB::raw('SUM(retail_shipments.gst) as gst_amount'),
+                DB::raw('SUM(retail_shipments.total_charges) as total_charges'),
+                DB::raw('SUM(retail_shipments.weight_charges) as weight_charges'),
+                
+                'retail_franchises.id as franchise_id',
+                'retail_franchises.code as franchise_code',
+                'retail_franchises.name as franchise_name',
+                'retail_franchises.cnic as franchise_cnic',
+                'retail_franchises.phone_no as franchise_phone',
+                
+                'retail_users.address as franchise_address',
 
-            'retail_franchises.id as franchise_id',
-            'retail_franchises.code as franchise_code',
-            'retail_franchises.name as franchise_name',
-            'retail_franchises.cnic as franchise_cnic',
-            'retail_franchises.phone_no as franchise_phone',
+                'retail_franchise_product_percentages.product_percentage as product_percentage',
 
-            'retail_users.address as franchise_address',
+                'retail_franchise_charges.franchise_deduction as franchise_deduction',
+                'retail_franchise_charges.franchise_gst as gst_percentage',
+                'retail_franchise_charges.franchise_withholding as withholding_percentage',
 
-            'retail_franchise_product_percentages.product_percentage as product_percentage',
-            'retail_franchise_charges.franchise_deduction',
-            'retail_franchise_charges.franchise_gst as gst_percentage',
-            'retail_franchise_charges.franchise_withholding as withholding_percentage',
+                'retail_shipping_modes.id as retail_shipping_mode_id',
+                'retail_shipping_modes.name as shipping_mode_name',
+            ])
+            ->groupBy([
+                'retail_franchises.id',
+                'retail_franchises.code',
+                'retail_franchises.name',
+                'retail_franchises.cnic',
+                'retail_franchises.phone_no',
+                'retail_users.address',
+                'retail_franchise_product_percentages.product_percentage',
+                'retail_franchise_charges.franchise_deduction',
+                'retail_franchise_charges.franchise_gst',
+                'retail_franchise_charges.franchise_withholding',
+                'retail_shipping_modes.id',
+                'retail_shipping_modes.name'
+            ])
+            ->get();
+        $total_commission = 0;
+        $amount_minus_withholding = 0;
+        $amout_minus_deduction = 0;
 
-            'retail_shipping_modes.id as retail_shipping_mode_id',
-            'retail_shipping_modes.name as shipping_mode_name',
+        // store sum data
 
-            DB::raw('COUNT(retail_shipments.id) as shipment_count')
-        ])
-        ->groupBy([
-            'shipment_month',
-            'franchise_id',
-            'retail_shipping_mode_id'
-        ])
-        ->get();
-        
         foreach ($shipments as $shipment) {
-            // Shipment count
-            $shipmentCount = $shipment->shipment_count;
-            $product_percentage_amount = $shipment->product_percentage / 100 ;
-            $commission = $product_percentage_amount * $shipment->weight_charges;
+            $product_percentage_amount = $shipment->product_percentage / 100;
+            $weight_charges = $shipment->total_charges - $shipment->gst_amount;
+            $commission = $product_percentage_amount * $weight_charges;
+
+            $withholding_amount = $shipment->withholding_percentage / 100;
+            $deduction_amount = $shipment->franchise_deduction / 100;
 
             RetailFranchiseCommission::create([
                 'franchise_id' => $shipment->franchise_id,
@@ -115,18 +129,35 @@ class CalculateFranchiseCommission extends Command
                 'month' => $month,
                 'retail_shipping_mode_id' => $shipment->retail_shipping_mode_id,
                 'retail_shipping_mode_name' => $shipment->shipping_mode_name,
-                'number_of_shipments' => $shipmentCount,
+                'number_of_shipments' => $shipment->shipment_count,
                 'total_charges_without_gst' => $shipment->total_charges_without_gst,
                 'total_charges' => $shipment->total_charges,
-                'weight_charges' => $shipment->weight_charges,
-                'gst_percentage'=> $shipment->gst_percentage,
+                'weight_charges' => $weight_charges,
+                'gst_percentage' => $shipment->gst_percentage,
                 'franchise_gst_amount' => $shipment->gst_amount,
                 'franchise_withholding_percentage' => $shipment->withholding_percentage,
                 'product_percentage' => $shipment->product_percentage,
-                'commission' => $commission
+                'commission' => $commission,
+                'franchise_withholding_amout' => $withholding_amount,
+                'deduction_percentage' => $shipment->franchise_deduction,
+                'deduction_amount' => $deduction_amount,
             ]);
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private function user_commission_view()
     {
