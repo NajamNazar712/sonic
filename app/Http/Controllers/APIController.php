@@ -9819,11 +9819,12 @@ class APIController extends Controller
 
     }
 
+
     public function trax_pk_validation($company_name =  null , $email_address = null , $phone_number = null) {
         $exists = User::where('name', $company_name)
                   ->orWhere('email', $email_address)
                   ->orWhere('phone', $phone_number)->exists();
-
+                  
         return response()->json(['exists' => $exists]);
     }
 }
