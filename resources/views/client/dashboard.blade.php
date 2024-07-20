@@ -60,9 +60,7 @@
                                         </div>
 
                                         <div class="form-group col-md-3 mt-2 justify-content-center">
-                                            <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width">
-                                                <i class="la la-search"></i> Search
-                                            </button>
+                                            <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                         </div>
                                     </form>
                                 </div>
@@ -823,8 +821,6 @@
                         title: 'Order Details',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                        enabled: false,
-
                     },
 
                         {{--{--}}
@@ -926,7 +922,7 @@
                         className: 'btn btn-primary print',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            table.button(0).disable();
+                            // table.button(0).disable();
                             table.button(1).disable();
                             print(selected_rows);
                             table.rows().deselect();
@@ -943,8 +939,6 @@
                     {
                         text: '<i class="la la-plus"></i> Add Request',
                         className: 'btn btn-primary request_add',
-                        enabled: false,
-
                         action: function (e, dt, node, config) {
                             if (selected_rows.length > 0) {
                                 $('#AddRequestModal').modal('show');
@@ -994,8 +988,6 @@
                                     table.button('.print').enable();
                                     table.button('.cancel').enable();
                                     table.button('.consolidate').enable();
-                                    table.button('.request_add').enable();
-
 
                                 }
                             });
@@ -1050,7 +1042,6 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                deferLoading: 0,
                 ajax: {
                     url: '{{ route('cod.orders.list') }}',
                     data: function (d) {
@@ -1343,7 +1334,7 @@
                                 }else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
-                                table.button(0).disable();
+                                // table.button(0).disable();
                                 table.button(1).disable();
 
                                 table.rows().deselect();
@@ -1452,15 +1443,12 @@
                     table.button(0).enable();
                     table.button(1).enable();
                     table.button(2).enable();
-                    table.button(3).enable();
-
 
                 }
                 else {
-                    table.button(0).disable();
+                    // table.button(0).disable();
                     table.button(1).disable();
                     table.button(2).disable();
-                    table.button(3).disable();
                 }
             });
 

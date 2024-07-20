@@ -1245,6 +1245,8 @@ class Permission
             'retail.users.index' => 474,
             'retail.users.list' => 474,
 
+            'retail.international.economy_rates.index' => 992,
+            'retail.international.economy_rates.excel' => 992,
 
             'debriefing.supervisor.index' => 495,
             'debriefing.supervisor.list' => 495,
@@ -1458,6 +1460,7 @@ class Permission
 
             'settings.mms_excel_booking_setting.index' => 938,
 			'reports.cargo_manifest.index' => 933,
+            'reports.sms.index' => 945,
 
             'logistic.master_product.index' =>952,
             'logistic.master_product.list' =>952,
