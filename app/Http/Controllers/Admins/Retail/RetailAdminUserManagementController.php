@@ -33,13 +33,14 @@ use App\Http\Models\RetailUserFamilyInformation;
 use App\Http\Models\RetailUserProductPercentage;
 use App\Http\Models\RetailUserAttachment;
 use App\Http\Models\RetailUserHistory;
+use App\Http\Models\TotalSumFranchiseCommission;
+use App\Http\Models\TotalSumRetailTraxCenter;
 
 class RetailAdminUserManagementController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth:admin')->except('cancel');
-
         $this->middleware('Permission');
     }
 
@@ -563,35 +564,14 @@ class RetailAdminUserManagementController extends Controller
         ]);
     }
 
+
+
     public function user_commission_invoice_print(Request $request)
     {
         $trax_user = $request->trax_users;
         $data = explode(', ', $trax_user);
-        $retail_commissions = RetailUserCommission::whereIn('franchise_code', $data)
-        ->select(
-            'franchise_id',
-            'franchise_code',
-            'trax_center_name',
-            'trax_center_cnic',
-            'trax_center_phone',
-            'franchise_address',
-            DB::raw("MONTHNAME(STR_TO_DATE(month, '%m')) as month"),
-            'retail_shipping_mode_id',
-            'retail_shipping_mode_name',
-            DB::raw('SUM(number_of_shipments) as total_shipments'),
-            DB::raw('SUM(total_charges_without_gst) as total_charges_without_gst'),
-            DB::raw('SUM(total_charges) as total_charges'),
-            DB::raw('SUM(weight_charges) as total_weight_charges'),
-            DB::raw('SUM(franchise_gst_amount) as total_franchise_gst_amount'),
-            'commission',
-            DB::raw('(commission/100) * SUM(weight_charges) as net_commission')
-        )
-        ->groupBy(
-            'retail_shipping_mode_id',
-            'retail_shipping_mode_name',
-        )
-        ->get();
-
+        $retail_commissions = RetailUserCommission::whereIn('id', $data)->get();
+    
         $html = '';
         $html .= '<!doctype html>';
         $html .= '<html lang="en">';
@@ -613,32 +593,13 @@ class RetailAdminUserManagementController extends Controller
         $html .= '</style>';
         
         $html .= '</head>';
-        $html .= '<body>';
-        
-        $html .= '<div>';
-        $html .= '<div class="p-1">';
-        
-        $html .= '<div>';
-        $html .= '<div class="p-1">';
-        
-        $html .= '<div>';
-        $html .= '<div class="p-1">';
-
-
-        $html .= '<div>';
-        $html .= '<div class="p-1">';
+        $html .= '<body style="padding:98px;">';
     
-        $html .= '<div>';
-        $html .= '<div class="p-1">';
-    
-        $html .= '<div>';
-        $html .= '<div class="p-1">';
-
         $grouped_data = [];
-        foreach ($retail_commissions as $data) {
-            $grouped_data[$data->trax_center_name][] = $data;
+        foreach ($retail_commissions as $record) {
+            $grouped_data[$record->trax_center_name][] = $record;
         }
-
+    
         foreach ($grouped_data as $franchise_name => $records) {
             // Start the main container for a franchise
             $html .= '<div class="row align-items-start justify-content-between summary my-4">';
@@ -651,7 +612,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<tr><td>Address:</td><td>' . $records[0]->franchise_address . '</td></tr>';
             $html .= '<tr><td>Code:</td><td>' . $records[0]->franchise_code . '</td></tr>';
             $html .= '<tr><td>CNIC:</td><td>' . $records[0]->trax_center_cnic . '</td></tr>';
-            $html .= '<tr><td>Phone #</td><td>' . $records[0]->trax_center_phone . '</td></tr>';
+            $html .= '<tr><td>Phone #:</td><td>' . $records[0]->trax_center_phone . '</td></tr>';
             $html .= '<tr><td><strong>Payment Month:</strong></td><td>' . $records[0]->month . '</td></tr>';
             $html .= '</tbody>';
             $html .= '</table>';
@@ -674,33 +635,35 @@ class RetailAdminUserManagementController extends Controller
             $html .= '</tr>';
             $html .= '</thead>';
             $html .= '<tbody>';
-        
+    
             // Product records
             $total_shipments = 0;
             $total_charges = 0;
             $total_gst = 0;
             $total_weight_charges = 0;
             $total_commission = 0;
-        
+    
             foreach ($records as $record) {
+                $data = TotalSumRetailTraxCenter::where('retail_user_id', $record->franchise_id)->first();
+
                 $html .= '<tr>';
                 $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
-                $html .= '<td>' . $record->commission . '%</td>';
-                $html .= '<td>' . $record->total_shipments . '</td>';
+                $html .= '<td>' . ($record->commission ?? '0') . '%</td>';
+                $html .= '<td>' . $record->number_of_shipments . '</td>';
                 $html .= '<td>' . $record->total_charges . '</td>';
-                $html .= '<td>' . $record->total_franchise_gst_amount . '</td>';
-                $html .= '<td>' . $record->total_weight_charges . '</td>';
+                $html .= '<td>' . $record->franchise_gst_amount . '</td>';
+                $html .= '<td>' . $record->weight_charges . '</td>';
                 $html .= '<td>' . $record->net_commission . '</td>';
                 $html .= '</tr>';
-        
+    
                 // Summing up totals
-                $total_shipments += $record->total_shipments;
-                $total_charges += $record->total_charges;
-                $total_gst += $record->total_franchise_gst_amount;
-                $total_weight_charges += $record->total_weight_charges;
+                $total_shipments = $data->sum_of_shipments;
+                $total_charges = $data->sum_of_total_charges;
+                $total_gst = $data->sum_of_gst;
+                $total_weight_charges = $data->sum_of_weight_charges;
                 $total_commission += $record->net_commission;
             }
-        
+    
             // Totals row
             $html .= '<tr>';
             $html .= '<td class="text-center" colspan="2">Total</td>';
@@ -710,9 +673,9 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<td>' . $total_weight_charges . '</td>';
             $html .= '<td>' . $total_commission . '</td>';
             $html .= '</tr>';
-        
+    
             $gross_commission = $total_commission;
-        
+    
             // Gross commission row
             $html .= '<tr>';
             $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
@@ -756,7 +719,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '</table>';
             $html .= '</div>';
             $html .= '</div>';
-
+    
             // Prepared by and Checked by
             $html .= '<div class="row align-items-start justify-content-between summary col-6">';
             $html .= '<div class="col-6 d-flex justify-content-between">';
@@ -768,12 +731,12 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<strong>Approved By:</strong>';
             $html .= '</div>';
             $html .= '</div>';
-
+    
             $html .= '<div class="row col-6">';
             $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
             $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
             $html .= '</div>';
-
+    
             $html .= '<div class="row align-items-start justify-content-between summary col-6">';
             $html .= '<div class="col-6 d-flex justify-content-between">';
             $html .= '<strong>Retail Team</strong>';
@@ -784,7 +747,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<strong>COO</strong>';
             $html .= '</div>';
             $html .= '</div>';
-
+    
             // Empty tables
             $html .= '<div class="row align-items-start summary">';
             $html .= '<div class="col-3">';
@@ -797,7 +760,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '</tbody>';
             $html .= '</table>';
             $html .= '</div>';
-
+    
             $html .= '<div class="col-3">';
             $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
             $html .= '<tbody>';
@@ -809,14 +772,12 @@ class RetailAdminUserManagementController extends Controller
             $html .= '</table>';
             $html .= '</div>';
             $html .= '</div>';
+    
+            // Disclaimer after empty tables with page break
+            $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
+            $html .= '<div style="page-break-after: always;"></div>';
         }
 
-
-        $html .= '<div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
-
-        $html .= '</div>';
-        $html .= '</div>';
-        
         $html .= '</body>';
         $html .= '</html>';
         return $html;
@@ -826,33 +787,7 @@ class RetailAdminUserManagementController extends Controller
     {
         $franchise_code = $request->franchise_code;
         $franchise = explode(', ', $franchise_code);
-
-        $franchise_names = RetailFranchiseCommission::whereIn('franchise_code', $franchise)
-        ->select(
-            'franchise_id',
-            'franchise_code',
-            'franchise_cnic',
-            'franchise_phone',
-            'franchise_name',
-            'franchise_address',
-            'retail_shipping_mode_id',
-            'retail_shipping_mode_name',
-            'franchise_gst_amount',
-            'franchise_withholding_percentage',
-            'product_percentage',
-            DB::raw("MONTHNAME(STR_TO_DATE(month, '%m')) as month_name"),
-            DB::raw('SUM(number_of_shipments) as total_shipments'),
-            DB::raw('SUM(total_charges_without_gst) as total_charges_without_gst'),
-            DB::raw('SUM(total_charges) as total_charges'),
-            DB::raw('SUM(weight_charges) as total_weight_charges'),
-            DB::raw('SUM(franchise_gst_amount) as total_franchise_gst_amount'),
-            DB::raw('(franchise_withholding_percentage/100) * SUM(weight_charges) as commission')
-        )
-        ->groupBy(
-            'retail_shipping_mode_id',
-            'retail_shipping_mode_name',
-        )
-        ->get();
+        $franchise_names = RetailFranchiseCommission::whereIn('id', $franchise)->get();
 
         $html = '';
         $html .= '<!doctype html>';
@@ -885,18 +820,13 @@ class RetailAdminUserManagementController extends Controller
         
         $html .= '<div>';
         $html .= '<div class="p-1">';
-
-
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
         $html .= '<div>';
         $html .= '<div class="p-1">';
     
-        $html .= '<div>';
-        $html .= '<div class="p-1">';
-    
-        $html .= '<div>';
-        $html .= '<div class="p-1">';
-    
-
         $grouped_data = [];
         foreach ($franchise_names as $data) {
             $grouped_data[$data->franchise_name][] = $data;
@@ -920,7 +850,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '</table>';
             $html .= '</div>';
             $html .= '</div>';
-        
+
             // Start the table for product details
             $html .= '<div class="row align-items-start justify-content-between summary">';
             $html .= '<div class="col-12">';
@@ -937,33 +867,34 @@ class RetailAdminUserManagementController extends Controller
             $html .= '</tr>';
             $html .= '</thead>';
             $html .= '<tbody>';
-        
+
             // Product records
             $total_shipments = 0;
             $total_charges = 0;
             $total_gst = 0;
             $total_weight_charges = 0;
             $total_commission = 0;
-        
+
             foreach ($records as $record) {
+                $data = TotalSumFranchiseCommission::where('franchise_id', $record->franchise_id)->first();
+
                 $html .= '<tr>';
                 $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
                 $html .= '<td>' . $record->product_percentage . '%</td>';
-                $html .= '<td>' . $record->total_shipments . '</td>';
+                $html .= '<td>' . $record->number_of_shipments . '</td>';
                 $html .= '<td>' . $record->total_charges . '</td>';
-                $html .= '<td>' . $record->total_franchise_gst_amount . '</td>';
-                $html .= '<td>' . $record->total_weight_charges . '</td>';
+                $html .= '<td>' . $record->franchise_gst_amount . '</td>';
+                $html .= '<td>' . $record->weight_charges . '</td>';
                 $html .= '<td>' . $record->commission . '</td>';
                 $html .= '</tr>';
-        
-                // Summing up totals
-                $total_shipments += $record->total_shipments;
-                $total_charges += $record->total_charges;
-                $total_gst += $record->total_franchise_gst_amount;
-                $total_weight_charges += $record->total_weight_charges;
-                $total_commission += $record->commission;
+
+                $total_shipments = $data->sum_of_all_shipments;
+                $total_charges = $data->sum_of_total_charges;
+                $total_gst = $data->sum_of_gst;
+                $total_weight_charges = $data->sum_of_weight_charges;
+                $total_commission = $data->sum_of_commission;
             }
-        
+
             // Totals row
             $html .= '<tr>';
             $html .= '<td class="text-center" colspan="2">Total</td>';
@@ -973,15 +904,23 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<td>' . $total_weight_charges . '</td>';
             $html .= '<td>' . $total_commission . '</td>';
             $html .= '</tr>';
-        
-            $withholding_amount = ($records[0]->franchise_withholding_percentage / 100 * $total_commission);
-            $gross_commission = $total_commission - $withholding_amount;
+
+            $withholding_amount = $data->withholding_amount;
+            $deduction_amount = $data->deduction_amount;
+            $gross_commission = $total_commission - ($withholding_amount + $deduction_amount);
+
             // Withholding tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Withholding Income Tax' . $records[0]->franchise_withholding_percentage . '%</td>';
+            $html .= '<td class="text-center" colspan="6">Withholding Income Tax ' . $data->withholding_tax_percent . '%</td>';
             $html .= '<td>' . $withholding_amount . '</td>';
             $html .= '</tr>';
-        
+
+            // Deduction GST tax row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6">Commission GST Deduction ' . $data->commission_gst_deduction_percent . '%</td>';
+            $html .= '<td>' . $deduction_amount . '</td>';
+            $html .= '</tr>';
+
             // Gross commission row
             $html .= '<tr>';
             $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
@@ -991,7 +930,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '</table>';
             $html .= '</div>';
             $html .= '</div>';
-        
+
             // Third table: Deposits
             $html .= '<div class="row align-items-start justify-content-between summary">';
             $html .= '<div class="col-12">';
@@ -1011,7 +950,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '</table>';
             $html .= '</div>';
             $html .= '</div>';
-        
+
             // Fourth table: Pending Sales
             $html .= '<div class="row align-items-start justify-content-between summary">';
             $html .= '<div class="col-3">';
@@ -1060,8 +999,9 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
             $html .= '<tbody>';
             $html .= '<tr>';
+            $html .= '<td class="w-50" style="height: 3rem; padding-top';
             $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
-            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
             $html .= '</tr>';
             $html .= '</tbody>';
             $html .= '</table>';
@@ -1072,15 +1012,16 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<tbody>';
             $html .= '<tr>';
             $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
-            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
             $html .= '</tr>';
             $html .= '</tbody>';
             $html .= '</table>';
             $html .= '</div>';
             $html .= '</div>';
+            
+            $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
+            $html .= '<div style="page-break-after: always;"></div>';
         }
-
-        $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
 
         $html .= '</div>';
         $html .= '</div>';
@@ -1090,7 +1031,7 @@ class RetailAdminUserManagementController extends Controller
         return $html;
     }
 
-    public function franchisex(Request $request)
+    public function franchise_commission_view_ajax_list(Request $request)
     {
         $month = $request->month;
         $franchise = $request->franchise;
@@ -3075,6 +3016,104 @@ class RetailAdminUserManagementController extends Controller
         $retail_user_history = RetailUserHistory::where('retail_user_id', $id)->get();
         return view('admin.retail.users.history', [
             'retail_user_history' => $retail_user_history
+        ]);
+    }
+
+    public function show_commission(Request $request) 
+    {
+        $request->validate([
+            'id' => 'required'
+        ]);
+        $ids = explode(',', $request->id);
+        $ids = array_map('trim', $ids);
+        $data = RetailFranchiseCommission::whereIn('id', $ids)->get();
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+
+    public function commission_payment(Request $request) 
+    {
+        $request->validate([
+            'id' => 'required'
+        ]);
+        $ids = explode(',', $request->id);
+        $ids = array_map('trim', $ids);
+        $data = RetailFranchiseCommission::whereIn('id', $ids)->get();
+        if ($data->isEmpty()) {
+            return response()->json([
+                'error' => 'No data found for the provided IDs.'
+            ], 404);
+        }
+        $franchiseIds = $data->pluck('franchise_id')->unique();
+        if ($franchiseIds->count() > 1) {
+            return response()->json([
+                'error' => 'Selected IDs do not belong to the same franchise.',
+                'status' => 1
+            ], 400);
+        }
+        foreach($data as $record){
+            if ($record->is_paid == 1){
+                return response()->json([
+                    'error' => 'Payment for this franchise has already been made.',
+                    'status' => 2,
+                    'error_data' => $record->franchise_name
+                ], 400);
+            }
+            $record->is_paid = 1;
+            $record->save();
+        }
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+
+    public function show_retail_commission(Request $request) 
+    {
+        $request->validate([
+            'id' => 'required'
+        ]);
+        $ids = explode(',', $request->id);
+        $ids = array_map('trim', $ids);
+        $data = RetailUserCommission::whereIn('id', $ids)->get();
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+
+    public function retail_commission_payment(Request $request) 
+    {
+        $request->validate([
+            'id' => 'required'
+        ]);
+        $ids = explode(',', $request->id);
+        $ids = array_map('trim', $ids);
+        $data = RetailUserCommission::whereIn('id', $ids)->get();
+        if ($data->isEmpty()) {
+            return response()->json([
+                'error' => 'No data found for the provided IDs.'
+            ], 404);
+        }
+        $franchiseIds = $data->pluck('franchise_id')->unique();
+        if ($franchiseIds->count() > 1) {
+            return response()->json([
+                'error' => 'Selected data does not belong to the same User.',
+                'status' => 1
+            ], 400);
+        }
+        foreach($data as $record){
+            if ($record->is_paid == 1){
+                return response()->json([
+                    'error' => 'Payment for this User has already been made.',
+                    'status' => 2,
+                    'error_data' => $record->trax_center_name
+                ], 400);
+            }
+            $record->is_paid = 1;
+            $record->save();
+        }
+        return response()->json([
+            'data' => $data
         ]);
     }
 }

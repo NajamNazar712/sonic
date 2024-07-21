@@ -24,6 +24,7 @@ class RetailUserCommission extends Model
         'franchise_gst_amount',
         'net_commission',
         'total_charges',
-        'weight_charges'
+        'weight_charges',
+        'is_paid'
     ];
 }

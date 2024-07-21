@@ -31,7 +31,8 @@ class RetailFranchiseCommission extends Model
         'charges_without_withholding',
         'deduction_percentage',
         'deduction_amount',
-        'net_commission'
+        'net_commission',
+        'is_paid'
     ];
     
 }

@@ -3841,6 +3841,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('user_commission/ajax', 'Admins\Retail\RetailAdminUserManagementController@user_commission_view_ajax_list')->name('user_commission.list');
 
             Route::post('print', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_invoice_print')->name('franchise_commission_invoice_print');
+
+            Route::post('show_commission', 'Admins\Retail\RetailAdminUserManagementController@show_commission')->name('show_commission');
+            Route::post('commission_payment', 'Admins\Retail\RetailAdminUserManagementController@commission_payment')->name('commission_payment');
         });
         Route::prefix('trax_center')->name('trax_center.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');
@@ -3869,6 +3872,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/retail_user_attachments', 'Admins\Retail\RetailAdminUserManagementController@retail_user_attachments')->name('retail_user_attachments');
 
             Route::get('{id}/retail_history', 'Admins\Retail\RetailAdminUserManagementController@retail_history')->name('retail_history');
+
+            Route::post('show_retail_commission', 'Admins\Retail\RetailAdminUserManagementController@show_retail_commission')->name('show_retail_commission');
+            Route::post('retail_commission_payment', 'Admins\Retail\RetailAdminUserManagementController@retail_commission_payment')->name('retail_commission_payment');
+
         });
 
         Route::prefix('international')->name('international.')->group(function () {
