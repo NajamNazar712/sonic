@@ -269,7 +269,7 @@
                                                                     || in_array(184, session('permissions')) 
                                                                     // || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id()) || $escalation_tagged_check == true) 
                                                                     // || (in_array(session('role_id'), [8, 9 ,10]) 
-                                                                    && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))
+                                                                    && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs'))))
                                                                     <button id="valid" type="submit"
                                                                             class="btn btn-success mr-1">
                                                         <span class="d-none d-lg-block">
