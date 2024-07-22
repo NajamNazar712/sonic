@@ -126,6 +126,7 @@ class WebsiteLead extends Command
                     $new_lead->reference_id = $reference_id;
                     $new_lead->activation_code = $token;
                     $new_lead->cnic_number = $lead->data->cnic_number;
+                    $new_lead->via_channel = 'Website';
                     $new_lead->save();
 
                     $lead_log = new LeadLog();

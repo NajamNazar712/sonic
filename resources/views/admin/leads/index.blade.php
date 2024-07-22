@@ -273,6 +273,7 @@
                         <th class="border-primary border-darken-1">Call Status</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Updated AT</th>
+                        <th class="border-primary border-darken-1">Requested Resource</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -1065,6 +1066,7 @@
                             head.push('Call Status');
                             head.push('Updated By');
                             head.push('Updated At');
+                            head.push('Requested Resource');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -1093,6 +1095,7 @@
                                 row.push(values.call_status);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
+                                row.push(values.via_channel);
 
                                 body.push(row);
                             });
@@ -1273,6 +1276,7 @@
                     {data: 'call_status', name: 'leads.call_status', class: 'align-middle call_status'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'leads.updated_at', class: 'align-middle updated_at'},
+                    {data: 'request_resource', name: 'request_resource', class: 'align-middle request_resource'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
