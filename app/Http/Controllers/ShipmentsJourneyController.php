@@ -201,5 +201,35 @@ class ShipmentsJourneyController extends Controller
         if($shipper_status_id == 52){
             ReattemptShipmentStatusController::auto_reattempt_status_for_max_delivery_ratio($shipment_id);
         }
+
+        //if shipper_status_id is
+        // 14 => Shipment - Delivered
+        // 20 => Return - Confirm
+        // 25 => Return - Delivered to Shipper
+        // 31 => Replacement - Delivered to Shipper
+        //Then Auto Close Complaints
+        if(in_array($shipper_status_id, [14, 20, 25, 31]))
+        {
+            if($shipper_status_id = 14)
+            {
+                
+            }
+        }
     }
 }
+
+// Dear (shipper name),
+// Thank you for reaching us out!
+// Your Service Request has been processed, and the shipment has been delivered. We appreciate your patience and
+// understanding throughout this process. In case of any further query regarding this shipment you may reach us out
+// within 24 hrs.
+// Dear (shipper name),
+// Thank you for reaching us out!
+// Your complaint has been resolved, and the shipment has been delivered. We appreciate your patience and
+// understanding throughout this process. In case of any further query regarding this shipment you may reach us out
+// within 24 hrs.
+// Dear (shipper name),
+// Thank you for reaching us out!
+// Your complaint has been resolved, and the shipment has been return delivered. We appreciate your patience and
+// understanding throughout this process. In case of any further query regarding this shipment you may reach us out
+// within 48 hrs.
