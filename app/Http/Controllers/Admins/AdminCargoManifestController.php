@@ -2962,7 +2962,13 @@ class AdminCargoManifestController extends Controller
                                         $status = 49;
                                     }
                                 } elseif($bag->type == 2) {
-                                    $status = 76;
+                                    if($shipment_table->booking_type_id == 2) {
+                                        $status = 73;
+                                    } elseif($shipment_table->booking_type_id == 3) {
+                                        $status = 70;
+                                    } else {
+                                        $status = 76;
+                                    }
                                 }
 
                                 ShipmentsJourneyController::add($shipment->shipment_id, $status, $status, null, null, null, Auth::id(), $bag->seal_number);
