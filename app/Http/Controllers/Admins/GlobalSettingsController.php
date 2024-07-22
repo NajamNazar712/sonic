@@ -1830,8 +1830,8 @@ class GlobalSettingsController extends Controller
             'case_nature' => 'required',
             'case_nature_type' => 'required',
             'remarks.*' => 'required_if:remarks_visibility,on',
-            'shipment_status' => 'required|array|min:1',
-            'admin_departments' => 'required|array|min:1'
+            'shipment_status.*' => 'required|min:1',
+            'admin_departments.*' => 'required|min:1'
         ], [
             'remarks.*.required_if' => 'Remarks are required when the remarks visibility checkbox is checked.',
         ]);

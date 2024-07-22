@@ -28,17 +28,16 @@
                                 <div class="col-6">
                                     <fieldset class="form-group">
                                         <label for="case_nature">Case Nature*</label>
-                                        <select name="case_nature" id="edit_case_nature" class="form-control select2" required data-rule-required="true" data-msg-required="Case Nature is required*">
+                                        <select name="case_nature" id="edit_case_nature" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required*">
                                             @foreach($case_nature as $nature)
                                                 <option value="{{$nature->id}}">{{$nature->name}}</option>
                                             @endforeach
                                         </select>
-                                        <label for="" id="edit_case_nature_error" class="text-danger d-none">Case Nature is required*</label>
                                     </fieldset>
                 
                                     <fieldset class="form-group">
                                         <label class="d-flex">Shipment status visibility (<input type="checkbox" name="select_all_status" id="select_all_status"> select all) </label>
-                                        <select name="shipment_status[]" id="edit_shipment_status" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Select At least 1 shipment status">
+                                        <select name="shipment_status[]" id="edit_shipment_status" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Select At least 1 shipment status">
                                             @foreach($shipment_status as $status)
                                                 <option value="{{$status->id}}">{{$status->name}}</option>
                                             @endforeach
@@ -63,12 +62,12 @@
                                 <div class="col-6">
                                     <fieldset class="form-group">
                                         <label for="case_nature_type">Case Nature Type*</label>
-                                        <input type="text" name="case_nature_type" id="edit_case_nature_type" class="form-control" placeholder="Enter Case Nature Type" required data-rule-required="true" data-msg-required="Please enter case nature type*">
+                                        <input type="text" name="case_nature_type" id="edit_case_nature_type" class="form-control" placeholder="Enter Case Nature Type" data-rule-required="true" data-msg-required="Please enter case nature type*" required="required">
                                     </fieldset>
     
                                     <fieldset class="form-group">
                                         <label class="d-flex">Admin departments visibility (<input type="checkbox" name="select_all_admin_department" id="edit_select_all_admin_department"> select all) </label>
-                                        <select name="admin_departments[]" id="edit_admin_department_visibility" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="Select At least 1 department">
+                                        <select name="admin_departments[]" id="edit_admin_department_visibility" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Select At least 1 department">
                                             @foreach($admin_departments as $department)
                                                 <option value="{{$department->id}}">{{$department->name}}</option>
                                             @endforeach
@@ -340,13 +339,43 @@
 
                     // Toggling error message
                     var edit_case_nature = $('#edit_case_nature');
-                    var edit_case_nature_error = $('#edit_case_nature_error');
                     edit_case_nature.on('change', function(){
+                        var edit_case_nature_error = $('#edit_case_nature-error');
                         if (edit_case_nature.val() == null){
                             edit_case_nature_error.removeClass('d-none');
                             return false;
                         } else {
                             edit_case_nature_error.addClass('d-none');
+                        }
+                    });
+
+                    var edit_admin_department_visibility = $('#edit_admin_department_visibility');
+                    edit_admin_department_visibility.on('change', function(){
+                        var edit_admin_visibility_error = $('#edit_admin_department_visibility-error');
+                        if (edit_admin_department_visibility.val() != ''){
+                            edit_admin_visibility_error.hide();
+                        } else {
+                            edit_admin_visibility_error.show();
+                        }
+                    });
+
+                    var edit_shipment_status = $('#edit_shipment_status');
+                    edit_shipment_status.on('change', function(){
+                        var edit_shipment_status_error = $('#edit_shipment_status-error');
+                        if (edit_shipment_status.val() != ''){
+                            edit_shipment_status_error.hide();
+                        } else {
+                            edit_shipment_status_error.show();
+                        }
+                    });
+
+                    $( "#edit_form" ).validate({
+                        errorClass:"danger",
+                        errorPlacement: function(error, element) {
+                            error.addClass('w-100').appendTo(element.parent('.form-group'));
+                        },
+                        submitHandler: function(form) {
+                            form.submit();
                         }
                     });
                 }
