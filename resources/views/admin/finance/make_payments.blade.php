@@ -809,10 +809,7 @@
                                         selected_shippers_id.push(parseInt(rowData.user_id));
                                     }
                                 });
-                                var newTab = window.open('{{ route('admin.finance.make_payments.payment') }}', '_blank');
-                                newTab.onload = function() {
-                                    newTab.postMessage(selected_shippers_id, '*');
-                                };
+                                openNewTabWithData(selected_rows,selected_shippers_id);
                             }
                         },
 
@@ -1223,12 +1220,12 @@
                 var table = $('#datatable').DataTable();
                 var closestRow = $(this).closest('tr');
                 var rowData = table.row(closestRow).data();
-                var userId = rowData.user_id;
-                openNewTabWithData(userId);
+                console.log(rowData.id,rowData.user_id);
+                openNewTabWithData([rowData.id],[rowData.user_id]);
             });
 
 
-            function openNewTabWithData(userId) {
+            function openNewTabWithData(row_id = [],selected_shippers_id = []) {
                 $('#make_payments #make_payments_form .total_amount').val(0);
                 $('#make_payments #make_payments_form .total_charges').val(0);
                 $('#make_payments #make_payments_form .total_gst').val(0);
@@ -1243,15 +1240,13 @@
                 
                 $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
 
-
-                var selected_shippers_id = [];
-                selected_shippers_id.push(parseInt(userId));
                 var newTab = window.open('{{ route('admin.finance.make_payments.payment') }}', '_blank');
                 newTab.onload = function() {
-                    newTab.postMessage({
-                        selected_shippers_id: selected_shippers_id,
-                    }, '*');
+                    newTab.postMessage({id: row_id, selected_shipper_id: selected_shippers_id}, '*');
                 };
+
+
+
             }
 
 
