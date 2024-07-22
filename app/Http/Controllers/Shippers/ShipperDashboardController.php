@@ -682,7 +682,7 @@ class ShipperDashboardController extends Controller
         //      $connection = 'mysql';
         //  }
 
-        $connection = 'reports';
+        $connection = 'mysql';
         $shipments = DB::connection($connection)->table('shipments')
             ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -2181,7 +2181,7 @@ class ShipperDashboardController extends Controller
          else {
              $connection = 'mysql';
          }
-
+        $connection = 'mysql';
         $date = Carbon::now()->subMonths(6)->startOfDay()->toDateTimeString();
 
         $starting_id = DB::connection($connection)->table('shipments')->where('created_at', '>=', $date)->first()->id;
