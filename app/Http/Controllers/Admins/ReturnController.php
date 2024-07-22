@@ -780,11 +780,7 @@ class ReturnController extends Controller
                 }
             })
             ->editColumn('rv_status_date', function ($shipments) {
-                if ($shipments->rv_status_date) {
-                    return Carbon::parse($shipments->rv_status_date)->toDateString();
-                } else {
-                    return " - ";
-                }
+                return $shipments->rv_status_date ?? "-";
             })
             ->addColumn('consolidation', function ($shipments) {
                 $consolidations = DeliveryController::check_consolidation($shipments->shId);
