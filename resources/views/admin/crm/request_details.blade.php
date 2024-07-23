@@ -256,19 +256,20 @@
                                                                value="{{$crm_details->status_id}}">
                                                         @if($crm_details['status_id'] != 3)
                                                             @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                                <button id="valid" type="submit"
-                                                                        class="btn btn-success mr-1">
-                                                    <span class="d-none d-lg-block">
-                                                        Valid
-                                                    </span>
+                                                                <button id="valid" type="submit"class="btn btn-success mr-1">
+                                                                    <span class="d-none d-lg-block">
+                                                                        Valid
+                                                                    </span>
                                                                 </button>
                                                             @elseif($crm_details['status_id'] == 2)
-                                                                @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id()) || $escalation_tagged_check == true) || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))
-                                                                    <button id="valid" type="submit"
-                                                                            class="btn btn-success mr-1">
-                                                        <span class="d-none d-lg-block">
-                                                        Resolve
-                                                        </span>
+                                                                {{-- @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id()) || $escalation_tagged_check == true) || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))
+                                                                    <button id="valid" type="submit" class="btn btn-success mr-1">
+                                                                        <span class="d-none d-lg-block">Resolve</span>
+                                                                    </button>
+                                                                @endif --}}
+                                                                @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs'))))
+                                                                    <button id="valid" type="submit" class="btn btn-success mr-1">
+                                                                        <span class="d-none d-lg-block">Resolve</span>
                                                                     </button>
                                                                 @endif
                                                             @elseif($crm_details['status_id'] == 4 && (in_array(186, session('permissions')) || session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id()))
