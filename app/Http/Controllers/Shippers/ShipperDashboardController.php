@@ -2392,7 +2392,7 @@ class ShipperDashboardController extends Controller
           /*if($lead_id == NULL){
             return redirect()->route('cod.getstarted');
         }*/
-
+        
         $user = User::find(session('user_id'));
         $lead = Lead::find($user->lead_id);
         $account_type = AccountType::all();
@@ -2412,7 +2412,6 @@ class ShipperDashboardController extends Controller
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
         $invoicing_cycle = InvoicingCycle::all();
-
 
         if (!RateStatus::where('user_id', $user->id)->exists()) {
             $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
@@ -2458,7 +2457,7 @@ class ShipperDashboardController extends Controller
             $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission', 'sales_status']);
             $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id','admins.trax_id'])->where('admins.status', 1)->get();
             $riders_permanent = Rider::where('rider_type_id', 1)->get();
-     
+
             $users = array();
             $sales = array();
             $all_users = array();
