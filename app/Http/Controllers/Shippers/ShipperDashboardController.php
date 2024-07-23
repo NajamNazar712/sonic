@@ -2290,10 +2290,7 @@ class ShipperDashboardController extends Controller
             $user_attachment->e_sign_image = $filename;
             $user_attachment->save();
             session(['agreement_signed' => 1]);
-            User::where('id',session('user_id'))->update(['agreement_signed' => 1]);
-
-            // $this->download_crf($user_attachment, $date);
-            
+            User::where('id',session('user_id'))->update(['agreement_signed' => 1]);            
 
             NotificationsController::send(149,session('user_id'));
         }
@@ -2305,35 +2302,6 @@ class ShipperDashboardController extends Controller
         $html = ShipperAgreementController::view_crf_agreement($request->id,null,TRUE);
         return $html;
     }
-
-
-    public function download_crf($user_attachment, $date)
-    {
-        // Check if the user already has an attached signed acknowledgement PDF
-        if ($user_attachment->signed_acknowledgement_pdf != NULL) {
-            Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->signed_acknowledgement_pdf);
-        }
-    
-        // Define the new filename
-        $filename = 'signed_acknowledgement_pdf_' . $date . '_' . session('user_id') . '.pdf';
-    
-        // Generate the HTML content for the PDF
-        $html = ShipperAgreementController::view_crf_agreement(session('user_id'));
-    
-        // Load the HTML content into a PDF instance
-        $pdf = SnappyPDF::loadHTML($html);
-    
-        // Define the full path to save the PDF
-        $filePath = 'users_attached_documents/' . session('user_id') . '/' . $filename;
-    
-        // Save the PDF to the specified path
-        Storage::disk('public')->put($filePath, $pdf->output());
-    
-        // Update the user attachment record with the new filename
-        $user_attachment->signed_acknowledgement_pdf = $filename;
-        $user_attachment->save();
-    }
-    
 
     public function rate_daily_visit (Request $request)
     {

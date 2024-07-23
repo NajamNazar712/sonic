@@ -74,6 +74,15 @@
                 <form id="logout-form" action="{{ route('cod.logout') }}" method="POST" style="display: none;">
                   @csrf
                 </form>
+
+
+                {{-- CRF form download --}}
+                 <a class="dropdown-item" href="{{route('cod.terms.download', ['id' => session('user_id'), 'token' => session('token')])}}" onclick="event.preventDefault();
+                document.getElementById('crf-form').submit();"><i class="ft-power"></i> CRF Download</a>
+                <form id="crf-form" action="{{ route('cod.terms.download', ['id' => session('user_id'), 'token' => session('token')]) }}" method="POST" style="display: none;">
+                  @csrf
+                </form>
+                {{-- end --}}
               </div>
             </li>
           </ul>

@@ -452,7 +452,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/register/email/match/{email}/{id}', 'Auth\RegisterController@checkCompanyEmail')->name('check.email');
     Route::get('/register/name/match/{name}/{id}', 'Auth\RegisterController@checkCompanyNameProfile')->name('check.name');
     Route::get('terms_and_conditions/{token}/{id}/accept', 'ShipperAgreementController@accept')->name('terms.accept');
-    Route::get('terms_and_conditions/{token}/{id}/download', 'ShipperAgreementController@crf_download')->name('terms.download');
+    Route::post('terms_and_conditions/{token}/{id}/download', 'ShipperAgreementController@crf_download')->name('terms.download');
     Route::get('/terms/success', 'Auth\RegisterController@register_success')->name('terms.success');
 
     //user profile
