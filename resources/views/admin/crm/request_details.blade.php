@@ -267,7 +267,7 @@
                                                                         <span class="d-none d-lg-block">Resolve</span>
                                                                     </button>
                                                                 @endif --}}
-                                                                @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs'))))
+                                                                @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
                                                                     <button id="valid" type="submit" class="btn btn-success mr-1">
                                                                         <span class="d-none d-lg-block">Resolve</span>
                                                                     </button>
