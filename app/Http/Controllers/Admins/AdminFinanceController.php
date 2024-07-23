@@ -8298,6 +8298,37 @@ class AdminFinanceController extends Controller
 
                         $shipment->save();
 
+                        // Auto Close Complaints
+                        if ($shipper_status_id == 20) {
+                            $crm_request = CrmRequest::where('shipment_id', $shipment_id)->first();
+                            
+                            if ($crm_request && in_array($crm_request->case_nature_type_id, [2, 10, 14])) { 
+                                $shipperName = User::find($user_id)->name;
+                                
+                                if ($crm_request->status_id == 3) {
+                                    CrmRequest::where('id', $crm_request->id)->update([
+                                        'status_id' => 4 // Closed status
+                                    ]);
+                                    CrmRequestStatusHistory::create([
+                                        'crm_request_id' => $crm_request->id,
+                                        'status_id' => 4,
+                                        'agent_id' => Auth::id()
+                                    ]);
+                                    
+                                    CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+
+                                    $comment = str_replace(':shipperName', $shipperName, 'Dear :shipperName,
+                                            Thank you for reaching us out!
+                                            Please be noted that shipment has been updated on return status after due processing and validations, therefore at this status of shipment the reported ticket has been closed.
+                                            Regards,
+                                            Team CRM
+                                            TRAX');
+                                    
+                                    CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                                }
+                            }
+                        }
+
                         ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
                     }
                 }
