@@ -1284,75 +1284,7 @@
                                                             </div>
                                                             <hr>
                     
-                                                            <div class="row">
-                                                                <div class="col-md-2">
-                                                                    <h3 class="card-title">Insurance Charges</h3>
-                                                                </div>
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group ">
-                                                                        <input type="checkbox" name="on_insurance_charges_switch"
-                                                                               class="insuranceChargesOvernight d-none"
-                                                                               data-color="success" data-size="sm" checked/>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Up</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Down</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Charges</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="insurance-charges-div-overnight slabs">
-                                                                @foreach($insuranceCharges[1] as $index => $insurance)
-                                                                    <div class="row" id="on_insurance_handle_0">
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="on_ins_range_up[{{$index}}]"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       type="text" class="form-control numeric"
-                                                                                       value="{{$insurance->range_up}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="on_ins_range_down[{{$index}}]"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       type="text" class="form-control numeric"
-                                                                                       value="{{$insurance->range_down}}">
-                                                                            </fieldset>
-                                                                        </div>
-                    
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="on_ins_charges[{{$index}}]"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       type="text" class="form-control dec-percent"
-                                                                                       value="{{$insurance->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        @if($index>0)
-                                                                            <div class="col">
-                                                                                <span class= rounded btn-sm-width mr-1 mb-1 on_weight_close"><i
-                                                                                            class=""></i></span>
-                                                                            </div>
-                                                                        @endif
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                            <div class="insurance-charges-btn-overnight">
-                                                                <button id="addMoreSlabsInsurance" type="button"
-                                                                        class="btn btn-outline-success mr-1" title="Add more slabs"><i
-                                                                            class="la la-plus"></i></button>
-                                                            </div>
-                                                            <hr>
+                                                    
                                                             <div class="row">
                                                                 <div class="col-md-2">
                                                                     <h3 class="card-title">Return Charges</h3>
@@ -1778,75 +1710,7 @@
                                                             </div>
                                                             <hr>
                     
-                                                            <div class="row">
-                                                                <div class="col-md-2">
-                                                                    <h3 class="card-title">Insurance Charges</h3>
-                                                                </div>
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group ">
-                                                                        <input type="checkbox" name="ol_insurance_charges_switch"
-                                                                               class="insuranceChargesoverland d-none"
-                                                                               data-color="success" data-size="sm" checked/>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Up</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Down</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Charges</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="insurance-charges-div-overland slabs">
-                                                                @foreach($insuranceCharges[2] as $index => $ol_insurance)
-                                                                    <div class="row">
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="ol_ins_range_up[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$ol_insurance->range_up}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="ol_ins_range_down[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$ol_insurance->range_down}}">
-                                                                            </fieldset>
-                                                                        </div>
-                    
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="ol_ins_charges[{{$index}}]" type="text"
-                                                                                       class="form-control dec-percent"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$ol_insurance->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col">
-                                                                            @if($index>0)
-                                                                                <span class= rounded btn-sm-width mr-1 mb-1 ol_row_delete"><i
-                                                                                            class=""></i></span>
-                                                                            @endif
-                                                                        </div>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                            <div class="insurance-charges-btn-overland">
-                                                                <button id="oladdMoreSlabsInsurance" type="button"
-                                                                        class="btn btn-outline-success mr-1" title="Add more slabs"><i
-                                                                            class="la la-plus"></i></button>
-                                                            </div>
-                                                            <hr>
+                                                           
                                                             <div class="row">
                                                                 <div class="col-md-2">
                                                                     <h3 class="card-title">Return Charges</h3>
@@ -2268,75 +2132,6 @@
                     
                                                             <div class="row">
                                                                 <div class="col-md-2">
-                                                                    <h3 class="card-title">Insurance Charges</h3>
-                                                                </div>
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group ">
-                                                                        <input type="checkbox" name="detain_insurance_charges_switch"
-                                                                               class="insuranceChargesdetain d-none" data-color="success"
-                                                                               data-size="sm" checked/>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Up</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Down</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Charges</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="insurance-charges-div-detain slabs">
-                                                                @foreach($insuranceCharges[3] as $index => $det_insurance)
-                                                                    <div class="row">
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="detain_ins_range_up[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$det_insurance->range_up}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="detain_ins_range_down[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$det_insurance->range_down}}">
-                                                                            </fieldset>
-                                                                        </div>
-                    
-                                                                        <div class="col-md-2">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="detain_ins_charges[{{$index}}]" type="text"
-                                                                                       class="form-control dec-percent"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$det_insurance->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col">
-                                                                            @if($index>0)
-                                                                                <span class= rounded btn-sm-width mr-1 mb-1 detain_row_delete"><i
-                                                                                            class=""></i></span>
-                                                                            @endif
-                                                                        </div>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                            <div class="insurance-charges-btn-detain">
-                                                                <button id="detainaddMoreSlabsInsurance" type="button"
-                                                                        class="btn btn-outline-success mr-1" title="Add more slabs"><i
-                                                                            class="la la-plus"></i></button>
-                                                            </div>
-                                                            <hr>
-                                                            <div class="row">
-                                                                <div class="col-md-2">
                                                                     <h3 class="card-title">Return Charges</h3>
                                                                 </div>
                                                                 <div class="col-md-2">
@@ -2720,75 +2515,8 @@
                                                             </div>
                                                             <hr>
                     
-                                                            <div class="row">
-                                                                <div class="col-md-2">
-                                                                    <h3 class="card-title">Insurance Charges</h3>
-                                                                </div>
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group ">
-                                                                        <input type="checkbox" name="sameday_insurance_charges_switch"
-                                                                               class="insuranceChargessameday d-none"
-                                                                               data-color="success" data-size="sm" checked/>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Up</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Down</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Charges</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="insurance-charges-div-sameday slabs">
-                                                                @foreach($insuranceCharges[4] as $index => $same_insurance)
-                                                                    <div class="row">
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="sameday_ins_range_up[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$same_insurance->range_up}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="sameday_ins_range_down[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$same_insurance->range_down}}">
-                                                                            </fieldset>
-                                                                        </div>
-                    
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="sameday_ins_charges[{{$index}}]" type="text"
-                                                                                       class="form-control dec-percent"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$same_insurance->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col">
-                                                                            @if($index>0)
-                                                                                <span class= rounded btn-sm-width mr-1 mb-1 sameday_row_delete"><i
-                                                                                            class=""></i></span>
-                                                                            @endif
-                                                                        </div>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                            <div class="insurance-charges-btn-sameday">
-                                                                <button id="samedayaddMoreSlabsInsurance" type="button"
-                                                                        class="btn btn-outline-success mr-1" title="Add more slabs"><i
-                                                                            class="la la-plus"></i></button>
-                                                            </div>
-                                                            <hr>
+                                                          
+                                                            
                                                             <div class="row">
                                                                 <div class="col-md-2">
                                                                     <h3 class="card-title">Return Charges</h3>

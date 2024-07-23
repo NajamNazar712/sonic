@@ -19,7 +19,9 @@
 
                     <div style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; max-width: 600px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
                         <div style="text-align: left; flex-grow: 1;">
-                            <h2>Your Account Status: Signed Up</h2>
+                            @if ($short_description != "")
+                               <h2>Your Account Status: {{$short_description}}</h2> 
+                            @endif
                             <p style="margin-top:20px;">{{ $description }}</p>
                             @if(($user->on_board_status < 1 && session('request_custom_quotation') != 1))
                                 <a href="{{ route('cod.wordpress.register') }}" style="display: inline-block; padding: 10px 20px; color: white; background-color: #007bff; border-radius: 5px; text-decoration: none;">Start Onboarding</a>

@@ -138,6 +138,7 @@ use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\LeadProgressSetting;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 
 
 //use Illuminate\Support\Facades\Auth;
@@ -271,7 +272,9 @@ class ShipperDashboardController extends Controller
 
                 $percentage = null; 
                 $color = null;
+                $short_description = "";
                 $description = "";
+
                 $user = User::find($shipper_id);
                 
                 $weight_charges = WeightCharge::where('user_id' , $shipper_id);
@@ -281,12 +284,15 @@ class ShipperDashboardController extends Controller
                     $color = $lead_progress_setting->color;
 
                     $description = "Your account is $percentage% completed";
+                    $short_description = 'Signed Up';
                 }else if(($weight_charges->exists() || $user->request_custom_quotation == 1) && !isset($user->rates_added_by)){
                     $lead_progress_setting = LeadProgressSetting::find(2);
                     $percentage = $lead_progress_setting->percent;
                     $color = $lead_progress_setting->color;
 
                     $description = "Your account is $percentage% completed";
+                    $short_description = 'Custom Rates Requested';
+
 
                 }else if (isset($user->rates_added_by) && $user->documents_status != 2){
                     $lead_progress_setting = LeadProgressSetting::find(3);
@@ -294,6 +300,8 @@ class ShipperDashboardController extends Controller
                     $color = $lead_progress_setting->color;
 
                     $description = "Your account is $percentage% completed";
+                    $short_description = 'Registration Confirmed';
+
 
                 }else if ($user->documents_status == 2 && $user->status != 3){
                     $lead_progress_setting = LeadProgressSetting::find(4);
@@ -301,6 +309,8 @@ class ShipperDashboardController extends Controller
                     $color = $lead_progress_setting->color;
                     
                     $description = "Your account is $percentage% completed";
+                    $short_description = 'Documents Verified';
+
 
                 }else if ($user->status == 3){
                     $lead_progress_setting = LeadProgressSetting::find(5);
@@ -308,6 +318,7 @@ class ShipperDashboardController extends Controller
                     $color = $lead_progress_setting->color;
 
                     $description = "Your account is activated";
+                    $short_description = 'Account Activated';
 
                 }
 
@@ -320,7 +331,7 @@ class ShipperDashboardController extends Controller
                 }*/
                 $shipper_payment = null;
 
-                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment, 'percentage' => $percentage, 'user' => $user, 'color' => $color , 'description' => $description]);
+                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment, 'percentage' => $percentage, 'user' => $user, 'color' => $color , 'description' => $description, 'short_description' => $short_description]);
             }
  
         }
@@ -2281,6 +2292,9 @@ class ShipperDashboardController extends Controller
             session(['agreement_signed' => 1]);
             User::where('id',session('user_id'))->update(['agreement_signed' => 1]);
 
+            // $this->download_crf($user_attachment, $date);
+            
+
             NotificationsController::send(149,session('user_id'));
         }
         return redirect()->back()->with(['success'=>"Agreement Signed Successfully!"]);
@@ -2291,6 +2305,35 @@ class ShipperDashboardController extends Controller
         $html = ShipperAgreementController::view_crf_agreement($request->id,null,TRUE);
         return $html;
     }
+
+
+    public function download_crf($user_attachment, $date)
+    {
+        // Check if the user already has an attached signed acknowledgement PDF
+        if ($user_attachment->signed_acknowledgement_pdf != NULL) {
+            Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->signed_acknowledgement_pdf);
+        }
+    
+        // Define the new filename
+        $filename = 'signed_acknowledgement_pdf_' . $date . '_' . session('user_id') . '.pdf';
+    
+        // Generate the HTML content for the PDF
+        $html = ShipperAgreementController::view_crf_agreement(session('user_id'));
+    
+        // Load the HTML content into a PDF instance
+        $pdf = SnappyPDF::loadHTML($html);
+    
+        // Define the full path to save the PDF
+        $filePath = 'users_attached_documents/' . session('user_id') . '/' . $filename;
+    
+        // Save the PDF to the specified path
+        Storage::disk('public')->put($filePath, $pdf->output());
+    
+        // Update the user attachment record with the new filename
+        $user_attachment->signed_acknowledgement_pdf = $filename;
+        $user_attachment->save();
+    }
+    
 
     public function rate_daily_visit (Request $request)
     {
