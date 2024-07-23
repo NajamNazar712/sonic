@@ -574,6 +574,9 @@
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
+                    if (data.check_return_bag == 'yes') {
+                        $('td:eq(0)', row).removeClass('select-checkbox');
+                    }
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                     if ($.inArray(data.shId, selected_rows) !== -1) {
