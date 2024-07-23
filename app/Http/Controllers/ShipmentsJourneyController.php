@@ -225,7 +225,7 @@ class ShipmentsJourneyController extends Controller
 
         // Condition for Delay in Delivery & Fake Reason & Urgent Delivery
         if ($shipper_status_id == 14) {
-            $crm_request = CrmRequest::where('shipment_id', $shipment_id)->first();
+            $crm_request = CrmRequest::where('shipment_id', $shipment_id)->where('status_id', 2)->first();
             
             if ($crm_request && ($crm_request->case_nature_id == 1 || $crm_request->case_nature_id == 2)) { // 1=>Complaints Or 2=>Service Request
                 $shipperName = User::find($user_id)->name;
@@ -244,20 +244,20 @@ class ShipmentsJourneyController extends Controller
 
                     if($crm_request->case_nature_id == 1 && (in_array($crm_request->case_nature_type_id, [2, 10]))) //Complaints
                     {
-                        $comment = str_replace(':shipperName', $shipperName, 'Dear :shipperName,
+                        $comment = 'Dear '.$shipperName.',
                                 Thank you for reaching us out!
                                 Your complaint has been resolved, and the shipment has been delivered. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 24 hrs.
                                 Regards,
                                 Team CRM
-                                TRAX');
+                                TRAX';
                     }
                     elseif ($crm_request->case_nature_id == 2 && (in_array($crm_request->case_nature_type_id, [14]))) { //Service Request
-                        $comment = str_replace(':shipperName', $shipperName, 'Dear :shipperName,
-                        Thank you for reaching us out!
-                        Your Service Request has been processed, and the shipment has been delivered. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 24 hrs
-                        Regards,
-                        Team CRM
-                        TRAX');
+                        $comment = 'Dear '.$shipperName.',
+                            Thank you for reaching us out!
+                            Your Service Request has been processed, and the shipment has been delivered. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 24 hrs
+                            Regards,
+                            Team CRM
+                            TRAX';
                     }
                     
                     CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
@@ -267,7 +267,7 @@ class ShipmentsJourneyController extends Controller
 
         // Condition for Delay in Return
         if (in_array($shipper_status_id, [25, 31])) {
-            $crm_request = CrmRequest::where('shipment_id', $shipment_id)->first();
+            $crm_request = CrmRequest::where('shipment_id', $shipment_id)->where('status_id', 2)->first();
             
             if ($crm_request) {
                 $shipperName = User::find($user_id)->name;
@@ -284,12 +284,12 @@ class ShipmentsJourneyController extends Controller
                     
                     CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
 
-                    $comment = str_replace(':shipperName', $shipperName, 'Dear :shipperName,
-                            Thank you for reaching us out!
-                            Your complaint has been resolved, and the shipment has been return delivered. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 48 hrs.
-                            Regards,
-                            Team CRM
-                            TRAX');
+                    $comment = 'Dear '.$shipperName.',
+                        Thank you for reaching us out!
+                        Your complaint has been resolved, and the shipment has been return delivered. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 48 hrs.
+                        Regards,
+                        Team CRM
+                        TRAX';
                     
                     CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
                 }
@@ -298,7 +298,7 @@ class ShipmentsJourneyController extends Controller
 
         // Condition for Return Confirm (And Delay in Delivery, Fake Reason & Urgent Delivery)
         if ($shipper_status_id == 20) {
-            $crm_request = CrmRequest::where('shipment_id', $shipment_id)->first();
+            $crm_request = CrmRequest::where('shipment_id', $shipment_id)->where('status_id', 2)->first();
             
             if ($crm_request && in_array($crm_request->case_nature_type_id, [2, 10, 14])) { 
                 $shipperName = User::find($user_id)->name;
@@ -315,12 +315,12 @@ class ShipmentsJourneyController extends Controller
                     
                     CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
 
-                    $comment = str_replace(':shipperName', $shipperName, 'Dear :shipperName,
-                            Thank you for reaching us out!
-                            Please be noted that shipment has been updated on return status after due processing and validations, therefore at this status of shipment the reported ticket has been closed.
-                            Regards,
-                            Team CRM
-                            TRAX');
+                    $comment = 'Dear '.$shipperName.',
+                        Thank you for reaching us out!
+                        Please be noted that shipment has been updated on return status after due processing and validations, therefore at this status of shipment the reported ticket has been closed.
+                        Regards,
+                        Team CRM
+                        TRAX';
                     
                     CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
                 }

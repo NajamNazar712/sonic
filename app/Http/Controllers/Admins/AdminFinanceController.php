@@ -117,6 +117,7 @@ use App\Http\Controllers\ShipmentsPaymentJourneyController;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Controllers\Admins\AdminDashboardController;
+use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Models\UserIbftCharge;
 use App\Http\Models\ShipmentServicesCharges;
 use App\Http\Models\Admin\StationDepositeNoteActionLog;
@@ -124,6 +125,9 @@ use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\ShipmentSmsLogs;
 use Illuminate\Support\Facades\Response;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\NotificationSetting;
 
 class AdminFinanceController extends Controller
@@ -8298,36 +8302,37 @@ class AdminFinanceController extends Controller
 
                         $shipment->save();
 
-                        // Auto Close Complaints
-                        if ($shipper_status_id == 20) {
-                            $crm_request = CrmRequest::where('shipment_id', $shipment_id)->first();
+                        //---------x-----------x-------------
+                        // Start Auto Close Complaints
+                        $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('status_id', 2)->first();
+                        
+                        if ($crm_request) { 
+                            $shipperName = User::find($shipment->user_id)->name;
                             
-                            if ($crm_request && in_array($crm_request->case_nature_type_id, [2, 10, 14])) { 
-                                $shipperName = User::find($user_id)->name;
+                            if ($crm_request->status_id == 3) {
+                                CrmRequest::where('id', $crm_request->id)->update([
+                                    'status_id' => 4 // Closed status
+                                ]);
+                                CrmRequestStatusHistory::create([
+                                    'crm_request_id' => $crm_request->id,
+                                    'status_id' => 4,
+                                    'agent_id' => Auth::id()
+                                ]);
                                 
-                                if ($crm_request->status_id == 3) {
-                                    CrmRequest::where('id', $crm_request->id)->update([
-                                        'status_id' => 4 // Closed status
-                                    ]);
-                                    CrmRequestStatusHistory::create([
-                                        'crm_request_id' => $crm_request->id,
-                                        'status_id' => 4,
-                                        'agent_id' => Auth::id()
-                                    ]);
-                                    
-                                    CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+                                CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
 
-                                    $comment = str_replace(':shipperName', $shipperName, 'Dear :shipperName,
-                                            Thank you for reaching us out!
-                                            Please be noted that shipment has been updated on return status after due processing and validations, therefore at this status of shipment the reported ticket has been closed.
-                                            Regards,
-                                            Team CRM
-                                            TRAX');
-                                    
-                                    CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
-                                }
+                                $comment = 'Dear '.$shipperName.',
+                                        Thank you for reaching us out! 
+                                        Your complaint has been resolved, and the payment has been paid. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 48 hrs.
+                                        Regards,
+                                        Team CRM
+                                        TRAX';
+                                
+                                CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
                             }
                         }
+                        // End Auto Close Complaints
+                        //---------x-----------x-------------
 
                         ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
                     }
