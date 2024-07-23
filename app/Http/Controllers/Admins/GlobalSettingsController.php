@@ -1836,6 +1836,11 @@ class GlobalSettingsController extends Controller
             'remarks.*.required_if' => 'Remarks are required when the remarks visibility checkbox is checked.',
         ]);
 
+        // on means checbox is checked
+        if ($request->remarks_visibility == 'on' && (empty($request->remarks) || !is_array($request->remarks))) {
+            return redirect()->back()->with('error', 'Remarks are required when the remarks visibility checkbox is checked.');
+        }
+
         $nature = $request->case_nature;
         $type = $request->case_nature_type;
         if ($nature == null && $type == null && $nature == '' && $type == '') {
@@ -1894,11 +1899,17 @@ class GlobalSettingsController extends Controller
             'case_nature' => 'required',
             'case_nature_type' => 'required',
             'remarks.*' => 'required_if:remarks_visibility,on',
-            'shipment_status' => 'required|array|min:1',
-            'admin_departments' => 'required|array|min:1',
+            'shipment_status' => 'required|min:1',
+            'admin_departments' => 'required|min:1',
         ], [
             'remarks.*.required_if' => 'Remarks are required when the remarks visibility checkbox is checked.',
         ]);
+
+        // on means checbox is checked
+        if ($request->remarks_visibility == 'on' && (empty($request->remarks) || !is_array($request->remarks))) {
+            return redirect()->back()->with('error', 'Remarks are required when the remarks visibility checkbox is checked.');
+        }
+
         $type = $request->input('case_nature_type');
         $case_nature_id = $request->input('case_nature_id');
         $case_nature = $request->input('case_nature');
@@ -1931,7 +1942,6 @@ class GlobalSettingsController extends Controller
     
         // Handle remarks update
         $existingRemarks = CrmCaseNatureRemark::where('case_nature_id', $caseNatureType->id)->get();
-        
         // Delete remarks that are not in the new remarks
         foreach ($existingRemarks as $existingRemark) {
             if (!in_array($existingRemark->remarks, $remarks)) {
@@ -1954,7 +1964,6 @@ class GlobalSettingsController extends Controller
                 }
             }
         }
-    
         return redirect()->route('admin.settings.crm_case_nature_types.index')->with('success', 'Case Nature Type Updated successfully!');
     }
 

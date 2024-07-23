@@ -199,6 +199,7 @@
                     var errorMessage = '<span id="remarks_error" class="text-danger">At least one remark is required.</span>';
                     var remarks_visibility = $('#edit_remarks_visibility').is(':checked');
                     var edit_case_nature_btn = $('#edit_case_nature_btn');
+                    var errorMessageEmptyRemarks = '<span id="remarks_error_empty" class="text-danger">Cannot submit empty remarks.</span>';
 
                     function toggleErrorMessage() {
                         if (remarks_visibility && remarksContainer.children().length === 0) {
@@ -229,9 +230,7 @@
                                 remarksContainer.append(inputHtml);
                             }
                         });
-
                         $('#edit_add_remark_btn').prop('disabled', remarks.length >= 5);
-
                         if (!remarks_visibility) {
                             remarksContainer.hide();
                             $('#edit_add_remark_btn').prop('disabled', true);
@@ -239,40 +238,46 @@
                             remarksContainer.show();
                             $('#edit_add_remark_btn').prop('disabled', false);
                         }
-                        toggleErrorMessage();
+                        // toggleErrorMessage();
                     }
                     populateRemarks();
 
+                    function toggleCaseNatureButton() {
+                        var inputLength = $('.edit_remarks_new').length;
+                        edit_add_remark_btn.prop('disabled', inputLength >= 5);
+                    }
+
                     $('#edit_add_remark_btn').on('click', function() {
-                        if (remarks.length < 5) {
-                            var newIndex = remarks.length + 1;
-                            var newRemark = { id: newIndex, case_nature_id: '', remarks: '', created_at: '', updated_at: '' };
+                        var currentInputLength = $('.edit_remarks_new').length;
+                        if (currentInputLength < 5) {
                             var newInputHtml = `
-                                <div class="form-group" id="remark_${newRemark.id}_container">
+                                <div class="form-group">
                                     <div class="input-group">
-                                        <input type="text" id="remark_${newRemark.id}" name="remarks[]" class="form-control edit_remarks_new" placeholder="Add Remark">
+                                        <input type="text" name="remarks[]" class="form-control edit_remarks_new" placeholder="Add Remark">
                                         <div class="input-group-append mx-1">
-                                            <button class="btn btn-danger remove-remark-btn" data-remark-id="${newRemark.id}" type="button">Remove</button>
+                                            <button class="btn btn-danger remove-remark-btn" type="button">Remove</button>
                                         </div>
                                     </div>
                                 </div>
                             `;
                             remarksContainer.append(newInputHtml);
-                            remarks.push(newRemark);
+                            toggleCaseNatureButton();
 
-                            // Disable "Add Remark" button if there are now 5 remarks
-                            $('#edit_add_remark_btn').prop('disabled', remarks.length >= 5);
+                            $('.edit_remarks_new').off('input').on('input', function() {
+                                var allInputs = $('.edit_remarks_new');
+                                var allFilled = allInputs.toArray().every(input => $(input).val().trim() !== '');
+                                edit_add_remark_btn.prop('disabled', allFilled && allInputs.length < 5);
+                                toggleCaseNatureButton();
+                            });
                         }
                     });
+                    toggleCaseNatureButton();
 
                     var updateRemarksLength = function() {
                         var remark_length = $('.edit_remarks_new').length;
                         if (remark_length === 0 && $('#edit_remarks_visibility').is(':checked')) {
-                            $('#edit_case_nature_btn').prop('disabled', true);
                             $('#remarks_error').remove();
-                            // $('#edit_remarks_section').after(errorMessage);
                         } else {
-                            $('#edit_case_nature_btn').prop('disabled', false);
                             $('#remarks_error').remove();
                         }
                     };
@@ -286,11 +291,11 @@
                     $('#edit_add_remark_btn').on('click', function() {
                         var newRemarkLength = $('.edit_remarks_new').length;
                         if (newRemarkLength > 0) {
-                            $('#edit_case_nature_btn').prop('disabled', false);
                             $('#remarks_error').remove();
+                            // $('#edit_case_nature_btn').prop('disabled', false);
                         } else {
-                            $('#edit_case_nature_btn').prop('disabled', true);
                             $('#remarks_error').remove();
+                            // $('#edit_case_nature_btn').prop('disabled', true);
                             // $('#edit_remarks_section').after(errorMessage);
                         }
                     });
@@ -322,7 +327,34 @@
                     });
 
                     edit_case_nature_btn.on('click', function() {
-                        var edit_remarks_new = $('.edit_remarks_new');
+                        var hasEmptyRemarks = false;
+                        $('.edit_remarks_new').each(function() {
+                            if ($(this).val().trim() === '') {
+                                hasEmptyRemarks = true;
+                                return false;
+                            }
+                        });
+                        if (hasEmptyRemarks) {
+                            if ($('#remarks_error_empty').length === 0) {
+                                remarksContainer.append(errorMessageEmptyRemarks);
+                            }
+                            return false;  // Prevent form submission or other actions
+                        } else {
+                            $('#remarks_error').remove();  // Remove error message if all fields are filled
+                        }
+                        if (remarks_visibility && remarksContainer.children().length == 0){
+                            remarksContainer.append(errorMessage);
+                            return false;
+                        } 
+                        var filledRemarkCount = 0;
+                        var emptyRemarkCount = 0;
+                        edit_remarks_new.each(function() {
+                            if ($(this).val().trim() === '') {
+                                emptyRemarkCount++;
+                            } else {
+                                filledRemarkCount++;
+                            }
+                        });
                         var isEmpty = false;
                         edit_remarks_new.each(function() {
                             if ($(this).val().trim() == '') {
@@ -334,6 +366,12 @@
                             $('#remarks_error').remove();
                             remarksContainer.before(errorMessage);
                             return false;
+                        }
+                    });
+
+                    $(document).on('keyup', '.edit_remarks_new', function() {
+                        if ($('#remarks_error_empty').length > 0) {
+                            $('#remarks_error_empty').remove();
                         }
                     });
 

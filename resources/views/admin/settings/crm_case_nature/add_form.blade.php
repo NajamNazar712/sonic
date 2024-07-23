@@ -115,6 +115,7 @@
     <script>
         $(document).ready(function() {
         var errorMessage = '<span id="remarks_error" class="text-danger">At least one remark is required.</span>';
+        var errorMessageEmptyRemarks = '<span id="empty_remarks_error" class="text-danger">Cannot submit empty remarks.</span>';
         var maxRemarks = 5;
         function toggleRemarksVisibility() {
             var isRemarksVisible = $('#remarks_visibility').is(':checked');
@@ -142,7 +143,6 @@
 
         function addRemarkField() {
             var currentRemarksCount = $('#remarks_section .remark-field').length;
-            
             if (currentRemarksCount < maxRemarks) {
                 $('#remarks_section').append(`
                     <div class="remark-field d-flex mb-2">
@@ -152,25 +152,23 @@
                         </div>
                     </div>
                 `);
-                
                 var newInput = $('#remarks_section .remark-field:last-child input');
-                
-                newInput.on('input', function() {
-                    if ($(this).val().trim() !== '') {
-                        $('#add_remarks_section').removeAttr('disabled');
+                function updateAddButtonState() {
+                    var allInputsFilled = $('#remarks_section .remark-field input').toArray().every(function(input) {
+                        return $(input).val().trim() !== '';
+                    });
+                    var newRemarksCount = $('#remarks_section .remark-field').length;
+
+                    if (newRemarksCount >= 5 || !allInputsFilled) {
+                        $('#add_remarks_section').prop('disabled', true);
                     } else {
-                        $('#add_remarks_section').attr('disabled', 'disabled');
+                        $('#add_remarks_section').prop('disabled', false);
                     }
-                });
-
-                // Initially disable the add button if the new input is empty
-                if (newInput.val().trim() === '') {
-                    $('#add_remarks_section').attr('disabled', 'disabled');
                 }
-
-                if (currentRemarksCount >= maxRemarks - 1) {
-                    $('#add_remarks_section').attr('disabled', 'disabled');
-                }
+                updateAddButtonState();
+                $('#remarks_section').on('input', 'input', updateAddButtonState);
+            } else {
+                $('#add_remarks_section').prop('disabled', true);
             }
         }
 
@@ -189,24 +187,43 @@
             var remarkFields = $('#remarks_section .remark-field input').filter(function() {
                 return $(this).is(':visible');
             });
-            var currentRemarksCount = remarkFields.length;
             $('#remarks_error').remove();
+            $('#empty_remarks_error').remove();
             if (isRemarksVisible) {
                 var filledRemarkCount = 0;
+                var emptyRemarkCount = 0;
                 remarkFields.each(function() {
                     if ($(this).val().trim() !== '') {
                         filledRemarkCount++;
+                    } else {
+                        emptyRemarkCount++;
                     }
                 });
                 if (filledRemarkCount === 0) {
                     $('#remarks_section').append(errorMessage);
                     return false;
+                } else if (emptyRemarkCount > 0) {
+                    $('#remarks_section').append(errorMessageEmptyRemarks);
+                    return false;
                 } else {
                     $('#remarks_error').remove();
+                    $('#empty_remarks_error').remove();
                 }
             }
             return true;
         }
+
+        $(document).on('keyup', '#remarks_section .remark-field input', function() {
+            $('#remarks_error').remove();
+            $('#empty_remarks_error').remove();
+        });
+
+        $('#add_remark_field').click(function() {
+            var remarkFields = $('#remarks_section .remark-field').length;
+            if (remarkFields < 5) {
+                $('#remarks_section').append('<div class="remark-field"><input type="text" class="case_remarks form-control" /></div>');
+            }
+        });
 
         $('#remarks_visibility').change(function() {
             toggleRemarksVisibility();
