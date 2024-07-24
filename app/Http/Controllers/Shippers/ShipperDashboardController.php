@@ -2282,6 +2282,10 @@ class ShipperDashboardController extends Controller
             }
 
             $date = Carbon::now()->format('Y_m_d');
+
+            //Download CRF for new requirement from shipper side
+            $this->download_crf($user_attachment, $date);         
+
             if($user_attachment->e_sign_image != NULL) {
                 Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->e_sign_image);
             }
@@ -2290,18 +2294,46 @@ class ShipperDashboardController extends Controller
             $user_attachment->e_sign_image = $filename;
             $user_attachment->save();
             session(['agreement_signed' => 1]);
-            User::where('id',session('user_id'))->update(['agreement_signed' => 1]);            
+            User::where('id',session('user_id'))->update(['agreement_signed' => 1]);   
 
             NotificationsController::send(149,session('user_id'));
         }
         return redirect()->back()->with(['success'=>"Agreement Signed Successfully!"]);
     }
 
+
+
     public function get_agreement(Request $request)
     {
         $html = ShipperAgreementController::view_crf_agreement($request->id,null,TRUE);
         return $html;
     }
+
+
+    public function download_crf($user_attachment, $date)
+    {
+        try {
+            if ($user_attachment->filled_and_signed_pdf != NULL) {
+                Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->filled_and_signed_pdf);
+            }
+        
+            $date = now()->format('Ymd_His');
+            $filename = 'filled_and_signed_pdf_' . $date . '_' . session('user_id') . '.pdf';
+            $html = ShipperAgreementController::view_crf_agreement(session('user_id'));
+            $pdf = SnappyPDF::loadHTML($html);
+            $filePath = 'users_attached_documents/' . session('user_id') . '/' . $filename;
+            Storage::disk('public')->put($filePath, $pdf->output());
+        
+            $user_attachment->filled_and_signed_pdf = $filename;
+            $user_attachment->save();
+        
+        } catch (\Exception $e) {
+            \Log::error('Error in handling PDF: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while processing the document.');
+        }
+    }
+
+
 
     public function rate_daily_visit (Request $request)
     {

@@ -149,7 +149,7 @@
                                                             <input type="text" class="form-control required"
                                                                 placeholder="Person Name (Alphabet Only)"
                                                                 name="shipper_poc"
-                                                                value="@if (old('shipper_poc') != null) {{ old('shipper_poc') }}@elseif($lead != null){{ $lead->contact_person }}@else{{ old('shipper_poc') }} @endif">
+                                                                >
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1657,10 +1657,10 @@
                 greedy: false,
                 definitions: {
                     R: {
-                        validator: '[a-zA-Z0-9]',
+                        validator: '[a-zA-Z]',
                     },
                 },
-            });
+        });
 
             $('#iban_no').on('input', function (e) {
                 var iban = $(this).val().replace(/\s+/g, '').toUpperCase(); // Remove white spaces and convert to uppercase
@@ -1682,6 +1682,12 @@
                     $('#iban_no_error').hide();
                 }
             });
+            
+        $("input[name='shipper_poc']").on('keyup', function() {
+            var currentValue = $(this).val();
+            var filteredValue = currentValue.replace(/[^a-zA-Z ]+/g, '');            
+            $(this).val(filteredValue);
+        });
 
     </script>
 </body>

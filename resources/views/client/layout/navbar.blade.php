@@ -75,14 +75,16 @@
                   @csrf
                 </form>
 
+                @if(Session::has('agreement_signed') && session('agreement_signed') == 1)
+                    {{-- CRF form download --}}
+                    <a class="dropdown-item" href="{{route('cod.terms.download', ['id' => session('user_id'), 'token' => session('token')])}}" onclick="event.preventDefault();
+                    document.getElementById('crf-form').submit();"><i class="ft-power"></i> View CRF </a>
+                    <form id="crf-form" action="{{ route('cod.terms.download', ['id' => session('user_id'), 'token' => session('token')]) }}" method="POST" style="display: none;">
+                      @csrf
+                    </form>
+                    {{-- end --}}
 
-                {{-- CRF form download --}}
-                 <a class="dropdown-item" href="{{route('cod.terms.download', ['id' => session('user_id'), 'token' => session('token')])}}" onclick="event.preventDefault();
-                document.getElementById('crf-form').submit();"><i class="ft-power"></i> CRF Download</a>
-                <form id="crf-form" action="{{ route('cod.terms.download', ['id' => session('user_id'), 'token' => session('token')]) }}" method="POST" style="display: none;">
-                  @csrf
-                </form>
-                {{-- end --}}
+                @endif
               </div>
             </li>
           </ul>
