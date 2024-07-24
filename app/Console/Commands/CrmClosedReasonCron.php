@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use App\Http\Models\CRM\CrmRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Controllers\NotificationsController;
 
 class CrmClosedReasonCron extends Command
