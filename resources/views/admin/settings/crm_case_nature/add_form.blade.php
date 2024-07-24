@@ -130,7 +130,6 @@
                     } else {
                         add_remarks_section.prop('disabled', false);
                     }
-                    // addRemarkField();
                 }
             } else {
                 $('#remarks_section').hide();
@@ -138,7 +137,6 @@
                 add_remarks_section.prop('disabled', true);
                 $('#remarks_error').remove();
             }
-            // toggleFirstRemarkRemoveButton();
         }
 
         function addRemarkField() {
@@ -238,10 +236,10 @@
             e.preventDefault();
             $(this).closest('.remark-field').remove();
             var currentRemarksCount = $('#remarks_section .remark-field').length;
-            if (currentRemarksCount < maxRemarks) {
+            var currentRemarksinput = $('#remarks_section .remark-field');
+            if (currentRemarksCount < maxRemarks && currentRemarksinput.val().trim() != '') {
                 $('#add_remarks_section').removeAttr('disabled');
             }
-            // toggleFirstRemarkRemoveButton();
         });
         toggleRemarksVisibility();
 

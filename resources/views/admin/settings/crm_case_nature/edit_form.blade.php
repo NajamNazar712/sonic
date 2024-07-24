@@ -230,6 +230,8 @@
                                 remarksContainer.append(inputHtml);
                             }
                         });
+
+                        var edit_remark = $('.edit_remarks_new');
                         $('#edit_add_remark_btn').prop('disabled', remarks.length >= 5);
                         if (!remarks_visibility) {
                             remarksContainer.hide();
@@ -238,7 +240,12 @@
                             remarksContainer.show();
                             $('#edit_add_remark_btn').prop('disabled', false);
                         }
-                        // toggleErrorMessage();
+
+                        edit_remark.off('keyup').on('keyup', function() {
+                            var allInputs = $('.edit_remarks_new');
+                            var anyEmpty = allInputs.toArray().some(input => $(input).val().trim() === '');
+                            $('#edit_add_remark_btn').prop('disabled', anyEmpty || allInputs.length >= 5);
+                        });
                     }
                     populateRemarks();
 
@@ -248,8 +255,8 @@
                     }
 
                     $('#edit_add_remark_btn').on('click', function() {
-                        var currentInputLength = $('.edit_remarks_new').length;
-                        if (currentInputLength < 5) {
+                        var currentInputLength = $('.edit_remarks_new').length + 1;
+                        if (currentInputLength <= 5) {
                             var newInputHtml = `
                                 <div class="form-group">
                                     <div class="input-group">
@@ -263,14 +270,23 @@
                             remarksContainer.append(newInputHtml);
                             toggleCaseNatureButton();
 
-                            $('.edit_remarks_new').off('input').on('input', function() {
-                                var allInputs = $('.edit_remarks_new');
-                                var allFilled = allInputs.toArray().every(input => $(input).val().trim() !== '');
-                                edit_add_remark_btn.prop('disabled', allFilled && allInputs.length < 5);
-                                toggleCaseNatureButton();
+                            updateButtonState();
+
+                            // Attach keyup event handler to all .edit_remarks_new elements
+                            $('.edit_remarks_new').off('keyup').on('keyup', function() {
+                                updateButtonState();
                             });
                         }
                     });
+
+                    function updateButtonState() {
+                        var allInputs = $('.edit_remarks_new');
+                        var anyEmpty = allInputs.toArray().some(input => $(input).val().trim() === '');
+                        var inputCount = allInputs.length;
+                        edit_add_remark_btn.prop('disabled', anyEmpty || inputCount >= 5);
+
+                    }
+
                     toggleCaseNatureButton();
 
                     var updateRemarksLength = function() {
@@ -282,44 +298,27 @@
                         }
                     };
 
-                    var remove_remark_btn = $('.remove-remark-btn');
-                    remove_remark_btn.on('click', function() {
-                        $(this).closest('.form-group').remove();
-                        updateRemarksLength();
-                    });
-
-                    $('#edit_add_remark_btn').on('click', function() {
-                        var newRemarkLength = $('.edit_remarks_new').length;
-                        if (newRemarkLength > 0) {
-                            $('#remarks_error').remove();
-                            // $('#edit_case_nature_btn').prop('disabled', false);
-                        } else {
-                            $('#remarks_error').remove();
-                            // $('#edit_case_nature_btn').prop('disabled', true);
-                            // $('#edit_remarks_section').after(errorMessage);
-                        }
-                    });
-
                     $(document).on('click', '.remove-remark-btn', function() {
-                        $(this).closest('.form-group').remove();
+                        var closest_form_group = $(this).closest('.form-group');
+                        closest_form_group.remove();
                         updateRemarksLength();
+                        if (closest_form_group.val().trim() === '' && closest_form_group.length != 0 && !remarks_visibility){
+                            edit_add_remark_btn.prop('disabled', true);
+                        }
+
+                        if (closest_form_group.val().trim() === ''){
+                            edit_add_remark_btn.prop('disabled', true);
+                        }
+
+                        else {
+                            edit_add_remark_btn.prop('disabled', false);
+                        }
                     });
 
                     $('#edit_remarks_visibility').on('change', function() {
                         updateRemarksLength();
                     });
                     updateRemarksLength();
-
-                    $(document).on('click', '.remove-remark-btn', function() {
-                        var remarkId = $(this).data('remark-id');
-                        $('#remark_' + remarkId + '_container').remove();
-                        remarks = remarks.filter(function(remark) {
-                            return remark.id !== remarkId;
-                        });
-
-                        // Enable "Add Remark" button if remarks count is less than 5
-                        $('#edit_add_remark_btn').prop('disabled', remarks.length >= 5);
-                    });
 
                     $('#edit_remarks_visibility').on('change', function() {
                         remarks_visibility = $(this).is(':checked');
@@ -328,19 +327,30 @@
 
                     edit_case_nature_btn.on('click', function() {
                         var hasEmptyRemarks = false;
+                        var edit_remarks_new = $('.edit_remarks_new')
                         $('.edit_remarks_new').each(function() {
                             if ($(this).val().trim() === '') {
                                 hasEmptyRemarks = true;
                                 return false;
                             }
                         });
-                        if (hasEmptyRemarks) {
+
+                        if (hasEmptyRemarks && edit_remarks_new.length === 1) {
+                            if ($('#remarks_error').length === 0) {
+                                remarksContainer.before(errorMessage);
+                                $('#remarks_error_empty').remove();
+                            }
+                            return false;
+                        }
+
+                        if (hasEmptyRemarks && edit_remarks_new.length > 1) {
                             if ($('#remarks_error_empty').length === 0) {
                                 remarksContainer.append(errorMessageEmptyRemarks);
                             }
-                            return false;  // Prevent form submission or other actions
+                            return false; 
                         } else {
-                            $('#remarks_error').remove();  // Remove error message if all fields are filled
+                            $('#remarks_error_empty').remove();
+                            $('#remarks_error').remove();
                         }
                         if (remarks_visibility && remarksContainer.children().length == 0){
                             remarksContainer.append(errorMessage);
@@ -405,6 +415,16 @@
                         } else {
                             edit_shipment_status_error.show();
                         }
+                    });
+
+                    if (case_nature.remarks_visibility == 0) {
+                        $('#edit_add_remark_btn').prop('disabled', true);
+                    } else {
+                        $('#edit_add_remark_btn').prop('disabled', false);
+                    }
+
+                    $('.edit_remarks_new').on('keydown', function(){
+                        $('#remarks_error').remove();
                     });
 
                     $( "#edit_form" ).validate({
