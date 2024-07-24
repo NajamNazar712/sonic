@@ -14630,13 +14630,13 @@ class AdminReportsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 137);
         if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [0, 3, 4])->select('id', 'name')->get();
         } else {
-            $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('status', [0, 3, 4])->select('id', 'name')->get();
         }
 
-        $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
-        $zones = DB::connection('reports')->table('zones')->select('id', 'name')->get();
+        $cities = DB::connection('reports')->table('cities')->where('status', 1)->select('id', 'name')->get();
+        $zones = DB::connection('reports')->table('zones')->where('status', 1)->select('id', 'name')->get();    
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $areas = DB::connection('reports')->table('city_areas')->where('status', 1)->select('id', 'name')->get();
         $service_types = DB::connection('reports')->table('booking_types')->get();    

@@ -329,8 +329,9 @@
             });
             $('#search_shippers').select2({
                 width:'100%',
-                placeholder:"Select Multiple Shippers",
+                placeholder:"Select Shipper(s)",
                 allowClear:true,
+                minimumInputLength: 3
             });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
