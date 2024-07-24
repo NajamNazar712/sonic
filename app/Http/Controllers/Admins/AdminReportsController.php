@@ -15168,6 +15168,11 @@ class AdminReportsController extends Controller
                 // if (isset($rowArray['location_status_hss'])) {
                 //     $rowArray['location_status_hss'] = ($rowArray['location_status_hss']) ? (($rowArray['location_status_hss'] == 1) ? 'On-site' : 'Off-site') : '-';
                 // }
+
+                //format tracking_number
+                if (isset($rowArray['tracking_number']) && $rowArray['tracking_number']) {
+                    $rowArray['tracking_number'] = '="' . $rowArray['tracking_number'] .'"' ;
+                }
                 
                 $rowArray['shipper'] = ($rowArray['booking_type_id'] == 4) ? ($rowArray['shipper'] . ' (' . $rowArray['poc'] . ')') : $rowArray['shipper'];
                 
