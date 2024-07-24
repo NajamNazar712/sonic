@@ -741,13 +741,13 @@ class RegisterController extends Controller
                 }
 
                 DB::commit();
-                
+
                 return $newUser;
             }
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error in handling PDF: ' . $e->getMessage());
+            Log::error('Error in handling Register: ' . $e->getMessage());
         }
     }
     public function email_verified($id)
