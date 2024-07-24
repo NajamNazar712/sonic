@@ -40,10 +40,11 @@
                                     <thead>
                                         <tr class="bg-primary white">
                                             <th class="border-primary border-darken-1"></th>
-                                            <th class="border-primary border-darken-1">Franchise Name</th>
-                                            <th class="border-primary border-darken-1">Code</th>
-                                            <th class="border-primary border-darken-1">Address</th>
+                                            <th class="border-primary border-darken-1">S.no</th>
                                             <th class="border-primary border-darken-1">Product Name</th>
+                                            <th class="border-primary border-darken-1">Franchise Name</th>
+                                            <th class="border-primary border-darken-1">Address</th>
+                                            <th class="border-primary border-darken-1">Code</th>
                                             <th class="border-primary border-darken-1">CNIC</th>
                                             <th class="border-primary border-darken-1">Phone Number</th>
                                             <th class="border-primary border-darken-1">Month</th>
@@ -54,6 +55,7 @@
                                             <th class="border-primary border-darken-1">Weight Charges</th>
                                             <th class="border-primary border-darken-1">Commission amount</th>
                                             <th class="border-primary border-darken-1">Franchise Withholding Percentage</th>
+                                            <th class="border-primary border-darken-1">Payment Status</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -62,6 +64,7 @@
                                     <thead>
                                         <tr class="bg-primary white">
                                             <th class="border-primary border-darken-1"></th>
+                                            <th class="border-primary border-darken-1">S.no</th>
                                             <th class="border-primary border-darken-1">Trax User Name</th>
                                             <th class="border-primary border-darken-1">Franchise Code</th>
                                             <th class="border-primary border-darken-1">CNIC</th>
@@ -75,6 +78,7 @@
                                             <th class="border-primary border-darken-1">GST Amount</th>
                                             <th class="border-primary border-darken-1">Product %</th>
                                             <th class="border-primary border-darken-1">Commission</th>
+                                            <th class="border-primary border-darken-1">Payment Status</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -187,7 +191,7 @@
                                             action: function () {
                                                 var selectedFranchiseNames = [];
                                                 $('#datatable > tbody > .selected').each(function(index){
-                                                    var franchiseCode = $(this).find('td:eq(2)').text().trim();
+                                                    var franchiseCode = $(this).find('td:eq(1)').text().trim();
                                                     if (franchiseCode) {
                                                         selectedFranchiseNames.push(franchiseCode);
                                                     }
@@ -232,21 +236,31 @@
                                                 return '<input type="checkbox" class="select-checkbox d-none" />';
                                             }
                                         },
-
-                                        { data: 'franchise_name' },
-                                        { data: 'franchise_code' },
-                                        { data: 'franchise_address' },
+                                        { data: 'id' },
                                         { data: 'retail_shipping_mode_name' },
+                                        { data: 'franchise_name' },
+                                        { data: 'franchise_address' },
+                                        { data: 'franchise_code' },
                                         { data: 'franchise_cnic' },
                                         { data: 'franchise_phone' },
-                                        { data: 'month_name' },
+                                        { data: 'month' },
                                         { data: 'product_percentage' },
-                                        { data: 'total_shipments' },
+                                        { data: 'number_of_shipments' },
                                         { data: 'total_charges' },
-                                        { data: 'total_franchise_gst_amount' },
-                                        { data: 'total_weight_charges' },
+                                        { data: 'franchise_gst_amount' },
+                                        { data: 'weight_charges' },
                                         { data: 'commission' },
                                         { data: 'franchise_withholding_percentage' },
+                                        {
+                                            data: 'is_paid',
+                                            render: function (data, type, row) {
+                                                if (data == 1) {
+                                                    return '<span style="color: green;">Paid</span>';
+                                                } else {
+                                                    return '<span style="color: red;">Not Paid</span>';
+                                                }
+                                            }
+                                        }
                                     ],
                                     scrollX: true,
                                     scrollY: true,
@@ -325,7 +339,7 @@
                                             action: function () {
                                                 var selectedFranchiseNames = [];
                                                 $('#datatable > tbody > .selected').each(function(index){
-                                                    var franchiseName = $(this).find('td:eq(2)').text().trim();
+                                                    var franchiseName = $(this).find('td:eq(1)').text().trim();
                                                     if (franchiseName) {
                                                         selectedFranchiseNames.push(franchiseName);
                                                     }
@@ -372,20 +386,30 @@
                                                 return '<input type="checkbox" class="select-checkbox d-none" />';
                                             }
                                         },
-
-                                        { data: 'franchise_name' },
+                                        { data: 'id' },
+                                        { data: 'trax_center_name' },
                                         { data: 'franchise_code' },
-                                        { data: 'franchise_cnic' },
-                                        { data: 'franchise_phone' },
+                                        { data: 'trax_center_cnic' },
+                                        { data: 'trax_center_phone' },
                                         { data: 'franchise_address' },
-                                        { data: 'month_name' },
+                                        { data: 'month' },
                                         { data: 'retail_shipping_mode_name' },
-                                        { data: 'total_shipments' },
+                                        { data: 'number_of_shipments' },
                                         { data: 'total_charges' },
-                                        { data: 'total_weight_charges' },
-                                        { data: 'total_franchise_gst_amount' },
-                                        { data: 'product_percentage' },
+                                        { data: 'weight_charges' },
+                                        { data: 'franchise_gst_amount' },
                                         { data: 'commission' },
+                                        { data: 'net_commission' },
+                                        {
+                                            data: 'is_paid',
+                                            render: function (data, type, row) {
+                                                if (data == 1) {
+                                                    return '<span style="color: green;">Paid</span>';
+                                                } else {
+                                                    return '<span style="color: red;">Not Paid</span>';
+                                                }
+                                            }
+                                        }
                                     ],
                                     scrollX: true,
                                     scrollY: true,

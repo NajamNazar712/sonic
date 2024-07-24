@@ -273,7 +273,8 @@ class RetailAdminUserManagementController extends Controller
             'security_deposit' => 'required',
             'license_fees' => 'required',
             'bank_id' => 'required',
-            'cheque_number' => 'required',
+            'security_cheque_number' => 'required',
+            'license_cheque_number' => 'required',
         ]);
 
         $admin = $request->user();
@@ -339,7 +340,8 @@ class RetailAdminUserManagementController extends Controller
         $franchise_product_charges->bank_id = $request->bank_id;
         $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
         $franchise_product_charges->bank_name = $bank_name;
-        $franchise_product_charges->cheque_number = $request->cheque_number;
+        $franchise_product_charges->security_cheque_number = $request->security_cheque_number;
+        $franchise_product_charges->license_cheque_number = $request->license_cheque_number;
         $franchise_product_charges->save();
 
         $franchise_retail_product_attachment = new RetailFranchiseProductAttachment();
@@ -402,7 +404,8 @@ class RetailAdminUserManagementController extends Controller
             'security_deposit' => 'required',
             'license_fees' => 'required',
             'bank_id' => 'required',
-            'cheque_number' => 'required',
+            'security_cheque_number' => 'required',
+            'license_cheque_number' => 'required',
         ]);
         $date = Carbon::now()->format('Y_m_d');
         $admin = $request->user();
@@ -459,7 +462,8 @@ class RetailAdminUserManagementController extends Controller
                 $new_charges->bank_id = $request->bank_id;
                 $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
                 $new_charges->bank_name = $bank_name;
-                $new_charges->cheque_number = $request->cheque_number;
+                $new_charges->security_cheque_number = $request->security_cheque_number;
+                $new_charges->license_cheque_number = $request->license_cheque_number;
                 $new_charges->save();
             } else {
                 $new_charges = new RetailFranchiseCharge();
@@ -472,7 +476,8 @@ class RetailAdminUserManagementController extends Controller
                 $new_charges->bank_id = $request->bank_id;
                 $bank_name = BanksList::where('id', $request->bank_id)->first()->name;
                 $new_charges->bank_name = $bank_name;
-                $new_charges->cheque_number = $request->cheque_number;
+                $new_charges->security_cheque_number = $request->security_cheque_number;
+                $new_charges->license_cheque_number = $request->license_cheque_number;
                 $new_charges->save();
             }
 
@@ -619,6 +624,7 @@ class RetailAdminUserManagementController extends Controller
         }
     
         foreach ($grouped_data as $franchise_name => $records) {
+
             // Start the main container for a franchise
             $html .= '<div class="row align-items-start justify-content-between summary my-4">';
             $html .= '<div class="col-12">';
@@ -628,7 +634,7 @@ class RetailAdminUserManagementController extends Controller
             $html .= '<tr>';
             $html .= '<td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>';
             $html .= '<td class="text-center align-middle color primary"><strong>Delivery Note</strong></td>';
-            $html .= '<td class="text-center align-middle color secondary">Created at ' . $records->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '<td class="text-center align-middle color secondary">Created at ' . $records[0]->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
             $html .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
             $html .= '</tr>';
             
@@ -711,25 +717,25 @@ class RetailAdminUserManagementController extends Controller
             $html .= '</div>';
             $html .= '</div>';
         
-            // Third table: Deposits
-            $html .= '<div class="row align-items-start justify-content-between summary">';
-            $html .= '<div class="col-12">';
-            $html .= '<table class="table table-sm table-bordered border">';
-            $html .= '<thead>';
-            $html .= '<tr>';
-            $html .= '<th class="color primary">Deposits</th>';
-            $html .= '<th class="color primary">Amount</th>';
-            $html .= '<th class="color primary">Bank Name</th>';
-            $html .= '<th class="color primary">Cheque #</th>';
-            $html .= '</tr>';
-            $html .= '</thead>';
-            $html .= '<tbody>';
-            $html .= '<tr><td>Security Deposit</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
-            $html .= '<tr><td>License Fees</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // // Third table: Deposits
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-12">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<thead>';
+            // $html .= '<tr>';
+            // $html .= '<th class="color primary">Deposits</th>';
+            // $html .= '<th class="color primary">Amount</th>';
+            // $html .= '<th class="color primary">Bank Name</th>';
+            // $html .= '<th class="color primary">Cheque #</th>';
+            // $html .= '</tr>';
+            // $html .= '</thead>';
+            // $html .= '<tbody>';
+            // $html .= '<tr><td>Security Deposit</td><td>' . $franchise_charges->security_deposit . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->security_cheque_number . '</td></tr>';
+            // $html .= '<tr><td>License Fees</td><td>' . $franchise_charges->license_fees . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->license_cheque_number . '</td></tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
         
             // Fourth table: Pending Sales
             $html .= '<div class="row align-items-start justify-content-between summary">';
@@ -858,6 +864,8 @@ class RetailAdminUserManagementController extends Controller
         }
 
         foreach ($grouped_data as $franchise_name => $records) {
+            $franchise_charges = RetailFranchiseCharge::where('franchise_id', $records[0]->franchise_id)->first();
+
             // Start the main container for a franchise
             $html .= '<div class="row align-items-start justify-content-between summary my-4">';
             $html .= '<div class="col-12">';
@@ -977,8 +985,8 @@ class RetailAdminUserManagementController extends Controller
             $html .= '</tr>';
             $html .= '</thead>';
             $html .= '<tbody>';
-            $html .= '<tr><td>Security Deposit</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
-            $html .= '<tr><td>License Fees</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
+            $html .= '<tr><td>Security Deposit</td><td>' . $franchise_charges->security_deposit . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->security_cheque_number . '</td></tr>';
+            $html .= '<tr><td>License Fees</td><td>' . $franchise_charges->license_fees . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->license_cheque_number . '</td></tr>';
             $html .= '</tbody>';
             $html .= '</table>';
             $html .= '</div>';

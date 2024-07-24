@@ -15,6 +15,7 @@ class RetailFranchiseCharge extends Model
         'license_fees',
         'bank_id',
         'bank_name',
-        'cheque_number'
+        'security_cheque_number',
+        'license_cheque_number',
     ];
 }

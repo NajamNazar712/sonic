@@ -218,7 +218,11 @@
                                         </div>
                                         
                                         <div class="form-group">
-                                            <input type="text" name="cheque_number" id="cheque_number" class="form-control" placeholder="Cheque Number*" value="" data-rule-required="true" data-msg-required="Cheque Number is required">
+                                            <input type="text" name="security_cheque_number" id="security_cheque_number" class="form-control" placeholder="Security Deposit Cheque Number*" value="" data-rule-required="true" data-msg-required="Security Deposit Cheque Number is required">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <input type="text" name="license_cheque_number" id="license_cheque_number" class="form-control" placeholder="License Fees Cheque Number*" value="" data-rule-required="true" data-msg-required="License Fees Cheque Number is required">
                                         </div>
 
                                     </div>
@@ -398,7 +402,11 @@
                                     </div>
                                     
                                     <div class="form-group">
-                                        <input type="text" name="cheque_number" id="edit_cheque_number" class="form-control edit_cheque_number" placeholder="Cheque Number*" value="" data-rule-required="true" data-msg-required="Cheque Number is required">
+                                        <input type="text" name="security_cheque_number" id="edit_security_cheque_number" class="form-control edit_cheque_number" placeholder="Security Deposit Cheque Number*" value="" data-rule-required="true" data-msg-required="Cheque Number is required">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="license_cheque_number" id="edit_license_cheque_number" class="form-control edit_cheque_number" placeholder="License Fees Cheque Number*" value="" data-rule-required="true" data-msg-required="Cheque Number is required">
                                     </div>
 
                                 </div>
@@ -452,7 +460,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $('#bank_id').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select a Bank',
+                placeholder: 'Select a Bank*',
                 width: '100%',
                 allowClear: true
             });
@@ -724,7 +732,8 @@
                         $('#edit_security_deposit').val(response.data.security_deposit);
                         $('#edit_license_fees').val(response.data.license_fees);
                         $('#edit_bank_id').val(response.data.bank_id);
-                        $('#edit_cheque_number').val(response.data.cheque_number);
+                        $('#edit_security_cheque_number').val(response.data.security_cheque_number);
+                        $('#edit_license_cheque_number').val(response.data.license_cheque_number);
                         // $('#deduction_percentage_edit').val(response.data.franchise_deduction);
                     }
                 });
