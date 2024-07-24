@@ -96,6 +96,7 @@ use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\IssueSackBagOrigin;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
+use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Traits\RvTrait;
 use App\RvAgentCallHistory;
 use DateTime;
@@ -13791,9 +13792,10 @@ class AdminReportsController extends Controller
         $ratings = CrmRequestRating::all();
         $csat_formula = GlobalSettings::where('type', 'csat_formula')->latest()->first();
         $formula_value = explode(',', $csat_formula->text ?? '');
+        $claim = CrmRequestCaseNature::where('name', 'Claim')->first()->id;  
         $csat_score = CrmRequest::leftJoin('crm_request_feedbacks', 'crm_requests.id', 'crm_request_feedbacks.crm_request_id')
             ->where('crm_requests.status_id', 4)
-            ->where('crm_requests.case_nature_id', '!=', 1)
+            ->where('crm_requests.case_nature_id', '!=', $claim)
             ->whereIn('crm_request_feedbacks.rating_id', $formula_value ?? [])
             ->count();
         $csat_score = $csat_score / ((CrmRequestFeedback::count() != 0 ? CrmRequestFeedback::count() : 1)) * 100;
@@ -13809,6 +13811,7 @@ class AdminReportsController extends Controller
 
         $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
         $case_types = explode(',', $csat_types->text ?? '');
+        $claim = CrmRequestCaseNature::where('name', 'Claim')->first()->id;  
 
         if (isset($case_types)) {
             $case_types;
@@ -13823,7 +13826,7 @@ class AdminReportsController extends Controller
         ->join('crm_request_feedbacks as crmf', 'crmf.crm_request_id', 'crm_requests.id')
         ->select('crm_requests.agent_id as agent_id', 'crm_requests.id as id', 'crm_requests.case_nature_type_id as case_nature_type_id', 'crm_requests.status_id as status_id', 'crm_requests.created_at as created_at', 'sj.shipper_status_id as shipment_status', 'sj.shipment_id as shipment_id', 'crm_requests.updated_at as updated_at', 'crmf.rating_id as rating_id')
         ->where('crm_requests.status_id', 4)
-        ->where('crm_requests.case_nature_id', '!=', 1)
+        ->where('crm_requests.case_nature_id', '!=', $claim)
         ->whereIn('crm_requests.case_nature_type_id', $case_types);
 
         $datatable = Datatables::of($csat_report)->editColumn('agent_id', function ($result) {
