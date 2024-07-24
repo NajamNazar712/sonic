@@ -8307,7 +8307,7 @@ class AdminFinanceController extends Controller
                         $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('status_id', 2)->first();
                         
                         if ($crm_request) { 
-                            $shipperName = User::find($shipment->user_id)->name;
+                            $shipperName = User::find(Shipment::where('id', $shipment->id)->select('user_id')->first()->user_id)->name;
                             
                             if ($crm_request->status_id == 3) {
                                 CrmRequest::where('id', $crm_request->id)->update([

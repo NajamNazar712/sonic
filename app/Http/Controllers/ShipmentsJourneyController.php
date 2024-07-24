@@ -228,7 +228,7 @@ class ShipmentsJourneyController extends Controller
             $crm_request = CrmRequest::where('shipment_id', $shipment_id)->where('status_id', 2)->first();
             
             if ($crm_request && ($crm_request->case_nature_id == 1 || $crm_request->case_nature_id == 2)) { // 1=>Complaints Or 2=>Service Request
-                $shipperName = User::find($user_id)->name;
+                $shipperName = User::find(Shipment::where('id', $shipment_id)->select('user_id')->first()->user_id)->name;
                 
                 if ($crm_request->status_id == 3 && (in_array($crm_request->case_nature_type_id, [2, 10, 14]))) { // 2=>Delay in Delivery, 10=> Fake Reason, 14=>Urgent Delivery
                     CrmRequest::where('id', $crm_request->id)->update([
@@ -270,7 +270,7 @@ class ShipmentsJourneyController extends Controller
             $crm_request = CrmRequest::where('shipment_id', $shipment_id)->where('status_id', 2)->first();
             
             if ($crm_request) {
-                $shipperName = User::find($user_id)->name;
+                $shipperName = User::find(Shipment::where('id', $shipment_id)->select('user_id')->first()->user_id)->name;
                 
                 if ($crm_request->status_id == 3) {
                     CrmRequest::where('id', $crm_request->id)->update([
@@ -301,7 +301,7 @@ class ShipmentsJourneyController extends Controller
             $crm_request = CrmRequest::where('shipment_id', $shipment_id)->where('status_id', 2)->first();
             
             if ($crm_request && in_array($crm_request->case_nature_type_id, [2, 10, 14])) { 
-                $shipperName = User::find($user_id)->name;
+                $shipperName = User::find(Shipment::where('id', $shipment_id)->select('user_id')->first()->user_id)->name;
                 
                 if ($crm_request->status_id == 3) {
                     CrmRequest::where('id', $crm_request->id)->update([
