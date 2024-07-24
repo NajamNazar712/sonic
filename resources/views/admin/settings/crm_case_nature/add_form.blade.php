@@ -121,6 +121,8 @@
             var isRemarksVisible = $('#remarks_visibility').is(':checked');
             var add_remarks_section = $('#add_remarks_section');
             if (isRemarksVisible) {
+                console.log(isRemarksVisible);
+
                 $('#remarks_section .remark-field').show();
                 if ($('#remarks_section .remark-field').length >= 0) {
                     add_remarks_section.prop('disabled', false);
@@ -131,7 +133,9 @@
                         add_remarks_section.prop('disabled', false);
                     }
                 }
-            } else {
+            } 
+            
+            else {
                 $('#remarks_section').hide();
                 $('#remarks_section .remark-field').hide();
                 add_remarks_section.prop('disabled', true);
@@ -237,7 +241,7 @@
             $(this).closest('.remark-field').remove();
             var currentRemarksCount = $('#remarks_section .remark-field').length;
             var currentRemarksinput = $('#remarks_section .remark-field');
-            if (currentRemarksCount < maxRemarks && currentRemarksinput.val().trim() != '') {
+            if (currentRemarksCount < maxRemarks && currentRemarksinput.length === 0) {
                 $('#add_remarks_section').removeAttr('disabled');
             }
         });

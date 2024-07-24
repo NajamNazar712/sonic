@@ -220,7 +220,7 @@
                                 var inputHtml = `
                                     <div class="form-group" id="remark_${remark.id}_container">
                                         <div class="input-group">
-                                            <input type="text" id="remark_${remark.id}" name="remarks[]" class="form-control edit_remarks_new" value="${remark.remarks}">
+                                            <input type="text" id="remark_${remark.id}" name="remarks[]" class="form-control edit_remarks_new" value="${remark.remarks}" placeholder="Add Remark">
                                             <div class="input-group-append mx-1">
                                                 <button class="btn btn-danger remove-remark-btn" data-remark-id="${remark.id}" type="button">Remove</button>
                                             </div>
@@ -284,11 +284,9 @@
                         var anyEmpty = allInputs.toArray().some(input => $(input).val().trim() === '');
                         var inputCount = allInputs.length;
                         edit_add_remark_btn.prop('disabled', anyEmpty || inputCount >= 5);
-
                     }
 
                     toggleCaseNatureButton();
-
                     var updateRemarksLength = function() {
                         var remark_length = $('.edit_remarks_new').length;
                         if (remark_length === 0 && $('#edit_remarks_visibility').is(':checked')) {
@@ -302,11 +300,16 @@
                         var closest_form_group = $(this).closest('.form-group');
                         closest_form_group.remove();
                         updateRemarksLength();
+
                         if (closest_form_group.val().trim() === '' && closest_form_group.length != 0 && !remarks_visibility){
                             edit_add_remark_btn.prop('disabled', true);
                         }
 
-                        if (closest_form_group.val().trim() === ''){
+                        else if (closest_form_group.length <= 1 && remarks_visibility){
+                            edit_add_remark_btn.prop('disabled', false);
+                        }
+
+                        else if (closest_form_group.length != 0 && remarks_visibility && closest_form_group.val().trim() === ''){
                             edit_add_remark_btn.prop('disabled', true);
                         }
 
@@ -382,6 +385,8 @@
                     $(document).on('keyup', '.edit_remarks_new', function() {
                         if ($('#remarks_error_empty').length > 0) {
                             $('#remarks_error_empty').remove();
+                        } else if ($('#remarks_error').length > 0){
+                            $('#remarks_error').remove();
                         }
                     });
 
