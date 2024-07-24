@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use Illuminate\Support\Facades\Log;
 use Auth;
 use Carbon\Carbon;
 use App\DailyVisit;
@@ -12,6 +13,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\Product;
 use App\Http\Models\Segment;
+use App\LeadProgressSetting;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
 use App\Http\Models\BanksList;
@@ -47,6 +49,7 @@ use App\Http\Models\PackagingCharge;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\BusinessCategory;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\SubCategorySegment;
@@ -99,10 +102,10 @@ use App\Http\Models\PackagingMaterialTypeSizes;
 use App\Http\Models\ShipperVerificationPinCode;
 use App\Http\Models\WMS\WmsPerSquareFootCharge;
 use App\Http\Models\Admin\StandardFuelSurcharge;
+
 use App\Http\Models\CorporateCashHandlingCharge;
 use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Controllers\NotificationsController;
-
 use App\Http\Models\CorporateDefaultReturnCharge;
 use App\Http\Models\CorporateDefaultWeightCharge;
 use App\Http\Models\CorporateMinChargeableWeight;
@@ -137,8 +140,6 @@ use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\LeadProgressSetting;
-use Barryvdh\Snappy\Facades\SnappyPdf;
 
 
 //use Illuminate\Support\Facades\Auth;
@@ -2328,7 +2329,7 @@ class ShipperDashboardController extends Controller
             $user_attachment->save();
         
         } catch (\Exception $e) {
-            \Log::error('Error in handling PDF: ' . $e->getMessage());
+            Log::error('Error in handling PDF: ' . $e->getMessage());
             return redirect()->back()->with('error', 'An error occurred while processing the document.');
         }
     }
