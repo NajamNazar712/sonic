@@ -15272,4 +15272,24 @@ class AdminReportsController extends Controller
  
         return $datatable->make(true);
     }
+
+    public function updated_shippers_list(Request $request)
+    {
+        $segment_id = $request->sub_segment_value;
+        if($segment_id){
+            $updated_shippers_list = DB::connection('reports')->table('users')
+            ->whereIn('status', [3, 4])
+            ->where('segment_id', $segment_id)
+            ->select('id', 'name')
+            ->get();
+        } else {
+            $updated_shippers_list = DB::connection('reports')->table('users')
+            ->whereIn('status', [0, 3, 4])
+            ->select('id', 'name')
+            ->get();
+        }
+        return response()->json([
+            'data' => $updated_shippers_list
+        ]);
+    }
 }
