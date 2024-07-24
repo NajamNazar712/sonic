@@ -14992,7 +14992,7 @@ class AdminReportsController extends Controller
                       ->orWhere('scu.user_id', $search_kam);
             });
         }
-
+        $shipments = $shipments->whereNotNull('shipments.tracking_number');
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
