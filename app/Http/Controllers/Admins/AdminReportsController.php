@@ -5555,7 +5555,7 @@ class AdminReportsController extends Controller
                 $count = $count->whereIn('dc.hub_id', session('hubs'));
             }
         }
-
+        $count=  $count->whereNotNull('shipments.tracking_number');
         $count = $count->count();
 
         $sales = DB::connection($connection)->table('shipments')
@@ -5672,7 +5672,7 @@ class AdminReportsController extends Controller
                 $sales = $sales->whereIn('dc.hub_id', session('hubs'));
             }
         }
-
+        $sales = $sales->whereNotNull('shipments.tracking_number');
         $datatable = Datatables::of($sales)
             ->setTotalRecords($count)
 
