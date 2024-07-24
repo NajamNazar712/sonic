@@ -47,7 +47,7 @@
                                     <div class="mt-4">
                                         <label for="">Add remarks (you can add maximum 5 remarks)</label>
                                         <fieldset class="form-group">
-                                            <div id="remarks_section" class="my-2"></div>
+                                            <div id="remarks_section" class="mb-2"></div>
                                             <button class="btn btn-success" id="add_remarks_section">Add Remark</button>
                                         </fieldset>
                                     </div>
@@ -121,8 +121,6 @@
             var isRemarksVisible = $('#remarks_visibility').is(':checked');
             var add_remarks_section = $('#add_remarks_section');
             if (isRemarksVisible) {
-                console.log(isRemarksVisible);
-
                 $('#remarks_section .remark-field').show();
                 if ($('#remarks_section .remark-field').length >= 0) {
                     add_remarks_section.prop('disabled', false);
@@ -202,7 +200,7 @@
                     }
                 });
                 if (filledRemarkCount === 0) {
-                    $('#remarks_section').append(errorMessage);
+                    $('#remarks_section').before(errorMessage);
                     return false;
                 } else if (emptyRemarkCount > 0) {
                     $('#remarks_section').append(errorMessageEmptyRemarks);
@@ -241,8 +239,11 @@
             $(this).closest('.remark-field').remove();
             var currentRemarksCount = $('#remarks_section .remark-field').length;
             var currentRemarksinput = $('#remarks_section .remark-field');
-            if (currentRemarksCount < maxRemarks && currentRemarksinput.length === 0) {
+            if (currentRemarksCount < maxRemarks) {
                 $('#add_remarks_section').removeAttr('disabled');
+            }
+            else if (currentRemarksCount < maxRemarks && currentRemarksinput.val().trim() == ''){
+                $('#add_remarks_section').prop('disabled', true);
             }
         });
         toggleRemarksVisibility();
