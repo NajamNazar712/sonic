@@ -230,7 +230,8 @@ class ShipmentsJourneyController extends Controller
             if ($crm_request && ($crm_request->case_nature_id == 1 || $crm_request->case_nature_id == 2)) { // 1=>Complaints Or 2=>Service Request
                 $shipperName = User::find(Shipment::where('id', $shipment_id)->select('user_id')->first()->user_id)->name;
                 
-                if ($crm_request->status_id == 3 && (in_array($crm_request->case_nature_type_id, [2, 10, 14]))) { // 2=>Delay in Delivery, 10=> Fake Reason, 14=>Urgent Delivery
+                //if crm request is in_process =>2
+                if ($crm_request->status_id == 2 && (in_array($crm_request->case_nature_type_id, [2, 10, 14]))) { // 2=>Delay in Delivery, 10=> Fake Reason, 14=>Urgent Delivery
                     CrmRequest::where('id', $crm_request->id)->update([
                         'status_id' => 4 // Closed status
                     ]);
@@ -272,7 +273,7 @@ class ShipmentsJourneyController extends Controller
             if ($crm_request) {
                 $shipperName = User::find(Shipment::where('id', $shipment_id)->select('user_id')->first()->user_id)->name;
                 
-                if ($crm_request->status_id == 3) {
+                if ($crm_request->status_id == 2) {//if crm request is in_process
                     CrmRequest::where('id', $crm_request->id)->update([
                         'status_id' => 4 // Closed status
                     ]);
@@ -303,7 +304,7 @@ class ShipmentsJourneyController extends Controller
             if ($crm_request && in_array($crm_request->case_nature_type_id, [2, 10, 14])) { 
                 $shipperName = User::find(Shipment::where('id', $shipment_id)->select('user_id')->first()->user_id)->name;
                 
-                if ($crm_request->status_id == 3) {
+                if ($crm_request->status_id == 2) {//if crm request is in_process
                     CrmRequest::where('id', $crm_request->id)->update([
                         'status_id' => 4 // Closed status
                     ]);

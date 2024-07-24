@@ -8309,7 +8309,7 @@ class AdminFinanceController extends Controller
                         if ($crm_request) { 
                             $shipperName = User::find(Shipment::where('id', $shipment->id)->select('user_id')->first()->user_id)->name;
                             
-                            if ($crm_request->status_id == 3) {
+                            if ($crm_request->status_id == 2) {//if crm request is in_process
                                 CrmRequest::where('id', $crm_request->id)->update([
                                     'status_id' => 4 // Closed status
                                 ]);
