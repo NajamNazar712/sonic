@@ -390,8 +390,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data, Request $request)
     {
-        try {
-            DB::beginTransaction();
+        
             $admin_auto_tag_territory = null;
             if (isset($data['wordpress_lead_register']) && $data['wordpress_lead_register'] == 1) {
                 $lead = Lead::find($data['lead_id']);
@@ -740,15 +739,13 @@ class RegisterController extends Controller
                     $mail->send(new Notifications($subject, $body, null));
                 }
 
-                DB::commit();
+                
+
+                Log::info('Transaction committed successfully.');
 
                 return $newUser;
             }
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error in handling Register: ' . $e->getMessage());
-        }
     }
     public function email_verified($id)
     {
