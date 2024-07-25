@@ -15283,10 +15283,11 @@ class AdminReportsController extends Controller
             ->select('id', 'name')
             ->get();
         } else {
-            $updated_shippers_list = DB::connection('reports')->table('users')
-            ->whereIn('status', [0, 3, 4])
-            ->select('id', 'name')
-            ->get();
+            if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
+                $updated_shippers_list = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [0, 3, 4])->select('id', 'name')->get();
+            } else {
+                $updated_shippers_list = DB::connection('reports')->table('users')->whereIn('status', [0, 3, 4])->select('id', 'name')->get();
+            }
         }
         return response()->json([
             'data' => $updated_shippers_list
