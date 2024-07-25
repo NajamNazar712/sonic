@@ -66,7 +66,6 @@
                                         <input type="text" class="form-control required"
                                             name="company_address"
                                             value="{{ $lead->business_address }}"     {{ $lead->business_address ? 'readonly' : '' }}>
-                                            >
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -86,7 +85,6 @@
                                     <div class="form-group">
                                         <label for="cnic">CNIC Number: <span class="danger">*</span></label>
                                         <input type="text" class="form-control required" placeholder="XXXXX-1234567-X" value="{{ $lead->cnic_number }}" name="cnic"  {{ $lead->cnic_number ? 'readonly' : '' }}>
-                                        >
                                     </div>
                                 </div>
                                 <div class="col-md-6">
