@@ -9435,9 +9435,7 @@ class AdminDashboardController extends Controller
                     return "Approved";
                 } elseif ($users->rate_status == 1) {
                     return "Requested";
-                } else if($users->on_board_status == 0 && $users->status == 0) {
-                    return "Pending";
-                }else{
+                } else {
                     return "Rejected";
                 }
             })->editColumn('disable_reason', function ($users) {
@@ -10071,6 +10069,8 @@ class AdminDashboardController extends Controller
                 } else if ($users->rate_status == 0 && $users->status == 1) {
                     return "Requested";
                 } else if ($users->rate_status == 0 && $users->status == 0) {
+                    return "Pending";
+                }else{
                     return "Requested For Custom Quotation";
                 }
             })
