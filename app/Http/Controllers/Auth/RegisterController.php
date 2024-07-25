@@ -390,8 +390,10 @@ class RegisterController extends Controller
      */
     protected function create(array $data, Request $request)
     {
-        
+        try {
+            DB::beginTransaction();
             $admin_auto_tag_territory = null;
+
             if (isset($data['wordpress_lead_register']) && $data['wordpress_lead_register'] == 1) {
                 $lead = Lead::find($data['lead_id']);
                 User::create([
@@ -412,17 +414,16 @@ class RegisterController extends Controller
                     'on_board_status' => '0',
                 ]);
 
-
-                $city = City::find($lead->city_id); // Using find() to directly get the city by ID
-                if ($city) { // Check if city exists
-                    $zone_id = $city->zone_id; // Assuming there's a zone_id in your City model
-                    $lead_zone = LeadZone::where(['zone_id' => $zone_id, 'status' => 1])->first(); // Get lead zone
-                    if ($lead_zone) { // Check if lead zone exists
+                $city = City::find($lead->city_id);
+                if ($city) {
+                    $zone_id = $city->zone_id;
+                    $lead_zone = LeadZone::where(['zone_id' => $zone_id, 'status' => 1])->first();
+                    if ($lead_zone) {
                         $sale_person = new SalePersonTag();
-                        $sale_person->admin_id = $lead_zone->admin_id; // Corrected comma to semicolon
-                        $sale_person->user_id = User::max('id'); // Corrected comma to semicolon
-                        $sale_person->status = 0; // Corrected comma to semicolon
-                        $sale_person->save(); // Corrected comma to semicolon and added save() method
+                        $sale_person->admin_id = $lead_zone->admin_id;
+                        $sale_person->user_id = User::max('id');
+                        $sale_person->status = 0;
+                        $sale_person->save();
                         $admin_auto_tag_territory = $lead_zone->admin_id;
                     }
 
@@ -431,6 +432,7 @@ class RegisterController extends Controller
                         $lead->save();
                     }
                 }
+                DB::commit();
             } else {
                 if (array_key_exists('lead_id', $data)) {
                     $lead_id = $data['lead_id'];
@@ -513,13 +515,13 @@ class RegisterController extends Controller
                         ]
                     );
 
-
                     $adminDashboardController = new AdminDashboardController();
                     $adminDashboardController->addRates($request, User::max('id'));
 
                     $lead = Lead::find($data['lead_id']);
                     $lead->status_id = 9;
                     $lead->save();
+                    DB::commit();
                 } else {
                     $newUser = User::create([
                         'name' => $data['name'],
@@ -551,10 +553,10 @@ class RegisterController extends Controller
                         'payment_cycle_id' =>  $data['payment_cycles'],
                         'payment_cycle_days' => $payment_cycle_days
                     ]);
+                    DB::commit();
                 }
 
                 $shipper = User::find($newUser->id);
-                //        $shipper->products()->attach($data['product_type']);
 
                 if (isset($data['sale_person'])) {
                     $sale_person = new SalePersonTag();
@@ -576,11 +578,10 @@ class RegisterController extends Controller
                     $sales_commission_user->user_id = $data['sale_person'];
                     $sales_commission_user->commission = 2.5;
                     $sales_commission_user->save();
+                    DB::commit();
                 }
                 $first = TRUE;
-
                 foreach ($data['pickup_address'] as $index => $pickup_address) {
-
                     if ($first) {
                         UserShippingInfo::create([
                             'user_id' => $newUser->id,
@@ -592,7 +593,6 @@ class RegisterController extends Controller
                             'pickup_brand_name' => $data['pickup_brand_name'][$index],
                             'default_address' => TRUE
                         ]);
-
                         $first = FALSE;
                     } else {
                         UserShippingInfo::create([
@@ -602,11 +602,12 @@ class RegisterController extends Controller
                             'phone' => $data['shipping_phone'][$index],
                             'email' => $data['shipping_email'][$index],
                             'city_id' => $data['shipping_city'][$index],
-                            'pickup_brand_name' => $data['pickup_brand_name'][$index],
-
+                            'pickup_brand_name' => $data['pickup_brand_name'][$index]
                         ]);
                     }
                 }
+                DB::commit(); // Commit after creating shipping info
+
                 $iban_array = array();
                 $default_bank = TRUE;
                 foreach ($data['bank_name'] as $rowId => $bank) {
@@ -658,6 +659,8 @@ class RegisterController extends Controller
                         ]);
                     }
                 }
+                DB::commit(); // Commit after creating bank info
+
                 self::duplicate_user_info($newUser->id, $data['name'], $data['phone'], $data['phone2'], $data['cnic'], $iban_array);
 
                 $token = uniqid(base64_encode(str_random(60)));
@@ -666,6 +669,7 @@ class RegisterController extends Controller
                 $crf_terms_and_conditions->token = $token;
                 $crf_terms_and_conditions->save();
 
+                DB::commit(); // Commit after creating CRF terms and conditions
 
                 $banks_infos = array();
                 $user_bank_infos = UserBankInfo::where('user_id', $newUser->id)->get();
@@ -708,7 +712,6 @@ class RegisterController extends Controller
                             </div>';
                 }
 
-
                 $html .= '</div>
                         <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>
                     </div>';
@@ -735,17 +738,18 @@ class RegisterController extends Controller
                 $to = array_values(array_filter($to));
                 if (!empty($to)) {
                     $mail = Mail::to($to);
-
                     $mail->send(new Notifications($subject, $body, null));
                 }
 
-                
+                DB::commit(); // Final commit for sending email
+
 
                 Log::info('Transaction committed successfully.');
-
                 return $newUser;
             }
-
+        } catch (\Throwable $th) {
+            DB::rollBack();
+        }
     }
     public function email_verified($id)
     {
