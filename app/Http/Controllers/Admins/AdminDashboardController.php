@@ -8505,6 +8505,7 @@ class AdminDashboardController extends Controller
         
         if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
             User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_authorized_by' => 346, 'rates_approved_at' => Carbon::now(), 'rates_added_at' => Carbon::now(), 'rate_status' => 0, 'request_custom_quotation' => 0, 'on_board_status' => 1]);
+            session(['status' => 2]);
         } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
             User::where('id', $id)->update(['status' => 0, 'rate_status' => 0, 'request_custom_quotation' => 1, 'on_board_status' => 1]);
             // NotificationsController::send(231, $id);
