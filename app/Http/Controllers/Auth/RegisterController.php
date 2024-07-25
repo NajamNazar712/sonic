@@ -741,14 +741,16 @@ class RegisterController extends Controller
                     $mail->send(new Notifications($subject, $body, null));
                 }
 
-                DB::commit(); // Final commit for sending email
+                DB::commit(); 
 
 
                 Log::info('Transaction committed successfully.');
                 return $newUser;
             }
-        } catch (\Throwable $th) {
+        } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Transaction failed: ' . $e->getMessage());
+            throw $e;
         }
     }
     public function email_verified($id)
