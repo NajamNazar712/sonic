@@ -10352,34 +10352,29 @@ class AdminDashboardController extends Controller
                     if(($user->on_board_status < 1 && $user->created_at > '2024-06-13 00:00:00')){
                         $lead_progress_setting = LeadProgressSetting::find(1);
                         $percentage = $lead_progress_setting->percent;
-                        $color = $lead_progress_setting->color;
     
                         $description = "Your account is $percentage% completed";
                     }else if(($weight_charges->exists() || $user->request_custom_quotation == 1) && !isset($user->rates_added_by)){
                         $lead_progress_setting = LeadProgressSetting::find(2);
                         $percentage = $lead_progress_setting->percent;
-                        $color = $lead_progress_setting->color;
     
                         $description = "Your account is $percentage% completed";
     
                     }else if (isset($user->rates_added_by) && $user->documents_status != 2){
                         $lead_progress_setting = LeadProgressSetting::find(3);
                         $percentage = $lead_progress_setting->percent;
-                        $color = $lead_progress_setting->color;
     
                         $description = "Your account is $percentage% completed";
     
                     }else if ($user->documents_status == 2 && $user->status != 3){
                         $lead_progress_setting = LeadProgressSetting::find(4);
                         $percentage = $lead_progress_setting->percent;
-                        $color = $lead_progress_setting->color;
                         
                         $description = "Your account is $percentage% completed";
     
                     }else if ($user->status == 3){
                         $lead_progress_setting = LeadProgressSetting::find(5);
                         $percentage = $lead_progress_setting->percent;
-                        $color = $lead_progress_setting->color;
     
                         $description = "Your account is activated";
     

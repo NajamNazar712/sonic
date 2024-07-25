@@ -2314,6 +2314,7 @@ class ShipperDashboardController extends Controller
     public function download_crf($user_attachment, $date)
     {
         try {
+            DB::beginTransaction();
             if ($user_attachment->filled_and_signed_pdf != NULL) {
                 Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->filled_and_signed_pdf);
             }
@@ -2327,8 +2328,11 @@ class ShipperDashboardController extends Controller
         
             $user_attachment->filled_and_signed_pdf = $filename;
             $user_attachment->save();
-        
+            DB::commit();
+
         } catch (\Exception $e) {
+            DB::rollBack();
+
             Log::error('Error in handling PDF: ' . $e->getMessage());
             return redirect()->back()->with('error', 'An error occurred while processing the document.');
         }
