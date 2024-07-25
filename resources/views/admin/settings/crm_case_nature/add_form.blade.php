@@ -237,20 +237,30 @@
         $('#remarks_section').on('click', '.remove-remark', function(e) {
             e.preventDefault();
             $(this).closest('.remark-field').remove();
-            var currentRemarksCount = $('#remarks_section .remark-field').length;
-            var currentRemarksinput = $('#remarks_section .remark-field');
-            if (currentRemarksCount < maxRemarks) {
-                if(currentRemarksCount < maxRemarks && currentRemarksinput.val().trim() == '') {
-                    $('#add_remarks_section').removeAttr('disabled');
-                }
-            } else {
-                $('#add_remarks_section').removeAttr('disabled');
-            }
+            toggleAddRemarkButton();
         });
+
+        function toggleAddRemarkButton() {
+            var currentVisibleRemarksCount = $('#remarks_section .remark-field:visible').length;
+            var anyRemarkEmpty = false;
+            $('#remarks_section .remark-field:visible input').each(function() {
+                if ($(this).val().trim() === '') {
+                    anyRemarkEmpty = true;
+                    return false;
+                }
+            });
+            if (anyRemarkEmpty && currentVisibleRemarksCount < maxRemarks) {
+                $('#add_remarks_section').attr('disabled', 'disabled');
+            } else if (!anyRemarkEmpty && currentVisibleRemarksCount < maxRemarks) {
+                $('#add_remarks_section').removeAttr('disabled');
+            } else {
+                $('#add_remarks_section').attr('disabled', 'disabled');
+            }
+        }
+        toggleAddRemarkButton();
         toggleRemarksVisibility();
 
         var remarks_visibility = $('#remarks_visibility').is(':checked');
-
         $('#shipment_status').select2({
             width:'100%',
             placeholder:"Select Status",

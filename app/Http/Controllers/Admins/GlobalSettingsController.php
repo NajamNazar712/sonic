@@ -1706,7 +1706,6 @@ class GlobalSettingsController extends Controller
                 }
             })
             ->addColumn('action', function ($data) {
-                // $data->id
                 if (session('role_id') == 1 || in_array(537, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
