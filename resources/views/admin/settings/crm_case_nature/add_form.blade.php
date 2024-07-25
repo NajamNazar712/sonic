@@ -240,10 +240,13 @@
             var currentRemarksCount = $('#remarks_section .remark-field').length;
             var currentRemarksinput = $('#remarks_section .remark-field');
             if (currentRemarksCount < maxRemarks) {
+                if (currentRemarksinput.val().trim() == '') {
+                    $('#add_remarks_section').attr('disabled');
+                } else {
+                    $('#add_remarks_section').removeAttr('disabled');
+                }
+            } else {
                 $('#add_remarks_section').removeAttr('disabled');
-            }
-            else if (currentRemarksCount < maxRemarks && currentRemarksinput.val().trim() == ''){
-                $('#add_remarks_section').prop('disabled', true);
             }
         });
         toggleRemarksVisibility();
