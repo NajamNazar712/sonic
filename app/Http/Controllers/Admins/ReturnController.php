@@ -104,6 +104,8 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\RvShipmentTicket;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 
 class ReturnController extends Controller
 {
@@ -407,8 +409,8 @@ class ReturnController extends Controller
         ->count();
         $number_of_pending_second_call_percentage = ($reason_validation_required > 0) ? (($number_of_pending_second_call / $reason_validation_required) * 100) : 0;
 
-        //Total Agents Online Today
-        $number_of_available_agents = Employee::join('employee_attendances', 'employees.id', 'employee_attendances.employee_id')
+        
+        $number_of_agents = Employee::join('employee_attendances', 'employees.id', 'employee_attendances.employee_id')
             ->whereDate('employee_attendances.attendance_date', '=', now()->format('Y-m-d'))
             ->whereNotNull('employee_attendances.clock_in')
             ->where('employees.employee_type_id', 1)
@@ -416,13 +418,20 @@ class ReturnController extends Controller
             ->where('employees.is_line_manager', 0)
             ->where('employees.status_id', '!=', 2)
             ->pluck('employees.id')->toArray();
-
-
+        
+        //Total Agents Online Today
+        $number_of_available_agents = RvShipmentAssignAgentDetails::whereDate('rv_shipment_assign_agent_details.created_at', now()->format('Y-m-d'))
+        ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
+        ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
+        ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
+        ->where('rv_shipment_assign_agent_details.updated_type_id', 2)
+        ->distinct('rv_shipment_assign_agent_details.agent_id')
+        ->count('rv_shipment_assign_agent_details.agent_id');
         //Online Available Agents
         $online_agents = EmployeeAttendance::join('admins', 'admins.employee_id', 'employee_attendances.employee_id')
             ->join('rv_shipment_assign_agents as rvsa', 'rvsa.agent_id', 'admins.id') //Agent will be considered as logged out if it's latest record in rv_shipment_assign_agent is older 30 minutes
             ->where('rvsa.updated_at', '>', now()->subMinutes(30))
-            ->whereIn('employee_attendances.employee_id', $number_of_available_agents)
+            ->whereIn('employee_attendances.employee_id', $number_of_agents)
             ->whereIn('employee_attendances.id', function ($query) {
                 $query->select(DB::raw('MAX(id)'))
                     ->from('employee_attendances')
@@ -433,7 +442,7 @@ class ReturnController extends Controller
             ->get(['employee_attendances.employee_id'])->count();
 
         //Average Ticket Per Agent
-        $average_ticket_per_agent = (count($number_of_available_agents) > 0) ? ($total_tickets_today / count($number_of_available_agents)) : 0;
+        $average_ticket_per_agent = ($number_of_available_agents > 0) ? ($total_tickets_today / $number_of_available_agents) : 0;
 
 
         //Average First Call Time of Last 30 days records
@@ -443,16 +452,42 @@ class ReturnController extends Controller
         $minutes = ($average_first_call_time % 60);
         $average_first_call_time = $hours . " h : " . $minutes . " m";
 
+        //-----------x--------x-------aging------x-----------x-----------x---------
         //Average Hours
         $aging = ShipmentsJourney::join('rv_shipment_assign_agents', 'shipments_journey.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
-            ->where('shipments_journey.shipper_status_id', 2)->get(['shipments_journey.created_at']);
-        $totalSeconds = 0;
+        ->whereIn('shipments_journey.shipper_status_id', [2,12])
+        ->orderBy('shipments_journey.shipment_id')
+        ->orderBy('shipments_journey.created_at')
+        ->where('shipments_journey.created_at','>=',now()->subDays(30))
+        ->get(['shipments_journey.shipment_id','shipments_journey.shipper_status_id','shipments_journey.created_at'])
+        ->groupBy('shipments_journey.shipment_id');
+        $totalMinutes = 0;
         $count = count($aging);
-        foreach ($aging as $record) {
-            $totalSeconds += now()->diffInSeconds($record->created_at);
+
+        foreach ($aging as $shipment) {
+            $createdAt12 = null;
+            $createdAt2 = null;
+
+            foreach ($shipment as $record) {
+                if ($record->shipper_status_id == 12) {
+                    $createdAt12 = Carbon::parse($record->created_at);
+                } elseif ($record->shipper_status_id == 2) {
+                    $createdAt2 = Carbon::parse($record->created_at);
+                }
+
+                // Calculate the difference when both statuses are found
+                if ($createdAt12 && $createdAt2) {
+                    $totalMinutes += $createdAt12->diffInMinutes($createdAt2);
+                    break;
+                }
+            }
+
         }
-        $averageSeconds = ($count > 0) ? $totalSeconds / $count : 0;
-        $averageHours = ($averageSeconds > 0) ? $averageSeconds / 3600 : 0; // 1 hour = 3600 seconds
+
+        $averageMinutes = $count > 0 ? $totalMinutes / $count : 0;
+        $averageHours = $averageMinutes / 60; // Convert minutes to hours
+
+        //----------x---------x-----!aging!--------x---------x----------
 
         $stats = array();
         $stats['total_of_shipments'] = $total_of_shipments;
@@ -466,7 +501,7 @@ class ReturnController extends Controller
         $stats['number_of_pending_first_call_percentage'] = round($number_of_pending_first_call_percentage);
         $stats['number_of_pending_second_call'] = $number_of_pending_second_call;
         $stats['number_of_pending_second_call_percentage'] = round($number_of_pending_second_call_percentage);
-        $stats['number_of_available_agents'] = count($number_of_available_agents);
+        $stats['number_of_available_agents'] = $number_of_available_agents;
         $stats['online_agents'] = $online_agents;
         $stats['total_tickets_today'] = $total_tickets_today;
         $stats['average_ticket_per_agent'] = round($average_ticket_per_agent);
@@ -2413,6 +2448,21 @@ class ReturnController extends Controller
                     } else {
                         return 'Cargo';
                     }
+                }
+            })
+            ->addColumn('check_return_bag', function ($shipment) {
+                $cargo_bag = CargoManifestBagShipments::where('shipment_id' , $shipment->shipment_id);
+                if($cargo_bag->exists()) {
+                    $cargo_bag = $cargo_bag->latest()->first();
+                    $bag_number = $cargo_bag->cargo_manifest_bag_id;
+                    $return_bag = CargoManifestBag::where('id', $bag_number)->where('type', 2);
+                    if($return_bag->exists()) {
+                        return 'yes';
+                    } else {
+                        return 'no';
+                    }
+                } else {
+                    return 'no';
                 }
             })
             ->addColumn('return_city', function ($shipment) {
