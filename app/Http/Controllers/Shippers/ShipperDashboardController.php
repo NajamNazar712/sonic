@@ -2284,8 +2284,7 @@ class ShipperDashboardController extends Controller
 
             $date = Carbon::now()->format('Y_m_d');
 
-            //Download CRF for new requirement from shipper side
-            $this->download_crf($user_attachment, $date);         
+            
 
             if($user_attachment->e_sign_image != NULL) {
                 Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->e_sign_image);
@@ -2295,7 +2294,17 @@ class ShipperDashboardController extends Controller
             $user_attachment->e_sign_image = $filename;
             $user_attachment->save();
             session(['agreement_signed' => 1]);
-            User::where('id',session('user_id'))->update(['agreement_signed' => 1]);   
+            User::where('id',session('user_id'))->update(['agreement_signed' => 1]);
+
+
+             //Download CRF for new requirement from shipper side
+
+             $user = User::find(session('user_id'));
+             if($user->lead_id){
+                $user->term_and_conditions = 1;
+                $user->save();
+                $this->download_crf($user_attachment, $date);        
+             }
 
             NotificationsController::send(149,session('user_id'));
         }
@@ -2313,8 +2322,8 @@ class ShipperDashboardController extends Controller
 
     public function download_crf($user_attachment, $date)
     {
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
             if ($user_attachment->filled_and_signed_pdf != NULL) {
                 Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->filled_and_signed_pdf);
             }
