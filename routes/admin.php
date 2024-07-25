@@ -1988,6 +1988,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('edit', 'Admins\AdminNotificationsController@app_notification_edit')->name('edit');
     });
 
+    // SMS logs
+    Route::prefix('sms_logs')->name('sms_logs.')->group(function () {
+        Route::get('', 'Admins\AdminNotificationsController@sms_logs_view')->name('index');
+        Route::post('list', 'Admins\AdminNotificationsController@sms_logs')->name('list');
+    });
+
     //Reports start
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::prefix('qsr')->name('qsr.')->group(function () {
