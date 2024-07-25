@@ -10348,7 +10348,9 @@ class AdminDashboardController extends Controller
             ->addColumn("lead_progress", function ($user) {
                 if($user->lead_id){
                     $weight_charges = WeightCharge::where('user_id' , $user->id);
-    
+
+                    $description = '-';
+                    
                     if(($user->on_board_status < 1 && $user->created_at > '2024-06-13 00:00:00')){
                         $lead_progress_setting = LeadProgressSetting::find(1);
                         $percentage = $lead_progress_setting->percent;
