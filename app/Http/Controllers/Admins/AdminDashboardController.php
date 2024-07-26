@@ -9157,16 +9157,14 @@ class AdminDashboardController extends Controller
             }
         }
 
-      
-
+        $user =  User::find($id);
+        if($request->request_custom_quotations == 1 && $user->lead_id){
+            NotificationsController::send(38, $id);
+        }
 
         //Sales Commissison End
 
         if(!$request->has('wordpress_account')){
-            $user =  User::find($id);
-            if($request->request_custom_quotations == 1){
-                NotificationsController::send(38, $id);
-            }
             return redirect(route('admin.accounts.pending'))->with('success', 'All Rates are added');
         }
     }
