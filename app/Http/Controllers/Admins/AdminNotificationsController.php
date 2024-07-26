@@ -20,6 +20,7 @@ use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Http\Models\City;
+use App\Http\Models\SMS;
 use Illuminate\Support\Facades\Storage;
 
 use Auth;
