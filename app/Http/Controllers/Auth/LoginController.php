@@ -286,6 +286,12 @@ class LoginController extends Controller
                 session(['status' => $shipper->status]);
                 session(['request_custom_quotation' => $shipper->request_custom_quotation]);
                 session(['on_board_status' => $shipper->on_board_status]);
+
+                $token = CRFTermsConditions::where('user_id', $user->id)->first()->token ?? null;
+
+                session(['token' => $token]);
+
+                
 //                if (PackagingCharge::where('user_id', $user->user_id)->exists()) {
 //                    $packaging_charges_check = TRUE;
 //                }
