@@ -1116,7 +1116,7 @@ class AdminCargoManifestController extends Controller
             return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
         }
 
-        if ($shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 70 || $shipment->shipper_status_id == 73) {
+        if ($shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 70 || $shipment->shipper_status_id == 73 ||$shipment->shipper_status_id == 76) {
             $shipment_details = $shipment->misrouted_history()->latest()->first();
             $city_details = City::find($shipment_details->old_consignee_city_id);
             $origin = $city_details->hub_city;
@@ -1138,7 +1138,7 @@ class AdminCargoManifestController extends Controller
 
         $origin_details = array();
 
-        if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 55 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30) {
+        if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 55 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30 || $shipment->shipper_status_id == 69 || $shipment->shipper_status_id == 72 || $shipment->shipper_status_id == 75) {
             $origin_details['id'] = $origin->id;
         } else {
             $origin_details['id'] = Auth::user()->default_hub_id;
