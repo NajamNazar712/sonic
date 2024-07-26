@@ -282,6 +282,7 @@ class RetailAdminUserManagementController extends Controller
 
     public function franchise_add(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
             'franchise_deduction' => 'required|numeric',
@@ -305,12 +306,14 @@ class RetailAdminUserManagementController extends Controller
         $admin = $request->user();
         $date = Carbon::now()->format('Y_m_d');
         $hub_count = RetailFranchise::where('default_hub', $request->hub)->count() + 1;
+        $cnic_active_status = $request->cnic_status == "on" ? 1 : 0;
 
         $franchise = new RetailFranchise();
         $franchise->name = $request->name;
         $franchise->phone_no = $request->phone_number;
         $franchise->email = $request->email;
         $franchise->cnic = $request->cnic;
+        $franchise->cnic_status = $cnic_active_status;
         $franchise->default_hub = $request->hub;
         $franchise->location_latitude = $request->lat;
         $franchise->location_longitude = $request->long;

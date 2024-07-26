@@ -3888,6 +3888,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::post('show_commission', 'Admins\Retail\RetailAdminUserManagementController@show_commission')->name('show_commission');
             Route::post('commission_payment', 'Admins\Retail\RetailAdminUserManagementController@commission_payment')->name('commission_payment');
+
+            oute::get('/cnic_status', 'Admins\Retail\RetailAdminUserManagementController@cnic_status')->name('cnic_status');
         });
         Route::prefix('trax_center')->name('trax_center.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');
