@@ -8501,7 +8501,6 @@ class AdminDashboardController extends Controller
                 $labelling->save();
             }
         }
-
         
         if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
             User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_authorized_by' => 346, 'rates_approved_at' => Carbon::now(), 'rates_added_at' => Carbon::now(), 'rate_status' => 0, 'request_custom_quotation' => 0, 'on_board_status' => 1]);
@@ -10069,7 +10068,7 @@ class AdminDashboardController extends Controller
                     return "Authorized";
                 } else if ($users->rate_status == 0 && $users->status == 1) {
                     return "Requested";
-                } else if ($users->rate_status == 0 && $users->status == 0) {
+                } else if ($users->rate_status == 0 && $users->status == 0 && $users->request_custom_quotation != 1) {
                     return "Pending";
                 }else{
                     return "Requested For Custom Quotation";
