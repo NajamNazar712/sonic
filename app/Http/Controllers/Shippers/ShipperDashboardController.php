@@ -2301,8 +2301,6 @@ class ShipperDashboardController extends Controller
 
              $user = User::find(session('user_id'));
              if($user->lead_id){
-                $user->term_and_conditions = 1;
-                $user->save();
                 $this->download_crf($user_attachment, $date);        
              }
 

@@ -764,6 +764,7 @@ class LeadManagementController extends Controller
     {
         $lead_ids = $request->lead_ids;
         $sale_person = $request->sale_person;
+
         if ($request->has('reference_person')) {
             $reference_person = $request->reference_person;
         } else {
@@ -783,6 +784,7 @@ class LeadManagementController extends Controller
                         $lead_tagging->count = $lead_tagging->count - 1;
                     }
                 }
+
                 //autotagging end
                 $lead->sale_person_id = $sale_person;
                 if ($request->has('reference_person')) {
@@ -939,6 +941,7 @@ class LeadManagementController extends Controller
             $new_lead->company = $request->company;
             $new_lead->company_name = $request->company;
             $new_lead->expected_shipments = $request->expected_shipments;
+            $new_lead->average_shipment_per_week = $request->expected_shipments;
             $new_lead->status_id = 1;
             $new_lead->activation_code = $token;
             $new_lead->via_channel = 'Sonic';

@@ -418,16 +418,17 @@ class RegisterController extends Controller
                 if ($city) {
                     $zone_id = $city->zone_id;
                     $lead_zone = LeadZone::where(['zone_id' => $zone_id, 'status' => 1])->first();
-                    if ($lead_zone) {
+                    $sale_person_instance = $lead->sale_person_id ? TRUE : FALSE;
+                    if ($lead_zone || $lead->sale_person_id) {
                         $sale_person = new SalePersonTag();
-                        $sale_person->admin_id = $lead_zone->admin_id;
+                        $sale_person->admin_id = $sale_person_instance ? $lead->sale_person_id : $lead_zone->admin_id;
                         $sale_person->user_id = User::max('id');
                         $sale_person->status = 0;
                         $sale_person->save();
-                        $admin_auto_tag_territory = $lead_zone->admin_id;
+                        $admin_auto_tag_territory = $lead_zone->admin_id ?? $lead->sale_person_id;
                     }
 
-                    if ($lead) {
+                    if (!$lead->sale_person_id) {
                         $lead->sale_person_id = $lead_zone->admin_id ?? null;
                         $lead->save();
                     }
@@ -516,7 +517,7 @@ class RegisterController extends Controller
                     );
 
                     $adminDashboardController = new AdminDashboardController();
-                    $adminDashboardController->addRates($request, User::max('id'));
+                    $adminDashboardController->addRates($request, $newUser->id);
 
                     $lead = Lead::find($data['lead_id']);
                     $lead->status_id = 9;

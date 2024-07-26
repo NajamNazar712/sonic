@@ -1144,7 +1144,7 @@ otherwise it will be rejected</li>
             $fuel_charge = $fuel_surcharge->fuel_surcharge;
         }
         $check = '';
-        if($shipper->term_and_conditions || $shipper->term_and_conditions == 1){
+        if($shipper->term_and_conditions || $shipper->lead_id){
             $check = 'checked';
         }
         $terms_conditions = '<div class="terms_conditions pl-2 pt-6"><h2><u>General Terms & Conditions </u></h2>';
