@@ -14630,9 +14630,9 @@ class AdminReportsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 137);
         if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [0, 3, 4])->select('id', 'name')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->where('blacklist', 0)->select('id', 'name')->get();
         } else {
-            $shippers = DB::connection('reports')->table('users')->whereIn('status', [0, 3, 4])->select('id', 'name')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->where('blacklist', 0)->select('id', 'name')->get();
         }
 
         $cities = DB::connection('reports')->table('cities')->where('status', 1)->select('id', 'name')->get();
@@ -15279,14 +15279,15 @@ class AdminReportsController extends Controller
         if($segment_id){
             $updated_shippers_list = DB::connection('reports')->table('users')
             ->whereIn('status', [3, 4])
+            ->where('blacklist', 0)
             ->where('segment_id', $segment_id)
             ->select('id', 'name')
             ->get();
         } else {
             if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
-                $updated_shippers_list = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [0, 3, 4])->select('id', 'name')->get();
+                $updated_shippers_list = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->where('blacklist', 0)->select('id', 'name')->get();
             } else {
-                $updated_shippers_list = DB::connection('reports')->table('users')->whereIn('status', [0, 3, 4])->select('id', 'name')->get();
+                $updated_shippers_list = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->where('blacklist', 0)->select('id', 'name')->get();
             }
         }
         return response()->json([
