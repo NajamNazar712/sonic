@@ -14961,14 +14961,30 @@ class AdminReportsController extends Controller
             }
         }
 
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
+        // if ($request->get('search_from') && $request->get('search_to')) {
+        //     $from = $request->get('search_from');
+        //     $to = $request->get('search_to');
+        //     $shipments->whereBetween('journey.created_at', [$from, $to]);
+        // }
+        // if ($request->get('arrival_search_from') && $request->get('arrival_search_to')) {
+        //     $from1 = $request->get('arrival_search_from');
+        //     $to1 = $request->get('arrival_search_to');
+        //     $shipments->whereBetween('sj.created_at', [$from1, $to1]);
+        // }
+
+        $search_from = $request->get('search_from');
+        $search_to = $request->get('search_to');
+        if ($search_from && $search_to) {
+            $from = Carbon::parse($search_from)->format('Y-m-d H:i:s');
+            $to = Carbon::parse($search_to)->format('Y-m-d H:i:s');
             $shipments->whereBetween('journey.created_at', [$from, $to]);
         }
-        if ($request->get('arrival_search_from') && $request->get('arrival_search_to')) {
-            $from1 = $request->get('arrival_search_from');
-            $to1 = $request->get('arrival_search_to');
+
+        $arrival_search_from = $request->get('arrival_search_from');
+        $arrival_search_to = $request->get('arrival_search_to');
+        if ($arrival_search_from && $arrival_search_to) {
+            $from1 = Carbon::parse($arrival_search_from)->format('Y-m-d H:i:s');
+            $to1 = Carbon::parse($arrival_search_to)->format('Y-m-d H:i:s');
             $shipments->whereBetween('sj.created_at', [$from1, $to1]);
         }
 

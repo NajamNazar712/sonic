@@ -266,6 +266,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
         table.dataTable {
             font-size: 12px;
@@ -303,7 +304,7 @@
             white-space: normal;
         }
 
-        #toast-bottom-center.toast-container {
+        /* #toast-bottom-center.toast-container {
             text-align: center;
         }
 
@@ -311,7 +312,25 @@
             display: table;
             width: auto !important;
             text-align: left;
+        } */
+
+        #toast-top-full-width {
+            position: fixed !important;
+            width: 100% !important;
+            top: 0 !important;
+            left: 0 !important;
+            text-align: center !important;
         }
+        .toast-top-full-width .toast {
+            width: 90rem !important;
+        }
+        .toast-top-full-width .toast-message {
+            font-size: 24px !important;
+        }
+        .toast-title{
+            display: none !important;
+        }
+
     </style>
 @endsection
 @section('js')
@@ -319,6 +338,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -721,9 +741,39 @@
                 }
             });
 
-
             $('#search_filter_btn').on('click',function () {
-                table.draw();
+                var from_date = $('#from_date').val();
+                var to_date = $('#to_date').val();
+                var arrival_from_date = $('#from_date1').val();
+                var arrival_to_date = $('#to_date1').val();
+
+                var search_qsr = $('#search_qsr').val();
+                var search_types = $('#search_types').val();
+                var search_shippimg_modes = $('#search_shippimg_modes').val();
+                var search_shipment_status = $('#search_shipment_status').val();
+
+                // Check if any dropdown has a selected value
+                var isDropdownSelected = search_qsr || search_types || search_shippimg_modes || search_shipment_status;
+
+                // Check if either pair of dates is filled
+                var isFromDateFilled = from_date && to_date;
+                var isArrivalDateFilled = arrival_from_date && arrival_to_date;
+
+                if (isDropdownSelected) {
+                    if (!isFromDateFilled && !isArrivalDateFilled) {
+                        toastr.error('Please fill in either the "From Date" and "To Date" pair or the "Arrival From Date" and "Arrival To Date" pair.', 'Error!', {
+                            positionClass: 'toast-top-full-width',
+                            containerId: 'toast-top-full-width'
+                        });
+                        return false;
+                    } else {
+                        table.draw();
+                    }
+                } else {
+                    table.draw();
+                }
+
+                // table.draw();
             });
 
             let option = '';
