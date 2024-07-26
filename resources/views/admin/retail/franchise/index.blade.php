@@ -78,7 +78,7 @@
                                     <div class="col text-center">
                                         <div class="form-group">
                                             <label for="cnic_status" class="mr-1">CNIC Status</label>
-                                            <input type="checkbox" id="cnic_status" name="cnic_status" class="switchery weightAdditionHdocs" data-color="success" data-size="sm">
+                                            <input type="checkbox" id="cnic_status" name="cnic_status" class="switchery" data-color="success" data-size="sm">
                                         </div>
                                     </div>
 
@@ -279,7 +279,7 @@
                                 <div class="col text-center">
                                     <div class="form-group">
                                         <label for="edit_cnic_status" class="mr-1">CNIC Status</label>
-                                        <input type="checkbox" id="edit_cnic_status" name="cnic_status" class="switchery weightAdditionHdocs" data-color="success" data-size="sm">
+                                        <input type="checkbox" id="edit_cnic_status" name="cnic_status" class="switchery" data-color="success" data-size="sm" data-switchery="true">
                                     </div>
                                 </div>
 
@@ -778,13 +778,18 @@
                     }
                 });
 
-                // show cnic status
+                // show the franchise retail charges
                 $.ajax({
                     type: "GET",
-                    url: '{{ route('admin.retail.franchise.retail_product_charges') }}',
+                    url: '{{ route('admin.retail.franchise.cnic_status') }}',
                     data: { franchise_id: id },
                     success: function (response) {
-                        
+                        var response = response.data;
+                        var cnic_status = response.cnic_status;
+                        var edit_cnic_status = $('#edit_cnic_status'); 
+                        if (cnic_status == 1){
+                            edit_cnic_status.trigger('click');
+                        }
                     }
                 });
 
@@ -869,6 +874,7 @@
                 $("#tableBodyEdit").empty();
                 $("#tableRow").hide();
                 $("#tableRowEdit").hide();
+                $('#edit_cnic_status').trigger('change');
             }
 
             $("#retail_product_add_btn").on('click', function (event) {

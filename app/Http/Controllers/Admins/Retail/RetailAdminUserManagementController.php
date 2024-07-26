@@ -3641,4 +3641,19 @@ class RetailAdminUserManagementController extends Controller
             'data' => $data
         ]);
     }
+
+    public function cnic_status(Request $request){
+        $franchiseId = $request->franchise_id;
+        $retail_franchise_cnic_status = RetailFranchise::where('id', $franchiseId)
+        ->select('cnic_status')
+        ->first();
+        if ($retail_franchise_cnic_status != null){
+            $data = $retail_franchise_cnic_status;
+        } else {
+            $data = null;
+        }
+        
+        return response()->json(['data' => $data]);
+    }
+
 }
