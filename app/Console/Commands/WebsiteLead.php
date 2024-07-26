@@ -118,7 +118,7 @@ class WebsiteLead extends Command
                     $new_lead->service_id = $service_id;
                     $new_lead->ntn_number = $lead->data->ntn_number;
                     $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
-                    $new_lead->expected_shipment = $lead->data->avg_shipment;
+                    $new_lead->expected_shipments = $lead->data->avg_shipment;
                     $new_lead->average_parcel_cod_amount = $lead->data->avg_parcel;
                     $new_lead->business_address = $lead->data->business_address;
                     $new_lead->company = $lead->data->company_name;
