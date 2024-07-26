@@ -10424,7 +10424,7 @@ class AdminDashboardController extends Controller
                             if (session('role_id') == 1 || in_array(6, session('permissions'))) {
 
                                 if($result->lead_id){
-                                    if($result->status == 0 && $result->on_board_status < 1){
+                                    if($result->on_board_status < 1){
                                          $dropdown .= "";
                                     }else{
                                         $dropdown .= '<button onclick="window.open(\'' . route('admin.add.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
