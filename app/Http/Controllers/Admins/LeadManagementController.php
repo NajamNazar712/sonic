@@ -555,6 +555,10 @@ class LeadManagementController extends Controller
         $lead = Lead::find($lead_id);
         $status = $request->status;
 
+        if($status == 9 && !$lead->sale_person_id){
+            return response()->json(['status' => 0, 'error' => 'Without salesperson tagging, the status In Process for Activation will not be updated on Add Lead entries in lead management.']);
+        }
+
         if ($status != NULL) {
             if ($lead) {
                 $lead_log = new LeadLog();
@@ -629,6 +633,11 @@ class LeadManagementController extends Controller
         if ($status != Null) {
             foreach ($lead_ids as $lead) {
                 $lead = Lead::find($lead);
+
+                if($status == 9 && !$lead->sale_person_id){
+                    return response()->json(['status' => 0, 'error' => 'Without salesperson tagging, the status In Prcess for Activation will not be updated on Add Lead entres in lead management']);
+                }
+
                 if ($lead) {
                     $lead_log = new LeadLog();
                     $lead_log->lead_id = $lead->id;
