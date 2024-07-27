@@ -212,7 +212,7 @@
                                             <input type="text" class="form-control required"
                                                 value="{{ $lead->average_shipment_per_week }}"
                                                 name="average_shipment"
-                                                placeholder="Expected Average Shipments" readonly>
+                                                placeholder="Expected Average Shipments" {{ $lead->average_shipment_per_week ? 'readonly' : '' }}>
                                         </div>
                                     </div>
                                 </div>
