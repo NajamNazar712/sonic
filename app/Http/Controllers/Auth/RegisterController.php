@@ -751,7 +751,6 @@ class RegisterController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Transaction failed: ' . $e->getMessage());
-            throw $e;
         }
     }
     public function email_verified($id)
