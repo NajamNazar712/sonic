@@ -396,7 +396,7 @@ class RegisterController extends Controller
 
             if (isset($data['wordpress_lead_register']) && $data['wordpress_lead_register'] == 1) {
                 $lead = Lead::find($data['lead_id']);
-                User::create([
+                $newUser = User::create([
                     'name' => $lead->company_name,
                     'email' => $lead->email_address,
                     'address' => $lead->business_address,
@@ -422,7 +422,7 @@ class RegisterController extends Controller
                     if ($lead_zone || $lead->sale_person_id) {
                         $sale_person = new SalePersonTag();
                         $sale_person->admin_id = $sale_person_instance ? $lead->sale_person_id : $lead_zone->admin_id;
-                        $sale_person->user_id = User::max('id');
+                        $sale_person->user_id = $newUser->id;
                         $sale_person->status = 0;
                         $sale_person->save();
                         $admin_auto_tag_territory = $lead_zone->admin_id ?? $lead->sale_person_id;
