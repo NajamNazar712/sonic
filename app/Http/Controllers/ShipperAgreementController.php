@@ -159,13 +159,13 @@ class ShipperAgreementController extends Controller
                     <div class="double-border">';
         }
         $shipper = User::find($id);
+        
         if(!$shipper){
             return redirect(route('cod.404'));
         }
         $poc_name = '';
         $poc_name = $shipper->poc;
         $shipper_bank = $shipper->bank()->where('default_bank', 1)->first();
-        
         $sales_person_name = '';
         $sales_person = $shipper->sales_person()->where('status', 0)->first();
         if($sales_person){
@@ -337,7 +337,7 @@ otherwise it will be rejected</li>
                                 <td colspan="1">' . $shipper->address . '</td>
                                 
                                 <td colspan="1"><strong>Bank Name</strong></td>
-                                <td colspan="1">' . $shipper_bank->bank->name . '</td>
+                                <td colspan="1">' . ($shipper_bank ? $shipper_bank->bank->name : '') . '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>Person Of Contact</strong></td>
@@ -345,7 +345,7 @@ otherwise it will be rejected</li>
                                 <td colspan="1">' . $poc_name . '</td>
                                 
                                 <td colspan="1"><strong>Account No.</strong></td>
-                                <td colspan="1">' . $shipper_bank->account_no . '</td>
+                                <td colspan="1">' . ($shipper_bank ? $shipper_bank->account_no : '-') . '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>Phone Number 1</strong></td>
@@ -353,7 +353,7 @@ otherwise it will be rejected</li>
                                 <td colspan="1">' . $shipper->phone . '</td>
                                 
                                 <td colspan="1"><strong>Account Title</strong></td>
-                                <td colspan="1">' . $shipper_bank->account_title . '</td>
+                                <td colspan="1">' . ($shipper_bank ? $shipper_bank->account_title : '-') . '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>Phone Number 2</strong></td>
@@ -361,7 +361,7 @@ otherwise it will be rejected</li>
                                 <td colspan="1">' . $shipper->phone2 . '</td>
                                 
                                 <td colspan="1"><strong>IBAN Number</strong></td>
-                                <td colspan="1">' . $shipper_bank->iban . '</td>
+                                <td colspan="1">' . ($shipper_bank ? $shipper_bank->iban : '-'). '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>CNIC Number</strong></td>
@@ -369,7 +369,7 @@ otherwise it will be rejected</li>
                                 <td colspan="1">' . $shipper->cnic . '</td>
                                 
                                 <td colspan="1"><strong>Payment Cycle</strong></td>
-                                <td colspan="1">' . ucfirst($shipper->payment_cycle->name) . '</td>
+                                <td colspan="1">' . ($shipper->payment_cycle ? ucfirst($shipper->payment_cycle->name) : '-'). '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>NTN Number</strong></td>
@@ -387,7 +387,7 @@ otherwise it will be rejected</li>
                           <tr>      
                                 <td colspan="1"><strong>Product Type</strong></td>
                                 
-                                <td colspan="1">' . $shipper->products->product_name . '</td>
+                                <td colspan="1">' . ($shipper->products ? $shipper->products->product_name : '-') . '</td>
                           </tr>
                           <tr>      
                                 <td colspan="1"><strong>Expected Average Shipments</strong></td>

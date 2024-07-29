@@ -150,7 +150,9 @@ class Kernel extends ConsoleKernel
         // 'App\Console\Commands\AgentUnassignedTicket ',
         'App\Console\Commands\AgentSarNotification',
         'App\Console\Commands\SackBagStatusUpdate',
-        'App\Console\Commands\AutoAssignCrmAgentNew',
+        'App\Console\Commands\AutoAssignCrmAgentNew'
+//        'App\Console\Commands\ShipperLogisticBookingCron',
+//        'App\Console\Commands\HourlyShipperLogisticBookingEmailCron'
         ];
 
     /**
@@ -226,7 +228,7 @@ class Kernel extends ConsoleKernel
 
         //SarNotification Email Cron
         $agent_sar_settings = GlobalSettings::where('type', 'agent_sar_notification');
-        $agent_sar_notify_time = '01:30'; //1:30 am
+        $agent_sar_notify_time = '23:15'; //1:30 am
         if ($agent_sar_settings->exists()) {
             $sar_setting = $agent_sar_settings->first();
             $agent_sar_notify_time = $sar_setting->setting_value . ':00';
@@ -532,6 +534,9 @@ class Kernel extends ConsoleKernel
 		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground();
 		$schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
 		$schedule->command('clean:7DaysQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
+//        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
+//        $schedule->command('hourly-logistic:shipper-bookings')->hourly()->runInBackground();
+
     }
     /**
      * Register the commands for the application.

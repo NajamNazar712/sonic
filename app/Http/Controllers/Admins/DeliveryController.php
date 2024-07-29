@@ -125,6 +125,9 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\StationDepositeNoteActionLog;
 
 use App\Http\Traits\RvTrait;
+use App\Jobs\ProcessRvShipmentTicket;
+use App\RvShipmentTicket;
+
 class DeliveryController extends Controller
 {
 
@@ -326,6 +329,7 @@ class DeliveryController extends Controller
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status)
+            ->whereNotNull('shipments.tracking_number')
             ->groupBy('shipments.id');
 
 
@@ -2677,6 +2681,7 @@ class DeliveryController extends Controller
                                 //dispatch(new RCPSmsToConsignee($shipment));
                                 ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 0]);
                             }
+
                         }
                         if ($shipment_details->shipper_status_id != $selected_status) {
                             if ($shipment_details->packaging_material_request == 0) {
@@ -2718,6 +2723,18 @@ class DeliveryController extends Controller
 //                        $data['shipment_id'] = $shipment;
 //                        dispatch(new ProcessAgentCallMonitoring($data));
 //                    }
+
+                    if($selected_status == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
+                    {
+                    $rvData = [
+                    'shipment_id' => $shipment,
+                    'shipper_status_id' => $selected_status,
+                    'status_reason_id' => $selected_reason,
+                    'shipment_user_id' => $shipment_details->user_id,
+                    'call_count' => 0
+                    ];
+                    dispatch(new ProcessRvShipmentTicket($rvData));
+                    }
                 }
             }
 
@@ -2782,7 +2799,6 @@ class DeliveryController extends Controller
         $consignee_relation = $request->relation;
         $now = Carbon::now();
         $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
-
         $open_box_ids = array();
         $shipments = explode(',', $request->shipment_ids);
         $rcp_sms_setting = GlobalSettings::where('type', 'return_confirmation_pending_sms')->first();
@@ -2929,6 +2945,15 @@ class DeliveryController extends Controller
                                 //         }
 
                                 //     }
+                                //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
+                                $rvData = [
+                                    'shipment_id' => $shipment,
+                                    'shipper_status_id' => $request->status_drop[$shipment],
+                                    'status_reason_id' => $request->reason_drop[$shipment],
+                                    'shipment_user_id' => $shipment_status->user_id,
+                                    'call_count' => 0
+                                ];
+                                dispatch(new ProcessRvShipmentTicket($rvData));
                             }
                             /* if(in_array(session('role_id'),[18,19]) && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
                                 dispatch(new RCPSmsToConsignee($shipment));
@@ -4280,6 +4305,12 @@ class DeliveryController extends Controller
                             }
                             
                             ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+
+                            //Remove Shipment from RV Shipment Ticket
+                            RvShipmentTicket::where('shipment_id', $shipment)->delete();
+
+                            // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment));
+                            
                         }
                     }
 
@@ -7881,6 +7912,7 @@ class DeliveryController extends Controller
                     $shipment->save();
                     ShipmentChargesController::weight($shipment->id);
                     ShipmentChargesController::fuel_surcharge($shipment->id);
+                    ShipmentChargesController::faf_charges($shipment->id);
                     ShipmentsJourneyController::add($shipment->id, 49, 49, NULL, NULL, NULL, Auth::id());
                 }
             }
@@ -8115,6 +8147,7 @@ class DeliveryController extends Controller
                     ShipmentChargesController::cash_handling($shipment_id);
                     ShipmentChargesController::weight($shipment_id);
                     ShipmentChargesController::fuel_surcharge($shipment_id);
+                    ShipmentChargesController::faf_charges($shipment_id);
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());

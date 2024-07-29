@@ -3,6 +3,7 @@
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\ConsigneeUser;
 use App\Http\Models\PendingPayment;
@@ -23,22 +24,26 @@ class JourneyMissingEntrySeeder extends Seeder
      */
     public function run()
     {
-        //
-        $shipmentId = [34765978,34749674,34735683,34715191,34766064,34735846,34735107,34733669,34729209,34713659,34712703,34701378,34680021,34656644,34596999,34570400,34708125,34666844,34663418,34654551,34644290,34605866,34595605,34587925,34586309,34572306,34559379,34556914,34555066,34508354,34482996,34745352,34710003,34695139,34681841];
-        if($shipmentId){
-            foreach($shipmentId as $value){
-                $shipment = Shipment::find($value);
-                if($shipment->shipper_status_id === 5)
-                {
-                    $shipment->created_at = $shipment->created_at;
-                    $shipment->updated_at = $shipment->created_at;
+        //Only use for the marked as delivered....
+        $shipmentId = [
+            20220237926082, 20220238029527, 20220237936057
+        ];
+        echo count($shipmentId);
+        if ($shipmentId) {
+            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
+            foreach ($shipmentId as $shipment) {
+                
+                
+                // if ($shipment->shipper_status_id === 5) {
+                    // $shipment->created_at = $shipment->updated_at;
                     $shipment->shipper_status_id = 14;
                     $shipment->consignee_status_id = 14;
                     $shipment->save();
-                }
-                if (in_array($shipment->shipper_status_id, [13, 14, 18,55])) {
+                // }
+                $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
+
+                if (in_array($shipment->shipper_status_id, [13, 14])) {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
-                    $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
                     $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
                     $zone = Zone::find($shipment->pickup_address->city->zone_id);
                     if ($zone->gst == '0.16') {
@@ -57,7 +62,7 @@ class JourneyMissingEntrySeeder extends Seeder
                         $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
                         $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
 
-                        // $pending_payment->save();
+                        $pending_payment->save();
                     } else {
                         $pending_payment = new PendingPayment();
 
@@ -71,8 +76,8 @@ class JourneyMissingEntrySeeder extends Seeder
                     }
                     $pending_payment_shipment = new PendingPaymentShipment();
                     $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-                    $pending_payment_shipment->created_at = $shipment->created_at;
-                    $pending_payment_shipment->updated_at = $shipment->created_at;
+                    $pending_payment_shipment->created_at = $deliveryNoteId->updated_at;
+                    $pending_payment_shipment->updated_at = $deliveryNoteId->updated_at;
                     $pending_payment_shipment->shipment_id = $shipment->id;
                     $pending_payment_shipment->type = 0;
                     $pending_payment_shipment->amount = $shipment->amount;
@@ -86,26 +91,32 @@ class JourneyMissingEntrySeeder extends Seeder
                     // ShipmentsJourneyController::add($shipment->id, $shipment->shipper_status_id, $shipment->shipper_status_id, NULL, NULL, $shipment->user_id, NULL, $deliveryNoteId->delivery_note_id);
 
                 }
+                // $shipmentstatus = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 14)->first();
+                // if (!$shipmentstatus) {
+
+                
                 $verification = 1;
                 $shipment_journey = new ShipmentsJourney();
                 $status_id = (!in_array($shipment->shipper_status_id, [14]) ? '14' : $shipment->shipper_status_id);
                 $shipment_journey->shipment_id = $shipment->id;
                 $shipment_journey->verification = $verification;
-                $shipment_journey->created_at = $deliveryNoteId->updated_at;
-                $shipment_journey->updated_at = $deliveryNoteId->updated_at;
+                $shipment_journey->created_at = $deliveryNoteId->updated_at ?? $shipment->updated_at;
+                $shipment_journey->updated_at = $deliveryNoteId->updated_at ?? $shipment->updated_at;
                 $shipment_journey->shipper_status_id = $status_id;
                 $shipment_journey->consignee_status_id = $status_id;
                 $shipment_journey->status_reason_id = null;
+                $shipment_journey->city_id =  202;
                 $shipment_journey->remarks =  null;
                 $shipment_journey->user_id = null;
                 $shipment_journey->admin_id = 346;
                 $shipment_journey->rider_id = null;
-                $shipment_journey->reference_1_id = $deliveryNoteId->delivery_note_id;
+                $shipment_journey->reference_1_id = null;
                 $shipment_journey->reference_2_id = null;
                 $shipment_journey->received_or_refused_by = null;
                 $shipment_journey->relation = null;
                 $shipment_journey->cnic = null;
                 $shipment_journey->save();
+
                 if ($shipment->shipper_status_id != 1) {
                     ShipmentStatusWebhookController::webhook_subscription($shipment->id, $shipment->shipper_status_id, null);
                 }
@@ -124,6 +135,7 @@ class JourneyMissingEntrySeeder extends Seeder
                     }
                     ShipperShipmentsSubscription::where('shipment_id', $shipment->id)->delete();
                 }
+                // }
             }
         }
     }

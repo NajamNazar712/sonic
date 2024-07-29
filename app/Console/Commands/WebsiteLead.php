@@ -76,7 +76,7 @@ class WebsiteLead extends Command
             $leads = $response->leads;
             foreach ($leads as $key => $lead) {
                 
-                if($lead->data){
+                if($lead->data && isset($lead->data->contact_person)){
                     
                     $city = City::where('name', $lead->data->city_name[0])->first();
                     if($city){
@@ -120,6 +120,7 @@ class WebsiteLead extends Command
                     $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
                     $new_lead->average_parcel_cod_amount = $lead->data->avg_parcel;
                     $new_lead->business_address = $lead->data->business_address;
+                    $new_lead->company = $lead->data->company_name;
                     $new_lead->company_name = $lead->data->company_name;
                     $new_lead->business_registered_status = isset($lead->data->business_address) ? 1 : 0;
                     $new_lead->reference_id = $reference_id;
@@ -145,7 +146,7 @@ class WebsiteLead extends Command
         if(count($old_leads) > 0){
             self::old_api_request_delete($base_uri, $old_leads);
             NotificationsController::send(203, $leads_added, Carbon::today());
-            NotificationsController::send(230, $leads_added, $token_added);                
+            NotificationsController::send(230, $leads_added, Carbon::today());
         }
 
         Log::channel('cronJobLog')->info('s ' .'website:leads Running');

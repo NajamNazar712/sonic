@@ -391,6 +391,7 @@ class Permission
             'return.rider_request.approve' => 833,
             'return.rider_request.reject' => 834,
             'return.rider_request.update' => 835,
+            'settings.agents_list.index' => 951,
 
 
             'finance.outstanding_sdn.index' => 52,
@@ -1030,6 +1031,7 @@ class Permission
             'settings.shipper_ibft_charges_settings.list' => 917,
 
             'settings.shipper_negative_payable.index' => 982,
+            'settings.faf_charges.index'=>997,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -1460,6 +1462,72 @@ class Permission
 
             'settings.mms_excel_booking_setting.index' => 938,
 			'reports.cargo_manifest.index' => 933,
+            'reports.sms.index' => 945,
+
+            'logistic.master_product.index' =>952,
+            'logistic.master_product.list' =>952,
+            'logistic.master_product.store' =>953,
+            'logistic.master_product.edit' =>954,
+            'logistic.master_product.update' =>954,
+
+            'logistic.product.index' =>955,
+            'logistic.product.list' =>955,
+            'logistic.product.store' =>956,
+            'logistic.product.edit' =>957,
+            'logistic.product.update' =>957,
+
+            'logistic.service.index' =>958,
+            'logistic.service.list' =>958,
+            'logistic.service.store' =>959,
+            'logistic.service.edit' =>960,
+            'logistic.service.update' =>960,
+
+            'logistic.shipper_tagging.index' =>973,
+            'logistic.shipper_tagging.list' =>973,
+            'logistic.shipper_tagging.store' =>974,
+            'logistic.shipper_tagging.edit' =>975,
+            'logistic.shipper_tagging.update' =>975,
+
+            'logistic.batch.index' => 976,
+            'logistic.batch.assign_batch' =>977,
+            'logistic.batch.batch_bookings' =>985,
+
+            'logistic.index' => 986,
+            'logistic.list' => 986,
+            'logistic.store' => 988,
+            'logistic.edit' => 987,
+            'logistic.update' => 987,
+
+            'logistic.shipper_tagging.index' =>973,
+            'logistic.shipper_tagging.list' =>973,
+            'logistic.shipper_tagging.store' =>974,
+            'logistic.shipper_tagging.edit' =>975,
+            'logistic.shipper_tagging.update' =>975,
+
+            'logistic.cn.receive_admin_store.index' => 972,
+            'logistic.cn.receive_admin_store.list' => 972,
+            'logistic.cn.receive_admin_store.store' => 961,
+            'logistic.cn.receive_admin_store.edit' => 962,
+            'logistic.cn.receive_admin_store.update' => 962,
+
+            'logistic.cn.issue_to_rider.index' => 963,
+            'logistic.cn.issue_to_rider.list' => 963,
+            'logistic.cn.issue_to_rider.store' => 964,
+            'logistic.cn.issue_to_rider.edit' => 965,
+            'logistic.cn.issue_to_rider.update' => 965,
+
+            'logistic.cn.child_receive_admin_store.index' => 966,
+            'logistic.cn.child_receive_admin_store.list' => 966,
+            'logistic.cn.child_receive_admin_store.store' => 967,
+            'logistic.cn.child_receive_admin_store.edit' => 968,
+            'logistic.cn.child_receive_admin_store.update' =>968,
+
+            'logistic.cn.child_issue_to_rider.index' => 969,
+            'logistic.cn.child_issue_to_rider.list' => 969,
+            'logistic.cn.child_issue_to_rider.store' => 970,
+            'logistic.cn.child_issue_to_rider.edit' => 971,
+            'logistic.cn.child_issue_to_rider.update' => 971,
+
         ],
         'shipper' => [
             'shipment.book.index' => 1,
@@ -1599,6 +1667,7 @@ class Permission
                 return redirect()->route('cod.access_denied');
             }
         } else if (in_array(session('status'), [0,1,2,5]) ) {
+            
             $action = str_replace('cod.', '', $request->route()->getName());
 
             $allowedRoutes = [

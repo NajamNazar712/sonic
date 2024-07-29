@@ -20,6 +20,7 @@ use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Http\Models\City;
+use App\Http\Models\SMS;
 use Illuminate\Support\Facades\Storage;
 
 use Auth;
@@ -95,6 +96,7 @@ class AdminNotificationsController extends Controller
         
         $attachments = array();
         $from_email = $request->notification_sender;
+        
         if ($request->get('receiver') == 1) {
             if($request->get('search_hub') == 0) {
                 $emails = Admin::all()->pluck('email')->toArray();
@@ -156,12 +158,16 @@ class AdminNotificationsController extends Controller
                 // $body_attachment_message =  $body_attachment_message. PHP_EOL . 'NOTE: the attachments will be removed after 7 days(s)';
                 $body = $body . PHP_EOL . $body_attachment_message;
             }
-         
-         
-            foreach ($emails as $to) {
-                NotificationsController::custom(1, $subject, $body, $to,$from_email);
-            }
 
+
+            $totalItems = count($emails);
+            $chunkSize = 50;
+            for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
+                $parsed_emails = array_slice($emails, $offset, $chunkSize);
+                
+                NotificationsController::custom(1, $subject, $body, $parsed_emails,$from_email);
+                
+            }
             return redirect()->back()->with('success', 'Custom Email Sent');
         }
         else {
@@ -260,7 +266,7 @@ class AdminNotificationsController extends Controller
         else if ($id == 12) {
             $details['receiver'] = ['Consignee Phone Number'];
 
-            $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'consignee_name', 'consignee_address', 'order_id', 'amount', 'payment_mode', 'tracking_number', 'refusal_otp','online_payment_link'];
+            $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'consignee_name', 'consignee_address', 'order_id', 'amount', 'payment_mode', 'tracking_number', 'refusal_otp','online_payment_link', 'tracking_link'];
         }
         else if ($id == 13) {
              $details['receiver'] = ['Shipper Email'];
@@ -1251,6 +1257,13 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = ['employee_name', 'employee_type', 'depatment', 'updated_by'];
         }
+        else if ($id == 232 || $id == 233)
+        {
+            $details['receiver'] = ['Shipper Email'];
+
+            $details['fields'] = ['Booking_at','preview'];
+        }
+
         return $details;
     }
 
@@ -1448,5 +1461,69 @@ class AdminNotificationsController extends Controller
         else {
             return ['status' => 1, 'error' => 'No Notication with given ID is present'];
         }
+    }
+
+    public function sms_logs_view()
+    {
+        $notifications = Notification::where('status', 1)->get();
+        return view('admin.sms_logs.index', compact('notifications'));
+    }
+
+    // SMS logs
+    public function sms_logs(Request $request)
+    {
+        $search_from = $request->search_from;
+        $search_to = $request->search_to;
+
+        $logs = SMS::join('shipment_sms_logs', 'shipment_sms_logs.sms_id', '=', 'sms.id')
+            ->join('notifications', 'shipment_sms_logs.notification_id', 'notifications.id')
+            ->join('shipments', 'shipment_sms_logs.shipment_id', 'shipments.id')
+            ->select(
+                'sms.to', 
+                'sms.body as body', 
+                'sms.created_at as sms_created_at', 
+                'shipment_sms_logs.*', 
+                'notifications.name as name', 
+                'shipments.tracking_number as tracking_number'
+            );
+
+            if ($search_from && $search_to) {
+                $search_from = Carbon::createFromFormat('d F, Y', $search_from)->format('Y-m-d');
+                $search_to = Carbon::createFromFormat('d F, Y', $search_to)->format('Y-m-d');
+                $logs->whereBetween('sms.created_at', [$search_from, $search_to]);
+            }
+
+        return DataTables::of($logs)
+            ->editColumn('shipment_sms_logs.id', function ($row) {
+                return $row->id;
+            })
+            ->editColumn('name', function ($row) {
+                return $row->name;
+            })
+            ->editColumn('sms_created_at', function ($row) {
+                return $row->created_at ? $row->created_at->format('Y-m-d H:i:s') : '';
+            })
+            ->editColumn('to', function ($row) {
+                return $row->to;
+            })
+            ->editColumn('body', function ($row) {
+                return $row->body;
+            })
+            ->editColumn('tracking_number', function ($row) {
+                return $row->tracking_number;
+            })
+            ->filterColumn('tracking_number', function ($query, $keyword) {
+                $query->where('shipments.tracking_number', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('to', function ($query, $keyword) {
+                $query->where('sms.to', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('notifications.id', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('sms_created_at', function ($query, $keyword) {
+                $query->where('sms.created_at', 'like', "%{$keyword}%");
+            })
+        ->make(true);
     }
 }
