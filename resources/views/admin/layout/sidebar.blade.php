@@ -2722,8 +2722,6 @@
                                                                 href="{{ route('admin.user_management.fuel_management.index') }}">Fuel
                                                                 Management</a></li>
                                                     @endif
-
-
                                                 </ul>
                                             </li>
                                         @endif
@@ -2739,6 +2737,15 @@
                                                         class="menu-title">App-Notifications</span></a>
                                             </li>
                                         @endif
+
+                                        {{-- SMS logs --}}
+                                        @if (session('role_id') == 1 || in_array(1000, session('permissions')))
+                                            <li class=" nav-item"><a
+                                                    href="{{ route('admin.sms_logs.index') }}"><span
+                                                        class="menu-title">SMS logs</span></a>
+                                            </li>
+                                        @endif
+
                                         @if (session('role_id') == 1 || in_array(358, session('permissions')))
                                             <li class=" nav-item"><a
                                                     href="{{ route('admin.settings.holidays.index') }}"><span

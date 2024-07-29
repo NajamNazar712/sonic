@@ -77,6 +77,11 @@ class AdminLogisticBookingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 792);
         }
         $hub_ids=session('hubs');
+        $city_ids=City::whereIn('hub_id',$hub_ids);
+        if($city_ids->exists())
+        {
+            $city_ids=$city_ids->pluck('id');
+        }
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
             ->leftjoin('riders as r','r.id','=','trax_logistic_bookings.rider_id')
             ->leftjoin('user_shipping_infos as usi','usi.id','=','trax_logistic_bookings.shipper_address_id')
@@ -89,7 +94,7 @@ class AdminLogisticBookingController extends Controller
 
         if (session('role_id') != 1)
         {
-            $logistic_bookings = $logistic_bookings->whereIn('trax_logistic_bookings.origin_id',$hub_ids);
+            $logistic_bookings = $logistic_bookings->whereIn('trax_logistic_bookings.origin_id',$city_ids);
         }
         $datatables = Datatables::of($logistic_bookings)
             ->addColumn('action',function ($logistic_bookings){
@@ -140,6 +145,11 @@ class AdminLogisticBookingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 794);
         }
         $hub_ids=session('hubs');
+        $city_ids=City::whereIn('hub_id',$hub_ids);
+        if($city_ids->exists())
+        {
+            $city_ids=$city_ids->pluck('id');
+        }
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
             ->join('trax_booking_batch_details as bd','bd.booking_id','trax_logistic_bookings.id')
             ->join('trax_booking_batches as bb','bb.id','bd.batch_id')
@@ -160,7 +170,7 @@ class AdminLogisticBookingController extends Controller
 
         if (session('role_id') != 1)
         {
-            $logistic_bookings = $logistic_bookings->whereIn('bb.city_id',$hub_ids);
+            $logistic_bookings = $logistic_bookings->whereIn('bb.city_id',$city_ids);
         }
 
         $datatables = Datatables::of($logistic_bookings)
