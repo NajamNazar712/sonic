@@ -174,6 +174,9 @@ $(".steps-validation").steps({
             form.find(".body:eq(" + newIndex + ") label.error").remove();
             form.find(".body:eq(" + newIndex + ") .error").removeClass("error");
         }
+
+
+        
         form.validate().settings.ignore = ":disabled,:hidden";
         return form.valid();
     },
@@ -184,7 +187,18 @@ $(".steps-validation").steps({
             $('.actions ul').append(newLi);
         }else if(currentIndex != 4){
             $('#customQuotationBtn').closest('li').remove();
+            console.log(1);
         }
+
+        var isCheckedOn = $('input[name="on_main_switch"]').prop('checked');
+        var isCheckedOl = $('input[name="ol_main_switch"]').prop('checked');
+        var isCheckedDetain = $('input[name="detain_main_switch"]').prop('checked');
+        var isCheckedSameDay = $('input[name="sameday_main_switch"]').prop('checked');
+
+        if(isCheckedOn || isCheckedOl || isCheckedDetain || isCheckedSameDay){
+            $('#customQuotationBtn').prop('disabled', true);
+        }
+
 
     },
     onFinishing: function (event, currentIndex)
