@@ -345,11 +345,7 @@ class NotificationsController extends Controller
                     $mail->bcc($bcc);
                 }
     
-                if($id = 230){
-                    $mail->sendNow(new Notifications($subject, $body, $from));
-                }else{
-                    $mail->send(new Notifications($subject, $body, $from));
-                }
+              
             }
 
 
