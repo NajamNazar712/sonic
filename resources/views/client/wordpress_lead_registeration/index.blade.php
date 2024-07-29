@@ -102,7 +102,7 @@
                                         <label for="ntn_no">NTN Number:</label>
                                         <input type="text" class="form-control"
                                             placeholder="(e.g: 1234567-8)"
-                                            value="{{ $lead->ntn_number }}" name="ntn_no" readonly>
+                                            value="{{ $lead->ntn_number }}" name="ntn_no" {{ $lead->ntn_number ? 'readonly' : '' }}>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
