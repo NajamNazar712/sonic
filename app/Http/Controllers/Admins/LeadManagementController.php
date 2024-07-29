@@ -583,6 +583,7 @@ class LeadManagementController extends Controller
                 $token = str::random(8);
                 if($lead->activation_code == ''){
                     $lead->activation_code = $token;
+                    $lead->save();
                 }
 
                 if($status == 9 && $lead->email_status != 1 && isset($lead->activation_code) ) {
@@ -660,6 +661,7 @@ class LeadManagementController extends Controller
                     $token = str::random(8);
                     if($lead->activation_code == ''){
                         $lead->activation_code = $token;
+                        $lead->save();
                     }
     
                     if($status == 9 && $lead->email_status != 1 && isset($lead->activation_code) ) {
