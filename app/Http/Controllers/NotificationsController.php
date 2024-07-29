@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
-use App\BlockEmail;
 use Carbon\Carbon;
+use App\BlockEmail;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Client;
 use App\Http\Models\SMS;
@@ -19,7 +18,6 @@ use Illuminate\Support\Str;
 use App\Http\Models\Dispute;
 use App\Http\Models\Invoice;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Excel;
 use App\Http\Models\Shipment;
 use App\Jobs\ProcessOTPSMSITS;
@@ -44,6 +42,8 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\ShipmentStatus;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\CrmSmsLog;
@@ -51,6 +51,7 @@ use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\AppNotification;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\DailyFakeStatus;
+use App\Http\Models\ShipmentSmsLogs;
 use App\Jobs\ProcessOTPSMSForBotSMS;
 use App\ReturnDeliveredToShipperSms;
 use Illuminate\Support\Facades\Auth;
@@ -63,6 +64,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\Jobs\ProcessPushNotification;
 use App\Http\Models\RetailDonePayment;
 use App\Http\Models\ReturnNoteRequest;
+use App\Mail\NotificationsDispatchNow;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\DeliveryNoteOtpSms;
@@ -75,6 +77,7 @@ use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\MultipleSaleTagging;
 use App\Http\Models\NotificationSetting;
+use App\Http\Models\ShipmentsWeightType;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\ShipmentStatusReason;
@@ -89,6 +92,7 @@ use GuzzleHttp\Exception\RequestException;
 use App\Http\Models\Admin\ActivityTrailLog;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Controllers\ShortUrlController;
 use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Excel_reports\KaeNumber;
 use App\Http\Models\ShipmentsPaymentJourney;
@@ -119,6 +123,7 @@ use App\Http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminReportsController;
+use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Controllers\Admins\GlobalSettingsController;
@@ -126,11 +131,8 @@ use App\Http\Models\Excel_reports\MonthAverageDestination;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
-use App\Http\Models\ShipmentSmsLogs;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
-use App\Http\Models\ShipmentsWeightType;
-use App\Http\Controllers\ShortUrlController;
 
 
 class NotificationsController extends Controller
@@ -267,7 +269,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null)
+    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null, $id = null)
     {
         $block_email = BlockEmail::select('email')->pluck('email')->toArray();
         $filterBlockedEmails = function ($emails) use ($block_email) {
@@ -310,17 +312,35 @@ class NotificationsController extends Controller
             }
 
             if($to){
-                $mail = Mail::to($to);
-    
-                if ($cc) {
-                    $mail->cc($cc);
+
+                if($id = 230){
+
+                    $mail = new NotificationsDispatchNow($subject, $body);
+
+                    if ($cc) {
+                        $mail->cc($cc);
+                    }
+        
+                    if ($bcc) {
+                        $mail->bcc($bcc);
+                    }
+
+                    $mail = Mail::to($to)->send($mail);
+                    
+                }else{
+                    $mail = Mail::to($to);
+                
+                    if ($cc) {
+                        $mail->cc($cc);
+                    }
+        
+                    if ($bcc) {
+                        $mail->bcc($bcc);
+                    }
+
+                    $mail->send(new Notifications($subject, $body, $from));
                 }
-    
-                if ($bcc) {
-                    $mail->bcc($bcc);
-                }
-    
-                $mail->send(new Notifications($subject, $body, $from));
+                
             }
 
 
@@ -11171,21 +11191,20 @@ class NotificationsController extends Controller
                             $body = $notification->body; // Reset $body to its original state
                             $subject = $notification->subject;  // Reset $subject to its original state
 
-                            if (strpos($body, '[Link]') !== FALSE) {
-                                $body = str_replace('[Link]', $link, $body); // Use $body instead of $old_body
-                            }
-                            if (strpos($body, '[Company Name]') !== FALSE) {
-                                $body = str_replace('[Company Name]', $lead->company_name, $body); // Use $body instead of $old_body
-                            }
-                            if (strpos($body, '[Full Name]') !== FALSE) {
-                                $body = str_replace('[Full Name]', $lead->contact_person, $body); // Use $body instead of $old_body
-                            }
-                            if (strpos($subject, '[Company Name]') !== FALSE) {
-                                $subject = str_replace('[Company Name]', $lead->company_name, $subject);
-                            }
-                            self::email($subject, $body, $lead->email_address); // Send email with $body
-                        // }
-                    }
+                        if (strpos($body, '[Link]') !== FALSE) {
+                            $body = str_replace('[Link]', $link, $body); // Use $body instead of $old_body
+                        }
+                        if (strpos($body, '[Company Name]') !== FALSE) {
+                            $body = str_replace('[Company Name]', $lead->company_name, $body); // Use $body instead of $old_body
+                        }
+                        if (strpos($body, '[Full Name]') !== FALSE) {
+                            $body = str_replace('[Full Name]', $lead->contact_person, $body); // Use $body instead of $old_body
+                        }
+                        if (strpos($subject, '[Company Name]') !== FALSE) {
+                            $subject = str_replace('[Company Name]', $lead->company_name, $subject);
+                        }
+                        self::email($subject, $body, $lead->email_address, null, null, null, 230); // Send email with $body
+                    }                    
                 } else if ($id == 231){
                     $subject = $notification->subject;
                     $body = $notification->body;
@@ -11207,32 +11226,22 @@ class NotificationsController extends Controller
                     }
 
                 }
-                else if($id == 232 || $id == 233) {
+                else if($id == 232) {
                     $subject = $notification->subject;
                     $body = $notification->body;
-                    $shipper_ids=$reference_1_id;
-                    $date=$reference_2_id;
-                    $booking_ids=[];
-
-                    foreach ($shipper_ids as $user_email=>$shipper_id) {
+                    $booking_details=$reference_1_id;
+                    $logistic_booking_ids=[];
+                    $date=Carbon::now()->toDateString();
+                    $user_email=null;
+                    foreach ($booking_details as $user_id=>$booking_ids)
+                    {
                         $current_body = $body;
-
-                        if($id == 232)
-                        {
-                                $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
+                        $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
                                 ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
                                 ->select('trax_logistic_bookings.id as booking_id','u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
-                                ->where('trax_logistic_bookings.booking_date',$date)->where('trax_logistic_bookings.shipper_id',$shipper_id)->get();
-
-                        } else{
-                                $logisticbookings=TraxLogisticBooking::join('users as u','u.id','trax_logistic_bookings.shipper_id')
-                                ->join('trax_stations as ts','ts.id','trax_logistic_bookings.destination_id')
-                                ->select('trax_logistic_bookings.id as booking_id','u.id AS shipper_id','u.name AS shipper_name','u.email AS shipper_email','trax_logistic_bookings.shipper_reference as order_reference','trax_logistic_bookings.booking_date','trax_logistic_bookings.cn_number AS tracking_number','ts.name AS destination','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.total_pieces')
-                                ->where('trax_logistic_bookings.booking_date',$date)
+                                    ->whereIn('trax_logistic_bookings.id',$booking_ids)
                                     ->where('trax_logistic_bookings.is_email',0)
-                                    ->where('trax_logistic_bookings.shipper_id',$shipper_id)->get();
-
-                        }
+                                    ->where('trax_logistic_bookings.shipper_id',$user_id)->get();
 
                         $html = '<table style="width:100%;border-collapse: collapse;">';
                         $html .= '<thead><tr>
@@ -11246,8 +11255,8 @@ class NotificationsController extends Controller
                                                <th style="padding:4px; border: 1px solid black; border-collapse: collapse;">PCS</th>';
                         $html .= '</tr></thead><tbody>';
                         $serial = 1;
-                        foreach ($logisticbookings as $booking) {
 
+                        foreach ($logisticbookings as $booking) {
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->shipper_id . '</td>';
@@ -11259,10 +11268,11 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $booking->total_pieces . '</td>';
                             $html .= '</tr>';
                             $serial++;
-                            $booking_ids[]=$booking->booking_id;
+                            $logistic_booking_ids[]=$booking->booking_id;
+                            $user_email=$booking->shipper_email;
+                            $date=$booking->booking_date;
                         }
                         $html .= '</tbody></table>';
-
                         if (strpos($current_body, '[Booking_at]') !== FALSE) {
                             $current_body = str_replace('[Booking_at]', $date, $current_body);
                         }
@@ -11271,22 +11281,21 @@ class NotificationsController extends Controller
                             $current_body = str_replace('[preview]', $html, $current_body);
                         }
 
-                        try {
-                            DB::transaction(function () use ($shipper_id, $date, $subject, $current_body, $user_email){
-
-                                if($user_email)
-                                {
-                                    TraxLogisticBooking::where('shipper_id',$shipper_id)
-                                        ->where('booking_date',$date)->update(['is_email'=>1]);
+                        if($user_email)
+                        {
+                            try {
+                                DB::transaction(function () use ($logistic_booking_ids,$subject, $current_body, $user_email){
+                                    TraxLogisticBooking::whereIn('id',$logistic_booking_ids)->update(['is_email'=>1]);
                                     self::email($subject, $current_body, $user_email);
-                                }
-
-                            });
-
-                        } catch (\Throwable $th){
-                            DB::rollBack();
-                            Log::channel('cronJobLog')->error('failed-logisticbooking-email'.json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
+                                });
+                            }
+                            catch (\Throwable $th)
+                            {
+                                DB::rollBack();
+                                Log::channel('cronJobLog')->error('failed-logisticbooking-email'.json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
+                            }
                         }
+
                     }
 
                 }

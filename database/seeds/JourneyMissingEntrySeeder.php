@@ -26,12 +26,11 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //Only use for the marked as delivered....
         $shipmentId = [
-            25117237710854
+            20220237926082, 20220238029527, 20220237936057
         ];
         echo count($shipmentId);
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
-
             foreach ($shipmentId as $shipment) {
                 
                 
@@ -63,7 +62,7 @@ class JourneyMissingEntrySeeder extends Seeder
                         $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
                         $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
 
-                        // $pending_payment->save();
+                        $pending_payment->save();
                     } else {
                         $pending_payment = new PendingPayment();
 
