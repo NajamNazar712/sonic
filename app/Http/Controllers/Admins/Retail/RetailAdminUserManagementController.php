@@ -301,7 +301,7 @@ class RetailAdminUserManagementController extends Controller
             'security_cheque_number' => 'required',
             'license_cheque_number' => 'required',
         ]);
-
+        
         $admin = $request->user();
         $date = Carbon::now()->format('Y_m_d');
         $hub_count = RetailFranchise::where('default_hub', $request->hub)->count() + 1;
