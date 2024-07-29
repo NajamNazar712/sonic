@@ -1657,7 +1657,7 @@
                 greedy: false,
                 definitions: {
                     R: {
-                        validator: '[a-zA-Z]',
+                        validator: '[a-zA-Z0-9]',
                     },
                 },
         });
