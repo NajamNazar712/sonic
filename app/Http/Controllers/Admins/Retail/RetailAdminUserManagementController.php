@@ -282,7 +282,6 @@ class RetailAdminUserManagementController extends Controller
 
     public function franchise_add(Request $request)
     {
-        // dd($request->all());
         $request->validate([
             'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
             'franchise_deduction' => 'required|numeric',
@@ -418,6 +417,7 @@ class RetailAdminUserManagementController extends Controller
 
     public function franchise_edit(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'franchise_deduction' => 'required|numeric',
             'franchise_withholding' => 'required|numeric',
@@ -440,11 +440,13 @@ class RetailAdminUserManagementController extends Controller
         $id = $request->franchise_id;
         $existing_franchise = RetailUser::where('name', $request->name)->where('category_id', '!=', $id);
         if (!$existing_franchise->exists()) {
+            $cnic_active_status = $request->cnic_status == "on" ? 1 : 0;
             $franchise = RetailFranchise::find($request->franchise_id);
             $franchise->name = $request->name;
             $franchise->phone_no = $request->phone_number;
             $franchise->email = $request->email;
             $franchise->cnic = $request->cnic;
+            $franchise->cnic_status = $cnic_active_status;
             $franchise->location_latitude = $request->lat;
             $franchise->location_longitude = $request->long;
             $franchise->discount = $request->discount;
@@ -729,10 +731,10 @@ class RetailAdminUserManagementController extends Controller
                 $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
                 $html .= '<td>' . ($record->commission ?? '0') . '%</td>';
                 $html .= '<td>' . $record->number_of_shipments . '</td>';
-                $html .= '<td>' . $record->total_charges . '</td>';
-                $html .= '<td>' . $record->franchise_gst_amount . '</td>';
-                $html .= '<td>' . $record->weight_charges . '</td>';
-                $html .= '<td>' . $record->net_commission . '</td>';
+                $html .= '<td>' . number_format(round($record->total_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->franchise_gst_amount)) . '</td>';
+                $html .= '<td>' . number_format(round($record->weight_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->net_commission)) . '</td>';
                 $html .= '</tr>';
     
                 // Summing up totals
@@ -745,20 +747,20 @@ class RetailAdminUserManagementController extends Controller
     
             // Totals row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="2">Total</td>';
-            $html .= '<td>' . $total_shipments . '</td>';
-            $html .= '<td>' . $total_charges . '</td>';
-            $html .= '<td>' . $total_gst . '</td>';
-            $html .= '<td>' . $total_weight_charges . '</td>';
-            $html .= '<td>' . $total_commission . '</td>';
+            $html .= '<td class="text-center" colspan="2"><strong>Total</strong</td>';
+            $html .= '<td><strong>' . $total_shipments . '</strong</td>';
+            $html .= '<td><strong>' . number_format(round($total_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_gst)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_weight_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_commission)) . '</strong></td>';
             $html .= '</tr>';
     
             $gross_commission = $total_commission;
     
             // Gross commission row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
-            $html .= '<td>' . $gross_commission . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Gross Commission</strong></td>';
+            $html .= '<td><strong>' . round($gross_commission) . '</strong></td>';
             $html .= '</tr>';
             $html .= '</tbody>';
             $html .= '</table>';
@@ -988,10 +990,10 @@ class RetailAdminUserManagementController extends Controller
                 $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
                 $html .= '<td>' . ($record->product_percentage ?? '0') . '%</td>';
                 $html .= '<td>' . $record->number_of_shipments . '</td>';
-                $html .= '<td>' . $record->total_charges . '</td>';
-                $html .= '<td>' . $record->franchise_gst_amount . '</td>';
-                $html .= '<td>' . $record->weight_charges . '</td>';
-                $html .= '<td>' . $record->commission . '</td>';
+                $html .= '<td>' . number_format(round($record->total_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->franchise_gst_amount)) . '</td>';
+                $html .= '<td>' . number_format(round($record->weight_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->commission)) . '</td>';
                 $html .= '</tr>';
 
                 $total_shipments += $record->number_of_shipments;
@@ -1003,12 +1005,12 @@ class RetailAdminUserManagementController extends Controller
 
             // Totals row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="2">Total</td>';
-            $html .= '<td>' . $total_shipments . '</td>';
-            $html .= '<td>' . $total_charges . '</td>';
-            $html .= '<td>' . $total_gst . '</td>';
-            $html .= '<td>' . $total_weight_charges . '</td>';
-            $html .= '<td>' . $total_commission . '</td>';
+            $html .= '<td class="text-center" colspan="2"><strong>Total</strong></td>';
+            $html .= '<td><strong>' . $total_shipments . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_gst)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round( $total_weight_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_commission)) . '</strong></td>';
             $html .= '</tr>';
 
             // $withholding_amount = $data->withholding_amount;
@@ -1020,20 +1022,20 @@ class RetailAdminUserManagementController extends Controller
 
             // Withholding tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Withholding Income Tax ' . ($data->withholding_tax_percent ?? 0) . '%</td>';
-            $html .= '<td>' . $withholding_amount . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Withholding Income Tax ' . ($data->withholding_tax_percent ?? 0) . '%</strong></td>';
+            $html .= '<td><strong>' . number_format(round($withholding_amount)) . '</strong></td>';
             $html .= '</tr>';
 
             // Deduction GST tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Commission GST Deduction ' . ($data->commission_gst_deduction_percent ?? 0) . '%</td>';
-            $html .= '<td>' . $deduction_amount . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>GST ' . ($data->commission_gst_deduction_percent ?? 0) . '%</strong></td>';
+            $html .= '<td><strong>' . number_format(round($deduction_amount)) . '</strong></td>';
             $html .= '</tr>';
 
             // Gross commission row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
-            $html .= '<td>' . $gross_commission . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Gross Commission</strong></td>';
+            $html .= '<td><strong>' . number_format(round($gross_commission)) . '</strong></td>';
             $html .= '</tr>';
             $html .= '</tbody>';
             $html .= '</table>';
@@ -3655,5 +3657,4 @@ class RetailAdminUserManagementController extends Controller
         
         return response()->json(['data' => $data]);
     }
-
 }

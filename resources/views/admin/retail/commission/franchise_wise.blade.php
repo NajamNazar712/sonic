@@ -59,7 +59,7 @@
                                         <th class="border-primary border-darken-1">Commission %</th>
                                         <th class="border-primary border-darken-1">Number of Shipments</th>
                                         <th class="border-primary border-darken-1">Total Charges</th>
-                                        <th class="border-primary border-darken-1">GST Amount</th>
+                                        <th class="border-primary border-darken-1">GST</th>
                                         <th class="border-primary border-darken-1">Weight Charges</th>
                                         <th class="border-primary border-darken-1">Commission amount</th>
                                         <th class="border-primary border-darken-1">Franchise Withholding Percentage</th>
