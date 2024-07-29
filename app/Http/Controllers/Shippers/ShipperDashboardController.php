@@ -275,7 +275,7 @@ class ShipperDashboardController extends Controller
                 $user = User::find($shipper_id);
                 
                 $weight_charges = WeightCharge::where('user_id' , $shipper_id);
-                if($user->status == 0 && !$weight_charges->exists() && (!isset($user->request_custom_quotation) || $user->request_custom_quotation != 1)){
+                if(($user->on_board_status < 1 && $user->created_at > '2024-06-13 00:00:00')){
                     $lead_progress_setting = LeadProgressSetting::find(1);
                     $percentage = $lead_progress_setting->percent;
                     $color = $lead_progress_setting->color;
@@ -676,14 +676,14 @@ class ShipperDashboardController extends Controller
             $masp = array_merge($masp,$merged_account_sister_mapping);
         }
 
-         if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
-            $connection = 'reports';
-         }
-         else {
-             $connection = 'mysql';
-         }
+        //  if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
+        //     $connection = 'reports';
+        //  }
+        //  else {
+        //      $connection = 'mysql';
+        //  }
 
-        $connection = 'mysql';
+        $connection = 'reports';
         $shipments = DB::connection($connection)->table('shipments')
             ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -696,7 +696,10 @@ class ShipperDashboardController extends Controller
             ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'))
+                        ->where('shipments_journey.created_at', '>=', Carbon::now()->subMonth(6)) // Add created_at condition here
+                        ->where('shipments_journey.created_at', '<=', Carbon::now()); // Assuming you have these variables set
+ 
             })
             ->leftJoin('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')

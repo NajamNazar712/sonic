@@ -391,6 +391,7 @@ class Permission
             'return.rider_request.approve' => 833,
             'return.rider_request.reject' => 834,
             'return.rider_request.update' => 835,
+            'settings.agents_list.index' => 951,
 
 
             'finance.outstanding_sdn.index' => 52,
@@ -1030,6 +1031,7 @@ class Permission
             'settings.shipper_ibft_charges_settings.list' => 917,
 
             'settings.shipper_negative_payable.index' => 982,
+            'settings.faf_charges.index'=>997,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,

@@ -40,55 +40,211 @@
     </div>
 
     <div class="modal fade" id="add_user" role="dialog" aria-labelledby="add_user_title" aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog add_user_modal" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="add_remarks_title">Add User</h4>
 
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close modal_close_btn" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="add_user_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.users.add') }}" novalidate="novalidate">
-                        {{ csrf_field()  }}
-                        <div class="form-group">
-                            <select name="store" id="store" class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
-                                <option value="1">Franchise</option>
-                                <option value="2">Trax Center</option>
-                            </select>
-                        </div>
-                        <div class="form-group d-none" id="franchise_div">
-                            <select name="franchise" id="franchise" class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
-                                @foreach($franchises as $franchise)
-                                    <option value="{{$franchise->id}}"> {{$franchise->name}} </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group d-none" id="trax_center_div">
-                            <select name="trax_center" id="trax_center" class="form-control select2" data-rule-required="true" data-msg-required="Trax Center is required">
-                                @foreach($trax_centers as $trax_center)
-                                    <option value="{{$trax_center->id}}"> {{$trax_center->name}} </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="name" id="name" class="form-control" placeholder="User Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-remote="{{ route('admin.retail.users.name') }}" data-msg-remote="Name must be unique">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="phone_number" id="phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
-                        </div>
-                        <div class="form-group position-relative">
-                            <input type="password" class="form-control" id="password" placeholder="Password" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters" autocomplete="nope">
-                            <div class="form-control-position" id="eye">
-                                <i class="la la-eye success"></i>
+                    <form id="add_user_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.users.add') }}" novalidate="novalidate" enctype="multipart/form-data">
+                        {{ csrf_field() }}
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <select name="store" id="store" class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required" onchange="showForm()">
+                                            <option value="1">Franchise</option>
+                                            <option value="2">Trax Center</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group d-none" id="franchise_div">
+                                        <select name="franchise" id="franchise" class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
+                                            @foreach($franchises as $franchise)
+                                                <option value="{{$franchise->id}}"> {{$franchise->name}} </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group d-none" id="trax_center_div">
+                                        <select name="trax_center" id="trax_center" class="form-control select2" data-rule-required="true" data-msg-required="Trax Center is required">
+                                            @foreach($trax_centers as $trax_center)
+                                                <option value="{{$trax_center->id}}"> {{$trax_center->name}} </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="name" id="name" class="form-control" placeholder="User Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-remote="{{ route('admin.retail.users.name') }}" data-msg-remote="Name must be unique">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="phone_number" id="phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                                    </div>
+
+                                    <div class="form-group position-relative">
+                                        <input type="password" class="form-control" id="password" placeholder="Password*" value="" name="password" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters" autocomplete="nope">
+                                        <div class="form-control-position" id="eye">
+                                            <i class="la la-eye success"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="cnic" id="cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <textarea name="address" id="address" class="form-control address" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <input type="text" name="trax_id" id="trax_id" class="form-control" placeholder="Trax Id">
+                                    </div>
+                                    
+                                    {{-- <div class="form-group">
+                                        <input type="text" name="gst_percentage" id="gst_percentage" class="form-control" placeholder="GST %">
+                                    </div> --}}
+
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                        </div>
+                                        <input type="text" name="agreement_start_date" id="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Joining date*" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="number" name="salary" id="salary" class="form-control" placeholder="Salary">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" name="family_member_name[]" id="father_name" class="form-control" placeholder="Father Name">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <input type="text" name="family_member_name[]" id="mother_name" class="form-control" placeholder="Mother Name">
+                                    </div>
+                                </div>
+                                
+                                <div class="col">
+                                    <div id="for_trax_users" class="">
+                                        <div class="form-group">
+                                            <select name="marital_status" id="marital_status" class="select2 form-control">
+                                                <option value="" selected disabled>Select Marital Status</option>
+                                                <option value="1">Single</option>
+                                                <option value="2">Marital</option>
+                                            </select>
+                                        </div>
+    
+                                        <div class="form-group marital_details d-none">
+                                            <div class="form-group">
+                                                <input type="text" name="family_member_name[]" id="spouse_name" class="form-control" placeholder="Spouse Name">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="date" name="family_member_name[]" id="spouse_dob" class="form-control" placeholder="Spouse DOB">
+                                            </div>
+                                            <h4 class="">Children</h4>
+                                            <div class="row">
+    
+                                                <div class="col-9" id="child_input_container">
+                                                    <div class="child-template d-none">
+                                                        <div class="form-group row">
+                                                            <div class="col-9">
+                                                                <input type="text" class="form-control child_input" placeholder="Child">
+                                                            </div>
+                                                            <div class="col-3">
+                                                                <button type="button" class="btn btn-danger" id="remove_child_column_btn">
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button type="button" class="btn btn-primary" id="add_child_column_btn">
+                                                        Add
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+    
+                                        <h4 class="">Commission</h4>
+                                        <div class="row">
+                                            <div class="col-5">
+                                                <div class="form-group">
+                                                    <select name="retail_shipping_mode_id[]" id="retail_shipping_mode_id" class="select2 form-control retail_shipping_mode_id" data-rule-required="true" data-msg-required="Please choose a Product">
+                                                        @foreach($shipping_modes as $shipping_mode)
+                                                            <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+    
+                                            <div class="col-5">
+                                                <div class="form-group">
+                                                    <div class="input-group mb-2">
+                                                        <input type="text" name="product_percentage[]" id="product_percentage" class="form-control product_percentage" placeholder="Product"  value="" max="100">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text" id="basic-addon2">%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+    
+                                            <div class="col-2">
+                                                <input type="button" class="btn btn-primary" id="retail_product_add_btn" value="Add">
+                                            </div>
+                                        </div>
+                                        <span id="error_message" class="text-danger"></span>
+    
+                                        <div class="row" id="tableRow" style="display: none;">
+                                            <div class="col">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Selected Option</th>
+                                                            <th>Product Percentage</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tableBody">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="attachment_1" id="attachment_1_label">Upload Employee Form*</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept=".doc,.docx,.pdf" data-rule-required="true" data-msg-required="Employee Form is required">
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_2">CNIC front image*</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="CNIC front image is required">
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_3">CNIC back image*</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="CNIC back image is required">
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_4">Profile picture</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_4" id="attachment_4" accept="image/*,.doc,.docx,.pdf">
+                                    </div>
+            
+                                    <div class="form-group">
+                                        <label for="attachment_5">Attachment 5</label>
+                                        <input class="form-control form-control-sm" type="file" name="attachment_5" id="attachment_5" accept="image/*,.doc,.docx,.pdf">
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="cnic" id="cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required">
-                        </div>
-                        <div class="form-group">
-                            <textarea name="address" id="address" class="form-control address" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required"></textarea>
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
@@ -122,6 +278,9 @@
         }
         span.font-13{
             font-size: 13px;
+        }
+        .add_user_modal{
+            max-width: 1300px;
         }
     </style>
 
@@ -429,6 +588,17 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
+                    var retailShippingIds = [];
+                    var productPercentages = [];
+                    $("#tableBody").find("tr").each(function() {
+                        var selectedOption = $(this).find("td:first").text();
+                        var productPercentage = $(this).find("td:nth-child(2)").text();
+                        retailShippingIds.push(selectedOption);
+                        productPercentages.push(productPercentage);
+                    });
+                    $(form).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIds) + "'>");
+                    $(form).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentages) + "'>");
+
                     swal({
                         title: 'Please Wait!',
                         text: 'User is being added!',
@@ -438,6 +608,128 @@
                         closeOnEsc: false
                     });
                     form.submit();
+                }
+            });
+
+            $('#add_user_form #delivery_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#add_trax_center_form #delivery_date_to').pickadate('picker').set('min', $('#add_trax_center_form #delivery_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            $("#marital_status").on('change', function(){
+                var selectedOption = $(this).val();
+                if (selectedOption == 1){
+                    $(".marital_details").addClass("d-none");
+                    $("#spouse_name").val('');
+                    $("#spouse_dob").val('');
+                    // $("#wife_data").val('');
+                    $(".child_input").val('');
+                } else if(selectedOption == 2) {
+                    $(".marital_details").removeClass("d-none");
+                }
+            });
+
+            var childCount = 0;
+            function addChildInfo() {
+                // Update the number to increase child count
+                if (childCount < 4){
+                    var $childInput = $('.child-template').clone().removeClass('child-template').removeClass('d-none');
+                    childCount++;
+                    $childInput.find('.child_input').attr({
+                        'id': 'child_' + childCount + '_data',
+                        'name': 'family_member_name[]',
+                        'placeholder': 'Child name'
+                    });
+                    $('#child_input_container').append($childInput);
+                }
+            }
+            $("#add_child_column_btn").on('click', function () {
+                addChildInfo();
+            });
+
+            $(document).on('click', '#remove_child_column_btn', function () {
+                var $formGroup = $(this).closest('.form-group');
+                var $inputField = $(this).closest('.form-group').find('.child_input');
+                var inputId = $inputField.attr('id');
+                $inputField.val('');
+                $formGroup.remove();
+                if (childCount > 0) {
+                    childCount--;
+                }
+            });
+
+            function resetModal() {
+                $("#product_percentage").val("");
+                $("#retail_shipping_mode_id").val("1").trigger("change");
+                $("#error_message").hide();
+                $("#product_percentage").removeAttr("required");
+                $("#tableBody").empty();
+                $("#tableRow").hide();
+            }
+
+            $("#retail_product_add_btn").on('click', function (event) {
+                var selectedOption = $("#retail_shipping_mode_id option:selected").text();
+                var productPercentage = $("#product_percentage").val();
+
+                if (productPercentage.trim() === '' || !$.isNumeric(productPercentage)) {
+                    $("#error_message").text("Please enter a valid product percentage.").show();
+                    $("#product_percentage").attr("required", true);
+                } else {
+                    $("#error_message").hide();
+                    $("#product_percentage").removeAttr("required");
+                    var isDuplicate = false;
+                    $("#tableBody").find("tr").each(function() {
+                        if ($(this).find("td:first").text() === selectedOption) {
+                            isDuplicate = true;
+                            return false; // Exit the loop if a duplicate is found
+                        }
+                    });
+
+                    if (isDuplicate) {
+                        $("#error_message").text("Error: Cannot add same product.").show();
+                    } else {
+                        var newRow = $("<tr><td>" + selectedOption + "</td><td>" + productPercentage + "%</td><td><button class='btn btn-danger btn-sm remove-item'>Remove</button></td></tr>");
+                        $("#tableBody").append(newRow);
+                        newRow.find('.remove-item').click(function() {
+                            $(this).closest("tr").remove();
+                            if ($("#tableBody").find("tr").length === 0) {
+                                $("#tableRow").hide();
+                            }
+                        });
+                        $("#tableRow").show();
+                        $("#product_percentage").val('');
+                    }
+                }
+            });
+
+            $(".modal_close_btn").click(function() {
+                resetModal();
+            });
+
+            $('#store').on('change', function(){
+                var category = $(this).val();
+                if (category == 1) {
+                    $('#trax_id').addClass("d-none");
+                    $('#salary').addClass("d-none");
+                    $('#for_trax_users').addClass("d-none");
+                } else {
+                    $('#trax_id').removeClass("d-none");
+                    $('#trax_id').on('input', function(event) {
+                        $(this).val(function(_, value) {
+                            return value.replace(/\D/g, '');
+                        });
+                    });
+                    $('#salary').removeClass("d-none");
+                    $('#for_trax_users').removeClass("d-none");
                 }
             });
         });
@@ -454,5 +746,26 @@
                 });
             }
         });
+
+        function showForm() {
+            var selectedValue = document.getElementById("store").value;
+            var attachment_1_label = document.getElementById("attachment_1_label");
+
+            var selectedValue = document.getElementById("store").value;
+            var dateInput = document.getElementById("delivery_date_from");
+
+            if (selectedValue == 1) {
+                attachment_1_label.textContent = "Franchise Agreement Form*";
+                dateInput.placeholder = "Agreement Start date";
+                // dateInput.removeAttribute('required');
+                dateInput.setAttribute('data-msg-required', "Franchise Agreement Form is required");
+            } else if (selectedValue == 2) {
+                attachment_1_label.textContent = "Upload Employee Form*";
+                dateInput.placeholder = "Joining date";
+                dateInput.setAttribute('required', true);
+                dateInput.setAttribute('data-msg-required', "Employee Form is required");
+            }
+        }
+
     </script>
 @endsection

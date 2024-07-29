@@ -19,6 +19,7 @@ use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -76,6 +77,11 @@ class AdminLogisticBookingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 792);
         }
         $hub_ids=session('hubs');
+        $city_ids=City::whereIn('hub_id',$hub_ids);
+        if($city_ids->exists())
+        {
+            $city_ids=$city_ids->pluck('id');
+        }
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
             ->leftjoin('riders as r','r.id','=','trax_logistic_bookings.rider_id')
             ->leftjoin('user_shipping_infos as usi','usi.id','=','trax_logistic_bookings.shipper_address_id')
@@ -88,7 +94,7 @@ class AdminLogisticBookingController extends Controller
 
         if (session('role_id') != 1)
         {
-            $logistic_bookings = $logistic_bookings->whereIn('trax_logistic_bookings.origin_id',$hub_ids);
+            $logistic_bookings = $logistic_bookings->whereIn('trax_logistic_bookings.origin_id',$city_ids);
         }
         $datatables = Datatables::of($logistic_bookings)
             ->addColumn('action',function ($logistic_bookings){
@@ -139,6 +145,11 @@ class AdminLogisticBookingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 794);
         }
         $hub_ids=session('hubs');
+        $city_ids=City::whereIn('hub_id',$hub_ids);
+        if($city_ids->exists())
+        {
+            $city_ids=$city_ids->pluck('id');
+        }
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
             ->join('trax_booking_batch_details as bd','bd.booking_id','trax_logistic_bookings.id')
             ->join('trax_booking_batches as bb','bb.id','bd.batch_id')
@@ -159,7 +170,7 @@ class AdminLogisticBookingController extends Controller
 
         if (session('role_id') != 1)
         {
-            $logistic_bookings = $logistic_bookings->whereIn('bb.city_id',$hub_ids);
+            $logistic_bookings = $logistic_bookings->whereIn('bb.city_id',$city_ids);
         }
 
         $datatables = Datatables::of($logistic_bookings)
@@ -553,6 +564,7 @@ class AdminLogisticBookingController extends Controller
                 }),
             ],
             'insurance_item_code'=>['max:255'],
+            'shipper_reference'=>['string','max:255']
         ]);
         if($validate->fails())
         {
@@ -598,6 +610,7 @@ class AdminLogisticBookingController extends Controller
                     $logistic_booking->handling_inst=$request->handling_inst;
                     $logistic_booking->updated_by = $admin_id;
                     $logistic_booking->total_pieces=$request->total_pieces;
+                    $logistic_booking->shipper_reference=$request->shipper_reference;
                     $logistic_booking->save();
 
                     $shipment=Shipment::where('tracking_number',$request->cn_number);
@@ -609,12 +622,22 @@ class AdminLogisticBookingController extends Controller
 //                            $shipment->estimated_weight=$booking_weight;
 //                        }
                         //atif sir said shipment weight update regardless booking is arrived or not
+                        $shipment->consignee_city_id=$request->destination_id;
+                        $shipment->order_id=$request->shipper_reference;
                         $shipment->estimated_weight=$request->booking_weight;
                         $shipment->consignee_name=$request->consignee_name;
                         $shipment->consignee_address=$request->consignee_address;
-                        $shipment->consignee_phone_number_1=$request->consignee_phone_number_1;
+                        $shipment->consignee_phone_number_1=$request->consignee_phone_1;
                         $shipment->consignee_email=$request->consignee_email;
                         $shipment->save();
+
+                        //update shipment Quantity
+                        $shipment_item= ShipmentItem::where('shipment_id',$shipment->id);
+                        if($shipment_item->exists()){
+                            $shipment_item = $shipment_item->first();
+                            $shipment_item->quantity=$request->total_pieces;
+                            $shipment_item->save();
+                        }
                     }
 
                     if(isset($request->special_handling_id) && isset($request->item_insurance))

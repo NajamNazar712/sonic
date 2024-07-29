@@ -11,9 +11,9 @@ class ActivityTrailAndPermissionForInternationalEconomyStandardRatesSeeder exten
      */
     public function run()
     {
-        DB::table('activity_trail_actions')->insert(array(
-            array('id' => 800, 'screen_name' => 'Retail International Economy Rates Excel Upload', 'action'=> 'View'),
-        ));
+//        DB::table('activity_trail_actions')->insert(array(
+//            array('id' => 800, 'screen_name' => 'Retail International Economy Rates Excel Upload', 'action'=> 'View'),
+//        ));
 
         DB::table('module_permissions')->insert(array(
             array('id' => 992, 'name' => 'Retail International Economy Rates Excel Upload - View', 'module_id' => 14)

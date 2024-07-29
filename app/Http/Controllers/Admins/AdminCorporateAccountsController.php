@@ -166,6 +166,8 @@ use App\Http\Models\HistoryCorporateSmsCharges;
 use App\Http\Models\PendingCorporateSmsCharges;
 use App\Http\Models\HistoryCorporateDefaultSmsCharges;
 use App\Http\Models\PendingCorporateDefaultSmsCharges;
+use App\Http\Models\NotificationSetting;
+use App\Http\Models\NotificationSettingShipper;
 
 class AdminCorporateAccountsController extends Controller
 {
@@ -7475,6 +7477,16 @@ class AdminCorporateAccountsController extends Controller
 
                 }
 
+                $user = User::find($id);
+                if($user->sms_charges_status == 1) {
+                    $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                    foreach($notification_settings as $notification_setting ) {
+                        $notification_setting_shipper = new NotificationSettingShipper();
+                        $notification_setting_shipper->notification_setting_id = $notification_setting;
+                        $notification_setting_shipper->shipper_id = $id;
+                        $notification_setting_shipper->save();
+                    }
+                }
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
             if($request->has('rate_remarks') && $request->rate_remarks != null){
@@ -11593,6 +11605,16 @@ class AdminCorporateAccountsController extends Controller
 
                 }
 
+                $user = User::find($id);
+                if($user->sms_charges_status == 1) {
+                    $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                    foreach($notification_settings as $notification_setting ) {
+                        $notification_setting_shipper = new NotificationSettingShipper();
+                        $notification_setting_shipper->notification_setting_id = $notification_setting;
+                        $notification_setting_shipper->shipper_id = $id;
+                        $notification_setting_shipper->save();
+                    }
+                }
                 
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now changed.');
             }
@@ -18278,7 +18300,16 @@ class AdminCorporateAccountsController extends Controller
 
                 }
 
-               
+                $user = User::find($id);
+                if($user->sms_charges_status == 1) {
+                    $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                    foreach($notification_settings as $notification_setting ) {
+                        $notification_setting_shipper = new NotificationSettingShipper();
+                        $notification_setting_shipper->notification_setting_id = $notification_setting;
+                        $notification_setting_shipper->shipper_id = $id;
+                        $notification_setting_shipper->save();
+                    }
+                }
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
             if($request->has('rate_remarks') && $request->rate_remarks != null){
@@ -22088,7 +22119,16 @@ class AdminCorporateAccountsController extends Controller
 
                 }
 
-                
+                $user = User::find($id);
+                if($user->sms_charges_status == 1) {
+                    $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                    foreach($notification_settings as $notification_setting ) {
+                        $notification_setting_shipper = new NotificationSettingShipper();
+                        $notification_setting_shipper->notification_setting_id = $notification_setting;
+                        $notification_setting_shipper->shipper_id = $id;
+                        $notification_setting_shipper->save();
+                    }
+                }
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now changed.');
             }
 
@@ -29008,6 +29048,16 @@ class AdminCorporateAccountsController extends Controller
 
                 }
 
+                $user = User::find($id);
+                if($user->sms_charges_status == 1) {
+                    $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                    foreach($notification_settings as $notification_setting ) {
+                        $notification_setting_shipper = new NotificationSettingShipper();
+                        $notification_setting_shipper->notification_setting_id = $notification_setting;
+                        $notification_setting_shipper->shipper_id = $id;
+                        $notification_setting_shipper->save();
+                    }
+                }
                
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
@@ -31680,6 +31730,16 @@ class AdminCorporateAccountsController extends Controller
 
                }
 
+                $user = User::find($id);
+                if($user->sms_charges_status == 1) {
+                    $notification_settings = NotificationSetting::where('shipper_toggle' , 0)->pluck('id');
+                    foreach($notification_settings as $notification_setting ) {
+                        $notification_setting_shipper = new NotificationSettingShipper();
+                        $notification_setting_shipper->notification_setting_id = $notification_setting;
+                        $notification_setting_shipper->shipper_id = $id;
+                        $notification_setting_shipper->save();
+                    }
+                }
                if($request->has('edit_commission') && $request->edit_commission == 1){
                    if($request->total_commission > 0){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
