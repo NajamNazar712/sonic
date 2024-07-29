@@ -1670,14 +1670,13 @@
                     //     var description = $('#service_description').val();
                     // }
 
-                    else {
+                    else if (case_nature_id == 2) {
                         var complaint_id = $('#case_nature_requests').val();
                         var description = "";
                         if (!$('#case_nature_service_remarks_div').hasClass('d-none')) {
                             var selectedOptions = $('#case_nature_service_remarks option:selected');
                             var useTextarea = false;
                             var selectedTexts = [];
-
                             selectedOptions.each(function() {
                                 var optionValue = $(this).val();
                                 var optionText = $(this).text().trim();
@@ -1690,12 +1689,13 @@
                             });
 
                             if (useTextarea) {
-                                description = $('#service_description').val().trim();
+                                description = $('#service_description_new').val().trim();
                             } else {
+                                console.log(2, description);
                                 description = selectedTexts.join(', ');
                             }
-                        } else if (!$('#service_description_textarea').hasClass('d-none')) {
-                            description = $('#service_description').val().trim();
+                        } else if (!$('#service_description_textarea_new').hasClass('d-none')) {
+                            description = $('#service_description_new').val().trim();
                         }
                     }
 
