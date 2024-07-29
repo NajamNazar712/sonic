@@ -586,7 +586,7 @@ class LeadManagementController extends Controller
                     $lead->save();
                 }
 
-                if($status == 9 && $lead->email_status != 1 && isset($lead->activation_code) ) {
+                if($status == 9 && $lead->email_status != 1 && $lead->activation_code != '') {
                     $lead->email_status = 1;
                     $lead->via_channel = 'Sonic';
                     NotificationsController::send(230, $lead->id);
@@ -664,7 +664,7 @@ class LeadManagementController extends Controller
                         $lead->save();
                     }
     
-                    if($status == 9 && $lead->email_status != 1 && isset($lead->activation_code) ) {
+                    if($status == 9 && $lead->email_status != 1 && $lead->activation_code != '') {
                         $lead->email_status = 1;
                         $lead->via_channel = 'Sonic';
                         NotificationsController::send(230, $lead->id);
