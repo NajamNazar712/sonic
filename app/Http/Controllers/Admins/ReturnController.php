@@ -104,6 +104,8 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\RvShipmentTicket;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 
 class ReturnController extends Controller
 {
@@ -2455,6 +2457,21 @@ class ReturnController extends Controller
                     } else {
                         return 'Cargo';
                     }
+                }
+            })
+            ->addColumn('check_return_bag', function ($shipment) {
+                $cargo_bag = CargoManifestBagShipments::where('shipment_id' , $shipment->shipment_id);
+                if($cargo_bag->exists()) {
+                    $cargo_bag = $cargo_bag->latest()->first();
+                    $bag_number = $cargo_bag->cargo_manifest_bag_id;
+                    $return_bag = CargoManifestBag::where('id', $bag_number)->where('type', 2);
+                    if($return_bag->exists()) {
+                        return 'yes';
+                    } else {
+                        return 'no';
+                    }
+                } else {
+                    return 'no';
                 }
             })
             ->addColumn('return_city', function ($shipment) {

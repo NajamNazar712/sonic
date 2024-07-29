@@ -8761,4 +8761,14 @@ class ShipperShipmentBookController extends Controller
         self::consignee_address_area($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
         self::shipper_address_area($user_shipping_info->city_id,$user_shipping_info->pickup_address,$user_shipping_info->id);
     }
+
+    static function checkDuplicateTracking($order_id)
+    {
+        if(Shipment::where('tracking_number', $order_id)->exists())
+        {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }
