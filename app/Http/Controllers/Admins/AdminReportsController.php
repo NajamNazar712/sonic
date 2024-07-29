@@ -13792,7 +13792,7 @@ class AdminReportsController extends Controller
         $ratings = CrmRequestRating::all();
         $csat_formula = GlobalSettings::where('type', 'csat_formula')->latest()->first();
         $formula_value = explode(',', $csat_formula->text ?? '');
-        $claim = CrmRequestCaseNature::where('name', 'Claim')->first()->id;  
+        $claim = CrmRequestCaseNature::where('name', 'like', '%Claim%')->first()->id ?? null;
         $csat_score = CrmRequest::leftJoin('crm_request_feedbacks', 'crm_requests.id', 'crm_request_feedbacks.crm_request_id')
             ->where('crm_requests.status_id', 4)
             ->where('crm_requests.case_nature_id', '!=', $claim)
@@ -13811,7 +13811,7 @@ class AdminReportsController extends Controller
 
         $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
         $case_types = explode(',', $csat_types->text ?? '');
-        $claim = CrmRequestCaseNature::where('name', 'Claim')->first()->id;  
+        $claim = CrmRequestCaseNature::where('name', 'like', '%Claim%')->first()->id ?? null;
 
         if (isset($case_types)) {
             $case_types;
