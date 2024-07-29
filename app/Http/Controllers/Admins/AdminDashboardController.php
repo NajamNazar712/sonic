@@ -10692,7 +10692,7 @@ class AdminDashboardController extends Controller
         $average_shipment_durations_cycle = AverageShipmentCycle::all();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
         $territories = Territory::select('id', 'name')->get();
-        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'average_shipment_durations_cycle' =>$average_shipment_durations_cycle, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories,'days'=>$payment_cycle_days]);
+        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name ?? null, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'average_shipment_durations_cycle' =>$average_shipment_durations_cycle, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories,'days'=>$payment_cycle_days]);
     }
 
     public function updateProfile(Request $request)
