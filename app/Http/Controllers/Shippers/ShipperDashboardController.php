@@ -286,6 +286,7 @@ class ShipperDashboardController extends Controller
 
                     $description = "Your account is $percentage% completed";
                     $short_description = 'Signed Up';
+                    
                 }else if(($weight_charges->exists() || $user->request_custom_quotation == 1) && !isset($user->rates_added_by)){
                     $lead_progress_setting = LeadProgressSetting::find(2);
                     $percentage = $lead_progress_setting->percent;

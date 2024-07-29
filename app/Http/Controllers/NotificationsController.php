@@ -340,7 +340,16 @@ class NotificationsController extends Controller
 
                     $mail->send(new Notifications($subject, $body, $from));
                 }
-                
+    
+                if ($bcc) {
+                    $mail->bcc($bcc);
+                }
+    
+                if($id = 230){
+                    $mail->sendNow(new Notifications($subject, $body, $from));
+                }else{
+                    $mail->send(new Notifications($subject, $body, $from));
+                }
             }
 
 
@@ -11177,8 +11186,6 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 } else if ($id == 230){
-                    // $subject = $notification->subject;
-                    // $body = $notification->body;
                     $lead_ids = $reference_1_id;
 
                     if(!is_array($lead_ids)){
@@ -11187,12 +11194,11 @@ class NotificationsController extends Controller
                     
                     foreach ($lead_ids as $key => $lead_id) {
                         $lead = Lead::find($lead_id);
-                        // if(isset($tokens[$key])){
-                            $route = route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]);
-                            $link = '<a href="' . $route . '">Click here to sign up</a>';
-
-                            $body = $notification->body; // Reset $body to its original state
-                            $subject = $notification->subject;  // Reset $subject to its original state
+                        $route = route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]);
+                        $link = '<a href="' . $route . '">Click here to sign up</a>';
+                    
+                        $body = $notification->body; // Reset $body to its original state
+                        $subject = $notification->subject;  // Reset $subject to its original state
 
                         if (strpos($body, '[Link]') !== FALSE) {
                             $body = str_replace('[Link]', $link, $body); // Use $body instead of $old_body

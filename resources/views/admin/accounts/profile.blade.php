@@ -631,7 +631,7 @@
                                             <span class="danger">*</span>
                                             <select name="invoicing_cycle_id" id="invoicing_cycle" data-rule-required="true" data-msg-required="Invoicing Cycle is required" class="select2 form-control required">
                                                 @foreach($invoicing_cycle as $cycle)
-                                                    <option value="{{$cycle->id}}" {{ ($user_bank_default->invoicing_cycle_id != null) ? (($user_bank_default->invoicing_cycle_id == $cycle->id) ? 'selected' : '') : '' }}>{{$cycle->name}}</option>
+                                                    <option value="{{$cycle->id}}" {{ ($user_bank_default->invoicing_cycle_id != null && $user_bank_default->invoicing_cycle_id == $cycle->id) ? 'selected' : '' }}>{{$cycle->name}}</option>
                                                 @endforeach
                                             </select>
                                         </div>

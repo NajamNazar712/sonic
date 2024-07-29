@@ -17,7 +17,7 @@ use Auth;
 
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
-
+use DB;
 class AdminZonalManagementController extends Controller
 {
     public function __construct() {
@@ -134,7 +134,9 @@ class AdminZonalManagementController extends Controller
     public function update_index($id) {
         $zone_cities_gst = array();
         $cities = City::where(['status' => 1, 'business_category_id' => 1, 'zone_id' => $id])->get();
+        $all_cities = City::where(['status' => 1, 'business_category_id' => 1])->get();
         $zone = Zone::find($id);
+        $zones = Zone::where('id', '!=', $id)->get();
         $zone_class_cities = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 1])->pluck('class', 'city_id');
         $zone_class_cities_cor = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 2])->pluck('class', 'city_id');
         $zone_cities_gst = ZoneCitiesGst::join('cities as c','c.id','zone_cities_gsts.city_id')
@@ -154,8 +156,8 @@ class AdminZonalManagementController extends Controller
         }
 
 //        dump($zone_cities_gst,$zone_cities_gst_count);
-
-        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor,'zone_cities_gst' => $zone_cities_gst,'zone_cities_gst_count' => $zone_cities_gst_count,'zone_id' => $id]);
+        $classification = DB::table('zone_classification')->select(['id','name'])->get();
+        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor,'zone_cities_gst' => $zone_cities_gst,'zone_cities_gst_count' => $zone_cities_gst_count,'zone_id' => $id, 'all_cities' =>$all_cities, 'classifications' =>$classification ,'zones'=>$zones]);
     }
 
     public function update_store(Request $request, $id) {
@@ -165,43 +167,47 @@ class AdminZonalManagementController extends Controller
         $zone->gst = $request->gst;
 
         $zone->save();
-
-        foreach ($request->city_class as $city_id => $class) {
-            $zone_class_city = ZoneClassCity::where(['zone_id' => $zone->id, 'city_id' => $city_id, 'zone_classification_id' => 1]);
-            if ($zone_class_city->exists()) {
-                $zone_class_city = $zone_class_city->first();
-            } else {
-                $zone_class_city = new ZoneClassCity();
-
-                $zone_class_city->zone_id = $zone->id;
-                $zone_class_city->city_id = $city_id;
-                $zone_class_city->zone_classification_id = 1;
+        
+        if($request->has('city_class')) {
+            foreach ($request->city_class as $city_id => $class) {
+                $zone_class_city = ZoneClassCity::where(['zone_id' => $zone->id, 'city_id' => $city_id, 'zone_classification_id' => 1]);
+                if ($zone_class_city->exists()) {
+                    $zone_class_city = $zone_class_city->first();
+                } else {
+                    $zone_class_city = new ZoneClassCity();
+    
+                    $zone_class_city->zone_id = $zone->id;
+                    $zone_class_city->city_id = $city_id;
+                    $zone_class_city->zone_classification_id = 1;
+                }
+    
+                $zone_class_city->class = $class;
+    
+                $zone_class_city->save();
             }
-
-            $zone_class_city->class = $class;
-
-            $zone_class_city->save();
         }
-
-        foreach ($request->city_class_cor as $city_id_cor => $class_cor) {
-            $zone_class_city_cor = ZoneClassCity::where(['zone_id' => $zone->id, 'city_id' => $city_id_cor, 'zone_classification_id' => 2]);
-
-            if ($zone_class_city_cor->exists()) {
-                $zone_class_city_cor = $zone_class_city_cor->first();
+        
+        if($request->has('city_class_cor')) {
+            foreach ($request->city_class_cor as $city_id_cor => $class_cor) {
+                $zone_class_city_cor = ZoneClassCity::where(['zone_id' => $zone->id, 'city_id' => $city_id_cor, 'zone_classification_id' => 2]);
+    
+                if ($zone_class_city_cor->exists()) {
+                    $zone_class_city_cor = $zone_class_city_cor->first();
+                }
+                else {
+                    $zone_class_city_cor = new ZoneClassCity();
+    
+                    $zone_class_city_cor->zone_id = $zone->id;
+                    $zone_class_city_cor->city_id = $city_id_cor;
+                    $zone_class_city_cor->zone_classification_id = 2;
+                }
+    
+                $zone_class_city_cor->class = $class_cor;
+    
+                $zone_class_city_cor->save();
             }
-            else {
-                $zone_class_city_cor = new ZoneClassCity();
-
-                $zone_class_city_cor->zone_id = $zone->id;
-                $zone_class_city_cor->city_id = $city_id_cor;
-                $zone_class_city_cor->zone_classification_id = 2;
-            }
-
-            $zone_class_city_cor->class = $class_cor;
-
-            $zone_class_city_cor->save();
         }
-
+        
         return redirect()->route('admin.management.zonal.index')->with(['success' => 'Zone: ' . $request->name . ' has been updated!']);
     }
 
@@ -350,5 +356,40 @@ class AdminZonalManagementController extends Controller
         //dump($zoneCityGstCollection->toArray());
 
         return response()->json(['status' => 1, 'success' => 'Zone cities GST updated !']);
+    }
+
+    public function add_cities(Request $request)
+    {
+        
+        if($request->has('table_data')) {
+            $data = $request->table_data;
+            foreach($data as $d) 
+            {
+                $record = ZoneClassCity::where(['zone_id' => $request->zone_id , 'city_id' => $d['zone_city_id'], 'zone_classification_id' => $d['city_classification_id']]);
+                if($record->doesntExist()) {
+                    $new = new ZoneClassCity;
+                    $new->zone_id = $request->zone_id;
+                    $new->city_id =  $d['zone_city_id'];
+                    $new->class = $d['city_class_id'];
+                    $new->zone_classification_id = $d['city_classification_id'];
+                    $new->save();
+                }
+            }
+    
+            return response()->json(['status' => 1, 'success' => 'Request completed']);
+        }
+    
+    }
+
+    public function search_cities(Request $request) {
+
+        $cities = City::where(['status' => 1, 'business_category_id' => 1, 'zone_id' => $request->searchable_zone])->pluck('id')->toArray();
+        $cities_class_1 = ZoneClassCity::join('cities', 'zone_class_cities.city_id', 'cities.id')->where(['zone_class_cities.zone_id' => $request->zone_id, 'zone_class_cities.zone_classification_id' => 1])->whereIn('city_id',$cities )->select(['cities.name','zone_class_cities.*'])->get();
+        $cities_class_2 = ZoneClassCity::join('cities', 'zone_class_cities.city_id', 'cities.id')->where(['zone_class_cities.zone_id' => $request->zone_id, 'zone_class_cities.zone_classification_id' => 2])->whereIn('city_id',$cities )->select(['cities.name','zone_class_cities.*'])->get();
+        
+        return response()->json([
+            'cities_class_1' => $cities_class_1,
+            'cities_class_2' => $cities_class_2
+        ]);
     }
 }
