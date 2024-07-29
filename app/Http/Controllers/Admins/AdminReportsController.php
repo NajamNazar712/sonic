@@ -5559,7 +5559,7 @@ class AdminReportsController extends Controller
                 $count = $count->whereIn('dc.hub_id', session('hubs'));
             }
         }
-
+        $count=  $count->whereNotNull('shipments.tracking_number');
         $count = $count->count();
 
         $sales = DB::connection($connection)->table('shipments')
@@ -5676,7 +5676,7 @@ class AdminReportsController extends Controller
                 $sales = $sales->whereIn('dc.hub_id', session('hubs'));
             }
         }
-
+        $sales = $sales->whereNotNull('shipments.tracking_number');
         $datatable = Datatables::of($sales)
             ->setTotalRecords($count)
 
@@ -14996,7 +14996,7 @@ class AdminReportsController extends Controller
                       ->orWhere('scu.user_id', $search_kam);
             });
         }
-
+        $shipments = $shipments->whereNotNull('shipments.tracking_number');
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -15172,6 +15172,11 @@ class AdminReportsController extends Controller
                 // if (isset($rowArray['location_status_hss'])) {
                 //     $rowArray['location_status_hss'] = ($rowArray['location_status_hss']) ? (($rowArray['location_status_hss'] == 1) ? 'On-site' : 'Off-site') : '-';
                 // }
+
+                //format tracking_number
+                if (isset($rowArray['tracking_number']) && $rowArray['tracking_number']) {
+                    $rowArray['tracking_number'] = '="' . $rowArray['tracking_number'] .'"' ;
+                }
                 
                 $rowArray['shipper'] = ($rowArray['booking_type_id'] == 4) ? ($rowArray['shipper'] . ' (' . $rowArray['poc'] . ')') : $rowArray['shipper'];
                 
