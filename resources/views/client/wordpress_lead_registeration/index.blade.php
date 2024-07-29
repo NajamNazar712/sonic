@@ -288,7 +288,7 @@
                                         <div>
                                             <input type="text" class="form-control"
                                                 value="{{ old('brand_name') }}" name="brand_name"
-                                                placeholder="Brand Name">
+                                                placeholder="Brand Name" {{ $lead->brand ? 'readonly' : '' }}>
                                         </div>
                                     </div>
                                 </div>
