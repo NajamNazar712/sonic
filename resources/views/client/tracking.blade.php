@@ -1691,7 +1691,6 @@
                             if (useTextarea) {
                                 description = $('#service_description_new').val().trim();
                             } else {
-                                console.log(2, description);
                                 description = selectedTexts.join(', ');
                             }
                         } else if (!$('#service_description_textarea_new').hasClass('d-none')) {
