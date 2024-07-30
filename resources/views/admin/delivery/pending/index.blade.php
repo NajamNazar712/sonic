@@ -238,7 +238,6 @@
                     data: params,
                     success: function (result) {
                         head = [];
-
                         head.push('S.No');
                         head.push('Tracking .No');
                         head.push('Shipper');
@@ -276,7 +275,7 @@
                             row = [];
 
                             row.push(index + 1);
-                            row.push(values.tracking_number);
+                            row.push('\u200C' + values.tracking_number);
                             row.push(values.shipper);
                             row.push(values.sub_segment_name);
                             row.push(values.origin);

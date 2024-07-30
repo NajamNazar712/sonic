@@ -32,7 +32,8 @@
 
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
-                                            <a href="{{ asset('file/Track Actual Shipment Position.xlsx') }}?v=01_12_2022" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                            {{-- <a href="{{ asset('file/Track Actual Shipment Position.xlsx') }}?v=01_12_2022" class="btn btn-primary"><i class="la la-download"></i> Download Template</a> --}}
+                                            <a href="{{ asset('file/Track Actual Shipment Position New.xlsx') }}?v=07_30_2024" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                         </div>
                                     </div>
                                 </div>
@@ -219,10 +220,8 @@
 
                             $.each(result.data, function(index, values) {
                                 row = [];
-
-
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
+                                row.push('\u200C' + values.tracking_number);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.status);

@@ -944,7 +944,6 @@ class AdminTrackingController extends Controller
     public function track_v2(Request $request)
     {
         $tracking_numbers = explode(',', $request->tracking_numbers);
-
         $tracking = array();
 
         foreach ($tracking_numbers as $tracking_number) {
@@ -2201,7 +2200,7 @@ class AdminTrackingController extends Controller
             'integer' => ':attribute must be an Integer.',
         ];
         $rules = [
-            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')]
+            'tracking_number' => ['required', 'numeric', Rule::exists('shipments', 'tracking_number')]
         ];
         $fields = [0 => 'tracking_number'];
 

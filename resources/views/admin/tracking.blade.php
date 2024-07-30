@@ -2206,8 +2206,13 @@
                     });
             }
 
+            // @if (app('request')->has('tracking_number'))
+            //     track({{ app('request')->input('tracking_number') }});
+            // @endif
+
             @if (app('request')->has('tracking_number'))
-                track({{ app('request')->input('tracking_number') }});
+                let trackingNumber = BigInt('{{ app('request')->input('tracking_number') }}');;
+                track(trackingNumber);
             @endif
 
             var select = $('#track_form .tracking_numbers').selectize({
