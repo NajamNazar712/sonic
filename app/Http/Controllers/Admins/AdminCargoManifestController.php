@@ -352,7 +352,12 @@ class AdminCargoManifestController extends Controller
             })
             ->leftjoin('misrouted_history as mh', function ($join) {
                 $join->on('mh.shipment_id', '=', 'shipments.id')
-                    ->on('shipments.shipper_status_id', '=', DB::raw(49))
+                    ->on(function ($query) {
+                        $query->where('shipments.shipper_status_id', '=', DB::raw(49))
+                            ->orWhere('shipments.shipper_status_id', '=', DB::raw(70))
+                            ->orWhere('shipments.shipper_status_id', '=', DB::raw(73));
+                    })
+                    // ->on('shipments.shipper_status_id', '=', DB::raw(49))
                     ->where(
                         'mh.id',
                         '=',
@@ -370,7 +375,12 @@ class AdminCargoManifestController extends Controller
             })
             ->leftjoin('misrouted_history as gmhh', function ($join) {
                 $join->on('gmhh.shipment_id', '=', 'shipments.id')
-                    ->on('shipments.shipper_status_id', '=', DB::raw(68))
+                    //->on('shipments.shipper_status_id', '=', DB::raw(68))
+                    ->on(function ($query) {
+                        $query->where('shipments.shipper_status_id', '=', DB::raw(68))
+                            ->orWhere('shipments.shipper_status_id', '=', DB::raw(69))
+                            ->orWhere('shipments.shipper_status_id', '=', DB::raw(72));
+                    })
                     ->where('gmhh.id', '=',
                         DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
             })
@@ -463,11 +473,27 @@ class AdminCargoManifestController extends Controller
                             ->whereIn('olddc.hub_id', session('hubs'));
                     })
                     ->orWhere(function ($sub_query) {
+                        $sub_query->where('shipments.shipper_status_id', 70)
+                            ->whereIn('olddc.hub_id', session('hubs'));
+                    })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('shipments.shipper_status_id', 73)
+                            ->whereIn('olddc.hub_id', session('hubs'));
+                    })
+                    ->orWhere(function ($sub_query) {
                         $sub_query->where('shipments.shipper_status_id', 11)
                             ->whereIn('csj.city_id', session('hubs'));
                     })
                     ->orWhere(function ($sub_query) {
                         $sub_query->where('shipments.shipper_status_id', 68)
+                            ->whereIn('csj.city_id', session('hubs'));
+                    })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('shipments.shipper_status_id', 69)
+                            ->whereIn('csj.city_id', session('hubs'));
+                    })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('shipments.shipper_status_id', 72)
                             ->whereIn('csj.city_id', session('hubs'));
                     })
                     ->orWhere(function ($sub_query) {
@@ -553,7 +579,7 @@ class AdminCargoManifestController extends Controller
             ->editColumn('origin', function ($shipments) {
                 if (in_array($shipments->shipper_status_id, [20, 30, 37])) {
                     return $shipments->destination;
-                } else if ($shipments->shipper_status_id == 49) {
+                } else if ($shipments->shipper_status_id == 49 || $shipments->shipper_status_id == 70 || $shipments->shipper_status_id == 73) {
                     return $shipments->old_destination;
                 } else if ($shipments->shipper_status_id == 55) {
                     return $shipments->old_destination_intercept;
@@ -564,7 +590,7 @@ class AdminCargoManifestController extends Controller
             ->editColumn('origin_hub', function ($shipments) {
                 if (in_array($shipments->shipper_status_id, [20, 30, 37])) {
                     return $shipments->destination_hub;
-                } else if ($shipments->shipper_status_id == 49) {
+                } else if ($shipments->shipper_status_id == 49 || $shipments->shipper_status_id == 70 || $shipments->shipper_status_id == 73) {
                     return $shipments->old_destination_hub;
                 } else if ($shipments->shipper_status_id == 55) {
                     return $shipments->old_destination_intercept_hub;
@@ -588,7 +614,7 @@ class AdminCargoManifestController extends Controller
             ->editColumn('zone_name', function ($shipments) {
                 if (in_array($shipments->shipper_status_id, [20, 30, 37])) {
                     return $shipments->dest_zone;
-                } else if ($shipments->shipper_status_id == 49) {
+                } else if ($shipments->shipper_status_id == 49 || $shipments->shipper_status_id == 70 || $shipments->shipper_status_id == 73) {
                     return $shipments->old_destination_hub_zone;
                 } else if ($shipments->shipper_status_id == 55) {
                     return $shipments->old_destination_intercept_hub_zone;
