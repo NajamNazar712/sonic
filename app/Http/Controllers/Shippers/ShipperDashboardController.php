@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use Illuminate\Support\Facades\Log;
 use Auth;
 use Carbon\Carbon;
 use App\DailyVisit;
@@ -12,6 +13,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\Product;
 use App\Http\Models\Segment;
+use App\LeadProgressSetting;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
 use App\Http\Models\BanksList;
@@ -47,6 +49,7 @@ use App\Http\Models\PackagingCharge;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\BusinessCategory;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\SubCategorySegment;
@@ -99,10 +102,10 @@ use App\Http\Models\PackagingMaterialTypeSizes;
 use App\Http\Models\ShipperVerificationPinCode;
 use App\Http\Models\WMS\WmsPerSquareFootCharge;
 use App\Http\Models\Admin\StandardFuelSurcharge;
+
 use App\Http\Models\CorporateCashHandlingCharge;
 use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Controllers\NotificationsController;
-
 use App\Http\Models\CorporateDefaultReturnCharge;
 use App\Http\Models\CorporateDefaultWeightCharge;
 use App\Http\Models\CorporateMinChargeableWeight;
@@ -137,7 +140,6 @@ use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\LeadProgressSetting;
 
 
 //use Illuminate\Support\Facades\Auth;
@@ -271,7 +273,9 @@ class ShipperDashboardController extends Controller
 
                 $percentage = null; 
                 $color = null;
+                $short_description = "";
                 $description = "";
+
                 $user = User::find($shipper_id);
                 
                 $weight_charges = WeightCharge::where('user_id' , $shipper_id);
@@ -281,6 +285,7 @@ class ShipperDashboardController extends Controller
                     $color = $lead_progress_setting->color;
 
                     $description = "Your account is $percentage% completed";
+                    $short_description = 'Signed Up';
                     
                 }else if(($weight_charges->exists() || $user->request_custom_quotation == 1) && !isset($user->rates_added_by)){
                     $lead_progress_setting = LeadProgressSetting::find(2);
@@ -288,6 +293,8 @@ class ShipperDashboardController extends Controller
                     $color = $lead_progress_setting->color;
 
                     $description = "Your account is $percentage% completed";
+                    $short_description = 'Custom Rates Requested';
+
 
                 }else if (isset($user->rates_added_by) && $user->documents_status != 2){
                     $lead_progress_setting = LeadProgressSetting::find(3);
@@ -295,6 +302,8 @@ class ShipperDashboardController extends Controller
                     $color = $lead_progress_setting->color;
 
                     $description = "Your account is $percentage% completed";
+                    $short_description = 'Registration Confirmed';
+
 
                 }else if ($user->documents_status == 2 && $user->status != 3){
                     $lead_progress_setting = LeadProgressSetting::find(4);
@@ -302,6 +311,8 @@ class ShipperDashboardController extends Controller
                     $color = $lead_progress_setting->color;
                     
                     $description = "Your account is $percentage% completed";
+                    $short_description = 'Documents Verified';
+
 
                 }else if ($user->status == 3){
                     $lead_progress_setting = LeadProgressSetting::find(5);
@@ -309,6 +320,7 @@ class ShipperDashboardController extends Controller
                     $color = $lead_progress_setting->color;
 
                     $description = "Your account is activated";
+                    $short_description = 'Account Activated';
 
                 }
 
@@ -321,7 +333,7 @@ class ShipperDashboardController extends Controller
                 }*/
                 $shipper_payment = null;
 
-                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment, 'percentage' => $percentage, 'user' => $user, 'color' => $color , 'description' => $description]);
+                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment, 'percentage' => $percentage, 'user' => $user, 'color' => $color , 'description' => $description, 'short_description' => $short_description]);
             }
  
         }
@@ -2272,6 +2284,9 @@ class ShipperDashboardController extends Controller
             }
 
             $date = Carbon::now()->format('Y_m_d');
+
+            
+
             if($user_attachment->e_sign_image != NULL) {
                 Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->e_sign_image);
             }
@@ -2282,16 +2297,56 @@ class ShipperDashboardController extends Controller
             session(['agreement_signed' => 1]);
             User::where('id',session('user_id'))->update(['agreement_signed' => 1]);
 
+
+             //Download CRF for new requirement from shipper side
+
+             $user = User::find(session('user_id'));
+             if($user->lead_id){
+                $this->download_crf($user_attachment, $date);        
+             }
+
             NotificationsController::send(149,session('user_id'));
         }
         return redirect()->back()->with(['success'=>"Agreement Signed Successfully!"]);
     }
+
+
 
     public function get_agreement(Request $request)
     {
         $html = ShipperAgreementController::view_crf_agreement($request->id,null,TRUE);
         return $html;
     }
+
+
+    public function download_crf($user_attachment, $date)
+    {
+        try {
+            DB::beginTransaction();
+            if ($user_attachment->filled_and_signed_pdf != NULL) {
+                Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->filled_and_signed_pdf);
+            }
+        
+            $date = now()->format('Ymd_His');
+            $filename = 'filled_and_signed_pdf_' . $date . '_' . session('user_id') . '.pdf';
+            $html = ShipperAgreementController::view_crf_agreement(session('user_id'));
+            $pdf = SnappyPDF::loadHTML($html);
+            $filePath = 'users_attached_documents/' . session('user_id') . '/' . $filename;
+            Storage::disk('public')->put($filePath, $pdf->output());
+        
+            $user_attachment->filled_and_signed_pdf = $filename;
+            $user_attachment->save();
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Error in handling PDF: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while processing the document.');
+        }
+    }
+
+
 
     public function rate_daily_visit (Request $request)
     {

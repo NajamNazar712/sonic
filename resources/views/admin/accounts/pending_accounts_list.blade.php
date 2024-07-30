@@ -101,6 +101,7 @@
                                         <th class="border-primary border-darken-1">Referral Code</th>
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
+                                        <th class="border-primary border-darken-1">Lead Account Progress (%)</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -1223,6 +1224,8 @@
                         head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
+                        head.push('Lead Account Progress (%)');
+
 
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -1270,6 +1273,8 @@
                             row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
+                            row.push(values.lead_progress);
+
                             body.push(row);
                         });
                     },
@@ -1747,6 +1752,7 @@
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
+                {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
                rowCallback: function(row, data, index) {

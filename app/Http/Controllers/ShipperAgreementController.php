@@ -2,58 +2,60 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\BookingType;
-use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\City;
-use App\Http\Models\CorporateCashHandlingCharge;
-use App\Http\Models\CorporateDefaultCashHandlingCharge;
-use App\Http\Models\CorporateDefaultFuelSurcharge;
-use App\Http\Models\CorporateDefaultInsuranceCharge;
-use App\Http\Models\CorporateDefaultRateStatus;
-use App\Http\Models\CorporateDefaultReturnCharge;
-use App\Http\Models\CorporateDefaultWeightCharge;
-use App\Http\Models\CorporateDeliveryTypeStatus;
-use App\Http\Models\CorporateFuelSurcharge;
-use App\Http\Models\CorporateInsuranceCharge;
-use App\Http\Models\CorporateMinChargeableWeight;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CorporateReturnCharge;
-use App\Http\Models\CorporateReturnChargeZoneWise;
-use App\Http\Models\CorporateWeightCharge;
-use App\Http\Models\CorporateWeightChargeZoneWise;
-use App\Http\Models\CRFTermsConditions;
-use App\Http\Models\DiscountWeightCharge;
-use App\Http\Models\DwsWeightCharges;
-use App\Http\Models\FuelSurcharge;
-use App\Http\Models\InsuranceCharge;
-use App\Http\Models\InternationalRatesCashHandlingCharges;
-use App\Http\Models\InternationalRatesHub;
-use App\Http\Models\InternationalRatesInsuranceCharges;
-use App\Http\Models\InternationalRatesReturnCharges;
-use App\Http\Models\InternationalRatesStatus;
-use App\Http\Models\InternationalRatesWeightCharges;
-use App\Http\Models\InternationalStandardDhlRate;
-use App\Http\Models\InternationalUserRate;
-use App\Http\Models\PackagingCharge;
-use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
-use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
-use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
-use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
-use App\Http\Models\Rates\InternationalEconomyRate;
-use App\Http\Models\Rates\InternationalEconomyRateStatus;
-use App\Http\Models\Rates\RateDestinationHub;
-use App\Http\Models\Rates\RateOriginHub;
+use App\Http\Models\Zone;
+use Illuminate\Http\Request;
 use App\Http\Models\RateStatus;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\BookingType;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WeightCharge;
-use App\Http\Models\Zone;
+use App\Http\Models\FuelSurcharge;
+use App\Http\Models\InsuranceCharge;
+use App\Http\Models\PackagingCharge;
+use App\Http\Models\DwsWeightCharges;
 use Barryvdh\Snappy\Facades\SnappyPdf;
-use Illuminate\Http\Request;
+use App\Http\Models\CashHandlingCharge;
+use App\Http\Models\CRFTermsConditions;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\Rates\RateOriginHub;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\DiscountWeightCharge;
+use App\Http\Models\CorporateReturnCharge;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\InternationalRatesHub;
+use App\Http\Models\InternationalUserRate;
+use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\UserDocumentAttachment;
+use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\InternationalRatesStatus;
+use App\Http\Models\Rates\RateDestinationHub;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\CorporateCashHandlingCharge;
+use App\Http\Models\CorporateDeliveryTypeStatus;
+use App\Http\Models\CorporateDefaultReturnCharge;
+use App\Http\Models\CorporateDefaultWeightCharge;
+use App\Http\Models\CorporateMinChargeableWeight;
+use App\Http\Models\InternationalStandardDhlRate;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\CorporateReturnChargeZoneWise;
+use App\Http\Models\CorporateWeightChargeZoneWise;
+use App\Http\Models\Rates\InternationalEconomyRate;
+use App\Http\Models\CorporateDefaultInsuranceCharge;
+use App\Http\Models\InternationalRatesReturnCharges;
+use App\Http\Models\InternationalRatesWeightCharges;
+use App\Http\Models\CorporateDefaultCashHandlingCharge;
+use App\Http\Models\InternationalRatesInsuranceCharges;
+use App\Http\Models\Rates\InternationalEconomyRateStatus;
+use App\Http\Models\InternationalRatesCashHandlingCharges;
+use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
+use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
+use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 
 class ShipperAgreementController extends Controller
 {
@@ -1142,7 +1144,7 @@ otherwise it will be rejected</li>
             $fuel_charge = $fuel_surcharge->fuel_surcharge;
         }
         $check = '';
-        if($shipper->term_and_conditions){
+        if($shipper->term_and_conditions || $shipper->lead_id){
             $check = 'checked';
         }
         $terms_conditions = '<div class="terms_conditions pl-2 pt-6"><h2><u>General Terms & Conditions </u></h2>';
@@ -1165,8 +1167,24 @@ otherwise it will be rejected</li>
                                <li><strong>TRAX Online (Pvt) Ltd.</strong> may add new terms & conditions at any point in time.</li>
                              </ul>';
         if(!$for_shipper_agreement_modal) {
+          
             $terms_conditions .= '<h2 class="mt-0"><u>Acknowledgment & Signature</u></h2>';
-            $terms_conditions .= '<div class="m-2"><input class="form-check-input" type="checkbox" value="1" disabled ' . $check . '> <span class="mt-2">I hereby accept all the terms and conditions mention above along with the agreed upon rates mentioned within.</span> </div><div class="row mt-2"><div class="col-6"><span class="border-bottom"><strong>Rates Added By</strong></span><p class="pt-2">' . $sales_person_name . '</p></div><div class="col-6"><p><span class="border-bottom"><strong>Shipper Signature</strong></span></p><p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p></div></div>';
+            $terms_conditions .= '<div class="m-2"><input class="form-check-input" type="checkbox" value="1" disabled ' . $check . '> <span class="mt-2">I hereby accept all the terms and conditions mentioned above along with the agreed-upon rates mentioned within.</span> </div>';
+            $terms_conditions .= '<div class="row mt-2">';
+            $terms_conditions .= '<div class="col-6"><span class="border-bottom"><strong>Rates Added By</strong></span><p class="pt-2">' . $sales_person_name . '</p></div>';
+            $terms_conditions .= '<div class="col-6">';
+            $terms_conditions .= '<p><span class="border-bottom"><strong>Shipper Signature</strong></span></p>';
+
+            if($shipper->lead_id){
+                $user_documents = UserDocumentAttachment::where('user_id', $shipper_id)->first();
+                $file = $user_documents->e_sign_image;
+                $url = Storage::url('users_attached_documents/' . $shipper_id . '/' . $file);
+                $terms_conditions .= '<img src="' . $url . '" alt="Shipper Signature" />';
+            }
+            
+            $terms_conditions .= '<p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p>';
+            $terms_conditions .= '</div></div>';
+            
         }
 
 
@@ -1189,6 +1207,7 @@ otherwise it will be rejected</li>
                 </html>
       ';
         }
+
 
         return $html;
     }

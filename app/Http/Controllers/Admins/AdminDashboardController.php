@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\FafCharges;
 use Exception;
 use Carbon\Carbon;
+use App\FafCharges;
 use GuzzleHttp\Client;
 use App\RouteLocations;
 use App\Http\Models\City;
@@ -12,6 +12,7 @@ use App\Http\Models\Zone;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\Product;
+use App\LeadProgressSetting;
 use App\TerritoryTagHistory;
 use CreateCityOsaRatesTable;
 use Illuminate\Http\Request;
@@ -66,7 +67,9 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\HistorySmsCharges;
 use App\Http\Models\HR\EmployeeGender;
+use App\Http\Models\PendingSmsCharges;
 use App\Http\Models\Rates\RateHistory;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Admin\DeliveryNote;
@@ -82,6 +85,7 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\NotificationSetting;
 use App\Http\Models\Rates\RateOriginHub;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\AverageShipmentCycle;
@@ -123,6 +127,7 @@ use App\Http\Models\Admin\StandardReturnCharge;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\NotificationSettingShipper;
 use App\Http\Models\PackagingMaterialTypeSizes;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Rates\HistoryRateOriginHub;
@@ -182,6 +187,7 @@ use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Controllers\Admins\ActivityTrailController;
+
 use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Controllers\Admins\ShipmentChargesController;
@@ -206,10 +212,6 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Http\Models\HistorySmsCharges;
-use App\Http\Models\PendingSmsCharges;
-use App\Http\Models\NotificationSetting;
-use App\Http\Models\NotificationSettingShipper;
 
 
 class AdminDashboardController extends Controller
@@ -8508,6 +8510,7 @@ class AdminDashboardController extends Controller
 
         if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
             User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_authorized_by' => 346, 'rates_approved_at' => Carbon::now(), 'rates_added_at' => Carbon::now(), 'rate_status' => 0, 'request_custom_quotation' => 0, 'on_board_status' => 1]);
+            session(['status' => 2]);
         } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
             User::where('id', $id)->update(['status' => 0, 'rate_status' => 0, 'request_custom_quotation' => 1, 'on_board_status' => 1]);
             // NotificationsController::send(231, $id);
@@ -9160,16 +9163,14 @@ class AdminDashboardController extends Controller
             }
         }
 
-      
-
+        $user =  User::find($id);
+        if($request->request_custom_quotations == 1 && $user->lead_id){
+            NotificationsController::send(38, $id);
+        }
 
         //Sales Commissison End
 
         if(!$request->has('wordpress_account')){
-            $user =  User::find($id);
-            if(!isset($user->on_board_status)){
-                NotificationsController::send(38, $id);
-            }
             return redirect(route('admin.accounts.pending'))->with('success', 'All Rates are added');
         }
     }
@@ -10025,11 +10026,7 @@ class AdminDashboardController extends Controller
                 $join->on('faf_charges.user_id', '=', 'users.id')->where('faf_charges.status', '=', 1);
             })
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type' , 'users.sms_charges','faf_charges.status as fc_status'])
-            ->whereIn('users.status', [0, 1, 2, 5])
-            ->where('users.blacklist', 0)
-            ->where('users.email_verified', 1)
-            ->groupBy('users.id');
+            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type' , 'users.sms_charges', 'users.on_board_status', 'users.request_custom_quotation', 'faf_charges.status as fc_status'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)->groupBy('users.id');
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -10094,7 +10091,9 @@ class AdminDashboardController extends Controller
                     return "Authorized";
                 } else if ($users->rate_status == 0 && $users->status == 1) {
                     return "Requested";
-                } else if ($users->rate_status == 0 && $users->status == 0) {
+                } else if ($users->rate_status == 0 && $users->status == 0 && $users->request_custom_quotation != 1) {
+                    return "Pending";
+                }else{
                     return "Requested For Custom Quotation";
                 }
             })
@@ -10382,7 +10381,49 @@ class AdminDashboardController extends Controller
                     return '-';
                 }
             })
-            ->addColumn("action", function ($result) {
+            ->addColumn("lead_progress", function ($user) {
+                if($user->lead_id){
+                    $weight_charges = WeightCharge::where('user_id' , $user->id);
+
+                    $description = '-';
+                    
+                    if(($user->on_board_status < 1 && $user->created_at > '2024-06-13 00:00:00')){
+                        $lead_progress_setting = LeadProgressSetting::find(1);
+                        $percentage = $lead_progress_setting->percent;
+    
+                        $description = "Your account is $percentage% completed";
+                    }else if(($weight_charges->exists() || $user->request_custom_quotation == 1) && !isset($user->rates_added_by)){
+                        $lead_progress_setting = LeadProgressSetting::find(2);
+                        $percentage = $lead_progress_setting->percent;
+    
+                        $description = "Your account is $percentage% completed";
+    
+                    }else if (isset($user->rates_added_by) && $user->documents_status != 2){
+                        $lead_progress_setting = LeadProgressSetting::find(3);
+                        $percentage = $lead_progress_setting->percent;
+    
+                        $description = "Your account is $percentage% completed";
+    
+                    }else if ($user->documents_status == 2 && $user->status != 3){
+                        $lead_progress_setting = LeadProgressSetting::find(4);
+                        $percentage = $lead_progress_setting->percent;
+                        
+                        $description = "Your account is $percentage% completed";
+    
+                    }else if ($user->status == 3){
+                        $lead_progress_setting = LeadProgressSetting::find(5);
+                        $percentage = $lead_progress_setting->percent;
+    
+                        $description = "Your account is activated";
+    
+                    }
+
+                    return $description;
+                }else{
+                    return '-';
+                }
+            })
+                ->addColumn("action", function ($result) {
                 if (in_array($result->id, session('tagged_shippers'))) {
                     $multiple_sale_check = true;
                 } else {
@@ -10417,7 +10458,17 @@ class AdminDashboardController extends Controller
                             }
                         } else {
                             if (session('role_id') == 1 || in_array(6, session('permissions'))) {
-                                $dropdown .= '<button onclick="window.open(\'' . route('admin.add.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
+
+                                if($result->lead_id){
+                                    if($result->on_board_status < 1){
+                                         $dropdown .= "";
+                                    }else{
+                                        $dropdown .= '<button onclick="window.open(\'' . route('admin.add.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
+                                    }
+                                }else{
+                                    $dropdown .= '<button onclick="window.open(\'' . route('admin.add.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
+                                }
+                              
                             }
                         }
                     } else {
@@ -10472,8 +10523,12 @@ class AdminDashboardController extends Controller
                 }
 
 
-                if (session('role_id') == 1 || in_array(110, session('permissions'))) {
-                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+                if (session('role_id') == 1 || in_array(110, session('permissions'))) {                
+                    if(($result->lead_id && $result->on_board_status == 1) || !$result->lead_id){
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+                    }else{
+                        $dropdown .= "";
+                    }
                 }
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if ($sale_check != null) {
@@ -10674,12 +10729,12 @@ class AdminDashboardController extends Controller
         $email_ids = implode(',', $email_ids);
         $reference = Reference::where('id', $user->reference_id)->first();
         $segments = Segment::all();
-        $sub_segments = SubCategorySegment::where('segment_id', $user->segment->id)->get();
+        $sub_segments = SubCategorySegment::where('segment_id', $user->segment->id ?? null)->get();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
         $average_shipment_durations_cycle = AverageShipmentCycle::all();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
         $territories = Territory::select('id', 'name')->get();
-        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'average_shipment_durations_cycle' =>$average_shipment_durations_cycle, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories,'days'=>$payment_cycle_days]);
+        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name ?? null, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'average_shipment_durations_cycle' =>$average_shipment_durations_cycle, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories,'days'=>$payment_cycle_days]);
     }
 
     public function updateProfile(Request $request)

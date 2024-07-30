@@ -1677,6 +1677,7 @@ class Permission
                 'get_agreement',
                 'welcome',
                 'orders.list',
+                'terms.download'
 
             ];
             

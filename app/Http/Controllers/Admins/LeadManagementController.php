@@ -30,6 +30,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Models\Admin\Lead\LeadCallStatusLog;
 use App\Http\Models\ServiceList;
+use Illuminate\Support\Str;
 
 class LeadManagementController extends Controller
 {
@@ -179,7 +180,8 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status','leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name')->OrderByDesc('leads.requested_date');
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status','leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name')
+            ->OrderByDesc('leads.requested_date');
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
         }
@@ -270,6 +272,9 @@ class LeadManagementController extends Controller
                 $route = route('admin.leads.view_remarks', ['id' => $lead->lead_id]);
                 return "<u><a href='{$route}\' class='leads' target='_blank'>" . str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT) . "</a></u>";
                 //return $lead->lead_id;
+            })
+            ->addColumn('request_resource', function ($lead) {
+                return isset($lead->via_channel) ?  $lead->via_channel : '-';
             })
             ->addColumn('action', function ($lead) {
                 $dropdown = '
@@ -550,6 +555,10 @@ class LeadManagementController extends Controller
         $lead = Lead::find($lead_id);
         $status = $request->status;
 
+        if($status == 9 && !$lead->sale_person_id){
+            return response()->json(['status' => 0, 'error' => 'Without salesperson tagging, the status In Process for Activation will not be updated on Add Lead entries in lead management.']);
+        }
+
         if ($status != NULL) {
             if ($lead) {
                 $lead_log = new LeadLog();
@@ -569,12 +578,29 @@ class LeadManagementController extends Controller
                 $lead->status_id = $status;
                 $lead->reason = $reason;
                 $lead->updated_by = Auth::id();
+
+                //lead 2nd phase part
+                $token = str::random(8);
+                if($lead->activation_code == ''){
+                    $lead->activation_code = $token;
+                    $lead->save();
+                }
+
+                if($status == 9 && $lead->email_status != 1 && $lead->activation_code != '') {
+                    $lead->email_status = 1;
+                    $lead->via_channel = 'Sonic';
+                    NotificationsController::send(230, $lead->id);
+                }
+                //
+
                 $lead->save();
 
                 if ($lead->sale_person_id != NULL) {
-                    if ($status == 9) {
-                        NotificationsController::send(113, $lead);
-                    } elseif ($status == 2) {
+                    // if ($status == 9 && $lead->created_at < '2024-07-22 00:00:00')  {
+                    //     NotificationsController::send(113, $lead);
+                    // } elseif()
+                    
+                    if ($status == 2) {
                         LeadTaggingController::notification_unresponsive($lead->id);
                     }
                 }
@@ -603,11 +629,16 @@ class LeadManagementController extends Controller
             $reason = $request->reason;
         else
             $reason = NULL;
-        $status = $request->status;
+            $status = $request->status;
 
         if ($status != Null) {
             foreach ($lead_ids as $lead) {
                 $lead = Lead::find($lead);
+
+                if($status == 9 && !$lead->sale_person_id){
+                    return response()->json(['status' => 0, 'error' => 'Without salesperson tagging, the status In Prcess for Activation will not be updated on Add Lead entres in lead management']);
+                }
+
                 if ($lead) {
                     $lead_log = new LeadLog();
                     $lead_log->lead_id = $lead->id;
@@ -625,11 +656,29 @@ class LeadManagementController extends Controller
                     $lead->status_id = $status;
                     $lead->reason = $reason;
                     $lead->updated_by = Auth::id();
+
+                    //lead 2nd phase part
+                    $token = str::random(8);
+                    if($lead->activation_code == ''){
+                        $lead->activation_code = $token;
+                        $lead->save();
+                    }
+    
+                    if($status == 9 && $lead->email_status != 1 && $lead->activation_code != '') {
+                        $lead->email_status = 1;
+                        $lead->via_channel = 'Sonic';
+                        NotificationsController::send(230, $lead->id);
+                    }
+                    //
+
                     $lead->save();
+
                     if ($lead->sale_person_id != NULL) {
-                        if ($status == 9) {
-                            NotificationsController::send(113, $lead);
-                        } elseif ($status == 2) {
+                        // if ($status == 9 && $lead->created_at < '2024-07-22 00:00:00')  {
+                        //     NotificationsController::send(113, $lead);
+                        // } elseif()
+                        
+                        if ($status == 2) {
                             LeadTaggingController::notification_unresponsive($lead->id);
                         }
                     }
@@ -726,6 +775,7 @@ class LeadManagementController extends Controller
     {
         $lead_ids = $request->lead_ids;
         $sale_person = $request->sale_person;
+
         if ($request->has('reference_person')) {
             $reference_person = $request->reference_person;
         } else {
@@ -736,21 +786,25 @@ class LeadManagementController extends Controller
             $leads = $leads->get();
             foreach ($leads as $lead) {
                 //autotagging
+                
                 $lead_tagging = LeadTagging::where('sale_person_id', $lead->sale_person_id);
                 if ($lead_tagging->exists()) {
                     $lead_tagging = $lead_tagging->get()->first();
                     if ($lead_tagging->count > 0) {
-
+                        
                         $lead_tagging->count = $lead_tagging->count - 1;
                     }
                 }
+
                 //autotagging end
                 $lead->sale_person_id = $sale_person;
                 if ($request->has('reference_person')) {
                     $lead->reference_person_id = $reference_person;
                 }
+                
                 $lead->updated_by = Auth::id();
                 $lead->sale_person_updated_at = Carbon::now();
+                $lead->status_id = 15;
                 $lead->save();
                 NotificationsController::app_notification(14, $lead->sale_person_id, 1, $lead->id);
             }
@@ -882,9 +936,8 @@ class LeadManagementController extends Controller
 
     public function add(Request $request)
     {
-
         try {
-
+            $token = str::random(8);
             $new_lead = new Lead();
             $new_lead->contact_person = $request->contact_person;
             $new_lead->phone_number = $request->phone_number;
@@ -897,8 +950,12 @@ class LeadManagementController extends Controller
             $new_lead->territory_area_id = $request->territory_area_id;
             $new_lead->brand = $request->brand;
             $new_lead->company = $request->company;
+            $new_lead->company_name = $request->company;
             $new_lead->expected_shipments = $request->expected_shipments;
+            $new_lead->average_shipment_per_week = $request->expected_shipments;
             $new_lead->status_id = 1;
+            $new_lead->activation_code = $token;
+            $new_lead->via_channel = 'Sonic';
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
 
