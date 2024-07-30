@@ -427,6 +427,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('check_zone_name/{id?}', 'Admins\AdminZonalManagementController@check_zone_name')->name('check_zone_name');
 
             Route::post('update_zone_cities_gst', 'Admins\AdminZonalManagementController@update_zone_cities_gst')->name('update_zone_cities_gst');
+            Route::post('add_cities','Admins\AdminZonalManagementController@add_cities')->name('add_cities');
+            Route::post('search_cities','Admins\AdminZonalManagementController@search_cities')->name('search_cities');
         });
 
         Route::prefix('territory')->name('territory.')->group(function () {
@@ -845,6 +847,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status_logs', 'Admins\DeliveryController@sdn_status_logs')->name('status_logs');
 
             Route::post('sdn_actions', 'Admins\DeliveryController@sdn_actions')->name('sdn_actions');
+
+            Route::post('sdn_deposit_slip_logs', 'Admins\DeliveryController@sdn_deposit_slip_logs')->name('sdn_deposit_slip_logs');
 
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('{id}/details', 'Admins\Retail\RetailCompletedDeliveries@sdn_details')->name('details');
@@ -1984,6 +1988,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('status', 'Admins\AdminNotificationsController@app_notification_status')->name('status');
         Route::post('details', 'Admins\AdminNotificationsController@app_notification_details')->name('details');
         Route::post('edit', 'Admins\AdminNotificationsController@app_notification_edit')->name('edit');
+    });
+
+    // SMS logs
+    Route::prefix('sms_logs')->name('sms_logs.')->group(function () {
+        Route::get('', 'Admins\AdminNotificationsController@sms_logs_view')->name('index');
+        Route::post('list', 'Admins\AdminNotificationsController@sms_logs')->name('list');
     });
 
     //Reports start

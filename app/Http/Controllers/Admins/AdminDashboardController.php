@@ -1250,15 +1250,16 @@ class AdminDashboardController extends Controller
             $all_users['results'][2]['text'] = 'Riders';
             $all_users['results'][2]['children'] = [];
             $all_users['pagination']['more'] = true;
+            $pending_shippers = User::whereIn('status',[0, 1, 2, 5])->get();
 
-        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
-        return view('admin.accounts.pending_accounts_list')->with(['products' => $products, 'segments' => $segments, 'sale_name' => $salesperson, 'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'payment_cycles'=>$payment_cycles]);
+        // $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        return view('admin.accounts.pending_accounts_list')->with(['products' => $products, 'segments' => $segments, 'sale_name' => $salesperson, 'shippers' => $pending_shippers, 'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'payment_cycles'=>$payment_cycles]);
     }
 
     public function activeAccountsList()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 2);
-        $shippers = User::whereIn('status', [3, 4])->get();
+        
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
         $products = Product::select('id', 'product_name')->get();
         $segments = Segment::all();
@@ -1296,8 +1297,8 @@ class AdminDashboardController extends Controller
         $all_users['results'][2]['text'] = 'Riders';
         $all_users['results'][2]['children'] = [];
         $all_users['pagination']['more'] = true;
-        $active_shippers = User::where('status', 3)->get();
-        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'active_shippers' => $active_shippers,'block_disable_reasons'=> $block_disable_reasons]);
+        $active_shippers = User::whereIn('status', [3, 4])->get();
+        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson, 'shippers' => $active_shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'block_disable_reasons'=> $block_disable_reasons]);
     }
 
     public function shipperExclude(Request $request)
@@ -8505,7 +8506,6 @@ class AdminDashboardController extends Controller
             }
         }
 
-        
         if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
             User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_authorized_by' => 346, 'rates_approved_at' => Carbon::now(), 'rates_added_at' => Carbon::now(), 'rate_status' => 0, 'request_custom_quotation' => 0, 'on_board_status' => 1]);
         } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
@@ -9386,7 +9386,7 @@ class AdminDashboardController extends Controller
             $users = $users->where('users.cnic', $search_cnic);
         }
         if ($search_shipper = $request->get('search_shipper')) {
-            $users = $users->where('users.id', $search_shipper);
+            $users = $users->whereIn('users.id', $search_shipper);
         }
 
         if ($search_iban = $request->get('search_iban')) {
@@ -10024,7 +10024,7 @@ class AdminDashboardController extends Controller
             $users = $users->where('users.cnic', $search_cnic);
         }
         if ($search_shipper = $request->get('search_shipper')) {
-            $users = $users->where('users.name', 'like', '%' . $search_shipper . '%');
+            $users = $users->whereIn('users.id', $search_shipper);
         }
 
         if ($search_iban = $request->get('search_iban')) {
