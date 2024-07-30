@@ -408,13 +408,21 @@ class AdminCargoManifestController extends Controller
                                     ->where('mh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
                             })
                             ->orWhere(function ($sub_query) {
-                                $sub_query->whereIn('shipments.shipper_status_id', [11,68,69,72])
+                                $sub_query->where('shipments.shipper_status_id', '=', 11)
                                     ->where('gmh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
                             })
-                            // ->orWhere(function ($sub_query) {
-                            //     $sub_query->where('shipments.shipper_status_id', '=', 68)
-                            //         ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
-                            // })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('shipments.shipper_status_id', '=', 68)
+                                    ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                            })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('shipments.shipper_status_id', '=', 69)
+                                    ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                            })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('shipments.shipper_status_id', '=', 72)
+                                    ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                            })
                             ->orWhere(function ($sub_query) {
                                 $sub_query->where('shipments.shipper_status_id', '=', 55)
                                     ->where('irbrh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
