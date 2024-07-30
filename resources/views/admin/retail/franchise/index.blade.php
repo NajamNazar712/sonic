@@ -74,6 +74,14 @@
                                     <div class="form-group">
                                         <input type="text" name="cnic" id="cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required">
                                     </div>
+
+                                    <div class="col text-center">
+                                        <div class="form-group">
+                                            <label for="cnic_status" class="mr-1">CNIC Active</label>
+                                            <input type="checkbox" id="cnic_status" name="cnic_status" class="switchery" data-color="success" data-size="sm">
+                                        </div>
+                                    </div>
+
                                     <div class="form-group">
                                         <select name="hub" id="hub" class="form-control select2" data-rule-required="true" data-msg-required="Default Hub is required">
                                             @foreach($hubs as $hub)
@@ -121,7 +129,7 @@
                                     </div>
             
                                     <div class="input-group mb-2">
-                                        <input type="text" name="franchise_deduction" id="deduction_percentage" class="form-control deduction_percentage" placeholder="Commission GST Deduction*"  value="" max="100" data-rule-required="true" data-msg-required="Commission GST Deduction is required">
+                                        <input type="text" name="franchise_deduction" id="deduction_percentage" class="form-control deduction_percentage" placeholder="GST*"  value="" max="100" data-rule-required="true" data-msg-required="Commission GST Deduction is required">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
@@ -267,6 +275,14 @@
                                 <div class="form-group">
                                     <input type="text" name="cnic" id="edit_cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="">
                                 </div>
+
+                                <div class="col text-center">
+                                    <div class="form-group">
+                                        <label for="edit_cnic_status" class="mr-1">CNIC Active</label>
+                                        <input type="checkbox" id="edit_cnic_status" name="cnic_status" class="switchery" data-color="success" data-size="sm" data-switchery="true">
+                                    </div>
+                                </div>
+
                                 <div class="form-group">
                                     <input type="text" name="lat" id="edit_lat" class="form-control lat" placeholder="Latitude*" data-rule-required="true" data-msg-required="Latitude is required" value="">
                                 </div>
@@ -761,6 +777,24 @@
                         }
                     }
                 });
+
+                // show cnic status
+                $.ajax({
+                    type: "GET",
+                    url: '{{ route('admin.retail.franchise.cnic_status') }}',
+                    data: { franchise_id: id },
+                    success: function(response) {
+                        var response = response.data;
+                        var cnic_status = response.cnic_status;
+                        var edit_cnic_status = $('#edit_cnic_status');
+                        if (cnic_status == 1 && !edit_cnic_status.is(':checked')) {
+                            edit_cnic_status.trigger('click');
+                        } else if (cnic_status != 1 && edit_cnic_status.is(':checked')) {
+                            edit_cnic_status.trigger('click');
+                        }
+                    }
+                });
+
                 $('#edit_franchise').modal('show');
             });
 
@@ -842,6 +876,10 @@
                 $("#tableBodyEdit").empty();
                 $("#tableRow").hide();
                 $("#tableRowEdit").hide();
+                var edit_cnic_status = $('#edit_cnic_status');
+                if (edit_cnic_status.is(':checked')) {
+                    edit_cnic_status.trigger('click');
+                }
             }
 
             $("#retail_product_add_btn").on('click', function (event) {
@@ -954,6 +992,8 @@
             $('#license_fees, #edit_license_fees').on('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '');
             });
+
+            
         });
 
     </script>

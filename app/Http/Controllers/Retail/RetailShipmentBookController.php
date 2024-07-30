@@ -2382,8 +2382,9 @@ class RetailShipmentBookController extends Controller
         $results = null;
         $month = $request->month;
         $user = auth()->user();
-        $retail_user_commission = RetailUserCommission::where('franchise_id', $user->id)->first();
+        $paid_status = $request->paid_status;
 
+        $retail_user_commission = RetailUserCommission::where('franchise_id', $user->id)->first();
         $retail_franchise_code = RetailFranchise::pluck('code');
         $franchise_commission = RetailFranchiseCommission::whereIn('franchise_code', $retail_franchise_code)->first(); 
 
@@ -2393,6 +2394,9 @@ class RetailShipmentBookController extends Controller
             ->where('month', $month);
             if (!empty($franchise)) {
                 $query->where('franchise_id', $franchise);
+            }
+            if (!empty($paid_status) || $paid_status == '0') {
+                $query->where('is_paid', $paid_status);
             }
             $retail_trax_center_commission = $query->get();
             $results = $retail_trax_center_commission;
@@ -2407,6 +2411,9 @@ class RetailShipmentBookController extends Controller
             ->where('month', $month);
             if (!empty($franchise)) {
                 $query->where('franchise_id', $franchise);
+            }
+            if (!empty($paid_status) || $paid_status == '0') {
+                $query->where('is_paid', $paid_status);
             }
             $retail_franchise_commission = $query->get();
             $results = $retail_franchise_commission;
@@ -2523,11 +2530,11 @@ class RetailShipmentBookController extends Controller
                 $html .= '<tr>';
                 $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
                 $html .= '<td>' . ($record->commission ?? '0') . '%</td>';
-                $html .= '<td>' . $record->number_of_shipments . '</td>';
-                $html .= '<td>' . $record->total_charges . '</td>';
-                $html .= '<td>' . $record->franchise_gst_amount . '</td>';
-                $html .= '<td>' . $record->weight_charges . '</td>';
-                $html .= '<td>' . $record->net_commission . '</td>';
+                $html .= '<td>' . number_format(round($record->number_of_shipments)) . '</td>';
+                $html .= '<td>' . number_format(round($record->total_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->franchise_gst_amount)) . '</td>';
+                $html .= '<td>' . number_format(round($record->weight_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->net_commission)) . '</td>';
                 $html .= '</tr>';
     
                 // Summing up totals
@@ -2540,20 +2547,20 @@ class RetailShipmentBookController extends Controller
     
             // Totals row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="2">Total</td>';
-            $html .= '<td>' . $total_shipments . '</td>';
-            $html .= '<td>' . $total_charges . '</td>';
-            $html .= '<td>' . $total_gst . '</td>';
-            $html .= '<td>' . $total_weight_charges . '</td>';
-            $html .= '<td>' . $total_commission . '</td>';
+            $html .= '<td class="text-center" colspan="2"><strong>Total</strong></td>';
+            $html .= '<td><strong>' . $total_shipments . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_gst)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_weight_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_commission)) . '</strong></td>';
             $html .= '</tr>';
     
             $gross_commission = $total_commission;
     
             // Gross commission row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
-            $html .= '<td>' . $gross_commission . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Gross Commission</strong></td>';
+            $html .= '<td><strong>' . number_format(round($gross_commission)) . '</strong></td>';
             $html .= '</tr>';
             $html .= '</tbody>';
             $html .= '</table>';
@@ -2781,10 +2788,10 @@ class RetailShipmentBookController extends Controller
                 $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
                 $html .= '<td>' . $record->product_percentage . '%</td>';
                 $html .= '<td>' . $record->number_of_shipments . '</td>';
-                $html .= '<td>' . $record->total_charges . '</td>';
-                $html .= '<td>' . $record->franchise_gst_amount . '</td>';
-                $html .= '<td>' . $record->weight_charges . '</td>';
-                $html .= '<td>' . $record->commission . '</td>';
+                $html .= '<td>' . number_format(round($record->total_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->franchise_gst_amount)) . '</td>';
+                $html .= '<td>' . number_format(round($record->weight_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->commission)) . '</td>';
                 $html .= '</tr>';
 
                 $total_shipments += $record->number_of_shipments;
@@ -2796,12 +2803,12 @@ class RetailShipmentBookController extends Controller
 
             // Totals row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="2">Total</td>';
-            $html .= '<td>' . $total_shipments . '</td>';
-            $html .= '<td>' . $total_charges . '</td>';
-            $html .= '<td>' . $total_gst . '</td>';
-            $html .= '<td>' . $total_weight_charges . '</td>';
-            $html .= '<td>' . $total_commission . '</td>';
+            $html .= '<td class="text-center" colspan="2"><strong>Total</strong></td>';
+            $html .= '<td><strong>' . $total_shipments . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_gst)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_weight_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_commission)) . '</strong></td>';
             $html .= '</tr>';
 
             $withholding_amount = ($record->franchise_withholding_percentage / 100) * $total_commission;
@@ -2810,20 +2817,20 @@ class RetailShipmentBookController extends Controller
 
             // Withholding tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Withholding Income Tax ' . $data->withholding_tax_percent . '%</td>';
-            $html .= '<td>' . $withholding_amount . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Withholding Income Tax ' . $data->withholding_tax_percent . '%</strong></td>';
+            $html .= '<td><strong>' . number_format(round($withholding_amount)) . '</strong></td>';
             $html .= '</tr>';
 
             // Deduction GST tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Commission GST Deduction ' . $data->commission_gst_deduction_percent . '%</td>';
-            $html .= '<td>' . $deduction_amount . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>GST ' . $data->commission_gst_deduction_percent . '%</strong></td>';
+            $html .= '<td><strong>' . number_format(round($deduction_amount)) . '</strong></td>';
             $html .= '</tr>';
 
             // Gross commission row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
-            $html .= '<td>' . $gross_commission . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Gross Commission</strong></td>';
+            $html .= '<td><strong>' . number_format(round($gross_commission)) . '</strong></td>';
             $html .= '</tr>';
             $html .= '</tbody>';
             $html .= '</table>';
@@ -2918,7 +2925,8 @@ class RetailShipmentBookController extends Controller
             // $html .= '</div>';
             // $html .= '</div>';
             
-            $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
+            // Disclaimer after empty tables with page break
+            // $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
             $html .= '<div style="page-break-after: always;"></div>';
         }
 
