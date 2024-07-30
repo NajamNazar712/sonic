@@ -92,6 +92,7 @@
                                         <th class="border-primary border-darken-1">Documents Rejected At</th>
                                         <th class="border-primary border-darken-1">Documents Status</th>
                                         <th class="border-primary border-darken-1">Documents Rejection Reason</th>
+                                        <th class="border-primary border-darken-1">FAF Charges Applied</th>
                                         <th class="border-primary border-darken-1">Duplicate</th>
                                         <th class="border-primary border-darken-1">Intl Rate Status</th>
                                         <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
@@ -1213,6 +1214,7 @@
                         head.push('Documents Rejected At');
                         head.push('Documents Status');
                         head.push('Documents Rejection Reason');
+                        head.push('FAF Charges Applied');
                         head.push('Duplicate');
                         head.push('International Rate Status');
                         head.push('International Rate Status Remarks');
@@ -1259,6 +1261,7 @@
                             row.push(values.documents_rejected_at);
                             row.push(values.documents_status);
                             row.push(values.documents_rejection_reason);
+                            row.push(values.fc_status);
                             row.push(values.duplication);
                             row.push(values.international_rate_status);
                             row.push(values.international_rejected_reason);
@@ -1735,6 +1738,7 @@
                 {data: 'documents_rejected_at', name: 'uda.rejected_at', class: 'align-middle documents_rejected_at'},
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
+                {data: 'fc_status', name: 'faf_charges.status', class: 'align-middle fc_status'},
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
                 {data: 'international_rate_status', name: 'international_rate_status', class: 'align-middle international_rate_status', orderable: false, searchable: false},
                 {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
@@ -1785,6 +1789,12 @@
                         '<option value="6">Fortnite</option>' +
 
                         '</select>';
+
+                var fc_status_drop_select = '<select name="fc_status_select" id="fc_status_select" class="select2 form-control">' +
+                    '<option value="1">Yes</option>' +
+                    '<option value="0">No</option>' +
+                    '</select>';
+
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
@@ -1806,7 +1816,12 @@
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
-                    } else if ($(header).is('.payment_cycle')) {
+                    }else if($(header).is('.fc_status')){
+                        $(fc_status_drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    }else if ($(header).is('.payment_cycle')) {
                             $(payment_cycle_select).appendTo($(search))
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
@@ -1822,6 +1837,13 @@
                     }
                 });
                 $("#documents_status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+
+                $("#fc_status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
                     width:'100%',
                     containerCssClass: 'select-xs',
