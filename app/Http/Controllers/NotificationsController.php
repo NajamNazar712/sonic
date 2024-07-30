@@ -11182,7 +11182,6 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 } else if ($id == 230){
-                    dd(1);
                     $lead_ids = $reference_1_id;
 
                     if(!is_array($lead_ids)){
