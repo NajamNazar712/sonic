@@ -11,7 +11,7 @@
                 <div class="card">
                     @include('admin.inc.messages')
                     <div id="search_form" class="row p-1">
-                        <div class="col-4">
+                        <div class="col-5">
                             <select name="month" id="month" class="form-control select2">
                                 <option value="01">January</option>
                                 <option value="02">February</option>
@@ -25,6 +25,14 @@
                                 <option value="10">October</option>
                                 <option value="11">November</option>
                                 <option value="12">December</option>
+                            </select>
+                        </div>
+
+                        <div class="col-5">
+                            <select name="paid_status" id="paid_status" class="select2 form-control">
+                                <option value="" class="text-secondary">Select Payment Status</option>
+                                <option value="0" class="text-secondary">Not Paid</option>
+                                <option value="1"class="text-secondary">Paid</option>
                             </select>
                         </div>
 
@@ -117,10 +125,15 @@
             width:'100%',
             allowClear:true
         }).bind('select2:select', function () {
-
             if($(this).val().length != 0){
                 $('#search_form').find('button[type=button]').prop('disabled', false);
             }
+        });
+
+        $('#paid_status').select2({
+            placeholder:'Select Payment Status',
+            width:'100%',
+            allowClear:true
         });
 
         var dataTable = null;
@@ -131,11 +144,13 @@
                 {
                     var selectedMonth = $('#month').val();
                     var franchise = $('#franchise').val();
+                    var paid_status = $('#paid_status').val();
                     $.ajax({
                         url: "{{ route('retail.retail_commission.list') }}",
                         method: 'GET',
                         data: { 
-                            month: selectedMonth
+                            month: selectedMonth,
+                            paid_status: paid_status
                         },
                         success: function(response) {
                             $('.select-checkbox input[type="checkbox"]').on('change', function() {
@@ -190,12 +205,26 @@
                                             className: 'btn btn-primary print_invoice',
                                             action: function () {
                                                 var selectedFranchiseNames = [];
+                                                var selectedIsPaidStatuses = [];
                                                 $('#datatable > tbody > .selected').each(function(index){
                                                     var franchiseCode = $(this).find('.hidden-id').val().trim();
+                                                    var is_paid = $(this).find('td:eq(16)').text().trim();
                                                     if (franchiseCode) {
                                                         selectedFranchiseNames.push(franchiseCode);
+                                                        selectedIsPaidStatuses.push(is_paid);
                                                     }
                                                 });
+
+                                                // check for paid status
+                                                var allSameStatus = selectedIsPaidStatuses.every(function(status, index, array) {
+                                                    return status === array[0];
+                                                });
+                                                
+                                                // do not open print invoice if different statuses
+                                                if (!allSameStatus && selectedIsPaidStatuses.length > 1) {
+                                                    return false;
+                                                }
+
                                                 var franchiseCodes = selectedFranchiseNames.join(', ');
                                                 if (franchiseCodes.length > 0) {
                                                     $.ajax({
@@ -292,11 +321,13 @@
                 {
                     var selectedMonth = $('#month').val();
                     var franchise = $('#franchise').val();
+                    var paid_status = $('#paid_status').val();
                     $.ajax({
                         url: "{{ route('retail.retail_commission.list') }}",
                         method: 'GET',
                         data: { 
-                            month: selectedMonth
+                            month: selectedMonth,
+                            paid_status: paid_status
                         },
                         success: function(response) {
                             if (response.data === 0) {
@@ -346,12 +377,26 @@
                                             className: 'btn btn-primary print_invoice',
                                             action: function () {
                                                 var selectedFranchiseNames = [];
+                                                var selectedIsPaidStatuses = [];
                                                 $('#datatable > tbody > .selected').each(function(index){
                                                     var franchiseName = $(this).find('.hidden-id').val().trim();
+                                                    var is_paid = $(this).find('td:eq(15)').text().trim();
                                                     if (franchiseName) {
                                                         selectedFranchiseNames.push(franchiseName);
+                                                        selectedIsPaidStatuses.push(is_paid);
                                                     }
                                                 });
+
+                                                // check for paid status
+                                                var allSameStatus = selectedIsPaidStatuses.every(function(status, index, array) {
+                                                    return status === array[0];
+                                                });
+                                                
+                                                // do not open print invoice if different statuses
+                                                if (!allSameStatus && selectedIsPaidStatuses.length > 1) {
+                                                    return false;
+                                                }
+
                                                 var franchiseNames = selectedFranchiseNames.join(', ');
                                                 if (franchiseNames.length > 0) {
                                                     $.ajax({

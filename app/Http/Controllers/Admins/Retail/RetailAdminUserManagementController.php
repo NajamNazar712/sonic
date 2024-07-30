@@ -301,16 +301,18 @@ class RetailAdminUserManagementController extends Controller
             'security_cheque_number' => 'required',
             'license_cheque_number' => 'required',
         ]);
-
+        
         $admin = $request->user();
         $date = Carbon::now()->format('Y_m_d');
         $hub_count = RetailFranchise::where('default_hub', $request->hub)->count() + 1;
+        $cnic_active_status = $request->cnic_status == "on" ? 1 : 0;
 
         $franchise = new RetailFranchise();
         $franchise->name = $request->name;
         $franchise->phone_no = $request->phone_number;
         $franchise->email = $request->email;
         $franchise->cnic = $request->cnic;
+        $franchise->cnic_status = $cnic_active_status;
         $franchise->default_hub = $request->hub;
         $franchise->location_latitude = $request->lat;
         $franchise->location_longitude = $request->long;
@@ -415,6 +417,7 @@ class RetailAdminUserManagementController extends Controller
 
     public function franchise_edit(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'franchise_deduction' => 'required|numeric',
             'franchise_withholding' => 'required|numeric',
@@ -437,11 +440,13 @@ class RetailAdminUserManagementController extends Controller
         $id = $request->franchise_id;
         $existing_franchise = RetailUser::where('name', $request->name)->where('category_id', '!=', $id);
         if (!$existing_franchise->exists()) {
+            $cnic_active_status = $request->cnic_status == "on" ? 1 : 0;
             $franchise = RetailFranchise::find($request->franchise_id);
             $franchise->name = $request->name;
             $franchise->phone_no = $request->phone_number;
             $franchise->email = $request->email;
             $franchise->cnic = $request->cnic;
+            $franchise->cnic_status = $cnic_active_status;
             $franchise->location_latitude = $request->lat;
             $franchise->location_longitude = $request->long;
             $franchise->discount = $request->discount;
@@ -726,10 +731,10 @@ class RetailAdminUserManagementController extends Controller
                 $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
                 $html .= '<td>' . ($record->commission ?? '0') . '%</td>';
                 $html .= '<td>' . $record->number_of_shipments . '</td>';
-                $html .= '<td>' . $record->total_charges . '</td>';
-                $html .= '<td>' . $record->franchise_gst_amount . '</td>';
-                $html .= '<td>' . $record->weight_charges . '</td>';
-                $html .= '<td>' . $record->net_commission . '</td>';
+                $html .= '<td>' . number_format(round($record->total_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->franchise_gst_amount)) . '</td>';
+                $html .= '<td>' . number_format(round($record->weight_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->net_commission)) . '</td>';
                 $html .= '</tr>';
     
                 // Summing up totals
@@ -742,20 +747,20 @@ class RetailAdminUserManagementController extends Controller
     
             // Totals row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="2">Total</td>';
-            $html .= '<td>' . $total_shipments . '</td>';
-            $html .= '<td>' . $total_charges . '</td>';
-            $html .= '<td>' . $total_gst . '</td>';
-            $html .= '<td>' . $total_weight_charges . '</td>';
-            $html .= '<td>' . $total_commission . '</td>';
+            $html .= '<td class="text-center" colspan="2"><strong>Total</strong</td>';
+            $html .= '<td><strong>' . $total_shipments . '</strong</td>';
+            $html .= '<td><strong>' . number_format(round($total_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_gst)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_weight_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_commission)) . '</strong></td>';
             $html .= '</tr>';
     
             $gross_commission = $total_commission;
     
             // Gross commission row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
-            $html .= '<td>' . $gross_commission . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Gross Commission</strong></td>';
+            $html .= '<td><strong>' . number_format(round($gross_commission)) . '</strong></td>';
             $html .= '</tr>';
             $html .= '</tbody>';
             $html .= '</table>';
@@ -782,72 +787,72 @@ class RetailAdminUserManagementController extends Controller
             // $html .= '</div>';
             // $html .= '</div>';
         
-            // Fourth table: Pending Sales
-            $html .= '<div class="row align-items-start justify-content-between summary">';
-            $html .= '<div class="col-3">';
-            $html .= '<table class="table table-sm table-bordered border">';
-            $html .= '<tbody>';
-            $html .= '<tr>';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
-            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // // Fourth table: Pending Sales
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
+            // $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
     
-            // Prepared by and Checked by
-            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
-            $html .= '<div class="col-6 d-flex justify-content-between">';
-            $html .= '<strong>Prepared By:</strong>';
-            $html .= '<strong>Checked By:</strong>';
-            $html .= '</div>';
-            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
-            $html .= '<strong>Verified By:</strong>';
-            $html .= '<strong>Approved By:</strong>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // // Prepared by and Checked by
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Prepared By:</strong>';
+            // $html .= '<strong>Checked By:</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
+            // $html .= '<strong>Verified By:</strong>';
+            // $html .= '<strong>Approved By:</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
     
-            $html .= '<div class="row col-6">';
-            $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
-            $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
-            $html .= '</div>';
+            // $html .= '<div class="row col-6">';
+            // $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
+            // $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
+            // $html .= '</div>';
     
-            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
-            $html .= '<div class="col-6 d-flex justify-content-between">';
-            $html .= '<strong>Retail Team</strong>';
-            $html .= '<strong>Finance Team</strong>';
-            $html .= '</div>';
-            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
-            $html .= '<strong>Head of Retail</strong>';
-            $html .= '<strong>COO</strong>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Retail Team</strong>';
+            // $html .= '<strong>Finance Team</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
+            // $html .= '<strong>Head of Retail</strong>';
+            // $html .= '<strong>COO</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
     
-            // Empty tables
-            $html .= '<div class="row align-items-start summary">';
-            $html .= '<div class="col-3">';
-            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
-            $html .= '<tbody>';
-            $html .= '<tr>';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
-            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
+            // // Empty tables
+            // $html .= '<div class="row align-items-start summary">';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
     
-            $html .= '<div class="col-3">';
-            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
-            $html .= '<tbody>';
-            $html .= '<tr>';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
-            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
     
             // Disclaimer after empty tables with page break
             $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
@@ -985,10 +990,10 @@ class RetailAdminUserManagementController extends Controller
                 $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
                 $html .= '<td>' . ($record->product_percentage ?? '0') . '%</td>';
                 $html .= '<td>' . $record->number_of_shipments . '</td>';
-                $html .= '<td>' . $record->total_charges . '</td>';
-                $html .= '<td>' . $record->franchise_gst_amount . '</td>';
-                $html .= '<td>' . $record->weight_charges . '</td>';
-                $html .= '<td>' . $record->commission . '</td>';
+                $html .= '<td>' . number_format(round($record->total_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->franchise_gst_amount)) . '</td>';
+                $html .= '<td>' . number_format(round($record->weight_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->commission)) . '</td>';
                 $html .= '</tr>';
 
                 $total_shipments += $record->number_of_shipments;
@@ -1000,12 +1005,12 @@ class RetailAdminUserManagementController extends Controller
 
             // Totals row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="2">Total</td>';
-            $html .= '<td>' . $total_shipments . '</td>';
-            $html .= '<td>' . $total_charges . '</td>';
-            $html .= '<td>' . $total_gst . '</td>';
-            $html .= '<td>' . $total_weight_charges . '</td>';
-            $html .= '<td>' . $total_commission . '</td>';
+            $html .= '<td class="text-center" colspan="2"><strong>Total</strong></td>';
+            $html .= '<td><strong>' . $total_shipments . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_gst)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round( $total_weight_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_commission)) . '</strong></td>';
             $html .= '</tr>';
 
             // $withholding_amount = $data->withholding_amount;
@@ -1017,116 +1022,117 @@ class RetailAdminUserManagementController extends Controller
 
             // Withholding tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Withholding Income Tax ' . ($data->withholding_tax_percent ?? 0) . '%</td>';
-            $html .= '<td>' . $withholding_amount . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Withholding Income Tax ' . ($data->withholding_tax_percent ?? 0) . '%</strong></td>';
+            $html .= '<td><strong>' . number_format(round($withholding_amount)) . '</strong></td>';
             $html .= '</tr>';
 
             // Deduction GST tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Commission GST Deduction ' . ($data->commission_gst_deduction_percent ?? 0) . '%</td>';
-            $html .= '<td>' . $deduction_amount . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>GST ' . ($data->commission_gst_deduction_percent ?? 0) . '%</strong></td>';
+            $html .= '<td><strong>' . number_format(round($deduction_amount)) . '</strong></td>';
             $html .= '</tr>';
 
             // Gross commission row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6">Gross Commission</td>';
-            $html .= '<td>' . $gross_commission . '</td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Gross Commission</strong></td>';
+            $html .= '<td><strong>' . number_format(round($gross_commission)) . '</strong></td>';
             $html .= '</tr>';
             $html .= '</tbody>';
             $html .= '</table>';
             $html .= '</div>';
             $html .= '</div>';
 
-            // Third table: Deposits
-            $html .= '<div class="row align-items-start justify-content-between summary">';
-            $html .= '<div class="col-12">';
-            $html .= '<table class="table table-sm table-bordered border">';
-            $html .= '<thead>';
-            $html .= '<tr>';
-            $html .= '<th class="color primary">Deposits</th>';
-            $html .= '<th class="color primary">Amount</th>';
-            $html .= '<th class="color primary">Bank Name</th>';
-            $html .= '<th class="color primary">Cheque #</th>';
-            $html .= '</tr>';
-            $html .= '</thead>';
-            $html .= '<tbody>';
-            $html .= '<tr><td>Security Deposit</td><td>' . ($franchise_charges->security_deposit ?? 0) . '</td><td>' . ($franchise_charges->bank_name ?? '') . '</td><td>' . ($franchise_charges->security_cheque_number ?? '') . '</td></tr>';
-            $html .= '<tr><td>License Fees</td><td>' . ($franchise_charges->license_fees ?? 0) . '</td><td>' . ($franchise_charges->bank_name ?? '') . '</td><td>' . ($franchise_charges->license_cheque_number ?? '') . '</td></tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // // Third table: Deposits
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-12">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<thead>';
+            // $html .= '<tr>';
+            // $html .= '<th class="color primary">Deposits</th>';
+            // $html .= '<th class="color primary">Amount</th>';
+            // $html .= '<th class="color primary">Bank Name</th>';
+            // $html .= '<th class="color primary">Cheque #</th>';
+            // $html .= '</tr>';
+            // $html .= '</thead>';
+            // $html .= '<tbody>';
+            // $html .= '<tr><td>Security Deposit</td><td>' . ($franchise_charges->security_deposit ?? 0) . '</td><td>' . ($franchise_charges->bank_name ?? '') . '</td><td>' . ($franchise_charges->security_cheque_number ?? '') . '</td></tr>';
+            // $html .= '<tr><td>License Fees</td><td>' . ($franchise_charges->license_fees ?? 0) . '</td><td>' . ($franchise_charges->bank_name ?? '') . '</td><td>' . ($franchise_charges->license_cheque_number ?? '') . '</td></tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
 
 
-            // Fourth table: Pending Sales
-            $html .= '<div class="row align-items-start justify-content-between summary">';
-            $html .= '<div class="col-3">';
-            $html .= '<table class="table table-sm table-bordered border">';
-            $html .= '<tbody>';
-            $html .= '<tr>';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
-            $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // // Fourth table: Pending Sales
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
+            // $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
 
-            // Prepared by and Checked by
-            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
-            $html .= '<div class="col-6 d-flex justify-content-between">';
-            $html .= '<strong>Prepared By:</strong>';
-            $html .= '<strong>Checked By:</strong>';
-            $html .= '</div>';
-            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
-            $html .= '<strong>Verified By:</strong>';
-            $html .= '<strong>Approved By:</strong>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // // Prepared by and Checked by
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Prepared By:</strong>';
+            // $html .= '<strong>Checked By:</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
+            // $html .= '<strong>Verified By:</strong>';
+            // $html .= '<strong>Approved By:</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
 
-            $html .= '<div class="row col-6">';
-            $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
-            $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
-            $html .= '</div>';
+            // $html .= '<div class="row col-6">';
+            // $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
+            // $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
+            // $html .= '</div>';
 
-            $html .= '<div class="row align-items-start justify-content-between summary col-6">';
-            $html .= '<div class="col-6 d-flex justify-content-between">';
-            $html .= '<strong>Retail Team</strong>';
-            $html .= '<strong>Finance Team</strong>';
-            $html .= '</div>';
-            $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
-            $html .= '<strong>Head of Retail</strong>';
-            $html .= '<strong>COO</strong>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Retail Team</strong>';
+            // $html .= '<strong>Finance Team</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
+            // $html .= '<strong>Head of Retail</strong>';
+            // $html .= '<strong>COO</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
 
-            // Empty tables
-            $html .= '<div class="row align-items-start summary">';
-            $html .= '<div class="col-3">';
-            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
-            $html .= '<tbody>';
-            $html .= '<tr>';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
-            $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
+            // // Empty tables
+            // $html .= '<div class="row align-items-start summary">';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
 
-            $html .= '<div class="col-3">';
-            $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
-            $html .= '<tbody>';
-            $html .= '<tr>';
-            $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
-            $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
             
-            $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
+            // Disclaimer after empty tables with page break
+            $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
             $html .= '<div style="page-break-after: always;"></div>';
         }
 
@@ -1142,9 +1148,13 @@ class RetailAdminUserManagementController extends Controller
     {
         $month = $request->month;
         $franchise = $request->franchise;
+        $paid_status = $request->paid_status;
         $query = RetailFranchiseCommission::where('month', $month);
         if (!empty($franchise)) {
             $query->where('franchise_id', $franchise);
+        }
+        if (!empty($paid_status) || $paid_status == '0') {
+            $query->where('is_paid', $paid_status);
         }
         $retail_franchise_commission = $query->get();
         $results = $retail_franchise_commission;
@@ -1169,9 +1179,13 @@ class RetailAdminUserManagementController extends Controller
     {
         $month = $request->month;
         $franchise = $request->franchise;
+        $paid_status = $request->paid_status;
         $query = RetailUserCommission::where('month', $month);
         if (!empty($franchise)) {
             $query->where('franchise_id', $franchise);
+        }
+        if (!empty($paid_status) || $paid_status == '0') {
+            $query->where('is_paid', $paid_status);
         }
         $retail_trax_center_commission = $query->get();
         $results = $retail_trax_center_commission;
@@ -3637,5 +3651,19 @@ class RetailAdminUserManagementController extends Controller
         return response()->json([
             'data' => $data
         ]);
+    }
+
+    public function cnic_status(Request $request){
+        $franchiseId = $request->franchise_id;
+        $retail_franchise_cnic_status = RetailFranchise::where('id', $franchiseId)
+        ->select('cnic_status')
+        ->first();
+        if ($retail_franchise_cnic_status != null){
+            $data = $retail_franchise_cnic_status;
+        } else {
+            $data = null;
+        }
+        
+        return response()->json(['data' => $data]);
     }
 }
