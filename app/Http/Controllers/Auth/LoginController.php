@@ -183,6 +183,8 @@ class LoginController extends Controller
                 session(['request_custom_quotation' => $user->request_custom_quotation]);
                 session(['on_board_status' => $user->on_board_status]);
 
+                session(['lead' => $user->lead_id ? true : false]);
+
                 $token = CRFTermsConditions::where('user_id', $user->id)->first()->token ?? null;
 
                 session(['token' => $token]);
