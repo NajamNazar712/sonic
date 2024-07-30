@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\UserLeadEmail;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use App\Http\Models\City;
@@ -70,7 +71,6 @@ class WebsiteLead extends Command
         $response = json_decode($response);
         $leads_added = array();
         $old_leads = array();
-        $token_added = array();
 
         if($response->status == 0){
             $leads = $response->leads;
@@ -135,7 +135,6 @@ class WebsiteLead extends Command
                     $lead_log->updated_by = 7;
                     $lead_log->save();
                     $leads_added[] = $new_lead->id;
-                    $token_added[$key] = $token;
                     $old_leads[] = $lead->id;
                                  
                 }

@@ -34,7 +34,12 @@
                             </div>
                             <div class="col-4">
                                 <fieldset class="form-group">
-                                    <input type="text" name="search_shipper" id="search_shipper" class="form-control shipper_name" placeholder="Shipper Name">
+                                    {{-- <input type="text" name="search_shipper[]" id="search_shipper" class="form-control shipper_name" placeholder="Shipper Name" multiple> --}}
+                                    <select name="search_shipper[]" id="search_shipper" class="form-control select2"  multiple>
+                                        @foreach($shippers as $shipper)
+                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                        @endforeach
+                                    </select>
                                 </fieldset>
                             </div>
                             <div class="col-4">
@@ -1104,6 +1109,13 @@
             width:'100%',
             dropdownParent:$('#SalesTierTypeTagModal')
         });
+
+        $('#search_shipper').select2({
+            width:'100%',
+            placeholder:"Select Shipper",
+            allowClear:true,
+            multiple: true
+         });
 
         $('#payment_cycles').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
