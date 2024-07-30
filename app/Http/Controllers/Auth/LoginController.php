@@ -158,7 +158,7 @@ class LoginController extends Controller
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Blacklisted, Contact Admin');
             }
-            else if (!in_array($user->status, [0,1,3,2,5]) || $user->status == 4) {
+            else if (!in_array($user->status, [0,1,3,2,5,6]) || $user->status == 4) {
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
             }
@@ -189,9 +189,9 @@ class LoginController extends Controller
                     session(['sale_person_status' => 0]);
                 }
                 session(['account_type' => $user->account_type_id]);
-//                if (PackagingCharge::where('user_id', $user->id)->exists()) {
-//                    $packaging_charges_check = TRUE;
-//                }
+                //if (PackagingCharge::where('user_id', $user->id)->exists()) {
+                //$packaging_charges_check = TRUE;
+                //}
 
                 $project_arrival_shipper = ProjectArrivalShipper::where('user_id', $user->id);
                 if($project_arrival_shipper->exists()){
