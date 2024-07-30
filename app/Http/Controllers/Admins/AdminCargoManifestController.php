@@ -404,17 +404,17 @@ class AdminCargoManifestController extends Controller
                                     ->where('oc.hub_id', '!=', DB::raw('dc.hub_id'));
                             })
                             ->orWhere(function ($sub_query) {
-                                $sub_query->where('shipments.shipper_status_id', '=', 49)
+                                $sub_query->whereIn('shipments.shipper_status_id', [49,70,73])
                                     ->where('mh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
                             })
                             ->orWhere(function ($sub_query) {
-                                $sub_query->where('shipments.shipper_status_id', '=', 11)
+                                $sub_query->whereIn('shipments.shipper_status_id', [11,68,69,72])
                                     ->where('gmh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
                             })
-                            ->orWhere(function ($sub_query) {
-                                $sub_query->where('shipments.shipper_status_id', '=', 68)
-                                    ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
-                            })
+                            // ->orWhere(function ($sub_query) {
+                            //     $sub_query->where('shipments.shipper_status_id', '=', 68)
+                            //         ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                            // })
                             ->orWhere(function ($sub_query) {
                                 $sub_query->where('shipments.shipper_status_id', '=', 55)
                                     ->where('irbrh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
@@ -720,14 +720,14 @@ class AdminCargoManifestController extends Controller
 
         if ($shipment_type = $request->get('shipment_type')) {
             if ($shipment_type == 0) {
-                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68]);
+                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68,69,70,72,73,75,76]);
             } else if ($shipment_type == 1) {
-                $datatables->whereIn('shipments.shipper_status_id', [2, 49, 55,11,68]);
+                $datatables->whereIn('shipments.shipper_status_id', [2, 49, 55,11,68,69,70,72,73]);
             } else if ($shipment_type == 2) {
                 $datatables->whereIn('shipments.shipper_status_id', [20, 30, 37]);
             }
         } else {
-            $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68]);
+            $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68,69,70,72,73,75,76]);
         }
         if ($mode = $request->get('search_shipping_mode')) {
             $datatables->where('sm.id', '=', $mode);
