@@ -11,7 +11,7 @@
                 <div class="card">
                     @include('admin.inc.messages')
                     <div id="search_form" class="row p-1">
-                        <div class="col-4">
+                        <div class="col-3">
                             <select name="month" id="month" class="form-control select2">
                                 <option value="01">January</option>
                                 <option value="02">February</option>
@@ -28,12 +28,20 @@
                             </select>
                         </div>
 
-                        <div class="col-4">
+                        <div class="col-3">
                             <select name="franchise" id="franchise" class="select2 form-control">
                                 <option value="" class="text-secondary">Select Franchise</option>
                                 @foreach ($franchises as $franchise)
                                     <option value="{{ $franchise->id }}">{{ $franchise->name }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-3">
+                            <select name="paid_status" id="paid_status" class="select2 form-control">
+                                <option value="" class="text-secondary">Select Payment Status</option>
+                                <option value="0" class="text-secondary">Not Paid</option>
+                                <option value="1"class="text-secondary">Paid</option>
                             </select>
                         </div>
 
@@ -122,26 +130,38 @@
 
     <script>
         $('#franchise').select2({
-                placeholder:'Select Franchise',
-                width:'100%',
-                allowClear:true
-            }).bind('select2:select', function () {
+            placeholder:'Select Franchise',
+            width:'100%',
+            allowClear:true
+        }).bind('select2:select', function () {
+            if($(this).val().length != 0){
+                $('#search_form').find('button[type=button]').prop('disabled', false);
+            }
+        });
 
-                if($(this).val().length != 0){
-                    $('#search_form').find('button[type=button]').prop('disabled', false);
-                }
-            });
+        $('#paid_status').select2({
+            placeholder:'Select Payment Status',
+            width:'100%',
+            allowClear:true
+        });
+            // .bind('select2:select', function () {
+            //     if($(this).val().length != 0){
+            //         $('#search_form').find('button[type=button]').prop('disabled', false);
+            //     }
+            // });
 
         var dataTable = null;
         $('#search_filter_btn').on('click', function() {
             var selectedMonth = $('#month').val();
             var franchise = $('#franchise').val();
+            var paid_status = $('#paid_status').val();
             $.ajax({
                 url: "{{ route('admin.retail.franchise.commission.list') }}",
                 method: 'GET',
                 data: { 
                     month: selectedMonth,
-                    franchise: franchise
+                    franchise: franchise,
+                    paid_status: paid_status
                 },
                 success: function(response) {
                     $('.select-checkbox input[type="checkbox"]').on('change', function() {
@@ -398,14 +418,28 @@
                                     action: function () {
                                         var selectedFranchiseCodes = [];
                                         var selectedProductName = [];
+                                        var selectedIsPaidStatuses = [];
                                         $('#datatable > tbody > .selected').each(function(index) {
                                             var franchiseCode = $(this).find('.hidden-id').val().trim();
                                             var productName = $(this).find('td:eq(1)').text().trim();
+                                            var is_paid = $(this).find('td:eq(16)').text().trim();
                                             if (franchiseCode) {
                                                 selectedFranchiseCodes.push(franchiseCode);
                                                 selectedProductName.push(productName);
+                                                selectedIsPaidStatuses.push(is_paid);
                                             }
                                         });
+
+                                        // check for paid status
+                                        var allSameStatus = selectedIsPaidStatuses.every(function(status, index, array) {
+                                            return status === array[0];
+                                        });
+                                        
+                                        // do not open print invoice if different statuses
+                                        if (!allSameStatus && selectedIsPaidStatuses.length > 1) {
+                                            return false;
+                                        }
+
                                         var franchiseCodes = selectedFranchiseCodes.join(', ');
                                         var productNames = selectedProductName.join(', ');
                                         if (franchiseCodes.length > 0) {
