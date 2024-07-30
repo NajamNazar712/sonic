@@ -2823,7 +2823,7 @@ class RetailShipmentBookController extends Controller
 
             // Deduction GST tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6"><strong>Commission GST Deduction ' . $data->commission_gst_deduction_percent . '%</strong></td>';
+            $html .= '<td class="text-center" colspan="6"><strong>GST ' . $data->commission_gst_deduction_percent . '%</strong></td>';
             $html .= '<td><strong>' . number_format(round($deduction_amount)) . '</strong></td>';
             $html .= '</tr>';
 
@@ -2926,7 +2926,7 @@ class RetailShipmentBookController extends Controller
             // $html .= '</div>';
             
             // Disclaimer after empty tables with page break
-            $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
+            // $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
             $html .= '<div style="page-break-after: always;"></div>';
         }
 

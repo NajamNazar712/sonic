@@ -1132,7 +1132,7 @@ class RetailAdminUserManagementController extends Controller
             // $html .= '</div>';
             
             // Disclaimer after empty tables with page break
-            $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
+            $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
             $html .= '<div style="page-break-after: always;"></div>';
         }
 
