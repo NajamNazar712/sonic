@@ -404,7 +404,15 @@ class AdminCargoManifestController extends Controller
                                     ->where('oc.hub_id', '!=', DB::raw('dc.hub_id'));
                             })
                             ->orWhere(function ($sub_query) {
-                                $sub_query->whereIn('shipments.shipper_status_id', [49,70,73])
+                                $sub_query->where('shipments.shipper_status_id', '=', 49)
+                                    ->where('mh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                            })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('shipments.shipper_status_id', '=', 70)
+                                    ->where('mh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                            })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('shipments.shipper_status_id', '=', 73)
                                     ->where('mh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
                             })
                             ->orWhere(function ($sub_query) {
