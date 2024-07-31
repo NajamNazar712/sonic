@@ -49,6 +49,7 @@ class ReversionDeliveredShipments extends Command
         $destination_shipments = array();
         if($reversion_shipments->exists()){
             $reversion_shipments = $reversion_shipments->get();
+           
             foreach ($reversion_shipments as $reversion_shipment){
                 $shipment = Shipment::find($reversion_shipment->shipment_id);
                 $delivered_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [14, 30, 36, 37])->latest('id')->first();
@@ -69,7 +70,7 @@ class ReversionDeliveredShipments extends Command
             if(count($destination_shipments) > 0){
                 $admins = Admin::whereIn('role_id', [3, 8, 9, 10, 15, 88]);
                 if($admins->exists()){
-                    $admins = $admins->get();
+                    $admins = $admins->limit(1)->get();
                     foreach ($admins as $admin){
                         $shipment_details = array();
                         $assigned_hubs = AdminHub::where('admin_id', $admin->id)->pluck('hub_id')->toArray();
