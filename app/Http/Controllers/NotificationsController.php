@@ -313,7 +313,7 @@ class NotificationsController extends Controller
 
             if($to){
 
-                if($id = 230){
+                if($id == 230){
 
                     $mail = new NotificationsDispatchNow($subject, $body);
 
