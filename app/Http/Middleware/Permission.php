@@ -1677,7 +1677,8 @@ class Permission
                 'get_agreement',
                 'welcome',
                 'orders.list',
-                'terms.download'
+                'terms.download',
+                'updateSignOffCrf'
 
             ];
             

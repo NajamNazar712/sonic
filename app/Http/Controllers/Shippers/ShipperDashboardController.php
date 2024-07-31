@@ -2604,4 +2604,11 @@ class ShipperDashboardController extends Controller
         $city_list = City::where('status',1)->get();
         return view('client.components.banks')->with(['banks'=>$banks,'all_cities'=>$city_list]);
     }
+
+    public function updateCrfSign(Request $request){
+        $user = User::find($request->user_id);
+        if($user->status == 1){
+            session(['status' => 2]);
+        }
+    }
 }

@@ -59,7 +59,7 @@ class WebsiteLead extends Command
             $base_uri = 'http://trax_website.test/trax_website/wp-json/tl/v1/';
         }
         else{
-            $base_uri = 'http://trax_website.test/wp-json/tl/v1/';
+            $base_uri = 'http://trax.test/wp-json/tl/v1/';
         }
         $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
         $response = $client->post('leads', [

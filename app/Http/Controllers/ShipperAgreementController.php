@@ -173,8 +173,8 @@ class ShipperAgreementController extends Controller
         if($sales_person){
             $sales_person_name = Admin::find($sales_person->admin_id)->name ?? "";
 
-            if($sales_person_name == 'Global Admin'){
-                $sales_person_name = 'Yourself';
+            if($shipper->rates_added_by == 346){
+                $sales_person_name = $shipper->name;
             }
         }
         $claim_policy = '<h2 class="text-center mt-4">Claim Policy</h2>
