@@ -70,7 +70,7 @@ class ReversionDeliveredShipments extends Command
             if(count($destination_shipments) > 0){
                 $admins = Admin::whereIn('role_id', [3, 8, 9, 10, 15, 88]);
                 if($admins->exists()){
-                    $admins = $admins->limit(1)->get();
+                    $admins = $admins->get();
                     foreach ($admins as $admin){
                         $shipment_details = array();
                         $assigned_hubs = AdminHub::where('admin_id', $admin->id)->pluck('hub_id')->toArray();
