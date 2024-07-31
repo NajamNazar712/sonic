@@ -2472,13 +2472,19 @@ class ShipperDashboardController extends Controller
         $references = Reference::all();
         $average_shipment_durations = AverageShipmentCycle::all();
 //        $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7);
-        $segments = Segment::where('name', 'like', '%E-Commerce%')->get() ?? [];
+        $segments = Segment::where(function ($query) {
+            $query->where('name', 'like', '%E-Commerce%')
+                ->orWhere('name', 'like', '%E-Comm%');
+        })->get() ?? [];
         $sub_segments = SubCategorySegment::where('name', 'like', '%COD%')->get() ?? [];
         $payment_cycles = PaymentCycle::all();
         $admins = Admin::all();
 
         $average_shipment_duration_weekly = AverageShipmentCycle::where('name', 'like', '%weekly%')->first()->id ?? null;
-        $lead_segment = Segment::where('name', 'like', '%E-Commerce%')->first()->id ?? null;
+        $lead_segment = Segment::where(function ($query) {
+            $query->where('name', 'like', '%E-Commerce%')
+                  ->orWhere('name', 'like', '%E-Comm%');
+        })->first()->id ?? null;
         $lead_sub_segment = SubCategorySegment::where('name', 'like', '%COD%')->first()->id ?? null;
 
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
