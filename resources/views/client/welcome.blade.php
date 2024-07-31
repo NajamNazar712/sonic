@@ -277,7 +277,7 @@
                 'mask': '99999',
                 'alias': 'integer',
                 'allowMinus': false,
-                'allowPlus': false,r
+                'allowPlus': false,
                 'clearIncomplete': true
             });
                 $('#PasswordModal').modal('show');
