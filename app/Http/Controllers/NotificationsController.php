@@ -10084,7 +10084,7 @@ class NotificationsController extends Controller
                     $to[] = $admin->email;
 
 
-                    self::email($subject, $body, $to);
+                    self::email($subject, $body, 'sahban.ghani@trax.pk');
                 } else if ($id == 206) {
                     $subject = 'Retail Sales Report By Arrival Date  | ';
                     $file_path = $reference_1_id['file_path'];
