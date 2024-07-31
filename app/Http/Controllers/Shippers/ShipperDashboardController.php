@@ -2474,7 +2474,7 @@ class ShipperDashboardController extends Controller
 //        $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7);
         $segments = Segment::where(function ($query) {
             $query->where('name', 'like', '%E-Commerce%')
-                ->orWhere('name', 'like', '%E-Comm%');
+                ->orWhere('name', 'like', '%E-Com%');
         })->get() ?? [];
         $sub_segments = SubCategorySegment::where('name', 'like', '%COD%')->get() ?? [];
         $payment_cycles = PaymentCycle::all();
@@ -2483,7 +2483,7 @@ class ShipperDashboardController extends Controller
         $average_shipment_duration_weekly = AverageShipmentCycle::where('name', 'like', '%weekly%')->first()->id ?? null;
         $lead_segment = Segment::where(function ($query) {
             $query->where('name', 'like', '%E-Commerce%')
-                  ->orWhere('name', 'like', '%E-Comm%');
+                  ->orWhere('name', 'like', '%E-Com%');
         })->first()->id ?? null;
         $lead_sub_segment = SubCategorySegment::where('name', 'like', '%COD%')->first()->id ?? null;
 
