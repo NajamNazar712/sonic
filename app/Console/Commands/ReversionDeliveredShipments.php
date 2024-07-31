@@ -49,6 +49,7 @@ class ReversionDeliveredShipments extends Command
         $destination_shipments = array();
         if($reversion_shipments->exists()){
             $reversion_shipments = $reversion_shipments->get();
+           
             foreach ($reversion_shipments as $reversion_shipment){
                 $shipment = Shipment::find($reversion_shipment->shipment_id);
                 $delivered_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [14, 30, 36, 37])->latest('id')->first();

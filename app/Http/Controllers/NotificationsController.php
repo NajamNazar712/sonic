@@ -10081,10 +10081,10 @@ class NotificationsController extends Controller
                     }
                     $to = array();
 
-                    $to[] = $admin->email;
+                    $to[] = 'sahban.ghani@trax.pk';
 
 
-                    self::email($subject, $body, 'sahban.ghani@trax.pk');
+                    self::email($subject, $body, $to);
                 } else if ($id == 206) {
                     $subject = 'Retail Sales Report By Arrival Date  | ';
                     $file_path = $reference_1_id['file_path'];
