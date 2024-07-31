@@ -10081,7 +10081,8 @@ class NotificationsController extends Controller
                     }
                     $to = array();
 
-                    $to[] = 'sahban.ghani@trax.pk';
+                    $to[] =
+                    $admin->email;
 
 
                     self::email($subject, $body, $to);
