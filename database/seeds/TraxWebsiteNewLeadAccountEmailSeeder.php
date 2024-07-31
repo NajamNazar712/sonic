@@ -27,7 +27,7 @@ class TraxWebsiteNewLeadAccountEmailSeeder extends Seeder
                 'subject' => 'Welcome to Trax [Company Name]',
                 'body' => 'Dear [Full Name],' . PHP_EOL .
                 PHP_EOL .
-                'Welcome to signing up at TRAX for your company [Company Name]. Please verify your email address by clicking on the button/link below. By clicking on the ‘Verify Email Address’ button/link, the user would be directed to a screen for Sonic where they can set their password for logging in.' . PHP_EOL .
+                'Welcome to signing up at TRAX for your company [Company Name]. Please verify your email address by clicking on the button/link below.' . PHP_EOL .
                 PHP_EOL .
                 '[Link]',
                 

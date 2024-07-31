@@ -172,6 +172,10 @@ class ShipperAgreementController extends Controller
         $sales_person = $shipper->sales_person()->where('status', 0)->first();
         if($sales_person){
             $sales_person_name = Admin::find($sales_person->admin_id)->name ?? "";
+
+            if($shipper->rates_added_by == 346){
+                $sales_person_name = $shipper->name;
+            }
         }
         $claim_policy = '<h2 class="text-center mt-4">Claim Policy</h2>
 <style> .table1 tr:nth-child(even) {background-color: #d9e2f3;}</style>

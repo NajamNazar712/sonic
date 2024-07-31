@@ -2326,15 +2326,28 @@ class ShipperDashboardController extends Controller
             if ($user_attachment->filled_and_signed_pdf != NULL) {
                 Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->filled_and_signed_pdf);
             }
+
+            if ($user_attachment->signed_acknowledgement_pdf != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->signed_acknowledgement_pdf);
+            }
         
             $date = now()->format('Ymd_His');
-            $filename = 'filled_and_signed_pdf_' . $date . '_' . session('user_id') . '.pdf';
+
+            $filename_signed = 'filled_and_signed_pdf_' . $date . '_' . session('user_id') . '.pdf';
+            $filename_acknowleged = 'signed_acknowledgement_pdf_' . $date . '_' . session('user_id') . '.pdf';
+
             $html = ShipperAgreementController::view_crf_agreement(session('user_id'));
             $pdf = SnappyPDF::loadHTML($html);
-            $filePath = 'users_attached_documents/' . session('user_id') . '/' . $filename;
-            Storage::disk('public')->put($filePath, $pdf->output());
-        
-            $user_attachment->filled_and_signed_pdf = $filename;
+
+            $filePathSigned = 'users_attached_documents/' . session('user_id') . '/' . $filename_signed;
+            $filePathAcknowledgement = 'users_attached_documents/' . session('user_id') . '/' . $filename_acknowleged;
+
+            Storage::disk('public')->put($filePathSigned, $pdf->output());
+            Storage::disk('public')->put($filePathAcknowledgement, $pdf->output());
+
+            $user_attachment->filled_and_signed_pdf = $filename_signed;
+            $user_attachment->signed_acknowledgement_pdf = $filename_acknowleged;
+
             $user_attachment->save();
             DB::commit();
 
@@ -2459,11 +2472,20 @@ class ShipperDashboardController extends Controller
         $references = Reference::all();
         $average_shipment_durations = AverageShipmentCycle::all();
 //        $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7);
-        $segments = Segment::all();
-        $sub_segments = SubCategorySegment::all();
+        $segments = Segment::where(function ($query) {
+            $query->where('name', 'like', '%E-Commerce%')
+                ->orWhere('name', 'like', '%E-Com%');
+        })->get() ?? [];
+        $sub_segments = SubCategorySegment::where('name', 'like', '%COD%')->get() ?? [];
         $payment_cycles = PaymentCycle::all();
         $admins = Admin::all();
 
+        $average_shipment_duration_weekly = AverageShipmentCycle::where('name', 'like', '%weekly%')->first()->id ?? null;
+        $lead_segment = Segment::where(function ($query) {
+            $query->where('name', 'like', '%E-Commerce%')
+                  ->orWhere('name', 'like', '%E-Com%');
+        })->first()->id ?? null;
+        $lead_sub_segment = SubCategorySegment::where('name', 'like', '%COD%')->first()->id ?? null;
 
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
@@ -2537,11 +2559,10 @@ class ShipperDashboardController extends Controller
             $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         }
 
-      
         if($user->on_board_status == 1){
             return view('client.access_denied');
         }else{
-            return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities,'admins'=>$admins,]);
+            return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities,'admins'=>$admins, 'average_shipment_duration_weekly'=> $average_shipment_duration_weekly, 'lead_segment'=> $lead_segment, 'lead_sub_segment'=> $lead_sub_segment]);
         }
     }
 
@@ -2588,5 +2609,12 @@ class ShipperDashboardController extends Controller
         $banks = BanksList::all();
         $city_list = City::where('status',1)->get();
         return view('client.components.banks')->with(['banks'=>$banks,'all_cities'=>$city_list]);
+    }
+
+    public function updateCrfSign(Request $request){
+        $user = User::find($request->user_id);
+        if($user->status == 1){
+            session(['status' => 2]);
+        }
     }
 }

@@ -226,17 +226,18 @@
                                             <select name="average_shipment_duration"
                                                 id="average_shipment_duration"
                                                 class="select2 form-control required"
-                                                style="width: 100%">
+                                                style="width: 100%" disabled>
                                                 @foreach ($average_shipment_durations as $average_shipment_duration)
-                                                    @if ($average_shipment_duration->id==3)
+                                                    @if ($average_shipment_duration->name=='Weekly' || $average_shipment_duration->name=='weekly')
                                                         <option
-                                                            value="{{ $average_shipment_duration->id }}"
-                                                            {{ old('average_shipment_duration') == $average_shipment_duration->id ? 'selected' : '' }} selected>
+                                                            value="{{ $average_shipment_duration->id }}">
                                                             {{ $average_shipment_duration->name }}
                                                         </option>
                                                     @endif
                                                 @endforeach
                                             </select>
+
+                                            <input type="hidden" name="average_shipment_duration" value="{{$average_shipment_duration_weekly}}">
                                         </div>
                                     </div>
                                 </div>
@@ -275,7 +276,8 @@
                                                 @endforeach
                                         </select>
 
-                                              
+                                        <input type="hidden" name="sale_person" value="{{$lead->sale_person_id}}">
+
                                         </div>
                                     </div>
                                 </div>
@@ -300,12 +302,14 @@
                                         <div>
                                             <select name="segments" id="segments"
                                                 class="select2 form-control required"
-                                                style="width: 100%">
+                                                style="width: 100%" disabled>
                                                 @foreach ($segments as $segment)
                                                     <option value="{{ $segment->id }}">
                                                         {{ $segment->name }}</option>
                                                 @endforeach
                                             </select>
+
+                                            <input type="hidden" name="segments" value="{{$lead_segment}}">
                                         </div>
                                     </div>
                                 </div>
@@ -318,8 +322,14 @@
                                         <div>
                                             <select name="sub_segments" id="sub_segments"
                                                 class="select2 form-control required"
-                                                style="width: 100%">
+                                                style="width: 100%" disabled>
+                                                @foreach ($sub_segments as $sub_segment)
+                                                    <option value="{{ $sub_segment->id }}">
+                                                        {{ $sub_segment->name }}</option>
+                                                @endforeach
+                                                
                                             </select>
+                                            <input type="hidden" name="sub_segments" value="{{$lead_sub_segment}}">
                                         </div>
                                     </div>
                                 </div>
@@ -430,7 +440,7 @@
                                         <input type="text" id="pickup_phone"
                                             class="form-control required"
                                             placeholder="0345-9999999" name="shipping_phone[]"
-                                            value="{{ old('shipping_phone.0') }}">
+                                            value="">
                                     </div>
                                     <div class="form-group">
                                         <label for="shipping_poc">
@@ -469,7 +479,7 @@
                                         <input type="text" id="pickup_brand_name"
                                             class="form-control" placeholder="Brand Name"
                                             name="pickup_brand_name[]"
-                                            value="{{ old('pickup_brand_name.0') }}">
+                                            value="{{$lead->brand}}">
                                     </div>
                                     <div class="form-group">
                                         <label for="shipping_phone">
@@ -2702,9 +2712,13 @@
 
 
         @if ($lead != null)
+            var pickupPhoneNumber = "<?php echo htmlspecialchars($lead->phone_number, ENT_QUOTES, 'UTF-8'); ?>";
             $('#shipper_city').val({{ $lead->city_id }}).prop('disabled', true).trigger('change');
             $('#sale_person').val(@json($lead->sale_person_id ?? null)).trigger('change');
+            $('#average_shipment_duration').val(@json($average_shipment_duration_weekly ?? null)).trigger('change');
+            $('#pickup_phone').val(pickupPhoneNumber);
         @endif
+
 
         $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
@@ -2788,34 +2802,13 @@
             placeholder: 'Select Sale Person',
             // dropdownParent:$('#registership')
         });
-        $('select[name="sub_segments"]').prepend('<option value="" selected="selected"></option>').select2({
+
+        $('select[name="sub_segments"]').select2({
             placeholder: 'Select Sub Segments',
         });
-        $('select[name="segments"]').prepend('<option value="" selected="selected"></option>').select2({
+        $('select[name="segments"]').select2({
             placeholder: 'Select Segment',
-        }).bind('change', function() {
-            var id = $(this).val();
-            $(this).valid();
-            $.ajax({
-                url: '{!! route('cod.wordpress.get_sub_segment') !!}',
-                method: 'POST',
-                data: {
-                    'segment_id': id,
-                    '_token': '{{ csrf_token() }}'
-                }
-            }).done(function(data) {
-                if (data.status == 0) {
-                    $('#sub_segments').children().remove();
-                    $('#sub_segments').prepend('<option value="" selected="selected"></option>')
-                    $.each(data.sub_segments, function(index, sub_segments) {
-                        $('#sub_segments').append('<option value="' + sub_segments.id +
-                            '" id="trax_center">' + sub_segments.name + '</option>')
-                    });
-                }
-            });
         });
-
-
 
         $("input[name='average_shipment']").inputmask({
             'alias': 'integer',
@@ -3453,6 +3446,8 @@
                 enableFinishButton();
             }
         });
+
+
     });
 
 

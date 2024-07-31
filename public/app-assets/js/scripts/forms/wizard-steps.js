@@ -76,7 +76,7 @@ $(".steps-validation").steps({
 
         if(currentIndex === 0){
             var caddress = $('input[name="company_address"]').val();
-            var cphone = $('input[name="shipper_phone"]').val();
+            // var cphone = $('input[name="shipper_phone"]').val();
             var cpoc = $('input[name="shipper_poc"]').val();
             var ccity = $('#shipper_city').val();
             var cproduct = $('#shipper_product_type').val();
@@ -86,7 +86,7 @@ $(".steps-validation").steps({
 
                 $('#pickup_address').val(caddress);
                 $('#pickup_poc').val(cpoc);
-                $('#pickup_phone').val(cphone);
+                // $('#pickup_phone').val(cphone);
                 $('#shipping_city').val(ccity).trigger('change');
                 $('#product_select').val(cproduct).trigger('change');
             }
