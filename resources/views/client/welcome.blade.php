@@ -31,6 +31,8 @@
                             <img src="{{ asset('img/proposed_lead_image_onboard.png') }}" alt="Onboarding Image" style="width: 150px; height: auto;">
                         </div>
                     </div>
+
+
                     
 
                 @endif
@@ -234,13 +236,25 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
+
+
+            @if (session('status') != 3 && $user->status == 3)
+                var warning = 'Dear Shipper, We are pleased to inform you that your account has been successfully activated at 100%. Please log in again to use the portal. Thank you for choosing our services';
+                toastr.warning(warning, 'Note!', {
+                    positionClass: 'toast-top-center',
+                    containerId: 'toast-top-center',
+                    timeOut: 30000 // Duration in milliseconds
+                });
+
+            @endif
+            
             @if (session('user_type') == 1 && session()->has('phone_number_unverified'))
 
             $('#password_input').inputmask({
                 'mask': '99999',
                 'alias': 'integer',
                 'allowMinus': false,
-                'allowPlus': false,
+                'allowPlus': false,r
                 'clearIncomplete': true
             });
                 $('#PasswordModal').modal('show');
@@ -359,6 +373,8 @@
                     }
                 });
             });
+
+            
             @endif--}}
 
         });
