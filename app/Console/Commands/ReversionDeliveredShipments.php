@@ -45,11 +45,10 @@ class ReversionDeliveredShipments extends Command
     public function handle()
     {
         $date = Carbon::yesterday()->format('Y-m-d');
-        $reversion_shipments = ReversionDeliveredShipment::whereDate('created_at','>=','2024-05-01')->whereDate('created_at', '<=', '2024-07-31');
+        $reversion_shipments = ReversionDeliveredShipment::whereDate('created_at', $date);
         $destination_shipments = array();
         if($reversion_shipments->exists()){
             $reversion_shipments = $reversion_shipments->get();
-           
             foreach ($reversion_shipments as $reversion_shipment){
                 $shipment = Shipment::find($reversion_shipment->shipment_id);
                 $delivered_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [14, 30, 36, 37])->latest('id')->first();
