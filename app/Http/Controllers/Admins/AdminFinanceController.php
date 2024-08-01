@@ -18884,8 +18884,9 @@ class AdminFinanceController extends Controller
             if($return_discount_per) {
                 $payable = 0;
                 $weight_charges = $shipment->weight_charges;
-                if ($return_discount_per > 0) {
-                    $payable = $weight_charges - ($weight_charges * ($return_discount_per / 100));
+                $return_discount_percentage = ShipmentChargesController::return_discount_charges($shipment);
+                if ($return_discount_percentage && $return_discount_percentage > 0) {
+                    $payable = $weight_charges - ($weight_charges * ($return_discount_percentage / 100));
                     $payable = ($payable > 0) ? $payable : 0;
                 }
                 self::add_adjustment($shipment->id, $payable, 'Return Discount Weight Charges', $adjustment_type,null,$transaction_id);
