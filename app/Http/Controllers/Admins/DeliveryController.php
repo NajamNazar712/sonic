@@ -802,7 +802,6 @@ class DeliveryController extends Controller
                                 $is_updateable = 0;
                             }
 
-
                             if ($is_updateable == 0) {
                                 if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && $shipment->shipper_status_id == 2) {
                                     return ['status' => 1, 'error' => 'Cargo not arrived at destination center!'];

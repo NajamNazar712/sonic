@@ -278,6 +278,7 @@
             });
 
             $('#bank_info').prepend('<option value="" selected="selected"></option>').select2({
+                dropdownParent: $('#edit_shipper_details_form'),
                 width: '100%',
                 placeholder: 'Select Bank*'
             });
