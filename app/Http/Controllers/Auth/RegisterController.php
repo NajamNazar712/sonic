@@ -251,11 +251,10 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        try {
-            $this->validator($request->all())->validate();
-            event(new Registered($user = $this->create($request->all(), $request)));
-            if ($request->wordpress_lead_register != 1) {
-    
+        $this->validator($request->all())->validate();
+        event(new Registered($user = $this->create($request->all(), $request)));
+        if ($request->wordpress_lead_register != 1) {
+            try {
                 $user_attachment = new UserDocumentAttachment();
                 $user_attachment->user_id = $user->id ?? session('user_id');
                 $date = Carbon::now()->format('Y_m_d'); 
@@ -289,9 +288,9 @@ class RegisterController extends Controller
                     Storage::disk('public')->putFileAs('users_attached_documents/' . ($user->id ?? session('user_id')) . '', $file, $filename);
                     $user_attachment->blank_cheque_image = $filename;
                 }
+                
                 $user_attachment->uploaded_at = Carbon::now();
                 $user_attachment->save();
-    
     
                 if (!$request->has('wordpress_account')) {
                     return $this->registered($request, $user)
@@ -299,12 +298,13 @@ class RegisterController extends Controller
                 } else {
                     return redirect()->route('cod.welcome');
                 }
-            } else {
-                return redirect()->route('cod.login')->with('success', 'User Register Successfully!');
+            } catch (\Exception $e) {
+                Log::error('Transaction failed Register Controller (register function): ' . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            Log::error('Transaction failed Register Controller (register function): ' . $e->getMessage());
+        } else {
+            return redirect()->route('cod.login')->with('success', 'User Register Successfully!');
         }
+       
     }
 
     public function duplicate_user_info($user_id, $name, $phone1, $phone2, $cnic, $ibans)
