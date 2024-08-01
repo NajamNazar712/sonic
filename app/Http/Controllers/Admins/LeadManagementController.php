@@ -588,6 +588,11 @@ class LeadManagementController extends Controller
                     $lead->save();
                 }
 
+                //for old leads of company_name not set for new lead revamp
+                if($lead->company_name == ''){
+                    $lead->company_name = $lead->company ?? '';
+                }
+
                 if($status == 9 && $lead->email_status != 1 && $lead->activation_code != '') {
                     $lead->email_status = 1;
                     $lead->via_channel = 'Sonic';
@@ -664,6 +669,11 @@ class LeadManagementController extends Controller
                     if($lead->activation_code == ''){
                         $lead->activation_code = $token;
                         $lead->save();
+                    }
+
+                    //for old leads of company_name not set for new lead revamp
+                    if($lead->company_name == ''){
+                        $lead->company_name = $lead->company ?? '';
                     }
     
                     if($status == 9 && $lead->email_status != 1 && $lead->activation_code != '') {
