@@ -2385,34 +2385,65 @@
                     return $.trim(value);
                 },
                 submitHandler: function (form) {
-                    swal({
-                        text: 'Are you sure, you want to add this lead?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
+                    let phoneNumber = $('#add_phone_number').val();
+                    let emailAddress = $('#add_email').val();
+                    
+                    $.ajax({
+                        url: '{{ route('admin.leads.check.lead') }}',
+                        method: 'POST',
+                        data: {
+                            phone_number: phoneNumber,
+                            email_address: emailAddress,
+                            _token: '{{ csrf_token() }}'
                         },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            blockPagePermanently();
-                            form.submit();
+                        success: function(response) {
+                            if (response.phone_number_exists) {
+
+                                toastr.error('Phone number already exists', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                                
+                            } else if (response.email_address_exists) {
+
+                                toastr.error('Email address already exists', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+
+                            } else {
+                                swal({
+                                    text: 'Are you sure you want to add this lead?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        blockPagePermanently();
+                                        form.submit();
+                                    }
+                                });
+                            }
                         }
                     });
                 }
             });
+
 
         });
 
