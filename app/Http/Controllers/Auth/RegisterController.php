@@ -251,55 +251,59 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        $this->validator($request->all())->validate();
-        event(new Registered($user = $this->create($request->all(), $request)));
-        if ($request->wordpress_lead_register != 1) {
-
-            $user_attachment = new UserDocumentAttachment();
-            $user_attachment->user_id = $user->id ?? session('user_id');
-            $date = Carbon::now()->format('Y_m_d'); 
-
-            if ($request->hasFile('cnic_front_image')) {
-                if ($user_attachment->cnic_front_image != NULL) {
-                    Storage::disk('public')->delete('users_attached_documents/' . ($request->user_id ?? session('user_id')) . '/' . $user_attachment->cnic_front_image);
+        try {
+            $this->validator($request->all())->validate();
+            event(new Registered($user = $this->create($request->all(), $request)));
+            if ($request->wordpress_lead_register != 1) {
+    
+                $user_attachment = new UserDocumentAttachment();
+                $user_attachment->user_id = $user->id ?? session('user_id');
+                $date = Carbon::now()->format('Y_m_d'); 
+    
+                if ($request->hasFile('cnic_front_image')) {
+                    if ($user_attachment->cnic_front_image != NULL) {
+                        Storage::disk('public')->delete('users_attached_documents/' . ($request->user_id ?? session('user_id')) . '/' . $user_attachment->cnic_front_image);
+                    }
+                    $filename = 'cnic_front_image_' . $date . '_' . ($user->id ?? session('user_id')) . '.png';
+                    $file = $request->file('cnic_front_image');
+                    Storage::disk('public')->putFileAs('users_attached_documents/' . ($user->id ?? session('user_id')) . '', $file, $filename);
+                    $user_attachment->cnic_front_image = $filename;
                 }
-                $filename = 'cnic_front_image_' . $date . '_' . ($user->id ?? session('user_id')) . '.png';
-                $file = $request->file('cnic_front_image');
-                Storage::disk('public')->putFileAs('users_attached_documents/' . ($user->id ?? session('user_id')) . '', $file, $filename);
-                $user_attachment->cnic_front_image = $filename;
-            }
-
-            if ($request->hasFile('cnic_back_image')) {
-                if ($user_attachment->cnic_back_image != NULL) {
-                    Storage::disk('public')->delete('users_attached_documents/' . ($request->user_id ?? session('user_id')) . '/' . $user_attachment->cnic_back_image);
+    
+                if ($request->hasFile('cnic_back_image')) {
+                    if ($user_attachment->cnic_back_image != NULL) {
+                        Storage::disk('public')->delete('users_attached_documents/' . ($request->user_id ?? session('user_id')) . '/' . $user_attachment->cnic_back_image);
+                    }
+                    $filename = 'cnic_back_image_' . $date . '_' . ($user->id ?? session('user_id')) . '.png';
+                    $file = $request->file('cnic_back_image');
+                    Storage::disk('public')->putFileAs('users_attached_documents/' . ($user->id ?? session('user_id')) . '', $file, $filename);
+                    $user_attachment->cnic_back_image = $filename;
                 }
-                $filename = 'cnic_back_image_' . $date . '_' . ($user->id ?? session('user_id')) . '.png';
-                $file = $request->file('cnic_back_image');
-                Storage::disk('public')->putFileAs('users_attached_documents/' . ($user->id ?? session('user_id')) . '', $file, $filename);
-                $user_attachment->cnic_back_image = $filename;
-            }
-
-            if ($request->hasFile('blank_cheque_image')) {
-                if ($user_attachment->blank_cheque_image != NULL) {
-                    Storage::disk('public')->delete('users_attached_documents/' . ($request->user_id ?? session('user_id')) . '/' . $user_attachment->blank_cheque_image);
+    
+                if ($request->hasFile('blank_cheque_image')) {
+                    if ($user_attachment->blank_cheque_image != NULL) {
+                        Storage::disk('public')->delete('users_attached_documents/' . ($request->user_id ?? session('user_id')) . '/' . $user_attachment->blank_cheque_image);
+                    }
+                    $filename = 'blank_cheque_image_' . $date . '_' . ($user->id ?? session('user_id'))  . '.png';
+                    $file = $request->file('blank_cheque_image');
+                    Storage::disk('public')->putFileAs('users_attached_documents/' . ($user->id ?? session('user_id')) . '', $file, $filename);
+                    $user_attachment->blank_cheque_image = $filename;
                 }
-                $filename = 'blank_cheque_image_' . $date . '_' . ($user->id ?? session('user_id'))  . '.png';
-                $file = $request->file('blank_cheque_image');
-                Storage::disk('public')->putFileAs('users_attached_documents/' . ($user->id ?? session('user_id')) . '', $file, $filename);
-                $user_attachment->blank_cheque_image = $filename;
-            }
-            $user_attachment->uploaded_at = Carbon::now();
-            $user_attachment->save();
-
-
-            if (!$request->has('wordpress_account')) {
-                return $this->registered($request, $user)
-                    ?: redirect($this->redirectPath());
+                $user_attachment->uploaded_at = Carbon::now();
+                $user_attachment->save();
+    
+    
+                if (!$request->has('wordpress_account')) {
+                    return $this->registered($request, $user)
+                        ?: redirect($this->redirectPath());
+                } else {
+                    return redirect()->route('cod.welcome');
+                }
             } else {
-                return redirect()->route('cod.welcome');
+                return redirect()->route('cod.login')->with('success', 'User Register Successfully!');
             }
-        } else {
-            return redirect()->route('cod.login')->with('success', 'User Register Successfully!');
+        } catch (\Exception $e) {
+            Log::error('Transaction failed Register Controller (register function): ' . $e->getMessage());
         }
     }
 
