@@ -257,13 +257,13 @@ class RegisterController extends Controller
 
             $user_attachment = new UserDocumentAttachment();
             $user_attachment->user_id = $user->id ?? session('user_id');
-            $date = Carbon::now()->format('Y_m_d');
+            $date = Carbon::now()->format('Y_m_d'); 
 
             if ($request->hasFile('cnic_front_image')) {
                 if ($user_attachment->cnic_front_image != NULL) {
                     Storage::disk('public')->delete('users_attached_documents/' . $request->user_id ?? session('user_id') . '/' . $user_attachment->cnic_front_image);
                 }
-                $filename = 'cnic_front_image_' . $date . '_' . $user->id . '.png';
+                $filename = 'cnic_front_image_' . $date . '_' . $user->id ?? session('user_id') . '.png';
                 $file = $request->file('cnic_front_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/' . $user->id ?? session('user_id') . '', $file, $filename);
                 $user_attachment->cnic_front_image = $filename;
@@ -273,7 +273,7 @@ class RegisterController extends Controller
                 if ($user_attachment->cnic_back_image != NULL) {
                     Storage::disk('public')->delete('users_attached_documents/' . $request->user_id ?? session('user_id') . '/' . $user_attachment->cnic_back_image);
                 }
-                $filename = 'cnic_back_image_' . $date . '_' . $user->id . '.png';
+                $filename = 'cnic_back_image_' . $date . '_' . $user->id ?? session('user_id') . '.png';
                 $file = $request->file('cnic_back_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/' . $user->id ?? session('user_id') . '', $file, $filename);
                 $user_attachment->cnic_back_image = $filename;
@@ -283,7 +283,7 @@ class RegisterController extends Controller
                 if ($user_attachment->blank_cheque_image != NULL) {
                     Storage::disk('public')->delete('users_attached_documents/' . $request->user_id ?? session('user_id') . '/' . $user_attachment->blank_cheque_image);
                 }
-                $filename = 'blank_cheque_image_' . $date . '_' . $user->id . '.png';
+                $filename = 'blank_cheque_image_' . $date . '_' . $user->id ?? session('user_id')  . '.png';
                 $file = $request->file('blank_cheque_image');
                 Storage::disk('public')->putFileAs('users_attached_documents/' . $user->id ?? session('user_id') . '', $file, $filename);
                 $user_attachment->blank_cheque_image = $filename;
