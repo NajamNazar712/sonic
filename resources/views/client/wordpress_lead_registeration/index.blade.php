@@ -488,7 +488,7 @@
                                         </label>
                                         <input type="email" name="shipping_email[]"
                                             placeholder="abc@example.com"
-                                            value="{{ old('shipping_email.0') }}"
+                                            value="{{ $lead->email_address ?? old('shipping_email.0') }}"
                                             class="form-control required">
                                     </div>
                                     <div class="form-group">
