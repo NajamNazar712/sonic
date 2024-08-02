@@ -340,10 +340,8 @@ class NotificationsController extends Controller
 
                     $mail->send(new Notifications($subject, $body, $from));
                 }
-    
-                if ($bcc) {
-                    $mail->bcc($bcc);
-                }
+
+                
     
               
             }
