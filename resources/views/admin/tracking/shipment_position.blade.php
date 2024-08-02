@@ -220,7 +220,7 @@
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push('\u200C' + values.tracking_number);
+                                row.push(`="${values.tracking_number}"`);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.status);
@@ -261,7 +261,7 @@
                 scrollX: true, scrollY: '500px',
                 buttons: [
                     {
-                        extend: 'excel',
+                        extend: 'csv',
                         title: 'Track Actual Shipment Position',
                         className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
