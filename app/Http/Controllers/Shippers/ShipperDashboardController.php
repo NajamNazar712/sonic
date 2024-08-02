@@ -682,6 +682,10 @@ class ShipperDashboardController extends Controller
         //  else {
         //      $connection = 'mysql';
         //  }
+        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
+            $from = $request->get('booking_from_date');
+            $to = $request->get('booking_to_date');
+        }
 
         $connection = 'reports';
         $shipments = DB::connection($connection)->table('shipments')
@@ -693,13 +697,11 @@ class ShipperDashboardController extends Controller
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('payment_modes as pm','pm.id','=','shipments.payment_mode_id')
-            ->leftjoin('shipments_journey', function ($join) {
+            ->leftjoin('shipments_journey', function ($join)use ($from,$to) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'))
-                        ->where('shipments_journey.created_at', '>=', Carbon::now()->subMonth(6)) // Add created_at condition here
-                        ->where('shipments_journey.created_at', '<=', Carbon::now()); // Assuming you have these variables set
- 
+                       ->whereBetween('shipments_journey.created_at', [$from, $to]);
             })
             ->leftJoin('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
@@ -730,10 +732,7 @@ class ShipperDashboardController extends Controller
                 });
             }
         }
-
         if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
-            $from = $request->get('booking_from_date');
-            $to = $request->get('booking_to_date');
             $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
 
