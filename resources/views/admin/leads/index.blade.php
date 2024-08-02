@@ -2385,33 +2385,74 @@
                     return $.trim(value);
                 },
                 submitHandler: function (form) {
-                    swal({
-                        text: 'Are you sure, you want to add this lead?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
+                    let phoneNumber = $('#add_phone_number').val();
+                    let emailAddress = $('#add_email').val();
+                    let company = $('#add_company').val();
+
+                    $.ajax({
+                        url: '{{ route('admin.leads.check.lead') }}',
+                        method: 'POST',
+                        data: {
+                            phone: phoneNumber,
+                            email: emailAddress,
+                            company: company,
+                            _token: '{{ csrf_token() }}'
                         },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            blockPagePermanently();
-                            form.submit();
+                        success: function(response) {
+                            if (response.phone_number_exists || response.email_address_exists || response.company_exists)  {
+                                let errorMessage = '';
+
+                                if (response.phone_number_exists) {
+                                    errorMessage += 'Phone number already exists<br>';
+                                }
+                                if (response.email_address_exists) {
+                                    errorMessage += 'Email address already exists<br>';
+                                }
+                                if (response.company_exists) {
+                                    errorMessage += 'Company already exists';
+                                }
+                                toastr.error(errorMessage, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            } else {
+                                swal({
+                                    text: 'Are you sure you want to add this lead?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        blockPagePermanently();
+                                        form.submit();
+                                    }
+                                });
+                            }
                         }
                     });
                 }
+            });
+
+            
+            $("#add_lead_form input[name='contact_person']").on('keyup', function() {
+                var currentValue = $(this).val();
+                var filteredValue = currentValue.replace(/[^a-zA-Z ]+/g, '');            
+                $(this).val(filteredValue);
             });
 
         });

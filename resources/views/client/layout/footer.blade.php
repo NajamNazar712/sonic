@@ -34,7 +34,7 @@
     <script src="{{asset('szimek-signature_pad/signature.min.js')}}" type="text/javascript"></script>
 @endif
 
-@if($logged_user && $logged_user->status != 0)
+@if(isset($lead_logged_user) && $lead_logged_user->status != 0)
     
 <script type="text/javascript">
 

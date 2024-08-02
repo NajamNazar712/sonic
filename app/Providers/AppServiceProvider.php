@@ -33,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
             $search_sonic = NULL;
             $visit = NULL;
             $shipper_return_note_ticker = NULL;
+
             $return_notes = array();
 
             if (Auth::guard('admin')->check()) {
@@ -49,7 +50,7 @@ class AppServiceProvider extends ServiceProvider
               
                 $visit = DailyVisit::where('shipper_id', session('user_id'))->where('rated', 0);
 
-                $user = User::find(session('user_id'));
+                $lead_logged_user = User::find(session('user_id'));
                 
                 $from =  Carbon::now()->startOfDay()->toDateTimeString();
                 $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
@@ -69,8 +70,8 @@ class AppServiceProvider extends ServiceProvider
                     }
                 }
 
-                if ($user) {
-                    $view->with('logged_user', $user);
+                if ($lead_logged_user) {
+                    $view->with('lead_logged_user', $lead_logged_user);
                 }
 
             } else {
