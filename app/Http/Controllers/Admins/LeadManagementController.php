@@ -1041,9 +1041,35 @@ class LeadManagementController extends Controller
 
     public function checkLead(Request $request)
     {
-        $phoneNumberExists = User::where('phone', $request->phone)->exists();
-        $emailAddressExists = User::where('email', $request->email)->exists();
-        $companyExists = User::where('name', $request->company)->exists();
+        $id = $request->lead_id;
+
+        $lead = Lead::find($id);
+
+        $phoneNumberExists = false;
+        $emailAddressExists = false;
+        $companyExists = false;
+
+
+        if($id){
+            if($lead->phone_number != $request->phone){
+                $phoneNumberExists = Lead::where('phone_number', $request->phone)->exists();
+            }
+            
+            
+            if($lead->email_address != $request->email){
+                $emailAddressExists = Lead::where('email_address', $request->email)->exists();        
+            }
+        
+            if($lead->company != $request->company){
+                $companyExists = Lead::where('company', $request->company)->exists();
+            }
+
+            
+        }else{
+            $phoneNumberExists = User::where('phone', $request->phone)->exists();
+            $emailAddressExists = User::where('email', $request->email)->exists();
+            $companyExists = User::where('name', $request->company)->exists();
+        }
 
         return response()->json([
             'phone_number_exists' => $phoneNumberExists,

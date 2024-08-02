@@ -2254,56 +2254,6 @@
             });
 
 
-            $('#edit_lead_form').validate({
-                ignore: [],
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function (error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                normalizer: function (value) {
-                    return $.trim(value);
-                },
-                submitHandler: function (form) {
-                    swal({
-                        text: 'Are you sure, you want to edit this lead?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            var lead_id = $('#edit_lead_id').val();
-
-                            if (lead_id != null) {
-                                blockPagePermanently();
-                                form.submit();
-                            } else {
-                                var error = 'Invalid Lead ID!';
-                                toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                        }
-                    });
-                }
-            });
-
             $('#add_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder:'Select City*',
@@ -2453,6 +2403,91 @@
                 var currentValue = $(this).val();
                 var filteredValue = currentValue.replace(/[^a-zA-Z ]+/g, '');            
                 $(this).val(filteredValue);
+            });
+
+
+            $('#edit_lead_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function (value) {
+                    return $.trim(value);
+                },
+                submitHandler: function (form) {
+                    let phoneNumber = $('#edit_phone_number').val();
+                    let emailAddress = $('#edit_email').val();
+                    let company = $('#edit_company').val();
+                    let leadId = $('#edit_lead_id').val();
+
+                    $.ajax({
+                        url: '{{ route('admin.leads.check.lead') }}',
+                        method: 'POST',
+                        data: {
+                            phone: phoneNumber,
+                            email: emailAddress,
+                            company: company,
+                            lead_id: leadId,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            let errorMessages = [];
+
+                            if (response.phone_number_exists) {
+                                errorMessages.push('Phone number already exists<br>');
+                            }
+                            if (response.email_address_exists) {
+                                errorMessages.push('Email address already exists<br>');
+                            }
+                            if (response.company_exists) {
+                                errorMessages.push('Company already exists');
+                            }
+
+                            if (errorMessages.length > 0) {
+                                toastr.error(errorMessages.join('\n'), 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            } else {
+                                swal({
+                                    text: 'Are you sure you want to edit this lead?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        if (leadId != null) {
+                                            blockPagePermanently();
+                                            form.submit();
+                                        } else {
+                                            toastr.error('Invalid Lead ID!', 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
             });
 
         });
