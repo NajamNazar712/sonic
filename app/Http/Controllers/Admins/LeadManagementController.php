@@ -30,6 +30,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Models\Admin\Lead\LeadCallStatusLog;
 use App\Http\Models\ServiceList;
+use App\Http\Models\Shipper\User;
 use Illuminate\Support\Str;
 
 class LeadManagementController extends Controller
@@ -1040,12 +1041,14 @@ class LeadManagementController extends Controller
 
     public function checkLead(Request $request)
     {
-        $phoneNumberExists = Lead::where('phone_number', $request->phone_number)->exists();
-        $emailAddressExists = Lead::where('email_address', $request->email_address)->exists();
-        
+        $phoneNumberExists = User::where('phone', $request->phone)->exists();
+        $emailAddressExists = User::where('email', $request->email)->exists();
+        $companyExists = User::where('name', $request->company)->exists();
+
         return response()->json([
             'phone_number_exists' => $phoneNumberExists,
             'email_address_exists' => $emailAddressExists,
+            'company_exists' => $companyExists,
         ]);
     }
 }

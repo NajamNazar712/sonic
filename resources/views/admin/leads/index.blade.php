@@ -2387,30 +2387,34 @@
                 submitHandler: function (form) {
                     let phoneNumber = $('#add_phone_number').val();
                     let emailAddress = $('#add_email').val();
-                    
+                    let company = $('#add_company').val();
+
                     $.ajax({
                         url: '{{ route('admin.leads.check.lead') }}',
                         method: 'POST',
                         data: {
-                            phone_number: phoneNumber,
-                            email_address: emailAddress,
+                            phone: phoneNumber,
+                            email: emailAddress,
+                            company: company,
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                            if (response.phone_number_exists) {
+                            if (response.phone_number_exists || response.email_address_exists || response.company_exists)  {
+                                let errorMessage = '';
 
-                                toastr.error('Phone number already exists', 'Error!', {
+                                if (response.phone_number_exists) {
+                                    errorMessage += 'Phone number already exists<br>';
+                                }
+                                if (response.email_address_exists) {
+                                    errorMessage += 'Email address already exists<br>';
+                                }
+                                if (response.company_exists) {
+                                    errorMessage += 'Company already exists';
+                                }
+                                toastr.error(errorMessage, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
                                 });
-                                
-                            } else if (response.email_address_exists) {
-
-                                toastr.error('Email address already exists', 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-
                             } else {
                                 swal({
                                     text: 'Are you sure you want to add this lead?',
@@ -2444,6 +2448,12 @@
                 }
             });
 
+            
+            $("#add_lead_form input[name='contact_person']").on('keyup', function() {
+                var currentValue = $(this).val();
+                var filteredValue = currentValue.replace(/[^a-zA-Z ]+/g, '');            
+                $(this).val(filteredValue);
+            });
 
         });
 
