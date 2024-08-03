@@ -685,6 +685,7 @@ class ShipperDashboardController extends Controller
         if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
             $from = $request->get('booking_from_date');
             $to = $request->get('booking_to_date');
+            $oneMonthBack = Carbon::parse($from)->subMonth()->format('Y-m-d H:i:s');
         }
 
         $connection = 'reports';
@@ -697,11 +698,11 @@ class ShipperDashboardController extends Controller
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('payment_modes as pm','pm.id','=','shipments.payment_mode_id')
-            ->leftjoin('shipments_journey', function ($join)use ($from,$to) {
+            ->leftjoin('shipments_journey', function ($join)use ($from,$to,$oneMonthBack) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'))
-                       ->whereBetween('shipments_journey.created_at', [$from, $to]);
+                       ->whereBetween('shipments_journey.created_at', [$oneMonthBack, $to]);
             })
             ->leftJoin('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
