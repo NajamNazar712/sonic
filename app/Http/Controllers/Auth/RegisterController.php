@@ -298,8 +298,9 @@ class RegisterController extends Controller
                 } else {
                     return redirect()->route('cod.welcome');
                 }
-            } catch (\Exception $e) {
-                Log::error('Transaction failed Register Controller (register function): ' . $e->getMessage());
+            } catch (\Throwable $th) {
+                Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Failed'. $th->getMessage());
+//                Log::error('Transaction failed Register Controller (register function): ' . $e->getMessage());
             }
         } else {
             return redirect()->route('cod.login')->with('success', 'User Register Successfully!');
