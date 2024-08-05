@@ -313,7 +313,7 @@ class NotificationsController extends Controller
 
             if($to){
 
-                if($id = 230){
+                if($id == 230){
 
                     $mail = new NotificationsDispatchNow($subject, $body);
 
@@ -10075,7 +10075,8 @@ class NotificationsController extends Controller
                     }
                     $to = array();
 
-                    $to[] = $admin->email;
+                    $to[] =
+                    $admin->email;
 
 
                     self::email($subject, $body, $to);

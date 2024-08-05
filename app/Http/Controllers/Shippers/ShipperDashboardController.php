@@ -694,6 +694,11 @@ class ShipperDashboardController extends Controller
         //  else {
         //      $connection = 'mysql';
         //  }
+        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
+            $from = $request->get('booking_from_date');
+            $to = $request->get('booking_to_date');
+            $oneMonthBack = Carbon::parse($from)->subMonth()->format('Y-m-d H:i:s');
+        }
 
         $connection = 'reports';
         $shipments = DB::connection($connection)->table('shipments')
@@ -705,18 +710,16 @@ class ShipperDashboardController extends Controller
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('payment_modes as pm','pm.id','=','shipments.payment_mode_id')
-            ->leftjoin('shipments_journey', function ($join) {
+            ->leftjoin('shipments_journey', function ($join)use ($from,$to,$oneMonthBack) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'))
-                        ->where('shipments_journey.created_at', '>=', Carbon::now()->subMonth(6)) // Add created_at condition here
-                        ->where('shipments_journey.created_at', '<=', Carbon::now()); // Assuming you have these variables set
- 
+                       ->whereBetween('shipments_journey.created_at', [$oneMonthBack, $to]);
             })
             ->leftJoin('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->join('business_categories as bc', 'shipments.business_category_id', '=' , 'bc.id')
+            ->leftJoin('business_categories as bc', 'shipments.business_category_id', '=' , 'bc.id')
             ->whereIn('shipments.user_id', $masp)
             ->select(['u.id as user_id', 'u.name as user_name', 'shipments_journey.remarks as cancellation_remarks','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments_journey.shipper_status_id as status_id', 'shipments.booked_by as booked_by', 'bc.name as business_category' ,'pm.mode as payment_module','shipments.tracking_number as tracking']);
 //            ->where('shipments.user_id', session('user_id'))
@@ -742,10 +745,7 @@ class ShipperDashboardController extends Controller
                 });
             }
         }
-
         if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
-            $from = $request->get('booking_from_date');
-            $to = $request->get('booking_to_date');
             $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
 
