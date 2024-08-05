@@ -253,7 +253,8 @@ class RegisterController extends Controller
     {
         $this->validator($request->all())->validate();
         event(new Registered($user = $this->create($request->all(), $request)));
-        if ($request->wordpress_lead_register != 1) {
+        $wordpress_lead_register = isset($request->wordpress_lead_register) ? $request->wordpress_lead_register : 0;
+        if ($wordpress_lead_register != 1) {
             try {
                 $user_attachment = new UserDocumentAttachment();
                 $user_attachment->user_id = $user->id ?? session('user_id');
@@ -299,7 +300,7 @@ class RegisterController extends Controller
                     return redirect()->route('cod.welcome');
                 }
             } catch (\Throwable $th) {
-                Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Failed'. $th->getMessage());
+                Log::channel('cronJobLog')->info('s ' .'Register Log'. $th->getMessage());
 //                Log::error('Transaction failed Register Controller (register function): ' . $e->getMessage());
             }
         } else {
@@ -753,10 +754,12 @@ class RegisterController extends Controller
                 Log::info('Transaction committed successfully.');
                 return $newUser;
             }
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Transaction failed: ' . $e->getMessage());
+        } catch (\Throwable $th) {
+            DB::rollBack();;
+            Log::channel('cronJobLog')->info('s ' .'Register Log 2'. $th->getMessage());
         }
+
+
     }
     public function email_verified($id)
     {
