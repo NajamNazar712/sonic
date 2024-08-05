@@ -253,7 +253,8 @@ class RegisterController extends Controller
     {
         $this->validator($request->all())->validate();
         event(new Registered($user = $this->create($request->all(), $request)));
-        if ($request->wordpress_lead_register != 1) {
+        $wordpress_lead_register = isset($request->wordpress_lead_register) ? $request->wordpress_lead_register : 0;
+        if ($wordpress_lead_register != 1) {
             try {
                 $user_attachment = new UserDocumentAttachment();
                 $user_attachment->user_id = $user->id ?? session('user_id');
