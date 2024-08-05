@@ -299,7 +299,7 @@ class RegisterController extends Controller
                     return redirect()->route('cod.welcome');
                 }
             } catch (\Throwable $th) {
-                Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Failed'. $th->getMessage());
+                Log::channel('cronJobLog')->info('s ' .'Register Log'. $th->getMessage());
 //                Log::error('Transaction failed Register Controller (register function): ' . $e->getMessage());
             }
         } else {
@@ -753,10 +753,12 @@ class RegisterController extends Controller
                 Log::info('Transaction committed successfully.');
                 return $newUser;
             }
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Transaction failed: ' . $e->getMessage());
+        } catch (\Throwable $th) {
+            DB::rollBack();;
+            Log::channel('cronJobLog')->info('s ' .'Register Log 2'. $th->getMessage());
         }
+
+
     }
     public function email_verified($id)
     {
