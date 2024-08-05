@@ -768,194 +768,198 @@ class ShipperFinanceController extends Controller
 
     public function payments_export_to_excel(Request $request)
     {
-        $done_payment = DonePayment::find($request->id);
+        try{
+            $done_payment = DonePayment::find($request->id);
 
-        $filename = 'sonic_payment_details_' . $request->id . '.xlsx';
+            $filename = 'sonic_payment_details_' . $request->id . '.xlsx';
 
-        $details = array();
+            $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)','Total Charges (PKR)','GST','WHT','Net Retained Amount (PKR)','Net Disbursement Amount (PKR)
-'];
+            $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)', 'Total Charges (PKR)', 'GST', 'WHT', 'Net Retained Amount (PKR)', 'Net Disbursement Amount (PKR)'];
 
-        if ($done_payment && $done_payment->user_id == session('user_id')) {
-            $account_type_id = $done_payment->shipper->account_type_id;
+            if ($done_payment && $done_payment->user_id == session('user_id')) {
+                $account_type_id = $done_payment->shipper->account_type_id;
 
-            $serial_number = 1;
+                $serial_number = 1;
 
-            $total_collection_amount = 0;
-            $total_weight_charges = 0;
-            $total_cash_handling_charges = 0;
-            $total_insurance_charges = 0;
-            $total_replacement_charges = 0;
-            $total_try_and_buy_charges = 0;
-            $total_return_charges = 0;
-            $total_packaging_material_charges = 0;
-            $total_fuel_surcharge = 0;
-            $total_intercept_charges = 0;
-            $total_nsa_osa_charges = 0;
-            $total_gst = 0;
-            $total_wht = 0;
-            $total_charges = 0;
-            $total_adjustments = 0;
-            $total_payable = 0;
-            $total_faf_charges = 0;
+                $total_collection_amount = 0;
+                $total_weight_charges = 0;
+                $total_cash_handling_charges = 0;
+                $total_insurance_charges = 0;
+                $total_replacement_charges = 0;
+                $total_try_and_buy_charges = 0;
+                $total_return_charges = 0;
+                $total_packaging_material_charges = 0;
+                $total_fuel_surcharge = 0;
+                $total_intercept_charges = 0;
+                $total_nsa_osa_charges = 0;
+                $total_gst = 0;
+                $total_wht = 0;
+                $total_charges = 0;
+                $total_adjustments = 0;
+                $total_payable = 0;
+                $total_faf_charges = 0;
 
-            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
-                $shipment = $done_payment_shipment->shipment;
+                foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                    $shipment = $done_payment_shipment->shipment;
 
-                $shipment_weight = $shipment->actual_weight;
-                $weight_charges = $shipment->weight_charges;
+                    $shipment_weight = $shipment->actual_weight;
+                    $weight_charges = $shipment->weight_charges;
 
-                if ($done_payment_shipment->type != 2) {
-                    $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
-                    if ($change_shipment_weight_log->exists()) {
-                        $change_shipment_weight_log = $change_shipment_weight_log->first();
-
-                        $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
-                        $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
-
-                        if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
-                            $shipment_weight = $change_shipment_weight_log->old_weight;
-                            $weight_charges = $change_shipment_weight_log->old_charges;
-                        }
-                    }
-                }
-
-                if ($done_payment_shipment->type == 0) {
-                    $type = 'Delivered';
-                } else if ($done_payment_shipment->type == 1) {
-                    $type = 'Returned';
-                } else {
-                    $type = 'Adjusted';
-                }
-
-                $pickup_address = $shipment->pickup_address;
-
-                $row = array();
-                $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
-                $row[] = $serial_number;
-                $row[] = $shipment->tracking_number;
-                $row[] = $shipment->created_at;
-                $row[] = $type;
-                $row[] = $shipment->order_id;
-                $row[] = $pickup_address->vendor;
-                $row[] = $pickup_address->city->name;
-                $row[] = $shipment->consignee_name;
-                $row[] = $shipment->consignee_phone_number_1;
-                $row[] = $shipment->consignee_city->name;
-                $row[] = $shipment->booking_type->booking_type;
-                $row[] = $shipment_weight;
-                $row[] = $done_payment_shipment->amount;
-                $row[] = ((1 == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $weight_charges : 0);
-                $row[] = ((1 == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
-                $row[] = ((1 == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
-                $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
-
-                $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0');
-                $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0');
-                $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0');
-                $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) : '0');
-                $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->payable, 2) : '0');
-
-                $details[] = $row;
-
-                $serial_number++;
-
-                if (1 == 1) {
                     if ($done_payment_shipment->type != 2) {
-                        if ($done_payment_shipment->charges != 0) {
-                            if ($done_payment_shipment->type == 0) {
-                                $total_collection_amount += $done_payment_shipment->amount;
-                                $total_cash_handling_charges += $shipment->cash_handling_charges;
-                                $total_replacement_charges += $shipment->replacement_charges;
-                                $total_try_and_buy_charges += $shipment->try_and_buy_charges;
-                            } else {
-                                $total_return_charges += $shipment->return_charges;
+                        $change_shipment_weight_log = ChangeShipmentWeightLog::where('shipment_id', $shipment->id);
+                        if ($change_shipment_weight_log->exists()) {
+                            $change_shipment_weight_log = $change_shipment_weight_log->first();
+
+                            $done_payment_shipment_date = Carbon::parse($done_payment_shipment->created_at);
+                            $change_shipment_weight_log_date = Carbon::parse($change_shipment_weight_log->created_at);
+
+                            if ($change_shipment_weight_log_date->gt($done_payment_shipment_date)) {
+                                $shipment_weight = $change_shipment_weight_log->old_weight;
+                                $weight_charges = $change_shipment_weight_log->old_charges;
                             }
-
-                            $total_weight_charges += $weight_charges;
-
-                            if ($shipment->packaging_material_request) {
-                                $total_packaging_material_charges += $shipment->packaging_material_charges;
-                            }
-
-                            $total_insurance_charges += $shipment->insurance_charges;
-                            $total_fuel_surcharge += $shipment->fuel_surcharge;
-                            $total_intercept_charges += $shipment->intercept_charges;
-                            $total_nsa_osa_charges += $shipment->nsa_osa_charges;
-                            $total_faf_charges += $faf_charges;
-                        } else if ($done_payment_shipment->type == 0) {
-                            $total_collection_amount += $done_payment_shipment->amount;
                         }
-                    } else {
-                        $total_adjustments += $done_payment_shipment->payable;
                     }
 
-                    $total_gst += $done_payment_shipment->gst;
-                    $total_wht += $done_payment_shipment->wht;
-                    $total_charges += $done_payment_shipment->charges;
-                    $total_payable += $done_payment_shipment->payable;
-                } else {
                     if ($done_payment_shipment->type == 0) {
-                        $total_collection_amount += $done_payment_shipment->amount;
-                    } else if ($done_payment_shipment->type == 2) {
-                        $total_adjustments += $done_payment_shipment->payable;
+                        $type = 'Delivered';
+                    } else if ($done_payment_shipment->type == 1) {
+                        $type = 'Returned';
+                    } else {
+                        $type = 'Adjusted';
                     }
 
-                    $total_payable += $done_payment_shipment->payable;
+                    $pickup_address = $shipment->pickup_address;
+
+                    $row = array();
+                    $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
+                    $row[] = $serial_number;
+                    $row[] = $shipment->tracking_number;
+                    $row[] = $shipment->created_at;
+                    $row[] = $type;
+                    $row[] = $shipment->order_id;
+                    $row[] = $pickup_address->vendor;
+                    $row[] = $pickup_address->city->name;
+                    $row[] = $shipment->consignee_name;
+                    $row[] = $shipment->consignee_phone_number_1;
+                    $row[] = $shipment->consignee_city->name;
+                    $row[] = $shipment->booking_type->booking_type;
+                    $row[] = $shipment_weight;
+                    $row[] = $done_payment_shipment->amount;
+                    $row[] = ((1 == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $weight_charges : 0);
+                    $row[] = ((1 == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
+                    $row[] = ((1 == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
+                    $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
+
+                    $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0');
+                    $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0');
+                    $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0');
+                    $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) : '0');
+                    $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->payable, 2) : '0');
+
+                    $details[] = $row;
+
+                    $serial_number++;
+
+                    if (1 == 1) {
+                        if ($done_payment_shipment->type != 2) {
+                            if ($done_payment_shipment->charges != 0) {
+                                if ($done_payment_shipment->type == 0) {
+                                    $total_collection_amount += $done_payment_shipment->amount;
+                                    $total_cash_handling_charges += $shipment->cash_handling_charges;
+                                    $total_replacement_charges += $shipment->replacement_charges;
+                                    $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                                } else {
+                                    $total_return_charges += $shipment->return_charges;
+                                }
+
+                                $total_weight_charges += $weight_charges;
+
+                                if ($shipment->packaging_material_request) {
+                                    $total_packaging_material_charges += $shipment->packaging_material_charges;
+                                }
+
+                                $total_insurance_charges += $shipment->insurance_charges;
+                                $total_fuel_surcharge += $shipment->fuel_surcharge;
+                                $total_intercept_charges += $shipment->intercept_charges;
+                                $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                                $total_faf_charges += $faf_charges;
+                            } else if ($done_payment_shipment->type == 0) {
+                                $total_collection_amount += $done_payment_shipment->amount;
+                            }
+                        } else {
+                            $total_adjustments += $done_payment_shipment->payable;
+                        }
+
+                        $total_gst += $done_payment_shipment->gst;
+                        $total_wht += $done_payment_shipment->wht;
+                        $total_charges += $done_payment_shipment->charges;
+                        $total_payable += $done_payment_shipment->payable;
+                    } else {
+                        if ($done_payment_shipment->type == 0) {
+                            $total_collection_amount += $done_payment_shipment->amount;
+                        } else if ($done_payment_shipment->type == 2) {
+                            $total_adjustments += $done_payment_shipment->payable;
+                        }
+
+                        $total_payable += $done_payment_shipment->payable;
+                    }
                 }
-            }
 
-            $total_columns = count($details[0]);
+                $total_columns = count($details[0]);
 
-            $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Faf Charges' => $total_faf_charges, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst,'Total WHT (Deductable)' => $total_wht, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments - $total_wht)];
+                $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Faf Charges' => $total_faf_charges, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total WHT (Deductable)' => $total_wht, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments - $total_wht)];
 
-            $details[] = [];
+                $details[] = [];
 
-            $row = array();
-
-            for ($c = 0; $c < $total_columns; $c++) {
-                $row[] = '';
-            }
-
-            $row[] = 'Charges Summary (PKR)';
-            $row[] = '';
-
-            $details[] = $row;
-
-            foreach ($summary as $name => $value) {
                 $row = array();
 
                 for ($c = 0; $c < $total_columns; $c++) {
                     $row[] = '';
                 }
 
-                $row[] = $name;
-                $row[] = $value;
+                $row[] = 'Charges Summary (PKR)';
+                $row[] = '';
 
                 $details[] = $row;
+
+                foreach ($summary as $name => $value) {
+                    $row = array();
+
+                    for ($c = 0; $c < $total_columns; $c++) {
+                        $row[] = '';
+                    }
+
+                    $row[] = $name;
+                    $row[] = $value;
+
+                    $details[] = $row;
+                }
             }
+
+            $spreadsheet = new Spreadsheet();
+
+            $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0');
+            $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0.00');
+            $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode('#,##0.00');
+            $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0.00');
+            $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0.00');
+            $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode('#,##0.00');
+
+            $spreadsheet->getActiveSheet()->fromArray($details);
+
+            $writer = new Xlsx($spreadsheet);
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+
+            $writer->save('php://output');
+        } catch (\Exception $ex) {
+            return $ex->getMessage();
         }
-
-        $spreadsheet = new Spreadsheet();
-
-        $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0.00');
-        $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode('#,##0.00');
-
-        $spreadsheet->getActiveSheet()->fromArray($details);
-
-        $writer = new Xlsx($spreadsheet);
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-
-        $writer->save('php://output');
+        
     }
 
     public function payments_reconcile_through_receiving_sheet_index()
