@@ -123,7 +123,6 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 use App\Http\Models\Admin\Settings\GeneralSetting;
-use App\Jobs\ProcessRvShipmentTicket;
 use App\Http\Models\Admin\ShipperInterceptExclude;
 
 class APIController extends Controller
@@ -5037,14 +5036,8 @@ class APIController extends Controller
                             $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
                             //if Shipper Status Id = 66 (Shipment - Re-Attempt Call Requested) Then fetch Those Shipments in Get Ticket
-                            $rvData = [
-                                'shipment_id' => $shipment->id,
-                                'shipper_status_id' => 66,
-                                'status_reason_id' => $last_reason_id,
-                                'shipment_user_id' => $shipment->user_id,
-                                'call_count' => 2
-                            ];  
-                            dispatch(new ProcessRvShipmentTicket($rvData));
+                            $this->rvshipmentticketInsert($shipment->id, 66, $last_reason_id, $shipment->user_id);
+
 
                             if ($journey) {
                                 NotificationsController::send(33, $shipment->id);

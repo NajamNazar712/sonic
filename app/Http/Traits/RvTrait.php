@@ -46,6 +46,7 @@ use App\RvAssignAgentSubStatus;
 use App\RvShipmentTicket;
 use App\RvShipmentTicketDeleteTable;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\ProcessRvShipmentTicket;
 
 trait RvTrait
 {
@@ -2507,9 +2508,14 @@ trait RvTrait
 
     }
 
-    static function rvshipmentDelete($shipment_data = array()){
-        if(count($shipment_data) > 0){
-            RvShipmentTicketDeleteTable::insert($shipment_data);
-        }
+    static function rvshipmentticketInsert($shipmentId,$shipperStatusId,$shipperReasonStatusId,$shipperUserId,$callCount = 0){
+        $rvData = [
+            'shipment_id' => $shipmentId,
+            'shipper_status_id' => $shipperStatusId,
+            'status_reason_id' => $shipperReasonStatusId,
+            'shipment_user_id' => $shipperUserId,
+            'call_count' => $callCount
+        ];
+        dispatch(new ProcessRvShipmentTicket($rvData));
     }
 }

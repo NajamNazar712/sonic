@@ -32,7 +32,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Traits\RvTrait;
-use App\Jobs\ProcessRvShipmentTicket;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -495,16 +494,9 @@ class ShipperReturnController extends Controller
                     ShipmentsJourneyController::add($request->shipment_id, 66, 66, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
 
                     //if Shipper Status Id = 66 (Shipment - Re-Attempt Call Requested) Then fetch Those Shipments in Get Ticket
-                    {
-                        $rvData = [
-                            'shipment_id' => $parcel->id,
-                            'shipper_status_id' => 66,
-                            'status_reason_id' => $last_reason_id,
-                            'shipment_user_id' => $parcel->user_id,
-                            'call_count' => 2
-                        ];
-                        dispatch(new ProcessRvShipmentTicket($rvData));
-                    }
+                    $this->rvshipmentticketInsert($parcel->id, 66, $last_reason_id, $parcel->user_id,2);
+
+                    
 
                     //update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to open(3)
                     // $this->shipment_status_update_shipper($request, 7, 2, 3);

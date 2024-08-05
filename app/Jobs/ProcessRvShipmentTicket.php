@@ -81,6 +81,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'shipment_status_reason_id' => $this->shipment['status_reason_id'],
                     'shipment_user_id' => $this->shipment['shipment_user_id'],
                     'call_count' => $this->shipment['call_count'],
+                    'is_bot' => (in_array([1, 5, 8, 19, 38, 52, 60, 63], $this->shipment['status_reason_id']) ? 1 : 0),
                     'in_progress' => 0,
                     'is_completed' => 0,
                     'deleted_at' => null,
