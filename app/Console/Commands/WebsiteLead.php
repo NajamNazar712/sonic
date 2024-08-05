@@ -59,7 +59,7 @@ class WebsiteLead extends Command
             $base_uri = 'http://trax_website.test/trax_website/wp-json/tl/v1/';
         }
         else{
-            $base_uri = 'http://trax_website.test/wp-json/tl/v1/';
+            $base_uri = 'http://trax.test/wp-json/tl/v1/';
         }
         $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
         $response = $client->post('leads', [
@@ -118,6 +118,7 @@ class WebsiteLead extends Command
                     $new_lead->service_id = $service_id;
                     $new_lead->ntn_number = $lead->data->ntn_number;
                     $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
+                    $new_lead->expected_shipments = $lead->data->avg_shipment;
                     $new_lead->average_parcel_cod_amount = $lead->data->avg_parcel;
                     $new_lead->business_address = $lead->data->business_address;
                     $new_lead->company = $lead->data->company_name;
@@ -126,6 +127,7 @@ class WebsiteLead extends Command
                     $new_lead->reference_id = $reference_id;
                     $new_lead->activation_code = $token;
                     $new_lead->cnic_number = $lead->data->cnic_number;
+                    $new_lead->via_channel = 'Website';
                     $new_lead->save();
 
                     $lead_log = new LeadLog();

@@ -3049,6 +3049,9 @@
                                 </div>
 
                             </div>
+
+                            <input type="hidden" name="request_custom_quotations" value="1">
+
                             <div class="text-center mt-2">
                                 <div class="form-group">
 

@@ -65,7 +65,7 @@
                                         </label>
                                         <input type="text" class="form-control required"
                                             name="company_address"
-                                            value="{{ $lead->business_address }}" readonly>
+                                            value="{{ $lead->business_address }}"     {{ $lead->business_address ? 'readonly' : '' }}>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -84,7 +84,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="cnic">CNIC Number: <span class="danger">*</span></label>
-                                        <input type="text" class="form-control required" placeholder="XXXXX-1234567-X" value="{{ $lead->cnic_number }}" name="cnic" readonly>
+                                        <input type="text" class="form-control required" placeholder="XXXXX-1234567-X" value="{{ $lead->cnic_number }}" name="cnic"  {{ $lead->cnic_number ? 'readonly' : '' }}>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -102,7 +102,7 @@
                                         <label for="ntn_no">NTN Number:</label>
                                         <input type="text" class="form-control"
                                             placeholder="(e.g: 1234567-8)"
-                                            value="{{ $lead->ntn_number }}" name="ntn_no" readonly>
+                                            value="{{ $lead->ntn_number }}" name="ntn_no" {{ $lead->ntn_number ? 'readonly' : '' }}>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -212,7 +212,7 @@
                                             <input type="text" class="form-control required"
                                                 value="{{ $lead->average_shipment_per_week }}"
                                                 name="average_shipment"
-                                                placeholder="Expected Average Shipments" readonly>
+                                                placeholder="Expected Average Shipments" {{ $lead->average_shipment_per_week ? 'readonly' : '' }}>
                                         </div>
                                     </div>
                                 </div>
@@ -226,17 +226,18 @@
                                             <select name="average_shipment_duration"
                                                 id="average_shipment_duration"
                                                 class="select2 form-control required"
-                                                style="width: 100%">
+                                                style="width: 100%" disabled>
                                                 @foreach ($average_shipment_durations as $average_shipment_duration)
-                                                    @if ($average_shipment_duration->id==3)
+                                                    @if ($average_shipment_duration->name=='Weekly' || $average_shipment_duration->name=='weekly')
                                                         <option
-                                                            value="{{ $average_shipment_duration->id }}"
-                                                            {{ old('average_shipment_duration') == $average_shipment_duration->id ? 'selected' : '' }} selected>
+                                                            value="{{ $average_shipment_duration->id }}">
                                                             {{ $average_shipment_duration->name }}
                                                         </option>
                                                     @endif
                                                 @endforeach
                                             </select>
+
+                                            <input type="hidden" name="average_shipment_duration" value="{{$average_shipment_duration_weekly}}">
                                         </div>
                                     </div>
                                 </div>
@@ -275,7 +276,8 @@
                                                 @endforeach
                                         </select>
 
-                                              
+                                        <input type="hidden" name="sale_person" value="{{$lead->sale_person_id}}">
+
                                         </div>
                                     </div>
                                 </div>
@@ -287,8 +289,8 @@
                                         </label>
                                         <div>
                                             <input type="text" class="form-control"
-                                                value="{{ old('brand_name') }}" name="brand_name"
-                                                placeholder="Brand Name">
+                                                value="{{ $lead->brand }}" name="brand_name"
+                                                placeholder="Brand Name" {{ $lead->brand ? 'readonly' : '' }}>
                                         </div>
                                     </div>
                                 </div>
@@ -300,12 +302,14 @@
                                         <div>
                                             <select name="segments" id="segments"
                                                 class="select2 form-control required"
-                                                style="width: 100%">
+                                                style="width: 100%" disabled>
                                                 @foreach ($segments as $segment)
                                                     <option value="{{ $segment->id }}">
                                                         {{ $segment->name }}</option>
                                                 @endforeach
                                             </select>
+
+                                            <input type="hidden" name="segments" value="{{$lead_segment}}">
                                         </div>
                                     </div>
                                 </div>
@@ -318,8 +322,14 @@
                                         <div>
                                             <select name="sub_segments" id="sub_segments"
                                                 class="select2 form-control required"
-                                                style="width: 100%">
+                                                style="width: 100%" disabled>
+                                                @foreach ($sub_segments as $sub_segment)
+                                                    <option value="{{ $sub_segment->id }}">
+                                                        {{ $sub_segment->name }}</option>
+                                                @endforeach
+                                                
                                             </select>
+                                            <input type="hidden" name="sub_segments" value="{{$lead_sub_segment}}">
                                         </div>
                                     </div>
                                 </div>
@@ -430,7 +440,7 @@
                                         <input type="text" id="pickup_phone"
                                             class="form-control required"
                                             placeholder="0345-9999999" name="shipping_phone[]"
-                                            value="{{ old('shipping_phone.0') }}">
+                                            value="">
                                     </div>
                                     <div class="form-group">
                                         <label for="shipping_poc">
@@ -469,7 +479,7 @@
                                         <input type="text" id="pickup_brand_name"
                                             class="form-control" placeholder="Brand Name"
                                             name="pickup_brand_name[]"
-                                            value="{{ old('pickup_brand_name.0') }}">
+                                            value="{{$lead->brand}}">
                                     </div>
                                     <div class="form-group">
                                         <label for="shipping_phone">
@@ -478,7 +488,7 @@
                                         </label>
                                         <input type="email" name="shipping_email[]"
                                             placeholder="abc@example.com"
-                                            value="{{ old('shipping_email.0') }}"
+                                            value="{{ $lead->email_address ?? old('shipping_email.0') }}"
                                             class="form-control required">
                                     </div>
                                     <div class="form-group">
@@ -1284,75 +1294,7 @@
                                                             </div>
                                                             <hr>
                     
-                                                            <div class="row">
-                                                                <div class="col-md-2">
-                                                                    <h3 class="card-title">Insurance Charges</h3>
-                                                                </div>
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group ">
-                                                                        <input type="checkbox" name="on_insurance_charges_switch"
-                                                                               class="insuranceChargesOvernight d-none"
-                                                                               data-color="success" data-size="sm" checked/>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Up</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Down</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Charges</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="insurance-charges-div-overnight slabs">
-                                                                @foreach($insuranceCharges[1] as $index => $insurance)
-                                                                    <div class="row" id="on_insurance_handle_0">
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="on_ins_range_up[{{$index}}]"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       type="text" class="form-control numeric"
-                                                                                       value="{{$insurance->range_up}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="on_ins_range_down[{{$index}}]"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       type="text" class="form-control numeric"
-                                                                                       value="{{$insurance->range_down}}">
-                                                                            </fieldset>
-                                                                        </div>
-                    
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="on_ins_charges[{{$index}}]"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       type="text" class="form-control dec-percent"
-                                                                                       value="{{$insurance->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        @if($index>0)
-                                                                            <div class="col">
-                                                                                <span class= rounded btn-sm-width mr-1 mb-1 on_weight_close"><i
-                                                                                            class=""></i></span>
-                                                                            </div>
-                                                                        @endif
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                            <div class="insurance-charges-btn-overnight">
-                                                                <button id="addMoreSlabsInsurance" type="button"
-                                                                        class="btn btn-outline-success mr-1" title="Add more slabs"><i
-                                                                            class="la la-plus"></i></button>
-                                                            </div>
-                                                            <hr>
+                                                    
                                                             <div class="row">
                                                                 <div class="col-md-2">
                                                                     <h3 class="card-title">Return Charges</h3>
@@ -1778,75 +1720,7 @@
                                                             </div>
                                                             <hr>
                     
-                                                            <div class="row">
-                                                                <div class="col-md-2">
-                                                                    <h3 class="card-title">Insurance Charges</h3>
-                                                                </div>
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group ">
-                                                                        <input type="checkbox" name="ol_insurance_charges_switch"
-                                                                               class="insuranceChargesoverland d-none"
-                                                                               data-color="success" data-size="sm" checked/>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Up</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Down</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Charges</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="insurance-charges-div-overland slabs">
-                                                                @foreach($insuranceCharges[2] as $index => $ol_insurance)
-                                                                    <div class="row">
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="ol_ins_range_up[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$ol_insurance->range_up}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="ol_ins_range_down[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$ol_insurance->range_down}}">
-                                                                            </fieldset>
-                                                                        </div>
-                    
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="ol_ins_charges[{{$index}}]" type="text"
-                                                                                       class="form-control dec-percent"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$ol_insurance->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col">
-                                                                            @if($index>0)
-                                                                                <span class= rounded btn-sm-width mr-1 mb-1 ol_row_delete"><i
-                                                                                            class=""></i></span>
-                                                                            @endif
-                                                                        </div>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                            <div class="insurance-charges-btn-overland">
-                                                                <button id="oladdMoreSlabsInsurance" type="button"
-                                                                        class="btn btn-outline-success mr-1" title="Add more slabs"><i
-                                                                            class="la la-plus"></i></button>
-                                                            </div>
-                                                            <hr>
+                                                           
                                                             <div class="row">
                                                                 <div class="col-md-2">
                                                                     <h3 class="card-title">Return Charges</h3>
@@ -2268,75 +2142,6 @@
                     
                                                             <div class="row">
                                                                 <div class="col-md-2">
-                                                                    <h3 class="card-title">Insurance Charges</h3>
-                                                                </div>
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group ">
-                                                                        <input type="checkbox" name="detain_insurance_charges_switch"
-                                                                               class="insuranceChargesdetain d-none" data-color="success"
-                                                                               data-size="sm" checked/>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Up</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Down</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Charges</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="insurance-charges-div-detain slabs">
-                                                                @foreach($insuranceCharges[3] as $index => $det_insurance)
-                                                                    <div class="row">
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="detain_ins_range_up[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$det_insurance->range_up}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="detain_ins_range_down[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$det_insurance->range_down}}">
-                                                                            </fieldset>
-                                                                        </div>
-                    
-                                                                        <div class="col-md-2">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="detain_ins_charges[{{$index}}]" type="text"
-                                                                                       class="form-control dec-percent"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$det_insurance->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col">
-                                                                            @if($index>0)
-                                                                                <span class= rounded btn-sm-width mr-1 mb-1 detain_row_delete"><i
-                                                                                            class=""></i></span>
-                                                                            @endif
-                                                                        </div>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                            <div class="insurance-charges-btn-detain">
-                                                                <button id="detainaddMoreSlabsInsurance" type="button"
-                                                                        class="btn btn-outline-success mr-1" title="Add more slabs"><i
-                                                                            class="la la-plus"></i></button>
-                                                            </div>
-                                                            <hr>
-                                                            <div class="row">
-                                                                <div class="col-md-2">
                                                                     <h3 class="card-title">Return Charges</h3>
                                                                 </div>
                                                                 <div class="col-md-2">
@@ -2720,75 +2525,8 @@
                                                             </div>
                                                             <hr>
                     
-                                                            <div class="row">
-                                                                <div class="col-md-2">
-                                                                    <h3 class="card-title">Insurance Charges</h3>
-                                                                </div>
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group ">
-                                                                        <input type="checkbox" name="sameday_insurance_charges_switch"
-                                                                               class="insuranceChargessameday d-none"
-                                                                               data-color="success" data-size="sm" checked/>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Up</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Range Down</label>
-                                                                </div>
-                                                                <div class="col-md-2 text-center">
-                                                                    <label class="card-title">Charges</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="insurance-charges-div-sameday slabs">
-                                                                @foreach($insuranceCharges[4] as $index => $same_insurance)
-                                                                    <div class="row">
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="sameday_ins_range_up[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$same_insurance->range_up}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="sameday_ins_range_down[{{$index}}]" type="text"
-                                                                                       class="form-control numeric"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$same_insurance->range_down}}">
-                                                                            </fieldset>
-                                                                        </div>
-                    
-                                                                        <div class="col-md-2 text-center">
-                                                                            <fieldset class="form-group">
-                                                                                <input name="sameday_ins_charges[{{$index}}]" type="text"
-                                                                                       class="form-control dec-percent"
-                                                                                       data-rule-required="true"
-                                                                                       data-msg-required="This field is required"
-                                                                                       value="{{$same_insurance->charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                        <div class="col">
-                                                                            @if($index>0)
-                                                                                <span class= rounded btn-sm-width mr-1 mb-1 sameday_row_delete"><i
-                                                                                            class=""></i></span>
-                                                                            @endif
-                                                                        </div>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                            <div class="insurance-charges-btn-sameday">
-                                                                <button id="samedayaddMoreSlabsInsurance" type="button"
-                                                                        class="btn btn-outline-success mr-1" title="Add more slabs"><i
-                                                                            class="la la-plus"></i></button>
-                                                            </div>
-                                                            <hr>
+                                                          
+                                                            
                                                             <div class="row">
                                                                 <div class="col-md-2">
                                                                     <h3 class="card-title">Return Charges</h3>
@@ -2943,7 +2681,7 @@
 <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 <!-- END PAGE VENDOR JS-->
 <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-<script src="{{asset('app-assets/js/scripts/forms/wizard-steps.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/js/scripts/forms/wizard-steps.js?id=1')}}" type="text/javascript"></script>
 <!-- BEGIN MODERN JS-->
 
 <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
@@ -2974,9 +2712,13 @@
 
 
         @if ($lead != null)
+            var pickupPhoneNumber = "<?php echo htmlspecialchars($lead->phone_number, ENT_QUOTES, 'UTF-8'); ?>";
             $('#shipper_city').val({{ $lead->city_id }}).prop('disabled', true).trigger('change');
             $('#sale_person').val(@json($lead->sale_person_id ?? null)).trigger('change');
+            $('#average_shipment_duration').val(@json($average_shipment_duration_weekly ?? null)).trigger('change');
+            $('#pickup_phone').val(pickupPhoneNumber);
         @endif
+
 
         $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
@@ -3060,34 +2802,13 @@
             placeholder: 'Select Sale Person',
             // dropdownParent:$('#registership')
         });
-        $('select[name="sub_segments"]').prepend('<option value="" selected="selected"></option>').select2({
+
+        $('select[name="sub_segments"]').select2({
             placeholder: 'Select Sub Segments',
         });
-        $('select[name="segments"]').prepend('<option value="" selected="selected"></option>').select2({
+        $('select[name="segments"]').select2({
             placeholder: 'Select Segment',
-        }).bind('change', function() {
-            var id = $(this).val();
-            $(this).valid();
-            $.ajax({
-                url: '{!! route('cod.wordpress.get_sub_segment') !!}',
-                method: 'POST',
-                data: {
-                    'segment_id': id,
-                    '_token': '{{ csrf_token() }}'
-                }
-            }).done(function(data) {
-                if (data.status == 0) {
-                    $('#sub_segments').children().remove();
-                    $('#sub_segments').prepend('<option value="" selected="selected"></option>')
-                    $.each(data.sub_segments, function(index, sub_segments) {
-                        $('#sub_segments').append('<option value="' + sub_segments.id +
-                            '" id="trax_center">' + sub_segments.name + '</option>')
-                    });
-                }
-            });
         });
-
-
 
         $("input[name='average_shipment']").inputmask({
             'alias': 'integer',
@@ -3725,6 +3446,8 @@
                 enableFinishButton();
             }
         });
+
+
     });
 
 

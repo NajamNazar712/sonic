@@ -340,16 +340,10 @@ class NotificationsController extends Controller
 
                     $mail->send(new Notifications($subject, $body, $from));
                 }
+
+                
     
-//                if ($bcc) {
-//                    $mail->bcc($bcc);
-//                }
-//
-//                if($id = 230){
-//                    $mail->sendNow(new Notifications($subject, $body, $from));
-//                }else{
-//                    $mail->send(new Notifications($subject, $body, $from));
-//                }
+              
             }
 
 
@@ -8683,7 +8677,7 @@ class NotificationsController extends Controller
                         $shipper_body = str_replace('[person_of_contact]', $user->name, $shipper_body);
                     }
                     $to = $user->email;
-                    self::email($subject, $shipper_body, $to);
+                    // self::email($subject, $shipper_body, $to);
 
                     $sale_person = SalePersonTag::join('admins as sale_person', 'sale_person.id', '=', 'sale_person_tags.admin_id')
                         ->where('sale_person_tags.user_id', $user_id)
@@ -11188,6 +11182,11 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
                 } else if ($id == 230){
                     $lead_ids = $reference_1_id;
+
+                    if(!is_array($lead_ids)){
+                        $lead_ids = [$lead_ids];
+                    }
+                    
                     foreach ($lead_ids as $key => $lead_id) {
                         $lead = Lead::find($lead_id);
                         $route = route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]);
@@ -11207,6 +11206,11 @@ class NotificationsController extends Controller
                         }
                         if (strpos($subject, '[Company Name]') !== FALSE) {
                             $subject = str_replace('[Company Name]', $lead->company_name, $subject);
+                        }
+
+                        if ($lead->email_status != 1){
+                            $lead->email_status = 1;
+                            $lead->save();
                         }
                         self::email($subject, $body, $lead->email_address, null, null, null, 230); // Send email with $body
                     }                    
