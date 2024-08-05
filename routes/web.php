@@ -31,6 +31,7 @@ Route::prefix('survey_form')->name('survey.')->group(function () {
 
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
 
+Route::get('trax_pk_validation/{company_name}/{email_address}/{phone_number}', 'APIController@trax_pk_validation')->name('trax_pk_validation');
 
 
 Auth::routes();
@@ -96,6 +97,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('opt_verify_close', 'Shippers\ShipperDashboardController@opt_verify_close')->name('opt_verify_close');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
+
+    Route::post('/crf/update', 'Shippers\ShipperDashboardController@updateCrfSign')->name('updateSignOffCrf');;
+
     Route::post('get_sub_segment', 'Auth\RegisterController@get_sub_segment')->name('get_sub_segment');
 
     Route::get('referral', 'Auth\RegisterController@referral_valid')->name('referral.valid');
