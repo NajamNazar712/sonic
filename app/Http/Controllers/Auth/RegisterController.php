@@ -74,9 +74,13 @@ class RegisterController extends Controller
      */
     public function __construct(Request $request)
     {
-        if ($request->wordpress_account == 1 || $request->wordpress_lead_register == 1) {
-            // No middleware applied
-        } else {
+        if(isset($request->wordpress_lead_register) || isset($request->wordpress_account)) {
+            if ($request->wordpress_account == 1 || $request->wordpress_lead_register == 1) {
+                // No middleware applied
+            } else {
+                $this->middleware('guest');
+            }
+        }else{
             $this->middleware('guest');
         }
     }
@@ -253,7 +257,8 @@ class RegisterController extends Controller
     {
         $this->validator($request->all())->validate();
         event(new Registered($user = $this->create($request->all(), $request)));
-        if ($request->wordpress_lead_register != 1) {
+        $wordpress_lead_register = isset($request->wordpress_lead_register) ? $request->wordpress_lead_register : 0;
+        if ($wordpress_lead_register != 1) {
             try {
                 $user_attachment = new UserDocumentAttachment();
                 $user_attachment->user_id = $user->id ?? session('user_id');
@@ -298,8 +303,9 @@ class RegisterController extends Controller
                 } else {
                     return redirect()->route('cod.welcome');
                 }
-            } catch (\Exception $e) {
-                Log::error('Transaction failed Register Controller (register function): ' . $e->getMessage());
+            } catch (\Throwable $th) {
+                Log::channel('cronJobLog')->info('s ' .'Register Log'. $th->getMessage());
+//                Log::error('Transaction failed Register Controller (register function): ' . $e->getMessage());
             }
         } else {
             return redirect()->route('cod.login')->with('success', 'User Register Successfully!');

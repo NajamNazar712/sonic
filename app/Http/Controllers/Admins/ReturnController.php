@@ -1815,6 +1815,25 @@ class ReturnController extends Controller
 
     public function excel_store_revert(Request $request)
     {
+        
+        Validator::extend('return_bag_check', function ($attribute, $value, $parameters, $validator) {
+            if ($value) {
+                $shipment = Shipment::where('tracking_number', $value)->first(['id']);
+                $cargo_bag = CargoManifestBagShipments::where('shipment_id' , $shipment->id);
+                if($cargo_bag->exists()) {
+                    $cargo_bag = $cargo_bag->latest()->first();
+                    $bag_number = $cargo_bag->cargo_manifest_bag_id;
+                    $return_bag = CargoManifestBag::where('id', $bag_number)->where('type', 2);
+                    if($return_bag->exists()) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
+            }
+        });
         $names = [
             'tracking_number' => 'Tracking Number',
             'shipper_status_id' => 'Status (0 - Revert)',
@@ -1824,10 +1843,11 @@ class ReturnController extends Controller
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be an Integer.',
             'digits_between' => ':attribute must be between :min and :max Digits.',
-            'unique' => ':attribute is already Present.'
+            'unique' => ':attribute is already Present.',
+            'return_bag_check' => 'Shipment can not be reverted.'
         ];
         $rules = [
-            'tracking_number' => ['required', 'integer'],
+            'tracking_number' => ['required', 'integer', 'return_bag_check'],
             'shipper_status_id' => ['required', 'integer', 'digits_between:0,1'],
             'remarks' => ['nullable', 'between:0,190']
         ];

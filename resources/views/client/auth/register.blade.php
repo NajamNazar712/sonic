@@ -1110,7 +1110,7 @@
     <script src="{{ asset('app-assets/vendors/js/pickers/pickadate/legacy.js') }}" type="text/javascript"></script>
     <!-- END PAGE VENDOR JS-->
     <script src="{{ asset('app-assets/vendors/js/forms/select/select2.full.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('app-assets/js/scripts/forms/wizard-steps.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/js/scripts/forms/wizard-steps.js?id=1') }}" type="text/javascript"></script>
     <!-- BEGIN MODERN JS-->
     <script src="{{ asset('app-assets/js/core/app-menu.js') }}"></script>
     <script src="{{ asset('app-assets/js/core/app.js') }}"></script>

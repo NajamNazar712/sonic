@@ -371,6 +371,10 @@ class DeliveryController extends Controller
                     return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
                 }
             })
+            // type cast bigint into string
+            ->editColumn('tracking_number', function ($shipment) {
+                return (string)$shipment->tracking_number;
+            })
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
             })
@@ -797,7 +801,6 @@ class DeliveryController extends Controller
                             } else {
                                 $is_updateable = 0;
                             }
-
 
                             if ($is_updateable == 0) {
                                 if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && $shipment->shipper_status_id == 2) {
