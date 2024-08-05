@@ -36,6 +36,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use App\Http\Models\DonePaymentCalculation;
+use App\ShipmentsArchieve;
 
 class ShipperFinanceController extends Controller
 {
@@ -770,7 +771,7 @@ class ShipperFinanceController extends Controller
     {
         try{
             $done_payment = DonePayment::find($request->id);
-
+                
             $filename = 'sonic_payment_details_' . $request->id . '.xlsx';
 
             $details = array();
@@ -778,6 +779,7 @@ class ShipperFinanceController extends Controller
             $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)', 'Total Charges (PKR)', 'GST', 'WHT', 'Net Retained Amount (PKR)', 'Net Disbursement Amount (PKR)'];
 
             if ($done_payment && $done_payment->user_id == session('user_id')) {
+                
                 $account_type_id = $done_payment->shipper->account_type_id;
 
                 $serial_number = 1;
@@ -802,7 +804,9 @@ class ShipperFinanceController extends Controller
 
                 foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
                     $shipment = $done_payment_shipment->shipment;
-
+                    if($shipment == NULL && session('user_id') == 13580){
+                        $shipment = ShipmentsArchieve::find($done_payment_shipment->shipment_id); // Shipper as per request need to the old data only use for a few hours
+                    }
                     $shipment_weight = $shipment->actual_weight;
                     $weight_charges = $shipment->weight_charges;
 
@@ -936,7 +940,6 @@ class ShipperFinanceController extends Controller
                     $details[] = $row;
                 }
             }
-
             $spreadsheet = new Spreadsheet();
 
             $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
@@ -956,6 +959,7 @@ class ShipperFinanceController extends Controller
             header('Cache-Control: max-age=0');
 
             $writer->save('php://output');
+
         } catch (\Exception $ex) {
             return $ex->getMessage();
         }
