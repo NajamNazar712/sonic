@@ -284,7 +284,7 @@
                             row.push(values.area);
                             row.push(values.consignee_name);
                             row.push(values.consignee_phone);
-                            row.push(values.agent ? values.agent : '-');
+                            row.push(values.agent ? values.agent : '');
                             row.push(values.consignee_address);
                             row.push(values.sub_station);
                             row.push(values.weight);
@@ -295,17 +295,17 @@
                             row.push(values.service_type);
                             row.push(values.status);
 
-                            row.push(values.last_location_screen_location_name ? values.last_location_screen_location_name : '-');
+                            row.push(values.last_location_screen_location_name ? values.last_location_screen_location_name : '');
                             row.push(values.ca_scanning_last_location_name);
-                            row.push(values.last_location_updated_at ? values.last_location_updated_at : '-');
+                            row.push(values.last_location_updated_at ? values.last_location_updated_at : '');
 
-                            row.push(values.reason ? values.reason : '-');
-                            row.push(values.remarks ? values.remarks : '-');
+                            row.push(values.reason ? values.reason : '');
+                            row.push(values.remarks ? values.remarks : '');
                             row.push(values.arrival);
                             row.push(values.d_zone);
                             row.push(values.destination_arrival);
-                            row.push(values.last_rider ? values.last_rider : '-');
-                            row.push(values.rider_trax_id ? values.rider_trax_id : '-');
+                            row.push(values.last_rider ? values.last_rider : '');
+                            row.push(values.rider_trax_id ? values.rider_trax_id : '');
                             row.push(values.current_status_date);
 
                             body.push(row);
