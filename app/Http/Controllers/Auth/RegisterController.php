@@ -74,9 +74,13 @@ class RegisterController extends Controller
      */
     public function __construct(Request $request)
     {
-        if ($request->wordpress_account == 1 || $request->wordpress_lead_register == 1) {
-            // No middleware applied
-        } else {
+        if(isset($request->wordpress_lead_register) || isset($request->wordpress_account)) {
+            if ($request->wordpress_account == 1 || $request->wordpress_lead_register == 1) {
+                // No middleware applied
+            } else {
+                $this->middleware('guest');
+            }
+        }else{
             $this->middleware('guest');
         }
     }
