@@ -15296,15 +15296,50 @@ class AdminReportsController extends Controller
         return view('admin.reports.shipment_reversal_report.index');
     }
 
+
     public function shipment_reversal_list(Request $request)
     {
         $from_date = Carbon::parse($request->search_date_from)->startOfDay(); 
         $to_date = Carbon::parse($request->search_date_to)->endOfDay();
-        $shipments = DB::table('shipments')
-        ->join('shipments_journey', 'shipments_journey.shipment_id', '=', 'shipments.id')
-        ->join('delivery_note_shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
-        ->whereBetween('shipments.created_at', [$from_date, $to_date])
-        ->get();
-        return response()->json($shipments);
+        $query = DB::table('shipments')
+            ->leftJoin('delivery_note_shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
+            ->leftJoin('shipments_journey as sj5', function ($join) {
+                $join->on('sj5.shipment_id', '=', 'shipments.id')
+                    ->where('sj5.shipper_status_id', 5);
+            })
+            ->leftJoin('shipments_journey as sj13', function ($join) {
+                $join->on('sj13.shipment_id', '=', 'shipments.id')
+                    ->where('sj13.shipper_status_id', 13);
+            })
+            ->leftJoin('shipment_status', 'shipment_status.id', '=', 'sj13.shipper_status_id')
+            ->select(
+                'shipments.tracking_number',
+                'shipments.consignee_name',
+                'shipments.consignee_address',
+                'shipments.consignee_phone_number_1',
+                'shipments.consignee_city_id',
+                'shipments.amount',
+                DB::raw('MAX(delivery_note_shipments.delivery_note_id) AS latest_delivery_note_id'),
+                'sj5.created_at AS created_at_status_5',
+                'sj13.created_at AS created_at_status_13',
+                'sj13.admin_id AS admin_id_status_13',
+                'shipment_status.name AS latest_status_name'
+            )
+            ->whereBetween('sj13.created_at', [$from_date, $to_date])
+            ->whereNotNull('sj13.created_at')
+            ->groupBy(
+                'shipments.tracking_number',
+                'shipments.consignee_name',
+                'shipments.consignee_address',
+                'shipments.consignee_phone_number_1',
+                'shipments.consignee_city_id',
+                'shipments.amount',
+                'sj5.created_at',
+                'sj13.created_at',
+                'sj13.admin_id',
+                'shipment_status.name'
+            );
+        $datatable = Datatables::of($query);
+        return $datatable->make(true);
     }
 }

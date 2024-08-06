@@ -19,7 +19,9 @@
                                     <span class="">Date (From)</span>
                                 </span>
                             </div>
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" title="Date (From)" />
+                            <input type="text" name="search_date_from"
+                                class="form-control pickadate bg-primary border-primary white rounded-right"
+                                id="search_date_from" placeholder="Date (From)" title="Date (From)" />
                         </div>
                     </div>
                     <div class="col-4">
@@ -29,11 +31,14 @@
                                     <span class="">Date (To)</span>
                                 </span>
                             </div>
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" title="Date (To)" />
+                            <input type="text" name="search_date_to"
+                                class="form-control pickadate bg-primary border-primary white rounded-right"
+                                id="search_date_to" placeholder="Date (To)" title="Date (To)" />
                         </div>
                     </div>
                     <div class="col-2">
-                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width">
+                        <button type="button" id="search_filter_btn"
+                            class="mr-1 mb-1 btn btn-outline-primary btn-min-width">
                             <i class="la la-search"></i>
                             Search
                         </button>
@@ -66,9 +71,9 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/select2.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/pickers/pickadate/pickadate.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/plugins/pickers/daterange/daterange.min.css') }}">
 
     <style>
         table.dataTable {
@@ -106,13 +111,16 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
+
         a.btn.btn-secondary {
             border-radius: 20px;
             background: #64a0d2;
         }
+
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
+
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -127,164 +135,182 @@
 
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/pickers/pickadate/picker.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/pickers/pickadate/picker.date.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/pickers/pickadate/legacy.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/forms/select/select2.full.min.js') }}" type="text/javascript"></script>
 
     <script>
-        function getFirstAndLastDatesOfMonth(date) {
-            var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-            var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-            return { firstDay: firstDay, lastDay: lastDay };
-        }
-    
-        $('#reversal_search_form #search_date_from').pickadate({
-            firstDay: 1,
-            clear: '',
-            selectYears: true,
-            selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 00:00:00',
-            hiddenSuffix: '_formatted',
-            onSet: function(context) {
-                if (context.select) {
-                    var selectedDate = new Date(context.select);
-                    var dates = getFirstAndLastDatesOfMonth(selectedDate);
-                    $('#reversal_search_form #search_date_from').pickadate('picker').set('min', dates.firstDay);
-                    $('#reversal_search_form #search_date_from').pickadate('picker').set('max', dates.lastDay);
-                    $('#reversal_search_form #search_date_to').pickadate('picker').set('min', dates.firstDay);
-                    $('#reversal_search_form #search_date_to').pickadate('picker').set('max', dates.lastDay);
-                }
-            }
-        });
-    
-        $('#reversal_search_form #search_date_to').pickadate({
-            firstDay: 1,
-            clear: '',
-            selectYears: true,
-            selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 23:59:59',
-            hiddenSuffix: '_formatted',
-            onSet: function(context) {
-                if (context.select) {
-                    var selectedDate = new Date(context.select);
-                    var dates = getFirstAndLastDatesOfMonth(selectedDate);
-                    $('#reversal_search_form #search_date_from').pickadate('picker').set('min', dates.firstDay);
-                    $('#reversal_search_form #search_date_from').pickadate('picker').set('max', dates.lastDay);
-                    $('#reversal_search_form #search_date_to').pickadate('picker').set('min', dates.firstDay);
-                    $('#reversal_search_form #search_date_to').pickadate('picker').set('max', dates.lastDay);
-                }
-            }
-        });
+
+
+        // var from_date = $('#search_form #search_date_from').pickadate({
+        //     firstDay: 1,
+        //     clear: '',
+        //     selectYears: true,
+        //     selectMonths: true,
+        //     formatSubmit: 'yyyy-mm-dd 00:00:00',
+        //     hiddenSuffix: '_formatted',
+        //     onSet: function(context) {
+        //         if (context.select) {
+        //             var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+        //             var currentDate = moment(old_date_formatted);
+
+        //             var to_date_formatted = $('input[name="search_date_to_formatted"]').val();
+        //             var toDate = moment(to_date_formatted);
+
+        //             if (currentDate.format('x') > toDate.format('x')) {
+        //                 to_date.pickadate('picker').clear();
+        //             }
+
+        //             var afterDate = currentDate.add(30, 'days');
+        //             to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
+
+
+        //         }
+        //     }
+        // });
+
+
+        // var to_date = $('#search_form #search_date_to').pickadate({
+        //     firstDay: 1,
+        //     clear: '',
+        //     selectYears: true,
+        //     selectMonths: true,
+        //     formatSubmit: 'yyyy-mm-dd 23:59:59',
+        //     hiddenSuffix: '_formatted',
+        //     onSet: function(context) {
+        //         if (context.select) {
+        //             var current_date_formatted = $('input[name="search_date_to_formatted"]').val();
+        //             var currentDate = moment(current_date_formatted);
+
+        //             var from_date_formatted = $('input[name="search_date_from_formatted"]').val();
+        //             var fromDate = moment(from_date_formatted);
+
+        //             if (currentDate.format('x') < fromDate.format('x')) {
+        //                 from_date.pickadate('picker').clear();
+        //             }
+
+        //             var beforeDate = currentDate.subtract(30, 'days');
+        //             from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
+        //         }
+        //     }
+        // });
+
 
         var table = $('#datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
-            scrollX: true, scrollY: '500px',
-            buttons: [
-                {
-                    extend: 'excelHtml5',
-                    title: 'Shipment Reversal Report',
-                    text:'<i class="la la-file-excel-o"></i> Excel',
-                },
-
+            scrollX: true,
+            scrollY: '500px',
+            buttons: [{
+                extend: 'excelHtml5',
+                title: 'Shipment Reversal Report',
+                text: '<i class="la la-file-excel-o"></i> Excel',
+            }, ],
+            lengthMenu: [
+                [50, 100, 500, 1000, -1],
+                [50, 100, 500, 1000, 'All']
             ],
-            lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
             pageLength: 50,
             pagingType: 'full_numbers',
             processing: true,
+            deferLoading: 0,
             language: {
                 processing: data_table_loader
             },
             serverSide: true,
-            deferLoading: 0,
-            autoWidth: false,
             ajax: {
                 url: '{{ route('admin.reports.shipment_reversal_report.list') }}',
-                data: function (d) {
+                data: function(d) {
                     d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                     d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                 }
             },
-            columns: [
-                { 
-                    orderable: false, 
-                    searchable: false, 
-                    name: 'serial_number', 
-                    class: 'align-middle serial_number', 
-                    targets: 0, 
-                    render: function (data, type, row) {
-                        return '1'; 
+            columns: [{
+                    orderable: false,
+                    searchable: false,
+                    name: 'serial_number',
+                    class: 'align-middle serial_number',
+                    targets: 0,
+                    render: function(data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
                     }
                 },
-                { 
-                    data: 'tracking_number', 
-                    name: 'tracking_number', 
-                    class: 'align-middle tracking_number', 
-                    orderable: false, 
-                    searchable: false 
+                {
+                    data: 'tracking_number',
+                    name: 'tracking_number',
+                    class: 'align-middle tracking_number',
+                    orderable: false,
+                    searchable: false
                 },
-                { 
-                    data: 'consignee_name', 
-                    name: 'consignee_name', 
-                    class: 'align-middle consignee_name', 
-                    orderable: false, 
-                    searchable: false 
+                {
+                    data: 'consignee_name',
+                    name: 'consignee_name',
+                    class: 'align-middle consignee_name',
+                    orderable: false,
+                    searchable: false
                 },
-                { 
-                    data: 'consignee_address', 
-                    name: 'consignee_address', 
-                    class: 'align-middle consignee_address', 
-                    orderable: false, 
-                    searchable: false 
+                {
+                    data: 'consignee_phone_number_1',
+                    name: 'consignee_phone_number_1',
+                    class: 'align-middle consignee_phone_number_1',
+                    orderable: false,
+                    searchable: false
                 },
-                { 
-                    data: 'consignee_phone_number_1', 
-                    name: 'consignee_phone_number_1', 
-                    class: 'align-middle consignee_phone_number_1', 
-                    orderable: false, 
-                    searchable: false 
+                {
+                    data: 'consignee_address',
+                    name: 'consignee_address',
+                    class: 'align-middle consignee_address',
+                    orderable: false,
+                    searchable: false
                 },
-                { 
-                    data: 'consignee_city_id', 
-                    name: 'consignee_city_id', 
-                    class: 'align-middle consignee_city_id', 
-                    orderable: false, 
-                    searchable: false 
+                {
+                    data: 'consignee_city_id',
+                    name: 'consignee_city_id',
+                    class: 'align-middle consignee_city_id',
+                    orderable: false,
+                    searchable: false
                 },
-                { 
-                    data: 'amount', 
-                    name: 'amount', 
-                    class: 'align-middle amount', 
-                    orderable: false, 
-                    searchable: false 
+                {
+                    data: 'amount',
+                    name: 'amount',
+                    class: 'align-middle amount',
+                    orderable: false,
+                    searchable: false
                 },
-                { 
-                    data: 'delivery_note_id', 
-                    name: 'delivery_note_id', 
-                    class: 'align-middle delivery_note_id', 
-                    orderable: false, 
-                    searchable: false 
+                {
+                    data: 'latest_status_name',
+                    name: 'latest_status_name',
+                    class: 'align-middle latest_status_name',
+                    orderable: false,
+                    searchable: false
                 },
-                { 
-                    data: 'delivery_created_at', 
-                    name: 'delivery_created_at', 
-                    class: 'align-middle delivery_created_at', 
-                    orderable: false, 
-                    searchable: false 
+                {
+                    data: 'latest_delivery_note_id',
+                    name: 'latest_delivery_note_id',
+                    class: 'align-middle latest_delivery_note_id',
+                    orderable: false,
+                    searchable: false
                 },
-                { 
-                    data: 'reversal_created_at', 
-                    name: 'reversal_created_at', 
-                    class: 'align-middle reversal_created_at', 
-                    orderable: false, 
-                    searchable: false 
+                {
+                    data: 'created_at_status_5',
+                    name: 'created_at_status_5',
+                    class: 'align-middle created_at_status_5',
+                    orderable: false,
+                    searchable: false
                 },
-                { 
-                    data: 'admin_id', 
-                    name: 'admin_id', 
-                    class: 'align-middle admin_id', 
-                    orderable: false, 
-                    searchable: false 
+                {
+                    data: 'created_at_status_13',
+                    name: 'created_at_status_13',
+                    class: 'align-middle created_at_status_13',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'admin_id_status_13',
+                    name: 'admin_id_status_13',
+                    class: 'align-middle admin_id_status_13',
+                    orderable: false,
+                    searchable: false
                 }
             ],
             rowCallback: function(row, data, index) {
@@ -295,11 +321,9 @@
                 this.api().table().columns.adjust();
             }
         });
-
-        $('#search_filter_btn').on('click',function () {
+        
+        $('#search_filter_btn').on('click', function() {
             table.draw();
         });
-
     </script>
 @endsection
-
