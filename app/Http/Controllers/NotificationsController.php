@@ -10748,7 +10748,7 @@ class NotificationsController extends Controller
                         foreach ($items as $item) {
                             $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
                             $type = CrmRequestCaseNatureType::where('id', $item["case_nature_type_id"])->value('type');
-all doen
+          
                             // $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first() ?? null;
                             // $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"] ?? null)->latest()->first() ?? null;
 
