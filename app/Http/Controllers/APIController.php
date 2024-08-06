@@ -9843,7 +9843,6 @@ class APIController extends Controller
                 $exists = Lead::where('phone_number', $phone_number)->exists();
             }
         }
-
     
         return response()->json(['exists' => $exists]);
     }

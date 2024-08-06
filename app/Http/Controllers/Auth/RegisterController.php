@@ -575,6 +575,7 @@ class RegisterController extends Controller
                     $sale_person->status = 0;
                     $sale_person->save();
                 }
+                
                 $sales_commission = new SalesCommission();
                 $sales_commission->shipper_id = $newUser->id;
                 $sales_commission->commission_users_count = 1;
