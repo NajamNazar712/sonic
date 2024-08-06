@@ -15290,4 +15290,21 @@ class AdminReportsController extends Controller
  
         return $datatable->make(true);
     }
+
+    public function shipment_reversal_index()
+    {
+        return view('admin.reports.shipment_reversal_report.index');
+    }
+
+    public function shipment_reversal_list(Request $request)
+    {
+        $from_date = Carbon::parse($request->search_date_from)->startOfDay(); 
+        $to_date = Carbon::parse($request->search_date_to)->endOfDay();
+        $shipments = DB::table('shipments')
+        ->join('shipments_journey', 'shipments_journey.shipment_id', '=', 'shipments.id')
+        ->join('delivery_note_shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
+        ->whereBetween('shipments.created_at', [$from_date, $to_date])
+        ->get();
+        return response()->json($shipments);
+    }
 }

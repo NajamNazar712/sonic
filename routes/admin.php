@@ -2481,6 +2481,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ops_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@ops_report_list')->name('list');
         });
+
+        Route::prefix('shipment_reversal')->name('shipment_reversal_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@shipment_reversal_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@shipment_reversal_list')->name('list');
+        });
     });
 
     //Reports end
