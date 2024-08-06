@@ -129,15 +129,21 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\NotificationSetting;
+use Illuminate\Support\Facades\Log;
 
 class AdminFinanceController extends Controller
 {
-    static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
+    static public function sdn_action_logs($sdn_id, $status_id, $admin_id, $previous_bank_id = null, $new_bank_id = null, $previous_amount = null, $new_amount = null, $deposit_slip_image = null)
     {
         $sdn_log = new StationDepositeNoteActionLog();
         $sdn_log->sdn_id = $sdn_id;
         $sdn_log->status_id = $status_id;
         $sdn_log->admin_id = $admin_id;
+        $sdn_log->previous_bank_id = $previous_bank_id;
+        $sdn_log->new_bank_id = $new_bank_id;
+        $sdn_log->new_amount = $new_amount;
+        $sdn_log->previous_amount = $previous_amount;
+        $sdn_log->updated_deposit_slip_image = $deposit_slip_image;
         $sdn_log->save();
     }
 
@@ -1510,8 +1516,11 @@ class AdminFinanceController extends Controller
         $deposit_ids = explode(',', $request->deposit_rows);
         $total_amount = 0;
         foreach ($deposit_ids as $deposit_id) {
+            $oldData = null;
             $total_amount += $request->amount[$deposit_id];
             $slip = StationDepositNoteSlip::find($deposit_id);
+            $previous_bank_id = $slip->bank_id;
+            $previous_amount = $slip->amount;
             $slip->deposit_date = $request->date[$deposit_id];
             $slip->bank_id = $request->bank[$deposit_id];
             $slip->amount = $request->amount[$deposit_id];
@@ -1519,7 +1528,7 @@ class AdminFinanceController extends Controller
             $file_name = 'deposit_slip_' . $deposit_id;
             if ($request->has($file_name)) {
                 $image = $request->file($file_name);
-//                $extension = $image->getClientOriginalExtension();
+                //$extension = $image->getClientOriginalExtension();
                 $extension = 'png';
                 $random = rand(1000, 100000);
                 $now = Carbon::now();
@@ -1530,6 +1539,9 @@ class AdminFinanceController extends Controller
                 $slip->image = $slip_name;
             }
             $slip->save();
+
+            //StationDepositeNoteActionLog
+            self::sdn_action_logs($sdn_id, 4, Auth::id(), $previous_bank_id, $slip->bank_id, $previous_amount, $slip->amount, $slip->image);
 
         }
 
@@ -1559,14 +1571,15 @@ class AdminFinanceController extends Controller
                 }
             }
 
+            
+            //StationDepositeNoteActionLog
+            self::sdn_action_logs($sdn_id, 4, Auth::id());
+
         }
 
         $sdn_detail = StationDepositNote::find($sdn_id);
         $sdn_detail->sdn_deposit_amount = $total_amount;
         $sdn_detail->save();
-
-        //StationDepositeNoteActionLog
-        self::sdn_action_logs($sdn_id, 4, Auth::id());
 
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip edited successfully!']);
     }

@@ -620,6 +620,26 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="sdn_deposit_slip_log" data-backdrop="static" role="dialog"
+            aria-labelledby="sdn_deposit_slip_log" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="sdn_deposit_slip_log_title">SDN <span></span></h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -2781,7 +2801,10 @@
                                             '<table class="table table-sm table-bordered border">' +
                                             '<thead>' +
                                             '<tr>' +
+                                            '<th class="color primary">DNCC No</th>' +
+                                            '<th class="color primary">DNCC Amount</th>' +
                                             '<th class="color primary text-center">Action</th>' +
+                                            '<th class="color primary text-center">Status</th>' +
                                             '<th class="color primary">Updated By</th>' +
                                             '<th class="color primary">Updated At</th>' +
                                             '</tr>' +
@@ -2790,6 +2813,9 @@
                             if (data.logs) {
                                 $.each(data.logs, function (index, value) {
                                     html += '<tr>' +
+                                            '<td>' + value.dncc_no + '</td>' +
+                                            '<td>' + value.dncc_amount + '</td>' +
+                                            '<td>' + value.action + '</td>' +
                                             '<td>' + value.status + '</td>' +
                                             '<td>' + value.updated_by + '</td>' +
                                             '<td>' + value.date + '</td>' +
@@ -2801,6 +2827,74 @@
                                     '</div>' + 
                                     '</div>';
                             $('#sdn_action_log .modal-body').html(html);
+                        }
+
+                        else{
+                            toastr.error(data.message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
+            });
+
+            $('#datatable tbody').on('click', 'tr td button.view_sdn_deposit_slip_log', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('admin.delivery.sdn.sdn_deposit_slip_logs') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'sdn_id': id
+                    }
+                })
+                    .done(function (data) {
+                        if (data.status == 1) {
+                            $('#sdn_deposit_slip_log .modal-body').html('');
+                            $('#sdn_deposit_slip_log').modal('show');
+                            $('#sdn_deposit_slip_log_title span').text(data.sdn_id);
+                                var html = '<div class="row">' +
+                                            '<div class="col">' +
+                                            '<table class="table table-sm table-bordered border">' +
+                                            '<thead>' +
+                                            '<tr>' +
+                                            '<th class="color primary text-center">Status</th>' +
+                                            '<th class="color primary">Previous Bank</th>' +
+                                            '<th class="color primary">New Bank</th>' +
+                                            '<th class="color primary">Previous Amount</th>' +
+                                            '<th class="color primary">New Amount</th>' +
+                                            '<th class="color primary">Updated By</th>' +
+                                            '<th class="color primary">Updated At</th>' +
+                                            '<th class="color primary">Updated Deposit Slip</th>' +
+                                            '</tr>' +
+                                            '</thead>' +
+                                            '<tbody>';
+                            if (data.logs) {
+                                $.each(data.logs, function (index, value) {
+                                    var image_url = '{{asset('uploads/sdn/')}}';
+                                    html += '<tr>' +
+                                        '<td>' + value.status + '</td>' +
+                                        '<td>' + value.previous_bank + '</td>' +
+                                        '<td>' + value.new_bank + '</td>' +
+                                        '<td>' + value.previous_amount + '</td>' +
+                                        '<td>' + value.new_amount + '</td>' +
+                                        '<td>' + value.updated_by + '</td>' +
+                                        '<td>' + value.date + '</td>' +
+                                        '<td>';
+
+                                if (value.image) {
+                                    html += '<div class="text-center"><button type="button" class="btn btn-primary btn-sm"><a class="white" href="' + image_url + '/' + value.image + '" target="_blank">View</a></button></div>';
+                                }
+
+                                html += '</td></tr>';
+                                });
+                            }
+                            html += '</tbody>' + 
+                                    '</table>' + 
+                                    '</div>' + 
+                                    '</div>';
+                            $('#sdn_deposit_slip_log .modal-body').html(html);
                         }
 
                         else{
