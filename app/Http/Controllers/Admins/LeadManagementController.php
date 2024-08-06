@@ -1067,8 +1067,20 @@ class LeadManagementController extends Controller
             
         }else{
             $phoneNumberExists = User::where('phone', $request->phone)->exists();
+            if(!$phoneNumberExists){
+                $phoneNumberExists = Lead::where('phone_number', $request->phone)->exists();
+            }
+
             $emailAddressExists = User::where('email', $request->email)->exists();
+            if(!$phoneNumberExists){
+                $emailAddressExists = Lead::where('email_address', $request->email)->exists();
+            }
+
             $companyExists = User::where('name', $request->company)->exists();
+            if(!$companyExists){
+                $companyExists = Lead::where('company', $request->company)->exists();
+
+            }
         }
 
         return response()->json([

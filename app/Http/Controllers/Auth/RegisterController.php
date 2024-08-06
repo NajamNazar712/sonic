@@ -566,12 +566,15 @@ class RegisterController extends Controller
             $shipper = User::find($newUser->id);
 
             if (isset($data['sale_person'])) {
-                $sale_person = new SalePersonTag();
-                $sale_person->admin_id = $data['sale_person'];
-                $sale_person->user_id = $newUser->id;
-                $sale_person->status = 0;
-                $sale_person->save();
+                $sale_person = SalePersonTag::where(['admin_id' => $data['sale_person'], 'user_id' => $newUser->id, 'status' => 0])->latest()->first() ?? null;
 
+                if($sale_person == null){
+                    $sale_person = new SalePersonTag();
+                    $sale_person->admin_id = $data['sale_person'];
+                    $sale_person->user_id = $newUser->id;
+                    $sale_person->status = 0;
+                    $sale_person->save();
+                }
                 $sales_commission = new SalesCommission();
                 $sales_commission->shipper_id = $newUser->id;
                 $sales_commission->commission_users_count = 1;
