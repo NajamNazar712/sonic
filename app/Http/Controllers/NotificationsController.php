@@ -10738,7 +10738,7 @@ class NotificationsController extends Controller
                         $html .= '<tr style="background-color: #f2f2f2;">';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Request #</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Type</th>';
-                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolution</th>';
+                        // $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolution</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Status</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolved Within</th>';
                         $html .= '</tr>';
@@ -10748,14 +10748,14 @@ class NotificationsController extends Controller
                         foreach ($items as $item) {
                             $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
                             $type = CrmRequestCaseNatureType::where('id', $item["case_nature_type_id"])->value('type');
-
-                            $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first() ?? null;
-                            $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"] ?? null)->latest()->first() ?? null;
+all doen
+                            // $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first() ?? null;
+                            // $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"] ?? null)->latest()->first() ?? null;
 
                             $html .= '<tr>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $item["id"] . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($type ?? '-') . '</td>';
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolution['name'] ?? '-') . '</td>';
+                            // $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolution['name'] ?? '-') . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">Closed</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
                             $html .= '</tr>';
