@@ -9682,7 +9682,7 @@ class GlobalSettingsController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
                 $dropdown .= $edit_product_type;
-                $dropdown .= $delete_product_type;
+//                $dropdown .= $delete_product_type;
                 $dropdown .= '
                         </div>
                         </div>

@@ -626,7 +626,7 @@ class APIController extends Controller
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-                'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric', 'min:0'],
+                'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric','between:0,999999.00'],
                 // 'parcel_value' => ['nullable','numeric','digits_between:1,1000000'],
                 'parcel_value' => ['nullable', 'numeric', 'between:0,1000000.00'],
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
@@ -9818,4 +9818,24 @@ class APIController extends Controller
         return response()->json(['status' => 0, 'message' => $message, 'data' => $record]);
 
     }
+
+
+    public function trax_pk_validation($company_name = null, $email_address = null, $phone_number = null) {
+    
+        if ($company_name != 'none' && $company_name) {
+            $exists = User::where('name', $company_name)->exists();
+        }
+    
+        if ($email_address != 'none' && $email_address) {
+            $exists = User::where('email', $email_address)->exists();
+        }
+    
+        if ($phone_number != 'none' && $phone_number) {
+            $exists = User::where('phone', $phone_number)->exists();
+        }
+
+    
+        return response()->json(['exists' => $exists]);
+    }
+    
 }

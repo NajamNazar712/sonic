@@ -31,6 +31,7 @@ Route::prefix('survey_form')->name('survey.')->group(function () {
 
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
 
+Route::get('trax_pk_validation/{company_name}/{email_address}/{phone_number}', 'APIController@trax_pk_validation')->name('trax_pk_validation');
 
 
 Auth::routes();
@@ -96,6 +97,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('opt_verify_close', 'Shippers\ShipperDashboardController@opt_verify_close')->name('opt_verify_close');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
+
+    Route::post('/crf/update', 'Shippers\ShipperDashboardController@updateCrfSign')->name('updateSignOffCrf');;
+
     Route::post('get_sub_segment', 'Auth\RegisterController@get_sub_segment')->name('get_sub_segment');
 
     Route::get('referral', 'Auth\RegisterController@referral_valid')->name('referral.valid');
@@ -117,7 +121,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     //        Route::post('add_request', 'Shippers\ShipperDashboardController@mentor_health_add_request')->name('add_request');
     //    });
     Route::prefix('shipment')->name('shipment.')->group(function () {
-        Route::prefix('book')->name('book.')->group(function () {
+        Route::middleware(['PauseShipperBooking'])->prefix('book')->name('book.')->group(function () {
             Route::get('index', 'Shippers\ShipperShipmentBookController@corporate_index')->name('corporate.index');
             Route::get('address_verify', 'Shippers\ShipperShipmentBookController@address_verify')->name('address_verify');
             Route::post('corporate_store', 'Shippers\ShipperShipmentBookController@corporate_store')->name('corporate.store');
@@ -171,9 +175,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
             });
         });
 
-        Route::resource('book', 'Shippers\ShipperShipmentBookController');
+        Route::middleware(['PauseShipperBooking'])->resource('book', 'Shippers\ShipperShipmentBookController');
 
-        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+        Route::middleware(['PauseShipperBooking'])->prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
             Route::get('list', 'Shippers\ShipperReceivingSheetController@list')->name('list');
             Route::get('receiving_sheet_list', 'Shippers\ShipperReceivingSheetController@receiving_sheet_list')->name('receiving_sheet_list');
             Route::get('all', 'Shippers\ShipperReceivingSheetController@all')->name('all');
@@ -197,7 +201,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             });
         });
 
-        Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
+        Route::middleware(['PauseShipperBooking'])->resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
 
         Route::prefix('receiving_sheet_history')->name('receiving_sheet_history.')->group(function () {
             Route::get('short_received_list', 'Shippers\ShipperReceivingSheetHistoryController@short_received_list')->name('short_received_list');

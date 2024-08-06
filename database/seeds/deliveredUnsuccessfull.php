@@ -18,13 +18,16 @@ class deliveredUnsuccessfull extends Seeder
     {
         //
         $shipmentId = [
-            27140240011429, 22340240172190, 22340240077969, 22327539961275, 22318840186553, 22318840078450, 22318840078092, 22318840078090, 22318840077836, 22318839991828, 22318839991776, 22318839991767, 22318839961479, 22318839956646, 22318839956504, 22318839956495, 22318839954060, 20240240077007, 20240239322932, 20231340054024, 20218840050583, 152991384287, 14440240169544
+            22320234315335
             ];
         echo count($shipmentId);
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
 
             foreach ($shipmentId as $shipment) {
+                $shipment->shipper_status_id = 8;
+                $shipment->consignee_status_id = 8;
+                $shipment->save();
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
                 // $delivertNote   = DeliveryNote::find($deliveryNoteId->delivery_note_id);
 

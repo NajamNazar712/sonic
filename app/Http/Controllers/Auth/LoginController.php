@@ -13,13 +13,14 @@ use App\Http\Models\PackagingCharge;
 use App\Http\Models\ShipmentPrebook;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\NpsShipperRatting;
+use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\NpsShipperSkipSurvey;
 use App\Http\Models\Admin\BackgroundImage;
-use App\Http\Models\ProjectArrivalShipper;
 
+use App\Http\Models\ProjectArrivalShipper;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\Shipper\UserOtpVerification;
@@ -158,7 +159,7 @@ class LoginController extends Controller
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Blacklisted, Contact Admin');
             }
-            else if (!in_array($user->status, [0,1,3,2,5]) || $user->status == 4) {
+            else if (!in_array($user->status, [0,1,3,2,5,6]) || $user->status == 4) {
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
             }
@@ -182,6 +183,12 @@ class LoginController extends Controller
                 session(['request_custom_quotation' => $user->request_custom_quotation]);
                 session(['on_board_status' => $user->on_board_status]);
 
+                session(['lead' => $user->lead_id ? true : false]);
+
+                $token = CRFTermsConditions::where('user_id', $user->id)->first()->token ?? null;
+
+                session(['token' => $token]);
+
                 if (SalePersonTag::where('user_id', session('user_id'))->where('status', 0)->exists()){
                     session(['sale_person_status' => 1]);
                 }
@@ -189,9 +196,9 @@ class LoginController extends Controller
                     session(['sale_person_status' => 0]);
                 }
                 session(['account_type' => $user->account_type_id]);
-//                if (PackagingCharge::where('user_id', $user->id)->exists()) {
-//                    $packaging_charges_check = TRUE;
-//                }
+                //if (PackagingCharge::where('user_id', $user->id)->exists()) {
+                //$packaging_charges_check = TRUE;
+                //}
 
                 $project_arrival_shipper = ProjectArrivalShipper::where('user_id', $user->id);
                 if($project_arrival_shipper->exists()){
@@ -281,6 +288,12 @@ class LoginController extends Controller
                 session(['status' => $shipper->status]);
                 session(['request_custom_quotation' => $shipper->request_custom_quotation]);
                 session(['on_board_status' => $shipper->on_board_status]);
+
+                $token = CRFTermsConditions::where('user_id', $shipper->id)->first()->token ?? null;
+
+                session(['token' => $token]);
+
+
 //                if (PackagingCharge::where('user_id', $user->user_id)->exists()) {
 //                    $packaging_charges_check = TRUE;
 //                }

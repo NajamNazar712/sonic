@@ -14,7 +14,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Models\ConsigneeUser;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\ShipmentStatus;
@@ -24,6 +24,9 @@ use App\Http\Models\Shipment;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\CRM\CrmRequestTagging;
 use Vectorface\Whip\Whip;
 use Auth;
 
@@ -200,6 +203,129 @@ class ShipmentsJourneyController extends Controller
 
         if($shipper_status_id == 52){
             ReattemptShipmentStatusController::auto_reattempt_status_for_max_delivery_ratio($shipment_id);
+        }
+
+        //if shipper_status_id is
+        // 14 => Shipment - Delivered
+        // 20 => Return - Confirm
+        // 25 => Return - Delivered to Shipper
+        // 31 => Replacement - Delivered to Shipper
+        //Then Auto Close Complaints
+
+        // Case Nature Types
+        // 2 => 'Delay in Delivery',
+        // 10 => 'Fake Reason',
+        // 14 => 'Urgent Delivery',
+        // 37 => 'Delay in Return',
+        // 1 => 'Payment',
+
+        // Case Nature Ids
+        // 1 => 'Complaints',
+        // 2 => 'Service Request',
+
+        // Condition for Delay in Delivery & Fake Reason & Urgent Delivery
+        if ($shipper_status_id == 14) {
+            $crm_request = CrmRequest::where('shipment_id', $shipment_id)->where('status_id', 2)->first();
+            
+            if ($crm_request && ($crm_request->case_nature_id == 1 || $crm_request->case_nature_id == 2)) { // 1=>Complaints Or 2=>Service Request
+                $shipperName = User::find(Shipment::where('id', $shipment_id)->select('user_id')->first()->user_id)->name;
+                
+                //if crm request is in_process =>2
+                if ($crm_request->status_id == 2 && (in_array($crm_request->case_nature_type_id, [2, 10, 14]))) { // 2=>Delay in Delivery, 10=> Fake Reason, 14=>Urgent Delivery
+                    CrmRequest::where('id', $crm_request->id)->update([
+                        'status_id' => 4 // Closed status
+                    ]);
+                    CrmRequestStatusHistory::create([
+                        'crm_request_id' => $crm_request->id,
+                        'status_id' => 4,
+                        'agent_id' => Auth::id()
+                    ]);
+                    
+                    CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+
+                    if($crm_request->case_nature_id == 1 && (in_array($crm_request->case_nature_type_id, [2, 10]))) //Complaints
+                    {
+                        $comment = 'Dear '.$shipperName.',
+                                Thank you for reaching us out!
+                                Your complaint has been resolved, and the shipment has been delivered. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 24 hrs.
+                                Regards,
+                                Team CRM
+                                TRAX';
+                    }
+                    elseif ($crm_request->case_nature_id == 2 && (in_array($crm_request->case_nature_type_id, [14]))) { //Service Request
+                        $comment = 'Dear '.$shipperName.',
+                            Thank you for reaching us out!
+                            Your Service Request has been processed, and the shipment has been delivered. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 24 hrs
+                            Regards,
+                            Team CRM
+                            TRAX';
+                    }
+                    
+                    CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                }
+            }
+        }
+
+        // Condition for Delay in Return
+        if (in_array($shipper_status_id, [25, 31])) {
+            $crm_request = CrmRequest::where('shipment_id', $shipment_id)->where('status_id', 2)->first();
+            
+            if ($crm_request) {
+                $shipperName = User::find(Shipment::where('id', $shipment_id)->select('user_id')->first()->user_id)->name;
+                
+                if ($crm_request->status_id == 2) {//if crm request is in_process
+                    CrmRequest::where('id', $crm_request->id)->update([
+                        'status_id' => 4 // Closed status
+                    ]);
+                    CrmRequestStatusHistory::create([
+                        'crm_request_id' => $crm_request->id,
+                        'status_id' => 4,
+                        'agent_id' => Auth::id()
+                    ]);
+                    
+                    CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+
+                    $comment = 'Dear '.$shipperName.',
+                        Thank you for reaching us out!
+                        Your complaint has been resolved, and the shipment has been return delivered. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 48 hrs.
+                        Regards,
+                        Team CRM
+                        TRAX';
+                    
+                    CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                }
+            }
+        }
+
+        // Condition for Return Confirm (And Delay in Delivery, Fake Reason & Urgent Delivery)
+        if ($shipper_status_id == 20) {
+            $crm_request = CrmRequest::where('shipment_id', $shipment_id)->where('status_id', 2)->first();
+            
+            if ($crm_request && in_array($crm_request->case_nature_type_id, [2, 10, 14])) { 
+                $shipperName = User::find(Shipment::where('id', $shipment_id)->select('user_id')->first()->user_id)->name;
+                
+                if ($crm_request->status_id == 2) {//if crm request is in_process
+                    CrmRequest::where('id', $crm_request->id)->update([
+                        'status_id' => 4 // Closed status
+                    ]);
+                    CrmRequestStatusHistory::create([
+                        'crm_request_id' => $crm_request->id,
+                        'status_id' => 4,
+                        'agent_id' => Auth::id()
+                    ]);
+                    
+                    CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+
+                    $comment = 'Dear '.$shipperName.',
+                        Thank you for reaching us out!
+                        Please be noted that shipment has been updated on return status after due processing and validations, therefore at this status of shipment the reported ticket has been closed.
+                        Regards,
+                        Team CRM
+                        TRAX';
+                    
+                    CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                }
+            }
         }
     }
 }
