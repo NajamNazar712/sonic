@@ -944,7 +944,6 @@ class AdminTrackingController extends Controller
     public function track_v2(Request $request)
     {
         $tracking_numbers = explode(',', $request->tracking_numbers);
-
         $tracking = array();
 
         foreach ($tracking_numbers as $tracking_number) {
@@ -2201,7 +2200,7 @@ class AdminTrackingController extends Controller
             'integer' => ':attribute must be an Integer.',
         ];
         $rules = [
-            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')]
+            'tracking_number' => ['required', 'numeric', Rule::exists('shipments', 'tracking_number')]
         ];
         $fields = [0 => 'tracking_number'];
 
@@ -2231,6 +2230,12 @@ class AdminTrackingController extends Controller
                     unset($spreadsheet[0]);
                 }
             }
+
+            // Check if the number of rows exceeds the limit
+            if (count($spreadsheet) > 2001) { // including header row
+                return redirect()->back()->with('error', 'The uploaded file exceeds the maximum allowed row limit of 2000.');
+            }
+
             $valid_fields = true;
             if (!empty($spreadsheet) || !isset($spreadsheet)) {
                 $rows = array();
@@ -2576,6 +2581,10 @@ class AdminTrackingController extends Controller
                     DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
                 );
         })
+        ->leftjoin('shipments_journey as sj_arrival', function ($join) {
+            $join->on('sj_arrival.shipment_id', '=', 's.id')
+                ->where('sj_arrival.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
+        })
         ->leftJoin('shipments_journey as journey', function ($join) {
             $join->on('journey.shipment_id', '=', 's.id')
                 ->where(
@@ -2605,13 +2614,13 @@ class AdminTrackingController extends Controller
         ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
         ->leftJoin('admins as new_admin', 'new_admin.id', '=', 'ssj.admin_id')        
         ->leftJoin('city_areas as ca_scanning', 'new_admin.area_id', '=', 'ca_scanning.id')        
-        ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at', 'shipment_positions.handover_note', 'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'shipment_positions.last_action','u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id','sjl.shipment_id as journey_latest_id',
+        ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at',  'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id','sjl.shipment_id as journey_latest_id',
         'sjl.updated_at as journey_latest_updated_at',
-        'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id','ssjal.location_status as location_status','ca_scanning.name as scanning_city_area_name',
-        's.consignee_address', 's.actual_weight','shipment_positions.scanned_by_user_type as scanned_by_user_type','shipment_positions.scanned_by_id as scanned_by_id'
+        'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id', 'ca_scanning.name as scanning_city_area_name',
+        's.consignee_address', 's.actual_weight','shipment_positions.scanned_by_user_type as scanned_by_user_type','shipment_positions.scanned_by_id as scanned_by_id','sj_arrival.created_at as arrival', 'ssj.created_at as last_scanned_at'
         ])
         ->where('tracked_by', Auth::id())->groupBy('shipment_positions.shipment_id');
-
+        // dd($shipment_positions->get()->toArray());
         $datatables = Datatables::of($shipment_positions)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -2673,13 +2682,33 @@ class AdminTrackingController extends Controller
                 }
                 return $trax_id;
             })
-            ->editColumn('location_status', function ($shipment) {
-                if(isset($shipment->location_status)){
-                    return $shipment->location_status == 1 ? 'On-site' : 'Off-site';
-                }else{
-                    return '-';
+            ->addColumn('arrival_aging', function ($shipments) {
+
+                $days = Carbon::now()->diffInDays($shipments->arrival);
+                if ($days == 0) {
+                    return "-";
+                } else {
+                    return $days;
                 }
-            })->editColumn('scanning_city_area_name', function ($shipment) {
+            })
+            ->addColumn('status_aging', function ($shipments) {
+                $days = Carbon::now()->diffInDays($shipments->status_at);
+                if ($shipments->status_at == null) {
+                    return "-";
+                } else {
+                    return $days;
+                }
+            })
+            ->addColumn('last_scanned_at_aging', function ($shipments) {
+
+                $days = Carbon::now()->diffInDays($shipments->last_scanned_at);
+                if ($days == 0) {
+                    return "-";
+                } else {
+                    return $days;
+                }
+            })
+            ->editColumn('scanning_city_area_name', function ($shipment) {
                 if(!isset($shipment->scanning_city_area_name) && $shipment->scanned_by_user_type == 5){
                     $rider = Rider::find($shipment->scanned_by_id);
                     if(isset($rider->area)){
