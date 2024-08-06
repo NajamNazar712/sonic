@@ -150,7 +150,7 @@ class WebsiteLead extends Command
             NotificationsController::send(230, $leads_added, Carbon::today());
         }
 
-        Log::channel('cronJobLog')->info('s ' .'website:leads Running');
+//        Log::channel('cronJobLog')->info('s ' .'website:leads Running');
 
     }
 

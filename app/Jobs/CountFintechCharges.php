@@ -115,7 +115,7 @@ class CountFintechCharges implements ShouldQueue
                 ];
                 $client = new Client();
                 $response = $client->request('Post', $this->url, $options);
-                Log::channel('trax_pay')->info('s ' . json_encode($response->getBody()->getContents()));
+                //Log::channel('trax_pay')->info('s ' . json_encode($response->getBody()->getContents()));
             }
 
         } catch (\Throwable $e) {

@@ -1049,12 +1049,11 @@ class LeadManagementController extends Controller
         $emailAddressExists = false;
         $companyExists = false;
 
-
+        // for edit Validation
         if($id){
             if($lead->phone_number != $request->phone){
                 $phoneNumberExists = Lead::where('phone_number', $request->phone)->exists();
             }
-            
             
             if($lead->email_address != $request->email){
                 $emailAddressExists = Lead::where('email_address', $request->email)->exists();        
@@ -1064,11 +1063,22 @@ class LeadManagementController extends Controller
                 $companyExists = Lead::where('company', $request->company)->exists();
             }
 
-            
+        // for Add Validation
         }else{
             $phoneNumberExists = User::where('phone', $request->phone)->exists();
+            if(!$phoneNumberExists){
+                $phoneNumberExists = Lead::where('phone_number', $request->phone)->exists();
+            }
+
             $emailAddressExists = User::where('email', $request->email)->exists();
+            if(!$phoneNumberExists){
+                $emailAddressExists = Lead::where('email_address', $request->email)->exists();
+            }
+
             $companyExists = User::where('name', $request->company)->exists();
+            if(!$companyExists){
+                $companyExists = Lead::where('company', $request->company)->exists();
+            }
         }
 
         return response()->json([
