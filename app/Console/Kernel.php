@@ -154,7 +154,8 @@ class Kernel extends ConsoleKernel
 //        'App\Console\Commands\ShipperLogisticBookingCron',
 //        'App\Console\Commands\HourlyShipperLogisticBookingEmailCron'
 
-        'App\Console\Commands\CalculateFranchiseCommission'
+        'App\Console\Commands\CalculateFranchiseCommission',
+        'App\Console\Commands\DeleteOldDataFromShortUrlTable'
         ];
 
     /**
@@ -541,6 +542,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('commission:calculate_commission')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
 //        $schedule->command('hourly-logistic:shipper-bookings')->hourly()->runInBackground();
+        $schedule->command('delete:short-url-data')->dailyAt('01:00')->runInBackground();
 
     }
     /**
