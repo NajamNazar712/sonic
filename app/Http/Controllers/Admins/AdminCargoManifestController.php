@@ -161,7 +161,7 @@ class AdminCargoManifestController extends Controller
 
     public function manifest_mapping_store(Request $request)
     {
-
+        
         if (count($request->junctions) > 1 && $request->junctions[1] == null) {
             return redirect()->back()->with('error', 'Please Select Junction 1');
         }

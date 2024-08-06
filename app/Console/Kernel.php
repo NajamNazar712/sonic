@@ -150,9 +150,11 @@ class Kernel extends ConsoleKernel
         // 'App\Console\Commands\AgentUnassignedTicket ',
         'App\Console\Commands\AgentSarNotification',
         'App\Console\Commands\SackBagStatusUpdate',
-        'App\Console\Commands\AutoAssignCrmAgentNew'
+        'App\Console\Commands\AutoAssignCrmAgentNew',
 //        'App\Console\Commands\ShipperLogisticBookingCron',
 //        'App\Console\Commands\HourlyShipperLogisticBookingEmailCron'
+
+        'App\Console\Commands\CalculateFranchiseCommission'
         ];
 
     /**
@@ -534,6 +536,9 @@ class Kernel extends ConsoleKernel
 //		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground(); //ye filhal bnd ki hai due to r2 shutdown issue
 		$schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
 		$schedule->command('clean:7DaysQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
+
+        // Commission calculation schedule
+        $schedule->command('commission:calculate_commission')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
 //        $schedule->command('hourly-logistic:shipper-bookings')->hourly()->runInBackground();
 

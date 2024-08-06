@@ -313,7 +313,7 @@ class NotificationsController extends Controller
 
             if($to){
 
-                if($id = 230){
+                if($id == 230){
 
                     $mail = new NotificationsDispatchNow($subject, $body);
 
@@ -340,7 +340,10 @@ class NotificationsController extends Controller
 
                     $mail->send(new Notifications($subject, $body, $from));
                 }
+
                 
+    
+              
             }
 
 
@@ -8674,7 +8677,7 @@ class NotificationsController extends Controller
                         $shipper_body = str_replace('[person_of_contact]', $user->name, $shipper_body);
                     }
                     $to = $user->email;
-                    self::email($subject, $shipper_body, $to);
+                    // self::email($subject, $shipper_body, $to);
 
                     $sale_person = SalePersonTag::join('admins as sale_person', 'sale_person.id', '=', 'sale_person_tags.admin_id')
                         ->where('sale_person_tags.user_id', $user_id)
@@ -10072,7 +10075,8 @@ class NotificationsController extends Controller
                     }
                     $to = array();
 
-                    $to[] = $admin->email;
+                    $to[] =
+                    $admin->email;
 
 
                     self::email($subject, $body, $to);
@@ -10734,7 +10738,7 @@ class NotificationsController extends Controller
                         $html .= '<tr style="background-color: #f2f2f2;">';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Request #</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Type</th>';
-                        // $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolution</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolution</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Status</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolved Within</th>';
                         $html .= '</tr>';
@@ -10751,7 +10755,7 @@ class NotificationsController extends Controller
                             $html .= '<tr>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $item["id"] . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($type ?? '-') . '</td>';
-                            // $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolution['name'] ?? '-') . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolution['name'] ?? '-') . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">Closed</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
                             $html .= '</tr>';
@@ -11177,19 +11181,19 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 } else if ($id == 230){
-                    // $subject = $notification->subject;
-                    // $body = $notification->body;
                     $lead_ids = $reference_1_id;
-                    $tokens = $reference_2_id;
 
+                    if(!is_array($lead_ids)){
+                        $lead_ids = [$lead_ids];
+                    }
+                    
                     foreach ($lead_ids as $key => $lead_id) {
                         $lead = Lead::find($lead_id);
-                        // if(isset($tokens[$key])){
-                            $route = route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]);
-                            $link = '<a href="' . $route . '">Click here to sign up</a>';
-
-                            $body = $notification->body; // Reset $body to its original state
-                            $subject = $notification->subject;  // Reset $subject to its original state
+                        $route = route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]);
+                        $link = '<a href="' . $route . '">Click here to sign up</a>';
+                    
+                        $body = $notification->body; // Reset $body to its original state
+                        $subject = $notification->subject;  // Reset $subject to its original state
 
                         if (strpos($body, '[Link]') !== FALSE) {
                             $body = str_replace('[Link]', $link, $body); // Use $body instead of $old_body
@@ -11202,6 +11206,11 @@ class NotificationsController extends Controller
                         }
                         if (strpos($subject, '[Company Name]') !== FALSE) {
                             $subject = str_replace('[Company Name]', $lead->company_name, $subject);
+                        }
+
+                        if ($lead->email_status != 1){
+                            $lead->email_status = 1;
+                            $lead->save();
                         }
                         self::email($subject, $body, $lead->email_address, null, null, null, 230); // Send email with $body
                     }                    

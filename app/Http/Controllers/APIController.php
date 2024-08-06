@@ -9818,4 +9818,24 @@ class APIController extends Controller
         return response()->json(['status' => 0, 'message' => $message, 'data' => $record]);
 
     }
+
+
+    public function trax_pk_validation($company_name = null, $email_address = null, $phone_number = null) {
+    
+        if ($company_name != 'none' && $company_name) {
+            $exists = User::where('name', $company_name)->exists();
+        }
+    
+        if ($email_address != 'none' && $email_address) {
+            $exists = User::where('email', $email_address)->exists();
+        }
+    
+        if ($phone_number != 'none' && $phone_number) {
+            $exists = User::where('phone', $phone_number)->exists();
+        }
+
+    
+        return response()->json(['exists' => $exists]);
+    }
+    
 }
