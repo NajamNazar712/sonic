@@ -1071,7 +1071,7 @@ class LeadManagementController extends Controller
             }
 
             $emailAddressExists = User::where('email', $request->email)->exists();
-            if(!$phoneNumberExists){
+            if(!$emailAddressExists){
                 $emailAddressExists = Lead::where('email_address', $request->email)->exists();
             }
 
