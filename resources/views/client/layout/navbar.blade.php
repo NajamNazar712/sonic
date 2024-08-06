@@ -74,6 +74,19 @@
                 <form id="logout-form" action="{{ route('cod.logout') }}" method="POST" style="display: none;">
                   @csrf
                 </form>
+
+                @if(Session::has('agreement_signed') && session('agreement_signed') == 1 && session('token') != null)
+                    {{-- CRF form download --}}
+                    <a class="dropdown-item" href="{{route('cod.terms.download', ['id' => session('user_id'), 'token' => session('token')])}}"><i class="ft-download"></i> Download CRF </a>
+
+                    {{-- onclick="event.preventDefault();
+                    document.getElementById('crf-form').submit();" --}}
+                    {{-- <form id="crf-form" action="{{ route('cod.terms.download', ['id' => session('user_id'), 'token' => session('token')]) }}" method="POST" style="display: none;">
+                      @csrf
+                    </form> --}}
+                    {{-- end --}}
+
+                @endif
               </div>
             </li>
           </ul>
