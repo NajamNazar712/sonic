@@ -74,6 +74,12 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-4 mb-1">
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_rncc_no" id="search_rncc_no" placeholder="Search RNCC Number">
+                        </fieldset>
+                    </div>
+
 
                     <div class="col-4">
 
@@ -99,15 +105,6 @@
                         </div>
 
                     </div>
-
-
-                    <div class="col-4 mb-1">
-                        <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_rncc_no" id="search_rncc_no" placeholder="Search RNCC Number">
-                        </fieldset>
-                    </div>
-
-
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
