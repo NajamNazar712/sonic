@@ -243,30 +243,88 @@
         $(document).ready(function () {
 
 
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                if (this.context.length) {
+                    var body = [];
+                    var head = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.logistic.list') }}',
+                        data: params,
+                        success: function (result) {
+                             head = [
+                                'S.No',
+                                'Booking Date',
+                                'CN Number',
+                                'Shipper Name',
+                                'Pickup Address',
+                                'Product Name',
+                                'Service Name',
+                                'Rider Name',
+                                'Total Booking Weight',
+                                'Total Pieces',
+                                'Origin Name',
+                                'Destination Name',
+                                'Consignee Name',
+                                'Consignee Address'
+                            ];
+
+                            $.each(result.data, function (index, values) {
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.booking_date);
+                                row.push(values.cn_number);
+                                row.push(values.shipper_name);
+                                row.push(values.pickup_address);
+                                row.push(values.product_name);
+                                row.push(values.service_name);
+                                row.push(values.rider_name);
+                                row.push(values.total_booking_weight);
+                                row.push(values.total_pieces);
+                                row.push(values.origin_name);
+                                row.push(values.destination_name);
+                                row.push(values.consignee_name);
+                                row.push(values.consignee_address);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            });
 
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
                 @if (session('role_id') == 1 || count(array_intersect([988], session('permissions'))) !== 0)
-
-                buttons: [
-                    {
-                        text: '<i class="la la-plus"></i> Add Booking',
-                        className: 'btn btn-primary request_add',
-                        action: function (e, dt, node, config) {
-                            window.location.href = "{{ route('admin.logistic.create') }}";
-                        }
+                        {
+                            text: '<i class="la la-plus"></i> Add Booking',
+                            className: 'btn btn-primary request_add',
+                            action: function (e, dt, node, config) {
+                                window.location.href = "{{ route('admin.logistic.create') }}";
+                            }
 
 
-                    },
+                        },
+                    @endif
+                    @if (session('role_id') == 1 || count(array_intersect([1002], session('permissions'))) !== 0)
 
-                    'reset'
+                        {
+                            extend: 'excelHtml5',
+                            title: 'Logistic Booking',
+                            className: 'btn btn-primary',
+                            text: '<i class="la la-file-excel-o "></i> Excel',
+                        },
+                    @endif
+                    'reset',
+
                 ],
-                @else
-                buttons: [
-                    'reset'
-                ],
-                @endif
+
                 scrollX: true, scrollY: '500px',
                 // select: {
                 //     info: false,
