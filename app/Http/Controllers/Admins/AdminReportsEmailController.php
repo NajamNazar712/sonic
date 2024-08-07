@@ -1532,7 +1532,7 @@ class AdminReportsEmailController extends Controller
 
 
     static public function retail_done_payment($date){
-        Log::channel('cronJobLog')->info('s ' .'report:retail Running');
+//        Log::channel('cronJobLog')->info('s ' .'report:retail Running');
         try{
 
             $retail_done_payments = RetailDonePaymentCalculation::whereDate('created_at', $date);
@@ -1608,7 +1608,7 @@ class AdminReportsEmailController extends Controller
                 $writer->save($file_name);
                 
                 NotificationsController::send(141, $date, url('/') . '/' . $file_name_without_path);
-                Log::channel('cronJobLog')->info('s ' .'report:retail End');
+//                Log::channel('cronJobLog')->info('s ' .'report:retail End');
             }
         }catch(\Throwable $th){
             Log::channel('cronJobLog')->info('s ' .'report:retail Failed');
