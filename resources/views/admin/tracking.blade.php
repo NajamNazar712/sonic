@@ -2137,6 +2137,10 @@
                                         class: 'align-middle city'
                                     },
                                     {
+                                        name: 'area_log',
+                                        class: 'align-middle area_log'
+                                    },
+                                    {
                                         name: 'received_or_refused_by',
                                         class: 'align-middle received_or_refused_by'
                                     },
