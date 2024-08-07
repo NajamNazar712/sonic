@@ -12,6 +12,36 @@
                     Logistic Booking
                 </h1>
 
+                <div class="col mt-2">
+                    <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                      <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                      </span>
+                                </div>
+                                <input type="text" name="logistic_from_date" class="form-control bg-primary border-primary white rounded-right" id="logistic_from_date" placeholder="Logistic Date From"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}">
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                                </div>
+                                <input type="text" name="logistic_to_date" class="form-control bg-primary border-primary white rounded-right" id="logistic_to_date" placeholder="Logistic Date To" data-value="{{ \Carbon\Carbon::now() }}">
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-3 mt-2 justify-content-center">
+                            <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                        </div>
+                    </form>
+                </div>
+
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
@@ -242,6 +272,55 @@
 
         $(document).ready(function () {
 
+            var logistic_from_date = $('#logistic_from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+
+                    var old_date_formatted = $('input[name="logistic_from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(31, 'days');
+                    var current_max = moment(contractMoment).add(1, 'days');
+                    logistic_to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    logistic_to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    logistic_to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
+                }
+            });
+
+            var logistic_to_date = $('#logistic_to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    // if (context.select) {
+                    //     $('#track_form #logistic_from_date').pickadate('picker').set('max', $('#track_form #logistic_to_date').pickadate('picker').get('select'));
+                    // }
+                }
+            });
+
+            $('#track_form').bind('submit', function (e) {
+                e.preventDefault();
+                var logistic_from_date2 = $('#track_form #logistic_from_date').val();
+                var logistic_to_date2 = $('#track_form #logistic_to_date').val();
+
+
+                if (logistic_from_date2 != '' && logistic_to_date2 != '') {
+                    table.draw();
+                }
+
+            });
+
 
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
@@ -342,7 +421,12 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.logistic.list') }}',
+                    data: function (d) {
+                        d.logistic_from_date = $('input[name="logistic_from_date_formatted"]').val();
+                        d.logistic_to_date = $('input[name="logistic_to_date_formatted"]').val();
 
+
+                    }
                 },
                 rowId: 'id',
                 order: [[2, 'desc']],
