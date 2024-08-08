@@ -942,7 +942,7 @@ class ShipperAPIController extends Controller
                             //$updated_type_id updated by Shipper = 3
                             //$updated_rv_assign_agent_status_id, intercept requested i.e is 3
                             //$updated_rv_state_id updating rv status to 3 i.e open 
-                            $this->shipment_status_update_shipper($request, $user_id, 3, 3, 3);
+                            $this->shipment_status_update_shipper($request, $user_id, 3, 3, 4);
 
 
                             if ($request->hasFile('replacement_parcel_image')) {

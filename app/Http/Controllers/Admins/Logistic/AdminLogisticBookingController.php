@@ -19,6 +19,7 @@ use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -553,6 +554,7 @@ class AdminLogisticBookingController extends Controller
                 }),
             ],
             'insurance_item_code'=>['max:255'],
+            'shipper_reference'=>['string','max:255']
         ]);
         if($validate->fails())
         {
@@ -598,6 +600,7 @@ class AdminLogisticBookingController extends Controller
                     $logistic_booking->handling_inst=$request->handling_inst;
                     $logistic_booking->updated_by = $admin_id;
                     $logistic_booking->total_pieces=$request->total_pieces;
+                    $logistic_booking->shipper_reference=$request->shipper_reference;
                     $logistic_booking->save();
 
                     $shipment=Shipment::where('tracking_number',$request->cn_number);
@@ -609,12 +612,22 @@ class AdminLogisticBookingController extends Controller
 //                            $shipment->estimated_weight=$booking_weight;
 //                        }
                         //atif sir said shipment weight update regardless booking is arrived or not
+                        $shipment->consignee_city_id=$request->destination_id;
+                        $shipment->order_id=$request->shipper_reference;
                         $shipment->estimated_weight=$request->booking_weight;
                         $shipment->consignee_name=$request->consignee_name;
                         $shipment->consignee_address=$request->consignee_address;
-                        $shipment->consignee_phone_number_1=$request->consignee_phone_number_1;
+                        $shipment->consignee_phone_number_1=$request->consignee_phone_1;
                         $shipment->consignee_email=$request->consignee_email;
                         $shipment->save();
+
+                        //update shipment Quantity
+                        $shipment_item= ShipmentItem::where('shipment_id',$shipment->id);
+                        if($shipment_item->exists()){
+                            $shipment_item = $shipment_item->first();
+                            $shipment_item->quantity=$request->total_pieces;
+                            $shipment_item->save();
+                        }
                     }
 
                     if(isset($request->special_handling_id) && isset($request->item_insurance))
