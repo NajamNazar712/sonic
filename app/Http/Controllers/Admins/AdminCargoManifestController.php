@@ -4360,14 +4360,23 @@ class AdminCargoManifestController extends Controller
                                 $bag->junction_mapping_id = null;
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
-                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76])) {
+                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76,30,37])) {
                                         if($bag->type == 1) {
                                             $status = 11;
                                         } elseif($bag->type == 2) {
                                             if($shipment_table->booking_type_id == 2) {
-                                                $status = 72;
+                                                if(in_array($shipment_table->shipper_status_id, [26,30])) {
+                                                    $status = 72;
+                                                } else {
+                                                    $status = 75;
+                                                }
+                                                
                                             } elseif($shipment_table->booking_type_id == 3) {
-                                                $status = 69;
+                                                if(in_array($shipment_table->shipper_status_id, [32,37])) {
+                                                    $status = 69;
+                                                } else {
+                                                    $status = 75;
+                                                }
                                             } else {
                                                 $status = 75;
                                             }
@@ -4432,14 +4441,23 @@ class AdminCargoManifestController extends Controller
                                 $bag->junction_mapping_id = null;
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
-                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76])) {
+                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76,30,37])) {
                                         if($bag->type == 1) {
                                             $status = 11;
                                         } elseif($bag->type == 2) {
                                             if($shipment_table->booking_type_id == 2) {
-                                                $status = 72;
+                                                if(in_array($shipment_table->shipper_status_id, [26,30])) {
+                                                    $status = 72;
+                                                } else {
+                                                    $status = 75;
+                                                }
+                                                
                                             } elseif($shipment_table->booking_type_id == 3) {
-                                                $status = 69;
+                                                if(in_array($shipment_table->shipper_status_id, [32,37])) {
+                                                    $status = 69;
+                                                } else {
+                                                    $status = 75;
+                                                }
                                             } else {
                                                 $status = 75;
                                             }
@@ -4504,11 +4522,27 @@ class AdminCargoManifestController extends Controller
                                 $bag->junction_mapping_id = null;
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
-                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76])) {
+                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76,30,37])) {
                                         if($bag->type == 1) {
                                             $status = 11;
                                         } elseif($bag->type == 2) {
-                                            $status = 75;
+                                            //$status = 75;
+                                            if($shipment_table->booking_type_id == 2) {
+                                                if(in_array($shipment_table->shipper_status_id, [26,30])) {
+                                                    $status = 72;
+                                                } else {
+                                                    $status = 75;
+                                                }
+                                                
+                                            } elseif($shipment_table->booking_type_id == 3) {
+                                                if(in_array($shipment_table->shipper_status_id, [32,37])) {
+                                                    $status = 69;
+                                                } else {
+                                                    $status = 75;
+                                                }
+                                            } else {
+                                                $status = 75;
+                                            }
                                         }
                                         ShipmentsJourneyController::add($shipment->shipment_id,  $status,  $status, null, null, null, Auth::id(), $bag->seal_number);
                                         $shipment_table->shipper_status_id =  $status;
@@ -6060,7 +6094,7 @@ class AdminCargoManifestController extends Controller
             DB::beginTransaction();
             Log::channel('cronJobLog')->info('cargo:check_1');
 
-        $shipment_status_array = [2,3,11,20,21,26,32,49,68,69,70,72,73,75,76];
+        $shipment_status_array = [2,3,11,20,21,26,32,49,68,69,70,72,73,75,76,30,37];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $open_box_ids = explode(',', $request->open_box_ids);
         $bag_ids = array();
@@ -6488,21 +6522,32 @@ class AdminCargoManifestController extends Controller
                                             $consignee_status_id = 75;
                                         }
                                     } else if ($shipment->booking_type_id == 2) {
-                                        if ($shipment->shipper_status_id == 21) { //najam
+                                        if ($shipment->shipper_status_id == 21) {
                                             if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))  || ($omni_return_city_hub == $default_hub_id) || (in_array($omni_return_city_hub,$admin_assigned_hubs)) ) {
                                                 $shipper_status_id = 22;
                                                 $consignee_status_id = 22;
                                             } else {
-                                                $shipper_status_id = 72;
-                                                $consignee_status_id = 72;
+                                                $shipper_status_id = 75;
+                                                $consignee_status_id = 75;
                                             }
                                         } else {
                                             if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
-                                                $shipper_status_id = 27;
-                                                $consignee_status_id = 27;
+                                                if(in_array($shipment->shipper_status_id, [30,26,72,73])) {
+                                                    $shipper_status_id = 27;
+                                                    $consignee_status_id = 27;
+                                                } else {
+                                                    $shipper_status_id = 22;
+                                                    $consignee_status_id = 22;
+                                                }
+                                                
                                             } else {
-                                                $shipper_status_id = 72;
-                                                $consignee_status_id = 72;
+                                                if(in_array($shipment->shipper_status_id, [30,26,72,73])) {
+                                                    $shipper_status_id = 72;
+                                                    $consignee_status_id = 72;
+                                                } else {
+                                                    $shipper_status_id = 75;
+                                                    $consignee_status_id = 75;
+                                                }
                                             }
                                         }
                                     } else if ($shipment->booking_type_id == 3) {
