@@ -3161,6 +3161,9 @@ class ReturnController extends Controller
                                     $shipper_status_id = 23;
                                     $consignee_status_id = 23;
                                 }
+
+                                self::update_replacement_weight_and_charges($shipment);
+
                                 $shipment->shipper_status_id = $shipper_status_id;
                                 $shipment->consignee_status_id = $consignee_status_id;
                                 $shipment->save();
@@ -3201,6 +3204,15 @@ class ReturnController extends Controller
         } else {
 
             return ['error' => "No shipments scanned"];
+        }
+    }
+
+    private static function update_replacement_weight_and_charges($shipment)
+    {
+        if($shipment->replacement_weight == null)
+        {
+            $shipment->replacement_weight = $shipment->actual_weight;
+            $shipment->replacement_charges = $shipment->weight_charges;
         }
     }
 
@@ -7342,6 +7354,8 @@ class ReturnController extends Controller
                             if ($shipment_data->booking_type_id == 2) {
                                 $shipper_status_id = 28;
                                 $consignee_status_id = 28;
+
+                                self::update_replacement_weight_and_charges($shipment_data);
                             }
 
                             if ($shipment_data->booking_type_id == 3) {
