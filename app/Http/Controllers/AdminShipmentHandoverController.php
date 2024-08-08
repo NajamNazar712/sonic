@@ -23,6 +23,7 @@ use App\Http\Models\Handover\HandoverShipmentsJourney;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Models\ShipmentsJourney;
 use App\ShipmentScanningJourneyAreaLog;
 
 class AdminShipmentHandoverController extends Controller
@@ -201,6 +202,56 @@ class AdminShipmentHandoverController extends Controller
 //admin.handover.create.store
     public function bulk_handover_submit(Request $request){
         $shipment_ids = explode(',', $request->shipment_ids);
+        $current_hub = $request->hub_id;
+        
+        $hub_count_check = self::handoverHubCount($shipment_ids, $current_hub);
+        if ($hub_count_check) {
+          return $hub_count_check;
+        }
+
+        $normal_status_ids = [
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+          11, 12, 13, 14, 15, 17, 18, 19, 
+          49, 50, 51, 52, 53, 54, 55, 56,
+          58, 59, 61, 62, 65, 67, 68
+        ];
+
+        $return_status_ids = [
+          18, 20, 21, 22, 23, 24, 25, 26, 
+          27, 28, 29, 30, 31, 32, 33, 34,
+          35, 36, 37, 38, 44, 45, 46, 47,
+          48, 51, 56, 57
+        ];
+
+        $shipment_type = ShipmentsJourney::select('id', 'shipment_id', 'shipper_status_id')
+        ->whereIn('shipment_id', $shipment_ids)
+        ->whereIn('id', function ($query) use ($shipment_ids) {
+          $query->select(DB::raw('MAX(id)'))
+          ->from('shipments_journey')
+          ->whereIn('shipment_id', $shipment_ids)
+          ->groupBy('shipment_id');
+        })
+        ->get();
+
+        $shipper_status_ids = $shipment_type->pluck('shipper_status_id');
+
+          // Check if there are normal statuses
+          $has_normal = $shipper_status_ids->intersect($normal_status_ids)->isNotEmpty();
+          // Check if there are return statuses
+          $has_return = $shipper_status_ids->intersect($return_status_ids)->isNotEmpty();
+
+        if ($has_normal && $has_return) {
+          return redirect()->back()->with('error', 'All shipments must be of the same type (normal or return).');
+        }
+
+        // $handover_shipments = HandoverShipments::select('id', 'handover_id', 'shipment_id')->get();
+        // $handover_id = $handover_shipments->whereIn('shipment_id', $shipment_ids)->pluck('handover_id');
+        // $handover = Handover::whereIn('id', $handover_id)->get();
+        // $handover_hub = $handover->pluck('hub'); 
+        // if ($handover_hub->count() >= 3){
+        //   return redirect()->back()->with('error', 'You cannot add more handovers for this hub.');
+        // }
+
         // $hub_id = explode(',', $request->hub);
         $total= count($shipment_ids);
         if($total > 0){
@@ -991,4 +1042,19 @@ class AdminShipmentHandoverController extends Controller
             return response()->json(['status' => 0 ]);
         }
     }
+
+    public static function handoverHubCount($shipment_ids, $current_hub)
+    {
+        $handover_shipments = HandoverShipments::whereIn('shipment_id', $shipment_ids)->get();
+        $handover_ids = $handover_shipments->pluck('handover_id');
+        $handovers = Handover::whereIn('id', $handover_ids)->get();
+        $hub_count = $handovers->where('hub', $current_hub)->count();
+        
+        if ($hub_count >= 3) {
+            return redirect()->back()->with('error', 'You cannot add more handovers for this hub.');
+        }
+        return null;
+    }
+    
+    
 }
