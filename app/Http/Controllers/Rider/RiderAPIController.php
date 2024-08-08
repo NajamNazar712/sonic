@@ -14832,7 +14832,10 @@ class RiderAPIController extends Controller
             $pin = $request->pin;
             $pin = Hash::make($pin);
             $city_id = $request->city_id;
-            
+            $phoneNumberExist = RetailShipperInfo::where('shipper_phone_no',$mobile_number)->exists();
+            if($phoneNumberExist){
+                return response()->json(['status' => 1, 'create_message' => 'Retail Shipper phone number already exist']);
+            }else {
             $dataExist = RetailShipperInfo::where('shipper_phone_no',$mobile_number)->
             where('shipper_name',$full_name)->
             where('shipper_cnic',$cnic)->
@@ -14859,7 +14862,7 @@ class RiderAPIController extends Controller
             }else {
                 return response()->json(['status' => 1, 'create_message' => 'Retail Shipper account already exist']);
             }
-            
+        }
             // create retail shipper account here
 
         }
@@ -14909,13 +14912,13 @@ class RiderAPIController extends Controller
                         }
                         return response()->json(['status' => 0, 'message' => 'Shipper login successfully','profile_data'=>$rider,'bank_name'=>$bank_name]);
                     }else {
-                        return response()->json(['status' => 1, 'message' => 'Invalid Pin','pin 1'=>$pin,'Pin 2 '=>$rPin,'Results '=>$results]);
+                        return response()->json(['status' => 1, 'message' => 'Invalid Pin']);
       
                     }
                 
                 }
             }else {
-                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => 'not Exist']);
+                return response()->json(['status' => 1, 'message' => 'Invalid phone number']);
       
             }
             // create retail shipper account here
