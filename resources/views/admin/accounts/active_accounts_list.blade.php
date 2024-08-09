@@ -38,9 +38,6 @@
                                 <div class="col-4">
                                     <fieldset class="form-group">
                                         <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple>
-                                            @foreach($shippers as $shipper)
-                                                <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                            @endforeach
                                         </select>
                                     </fieldset>
                                 </div>
@@ -1062,7 +1059,23 @@ function checkboxStatus() {
             width:'100%',
             placeholder:"Select Shipper",
             allowClear:true,
-            multiple: true
+            multiple: true,
+            minimumInputLength: 2,
+            ajax: {
+                dataType: 'json',
+                url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                delay: 700,
+            }
          });
 
          $('#block_disable_reason').prepend('<option value="" selected></option>').select2({

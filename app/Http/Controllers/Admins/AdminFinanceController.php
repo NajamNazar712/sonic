@@ -15062,7 +15062,7 @@ class AdminFinanceController extends Controller
 
         $pending_payments = RetailPendingPayment::join('retail_shipper_infos as rsi', 'retail_pending_payments.user_id', '=', 'rsi.id')
             ->join('cities as c', 'rsi.city_id', '=', 'c.id')
-            ->join('banks_lists as ub', 'rsi.bank_id', '=', 'ub.id')
+            ->leftjoin('banks_lists as ub', 'rsi.bank_id', '=', 'ub.id')
             ->join('cities as bc', 'rsi.city_id', '=', 'bc.id')
             ->join('retail_pending_payment_shipments as pps', 'retail_pending_payments.id', '=', 'pps.retail_pending_payment_id')
             ->leftjoin('retail_pending_payment_calculations as ppc', 'ppc.retail_pending_payment_id', '=', 'retail_pending_payments.id')
