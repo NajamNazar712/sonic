@@ -6622,18 +6622,75 @@ class AdminCargoManifestController extends Controller
                         }
                         if (($selected_hub_id == $default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs)) || ($omni_return_city_hub == $default_hub_id) || (in_array($omni_return_city_hub,$admin_assigned_hubs))) // wisevarsa -> pickupaddress id
                         {
-                            $shipment->shipper_status_id = 22;
-                            $shipment->consignee_status_id = 22;
+                            // $shipment->shipper_status_id = 22;
+                            // $shipment->consignee_status_id = 22;
+                            // $shipment->save();
+                            
+                            if($shipment->booking_type_id == 2) {
+                                if(in_array($shipment->shipper_status_id, [30,27,72])) {
+                                    $shipper_status_id = 27;
+                                    $consignee_status_id = 27;
+                                    $without_manifest = 74;
+                                } else {
+                                    $shipper_status_id = 22;
+                                    $consignee_status_id = 22;
+                                    $without_manifest = 77;
+                                }
+                            } elseif($shipment->booking_type_id == 3) {
+                                if(in_array($shipment->shipper_status_id, [32,37,69,70])) {
+                                    $shipper_status_id = 33;
+                                    $consignee_status_id = 33;
+                                    $without_manifest = 71;
+                                } else {
+                                    $shipper_status_id = 22;
+                                    $consignee_status_id = 22;
+                                    $without_manifest = 77;
+                                }
+                            } else {
+                                $shipper_status_id = 22;
+                                $consignee_status_id = 22;
+                                $without_manifest = 77;
+                            }
+                            $shipment->shipper_status_id = $shipper_status_id;
+                            $shipment->consignee_status_id = $consignee_status_id;
                             $shipment->save();
-
-                            ShipmentsJourneyController::add($shipment_id, 77, 77, NULL, NULL, NULL, Auth::id()); // without manifest status
-                            ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, Auth::id()); // received at destination
+                            
+                            ShipmentsJourneyController::add($shipment_id, $without_manifest, $without_manifest, NULL, NULL, NULL, Auth::id()); // without manifest status
+                            ShipmentsJourneyController::add($shipment_id, $consignee_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id()); // received at destination
                             array_push($shipment_ids_array, $shipment->tracking_number);
                         }
                         else
                         {
-                            $shipment->shipper_status_id = 75;
-                            $shipment->consignee_status_id = 75;
+                            // $shipment->shipper_status_id = 75;
+                            // $shipment->consignee_status_id = 75;
+                            // $shipment->save();
+                            if($shipment->booking_type_id == 2) {
+                                if(in_array($shipment->shipper_status_id, [30,27,72])) {
+                                    $shipper_status_id = 72;
+                                    $consignee_status_id = 72;
+                                    $without_manifest = 74;
+                                } else {
+                                    $shipper_status_id = 75;
+                                    $consignee_status_id = 75;
+                                    $without_manifest = 77;
+                                }
+                            } elseif($shipment->booking_type_id == 3) {
+                                if(in_array($shipment->shipper_status_id, [32,37,69])) {
+                                    $shipper_status_id = 69;
+                                    $consignee_status_id = 69;
+                                    $without_manifest = 71;
+                                } else {
+                                    $shipper_status_id = 75;
+                                    $consignee_status_id = 75;
+                                    $without_manifest = 77;
+                                }
+                            } else {
+                                $shipper_status_id = 75;
+                                $consignee_status_id = 75;
+                                $without_manifest = 77;
+                            }
+                            $shipment->shipper_status_id = $shipper_status_id;
+                            $shipment->consignee_status_id = $consignee_status_id;
                             $shipment->save();
 
                             $last_scanned = ShipmentsJourney::where('shipment_id', $shipment_id)->select('city_id');
@@ -6643,8 +6700,8 @@ class AdminCargoManifestController extends Controller
                             } else {
                                 $remarks = '--';
                             }
-                            ShipmentsJourneyController::add($shipment_id, 77, 77, NULL, NULL, NULL, Auth::id()); // without manifest status
-                            ShipmentsJourneyController::add($shipment_id, 75, 75, NULL, $remarks, NULL, Auth::id());// new misrouted
+                            ShipmentsJourneyController::add($shipment_id, $without_manifest, $without_manifest, NULL, NULL, NULL, Auth::id()); // without manifest status
+                            ShipmentsJourneyController::add($shipment_id, $consignee_status_id, $consignee_status_id, NULL, $remarks, NULL, Auth::id());// new misrouted
                             array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
                         }
                     }
