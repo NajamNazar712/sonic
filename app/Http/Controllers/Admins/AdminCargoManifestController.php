@@ -4365,14 +4365,14 @@ class AdminCargoManifestController extends Controller
                                             $status = 11;
                                         } elseif($bag->type == 2) {
                                             if($shipment_table->booking_type_id == 2) {
-                                                if(in_array($shipment_table->shipper_status_id, [26,30])) {
+                                                if(in_array($shipment_table->shipper_status_id, [26,30,72,73])) {
                                                     $status = 72;
                                                 } else {
                                                     $status = 75;
                                                 }
                                                 
                                             } elseif($shipment_table->booking_type_id == 3) {
-                                                if(in_array($shipment_table->shipper_status_id, [32,37])) {
+                                                if(in_array($shipment_table->shipper_status_id, [32,37,69,70])) {
                                                     $status = 69;
                                                 } else {
                                                     $status = 75;
@@ -4446,14 +4446,14 @@ class AdminCargoManifestController extends Controller
                                             $status = 11;
                                         } elseif($bag->type == 2) {
                                             if($shipment_table->booking_type_id == 2) {
-                                                if(in_array($shipment_table->shipper_status_id, [26,30])) {
+                                                if(in_array($shipment_table->shipper_status_id, [26,30,72,73])) {
                                                     $status = 72;
                                                 } else {
                                                     $status = 75;
                                                 }
                                                 
                                             } elseif($shipment_table->booking_type_id == 3) {
-                                                if(in_array($shipment_table->shipper_status_id, [32,37])) {
+                                                if(in_array($shipment_table->shipper_status_id, [32,37,69,70])) {
                                                     $status = 69;
                                                 } else {
                                                     $status = 75;
@@ -4528,14 +4528,14 @@ class AdminCargoManifestController extends Controller
                                         } elseif($bag->type == 2) {
                                             //$status = 75;
                                             if($shipment_table->booking_type_id == 2) {
-                                                if(in_array($shipment_table->shipper_status_id, [26,30])) {
+                                                if(in_array($shipment_table->shipper_status_id, [26,30,72,73])) {
                                                     $status = 72;
                                                 } else {
                                                     $status = 75;
                                                 }
                                                 
                                             } elseif($shipment_table->booking_type_id == 3) {
-                                                if(in_array($shipment_table->shipper_status_id, [32,37])) {
+                                                if(in_array($shipment_table->shipper_status_id, [32,37,69,70])) {
                                                     $status = 69;
                                                 } else {
                                                     $status = 75;
