@@ -6552,11 +6552,21 @@ class AdminCargoManifestController extends Controller
                                         }
                                     } else if ($shipment->booking_type_id == 3) {
                                         if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
-                                            $shipper_status_id = 33;
-                                            $consignee_status_id = 33;
+                                            if(in_array($shipment->shipper_status_id, [32,37,69,70])) {
+                                                $shipper_status_id = 33;
+                                                $consignee_status_id = 33;
+                                            } else {
+                                                $shipper_status_id = 22;
+                                                $consignee_status_id = 22;
+                                            }
                                         } else {
-                                            $shipper_status_id = 69;
-                                            $consignee_status_id = 69;
+                                            if(in_array($shipment->shipper_status_id, [32,37,69,70])) {
+                                                $shipper_status_id = 69;
+                                                $consignee_status_id = 69;
+                                            } else {
+                                                $shipper_status_id = 75;
+                                                $consignee_status_id = 75;
+                                            }
                                         }
                                     } else if ($shipment->booking_type_id == 4) {
                                         if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs)) || ($omni_return_city_hub == $default_hub_id) || (in_array($omni_return_city_hub,$admin_assigned_hubs))) {
