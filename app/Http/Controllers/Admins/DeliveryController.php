@@ -9220,7 +9220,6 @@ class DeliveryController extends Controller
 
                     $body = $response->getBody()->getContents();
                     $data = json_decode($body, true);
-                                        dd($data);
 
                     //Pay Fast Api Integration Payment Link End   
                     $shipment = array();
