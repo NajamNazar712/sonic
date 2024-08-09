@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admins\DeliveryController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
@@ -12,6 +13,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipperShipmentsSubscription;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Request;
 
 class outForDeliveryJourney extends Seeder
 {
@@ -20,14 +22,14 @@ class outForDeliveryJourney extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(Request $request)
     {
         //
         $shipmentId = [
-            20220241204896,
-            22320241184675,
-            14420241177211,
-            20220241218625,
+            // 20220241204896,
+            // 22320241184675,
+            // 14420241177211,
+            // 20220241218625,
             15920241182732,
             22320241192407,
             22320241186515,
@@ -69,13 +71,15 @@ class outForDeliveryJourney extends Seeder
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id',5)->get();
             echo count($shipmentId);
             foreach ($shipmentId as $shipment) {
-                $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
-                $delivertNote   = DeliveryNote::find($deliveryNoteId->delivery_note_id);
+                DeliveryController::add_shipments_in_receive(2310715,$shipment->id);
+
+                // $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
+                // $delivertNote   = DeliveryNote::find($deliveryNoteId->delivery_note_id);
                 
-                if($delivertNote->request_note_id){
-                    $rider_for_delivery = RiderDeliveryNoteRequest::find($delivertNote->request_note_id);
-                }
-                ShipmentsJourneyController::add($shipment->id, 5, 5, null, null,null, 346, $deliveryNoteId->delivery_note_id, $rider_for_delivery->rider_id);
+                // if($delivertNote->request_note_id){
+                //     $rider_for_delivery = RiderDeliveryNoteRequest::find($delivertNote->request_note_id);
+                // }
+                // ShipmentsJourneyController::add($shipment->id, 5, 5, null, null,null, 346, $deliveryNoteId->delivery_note_id, $rider_for_delivery->rider_id);
             }
         }
     }
