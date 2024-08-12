@@ -26,7 +26,7 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //Only use for the marked as delivered....
         $shipmentId = [
-            22320237913537, 22320237897145, 20220238042025, 20220238042005, 20220238041899, 20220238000376, 20220237954786, 17420237897190, 20220238015960
+            // 22320237913537, 22320237897145, 20220238042025, 20220238042005, 20220238041899, 20220238000376, 20220237954786, 17420237897190, 20220238015960
         ];
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
