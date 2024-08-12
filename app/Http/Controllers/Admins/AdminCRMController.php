@@ -111,7 +111,6 @@ class AdminCRMController extends Controller
     }
 
     public function add_request(Request $request){
-        
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;

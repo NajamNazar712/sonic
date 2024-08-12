@@ -138,10 +138,34 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-6">
+                                    {{-- <div class="col-6">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5"
                                                 placeholder="Enter Description Here..."></textarea>
+                                        </fieldset>
+                                    </div> --}}
+                                    @foreach($case_nature_complaints as $complaint)
+                                        @if($complaint->remarks_visibility == 1)
+                                            <div class="col-10 d-none" id="case_nature_remarks_div">
+                                                <fieldset class="form-group">
+                                                    <select name="complaint_description[]" id="case_nature_remarks" class="form-control select2" multiple="multiple">
+                                                    
+                                                    </select>
+                                                </fieldset>
+                                            </div>
+                                        @else
+                                            <div class="col-10 d-none" id="complaint_description_textarea_new">
+                                                <fieldset class="form-group">
+                                                    <textarea class="form-control" name="complaint_description[]" id="complaint_description_new" rows="5"
+                                                        placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                                </fieldset>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                    <div class="col-10 d-none" id="complaint_description_textarea">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="complaint_description[]" id="complaint_description" rows="5"
+                                                placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
@@ -208,11 +232,37 @@
                                                     <input type="text" name="cod_parcel_value" id="cod_parcel_value" class="form-control rounded-right cod_parcel_value" placeholder="Parcel Value" data-rule-required="true" data-msg-required="Parcel Value is required" oninput="if(this.value=='0') this.value=''">
                                                 </fieldset>
                                             </div>
-                                            <div class="col-12">
+
+                                            {{-- <div class="col-12">
                                                 <fieldset class="form-group">
                                                     <textarea class="form-control" name="cod_remarks" id="cod_remarks" rows="3" placeholder="Enter Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
                                                 </fieldset>
+                                            </div> --}}
+
+                                    @foreach ($case_nature_service_requests as $service)
+                                        @if ($service->remarks_visibility == 1)
+                                            <div class="col-10 d-none" id="case_nature_service_remarks_div">
+                                                <fieldset class="form-group">
+                                                    <select name="service_description[]" id="case_nature_service_remarks" class="form-control select2" multiple="multiple">
+                                                        
+                                                    </select>
+                                                </fieldset>
                                             </div>
+                                        @else
+                                            <div class="col-10 d-none" id="service_description_textarea_new">
+                                                <fieldset class="form-group">
+                                                    <textarea class="form-control" name="service_description[]" id="service_description_new" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                                </fieldset>
+                                            </div>
+                                        @endif
+                                    @endforeach
+
+                                    <div class="col-10 d-none" id="service_description_textarea">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="service_description[]" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                        </fieldset>
+                                    </div>
+
                                         </div>
                                     </div>
                                     <div class="col-6">
@@ -346,12 +396,39 @@
                                     {{--                                        </fieldset> --}}
                                     {{--                                    </div> --}}
 
-                                    <div class="col-10">
+                                    {{-- <div class="col-10">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="description" id="claim_description" rows="5"
                                                 placeholder="Enter Description Here..."></textarea>
                                         </fieldset>
-                                    </div>
+                                    </div> --}}
+
+                                @foreach ($case_nature_type_claims as $claim)
+                                    @if ($claim->remarks_visibility == 1)
+                                        <div class="col-10 d-none" id="case_nature_claim_remarks_div">
+                                            <fieldset class="form-group">
+                                                <select name="description[]" id="case_nature_claim_remarks" class="form-control select2" multiple="multiple">
+                                                    
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                    @else
+                                        <div class="col-10 d-none" id="claim_description_div_new">
+                                            <fieldset class="form-group">
+                                                <textarea class="form-control" name="description[]" id="claim_description_new" rows="5"
+                                                    placeholder="Enter Description Here..."></textarea>
+                                            </fieldset>
+                                        </div>
+                                    @endif
+                                @endforeach
+
+                                <div class="col-10 d-none" id="claim_description_div">
+                                    <fieldset class="form-group">
+                                        <textarea class="form-control" name="description[]" id="claim_description" rows="5"
+                                            placeholder="Enter Description Here..."></textarea>
+                                    </fieldset>
+                                </div>
+
                                 </div>
                             </div>
                             <div class="row justify-content-center">
@@ -951,8 +1028,235 @@
                     $('#request_service').addClass('d-none');
                     $('#AddNewRequest').addClass('d-none');
                     $('#request_claims').addClass('d-none');
+                    $('#case_nature_remarks_div').addClass('d-none');
+                    $('#case_nature_service_remarks_div').addClass('d-none');
+                    $('#case_nature_claim_remarks').addClass('d-none');
                 }
             });
+
+
+            // complaints
+            var isComplainChange = false;
+            $('#case_nature_remarks').select2({
+                width: '100%',
+                placeholder: "Select Remarks",
+                allowClear: true,
+                dropdownParent: $('#add_request_form')
+            });
+
+            $('#case_nature_complaints').on('change', function() {
+                var complaintId = $(this).val();
+                $('#case_nature_remarks').empty();
+                $('#complaint_description_textarea_new').addClass('d-none');
+                $('#case_nature_remarks_div').addClass('d-none');
+                if (complaintId) {
+                    $.ajax({
+                        url: '{{ route('admin.crm.request.case_nature_remarks') }}',
+                        type: 'POST',
+                        data: { complaint_id: complaintId },
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            var $remarksDropdown = $('#case_nature_remarks');
+                            $remarksDropdown.empty();
+                            $.each(response.data, function(index, item) {
+                                $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
+                            });
+                            $remarksDropdown.append('<option value="0">Others</option>');
+
+                            if (response.remarks_visibility == 1) {
+                                $('#case_nature_remarks_div').removeClass('d-none');
+                                $('#complaint_description_textarea').addClass('d-none');
+                            } else {
+                                $('#case_nature_remarks_div').addClass('d-none');
+                                $('#complaint_description_textarea').removeClass('d-none');
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('An error occurred while fetching remarks:', textStatus, errorThrown);
+                        }
+                    });
+                } else {
+                    $('#case_nature_remarks').empty().append('<option value="" selected="selected">Select Remarks</option>');
+                    $('#case_nature_remarks_div').addClass('d-none');
+                }
+            });
+
+            $('#case_nature_remarks').on('change', function() {
+                // Important to stop recursive action
+                if (isComplainChange) {
+                    isComplainChange = false;
+                    return;
+                }
+                var selectedValues = $(this).val();
+                var $textareaDiv = $('#complaint_description_textarea');
+                if (selectedValues && selectedValues.includes('0')) {
+                    if (selectedValues.length > 1) {
+                        selectedValues = selectedValues.filter(value => value !== '0');
+                        $(this).val(selectedValues).trigger('change');
+                        $textareaDiv.addClass('d-none');
+                    } else {
+                        $textareaDiv.removeClass('d-none');
+                    }
+                } else {
+                    $textareaDiv.addClass('d-none');
+                }
+            });
+
+
+            // service request
+            var isServiceChange = false;
+            $('#case_nature_service_remarks').select2({
+                width: '100%',
+                placeholder: "Select Remarks",
+                allowClear: true,
+                dropdownParent: $('#add_request_form')
+            });
+
+            $('#case_nature_requests').on('change', function() {
+                var serviceId = $(this).val();
+                $('#case_nature_service_remarks').empty();
+                $('#case_nature_service_remarks_div').addClass('d-none');
+                $('#service_description_textarea_new').addClass('d-none');
+                $('#service_description_textarea').addClass('d-none');
+                if (serviceId) {
+                    $.ajax({
+                        url: '{{ route('admin.crm.request.case_nature_service_remarks') }}',
+                        type: 'POST',
+                        data: { service_id: serviceId },
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            var $remarksDropdown = $('#case_nature_service_remarks');
+                            $remarksDropdown.empty();
+                            
+                            $.each(response.data, function(index, item) {
+                                $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
+                            });
+                            $remarksDropdown.append('<option value="0">Others</option>');
+
+                            if (response.remarks_visibility == 1) {
+                                $('#case_nature_service_remarks_div').removeClass('d-none');
+                                $('#service_description_textarea_new').addClass('d-none');
+                                $('#service_description_textarea').addClass('d-none');
+                            } else {
+                                $('#service_description_textarea_new').removeClass('d-none');
+                                $('#service_description_textarea').addClass('d-none');
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('An error occurred while fetching remarks:', textStatus, errorThrown);
+                        }
+                    });
+                } else {
+                    $('#case_nature_service_remarks').empty().append('<option value="" selected="selected">Select Remarks</option>');
+                    $('#case_nature_service_remarks_div').addClass('d-none');
+                    $('#service_description_textarea_new').addClass('d-none');
+                    $('#service_description_textarea').addClass('d-none');
+                }
+            });
+
+            $('#case_nature_service_remarks').on('change', function() {
+                // Important to stop recursive action
+                if (isServiceChange) {
+                    isServiceChange = false;
+                    return;
+                }
+                var selectedValues = $(this).val();
+                var $textareaDiv = $('#service_description_textarea');
+                if (selectedValues && selectedValues.includes('0')) {
+                    if (selectedValues.length > 1) {
+                        selectedValues = selectedValues.filter(value => value !== '0');
+                        $(this).val(selectedValues).trigger('change');
+                        $textareaDiv.addClass('d-none');
+                    } else {
+                        $textareaDiv.removeClass('d-none');
+                    }
+                } else {
+                    $textareaDiv.addClass('d-none');
+                }
+            });
+
+            // claim
+            var isClaimChange = false;
+            $('#case_nature_claim_remarks').select2({
+                width: '100%',
+                placeholder: "Select Remarks",
+                allowClear: true,
+                dropdownParent: $('#add_request_form')
+            });
+
+            $('#case_nature_claim').on('change', function() {
+                var claimId = $(this).val();
+                $('#case_nature_claim_remarks').empty();
+                $('#case_nature_claim_remarks_div').addClass('d-none');
+                $('#claim_description_div_new').addClass('d-none');
+                $('#claim_description_div').addClass('d-none');
+                
+                if (claimId) {
+                    $.ajax({
+                        url: '{{ route('admin.crm.request.case_nature_claim_remarks') }}',
+                        type: 'POST',
+                        data: { claim_id: claimId },
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            var $remarksDropdown = $('#case_nature_claim_remarks');
+                            $remarksDropdown.empty();
+                            
+                            $.each(response.data, function(index, item) {
+                                $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
+                            });
+                            $remarksDropdown.append('<option value="0">Others</option>');
+
+                            if (response.remarks_visibility == 1) {
+                                $('#case_nature_claim_remarks_div').removeClass('d-none');
+                                $('#claim_description_div_new').addClass('d-none');
+                                $('#claim_description_div').addClass('d-none');
+                            } else {
+                                $('#claim_description_div_new').removeClass('d-none');
+                                $('#claim_description_div').addClass('d-none');
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('An error occurred while fetching remarks:', textStatus, errorThrown);
+                        }
+                    });
+                } else {
+                    $('#case_nature_claim_remarks').empty().append('<option value="" selected="selected">Select Remarks</option>');
+                    $('#case_nature_claim_remarks_div').addClass('d-none');
+                    $('#claim_description_div_new').addClass('d-none');
+                    $('#claim_description_div').addClass('d-none');
+                }
+            });
+
+            $('#case_nature_claim_remarks').on('change', function() {
+                // Important to stop recursive action
+                if (isClaimChange) {
+                    isClaimChange = false;
+                    return;
+                }
+                var selectedValues = $(this).val();
+                var $textareaDiv = $('#claim_description_div');
+                if (selectedValues && selectedValues.includes('0')) {
+                    if (selectedValues.length > 1) {
+                        selectedValues = selectedValues.filter(value => value !== '0');
+                        $(this).val(selectedValues).trigger('change');
+                        $textareaDiv.addClass('d-none');
+                    } else {
+                        $textareaDiv.removeClass('d-none');
+                    }
+                } else {
+                    $textareaDiv.addClass('d-none');
+                }
+            });
+
             var lost_flag = true;
             $('#case_nature_claim').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -2717,11 +3021,39 @@
             },
             submitHandler: function(form) {
                 var case_nature_id = parseInt($('#case_nature_select').val());
+
                 if (case_nature_id === 1) {
                     var nature_flag = true;
                     var case_nature_complaint_id = $('#case_nature_complaints').val();
                     var case_nature_channel_id = $('#complaint_channels').val();
-                    var complaint_description = $('#complaint_description').val();
+                    // var complaint_description = $('#complaint_description').val();
+
+                    var complaint_description = "";
+                    if (!$('#case_nature_remarks_div').hasClass('d-none')) {
+                        var selectedOptions = $('#case_nature_remarks option:selected');
+                        var useTextarea = false;
+                        var selectedTexts = [];
+
+                        selectedOptions.each(function() {
+                            var optionValue = $(this).val();
+                            var optionText = $(this).text().trim();
+                            if (optionValue === '0') {
+                                useTextarea = true;
+                                return false;
+                            } else {
+                                selectedTexts.push(optionText);
+                            }
+                        });
+
+                        if (useTextarea) {
+                            complaint_description = $('#complaint_description').val().trim();
+                        } else {
+                            complaint_description = selectedTexts.join(', ');
+                        }
+                    } else if (!$('#complaint_description_textarea').hasClass('d-none')) {
+                        complaint_description = $('#complaint_description').val().trim();
+                    }
+
                     if (!case_nature_complaint_id) {
                         nature_flag = false;
                         var error = "Please select Complaint type!";
@@ -2826,13 +3158,41 @@
                             });
                     }
 
-                } else if (case_nature_id == 2) {
+                } 
+                
+                else if (case_nature_id == 2) {
                     var nature_flag = true;
                     var case_nature_complaint_id = $('#case_nature_requests').val();
                     var case_nature_channel_id = $('#request_channels').val();
-                    var service_description = $('#service_description').val();
+                    // var service_description = $('#service_description').val();
                     var alternate_phone = $('#alternate_phone').val();
                     // var cod_amount = $('#cod_amount').val();
+
+                    var service_description = "";
+                    if (!$('#case_nature_service_remarks_div').hasClass('d-none')) {
+                        var selectedOptions = $('#case_nature_service_remarks option:selected');
+                        var useTextarea = false;
+                        var selectedTexts = [];
+
+                        selectedOptions.each(function() {
+                            var optionValue = $(this).val();
+                            var optionText = $(this).text().trim();
+                            if (optionValue === '0') {
+                                useTextarea = true;
+                                return false;
+                            } else {
+                                selectedTexts.push(optionText);
+                            }
+                        });
+
+                        if (useTextarea) {
+                            description = $('#service_description').val().trim();
+                        } else {
+                            description = selectedTexts.join(', ');
+                        }
+                    } else if (!$('#service_description_textarea').hasClass('d-none')) {
+                        description = $('#service_description').val().trim();
+                    }
 
                     if (!case_nature_complaint_id) {
                         nature_flag = false;
@@ -3084,7 +3444,9 @@
                             });
                         }
                     }
-                } else if (case_nature_id == 3) {
+                } 
+                
+                else if (case_nature_id == 3) {
                     var feedback_flag = true;
                     var feedback_channel = $('#feedback_channel_request').val();
                     var feedback_description = $('#feedback_description_request').val();
@@ -3170,7 +3532,9 @@
                                 $('#AddNewRequest').attr('disabled', false);
                             });
                     }
-                } else if (case_nature_id === 4) {
+                } 
+                
+                else if (case_nature_id === 4) {
                     var nature_flag = true;
                     var case_nature_claim_id = $('#case_nature_claim').val();
                     var case_nature_channel_id = $('#claim_channel').val();
@@ -3182,6 +3546,33 @@
                     $('#channel_id').val(case_nature_channel_id);
                     $('#complaint_id').val(case_nature_claim_id);
                     var formData = new FormData($('#add_request_form')[0]);
+                    var claim_description = '';
+                    if (!$('#case_nature_claim_remarks_div').hasClass('d-none')) {
+                        var selectedOptions = $('#case_nature_claim_remarks option:selected');
+                        var selectedTexts = [];
+                        var useTextarea = false;
+                        selectedOptions.each(function() {
+                            if ($(this).val() == '0') {
+                                useTextarea = true;
+                                return false;
+                            } else {
+                                selectedTexts.push($(this).text().trim());
+                            }
+                        });
+
+                        if (useTextarea) {
+                            var textarea = document.getElementById('claim_description');
+                            claim_description = textarea.value.trim();
+                        } else {
+                            claim_description = selectedTexts.join(', ');
+                        }
+                    } else if (!$('#claim_description_div').hasClass('d-none')) {
+                        var textarea = document.getElementById('claim_description');
+                        claim_description = textarea.value.trim();
+                    }
+                    formData.append('description', claim_description);
+                    $('#claim_description').val(claim_description);
+
                     if (case_nature_claim_id === 23) {
                         if ($('#request_id').val() == "" || $('#request_id').val() == null) {
                             nature_flag = false;

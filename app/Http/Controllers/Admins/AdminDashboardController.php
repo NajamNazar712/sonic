@@ -1618,16 +1618,21 @@ class AdminDashboardController extends Controller
         if ($user->exists()) {
             $user = $user->first();
             if ($status == 'enable') {
-                if ($user->status == 4) {
+                if ($user->status == 4 || $user->status == 6) {
                     $user->status = 3;
                     $user->disable_remarks = null;
                     $user->reactivated_at = Carbon::now();
-//                    $user->disable_at = null;
+                    //$user->disable_at = null;
 
                     $user->save();
                     return response()->json(['status' => 1, 'success' => "User is now enabled!"]);
-                } else {
+                } else if($user->status == 3){
                     return response()->json(['status' => 0, 'error' => "User is already enabled!"]);
+                }
+
+                else
+                {
+                    return response()->json(['status' => 0, 'error' => "Something went wrong!"]);
                 }
             } else if ($status == 'disable') {
                 if ($user->status == 3) {
@@ -1659,6 +1664,22 @@ class AdminDashboardController extends Controller
                 } else {
                     return response()->json(['status' => 0, 'error' => "User is already disabled!"]);
 
+                }
+            }
+            else if($status == 'pause')
+            {
+                if ($user->status == 3) {
+                    $user->status = 6;
+                    $user->disable_remarks = null;
+                    
+                    $user->save();
+                    return response()->json(['status' => 1, 'success' => "User is now Paused!"]);
+                } else if($user->status == 6) {
+                    return response()->json(['status' => 0, 'error' => "User is already Paused!"]);
+                }
+                else
+                {
+                    return response()->json(['status' => 0, 'error' => "Something went wrong!"]);
                 }
             }
         } else {
@@ -9391,7 +9412,7 @@ class AdminDashboardController extends Controller
                 $join->on('faf_charges.user_id', '=', 'users.id')->where('faf_charges.status', '=', 1);
             })
             ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason','users.sms_charges','faf_charges.status as fc_status'])
-            ->whereIn('users.status', [3, 4])
+            ->whereIn('users.status', [3, 4, 6])
             ->where('users.blacklist', 0)
             ->groupBy('users.id');
         if (session('role_id') != 1) {
@@ -9480,7 +9501,10 @@ class AdminDashboardController extends Controller
             ->editColumn('status', function ($users) {
                 if ($users->status == 3) {
                     return "Enable";
-                } else {
+                } else if($users->status == 6) {
+                    return "Booking Paused";
+                }
+                else{
                     return "Disable";
                 }
             })
@@ -9633,7 +9657,7 @@ class AdminDashboardController extends Controller
             })
 
             ->filterColumn('status', function ($query, $keyword) {
-                if ($keyword == 3 || $keyword == 4) {
+                if ($keyword == 3 || $keyword == 4 || $keyword == 6) {
                     $query->where('users.status', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
@@ -9974,9 +9998,16 @@ class AdminDashboardController extends Controller
                     }
 
                     
-                if (session('role_id') == 1 || in_array(855, session('permissions'))) {
-                    $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
-                }
+                    if (session('role_id') == 1 || in_array(855, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
+                    }
+
+                    if (session('role_id') == 1 || in_array(999, session('permissions'))) {
+                        if ($result->status == 3) {
+                            $dropdown .= '<button type="button" class="dropdown-item pause_shipper_booking"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Pause Shipper Booking</div></button>';
+                        }
+                    }
+                
 
                 $dropdown .= '<button type="button" class="dropdown-item add_shipper_exclude_intercept_type"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add shipper exclude/Intercept 
                 Type </div></button>';

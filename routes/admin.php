@@ -2781,6 +2781,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\GlobalSettingsController@crm_case_nature_types_list')->name('list');
             Route::post('status', 'Admins\GlobalSettingsController@crm_case_nature_types_status')->name('status');
             Route::post('store', 'Admins\GlobalSettingsController@crm_case_nature_types_store')->name('store');
+
+            Route::get('add', 'Admins\GlobalSettingsController@crm_case_nature_types_add_form')->name('add');
+            Route::get('edit/{id}', 'Admins\GlobalSettingsController@crm_case_nature_types_edit_form')->name('edit');
+            Route::get('edit/ajax/{id}', 'Admins\GlobalSettingsController@crm_case_nature_types_edit_ajax_list')->name('edit_ajax');
+
+            Route::post('update', 'Admins\GlobalSettingsController@crm_case_nature_types_update')->name('update');
         });
 
         Route::prefix('return_delivered_to_shipper_email_cut_off_time')->name('return_delivered_to_shipper_email_cut_off_time.')->group(function () {
@@ -3529,6 +3535,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/lost/claim', 'Admins\AdminCRMController@lost_claim')->name('lost.claim');
             Route::post('request', 'Admins\AdminCRMController@special_request_appvove')->name('special_request_appvove');
             Route::post('request_adjusted', 'Admins\AdminCRMController@special_request_adjusted')->name('special_request_adjusted');
+
+            Route::post('case_nature_remarks', 'Admins\AdminTrackingController@case_nature_remarks')->name('case_nature_remarks');
+            Route::post('case_nature_service_remarks', 'Admins\AdminTrackingController@case_nature_service_remarks')->name('case_nature_service_remarks');
+            Route::post('case_nature_claim_remarks', 'Admins\AdminTrackingController@case_nature_claim_remarks')->name('case_nature_claim_remarks');
         });
         Route::prefix('feedback')->name('feedback.')->group(function () {
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
