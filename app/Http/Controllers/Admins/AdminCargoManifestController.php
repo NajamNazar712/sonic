@@ -4441,7 +4441,7 @@ class AdminCargoManifestController extends Controller
                                 $bag->junction_mapping_id = null;
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
-                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76,30,37])) {
+                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76,30,37,69,72,75])) {
                                         if($bag->type == 1) {
                                             $status = 11;
                                         } elseif($bag->type == 2) {
@@ -4522,7 +4522,7 @@ class AdminCargoManifestController extends Controller
                                 $bag->junction_mapping_id = null;
                                 foreach ($bag->shipment as $shipment) {
                                     $shipment_table = Shipment::find($shipment->shipment_id);
-                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76,30,37])) {
+                                    if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 49, 70, 73, 76,30,37,69,72,75])) {
                                         if($bag->type == 1) {
                                             $status = 11;
                                         } elseif($bag->type == 2) {
