@@ -62,7 +62,7 @@
 
                             <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                                 <div class="form-group">
-                                    <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                    <input type="text" id="scan_tracking_number" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
                                     <!-- <div class="d-inline-block ml-1">
                                         <a href="#" id="camera_scan_initiate" tabindex="-1">
                                             <i class="ft-camera h1"></i>
@@ -175,6 +175,9 @@
     <script>
         $(document).ready(function() {
             var bag_number = $('#bag_number');
+            var scan_tracking_number = $('#scan_tracking_number');
+            scan_tracking_number.prop('disabled', true);
+
             bag_number.prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Bag Number',
                 width: '200px',
@@ -182,6 +185,7 @@
             });
 
             var bag = null;
+
             var shipment_type_datatable = $('#shipment_type_datatable').DataTable({
                 dom: 'ltipr',
                 scrollX: false,
@@ -277,6 +281,9 @@
                         }
                         var trimmed_type = type.split(' ').pop();
                         $('#shipment_type').val(trimmed_type);
+                        scan_tracking_number.prop('disabled', false);
+                    } else {
+                        scan_tracking_number.prop('disabled', true);
                     }
                 }
             });
@@ -327,6 +334,7 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+
             $('#add_shipment_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -357,7 +365,6 @@
                                     var index = $.inArray(id, shipment_ids);
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
-
                                         var verificationStatus = data.details.verification_status;
                                         var backgroundColor = '';
                                         if (verificationStatus === 'Verified') {
@@ -624,9 +631,6 @@
                         }
                     });
             });
-
-            
         });
-
     </script>
 @endsection

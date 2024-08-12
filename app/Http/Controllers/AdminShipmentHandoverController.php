@@ -1104,8 +1104,6 @@ class AdminShipmentHandoverController extends Controller
             'shipments.pickup_date',
             'shipments.special_instructions',
             'users.name as shipper_name',
-            'shipments_journey.shipper_status_id',
-            'shipments_journey.consignee_status_id',
             DB::raw("
                 CASE 
                     WHEN latest_journey.shipper_status_id IN ($normal_status_ids_str) THEN 'Shipment Type is Normal'
