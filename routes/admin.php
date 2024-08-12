@@ -3654,6 +3654,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');
             Route::post('shipment_details', 'AdminShipmentHandoverController@arrival_bulk_shipment_details_receive')->name('shipment_details');
             Route::post('store', 'AdminShipmentHandoverController@bulk_handover_submit_receive')->name('store');
+
+            Route::get('handover_shipment_type', 'AdminShipmentHandoverController@handover_shipment_type')->name('handover_shipment_type');
         });
         Route::prefix('list')->name('list.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_list_index')->name('index');

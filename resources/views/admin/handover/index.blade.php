@@ -115,6 +115,7 @@
                         <input type="hidden" name="from_dept_area_desg" class="from_dept_area_desg">
                         <input type="hidden" name="to" class="to">
                         <input type="hidden" name="to_dept_area_desg" class="to_dept_area_desg">
+                        <input type="hidden" name="bag_number" class="bag_number">
 
                         <div class="form-group ml-1">
                             <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
@@ -169,7 +170,37 @@
             </div>
         </div>
     </div>
-   
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="handoverModal" tabindex="-1" role="dialog" aria-labelledby="handoverModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="handoverModalLabel">Handover Note</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="handoverForm">
+                        <div class="form-group">
+                            <label for="hub_name_modal">Hub Name</label>
+                            <input type="text" readonly id="hub_name_modal" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="bag_number">Bag Information</label>
+                            <input type="text" id="bag_number" name="bag_number" class="form-control" placeholder="Bag number*" data-rule-required="true" data-msg-required="Bag Number is required">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmHandover">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -212,7 +243,6 @@
 
             // $('#responsibles_switch').change(function () {
                 var isChecked = $(this).is(':checked');
-                // console.log(isChecked);
                 handleResponsiblesSwitchChange(isChecked);
             // });
 
@@ -389,8 +419,6 @@
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
                                         shipment_ids.push(data.details.id);
-                                        // console.log(shipment_ids);
-                                        // console.log(data.details.id);
 
                                         $('#delivery_location_mapping').val(data.details.delivery_area);
                                         $('#add_shipment_form button.add').prop('disabled', false);
@@ -493,8 +521,9 @@
                 from_dept_area_desg =  $('#from_dept_area_desg').val();
                 to =  $('#to :selected').val();
                 to_dept_area_desg =  $('#to_dept_area_desg').val();
+                bag_number = $('#bag_number').val();
                 errors = 0;
-               
+
                 if (hub_id !== '' && hub_id !== null) {
                     $('#hub_error').css('display', 'none');
                 }
@@ -550,46 +579,105 @@
                 $('#arrival_of_shipments_form input.from').val(from);
                 $('#arrival_of_shipments_form input.to').val(to);
                 $('#arrival_of_shipments_form input.to_dept_area_desg').val(to_dept_area_desg);
-                
                 var form = this;
-            //    console.log('hub_id '+hub_id);
-            if(errors !=1){
-                swal({
-                   
-                    text: 'Are you sure, Select Yes to create the Handover Note?',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
+
+                if (errors != 1) {
+                    var hubName = $('#hub').find(":selected").text();
+                    $('#hub_name_modal').val(hubName);
+                    $('#handoverModal').modal('show');
+
+                    $('#bag_number').on('keyup', function() {
+                        var value = $(this).val();
+                        var numericValue = value.replace(/[^0-9]/g, '');
+                        $(this).val(numericValue);
+                    });
+
+                    $('#confirmHandover').on('click', function () {
+                        var bagNumber = $('#bag_number').val();
+                        $('input[name="bag_number"]').val(bagNumber);
+
+                        if (bagNumber.trim() === '') {
+                            toastr.error('Bag Number is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            return;
                         }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function(confirm) {
-                    if (confirm) {
+
+                        $('#handoverModal').modal('hide');
                         swal({
-                            title: 'Please Wait!',
-                            text: 'Handovers are being created!',
-                            icon: 'info',
-                            buttons: false,
+                            text: 'Are you sure, Select Yes to create the Handover Note?',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
                             closeOnClickOutside: false,
-                            closeOnEsc: false
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Handovers are being created!',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+
+                                blockPagePermanently();
+                                form.submit();
+                            }
                         });
-                        blockPagePermanently();
-                        form.submit();
-                    }
-                });
-            }
+                    });
+                }
+
+
+
+                // if(errors !=1){
+                //     swal({
+                //         text: 'Are you sure, Select Yes to create the Handover Note?',
+                //         icon: 'warning',
+                //         buttons: {
+                //             cancel: {
+                //                 text: 'No',
+                //                 value: null,
+                //                 visible: true,
+                //                 closeModal: true,
+                //             },
+                //             confirm: {
+                //                 text: 'Yes',
+                //                 value: true,
+                //                 visible: true,
+                //                 closeModal: true
+                //             }
+                //         },
+                //         closeOnClickOutside: false,
+                //         closeOnEsc: false,
+                //         dangerMode: true
+                //     }).then(function(confirm) {
+                //         if (confirm) {
+                //             swal({
+                //                 title: 'Please Wait!',
+                //                 text: 'Handovers are being created!',
+                //                 icon: 'info',
+                //                 buttons: false,
+                //                 closeOnClickOutside: false,
+                //                 closeOnEsc: false
+                //             });
+                //             blockPagePermanently();
+                //             form.submit();
+                //         }
+                //     });
+                // }
             });
 
             $('#datatable tbody').on('click', 'tr td.remove button', function() {
@@ -644,14 +732,12 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function (form) {
-                    // console.log('sss');
                     // // var shipment_id = $('#piece_shipment_id').val();
                     // // var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     // // var pieces_id = shipment_piece_ids;
                     // // var weight = $(form).find('input.pieces_weight').val();
                     // var tracking_number = $('#piece_tracking_number').val();
                     // var delivery_location_mapping = $('#delivery_location_mapping').val();
-                    // console.log(tracking_number,delivery_location_mapping);
                     // return;
                     // $.ajax({
                     //         url: '{!! route('admin.handover.create.shipment_details') !!}',

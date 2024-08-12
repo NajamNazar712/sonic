@@ -52,7 +52,7 @@ class AdminShipmentHandoverController extends Controller
         foreach($data as $row){
           if ($type == 0 && isset($row->name)){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
-          }else if ($type == 1 && !isset($row->name) && isset($row->admin_id)){
+          }else if ($type == 1 && isset($row->name) && isset($row->admin_id)){
             $output .= '<option value ="'.$row->id.'">' . Admin::where('id' ,$row->admin_id)->first()->name   . '</option> ';
 
           }
@@ -62,7 +62,7 @@ class AdminShipmentHandoverController extends Controller
 
 
     //admin.handover.create.shipment_details
-    public function arrival_bulk_shipment_details(Request $request){
+    public function arrival_bulk_shipment_details(Request $request){  
       $shipment = Shipment::where('tracking_number', $request->tracking_number);
       if ($shipment->exists()) {
         $shipment = $shipment->first();
@@ -157,16 +157,23 @@ class AdminShipmentHandoverController extends Controller
 
     //receive
     public function handover_receive_index(){
-      return view('admin.handover.receive');
+      $handover_bag_numbers = Handover::select('id', 'bag_number')
+      ->whereNotNull('bag_number')
+      ->get();
+      return view('admin.handover.receive', compact('handover_bag_numbers'));
     }
 
     public function arrival_bulk_shipment_details_receive(Request $request){
       $shipment = Shipment::where('tracking_number', $request->tracking_number);
-
       if ($shipment->exists()) {
-        $shipment = $shipment->first();
-        $shipment_pieces = $shipment->pieces;
+          $current_handover_id = $request->handover;
+          $current_handover = Handover::where('id', $current_handover_id)->first();
+          $current_bag_number = $current_handover->bag_number ?? '';
+          $shipment = $shipment->first();
+          $shipment_pieces = $shipment->pieces;
           $handover_shipments = HandoverShipments::where('shipment_id',$shipment->id)->whereIn('status', [1,3]);
+          $handover = Handover::where('id', $handover_shipments->first()->handover_id)->first();
+          $bag_number = $handover->bag_number;
           $details = array();
           $details['id'] = $shipment->id;
           $details['tracking_number'] = $shipment->tracking_number;
@@ -174,6 +181,13 @@ class AdminShipmentHandoverController extends Controller
           $details['phone_number'] = $shipment->user->phone;
           $details['pickup_date'] = $shipment->pickup_date;
           $details['special_instructions'] = $shipment->special_instructions;
+          $details['bag_number'] = $bag_number;
+
+          if ($bag_number == $current_bag_number) {
+            $details['verification_status'] = 'Verified';
+          } elseif ($bag_number != $current_bag_number) {
+            $details['verification_status'] = 'Excess';
+          }
 
           if($handover_shipments->exists() && $shipment_pieces == 1){
             ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
@@ -197,10 +211,14 @@ class AdminShipmentHandoverController extends Controller
       else {
       return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
       }
-}
+    }
 
 //admin.handover.create.store
     public function bulk_handover_submit(Request $request){
+      $request->validate([
+        'bag_number' => 'required|numeric|unique:handovers,bag_number',
+      ]);
+
         $shipment_ids = explode(',', $request->shipment_ids);
         $current_hub = $request->hub_id;
         
@@ -235,22 +253,14 @@ class AdminShipmentHandoverController extends Controller
 
         $shipper_status_ids = $shipment_type->pluck('shipper_status_id');
 
-          // Check if there are normal statuses
-          $has_normal = $shipper_status_ids->intersect($normal_status_ids)->isNotEmpty();
-          // Check if there are return statuses
-          $has_return = $shipper_status_ids->intersect($return_status_ids)->isNotEmpty();
+        // Check if there are normal statuses
+        $has_normal = $shipper_status_ids->intersect($normal_status_ids)->isNotEmpty();
+        // Check if there are return statuses
+        $has_return = $shipper_status_ids->intersect($return_status_ids)->isNotEmpty();
 
         if ($has_normal && $has_return) {
           return redirect()->back()->with('error', 'All shipments must be of the same type (normal or return).');
         }
-
-        // $handover_shipments = HandoverShipments::select('id', 'handover_id', 'shipment_id')->get();
-        // $handover_id = $handover_shipments->whereIn('shipment_id', $shipment_ids)->pluck('handover_id');
-        // $handover = Handover::whereIn('id', $handover_id)->get();
-        // $handover_hub = $handover->pluck('hub'); 
-        // if ($handover_hub->count() >= 3){
-        //   return redirect()->back()->with('error', 'You cannot add more handovers for this hub.');
-        // }
 
         // $hub_id = explode(',', $request->hub);
         $total= count($shipment_ids);
@@ -264,6 +274,7 @@ class AdminShipmentHandoverController extends Controller
             $handover->to = $request->to;
             $handover->to_dept_area_desg = $to_admin_dept->Edesignation->department_id ?? null;
             $handover->hub = $request->hub_id;
+            $handover->bag_number = $request->bag_number;
             $handover->status_id = 1 ;
             $handover->shipments =$total;
 
@@ -1055,6 +1066,59 @@ class AdminShipmentHandoverController extends Controller
         }
         return null;
     }
-    
-    
+
+    public function handover_shipment_type(Request $request)
+    {
+      $handover_id = $request->bag_number;
+      $normal_status_ids = [
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+          11, 12, 13, 14, 15, 17, 19, 49, 
+          50, 51, 52, 53, 54, 55, 56,
+          58, 59, 61, 62, 65, 67, 68
+      ];
+
+      $return_status_ids = [
+          18, 20, 21, 22, 23, 24, 25, 26, 
+          27, 28, 29, 30, 31, 32, 33, 34,
+          35, 36, 37, 38, 44, 45, 46, 47,
+          48, 51, 56, 57
+      ];
+
+      $normal_status_ids_str = implode(',', $normal_status_ids);
+      $return_status_ids_str = implode(',', $return_status_ids);
+
+      $handover_shipments = HandoverShipments::where('handover_id', $handover_id)
+        ->leftJoin('shipments', 'handover_shipments.shipment_id', '=', 'shipments.id')
+        ->leftJoin('shipments_journey', 'handover_shipments.shipment_id', '=', 'shipments_journey.shipment_id')
+        ->leftJoin(DB::raw('(SELECT MAX(id) as id, shipment_id, shipper_status_id 
+                            FROM shipments_journey 
+                            GROUP BY shipment_id) as latest_journey'),
+                  'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
+        ->leftJoin('users', 'shipments.user_id', '=', 'users.id')
+        ->select(
+            'handover_shipments.id',
+            'handover_shipments.handover_id',
+            'shipments.tracking_number',
+            'shipments.consignee_phone_number_1',
+            'shipments.consignee_name',
+            'shipments.pickup_date',
+            'shipments.special_instructions',
+            'users.name as shipper_name',
+            'shipments_journey.shipper_status_id',
+            'shipments_journey.consignee_status_id',
+            DB::raw("
+                CASE 
+                    WHEN latest_journey.shipper_status_id IN ($normal_status_ids_str) THEN 'Shipment Type is Normal'
+                    WHEN latest_journey.shipper_status_id IN ($return_status_ids_str) THEN 'Shipment Type is Return'
+                    ELSE 'Unknown'
+                END as shipment_type_text
+            ")
+        );
+      $datatable = Datatables::of($handover_shipments)
+      ->editColumn('tracking_number', function ($shipments) {
+        $route = route('admin.tracking.index');
+        return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+      });
+      return $datatable->make(true);
+    }
 }
