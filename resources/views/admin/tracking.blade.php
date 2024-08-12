@@ -239,37 +239,36 @@
                                                 </fieldset>
                                             </div> --}}
 
-                                    @foreach ($case_nature_service_requests as $service)
-                                        @if ($service->remarks_visibility == 1)
-                                            <div class="col-10 d-none" id="case_nature_service_remarks_div">
+                                            {{-- <div class="col-10 d-none" id="service_description_textarea">
                                                 <fieldset class="form-group">
-                                                    <select name="service_description[]" id="case_nature_service_remarks" class="form-control select2" multiple="multiple">
-                                                        
-                                                    </select>
+                                                    <textarea class="form-control" name="service_description[]" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
                                                 </fieldset>
-                                            </div>
-                                        @else
-                                            <div class="col-10 d-none" id="service_description_textarea_new">
-                                                <fieldset class="form-group">
-                                                    <textarea class="form-control" name="service_description[]" id="service_description_new" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
-                                                </fieldset>
-                                            </div>
-                                        @endif
-                                    @endforeach
+                                            </div> --}}
+                                        </div>
+                                    </div>
+
+                                    <div class="col-10 d-none" id="case_nature_service_remarks_div">
+                                        @foreach ($case_nature_service_requests as $service)
+                                            @if ($service->remarks_visibility == 1 && $loop->iteration == 1)
+                                                    <fieldset class="form-group">
+                                                        <select name="service_description[]" id="case_nature_service_remarks" class="form-control select2 case_nature_service_remarks" multiple="multiple">
+                                                            
+                                                        </select>
+                                                    </fieldset>
+                                            @endif
+                                        @endforeach
+                                    </div>
 
                                     <div class="col-10 d-none" id="service_description_textarea">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="service_description[]" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
                                         </fieldset>
                                     </div>
-
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
+                                    {{-- <div class="col-6">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description*"></textarea>
                                         </fieldset>
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </div>
                             <div class="feedback d-none" id="request_feedback">
@@ -1131,21 +1130,22 @@
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(response) {
-                            var $remarksDropdown = $('#case_nature_service_remarks');
-                            $remarksDropdown.empty();
-                            
+                            var $remarksDropdownService = $('#case_nature_service_remarks');
+                            $remarksDropdownService.empty();
                             $.each(response.data, function(index, item) {
-                                $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
+                                $remarksDropdownService.append('<option value="' + item.id + '">' + item.remarks + '</option>');
                             });
-                            $remarksDropdown.append('<option value="0">Others</option>');
+                            $remarksDropdownService.append('<option value="0">Others</option>');
 
                             if (response.remarks_visibility == 1) {
+                                console.log(response.remarks_visibility);
+                                
                                 $('#case_nature_service_remarks_div').removeClass('d-none');
                                 $('#service_description_textarea_new').addClass('d-none');
                                 $('#service_description_textarea').addClass('d-none');
                             } else {
                                 $('#service_description_textarea_new').removeClass('d-none');
-                                $('#service_description_textarea').addClass('d-none');
+                                $('#service_description_textarea').removeClass('d-none');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
@@ -3170,7 +3170,7 @@
 
                     var service_description = "";
                     if (!$('#case_nature_service_remarks_div').hasClass('d-none')) {
-                        var selectedOptions = $('#case_nature_service_remarks option:selected');
+                        var selectedOptions = $('.case_nature_service_remarks option:selected');
                         var useTextarea = false;
                         var selectedTexts = [];
 
@@ -3186,12 +3186,12 @@
                         });
 
                         if (useTextarea) {
-                            description = $('#service_description').val().trim();
+                            service_description = $('#service_description').val().trim();
                         } else {
-                            description = selectedTexts.join(', ');
+                            service_description = selectedTexts.join(', ');
                         }
                     } else if (!$('#service_description_textarea').hasClass('d-none')) {
-                        description = $('#service_description').val().trim();
+                        service_description = $('#service_description').val().trim();
                     }
 
                     if (!case_nature_complaint_id) {
