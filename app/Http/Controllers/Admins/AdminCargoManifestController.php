@@ -2968,10 +2968,10 @@ class AdminCargoManifestController extends Controller
                                     if ($shipment_table->booking_type_id == 1 || $shipment_table->booking_type_id == 4 || $shipment_table->booking_type_id == 5) {
                                         $shipper_status_id = 21;
                                         $consignee_status_id = 21;
-                                    } else if ($shipment_table->booking_type_id == 2) {
+                                    } else if ($shipment_table->booking_type_id == 2 && ($shipment_table->shipper_status_id == 30 || $shipment_table->shipper_status_id == 72 ) ) {
                                         $shipper_status_id = 26;
                                         $consignee_status_id = 26;
-                                    } else if ($shipment_table->booking_type_id == 3) {
+                                    } else if ($shipment_table->booking_type_id == 3 && ($shipment_table->shipper_status_id == 37 || $shipment_table->shipper_status_id == 69) ) {
                                         $shipper_status_id = 32;
                                         $consignee_status_id = 32;
                                     } else {
