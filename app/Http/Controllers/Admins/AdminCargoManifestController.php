@@ -2998,9 +2998,9 @@ class AdminCargoManifestController extends Controller
                                 if($bag->type == 1) {
                                     $status = 49;
                                 } elseif($bag->type == 2) {
-                                    if($shipment_table->booking_type_id == 2) {
+                                    if($shipment_table->booking_type_id == 2 && $shipment_table->shipper_status_id == 72 ) {
                                         $status = 73;
-                                    } elseif($shipment_table->booking_type_id == 3) {
+                                    } elseif($shipment_table->booking_type_id == 3 &&  $shipment_table->shipper_status_id == 69) {
                                         $status = 70;
                                     } else {
                                         $status = 76;
