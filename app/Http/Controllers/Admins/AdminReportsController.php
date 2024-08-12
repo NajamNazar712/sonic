@@ -14148,7 +14148,7 @@ class AdminReportsController extends Controller
                 'done_payment_calculations.updated_at',
                 'dp.status as status',
                 'shipments.tracking_number'
-            );
+            )->groupyBy('done_payment_id');
 
         $ibft_report = Datatables::of($ibft_report)
             ->editColumn('status', function ($status) {
