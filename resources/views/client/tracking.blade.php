@@ -204,12 +204,12 @@
                                                     </select>
                                                 </fieldset>
                                             </div>
-                                        @else
+                                        {{-- @else
                                             <div class="col-10 d-none" id="service_description_textarea_new">
                                                 <fieldset class="form-group">
                                                     <textarea class="form-control" name="service_description[]" id="service_description_new" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
                                                 </fieldset>
-                                            </div>
+                                            </div> --}}
                                         @endif
                                     @endforeach
 
@@ -1365,7 +1365,7 @@
                                 $('#service_description_textarea').addClass('d-none');
                             } else {
                                 $('#service_description_textarea_new').removeClass('d-none');
-                                $('#service_description_textarea').addClass('d-none');
+                                $('#service_description_textarea').removeClass('d-none');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
