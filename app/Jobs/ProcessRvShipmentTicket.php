@@ -2,7 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Traits\RvTrait;
 use App\RvShipmentTicket;
 use Illuminate\Bus\Queueable;
@@ -95,10 +97,18 @@ class ProcessRvShipmentTicket implements ShouldQueue
             // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved1');
 
             //need to Continue This
-            // if($isBot)
-            // {
-            //     $this->rv_shipment_assign();
-            // }
+            if($isBot)
+            {
+                $shipmentJourneyId = ShipmentsJourney::select('id')->where('shipment_id', $this->shipment['shipment_id'])->whereIn('shipper_status_id', [12, 66, 52])->latest();
+                $data = [
+                    'agent_id' => 1032, // testing purpose
+                    'shipments_journey_id' => $shipmentJourneyId,
+                    'rv_assign_agent_status_id' => null,
+                    'rv_assign_agent_sub_status_id' => null,
+                    'rv_state_id' => 1,
+                ];
+                $this->rv_shipment_assign($data);
+            }
 
         }
         // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Failed');

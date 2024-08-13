@@ -209,9 +209,10 @@ class BotCallingController extends Controller
         ];
         $validate = Validator::make($data, $validations);
         if ($validate->fails()) {
-            return response()->json(['status' => 1, 'errors' => $validate->errors()]);
+            return response()->json(['status' => 0, 'errors' => $validate->errors()]);
         } 
         $findShipmentId = Shipment::where('tracking_number', $request->input('tracking_number'))->first();
+        return response()->json(['status' => 1, 'message' => 'Data saved Successfully']);
 
         RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 1]);
         $array = [
