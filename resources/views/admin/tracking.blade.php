@@ -238,6 +238,20 @@
                                                     <textarea class="form-control" name="cod_remarks" id="cod_remarks" rows="3" placeholder="Enter Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
                                                 </fieldset>
                                             </div> --}}
+                                        </div>
+                                    </div>
+
+                                    {{-- <div class="col-10 d-none" id="case_nature_service_remarks_div">
+                                        @foreach ($case_nature_service_requests as $service)
+                                            @if ($service->remarks_visibility == 1 && $loop->iteration == 1)
+                                                    <fieldset class="form-group">
+                                                        <select name="service_description[]" id="case_nature_service_remarks" class="form-control select2" multiple="multiple">
+                                                            
+                                                        </select>
+                                                    </fieldset>
+                                            @endif
+                                        @endforeach
+                                    </div> --}}
 
                                     @foreach ($case_nature_service_requests as $service)
                                         @if ($service->remarks_visibility == 1)
@@ -248,26 +262,12 @@
                                                     </select>
                                                 </fieldset>
                                             </div>
-                                        @else
-                                            <div class="col-10 d-none" id="service_description_textarea_new">
-                                                <fieldset class="form-group">
-                                                    <textarea class="form-control" name="service_description[]" id="service_description_new" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
-                                                </fieldset>
-                                            </div>
                                         @endif
                                     @endforeach
-
+                                    
                                     <div class="col-10 d-none" id="service_description_textarea">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="service_description[]" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
-                                        </fieldset>
-                                    </div>
-
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <fieldset class="form-group">
-                                            <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description*"></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
@@ -1133,12 +1133,10 @@
                         success: function(response) {
                             var $remarksDropdown = $('#case_nature_service_remarks');
                             $remarksDropdown.empty();
-                            
                             $.each(response.data, function(index, item) {
                                 $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
                             });
                             $remarksDropdown.append('<option value="0">Others</option>');
-
                             if (response.remarks_visibility == 1) {
                                 $('#case_nature_service_remarks_div').removeClass('d-none');
                                 $('#service_description_textarea_new').addClass('d-none');
@@ -3186,12 +3184,12 @@
                         });
 
                         if (useTextarea) {
-                            description = $('#service_description').val().trim();
+                            service_description = $('#service_description').val().trim();
                         } else {
-                            description = selectedTexts.join(', ');
+                            service_description = selectedTexts.join(', ');
                         }
                     } else if (!$('#service_description_textarea').hasClass('d-none')) {
-                        description = $('#service_description').val().trim();
+                        service_description = $('#service_description').val().trim();
                     }
 
                     if (!case_nature_complaint_id) {
@@ -3388,6 +3386,7 @@
                                 }
                             })
                             .done(function (data) {
+                                swal.close();
                                 if (data.status) {
                                     if (data.flag) {
                                         var html = '';
