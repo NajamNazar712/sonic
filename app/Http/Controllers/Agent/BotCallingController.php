@@ -9,6 +9,7 @@ use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
+use App\Http\Traits\RvTrait;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentAgent;
 use App\RvShipmentTicket;
@@ -19,6 +20,8 @@ use Illuminate\Validation\Rule;
 
 class BotCallingController extends Controller
 {
+    use RvTrait;
+
     public function bot_get_ticket_details(Request $request)
     {
         $trackingNo = $request->tracking_number;
@@ -190,6 +193,7 @@ class BotCallingController extends Controller
         $validations = [
             'tracking_number' => 'required|exists:shipments,tracking_number',
             'call_status' => 'required',
+            'input' => 'required',
             // 'remarks' => Rule::requiredIf(function () use ($request) {
             //     return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 1 || $request->rv_assign_agent_status_id == 5;
             // }), //if unresponsive and other is selected remark is required
@@ -198,6 +202,7 @@ class BotCallingController extends Controller
         $data = [
             'tracking_number' => $request->input('tracking_number'),
             'call_status' => $request->input('call_status'),
+            'input' => $request->input('input'),
             // 'is_fake_status' => $request->input('is_fake_status'),
             // 'rv_fake_status_id' => $request->input('rv_fake_status_id') ?? null,
             // 'remarks' => $request->input('remarks') ?? null,
@@ -208,22 +213,22 @@ class BotCallingController extends Controller
         } 
         $findShipmentId = Shipment::where('tracking_number', $request->input('tracking_number'))->first();
 
-        RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress',1]);
+        RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 1]);
         $array = [
             0 => [
-                'statud_id' => 6,
+                'status_id' => 6,
                 'remarks' => 'Unresponsive'
             ], // unresponsive
             1 => [
-                'statud_id' => 2,
+                'status_id' => 2,
                 'remarks' => 'reattempt'
             ], // reattempt
             2 => [
-                'statud_id' => 1,
+                'status_id' => 1,
                 'remarks' => 'retrurn'
             ], // retrurn
         ];
-        $addRequestParameters = $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot calladd the' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1]);
+        $addRequestParameters = $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot calladd the' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1]);        
         $data = $this->update_shipment_assign_agent($addRequestParameters,null, Admin::where('id', Auth::id())->first());
         if($data['status'] == 1){ //data add successfully
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->shipment_id)->latest()->first();
