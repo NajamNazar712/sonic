@@ -228,8 +228,13 @@ class BotCallingController extends Controller
                 'remarks' => 'retrurn'
             ], // retrurn
         ];
-        $addRequestParameters = $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot calladd the' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1]);        
-        $data = $this->update_shipment_assign_agent($addRequestParameters,null, Admin::where('id', Auth::id())->first());
+        $addRequestParameters = $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot calladd the' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1]);        
+
+        $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->where('rv_state_id', 1)->latest()->first();
+        // if($shipment_assign_agent){
+
+        $data = $this->update_shipment_assign_agent($addRequestParameters,null, Admin::where('id', Auth::id())->first(), $shipment_assign_agent);
+
         if($data['status'] == 1){ //data add successfully
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->shipment_id)->latest()->first();
             $shipments_journey = ShipmentsJourney::where('shipment_id', $findShipmentId->shipment_id)->latest()->first();
