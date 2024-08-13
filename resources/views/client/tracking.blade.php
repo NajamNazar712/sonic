@@ -1689,12 +1689,12 @@
                             });
 
                             if (useTextarea) {
-                                description = $('#service_description_new').val().trim();
+                                description = $('#service_description').val().trim();
                             } else {
                                 description = selectedTexts.join(', ');
                             }
                         } else if (!$('#service_description_textarea_new').hasClass('d-none')) {
-                            description = $('#service_description_new').val().trim();
+                            description = $('#service_description').val().trim();
                         }
                     }
 
