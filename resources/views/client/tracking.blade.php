@@ -1654,6 +1654,10 @@
                                 description = $('#complaint_description').val().trim();
                             } else {
                                 description = selectedTexts.join(', ');
+                                if(!description)
+                                {
+                                    description = $('#complaint_description').val().trim();
+                                }
                             }
                         } else if (!$('#complaint_description_textarea').hasClass('d-none')) {
                             description = $('#complaint_description').val().trim();

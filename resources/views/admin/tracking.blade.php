@@ -3047,6 +3047,9 @@
                             complaint_description = $('#complaint_description').val().trim();
                         } else {
                             complaint_description = selectedTexts.join(', ');
+                            if(!complaint_description){
+                                complaint_description =  $('#complaint_description').val().trim();
+                            }
                         }
                     } else if (!$('#complaint_description_textarea').hasClass('d-none')) {
                         complaint_description = $('#complaint_description').val().trim();
