@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admins\DeliveryController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
@@ -12,6 +13,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipperShipmentsSubscription;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Request;
 
 class outForDeliveryJourney extends Seeder
 {
@@ -20,21 +22,18 @@ class outForDeliveryJourney extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(Request $request)
     {
         //
         $shipmentId = [
-            15943837832485,
-            144341037818475,
-            22343837891313,
-            22343837996777,
-            22343837978485,
+           
             ];
-        echo count($shipmentId);
+        
         if ($shipmentId) {
-            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
-
+            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id',5)->get();
+            echo count($shipmentId);
             foreach ($shipmentId as $shipment) {
+
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
                 $delivertNote   = DeliveryNote::find($deliveryNoteId->delivery_note_id);
                 

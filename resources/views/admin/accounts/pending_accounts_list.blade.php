@@ -36,9 +36,6 @@
                                 <fieldset class="form-group">
                                     {{-- <input type="text" name="search_shipper[]" id="search_shipper" class="form-control shipper_name" placeholder="Shipper Name" multiple> --}}
                                     <select name="search_shipper[]" id="search_shipper" class="form-control select2"  multiple>
-                                        @foreach($shippers as $shipper)
-                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                        @endforeach
                                     </select>
                                 </fieldset>
                             </div>
@@ -101,6 +98,7 @@
                                         <th class="border-primary border-darken-1">Referral Code</th>
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
+                                        <th class="border-primary border-darken-1">Lead Account Progress (%)</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -1114,7 +1112,23 @@
             width:'100%',
             placeholder:"Select Shipper",
             allowClear:true,
-            multiple: true
+            multiple: true,
+            minimumInputLength: 2,
+            ajax: {
+                dataType: 'json',
+                url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'pending']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                delay: 700,
+            }
          });
 
         $('#payment_cycles').prepend('<option value="" selected="selected"></option>').select2({
@@ -1223,6 +1237,8 @@
                         head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
+                        head.push('Lead Account Progress (%)');
+
 
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -1270,6 +1286,8 @@
                             row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
+                            row.push(values.lead_progress);
+
                             body.push(row);
                         });
                     },
@@ -1747,6 +1765,7 @@
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
+                {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
                rowCallback: function(row, data, index) {

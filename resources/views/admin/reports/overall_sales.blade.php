@@ -264,6 +264,7 @@
                         <th class="border-primary border-darken-1">Return Charges</th>
                         <th class="border-primary border-darken-1">Replacement Charges</th>
                         <th class="border-primary border-darken-1">Try & Buy Charges</th>
+                        <th class="border-primary border-darken-1">Reverse Pickup Charges</th>
                         <th class="border-primary border-darken-1">NSA/OSA Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">SMS Charges</th>
@@ -603,6 +604,7 @@
                             head.push('Return Charges');
                             head.push('Replacement Charges');
                             head.push('Try & Buy Charges');
+                            head.push('Reverse Pickup Charges');
                             head.push('NSA/OSA Charges');
                             head.push('GST');
                             head.push('SMS Charges');
@@ -666,6 +668,7 @@
                                 row.push(values.return_charges);
                                 row.push(values.replacement_charges);
                                 row.push(values.try_and_buy_charges);
+                                row.push(values.reverse_pickup_charges);
                                 row.push(values.nsa_osa_charges);
                                 row.push(values.p_gst);
                                 row.push(values.pps_sms_charges);
@@ -790,6 +793,7 @@
                     { data:'return_charges' ,name: 'shipments.return_charges', class: 'align-middle return_charges'},
                     { data:'replacement_charges' ,name: 'shipments.replacement_charges', class: 'align-middle replacement_charges'},
                     { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
+                    { data:'reverse_pickup_charges' ,name: 'ss_charge.reverse_pickup_charges', class: 'align-middle reverse_pickup_charges'},
                     { data:'nsa_osa_charges' ,name: 'shipments.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
                     { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
                     { data:'pps_sms_charges' ,name: 'pps.pps_sms_charges', class: 'align-middle pps_sms_charges',sortable:false},

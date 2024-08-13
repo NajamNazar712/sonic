@@ -124,6 +124,9 @@ use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\StationDepositeNoteActionLog;
 use App\Http\Traits\RvTrait;
+use App\Jobs\ProcessRvShipmentTicket;
+use App\RvShipmentTicket;
+use GuzzleHttp\Client;
 
 class DeliveryController extends Controller
 {
@@ -8987,7 +8990,6 @@ class DeliveryController extends Controller
 
     public function add_shipments_in_receive_deliveries(Request $request)
     {
-
         $shipment_id = $request->shipment_id;
 
         $delivery_note_id = $request->delivery_note_id;
@@ -9103,6 +9105,7 @@ class DeliveryController extends Controller
             return response()->json(['status' => 1, 'error' => 'Shipments Not Found']);
         }
     }
+    
 
     public function operation_riders(Request $request)
     {

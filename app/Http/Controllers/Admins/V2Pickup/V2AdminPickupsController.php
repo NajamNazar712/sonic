@@ -10,19 +10,21 @@ use App\Http\Models\Route;
 use Illuminate\Http\Request;
 use App\Http\Models\CityArea;
 use App\Http\Models\Shipment;
-use Illuminate\Support\Facades\Log;
+use App\Http\Models\WeightType;
+use App\Http\Models\Admin\Admin;
 use Yajra\Datatables\Datatables;
-use Illuminate\Http\Request as IlluminateRequest;
 use App\Http\Models\PickupAction;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShipmentPiece;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\ShipmentsWeightType;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\SelfCollectionCities;
 use App\Http\Models\InternationalShipment;
@@ -40,6 +42,7 @@ use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
+use Illuminate\Http\Request as IlluminateRequest;
 use App\Http\Models\Admin\CancelledShipmentArrival;
 use App\Http\Models\Admin\ShipmentsEstimatedWeight;
 use App\Http\Models\V2Pickup\V2PickupRequestLegend;
@@ -52,6 +55,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Admins\AdminReportsController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\V2Pickup\V2PickupRequestRiderStatus;
 use App\Http\Controllers\Admins\ShipmentChargesController;
@@ -62,9 +66,6 @@ use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
-use App\Http\Controllers\Admins\AdminReportsController;
-use App\Http\Models\ShipmentsWeightType;
-use App\Http\Models\WeightType;
 
 class V2AdminPickupsController extends Controller
 {
@@ -355,7 +356,20 @@ class V2AdminPickupsController extends Controller
             })
             ->addColumn('all_remarks', function ($pickup_requests) {
                 return '<button class="btn btn-sm btn-outline-info align-middle all_remarks_btn" rel="' . $pickup_requests->id . '"><span class="align-middle">View Remarks</span></button>';
+            })   
+            ->addColumn('sale_person', function ($pickup_requests) {
+                $sale_person = SalePersonTag::with('sales_person')
+                    ->where(['user_id' => $pickup_requests->user_id, 'status' => '0'])
+                    ->latest()
+                    ->first();
+                
+                if ($sale_person && $sale_person->sales_person) {
+                    return $sale_person->sales_person->name;
+                } else {
+                    return '-';
+                }
             });
+            
         if ($legend_filter = $request->get('legend_filter')) {
             if ($legend_filter == 8) {
                 $datatables->where('v2_pickup_requests.reverse_pickup', 1);

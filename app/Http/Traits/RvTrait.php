@@ -577,7 +577,7 @@ trait RvTrait
         // if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52])) { old for rv
 
         if (in_array($parcel->shipper_status_id, [12, 52, 66]) || $globalAdminId) {
-            Log::channel('cronJobLog')->info('s ' . ' agent:sarnotification return_confirm:in');
+//            Log::channel('cronJobLog')->info('s ' . ' agent:sarnotification return_confirm:in');
 
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
             NotificationsController::send(15, 0, $request->shipment_id);
@@ -867,7 +867,7 @@ trait RvTrait
     {
         
         $shipment = Shipment::find($data->shipment_id);
-        Log::channel('cronJobLog')->info('s ' .'forceFUllyShipmentstatus update'.$shipment->tracking_number.'with id'. $shipment->tracking_number);
+//        Log::channel('cronJobLog')->info('s ' .'forceFUllyShipmentstatus update'.$shipment->tracking_number.'with id'. $shipment->tracking_number);
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $data->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
 

@@ -26,11 +26,12 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //Only use for the marked as delivered....
         $shipmentId = [
-            20222334667835,   22322334771598,   20222334738397,   17422334740425,   22322334758751,   14422334748905,   22322334425814,   20222334705268,   22322334777470,   20222334645075,   20222334625919,   20222334625536
+            // 22320237913537, 22320237897145, 20220238042025, 20220238042005, 20220238041899, 20220238000376, 20220237954786, 17420237897190, 20220238015960
         ];
-        echo count($shipmentId);
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
+            echo count($shipmentId);
+           
             foreach ($shipmentId as $shipment) {
                 
                 
