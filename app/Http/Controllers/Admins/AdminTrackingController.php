@@ -2272,7 +2272,7 @@ class AdminTrackingController extends Controller
             }
 
             // Check if the number of rows exceeds the limit
-            if (count($spreadsheet) > 2001) { // including header row
+            if (count($spreadsheet) > 20001) { // including header row
                 return redirect()->back()->with('error', 'The uploaded file exceeds the maximum allowed row limit of 2000.');
             }
 
