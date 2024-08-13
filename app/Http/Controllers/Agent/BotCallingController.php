@@ -187,27 +187,63 @@ class BotCallingController extends Controller
 
     public function bot_submit_ticket(Request $request)
     {
-        $tracking_number = $request->tracking_number;
-        $response = $request->response;
+        $validations = [
+            'tracking_number' => 'required|exists:shipments,tracking_number',
+            'call_status' => 'required',
+            // 'remarks' => Rule::requiredIf(function () use ($request) {
+            //     return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 1 || $request->rv_assign_agent_status_id == 5;
+            // }), //if unresponsive and other is selected remark is required
+        ];
 
-        if($tracking_number == null){
-            return response()->json(['status' => 0, 'errors' => 'Tracking Number is Required']);
-        }
-        if($response == null){
-            return response()->json(['status' => 0, 'errors' => 'Response is Required']);
-        }
+        $data = [
+            'tracking_number' => $request->input('tracking_number'),
+            'call_status' => $request->input('call_status'),
+            // 'is_fake_status' => $request->input('is_fake_status'),
+            // 'rv_fake_status_id' => $request->input('rv_fake_status_id') ?? null,
+            // 'remarks' => $request->input('remarks') ?? null,
+        ];
+        $validate = Validator::make($data, $validations);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'errors' => $validate->errors()]);
+        } 
+        $findShipmentId = Shipment::where('tracking_number', $request->input('tracking_number'))->first();
 
-        $message = "";
-        if ($response == 1) {
-            $message = "Shipment Successfully Marked for Reattempt";
-        }
-        elseif ($response == 2) {
-            $message = "Shipment Successfully Marked for Return";
-        }
-        elseif ($response == 3) {
-            $message = "Shipment Successfully Send to Manual Agent";
-        }
+        RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress',1]);
+        $array = [
+            0 => [
+                'statud_id' => 6,
+                'remarks' => 'Unresponsive'
+            ], // unresponsive
+            1 => [
+                'statud_id' => 2,
+                'remarks' => 'reattempt'
+            ], // reattempt
+            2 => [
+                'statud_id' => 1,
+                'remarks' => 'retrurn'
+            ], // retrurn
+        ];
+        $addRequestParameters = $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot calladd the' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1]);
+        $data = $this->update_shipment_assign_agent($addRequestParameters,null, Admin::where('id', Auth::id())->first());
+        if($data['status'] == 1){ //data add successfully
+            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->shipment_id)->latest()->first();
+            $shipments_journey = ShipmentsJourney::where('shipment_id', $findShipmentId->shipment_id)->latest()->first();
 
-        return response()->json(['status' => 1,'message' => $message]);
+            $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($addRequestParameters, $shipment_assign_agent, $shipments_journey, $data['rv_agent_call_history_record_id']);
+
+        }
+        // $message = "";
+        // if ($response == 1) {
+
+        //     // $message = "Shipment Successfully Marked for Reattempt";
+        // }
+        // elseif ($response == 2) {
+        //     $message = "Shipment Successfully Marked for Return";
+        // }
+        // elseif ($response == 3) {
+        //     $message = "Shipment Successfully Send to Manual Agent";
+        // }
+
+        return response()->json(['status' => 1,'message' => $data]);
     }
 }
