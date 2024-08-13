@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Traits\RvTrait;
 use App\RvShipmentTicket;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 
 class ProcessRvShipmentTicket implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels,RvTrait;
     protected $shipment;
 
     /**
@@ -74,6 +75,8 @@ class ProcessRvShipmentTicket implements ShouldQueue
             }
             // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
 
+            $isBot = (in_array([1, 5, 8, 19, 38, 52, 60, 63], $this->shipment['status_reason_id']) ? 1 : 0);
+
             RvShipmentTicket::withTrashed()->updateOrCreate(
                 ['shipment_id' => $this->shipment['shipment_id']],
                 [
@@ -81,7 +84,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'shipment_status_reason_id' => $this->shipment['status_reason_id'],
                     'shipment_user_id' => $this->shipment['shipment_user_id'],
                     'call_count' => $this->shipment['call_count'],
-                    'is_bot' => (in_array([1, 5, 8, 19, 38, 52, 60, 63], $this->shipment['status_reason_id']) ? 1 : 0),
+                    'is_bot' => $isBot,
                     'in_progress' => 0,
                     'is_completed' => 0,
                     'deleted_at' => null,
@@ -90,6 +93,12 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 ]
             );
             // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved1');
+
+            //need to Continue This
+            // if($isBot)
+            // {
+            //     $this->rv_shipment_assign();
+            // }
 
         }
         // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Failed');
