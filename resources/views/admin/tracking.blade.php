@@ -1143,7 +1143,7 @@
                                 $('#service_description_textarea').addClass('d-none');
                             } else {
                                 $('#service_description_textarea_new').removeClass('d-none');
-                                $('#service_description_textarea').addClass('d-none');
+                                $('#service_description_textarea').removeClass('d-none');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
