@@ -238,12 +238,6 @@
                                                     <textarea class="form-control" name="cod_remarks" id="cod_remarks" rows="3" placeholder="Enter Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
                                                 </fieldset>
                                             </div> --}}
-
-                                            {{-- <div class="col-10 d-none" id="service_description_textarea">
-                                                <fieldset class="form-group">
-                                                    <textarea class="form-control" name="service_description[]" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
-                                                </fieldset>
-                                            </div> --}}
                                         </div>
                                     </div>
 
@@ -251,20 +245,13 @@
                                         @foreach ($case_nature_service_requests as $service)
                                             @if ($service->remarks_visibility == 1 && $loop->iteration == 1)
                                                     <fieldset class="form-group">
-                                                        <select name="service_description[]" id="case_nature_service_remarks" class="form-control select2 case_nature_service_remarks" multiple="multiple">
+                                                        <select name="service_description[]" id="case_nature_service_remarks" class="form-control select2" multiple="multiple">
                                                             
                                                         </select>
                                                     </fieldset>
                                             @endif
                                         @endforeach
-                                    </div>
-
-                                    <div class="col-10 d-none" id="service_description_textarea">
-                                        <fieldset class="form-group">
-                                            <textarea class="form-control" name="service_description[]" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
-                                        </fieldset>
                                     </div> --}}
-
 
                                     @foreach ($case_nature_service_requests as $service)
                                         @if ($service->remarks_visibility == 1)
@@ -275,15 +262,9 @@
                                                     </select>
                                                 </fieldset>
                                             </div>
-                                        @else
-                                            <div class="col-10 d-none" id="service_description_textarea_new">
-                                                <fieldset class="form-group">
-                                                    <textarea class="form-control" name="service_description[]" id="service_description_new" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
-                                                </fieldset>
-                                            </div>
                                         @endif
                                     @endforeach
-
+                                    
                                     <div class="col-10 d-none" id="service_description_textarea">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="service_description[]" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
@@ -1150,20 +1131,19 @@
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(response) {
-                            var $remarksDropdownService = $('#case_nature_service_remarks');
-                            $remarksDropdownService.empty();
+                            var $remarksDropdown = $('#case_nature_service_remarks');
+                            $remarksDropdown.empty();
                             $.each(response.data, function(index, item) {
-                                $remarksDropdownService.append('<option value="' + item.id + '">' + item.remarks + '</option>');
+                                $remarksDropdown.append('<option value="' + item.id + '">' + item.remarks + '</option>');
                             });
-                            $remarksDropdownService.append('<option value="0">Others</option>');
-
+                            $remarksDropdown.append('<option value="0">Others</option>');
                             if (response.remarks_visibility == 1) {
                                 $('#case_nature_service_remarks_div').removeClass('d-none');
                                 $('#service_description_textarea_new').addClass('d-none');
                                 $('#service_description_textarea').addClass('d-none');
                             } else {
                                 $('#service_description_textarea_new').removeClass('d-none');
-                                $('#service_description_textarea').removeClass('d-none');
+                                $('#service_description_textarea').addClass('d-none');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
