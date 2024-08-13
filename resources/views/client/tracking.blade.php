@@ -1696,6 +1696,11 @@
                                 description = $('#service_description').val().trim();
                             } else {
                                 description = selectedTexts.join(', ');
+                                if(!description)
+                                {
+                                    description = $('#service_description').val().trim();
+                                }
+
                             }
                         } else if (!$('#service_description_textarea_new').hasClass('d-none')) {
                             description = $('#service_description').val().trim();

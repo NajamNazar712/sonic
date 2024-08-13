@@ -3190,6 +3190,10 @@
                             service_description = $('#service_description').val().trim();
                         } else {
                             service_description = selectedTexts.join(', ');
+                            if(!service_description)
+                            {
+                                service_description = $('#service_description').val().trim();
+                            }
                         }
                     } else if (!$('#service_description_textarea').hasClass('d-none')) {
                         service_description = $('#service_description').val().trim();
