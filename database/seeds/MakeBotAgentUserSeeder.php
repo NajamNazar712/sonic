@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
 use Illuminate\Database\Seeder;
@@ -15,83 +16,69 @@ class MakeBotAgentUserSeeder extends Seeder
     public function run()
     {
         $employee_id = null;
+
+        $name = 'Bot Calling Agent';
+        $email = 'bot@trax.pk';
+        $defaultHub = 202;
+        $cnic = '44444-0310000-1';
+        $phoneNo = 03100000000;
+        $officialPhoneNo = 03100000001;
+        $designationId = 40;
+        $departmentId = 3;
+        $shiftId = 3;
+        $pin = bcrypt(315513);
+        $apiToken = uniqid(base64_encode(str_random(60)));
+
         $admin = new Admin();
 
-        $admin->name = $request->input('name');
-        $admin->email = $request->input('email');
-        $admin->phone_number = $request->input('phone_number');
-        $admin->official_phone_number = $request->input('official_phone_number');
-        $admin->role_id = $request->input('role_id');
-        $admin->default_hub_id = $request->input('default_hub');
-        $admin->password = bcrypt($request->input('pin'));
-        $admin->dummy_pin = $request->input('pin');
-        $admin->shift_id = $request->input('shift_id');
-        $admin->designation_id = $request->input('designation_id');
+        $admin->name = $name;
+        $admin->email = $email;
+        $admin->phone_number = $phoneNo;
+        $admin->official_phone_number = $officialPhoneNo;
+        $admin->role_id = 124;
+        $admin->default_hub_id = $defaultHub;
+        $admin->password = $pin;
+        $admin->dummy_pin = 123456;
+        $admin->shift_id = $shiftId; //Contractual Shift A
+        $admin->designation_id = $designationId; //Return Confirmation Officer
+        $admin->api_token = $apiToken;
 
-            $admin->cnic = $request->input('cnic');
-            if ($request->trax_id != null) {
-                $trax_id = $request->trax_id;
-                $employee = Employee::where('trax_id', $request->trax_id);
-                if ($employee->exists()) {
-                    $employee = $employee->first();
-                    $employee_id = $employee->id;
-                } else {
-                    $employee = new Employee();
-                    $employee->trax_id = $trax_id;
-                    $employee->name = $request->name;
-                    $employee->city_id = $request->default_hub;
-                    $employee->cnic = $request->cnic;
-                    $employee->phone_number = $request->phone_number;
-                    $employee->official_phone_number = $request->official_phone_number;
-                    $employee->employee_type_id = 1;
-                    $employee->request_status_id = 3;
-                    $employee->status_id = 3;
-                    $employee->official_email = $request->email;
-                    $employee->designation_id = $request->designation_id;
-                    $employee->department_id = EmployeeDesignation::find($request->designation_id)->department_id ?? null;
-                    $employee->pin = $request->pin;
-                    $employee->shift_id = $request->shift_id;
-                    $employee->save();
+        $admin->cnic = $cnic;
 
-                    $employee_id = $employee->id;
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
-                }
+        if ($global_setting->exists()) {
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
 
-            } else {
-                $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+            $employee = new Employee();
+            $employee->trax_id = $trax_id;
+            $employee->name = $name;
+            $employee->city_id = $defaultHub;
+            $employee->cnic = $cnic;
+            $employee->phone_number = $phoneNo;
+            $employee->official_phone_number = $officialPhoneNo;
+            $employee->employee_type_id = 1;
+            $employee->request_status_id = 3;
+            $employee->status_id = 3;
+            $employee->official_email = $email;
+            $employee->designation_id = $designationId;
+            $employee->department_id = $departmentId;
+            $employee->staff_category_id = 3;
+            $employee->pin = $pin;
+            $employee->shift_id = $shiftId;
+            $employee->save();
 
-                if ($global_setting->exists()) {
-                    $global_setting = $global_setting->first();
-                    $trax_id = $global_setting->setting_value + 1;
-                    $global_setting->setting_value = $trax_id;
-                    $global_setting->save();
-                    $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+            $employee_id = $employee->id;
+        } else {
+            $trax_id = null;
+        }
 
-                    $employee = new Employee();
-                    $employee->trax_id = $trax_id;
-                    $employee->name = $request->name;
-                    $employee->city_id = $request->default_hub;
-                    $employee->cnic = $request->cnic;
-                    $employee->phone_number = $request->phone_number;
-                    $employee->official_phone_number = $request->official_phone_number;
-                    $employee->employee_type_id = 1;
-                    $employee->request_status_id = 3;
-                    $employee->status_id = 3;
-                    $employee->official_email = $request->email;
-                    $employee->designation_id = $request->designation_id;
-                    $employee->department_id = EmployeeDesignation::find($request->designation_id)->department_id ?? null;
-                    $employee->pin = $request->pin;
-                    $employee->shift_id = $request->shift_id;
-                    $employee->save();
-
-                    $employee_id = $employee->id;
-                } else {
-                    $trax_id = null;
-                }
-            }
-
-            $admin->trax_id = $trax_id;
-            $admin->employee_id = $employee_id;
+        $admin->trax_id = $trax_id;
+        $admin->employee_id = $employee_id;
 
         $admin->save();
     }
