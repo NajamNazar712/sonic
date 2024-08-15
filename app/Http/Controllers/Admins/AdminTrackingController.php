@@ -2347,15 +2347,17 @@ class AdminTrackingController extends Controller
                                                                 $shipment_detail = array();
 
                                 $last_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'desc')->first();
-                                
-                                if($last_shipment_journey->user_id != null && $last_shipment_journey->name != null){
-                                    $shipment_journey_status_by = $last_shipment_journey->user->name . ' (Shipper)';
-                                }
-                                else if($last_shipment_journey->admin_id != null && $last_shipment_journey->admin != null){
-                                    $shipment_journey_status_by = $last_shipment_journey->admin->name . ' (Admin)';
-                                }
-                                else if($last_shipment_journey->rider_id != null && $last_shipment_journey->rider != null){
-                                    $shipment_journey_status_by = $last_shipment_journey->rider->name . ' (Rider)';
+                                if($last_shipment_journey){
+
+                                    if($last_shipment_journey->user_id != null && $last_shipment_journey->name != null){
+                                        $shipment_journey_status_by = $last_shipment_journey->user->name . ' (Shipper)';
+                                    }
+                                    else if($last_shipment_journey->admin_id != null && $last_shipment_journey->admin != null){
+                                        $shipment_journey_status_by = $last_shipment_journey->admin->name . ' (Admin)';
+                                    }
+                                    else if($last_shipment_journey->rider_id != null && $last_shipment_journey->rider != null){
+                                        $shipment_journey_status_by = $last_shipment_journey->rider->name . ' (Rider)';
+                                    }
                                 }
                                 else{
                                     $shipment_journey_status_by ='-';
@@ -2528,7 +2530,7 @@ class AdminTrackingController extends Controller
                                 }
 
                                 $last_action = 'Status';
-                                $last_date = $last_shipment_journey->created_at;
+                                $last_date = $last_shipment_journey->created_at ?? '-';
                                 if($last_scanned_location_flag){
                                     if($last_scanned_location->created_at > $last_date){
                                         $last_action = 'Scanned';
@@ -2554,7 +2556,7 @@ class AdminTrackingController extends Controller
                                 $shipment_position->origin = $shipment->pickup_address->city->name;
                                 $shipment_position->destination = $shipment->consignee_city->name;
                                 $shipment_position->status = $last_shipment_journey->shipment_status_shipper->name ?? '-';
-                                $shipment_position->status_at = $last_shipment_journey->created_at ? Carbon::parse($last_shipment_journey->created_at)->format('Y-m-d H:i:s') : '-';
+                                $shipment_position->status_at =  Carbon::parse($last_shipment_journey->created_at ?? null)->format('Y-m-d H:i:s') ?? '-';
                                 $shipment_position->status_by = $shipment_journey_status_by;
                                 $shipment_position->screen_location = $screen_location;
                                 $shipment_position->screen_location_id = $screen_location_id;
