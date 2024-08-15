@@ -104,7 +104,12 @@ class UserManagementController extends Controller
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'admins.trax_id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'emp.blood_group')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','ed.name as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person','admins.management_user as management_user', 'ad.id as admin_dept_id');
+            ->leftjoin('admin_hub_access_types as ahat', function ($join) {
+                $join->on('ahat.admin_id', '=', 'admins.id')
+                    ->where('ahat.id', '=', DB::raw('(SELECT MAX(id) FROM admin_hub_access_types WHERE admin_hub_access_types.admin_id = admins.id)'));
+            })
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','ed.name as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person','admins.management_user as management_user', 'ad.id as admin_dept_id', 'ahat.hub_access_type as hat')
+        ->where('ad.id', 6);
 
         if (!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
@@ -151,7 +156,8 @@ class UserManagementController extends Controller
 
                     $lost_hub_user_shipment_button = '<button type="button" class="dropdown-item lost_hub_user_shipment" data-target-id="' . $user->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">User Lost Shipment Hub</div></button>';
 
-                    $set_hub_access = '<button type="button" class="dropdown-item set_hub_access" data-target-id="' . $user->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Set Hub Access</div></button>';
+
+                    $set_hub_access = '<button type="button" class="dropdown-item set_hub_access" data-target-id="' . $user->id . '" data-target-hub_access_type="' . $user->hat . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Set Hub Access</div></button>';
 
                     $dropdown = '
                     <div class="btn-group">
@@ -1250,7 +1256,14 @@ class UserManagementController extends Controller
     {
         $hubAccessType = $request->input('hub_access');
         $adminId = $request->input('set_hub_admin_id');
-        $defaultHub = Auth::user()->default_hub_id;
+        $admin = Admin::find($adminId);
+
+        if (!$admin->default_hub_id){
+            return redirect()->back()->with(['error' => 'Please Assign its default hub first!']);
+        }else{
+            $defaultHub = $admin->default_hub_id;
+        }
+
 
         $oldHubs = AdminHub::where('admin_id', $adminId)->pluck('hub_id')->toArray();
 
@@ -1288,8 +1301,6 @@ class UserManagementController extends Controller
         AdminHubAccessType::create([
             'admin_id' => $adminId,
             'hub_access_type' => 1,
-            'previous_assigned_hubs' => implode(',' , $oldHubs),
-            'new_assigned_hubs' => implode(',' , $oldHubs),
             'updated_by' => Auth::id()
         ]);
     }
@@ -1313,31 +1324,35 @@ class UserManagementController extends Controller
     private function assignZonalHubs($adminId, $defaultHub, $oldHubs)
     {
 
-        $zonalIds = ZoneClassCity::where('city_id', $defaultHub)->pluck('zone_id')->toArray();
-        $zonalHubs = ZoneClassCity::whereIn('zone_id', $zonalIds)->pluck('city_id')->toArray();
-        $existingHubIds = AdminHub::where('admin_id', $adminId)->pluck('hub_id')->toArray();
-        $zonalHubs = array_unique($zonalHubs);
+        $city = City::where('hub_id' , $defaultHub);
 
-        $insertData = [];
-        foreach ($zonalHubs as $hubId) {
-            if (!in_array($hubId, $existingHubIds)) {
-                $insertData[] = [
-                    'admin_id' => $adminId,
-                    'hub_id' => $hubId,
-                ];
-            }   
+        if($city->exists()){
+            $zone_id = $city->first()->zone_id;
+            $zonalHubs = City::where(['zone_id' => $zone_id, 'status' => 1])->pluck('hub_id')->unique()->toArray();
+            $existingHubIds = AdminHub::where('admin_id', $adminId)->pluck('hub_id')->toArray();
+    
+            $insertData = [];
+            foreach ($zonalHubs as $hubId) {
+                if (!in_array($hubId, $existingHubIds)) {
+                    $insertData[] = [
+                        'admin_id' => $adminId,
+                        'hub_id' => $hubId,
+                    ];
+                }   
+            }
+    
+            AdminHub::insert($insertData);
+    
+            AdminHubAccessType::create([
+                'admin_id' => $adminId,
+                'hub_access_type' => 3,
+                'previous_assigned_hubs' => implode(',' , $oldHubs),
+                'new_assigned_hubs' => implode(',' , $zonalHubs),
+                'updated_by' => Auth::id()
+            ]);
+
+        }else{
+            return redirect()->back()->with(['error' => 'Zone Doesnt Exists!']);
         }
-
-        AdminHub::insert($insertData);
-
-        AdminHubAccessType::create([
-            'admin_id' => $adminId,
-            'hub_access_type' => 3,
-            'previous_assigned_hubs' => implode(',' , $oldHubs),
-            'new_assigned_hubs' => implode(',' , $zonalHubs),
-            'updated_by' => Auth::id()
-        ]);
     }
-
-
 }

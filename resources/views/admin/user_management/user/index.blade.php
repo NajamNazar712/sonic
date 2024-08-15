@@ -956,10 +956,23 @@
 			
 			$(document).on('click', '.set_hub_access', function() {
 				var id = $(this).data('target-id');
-				
+				var hat = $(this).data('target-hub_access_type');
+
+				if (hat == 1 || hat == '') {
+					$('#set_hub_access #multiple_hubs').prop('checked', true);
+				} else if (hat == 2) {
+					$('#set_hub_access #default_hub_only').prop('checked', true);
+				} else if (hat == 3) {
+					$('#set_hub_access #zonal_hubs').prop('checked', true);
+				}
+
 				$('#set_hub_access #set_hub_admin_id').val(id);
 
 				$('#set_hub_access').modal('show');
+			});
+
+			$('#set_hub_access').on('hidden.bs.modal', function (e) {
+				$('#set_hub_admin_id ').val('');
 			});
 
 
