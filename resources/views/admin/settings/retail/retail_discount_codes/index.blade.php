@@ -13,12 +13,12 @@
                 @include('admin.inc.messages')
 
                 <div class="row upload_discount_codes_form_div px-1" style="display: none">
-                    <form id="upload_shippers_form" class="form-horizontal w-100 p-2" method="POST" action="{{ route('admin.settings.shippers.base_rate_revisions.bulk_store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                    <form id="upload_shippers_form" class="form-horizontal w-100 p-2" method="POST" action="{{ route('admin.retail.retail_discount_codes.bulk.store') }}" novalidate="novalidate" enctype="multipart/form-data">
                         @csrf
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <input type="file" name="shippers" class="w-100 border-primary rounded" style="padding: 6px" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                    <input type="file" name="discount_codes" class="w-100 border-primary rounded" style="padding: 6px" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -200,7 +200,7 @@
                 ajax: '{{ route('admin.retail.retail_discount_codes.list') }}',
                 rowId: 'id',
                 // order: [
-                //     [1, 'desc']
+                //     [3, 'desc']
                 // ],
                 columns: [{
                         orderable: false,
@@ -214,25 +214,54 @@
                         }
                     },
                     {
-                        searchable: false,
                         data: 'code',
                         name: 'code',
+                        width: '10%',
                         class: 'align-middle text-center code',
                     },
                     {
-                        searchable: false,
                         data: 'discount_percentage',
                         name: 'discount_percentage',
+                        width: '10%',
                         class: 'align-middle text-center discount_percentage',
-                        orderable: false,
-                    }
-
+                    },
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
+
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td =
+                        '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input =
+                        '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon =
+                        '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if(!($(header).is('.discount_percentage') || $(header).is('.code')))
+                        {
+                            $(td).appendTo($(search));
+                        }
+                        else
+                        {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+    
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+
+                    });
+
                     this.api().table().columns.adjust();
                 }
             });

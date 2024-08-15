@@ -3979,8 +3979,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('retail_discount_codes')->name('retail_discount_codes.')->group(function () {
             Route::get('', 'Admins\Retail\RetailDiscountCodesController@index')->name('index');
             Route::get('list', 'Admins\Retail\RetailDiscountCodesController@list')->name('list');
-            Route::post('excel', 'Admins\Retail\RetailDiscountCodesController@excel')->name('excel');
-            Route::post('submit', 'Admins\Retail\RetailDiscountCodesController@submit')->name('submit');
+            Route::post('store', 'Admins\Retail\RetailDiscountCodesController@add_bulk_retail_discount_codes_store')->name('bulk.store');
         });
     });
     Route::prefix('human_resource')->name('human_resource.')->group(function () {
