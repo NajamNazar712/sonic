@@ -88,6 +88,8 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Handover ID</th>
+                        <th class="border-primary border-darken-1">Bag Number</th>
+                        <th class="border-primary border-darken-1">Bag Type</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At Area</th>
@@ -102,6 +104,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Shipment(s)</th>
+                        {{-- <th class="border-primary border-darken-1">Excess Shipment</th> --}}
                         <th class="border-primary border-darken-1">Received Shipment(s)</th>
                         <th class="border-primary border-darken-1">Remaining Shipment(s)</th>
                         <th class="border-primary border-darken-1">Shipment Pieces</th>
@@ -369,6 +372,8 @@
 
                             head.push('S. No');
                             head.push('Handover ID');
+                            head.push('Bag Number');
+                            head.push('Bag Type');
                             head.push('Created At');
                             head.push('Created By');
                             head.push('Created At Area');
@@ -394,6 +399,8 @@
 
                                 row.push(index + 1);
                                 row.push(values.handover_id);
+                                row.push(values.bag_number);
+                                row.push(values.bag_type);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.created_at_area);
@@ -571,6 +578,8 @@
                     {data: 'handover_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'handover_id_padded', name: 'handovers.id', class: 'align-middle handover_id_padded'},
+                    {data: 'bag_number', name: 'bag_number', class: 'align-middle bag_number'},
+                    {data: 'bag_type', name: 'bag_type', class: 'align-middle bag_type'},
                     {data: 'created_at', name: 'handovers.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
                     {data: 'created_at_area', name: 'created_at_area', class: 'align-middle created_at_area'},
