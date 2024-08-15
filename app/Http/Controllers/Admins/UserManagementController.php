@@ -108,8 +108,7 @@ class UserManagementController extends Controller
                 $join->on('ahat.admin_id', '=', 'admins.id')
                     ->where('ahat.id', '=', DB::raw('(SELECT MAX(id) FROM admin_hub_access_types WHERE admin_hub_access_types.admin_id = admins.id)'));
             })
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','ed.name as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person','admins.management_user as management_user', 'ad.id as admin_dept_id', 'ahat.hub_access_type as hat')
-        ->where('ad.id', 6);
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','ed.name as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person','admins.management_user as management_user', 'ad.id as admin_dept_id', 'ahat.hub_access_type as hat');
 
         if (!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
