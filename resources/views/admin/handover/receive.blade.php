@@ -41,7 +41,7 @@
                                 </div>
                             </div>
 
-                            <div class="my-4">
+                            <div class="my-4 d-none" id="shipment_type_datatable_container">
                                 <div class="text-center" id="shipment_text">
                                     
                                 </div>
@@ -54,14 +54,13 @@
                                             <th class="border-primary border-darken-1">Phone No</th>
                                             <th class="border-primary border-darken-1">Pickup Date</th>
                                             <th class="border-primary border-darken-1">Special Instruction</th>
-                                            <th class="border-primary border-darken-1"></th>
                                         </tr>
                                         </thead>
                                 </table>
                             </div>
 
                             <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                <div class="form-group">
+                                <div class="form-group d-none" id="scan_tracking_number_div">
                                     <input type="text" id="scan_tracking_number" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
                                     <!-- <div class="d-inline-block ml-1">
                                         <a href="#" id="camera_scan_initiate" tabindex="-1">
@@ -69,31 +68,35 @@
                                         </a>
                                     </div> -->
                                 </div>
-                                <div class="form-group ml-1">
+                                <div class="form-group ml-1 d-none" id="scan_button">
                                     <button type="submit" name="add" class="btn btn-primary add" value="Scan">Scan</button>
                                 </div>
                             </form>
-                            <table class="table table-bordered datatable" id="datatable" style="width:100%; z-index: 3;">
-                                <thead>
-                                <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1" id="shipment_verified_cn">Shipment Verified CN</th>
-                                    <th class="border-primary border-darken-1">Tracking Number</th>
-                                    <th class="border-primary border-darken-1">Shipper</th>
-                                    <th class="border-primary border-darken-1">Phone No</th>
-                                    <th class="border-primary border-darken-1">Pickup Date</th>
-                                    <th class="border-primary border-darken-1">Special Instruction</th>
-                                    <th class="border-primary border-darken-1"></th>
-                                </tr>
-                                </thead>
-                            </table>
+
+                            <div class="d-none" id="scan_tracking_numebr_table">
+                                <table class="table table-bordered datatable" id="datatable" style="width:100%; z-index: 3;">
+                                    <thead>
+                                    <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1" id="shipment_verified_cn">Shipment Verified CN</th>
+                                        <th class="border-primary border-darken-1">Tracking Number</th>
+                                        <th class="border-primary border-darken-1">Shipper</th>
+                                        <th class="border-primary border-darken-1">Phone No</th>
+                                        <th class="border-primary border-darken-1">Pickup Date</th>
+                                        <th class="border-primary border-darken-1">Special Instruction</th>
+                                        {{-- <th class="border-primary border-darken-1"></th> --}}
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+
 
                             <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.handover.receive.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
     
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
                                 
-                                <div class="form-group ml-1">
+                                <div class="form-group ml-1 d-none" id="confirm_button">
                                     <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
                                 </div>
                             </form>
@@ -157,9 +160,60 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
     <style>
-        #shipment_type_datatable {
+        #shipment_type_datatable th
+        /* #shipment_type_datatable td */
+        {
+            text-align: left;
+            vertical-align: middle;
+            width: 14.28%;
+        }
+
+        #shipment_type_datatable th {
+            font-weight: bold;
+        }
+
+        #shipment_type_datatable_wrapper {
             width: 100%;
         }
+
+        #shipment_type_datatable {
+            table-layout: fixed;
+            width: 100% !important;
+        }
+
+        #datatable th
+        /* #datatable td */
+        {
+            text-align: left;
+            vertical-align: middle;
+            width: 12.5%;
+        }
+
+        #datatable th {
+            font-weight: bold;
+        }
+
+        #datatable_wrapper {
+            width: 100%;
+        }
+
+        #datatable {
+            table-layout: fixed;
+            width: 100% !important;
+        }
+
+        .dataTables_empty {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        #datatable td .dataTables_empty{
+            text-align: center !important;
+        }
+
+
+
+
     </style>
 
 @endsection
@@ -176,7 +230,14 @@
         $(document).ready(function() {
             var bag_number = $('#bag_number');
             var scan_tracking_number = $('#scan_tracking_number');
-            scan_tracking_number.prop('disabled', true);
+            var shipment_type_datatable = $('#shipment_type_datatable');
+            var shipment_type_datatable_container = $('#shipment_type_datatable_container');
+            var scan_tracking_numebr_table = $('#scan_tracking_numebr_table');
+            var scan_tracking_number_div = $('#scan_tracking_number_div');
+            var scan_button = $('#scan_button');
+            var confirm_button = $('#confirm_button');
+            // scan_tracking_number.prop('disabled', true);
+
 
             bag_number.prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Bag Number',
@@ -185,7 +246,6 @@
             });
 
             var bag = null;
-
             var shipment_type_datatable = $('#shipment_type_datatable').DataTable({
                 dom: 'ltipr',
                 scrollX: false,
@@ -287,9 +347,28 @@
                     }
                 }
             });
+
+            // bag_number.on('change', function() {
+            //     bag = $(this).val();
+            //     shipment_type_datatable.draw();
+            // });
+
             bag_number.on('change', function() {
                 bag = $(this).val();
-                shipment_type_datatable.draw();
+                if (bag) {
+                    shipment_type_datatable.draw();
+                    shipment_type_datatable_container.removeClass('d-none');
+                    scan_tracking_numebr_table.removeClass('d-none');
+                    scan_tracking_number_div.removeClass('d-none');
+                    scan_button.removeClass('d-none');
+                    confirm_button.removeClass('d-none');
+                } else {
+                    shipment_type_datatable_container.addClass('d-none');
+                    scan_tracking_numebr_table.addClass('d-none');
+                    scan_tracking_number_div.addClass('d-none');
+                    scan_button.addClass('d-none');
+                    confirm_button.addClass('d-none');
+                }
             });
 
             var shipment_ids = [];
