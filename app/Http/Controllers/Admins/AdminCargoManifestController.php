@@ -418,7 +418,14 @@ class AdminCargoManifestController extends Controller
                             })
                             ->orWhere(function ($sub_query) {
                                 $sub_query->where('shipments.shipper_status_id', '=', 11)
-                                    ->where('gmh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                                    ->where('gmh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'))
+                                    ->whereNotExists(function ($sub_sub_query) {
+                                        $sub_sub_query->select(DB::raw(1))
+                                            ->from('cargo_manifest_bag_shipments as cmbs')
+                                            ->join('cargo_manifest_bags as cmb', 'cmbs.cargo_manifest_bag_id', '=', 'cmb.id')
+                                            ->whereColumn('cmbs.shipment_id', 'shipments.id')
+                                            ->whereIn('cmb.status_id', [1,5]);
+                                    });
                             })
                             ->orWhere(function ($sub_query) {
                                 $sub_query->where('shipments.shipper_status_id', '=', 68)
@@ -426,15 +433,36 @@ class AdminCargoManifestController extends Controller
                             })
                             ->orWhere(function ($sub_query) {
                                 $sub_query->where('shipments.shipper_status_id', '=', 69)
-                                    ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                                    ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'))
+                                    ->whereNotExists(function ($sub_sub_query) {
+                                        $sub_sub_query->select(DB::raw(1))
+                                            ->from('cargo_manifest_bag_shipments as cmbs')
+                                            ->join('cargo_manifest_bags as cmb', 'cmbs.cargo_manifest_bag_id', '=', 'cmb.id')
+                                            ->whereColumn('cmbs.shipment_id', 'shipments.id')
+                                            ->whereIn('cmb.status_id', [1,5]);
+                                    });
                             })
                             ->orWhere(function ($sub_query) {
                                 $sub_query->where('shipments.shipper_status_id', '=', 72)
-                                    ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                                    ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'))
+                                    ->whereNotExists(function ($sub_sub_query) {
+                                        $sub_sub_query->select(DB::raw(1))
+                                            ->from('cargo_manifest_bag_shipments as cmbs')
+                                            ->join('cargo_manifest_bags as cmb', 'cmbs.cargo_manifest_bag_id', '=', 'cmb.id')
+                                            ->whereColumn('cmbs.shipment_id', 'shipments.id')
+                                            ->whereIn('cmb.status_id', [1,5]);
+                                    });
                             })
                             ->orWhere(function ($sub_query) {
                                 $sub_query->where('shipments.shipper_status_id', '=', 75)
-                                    ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                                    ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'))
+                                    ->whereNotExists(function ($sub_sub_query) {
+                                        $sub_sub_query->select(DB::raw(1))
+                                            ->from('cargo_manifest_bag_shipments as cmbs')
+                                            ->join('cargo_manifest_bags as cmb', 'cmbs.cargo_manifest_bag_id', '=', 'cmb.id')
+                                            ->whereColumn('cmbs.shipment_id', 'shipments.id')
+                                            ->whereIn('cmb.status_id', [1,5]);
+                                    });
                             })
                             ->orWhere(function ($sub_query) {
                                 $sub_query->where('shipments.shipper_status_id', '=', 55)
@@ -755,9 +783,9 @@ class AdminCargoManifestController extends Controller
             if ($shipment_type == 0) {
                 $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68,69,70,72,73,75,76]);
             } else if ($shipment_type == 1) {
-                $datatables->whereIn('shipments.shipper_status_id', [2, 49, 55,11,68,69,70,72,73]);
+                $datatables->whereIn('shipments.shipper_status_id', [2, 49, 55,11,68]);
             } else if ($shipment_type == 2) {
-                $datatables->whereIn('shipments.shipper_status_id', [20, 30, 37]);
+                $datatables->whereIn('shipments.shipper_status_id', [20, 30, 37,69,70,72,73,75,76]);
             }
         } else {
             $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68,69,70,72,73,75,76]);
@@ -6503,6 +6531,22 @@ class AdminCargoManifestController extends Controller
                                 ShipmentsJourneyController::add($shipment_id, $without_manifest, $without_manifest, NULL, NULL, NULL, Auth::id()); // without manifest status
                                 ShipmentsJourneyController::add($shipment_id, $consignee_status_id, $consignee_status_id, NULL, $remarks, NULL, Auth::id()); // new misrouted
                                 array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
+                                MisroutedHistory::create([
+                                    'shipment_id' => $shipment->id,
+                                    'old_consignee_city_id' => Auth::user()->default_hub_id,
+                                    'old_consignee_name' => $shipment->consignee_name,
+                                    'old_consignee_address' => $shipment->consignee_address,
+                                    'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                    'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                    'old_consignee_email' => $shipment->consignee_email,
+                                    'new_consignee_city_id' => $shipment->consignee_city_id,
+                                    'new_consignee_name' => $shipment->consignee_name,
+                                    'new_consignee_address' => $shipment->consignee_address,
+                                    'new_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                    'new_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                    'new_consignee_email' => $shipment->consignee_email,
+                                    'admin_id' => Auth::id()
+                                ]);
                             }
                         } else {
                             if (in_array($shipment->shipper_status_id, $shipment_status_array)) {
@@ -6646,6 +6690,22 @@ class AdminCargoManifestController extends Controller
 
                                 if ($shipper_status_id == 75 || $shipper_status_id == 72 || $shipper_status_id == 69 )
                                     array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
+                                    MisroutedHistory::create([
+                                        'shipment_id' => $shipment->id,
+                                        'old_consignee_city_id' => Auth::user()->default_hub_id,
+                                        'old_consignee_name' => $shipment->consignee_name,
+                                        'old_consignee_address' => $shipment->consignee_address,
+                                        'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                        'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                        'old_consignee_email' => $shipment->consignee_email,
+                                        'new_consignee_city_id' => $shipment->consignee_city_id,
+                                        'new_consignee_name' => $shipment->consignee_name,
+                                        'new_consignee_address' => $shipment->consignee_address,
+                                        'new_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                        'new_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                        'new_consignee_email' => $shipment->consignee_email,
+                                        'admin_id' => Auth::id()
+                                    ]);
 
                                 ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
 
@@ -6754,6 +6814,22 @@ class AdminCargoManifestController extends Controller
                             ShipmentsJourneyController::add($shipment_id, $without_manifest, $without_manifest, NULL, NULL, NULL, Auth::id()); // without manifest status
                             ShipmentsJourneyController::add($shipment_id, $consignee_status_id, $consignee_status_id, NULL, $remarks, NULL, Auth::id());// new misrouted
                             array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
+                            MisroutedHistory::create([
+                                'shipment_id' => $shipment->id,
+                                'old_consignee_city_id' => Auth::user()->default_hub_id,
+                                'old_consignee_name' => $shipment->consignee_name,
+                                'old_consignee_address' => $shipment->consignee_address,
+                                'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                'old_consignee_email' => $shipment->consignee_email,
+                                'new_consignee_city_id' => $shipment->consignee_city_id,
+                                'new_consignee_name' => $shipment->consignee_name,
+                                'new_consignee_address' => $shipment->consignee_address,
+                                'new_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                'new_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                'new_consignee_email' => $shipment->consignee_email,
+                                'admin_id' => Auth::id()
+                            ]);
                         }
                     }
                 }
