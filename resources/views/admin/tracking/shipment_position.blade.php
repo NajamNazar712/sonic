@@ -54,20 +54,20 @@
                                     <th class="border-primary border-darken-1">Last Scanned Location</th>
                                     <th class="border-primary border-darken-1">Last Scanned City</th>
                                     <th class="border-primary border-darken-1">Sub Hub</th>
-                                    <th class="border-primary border-darken-1">Last Scanned Area Location</th>
                                     <th class="border-primary border-darken-1">Trax Id</th>
                                     <th class="border-primary border-darken-1">Last Scanned By</th>
                                     <th class="border-primary border-darken-1">Last Scanned At</th>
-                                    <th class="border-primary border-darken-1">Handover Note</th>
                                     <th class="border-primary border-darken-1">Handover Created By</th>
                                     <th class="border-primary border-darken-1">Handover Created At</th>
                                     <th class="border-primary border-darken-1">Handover From</th>
                                     <th class="border-primary border-darken-1">Handover To</th>
                                     <th class="border-primary border-darken-1">Handover Received By</th>
                                     <th class="border-primary border-darken-1">Handover Received At</th>
-                                    <th class="border-primary border-darken-1">Last Action Performed</th>
                                     <th class="border-primary border-darken-1">Consignee Address</th>
                                     <th class="border-primary border-darken-1">Actual Weight</th>
+                                    <th class="border-primary border-darken-1">Aging (Arrival)</th>
+                                    <th class="border-primary border-darken-1">Aging (Status)</th>
+                                    <th class="border-primary border-darken-1">Aging (Last Scanned At)</th>
 
 
                                 </tr>
@@ -199,20 +199,20 @@
                             head.push('Last Scanned Location');
                             head.push('Last Scanned City');
                             head.push('Sub Hub');
-                            head.push('Last Scanned Area Location');
                             head.push('Trax Id');
                             head.push('Last Scanned By');
                             head.push('Last Scanned At');
-                            head.push('Handover Note');
                             head.push('Handover Created By');
                             head.push('Handover Created At');
                             head.push('Handover From');
                             head.push('Handover To');
                             head.push('Handover Received By');
                             head.push('Handover Received At');
-                            head.push('Last Action Performed');
                             head.push('Consignee Address');
                             head.push('Actual Weight');
+                            head.push('Aging (Arrival)');
+                            head.push('Aging (Status)');
+                            head.push('Aging (Last Scan At Aging)');
                          	
 							
                     
@@ -231,20 +231,20 @@
                                 row.push(values.screen_location);
                                 row.push(values.city);
                                 row.push(values.scanning_city_area_name);
-                                row.push(values.location_status);
                                 row.push(values.trax_id);
                                 row.push(values.scanned_by);
                                 row.push(values.scanned_at);
-                                row.push(values.handover_note);
                                 row.push(values.handover_created_by);
                                 row.push(values.handover_created_at);
                                 row.push(values.handover_from);
                                 row.push(values.handover_to);
                                 row.push(values.handover_received_by);
                                 row.push(values.handover_received_at);
-                                row.push(values.last_action);
                                 row.push(values.consignee_address);
                                 row.push(values.actual_weight);
+                                row.push(values.arrival_aging);
+                                row.push(values.status_aging);
+                                row.push(values.last_scanned_at_aging);
 
                                 body.push(row);
                             });
@@ -295,20 +295,20 @@
                     {data: 'screen_location', name: 'shipment_positions.screen_location', class: 'align-middle screen_location'},
                     {data: 'city', name: 'shipment_positions.city', class: 'align-middle city'},
                     {data: 'scanning_city_area_name', name: 'ca_scanning.name', class: 'align-middle scanning_city_area_name'},
-                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
                     {data: 'trax_id', name: 'trax_id', class: 'align-middle trax_id'},
                     {data: 'scanned_by', name: 'shipment_positions.scanned_by', class: 'align-middle scanned_by'},
                     {data: 'scanned_at', name: 'shipment_positions.scanned_at', class: 'align-middle scanned_at'},
-                    {data: 'handover_note', name: 'shipment_positions.handover_note', class: 'align-middle handover_note'},
                     {data: 'handover_created_by', name: 'shipment_positions.handover_created_by', class: 'align-middle handover_created_by'},
                     {data: 'handover_created_at', name: 'shipment_positions.handover_created_at', class: 'align-middle handover_created_at'},
                     {data: 'handover_from', name: 'shipment_positions.handover_from', class: 'align-middle handover_from'},
                     {data: 'handover_to', name: 'shipment_positions.handover_to', class: 'align-middle handover_to'},
                     {data: 'handover_received_by', name: 'shipment_positions.handover_received_by', class: 'align-middle handover_received_by'},
                     {data: 'handover_received_at', name: 'shipment_positions.handover_received_at', class: 'align-middle handover_received_at'},
-                    {data: 'last_action', name: 'shipment_positions.last_action', class: 'align-middle action'},
                     {data: 'consignee_address', name: 's.consignee_address', class: 'align-middle action'},
                     {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle action'},
+                    {data: 'arrival_aging', name: 'arrival_aging', class: 'align-middle action'},
+                    {data: 'status_aging', name: 'status_aging', class: 'align-middle action'},
+                    {data: 'last_scanned_at_aging', name: 'last_scanned_at_aging', class: 'align-middle action'},
 
                 ],
                 rowCallback: function(row, data, index) {
