@@ -261,6 +261,18 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
+                                            {{-- <div class="row"> --}}
+                                                {{-- <div class="col-md-7"> --}}
+                                                    <label>Discount Code</label>
+                                                    <input type="text" name="discount_code" id="discount_code"
+                                                        class="form-control form-control-sm" placeholder="Discount Code">
+                                                {{-- </div> --}}
+                                                {{-- <div class="col-md-5 align-self-end">
+                                                        <a href="javascript:void(0);" id="add_discount_code" class="btn btn-outline-success" >Add</a>
+                                                </div> --}}
+                                            {{-- </div> --}}
+                                        </div>
+                                        <div class="form-group">
                                             <label>Charges</label>
                                             <input type="text" name="charges" id="charges" class="form-control form-control-sm" placeholder="Charges" disabled>
                                         </div>
@@ -599,6 +611,8 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+
+            $('#discount_code').inputmask('Regex', {regex: "^[A-Za-z0-9]*$"});
             var shipping_modes = @json($shipping_modes);
             var international_shipping_modes = @json($retail_international_shipping_modes);
 
