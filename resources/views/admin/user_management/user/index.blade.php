@@ -81,6 +81,51 @@
 							</div>
 						</div>
 					</div>
+					
+
+					<div class="modal fade text-left" id="set_hub_access" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="set_hub_access" aria-hidden="true">
+						<div class="modal-dialog modal-md" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h4 class="modal-title" id="">Set Hub Access</h4>
+								</div>
+								<form id="set_hub_access_form" action="{{ route('admin.user_management.users.set_hub_access') }}" method="POST">
+									@method('POST')
+									@csrf
+									<div class="modal-body">
+										<input type="hidden" id="set_hub_admin_id" name="set_hub_admin_id">
+										<div class="col-12 form-group">
+											<div class="d-none text-danger" id="assign_hubs_msg_error_1">Please Select Hub(s)</div>
+											<!-- Radio buttons for hub access -->
+											<div class="form-check">
+												<input class="form-check-input" type="radio" id="multiple_hubs" name="hub_access" value="1">
+												<label class="form-check-label" for="multiple_hubs">
+													Multiple Hubs
+												</label>
+											</div>
+											<div class="form-check">
+												<input class="form-check-input" type="radio" id="default_hub_only" name="hub_access" value="2">
+												<label class="form-check-label" for="default_hub_only">
+													Default Hub only
+												</label>
+											</div>
+											<div class="form-check">
+												<input class="form-check-input" type="radio" id="zonal_hubs" name="hub_access" value="3">
+												<label class="form-check-label" for="zonal_hubs">
+													Zonal hubs
+												</label>
+											</div>
+										</div>
+									</div>
+									<div class="modal-footer">
+										<button type="submit" class="btn btn-success" id="set_hub_access_submit">Submit</button>
+										<button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+					
 				
 
 
@@ -846,9 +891,6 @@
                 table.draw();
             });
 
-
-
-			
 			$(document).on('click', '.lost_hub_user_shipment', function() {
 				var id = $(this).data('target-id');
 				$('#admin_id').val(id);
@@ -908,6 +950,16 @@
 			$('#lost_hub_user_shipment').on('hidden.bs.modal', function (e) {
 				$('#admin_id ').val('');
 				$('#select_lost_hub_user_shipment').val([]).trigger('change');
+			});
+
+
+			
+			$(document).on('click', '.set_hub_access', function() {
+				var id = $(this).data('target-id');
+				
+				$('#set_hub_access #set_hub_admin_id').val(id);
+
+				$('#set_hub_access').modal('show');
 			});
 
 
