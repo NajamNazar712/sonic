@@ -41,16 +41,6 @@ class AdminRetailReportController extends Controller
         return view('admin.reports.retail.sales')->with(['retail_centers' => $retail_centers, 'retail_franchises' => $retail_franchises ,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses]);
     }
 
-
-
-
-
-
-
-
-
-
-
     public function sales_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
@@ -122,6 +112,7 @@ class AdminRetailReportController extends Controller
             if (!empty($rncc_numbers)) {
                 $sales->whereIn('pns.retail_pickup_note_id', $rncc_numbers);
             }
+            $sales->groupBy('pns.retail_pickup_note_id');
 
             $from_id = DB::connection('reports')->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
             if ($from_id->exists()) {
@@ -279,24 +270,6 @@ class AdminRetailReportController extends Controller
         }
         return $datatable->make(true);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     public static function retail_sales_report($report_type){
 
