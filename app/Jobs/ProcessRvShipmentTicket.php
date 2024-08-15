@@ -13,6 +13,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
+use App\Http\Models\RvShipmentAssignAgent;
+use App\RvShipmentAgent;
 
 class ProcessRvShipmentTicket implements ShouldQueue
 {
@@ -76,9 +78,9 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 $isShipperDisabled = 1;
             }
             // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
-
-            $isBot = (in_array([1, 5, 8, 19, 38, 52, 60, 63], $this->shipment['status_reason_id']) ? 1 : 0);
-
+            $isBot = (array_key_exists($this->shipment['status_reason_id'], array_flip([8, 5, 1, 19, 38, 52, 60, 63])) ? 1 : 0);
+            
+            
             RvShipmentTicket::withTrashed()->updateOrCreate(
                 ['shipment_id' => $this->shipment['shipment_id']],
                 [
@@ -99,15 +101,26 @@ class ProcessRvShipmentTicket implements ShouldQueue
             //need to Continue This
             if($isBot)
             {
-                $shipmentJourneyId = ShipmentsJourney::select('id')->where('shipment_id', $this->shipment['shipment_id'])->whereIn('shipper_status_id', [12, 66, 52])->latest();
+                $shipmentJourneyId = ShipmentsJourney::where('shipment_id', $this->shipment['shipment_id'])->latest()->select('id')->first();
                 $data = [
-                    'agent_id' => 1032, // testing purpose
-                    'shipments_journey_id' => $shipmentJourneyId,
+                    'agent_id' => 3372, // testing purpose
+                    'shipment_id' => $this->shipment['shipment_id'],
+                    'shipments_journey_id' => $shipmentJourneyId->id,
                     'rv_assign_agent_status_id' => null,
                     'rv_assign_agent_sub_status_id' => null,
+                    'assigned_to_type_id' => 0,
+                    'assigned_by' => 0,
                     'rv_state_id' => 1,
                 ];
                 $this->rv_shipment_assign($data);
+                if(RvShipmentAgent::where('agent_id', 3372)->doesntExist()){
+                    $new = new RvShipmentAgent();
+                    $new->agent_id = 3372;
+                    $new->total_shipments = 0;
+                    $new->actual_productivity = 0;
+                    $new->save();
+                }
+                
             }
 
         }

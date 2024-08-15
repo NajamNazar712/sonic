@@ -10,6 +10,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Traits\RvTrait;
+use App\RvAgentCallHistory;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentAgent;
 use App\RvShipmentTicket;
@@ -193,32 +194,24 @@ class BotCallingController extends Controller
         $validations = [
             'tracking_number' => 'required|exists:shipments,tracking_number',
             'call_status' => 'required',
-            'input' => 'required',
-            // 'remarks' => Rule::requiredIf(function () use ($request) {
-            //     return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 1 || $request->rv_assign_agent_status_id == 5;
-            // }), //if unresponsive and other is selected remark is required
+            'input' => 'required'
         ];
 
         $data = [
             'tracking_number' => $request->input('tracking_number'),
             'call_status' => $request->input('call_status'),
-            'input' => $request->input('input'),
-            // 'is_fake_status' => $request->input('is_fake_status'),
-            // 'rv_fake_status_id' => $request->input('rv_fake_status_id') ?? null,
-            // 'remarks' => $request->input('remarks') ?? null,
+            'input' => $request->input('input')
         ];
         $validate = Validator::make($data, $validations);
         if ($validate->fails()) {
             return response()->json(['status' => 0, 'errors' => $validate->errors()],422);
         } 
         $findShipmentId = Shipment::where('tracking_number', $request->input('tracking_number'))->first();
-        return response()->json(['status' => 1, 'message' => 'Data saved Successfully']);
-
         RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 1]);
         $array = [
             0 => [
                 'status_id' => 6,
-                'remarks' => 'Unresponsive'
+                'remarks' => 'unresponsive'
             ], // unresponsive
             1 => [
                 'status_id' => 2,
@@ -228,33 +221,48 @@ class BotCallingController extends Controller
                 'status_id' => 1,
                 'remarks' => 'retrurn'
             ], // retrurn
+            3 => [
+                'status_id' => 3,
+                'remarks' => 'assign to the manual agent'
+            ], // retrurn
         ];
-        $addRequestParameters = $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot calladd the' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1]);        
-
+        $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot calladd the ' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1]);
+        
         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->where('rv_state_id', 1)->latest()->first();
         // if($shipment_assign_agent){
-
-        $data = $this->update_shipment_assign_agent($addRequestParameters,null, Admin::where('id', Auth::id())->first(), $shipment_assign_agent);
-
-        if($data['status'] == 1){ //data add successfully
-            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->shipment_id)->latest()->first();
-            $shipments_journey = ShipmentsJourney::where('shipment_id', $findShipmentId->shipment_id)->latest()->first();
-
-            $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($addRequestParameters, $shipment_assign_agent, $shipments_journey, $data['rv_agent_call_history_record_id']);
-
+        if($request->input > 0){
+            $status = new RvAgentCallHistory();
+            $status->shipment_id = $request->shipment_id;
+            $status->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
+            $status->call_finding_id = 1; //call finding reasons
+            $status->call_to_id = 1; //Shipper or Consignee
+            $status->remarks = $request->remarks;
+            $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
+            $status->updated_by_id = $request->admin_id;
+            $status->save();
         }
-        // $message = "";
-        // if ($response == 1) {
+        $assigned_agent = RvShipmentAgent::where('agent_id',$request->admin_id)->first();
+        $admin_agent = Admin::where('id',$request->admin_id)->first();
+        $this->update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent);
+        $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
+        if($request->input != 3){ // not for the further assistance
+            $data = $this->update_shipment_status($request,1);
+            if($data['status'] == 1){ //data add successfully
+                $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->latest()->first();
 
-        //     // $message = "Shipment Successfully Marked for Reattempt";
-        // }
-        // elseif ($response == 2) {
-        //     $message = "Shipment Successfully Marked for Return";
-        // }
-        // elseif ($response == 3) {
-        //     $message = "Shipment Successfully Send to Manual Agent";
-        // }
+                $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey, $data['rv_agent_call_history_record_id'] ?? $status->id);          
+            }
+            unset($data['message']['rv_agent_call_history_record_id']);
+        }else{
+            $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey, $status->id);
 
+            RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 0,'is_bot'=>0]);
+            $data = [
+                'status' => 1,
+                'message' => 'Shipment is assign to manual agent'
+            ];
+        }
+        
         return response()->json(['status' => 1,'message' => $data]);
     }
 }
