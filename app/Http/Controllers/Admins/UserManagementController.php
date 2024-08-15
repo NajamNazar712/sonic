@@ -1270,7 +1270,7 @@ class UserManagementController extends Controller
             try {
                 switch ($hubAccessType) {
                     case 1:
-                        $this->assignMultipleHubs($adminId, $oldHubs);
+                        $this->assignMultipleHubs($adminId);
                         break;
         
                     case 2:
@@ -1295,7 +1295,7 @@ class UserManagementController extends Controller
         return redirect()->back()->with(['success' => 'Hub has been updated!']);
     }
 
-    private function assignMultipleHubs($adminId, $oldHubs)
+    private function assignMultipleHubs($adminId)
     {
         AdminHubAccessType::create([
             'admin_id' => $adminId,
