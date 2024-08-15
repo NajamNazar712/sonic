@@ -36,9 +36,6 @@
                                 <fieldset class="form-group">
                                     {{-- <input type="text" name="search_shipper[]" id="search_shipper" class="form-control shipper_name" placeholder="Shipper Name" multiple> --}}
                                     <select name="search_shipper[]" id="search_shipper" class="form-control select2"  multiple>
-                                        @foreach($shippers as $shipper)
-                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                        @endforeach
                                     </select>
                                 </fieldset>
                             </div>
@@ -1115,7 +1112,23 @@
             width:'100%',
             placeholder:"Select Shipper",
             allowClear:true,
-            multiple: true
+            multiple: true,
+            minimumInputLength: 2,
+            ajax: {
+                dataType: 'json',
+                url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'pending']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                delay: 700,
+            }
          });
 
         $('#payment_cycles').prepend('<option value="" selected="selected"></option>').select2({

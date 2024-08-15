@@ -21,9 +21,9 @@ class ShortUrlController extends Controller
             $latest_id = 1;
         }
 
-        $check_record = ShortUrl::where('tracking_number', $tracking_number);
+        $check_record = ShortUrl::where('tracking_number', $tracking_number)->first();
 
-        if(!$check_record->exists()) {
+        if(empty($check_record)) {
 
             $check_record = new ShortUrl;
             $check_record->long_url = $long_url;
@@ -39,8 +39,6 @@ class ShortUrlController extends Controller
             $result =  $check_record->site_url . $check_record->tiny_url;
             return $result;
         } else {
-            
-            $check_record = $check_record->first();
             $result =  $check_record->site_url . $check_record->tiny_url;
             return $result;
         }

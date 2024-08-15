@@ -204,12 +204,12 @@
                                                     </select>
                                                 </fieldset>
                                             </div>
-                                        @else
+                                        {{-- @else
                                             <div class="col-10 d-none" id="service_description_textarea_new">
                                                 <fieldset class="form-group">
                                                     <textarea class="form-control" name="service_description[]" id="service_description_new" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
                                                 </fieldset>
-                                            </div>
+                                            </div> --}}
                                         @endif
                                     @endforeach
 
@@ -1365,7 +1365,7 @@
                                 $('#service_description_textarea').addClass('d-none');
                             } else {
                                 $('#service_description_textarea_new').removeClass('d-none');
-                                $('#service_description_textarea').addClass('d-none');
+                                $('#service_description_textarea').removeClass('d-none');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
@@ -1654,6 +1654,10 @@
                                 description = $('#complaint_description').val().trim();
                             } else {
                                 description = selectedTexts.join(', ');
+                                if(!description)
+                                {
+                                    description = $('#complaint_description').val().trim();
+                                }
                             }
                         } else if (!$('#complaint_description_textarea').hasClass('d-none')) {
                             description = $('#complaint_description').val().trim();
@@ -1689,12 +1693,17 @@
                             });
 
                             if (useTextarea) {
-                                description = $('#service_description_new').val().trim();
+                                description = $('#service_description').val().trim();
                             } else {
                                 description = selectedTexts.join(', ');
+                                if(!description)
+                                {
+                                    description = $('#service_description').val().trim();
+                                }
+
                             }
                         } else if (!$('#service_description_textarea_new').hasClass('d-none')) {
-                            description = $('#service_description_new').val().trim();
+                            description = $('#service_description').val().trim();
                         }
                     }
 
