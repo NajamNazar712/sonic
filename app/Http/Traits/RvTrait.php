@@ -36,12 +36,10 @@ use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
-use App\Http\Controllers\Admins\AdminInterceptRebookRequestHistoryController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\Http\Models\HR\Employee;
 use App\Http\Models\ShipmentStatusReason;
-use App\Jobs\ProcessRemoveShipmentFromRvShipmentTicket;
+
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentTicket;
 use App\RvShipmentTicketDeleteTable;
@@ -92,20 +90,6 @@ trait RvTrait
         try {
             //if the same shipment has been already completed, new row will be created
             DB::beginTransaction();
-            // $completed_shipments = RvShipmentAssignAgent::where('shipment_id', $data['shipment_id'])->where('rv_state_id', 4)->latest()->first();
-            // if ($completed_shipments) {
-            //     $new_shipment = new RvShipmentAssignAgent();
-            //     $new_shipment->agent_id = $data['agent_id'];
-            //     $new_shipment->shipment_id = $data['shipment_id'];
-            //     $new_shipment->rv_state_id =  1;
-            //     $new_shipment->rv_assign_agent_status_id =  null;
-            //     $new_shipment->rv_assign_agent_sub_status_id = null;
-            //     $new_shipment->shipments_journey_id = $data['shipments_journey_id'];
-            //     $new_shipment->last_shipments_journey_id = $data['shipments_journey_id'];
-            //     $new_shipment->save();
-            // } 
-            // else {
-            //else if shipment_id is equal to $data['shipment_id'] update the row or insert new row
             $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $data['shipment_id'])->latest()->first();
             if ($rv_shipment_assign_agent) {
                 $rv_shipment_assign_agent->agent_id = $data['agent_id'];
@@ -179,7 +163,7 @@ trait RvTrait
         }
         catch(\Throwable $th)
         {
-            // dd($th->getMessage());
+            dd($th->getMessage());
             DB::rollBack();
         }
     }
@@ -304,12 +288,18 @@ trait RvTrait
     protected function update_shipments_status($request, $assigned_agent)
     {
         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
-
         $reattempt_count = BoltUndeliveredReasonMapCount::where('shipment_id', $request->shipment_id)->where('count', 3)->latest()->first();
         $reattempt_requested_shipment = Shipment::where('id', $request->shipment_id)->where('shipper_status_id', 52)->latest()->first();
 
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
 
+        //if bot call is unresponsive and again status is updated to the open
+        if($request->input < 1 && $request->rv_assign_agent_status_id == 6){
+            $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 6; //set status to unresponive confirm again asign
+            $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
+            $shipment_assign_agent_table_columns['rv_state_id'] = 1;
+            return $shipment_assign_agent_table_columns; // return assign again
+        }
         //if shipment delivery count is 3 and again status is updated to unresponsive set the shipment to return confirm
         if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count > 0 && $reattempt_count) {
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 1; //set status to return confirm
@@ -321,6 +311,7 @@ trait RvTrait
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 1; //set status to return confirm
             $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
             $shipment_assign_agent_table_columns['rv_state_id'] = 4; //set status as shipment completed
+            
         } else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count < 2) {
             $shipment_assign_agent_table_columns['rv_state_id'] = 2; //unassign shipment
         } else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 2) {
@@ -330,7 +321,7 @@ trait RvTrait
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 1; //set status to return confirm
             $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
             $shipment_assign_agent_table_columns['rv_state_id'] = 4; //set status as shipment completed
-        } elseif($request->rv_assign_agent_status_id == 3) { //bot call for other assitance rv_state_id is marked 3 is to manual agent
+        } elseif($request->rv_assign_agent_status_id == 3 ) { //bot call for other assitance rv_state_id is marked 3 is to manual agent
             $shipment_assign_agent_table_columns['rv_state_id'] = 3;
         }else{
             $shipment_assign_agent_table_columns['rv_state_id'] = 2;
@@ -441,6 +432,7 @@ trait RvTrait
     // Description:
     protected function update_shipment_status($request,$botCall = 0)
     {
+        
         if (Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $request->shipment_id)->doesntExist()) {
             RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
 
@@ -789,7 +781,6 @@ trait RvTrait
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
-
 
         if ($rv_shipment_assign_agent) {
             try {
@@ -2005,5 +1996,10 @@ trait RvTrait
             'call_count' => $callCount
         ];
         dispatch(new ProcessRvShipmentTicket($rvData));
+    }
+
+    static function botCallDispatch($shipmentid){
+        
+        
     }
 }
