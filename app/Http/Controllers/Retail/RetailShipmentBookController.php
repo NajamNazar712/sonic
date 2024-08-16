@@ -61,6 +61,7 @@ use App\Http\Models\RetailUserProductPercentage;
 use App\Http\Models\TotalSumFranchiseCommission;
 use App\Http\Models\TotalSumRetailTraxCenter;
 use App\Http\Models\RetailFranchiseCharge;
+use App\RetailDiscountCode;
 
 class RetailShipmentBookController extends Controller
 {
@@ -548,6 +549,16 @@ class RetailShipmentBookController extends Controller
                 $retail_shipment->admin_discount_type = 1;
             }
         }
+
+        if($request->has('apply_discount_code') && $request->apply_discount_code == 'on')
+        {
+            if($request->has('retail_discount_amount'))
+            {
+                $retail_shipment->retail_discount_amount = $request->retail_discount_amount;
+                RetailDiscountCode::where('code', '=', $request->discount_code)->update(['shipment_id' => $shipment_id]);
+            }
+        }
+
         $retail_shipment->save();
 
         // retail user history
@@ -658,6 +669,14 @@ class RetailShipmentBookController extends Controller
                 {
                     $details['total_charges'] = $details['total_charges'] - $request->admin_discount; // todo: for flat
                 }
+            }
+        }
+
+        if($request->has('retail_discount_applied'))
+        {
+            if ($request->filled('retail_discount_percentage') && $request->retail_discount_percentage > 0) {
+                $details['discount_amount'] = $details['total_charges'] * $request->retail_discount_percentage/100;
+                $details['total_charges'] = $details['total_charges'] - $details['discount_amount'];
             }
         }
 
@@ -2272,7 +2291,28 @@ class RetailShipmentBookController extends Controller
       }
       return response()->json(['status'=>'true']);
 
-  }
+    }
+
+    public function is_discount_available_to_apply($discountCode = null)
+    {
+
+        $response = [
+            'status' => 0,
+            'message' => 'Discount code is not valid',
+            'data' => null
+        ];
+
+        if($data = RetailDiscountCode::where('code', '=', $discountCode)->whereNull('shipment_id')->first())
+        {
+            $response = [
+                'status' => 1,
+                'message' => 'Discount code is valid',
+                'data' => $data
+            ];
+        }
+
+        return response()->json($response);
+    }
 
     static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address, $id)
     {
