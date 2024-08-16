@@ -1547,6 +1547,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('lost_hub_user_shipment', 'Admins\UserManagementController@lost_hub_user_shipment')->name('lost_hub_user_shipment');
             Route::get('get_lost_hub_user_shipment', 'Admins\UserManagementController@get_lost_hub_user_shipment')->name('get_lost_hub_user_shipment');
             Route::post('set_hub_access', 'Admins\UserManagementController@set_hub_access')->name('set_hub_access');
+            Route::get('get_hub_access', 'Admins\UserManagementController@get_hub_access')->name('get_hub_access');
+
         });
 
         Route::prefix('fuel_management')->name('fuel_management.')->group(function () {

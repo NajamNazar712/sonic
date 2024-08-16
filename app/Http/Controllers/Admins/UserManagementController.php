@@ -32,6 +32,7 @@ use App\Http\Models\Admin\AdminRoleModulePermission;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminHumanResourseController;
 use Illuminate\Support\Facades\Log;
+use PhpParser\Parser\Multiple;
 
 class UserManagementController extends Controller
 {
@@ -143,6 +144,24 @@ class UserManagementController extends Controller
                 $query->where('bg.id', $keyword);
             })
             ->removeColumn('department')
+            ->addColumn('ahat', function ($user) {
+                $type = '-';
+
+                if($user->hat == 1 || empty($user->hat)){
+                    $type = 'Multiple Hubs';
+                }else if ($user->hat == 2){
+                    $type = 'Default Hubs';
+                }else if ($user->hat == 3){
+                    $type = 'Zonal Hubs';
+                }
+
+                return '<button class="btn btn-sm btn-outline-info align-middle get_hub_access_type" data-target-id="' . $user->id . '">' . $type . '</button>';
+
+            })
+
+            ->addColumn('ahat_excel', function ($user) {
+               return $this->getHubsNameForUser($user->id);
+            })
             ->addColumn('action', function ($user) {
                 if (session('role_id') == 1 || count(array_intersect([83, 84, 542, 620], session('permissions'))) !== 0) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
@@ -196,7 +215,7 @@ class UserManagementController extends Controller
                         }
                     }
 
-                    if (session('role_id') == 1 || in_array(620, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(904, session('permissions'))) {
                         if ($user->admin_dept_id == 6) {
                             $dropdown .= $set_hub_access;
                         }
@@ -1257,20 +1276,20 @@ class UserManagementController extends Controller
         $adminId = $request->input('set_hub_admin_id');
         $admin = Admin::find($adminId);
 
-        if (!$admin->default_hub_id){
-            return redirect()->back()->with(['error' => 'Please Assign its default hub first!']);
-        }else{
-            $defaultHub = $admin->default_hub_id;
+
+        if (empty($admin->default_hub_id)) {
+            return redirect()->back()->with('error', 'Please assign a default hub first!');
         }
-
-
+        
+        $defaultHub = $admin->default_hub_id;
+    
         $oldHubs = AdminHub::where('admin_id', $adminId)->pluck('hub_id')->toArray();
 
         DB::transaction(function () use ($adminId, $hubAccessType, $defaultHub, $oldHubs) {
             try {
                 switch ($hubAccessType) {
                     case 1:
-                        $this->assignMultipleHubs($adminId);
+                        $this->assignMultipleHubs($adminId, $oldHubs);
                         break;
         
                     case 2:
@@ -1295,11 +1314,13 @@ class UserManagementController extends Controller
         return redirect()->back()->with(['success' => 'Hub has been updated!']);
     }
 
-    private function assignMultipleHubs($adminId)
+    private function assignMultipleHubs($adminId, $oldHubs)
     {
         AdminHubAccessType::create([
             'admin_id' => $adminId,
             'hub_access_type' => 1,
+            'previous_assigned_hubs' => implode(',' , $oldHubs),
+            'new_assigned_hubs' => implode(',' , $oldHubs),
             'updated_by' => Auth::id()
         ]);
     }
@@ -1322,36 +1343,62 @@ class UserManagementController extends Controller
 
     private function assignZonalHubs($adminId, $defaultHub, $oldHubs)
     {
+        $city = City::where('hub_id', $defaultHub)->first();
 
-        $city = City::where('hub_id' , $defaultHub);
-
-        if($city->exists()){
-            $zone_id = $city->first()->zone_id;
-            $zonalHubs = City::where(['zone_id' => $zone_id, 'status' => 1])->pluck('hub_id')->unique()->toArray();
-            $existingHubIds = AdminHub::where('admin_id', $adminId)->pluck('hub_id')->toArray();
-    
-            $insertData = [];
-            foreach ($zonalHubs as $hubId) {
-                if (!in_array($hubId, $existingHubIds)) {
-                    $insertData[] = [
-                        'admin_id' => $adminId,
-                        'hub_id' => $hubId,
-                    ];
-                }   
-            }
-    
-            AdminHub::insert($insertData);
-    
-            AdminHubAccessType::create([
-                'admin_id' => $adminId,
-                'hub_access_type' => 3,
-                'previous_assigned_hubs' => implode(',' , $oldHubs),
-                'new_assigned_hubs' => implode(',' , $zonalHubs),
-                'updated_by' => Auth::id()
-            ]);
-
-        }else{
-            return redirect()->back()->with(['error' => 'Zone Doesnt Exists!']);
+        if (!$city) {
+            return redirect()->back()->with(['error' => 'City Doesn\'t Exist!']);
         }
+        
+        $zone_id = $city->zone_id;
+        
+        if (!$zone_id) {
+            return redirect()->back()->with(['error' => 'Zone Doesn\'t Exist!']);
+        }
+        
+        $zonalHubs = City::where(['zone_id' => $zone_id, 'status' => 1])->pluck('hub_id')->unique()->toArray();
+        $existingHubIds = AdminHub::where('admin_id', $adminId)->pluck('hub_id')->toArray();
+
+        $insertData = [];
+        foreach ($zonalHubs as $hubId) {
+            if (!in_array($hubId, $existingHubIds)) {
+                $insertData[] = [
+                    'admin_id' => $adminId,
+                    'hub_id' => $hubId,
+                ];
+            }   
+        }
+
+        if(!empty($insertData)){
+            AdminHub::insert($insertData);
+        }
+
+        AdminHubAccessType::create([
+            'admin_id' => $adminId,
+            'hub_access_type' => 3,
+            'previous_assigned_hubs' => implode(',' , $oldHubs),
+            'new_assigned_hubs' => implode(',' , $zonalHubs),
+            'updated_by' => Auth::id()
+        ]);   
     }
+
+    public function get_hub_access(Request $request) {
+        return response()->json([
+            'status' => 1,
+            'hubs_name' => $this->getHubsNameForUser($request->id)
+        ]);
+    }
+
+    private function getHubsNameForUser($user)
+    {
+        $adminHubs = AdminHub::where('admin_id', $user)->pluck('hub_id');
+
+        if ($adminHubs->isEmpty()) {
+            return 'No Hub Assigned';
+        }
+
+        $hubsNames = City::whereIn('id', $adminHubs)->pluck('name');
+        return $hubsNames->implode(', ');
+    }
+
+    
 }

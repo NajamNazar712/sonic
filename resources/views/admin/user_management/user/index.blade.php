@@ -199,6 +199,7 @@
 										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Updated by</th>
 										<th class="border-primary border-darken-1">Status</th>
+										<th class="border-primary border-darken-1">Hub Access Type</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -270,6 +271,25 @@
 			</div>
 		</div>
 	</div>
+
+	<div id="get_hub_access_type" class="modal fade" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+			<h5 class="modal-title">Hubs</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+			</div>
+			<div id="modal-content" class="modal-body">
+			</div>
+			<div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+		</div>
+  	</div>
+  
 	
 @endsection
 
@@ -378,6 +398,8 @@
                             head.push('Updated Datetime');
                             head.push('Updated by');
                             head.push('Status');
+							head.push('Hub Access Type');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
@@ -393,6 +415,7 @@
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
                                 row.push(values.status);
+                                row.push(values.ahat_excel);
 
                                 body.push(row);
                             });
@@ -589,6 +612,7 @@
 					{data: 'updated_at', name: 'admins.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data: 'status', name: 'admins.status', class: 'align-middle status'},
+					{data: 'ahat', name: 'ahat', class: 'align-middle ahat'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -974,6 +998,27 @@
 			$('#set_hub_access').on('hidden.bs.modal', function (e) {
 				$('#set_hub_admin_id ').val('');
 			});
+
+			$(document).on('click', '.get_hub_access_type', function() {
+				var id = $(this).data('target-id');
+
+				// Make the AJAX request
+				$.ajax({
+					url: '{!! route('admin.user_management.users.get_hub_access') !!}',
+					method: 'GET',
+					data: { id: id },
+					success: function(response) {
+						
+						$('#get_hub_access_type #modal-content').html(response.hubs_name);
+						$('#get_hub_access_type').modal('show');
+					},
+					error: function() {
+						alert('An error occurred while fetching data.');
+					}
+				});
+			});
+
+
 
 
 		});
