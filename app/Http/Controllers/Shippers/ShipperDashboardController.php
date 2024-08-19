@@ -137,6 +137,7 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
+use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
@@ -1234,7 +1235,7 @@ class ShipperDashboardController extends Controller
             NotificationsController::send(91,$user_id,$pin);
 
             // Get the profile_otp from SMS model
-            $profile_otp = ShipperVerificationPinCode::where('otp', $pin)->first();
+            $profile_otp = AdminShipperVerificationPinCode::where('otp', $pin)->first(); //Model Updated
             if ($profile_otp) {
                 $data['code'] = $pin;
                 return json_encode($data);
