@@ -43,24 +43,44 @@ class AdminShipmentHandoverController extends Controller
         return view('admin.handover.index')->with(['hubs'=>$hub]);
     }
 
+    // public function handover_dropdown_val_fetch_from(Request $request){
+    //     $type = $request->type;
+    //     $value = $request->get('value');
+    //     // $dependent = $request->get('dependent');-
+    //     $dependent = "select From Person";
+    //     $data = HandoverResponsibilities::where('hub_id',$value)->where('status',1)->distinct('id')->get();
+    //     $output = '<option value ="">' .ucfirst($dependent). '</option> ';
+    //     foreach($data as $row){
+    //       if ($type == 0 && isset($row->name)){
+    //         $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
+    //       }else if ($type == 1 && !isset($row->name) && isset($row->admin_id)){
+    //         $output .= '<option value ="'.$row->id.'">' . Admin::where('id' ,$row->admin_id)->first()->name   . '</option> ';
+
+    //       }
+    //     }
+    //     echo $output;
+    // }
+
     public function handover_dropdown_val_fetch_from(Request $request){
-        $type = $request->type;
-        $value = $request->get('value');
-        // $dependent = $request->get('dependent');-
-        $dependent = "select From Person";
-        $data = HandoverResponsibilities::where('hub_id',$value)->where('status',1)->distinct('id')->get();
-        $output = '<option value ="">' .ucfirst($dependent). '</option> ';
-        foreach($data as $row){
-          if ($type == 0 && isset($row->name)){
-            $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
-          }else if ($type == 1 && isset($row->name) && isset($row->admin_id)){
-            $output .= '<option value ="'.$row->id.'">' . Admin::where('id' ,$row->admin_id)->first()->name   . '</option> ';
-
+      $type = $request->type;
+      $value = $request->get('value');
+      $dependent = "select From Person";
+      $data = DB::table('admins')
+      ->leftJoin('handover_responsibilities as handover_admins', 'handover_admins.admin_id', 'admins.id')
+      ->select('handover_admins.admin_id', 'handover_admins.name')
+      ->where('handover_admins.hub_id', $value)
+      ->whereNotNull('handover_admins.admin_id')
+      ->get();
+      $output = '<option value="">' . ucfirst($dependent) . '</option>';
+      foreach ($data as $row) {
+          if ($type == 0 && $row->name) {
+              $output .= '<option value="' . $row->admin_id . '">' . $row->name . '</option>';
+          } elseif ($type == 1 && $row->name) {
+              $output .= '<option value="' . $row->admin_id . '">' . $row->name . '</option>';
           }
-        }
-        echo $output;
-    }
-
+      }
+      echo $output;
+  }
 
     //admin.handover.create.shipment_details
     public function arrival_bulk_shipment_details(Request $request){  
