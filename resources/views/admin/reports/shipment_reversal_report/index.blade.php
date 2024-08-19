@@ -12,10 +12,6 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div id="reversal_search_form" class="row mb-2 justify-content-center">
-
-
-
-
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -157,6 +153,7 @@
             selectMonths: true,
             formatSubmit: 'yyyy-mm-dd 00:00:00',
             hiddenSuffix: '_formatted',
+            max: new Date(),
             onSet: function(context) {
                 if (context.select) {
                     var fromDateFormatted = $('input[name="search_date_from_formatted"]').val();
@@ -170,6 +167,9 @@
                     }
 
                     var maxDate = fromDate.add(30, 'days').toDate();
+                    if (maxDate > new Date()) {
+                        maxDate = new Date(); // Ensure maxDate does not exceed today
+                    }
                     to_date.pickadate('picker').set({
                         'max': maxDate
                     }, {
@@ -186,6 +186,7 @@
             selectMonths: true,
             formatSubmit: 'yyyy-mm-dd 23:59:59',
             hiddenSuffix: '_formatted',
+            max: new Date(),
             onSet: function(context) {
                 if (context.select) {
                     var toDateFormatted = $('input[name="search_date_to_formatted"]').val();
@@ -200,16 +201,14 @@
 
                     var minDate = toDate.subtract(30, 'days').toDate();
                     from_date.pickadate('picker').set({
-                        'min': minDate
+                        'min': minDate,
+                        'max': new Date()
                     }, {
                         muted: true
                     });
                 }
             }
         });
-
-
-
 
         jQuery.fn.DataTable.Api.register('buttons.exportData()', function(options) {
             if (this.context.length) {
@@ -241,8 +240,12 @@
 
                             $.each(result.data, function(index, values) {
                                 row = [];
+                                let trackingNumber = values.tracking_number.match(/>(\d+)<\/a>/);
+                                if (trackingNumber) {
+                                    trackingNumber = trackingNumber[1];
+                                }
                                 row.push(index + 1);
-                                row.push(`="${values.tracking_number}"`);
+                                row.push(`="${trackingNumber}"`);
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone_number_1);
                                 row.push(values.consignee_address);

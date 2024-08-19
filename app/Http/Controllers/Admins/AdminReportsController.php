@@ -15293,7 +15293,11 @@ class AdminReportsController extends Controller
 
     public function shipment_reversal_index()
     {
-        return view('admin.reports.shipment_reversal_report.index');
+        if (session('role_id') == 1 || in_array(1001, session('permissions'))) {
+            return view('admin.reports.shipment_reversal_report.index');
+        } else {
+            return redirect()->route('admin.access_denied');
+        }
     }
 
 
