@@ -18,6 +18,7 @@ use App\RvShipmentAgent;
 use App\RvShipmentTicket;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -120,6 +121,7 @@ class BotCallingController extends Controller
             ];
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->where('rv_state_id', 1)->latest()->first();
             $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot call add the ' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1]);
+            Log::channel('cronJobLog')->info('s ' . 'bot-call- parameters'. $request);
 
             // if($shipment_assign_agent){
             if ($request->input > 0) {
@@ -177,7 +179,7 @@ class BotCallingController extends Controller
                 'message' => 'Shipment is in different status, Cannot mark it as Another Status!'
             ];
         }
-       
+        Log::channel('cronJobLog')->info('s ' . ' bot-call- message-status update' . $data);
         
         return response()->json(['status' => 1,'message' => $data]);
     }
