@@ -157,8 +157,6 @@ class BotCallingController extends Controller
                             $job = (new BotCallDispatch($findShipmentId->id))->delay(60 * $globalSettingValue['setting_value']);
                             $this->dispatch($job);
                         }
-                        unset($data['message']['rv_agent_call_history_record_id']);
-
                     }
                     $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey,  $status->id ?? $data['rv_agent_call_history_record_id']);
                     unset($data['message']['rv_agent_call_history_record_id']);
