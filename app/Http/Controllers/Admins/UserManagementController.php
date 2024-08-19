@@ -155,8 +155,13 @@ class UserManagementController extends Controller
                     $type = 'Zonal Hubs';
                 }
 
-                return '<button class="btn btn-sm btn-outline-info align-middle get_hub_access_type" data-target-id="' . $user->id . '">' . $type . '</button>';
+                $admin_hubs = AdminHub::where('admin_id', $user->id)->pluck('hub_id');
 
+                if($admin_hubs->isNotEmpty()){
+                    return '<button class="btn btn-sm btn-outline-info align-middle get_hub_access_type" data-target-id="' . $user->id . '">' . $type . '</button>';
+                }else{
+                    return 'No Hub Assigned';
+                }
             })
 
             ->addColumn('ahat_excel', function ($user) {

@@ -15,13 +15,17 @@ class CreateAdminHubAccessTypesTable extends Migration
     {
         Schema::create('admin_hub_access_types', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('admin_id');
-            $table->integer('hub_access_type');
-            $table->longText('previous_assigned_hubs')->nullable();
+            $table->index('admin_id');
+            $table->integer('hub_access_type'); 
+            $table->unsignedInteger('admin_id');
+            $table->unsignedInteger('updated_by');
             $table->longText('new_assigned_hubs')->nullable();
-            $table->integer('updated_by');
+            $table->longText('previous_assigned_hubs')->nullable();
+            $table->foreign('admin_id')->references('id')->on('admins');
+            $table->foreign('updated_by')->references('id')->on('admins');
             $table->timestamps();
         });
+        
     }
 
     /**
