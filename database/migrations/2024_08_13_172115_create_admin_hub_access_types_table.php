@@ -19,8 +19,8 @@ class CreateAdminHubAccessTypesTable extends Migration
             $table->integer('hub_access_type'); 
             $table->unsignedInteger('admin_id');
             $table->unsignedInteger('updated_by');
-            $table->longText('new_assigned_hubs')->nullable();
-            $table->longText('previous_assigned_hubs')->nullable();
+            $table->longText('new_assigned_hubs');
+            $table->longText('previous_assigned_hubs');
             $table->foreign('admin_id')->references('id')->on('admins');
             $table->foreign('updated_by')->references('id')->on('admins');
             $table->timestamps();
