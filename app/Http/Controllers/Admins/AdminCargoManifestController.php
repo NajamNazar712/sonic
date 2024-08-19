@@ -455,7 +455,7 @@ class AdminCargoManifestController extends Controller
                             })
                             ->orWhere(function ($sub_query) {
                                 $sub_query->where('shipments.shipper_status_id', '=', 75)
-                                    ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'))
+                                    //->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id')) // commented because shipment was not showing again incase of return misrouted
                                     ->whereNotExists(function ($sub_sub_query) {
                                         $sub_sub_query->select(DB::raw(1))
                                             ->from('cargo_manifest_bag_shipments as cmbs')
