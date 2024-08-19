@@ -24,7 +24,7 @@ class BotCallDispatch implements ShouldQueue
      */
     public function __construct($data)
     {
-        // $this->queue = 'bot_call_shipment';
+        $this->queue = 'bot_call_shipment';
         $this->shipmentId = $data;
 
     }
