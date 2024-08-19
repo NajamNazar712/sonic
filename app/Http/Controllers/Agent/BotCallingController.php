@@ -179,7 +179,7 @@ class BotCallingController extends Controller
                 'message' => 'Shipment is in different status, Cannot mark it as Another Status!'
             ];
         }
-        Log::channel('cronJobLog')->info('s ' . ' bot-call- message-status update' . $data);
+        Log::channel('cronJobLog')->info('s ' . ' bot-call- message-status update' . json_encode($data));
         
         return response()->json(['status' => 1,'message' => $data]);
     }
