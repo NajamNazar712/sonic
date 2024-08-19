@@ -170,6 +170,10 @@ class ReturnController extends Controller
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13 and verification = 1)')
                     );
             })
+            ->leftjoin('shipments_journey as rvsj', function($join) {
+                $join->on('rvsj.shipment_id', '=', 'shipments.id')
+                     ->where('rvsj.shipper_status_id', '=', 12);
+            })
             // ->leftJoin('shipments_journey as sret', function ($join) {
             //     $join->on('sret.shipment_id', '=', 'shipments.id')
             //         ->where('sret.shipper_status_id','=',13)
@@ -294,7 +298,8 @@ class ReturnController extends Controller
                 'rvsaad.agent_id as last_agent_name',
                 'delivery_notes.pending_status as delivery_note_pending_status',
                 'rvsaa.shipment_id as rv_shipment_id',
-                'z.name as zone'
+                'z.name as zone',
+                'rvsj.updated_at as rv_status_date'
             );
         } else {
             $shipments = $shipments->select('shipments.id');
@@ -776,7 +781,9 @@ class ReturnController extends Controller
                     $query->whereRaw('false');
                 }
             })
-
+            ->editColumn('rv_status_date', function ($shipments) {
+                return $shipments->rv_status_date ?? "-";
+            })
             ->addColumn('consolidation', function ($shipments) {
                 $consolidations = DeliveryController::check_consolidation($shipments->shId);
                 $consol = '';
@@ -1002,6 +1009,7 @@ class ReturnController extends Controller
                 'Service Type',
                 'Status',
                 'Reason',
+                'RV Status Date',
                 'Call Findings',
                 'Remarks',
                 'Shipper Remarks',
@@ -1051,6 +1059,7 @@ class ReturnController extends Controller
                 $data[] = $row['service_type'];
                 $data[] = $row['status'];
                 $data[] = $row['reason'];
+                $data[] = $row['rv_status_date'];
                 $data[] = $row['remarks_excel'];
                 $data[] = $row['shipment_remarks_excel'];
                 $data[] = $row['shipper_remarks'];

@@ -200,15 +200,25 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    // {
+                    //     text: '<i class="la la-plus"></i> Add Type',
+                    //     className: 'btn btn-primary add_type',
+                    //     enabled: true,
+                    //     action: function (e, dt, node, config) {
+                    //         // $('#AddHoliday .modal-body').html(html);
+                    //         $('#AddCaseNatureTypes').modal('show');
+                    //     }
+                    // },
                     {
                         text: '<i class="la la-plus"></i> Add Type',
                         className: 'btn btn-primary add_type',
                         enabled: true,
                         action: function (e, dt, node, config) {
-                            // $('#AddHoliday .modal-body').html(html);
-                            $('#AddCaseNatureTypes').modal('show');
+                            var url = "{{ route('admin.settings.crm_case_nature_types.add') }}";
+                            window.open(url, '_blank');
                         }
                     },
+
                     {
                         extend: 'excelHtml5',
                         title: 'Case Nature Types',
@@ -328,46 +338,6 @@
                     }
                 });
             });  
-
-            $('#add_type_button').on('click', function () {
-                var case_nature = $('#case_nature_select').val();
-                var case_nature_type = $('#new_case_nature_type').val();
-                var flag = true;
-                if(!case_nature){
-                    flag = false;
-                    var error = "Please select Case Nature!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                if(!case_nature_type){
-                    flag = false;
-                    var error = "Please enter Case Nature Type!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-                if(flag){
-                    $('#add_type_button').attr('disabled',true);
-                    $.ajax({
-                        url: '{!! route('admin.settings.crm_case_nature_types.store') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'case_nature': case_nature,
-                            'case_nature_type' : case_nature_type
-                        }
-                    })
-                        .done(function(data) {
-                            if (data.status == 1) {
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                $('#AddCaseNatureTypes').modal('hide');
-                                table.draw();
-                            }
-                            else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                            $('#add_type_button').attr('disabled',false);
-                        });
-                }
-            });
-
             
             $('#AddCaseNatureTypes').on('hide.bs.modal', function (e) {
                 $('#case_nature_select').val('').trigger('change');
