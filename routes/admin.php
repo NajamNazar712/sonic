@@ -3666,6 +3666,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print', 'AdminShipmentHandoverController@handover_print')->name('print');
             Route::post('pieces_list', 'AdminShipmentHandoverController@handover_shipments_pieces')->name('pieces_list');
             Route::post('get_user', 'AdminShipmentHandoverController@get_user')->name('get_user');
+            Route::post('excess_handover_shipments', 'AdminShipmentHandoverController@excess_handover_shipments_count')->name('excess_handover_shipments');
         });
         Route::prefix('responsibles')->name('responsibles.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@responsibles_index')->name('index');

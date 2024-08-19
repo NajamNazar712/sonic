@@ -104,7 +104,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Shipment(s)</th>
-                        {{-- <th class="border-primary border-darken-1">Excess Shipment</th> --}}
+                        <th class="border-primary border-darken-1">Excess Shipment(s)</th>
                         <th class="border-primary border-darken-1">Received Shipment(s)</th>
                         <th class="border-primary border-darken-1">Remaining Shipment(s)</th>
                         <th class="border-primary border-darken-1">Shipment Pieces</th>
@@ -137,6 +137,29 @@
             </div>
         </div>
     </div>
+
+    {{-- Excess shipments modal --}}
+    <div class="modal fade" id="excess_shipments" role="dialog" aria-labelledby="shipments_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="excess_shipments_title">Excess Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
 
     {{-- Shipment Pieces Modal --}}
     <div class="modal fade" id="shipment_pieces" role="dialog" aria-labelledby="shipments_title" aria-hidden="true">
@@ -388,6 +411,7 @@
                             head.push('Hub');
                             head.push('Status');
                             head.push('Total Shipment(s)');
+                            head.push('Excess Shipment(s)');
                             head.push('Received Shipment(s)');
                             head.push('Remaining Shipment(s)');
                             head.push('Received By');
@@ -415,6 +439,7 @@
                                 row.push(values.hub);
                                 row.push(values.status);
                                 row.push(values.total_shipments);
+                                row.push(values.excess_shipments);
                                 row.push(values.received_shipments);
                                 row.push(values.remaining);
                                 row.push(values.received_by);
@@ -593,6 +618,7 @@
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},
                     {data: 'shipment_count', name: 'handovers.shipments', class: 'align-middle text-center shipment_count'},
+                    {data: 'excess_shipments', name: 'excess_shipments', class: 'align-middle text-center excess_shipments'},
                     {data: 'received_shipments', name: 'handovers.received', class: 'align-middle received_shipments'},
                     {data: 'remaining_shipment_count', name: 'remaining_shipment_count', class: 'align-middle text-center remaining_shipment_count', orderable: false, searchable: false},
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle text-center shipment_pieces', orderable: false, searchable: false},
@@ -689,6 +715,33 @@
 
                         }
                     });
+
+            });
+
+            $('#datatable tbody').on('click','tr td.excess_shipments button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#excess_shipments .modal-body').html('');
+                $('#excess_shipments').modal('show');
+
+                $.ajax({
+                        url: '{!! route('admin.handover.list.excess_handover_shipments') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id
+                        }
+                    })
+                    .done(function(data) {
+                        if (data) {
+                            var shipments = '';
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_numbers) {
+                                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                                });
+                            }
+                            $('#excess_shipments .modal-body').html(shipments);
+                        }
+                });
 
             });
 

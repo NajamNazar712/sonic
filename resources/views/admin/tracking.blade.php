@@ -1790,6 +1790,7 @@
                                     shipment += '<thead>';
                                     shipment += '<tr role="row">';
                                     shipment += '<th><strong>Handover Id</strong></th>';
+                                    shipment += '<th><strong>Bag Number</strong></th>';
                                     shipment += '<th><strong>Status</strong></th>';
                                     shipment += '<th><strong>Location</strong></th>';
 
@@ -1806,6 +1807,7 @@
                                     }
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.handover_id + '</td>';
+                                        shipment += '<td>' + history.bag_number.bag_number + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
                                         shipment += '<td>' + (history.area_log ? history.area_log.location_status + ' | (' + history.area_log.area + ') | <a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>' : '') + '</td>';
 

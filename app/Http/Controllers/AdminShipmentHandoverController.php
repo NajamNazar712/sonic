@@ -25,6 +25,7 @@ use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\ShipmentsJourney;
 use App\ShipmentScanningJourneyAreaLog;
+use App\Http\Models\Handover\ExcessHandoverShipment;
 
 class AdminShipmentHandoverController extends Controller
 {
@@ -159,6 +160,8 @@ class AdminShipmentHandoverController extends Controller
     public function handover_receive_index(){
       $handover_bag_numbers = Handover::select('id', 'bag_number')
       ->whereNotNull('bag_number')
+      ->orderBy('id', 'desc')
+      // ->take(6)
       ->get();
       return view('admin.handover.receive', compact('handover_bag_numbers'));
     }
@@ -302,9 +305,11 @@ class AdminShipmentHandoverController extends Controller
             return redirect()->route('admin.handover.create.index')->with('success','Handover Note created Successfully!');
         }
         return redirect()->back()->with('error', 'No shipments scanned!');
-
     }
 
+    private function isShipmentExcess($shipment, $request_bag_number, $existing_bag_number) {
+      return $request_bag_number->bag_number != $existing_bag_number->bag_number;
+    }
 
     public function bulk_handover_submit_receive(Request $request){
         $shipment_ids = explode(',', $request->shipment_ids);
@@ -319,8 +324,29 @@ class AdminShipmentHandoverController extends Controller
                 if(!in_array($handover_id, $handover_ids)){
                     $handover_ids[] = $handover_id;
                 }
-
                 HandoverShipmentJourneyController::add( $shipment_id,$handover_id,2);
+
+                // Save Verified or Excess shipments
+                $excess_shipment = null;
+                $request_bag_number = Handover::where('id', $request->handover_id)
+                  ->select('id','bag_number')
+                  ->first();
+                $existing_bag_number = Handover::where('id', $handover_shipments->handover_id)
+                  ->select('id','bag_number')
+                  ->first();
+
+                if ($request_bag_number->bag_number == $existing_bag_number->bag_number) {
+                  $excess_shipment = 0;
+                } else {
+                  $excess_shipment = 1;
+                  $data = [
+                    'handover_id' => $request->handover_id,
+                    'bag_number' => $request_bag_number->bag_number,
+                    'shipment_ids' => $shipment_id,
+                    'excess_shipment' => $excess_shipment
+                  ];
+                  ExcessHandoverShipment::create($data);
+                }
             }
         }
 
@@ -466,6 +492,10 @@ class AdminShipmentHandoverController extends Controller
                                 GROUP BY shipment_id) as latest_journey'),
                         'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
 
+      ->leftJoin('excess_handover_shipments', function($join) {
+        $join->on('excess_handover_shipments.handover_id', '=', 'handovers.id')
+          ->where('excess_handover_shipments.excess_shipment', '=', 1);
+      })    
 
         ->select(['handovers.id as handover_id','a.name as created_by','a.id as created_by_id','ad.name as received_by','ad.id as received_by_id',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
@@ -481,7 +511,8 @@ class AdminShipmentHandoverController extends Controller
                     WHEN latest_journey.shipper_status_id IN ($return_status_ids_str) THEN 'Return'
                     ELSE 'Unknown'
                 END as bag_type
-            ")
+            "), 
+            'excess_handover_shipments.shipment_ids as excess_shipments'
        
       ])
       ->whereBetween('handovers.created_at', [$from,$to])
@@ -497,6 +528,17 @@ class AdminShipmentHandoverController extends Controller
                   return '<button class="btn btn-sm btn-outline-info align-middle">' . $handover_list->shipment_count . '</button>';
               }
               else {
+                  return 0;
+              }
+            })
+
+            ->editColumn('excess_shipments', function($handover_list) {
+              $excessCount = ExcessHandoverShipment::where('handover_id', $handover_list->handover_id)
+              ->where('excess_shipment', 1)
+              ->count();
+              if ($excessCount != 0) {
+                  return '<button class="btn btn-sm btn-outline-info align-middle">' . $excessCount . '</button>';
+              } else {
                   return 0;
               }
             })
@@ -625,6 +667,26 @@ class AdminShipmentHandoverController extends Controller
                 return ['status' => 0, 'success' => 'No Handover Note Shipments', 'shipments' => FALSE];
         }
     }
+
+    public function excess_handover_shipments_count(Request $request)
+    {
+      $handover_id = $request->input('id');
+      $handover_shipments = ExcessHandoverShipment::where('handover_id', $handover_id)
+      ->where('excess_shipment', 1)
+      ->select('shipment_ids')
+      ->get();
+      $shipments = array();
+      if($handover_shipments->count() != 0){
+        foreach ($handover_shipments as $handover_shipment){
+          $shipment = Shipment::find($handover_shipment->shipment_ids);
+          $shipments[] = $shipment->tracking_number;
+        }
+        return ['status' => 0, 'success' => 'Handover Note Shipments', 'shipments' => $shipments];
+      }
+      else{
+        return ['status' => 0, 'success' => 'No Handover Note Shipments', 'shipments' => FALSE];
+      }
+  }
 
     public function handover_shipments_delivered(Request $request){
 

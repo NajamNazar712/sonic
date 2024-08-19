@@ -95,6 +95,7 @@
                                 {{ csrf_field() }}
     
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
+                                <input type="hidden" name="handover_id" class="handover_id">
                                 
                                 <div class="form-group ml-1 d-none" id="confirm_button">
                                     <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
@@ -237,7 +238,6 @@
             var scan_button = $('#scan_button');
             var confirm_button = $('#confirm_button');
             // scan_tracking_number.prop('disabled', true);
-
 
             bag_number.prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Bag Number',
@@ -634,8 +634,9 @@
 
             $('#arrival_of_shipments_form').bind('submit', function(e) {
                 e.preventDefault(); 
-                
                 $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
+                $('#arrival_of_shipments_form input.handover_id').val(bag);
+
                 var form = this;
                 swal({
                     text: 'Are you sure, Select Yes to receive the Handover?',
@@ -710,6 +711,31 @@
                         }
                     });
             });
+
+            // bag_number.on('select2:open', function() {
+            //     let searchInput = $('.select2-search__field');
+            //     searchInput.on('keyup', function() {
+            //         let query = $(this).val();
+            //         console.log(query);
+            //         $.ajax({
+            //             url: 'your_endpoint_url',
+            //             type: 'GET',
+            //             data: { search: query },
+            //             success: function(data) {
+            //                 bag_number.empty();
+            //                 bag_number.append('<option value=""></option>');
+            //                 $.each(data, function(index, item) {
+            //                     bag_number.append('<option value="' + item.id + '">' + item.bag_number + '</option>');
+            //                 });
+            //                 bag_number.trigger('change');
+            //             },
+            //             error: function(xhr) {
+            //                 console.error('An error occurred:', xhr.responseText);
+            //             }
+            //         });
+            //     });
+            // });
+
         });
     </script>
 @endsection
