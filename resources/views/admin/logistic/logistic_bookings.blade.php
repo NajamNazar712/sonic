@@ -12,6 +12,36 @@
                     Logistic Booking
                 </h1>
 
+                <div class="col mt-2">
+                    <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                      <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                      </span>
+                                </div>
+                                <input type="text" name="logistic_from_date" class="form-control bg-primary border-primary white rounded-right" id="logistic_from_date" placeholder="Logistic Date From"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}">
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                                </div>
+                                <input type="text" name="logistic_to_date" class="form-control bg-primary border-primary white rounded-right" id="logistic_to_date" placeholder="Logistic Date To" data-value="{{ \Carbon\Carbon::now() }}">
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-3 mt-2 justify-content-center">
+                            <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                        </div>
+                    </form>
+                </div>
+
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
@@ -242,31 +272,138 @@
 
         $(document).ready(function () {
 
+            var logistic_from_date = $('#logistic_from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
 
+                    var old_date_formatted = $('input[name="logistic_from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(31, 'days');
+                    var current_max = moment(contractMoment).add(1, 'days');
+                    logistic_to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    logistic_to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    logistic_to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
+                }
+            });
+
+            var logistic_to_date = $('#logistic_to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    // if (context.select) {
+                    //     $('#track_form #logistic_from_date').pickadate('picker').set('max', $('#track_form #logistic_to_date').pickadate('picker').get('select'));
+                    // }
+                }
+            });
+
+            $('#track_form').bind('submit', function (e) {
+                e.preventDefault();
+                var logistic_from_date2 = $('#track_form #logistic_from_date').val();
+                var logistic_to_date2 = $('#track_form #logistic_to_date').val();
+
+
+                if (logistic_from_date2 != '' && logistic_to_date2 != '') {
+                    table.draw();
+                }
+
+            });
+
+
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                if (this.context.length) {
+                    var body = [];
+                    var head = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.logistic.list') }}',
+                        data: params,
+                        success: function (result) {
+                             head = [
+                                'S.No',
+                                'Booking Date',
+                                'CN Number',
+                                'Shipper Name',
+                                'Pickup Address',
+                                'Product Name',
+                                'Service Name',
+                                'Rider Name',
+                                'Total Booking Weight',
+                                'Total Pieces',
+                                'Origin Name',
+                                'Destination Name',
+                                'Consignee Name',
+                                'Consignee Address'
+                            ];
+
+                            $.each(result.data, function (index, values) {
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.booking_date);
+                                row.push(values.cn_number);
+                                row.push(values.shipper_name);
+                                row.push(values.pickup_address);
+                                row.push(values.product_name);
+                                row.push(values.service_name);
+                                row.push(values.rider_name);
+                                row.push(values.total_booking_weight);
+                                row.push(values.total_pieces);
+                                row.push(values.origin_name);
+                                row.push(values.destination_name);
+                                row.push(values.consignee_name);
+                                row.push(values.consignee_address);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            });
 
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
                 @if (session('role_id') == 1 || count(array_intersect([988], session('permissions'))) !== 0)
-
-                buttons: [
-                    {
-                        text: '<i class="la la-plus"></i> Add Booking',
-                        className: 'btn btn-primary request_add',
-                        action: function (e, dt, node, config) {
-                            window.location.href = "{{ route('admin.logistic.create') }}";
-                        }
+                        {
+                            text: '<i class="la la-plus"></i> Add Booking',
+                            className: 'btn btn-primary request_add',
+                            action: function (e, dt, node, config) {
+                                window.location.href = "{{ route('admin.logistic.create') }}";
+                            }
 
 
-                    },
+                        },
+                    @endif
+                    @if (session('role_id') == 1 || count(array_intersect([1002], session('permissions'))) !== 0)
 
-                    'reset'
+                        {
+                            extend: 'excelHtml5',
+                            title: 'Logistic Booking',
+                            className: 'btn btn-primary',
+                            text: '<i class="la la-file-excel-o "></i> Excel',
+                        },
+                    @endif
+                    'reset',
+
                 ],
-                @else
-                buttons: [
-                    'reset'
-                ],
-                @endif
+
                 scrollX: true, scrollY: '500px',
                 // select: {
                 //     info: false,
@@ -284,7 +421,12 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.logistic.list') }}',
+                    data: function (d) {
+                        d.logistic_from_date = $('input[name="logistic_from_date_formatted"]').val();
+                        d.logistic_to_date = $('input[name="logistic_to_date_formatted"]').val();
 
+
+                    }
                 },
                 rowId: 'id',
                 order: [[2, 'desc']],

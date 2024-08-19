@@ -135,6 +135,7 @@
                                 <th class="border-primary border-darken-1">Service Type</th>
                                 <th class="border-primary border-darken-1">Status</th>
                                 <th class="border-primary border-darken-1">Reason</th>
+                                <th class="border-primary border-darken-1">RV Status Date</th>
                                 <th class="border-primary border-darken-1">Call Findings</th>
                                 <th class="border-primary border-darken-1">Remarks</th>
                                 <th class="border-primary border-darken-1">Shipper Remarks</th>
@@ -1340,6 +1341,7 @@
                                 head.push('Service Type');
                                 head.push('Status');
                                 head.push('Reason');
+                                head.push('RV Status Date');
                                 head.push('Call Findings');
                                 head.push('Remarks');
                                 head.push('Shipper Remarks');
@@ -1381,6 +1383,7 @@
                                     row.push(values.service_type);
                                     row.push(values.status);
                                     row.push(values.reason);
+                                    row.push(values.rv_status_date);
                                     row.push(values.remarks_excel); //Remarks Count
                                     row.push(values.shipment_remarks_excel);
                                     row.push(values.shipper_remarks);
@@ -2082,6 +2085,7 @@
                         {data: 'service_type',name: 'bt.id',class: 'align-middle service_type'},
                         {data: 'status',name: 'status',class: 'align-middle status' },
                         {data: 'reason',name: 'ssr.name',class: 'align-middle reason'},
+                        {data: 'rv_status_date', name: 'rvsj.udpated_at', class: 'align-middle reason'},
                         {data: 'remarks',name: '',class: 'align-middle text-center remarks'},
                         {data: 'shipment_remarks',name: 'admin_journey.remarks',class: 'align-middle shipment_remarks'},
                         {data: 'shipper_remarks',name: 'shipments_journey.remarks',class: 'align-middle shipper_remarks' },

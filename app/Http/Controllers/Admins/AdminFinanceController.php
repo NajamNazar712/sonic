@@ -117,6 +117,7 @@ use App\Http\Controllers\ShipmentsPaymentJourneyController;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Controllers\Admins\AdminDashboardController;
+use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Models\UserIbftCharge;
 use App\Http\Models\ShipmentServicesCharges;
 use App\Http\Models\Admin\StationDepositeNoteActionLog;
@@ -124,6 +125,9 @@ use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\ShipmentSmsLogs;
 use Illuminate\Support\Facades\Response;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\NotificationSetting;
 use Illuminate\Support\Facades\Log;
 
@@ -8311,6 +8315,38 @@ class AdminFinanceController extends Controller
 
                         $shipment->save();
 
+                        //---------x-----------x-------------
+                        // Start Auto Close Complaints
+                        $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('status_id', 2)->first();
+                        
+                        if ($crm_request) { 
+                            $shipperName = User::find(Shipment::where('id', $shipment->id)->select('user_id')->first()->user_id)->name;
+                            
+                            if ($crm_request->status_id == 2) {//if crm request is in_process
+                                CrmRequest::where('id', $crm_request->id)->update([
+                                    'status_id' => 4 // Closed status
+                                ]);
+                                CrmRequestStatusHistory::create([
+                                    'crm_request_id' => $crm_request->id,
+                                    'status_id' => 4,
+                                    'agent_id' => Auth::id()
+                                ]);
+                                
+                                CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+
+                                $comment = 'Dear '.$shipperName.',
+                                        Thank you for reaching us out! 
+                                        Your complaint has been resolved, and the payment has been paid. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 48 hrs.
+                                        Regards,
+                                        Team CRM
+                                        TRAX';
+                                
+                                CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                            }
+                        }
+                        // End Auto Close Complaints
+                        //---------x-----------x-------------
+
                         ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
                     }
                 }
@@ -15026,7 +15062,7 @@ class AdminFinanceController extends Controller
 
         $pending_payments = RetailPendingPayment::join('retail_shipper_infos as rsi', 'retail_pending_payments.user_id', '=', 'rsi.id')
             ->join('cities as c', 'rsi.city_id', '=', 'c.id')
-            ->join('banks_lists as ub', 'rsi.bank_id', '=', 'ub.id')
+            ->leftjoin('banks_lists as ub', 'rsi.bank_id', '=', 'ub.id')
             ->join('cities as bc', 'rsi.city_id', '=', 'bc.id')
             ->join('retail_pending_payment_shipments as pps', 'retail_pending_payments.id', '=', 'pps.retail_pending_payment_id')
             ->leftjoin('retail_pending_payment_calculations as ppc', 'ppc.retail_pending_payment_id', '=', 'retail_pending_payments.id')
