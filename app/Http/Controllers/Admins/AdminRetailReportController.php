@@ -53,7 +53,7 @@ class AdminRetailReportController extends Controller
         $to = Carbon::parse($to)->addDay()->setTimeFromTimeString('06:00:00');
 
         $rncc_numbers = $request->input('search_rncc_no', []);
-        if (!is_array($rncc_numbers)) {
+        if (!is_array($rncc_numbers) && !is_array($rncc_numbers)) {
             $rncc_numbers = explode(',', $rncc_numbers);
         }
 
