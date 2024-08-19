@@ -15303,6 +15303,7 @@ class AdminReportsController extends Controller
 
     public function shipment_reversal_list(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 803);
         $from_date = $request->has('search_date_from') && !empty($request->search_date_from)
             ? Carbon::parse($request->search_date_from)->startOfDay()
             : null;
