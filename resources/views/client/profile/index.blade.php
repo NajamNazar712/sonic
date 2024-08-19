@@ -1637,6 +1637,15 @@
 
                     @else
 
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your bank is being added!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
                     form.submit();
 
                     @endif
