@@ -11823,6 +11823,8 @@ class RiderAPIController extends Controller
 
                                             if($shipper_status_id == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
                                             {
+                                                \Log::channel('cronJobLog')->info('s ' . 'shipper_status_id - '. $shipper_status_id);
+
                                                 $this->rvshipmentticketInsert($shipment->id, $shipper_status_id, $request->status_reason_id, $shipment->user_id);
                                             }
 

@@ -95,7 +95,6 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'delete_reason' => null
                 ]
             );
-            // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved1');
             $adminId = 3399;
             //need to Continue This
             if($isBot)
@@ -112,13 +111,15 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'rv_state_id' => 1,
                 ];
                 $this->rv_shipment_assign($data);
-                if(RvShipmentAgent::where('agent_id', 3372)->doesntExist()){
+                if(RvShipmentAgent::where('agent_id', $adminId)->doesntExist()){
                     $new = new RvShipmentAgent();
                     $new->agent_id = $adminId;
                     $new->total_shipments = 0;
                     $new->actual_productivity = 0;
                     $new->save();
                 }
+                Log::channel('cronJobLog')->info('s ' . 'rv_shipment_assign Saved1');
+
                 //Job implementation for the bot call.                
                 dispatch(new BotCallDispatch($this->shipment['shipment_id']));
             }
