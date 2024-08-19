@@ -1591,6 +1591,9 @@
                 },
                 submitHandler: function(form) {
                     $('#AddBankModal').modal('hide');
+
+                    @if($isIbanNotificationEnabled)
+
                     $('#demoModal').modal('show');
                     $.ajax({
                         url: "{{ route('cod.verify.pin.code') }}",
@@ -1631,6 +1634,12 @@
                             }
                         }
                     });
+
+                    @else
+
+                    form.submit();
+
+                    @endif
 
                 }
             });

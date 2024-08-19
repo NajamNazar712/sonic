@@ -99,10 +99,8 @@ use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\CorporateBookingTypeCharge;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\PackagingMaterialTypeSizes;
-use App\Http\Models\ShipperVerificationPinCode;
 use App\Http\Models\WMS\WmsPerSquareFootCharge;
 use App\Http\Models\Admin\StandardFuelSurcharge;
-
 use App\Http\Models\CorporateCashHandlingCharge;
 use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Controllers\NotificationsController;
@@ -138,6 +136,7 @@ use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
+use App\Http\Models\Notification;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
@@ -1183,8 +1182,9 @@ class ShipperDashboardController extends Controller
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $reference = Reference::where('id', $user->reference_id)->first();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
+        $isIbanNotificationEnabled = Notification::select('status')->find(91)->status ?? false;
 
-        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
+        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days, 'isIbanNotificationEnabled' => $isIbanNotificationEnabled]);
     }
 
     public function storeShipperId(Request $request)
