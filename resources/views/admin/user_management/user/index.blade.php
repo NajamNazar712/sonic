@@ -612,7 +612,7 @@
 					{data: 'updated_at', name: 'admins.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data: 'status', name: 'admins.status', class: 'align-middle status'},
-					{data: 'ahat', name: 'ahat', class: 'align-middle ahat'},
+					{data: 'ahat', name: 'ahat', class: 'align-middle ahat', orderable:false },
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -643,7 +643,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select-checkbox')) {
+						if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select-checkbox') || $(header).is('.ahat')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.status')){
                             $(status_select).appendTo($(search))

@@ -617,6 +617,13 @@ class UserManagementController extends Controller
 
             AdminHub::where('admin_id', $id)->whereIn('hub_id', $delete_hub_ids)->delete();
 
+            $admin_hub_access = AdminHubAccessType::where('admin_id', $id);
+
+            if($admin_hub_access->exists()) {
+                $admin_hub_access->latest()->first()->update([
+                    'hub_access_type' => 1
+                ]);
+            }
             foreach ($new_hub_ids as $hub_id) {
                 $admin_hub = new AdminHub();
 
@@ -625,6 +632,8 @@ class UserManagementController extends Controller
 
                 $admin_hub->save();
             }
+
+
         } else {
             AdminHub::where('admin_id', $id)->delete();
         }
