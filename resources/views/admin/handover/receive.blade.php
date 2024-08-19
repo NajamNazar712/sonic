@@ -239,10 +239,27 @@
             var confirm_button = $('#confirm_button');
             // scan_tracking_number.prop('disabled', true);
 
-            bag_number.prepend('<option value="" selected="selected"></option>').select2({
+            bag_number
+            .prepend('<option value="" selected="selected"></option>')
+            .select2({
                 placeholder:'Select Bag Number',
                 width: '200px',
-                allowClear:true
+                allowClear:true,
+                // ajax: {
+                //     dataType: 'json',
+                //     url:  '{!! route('admin.handover.receive.bag_number_dropdown') !!}',
+                //         data: function (params) {
+                //             return {
+                //                 search: params.term,
+                //             }
+                //         },
+                //         processResults: function (data) {
+                //             return {
+                //                 results: data
+                //             };
+                //         },
+                //     delay: 200,
+                // }
             });
 
             var bag = null;
@@ -711,31 +728,6 @@
                         }
                     });
             });
-
-            // bag_number.on('select2:open', function() {
-            //     let searchInput = $('.select2-search__field');
-            //     searchInput.on('keyup', function() {
-            //         let query = $(this).val();
-            //         console.log(query);
-            //         $.ajax({
-            //             url: 'your_endpoint_url',
-            //             type: 'GET',
-            //             data: { search: query },
-            //             success: function(data) {
-            //                 bag_number.empty();
-            //                 bag_number.append('<option value=""></option>');
-            //                 $.each(data, function(index, item) {
-            //                     bag_number.append('<option value="' + item.id + '">' + item.bag_number + '</option>');
-            //                 });
-            //                 bag_number.trigger('change');
-            //             },
-            //             error: function(xhr) {
-            //                 console.error('An error occurred:', xhr.responseText);
-            //             }
-            //         });
-            //     });
-            // });
-
         });
     </script>
 @endsection

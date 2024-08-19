@@ -1218,4 +1218,14 @@ class AdminShipmentHandoverController extends Controller
       });
       return $datatable->make(true);
     }
+
+    public function bag_number_dropdown(Request $request)
+    {
+      $handover_bag_numbers = Handover::select('id', 'bag_number')
+      ->whereNotNull('bag_number')
+      ->orderBy('id', 'desc')
+      ->take(6)
+      ->get();
+      return response()->json($handover_bag_numbers);
+    }
 }
