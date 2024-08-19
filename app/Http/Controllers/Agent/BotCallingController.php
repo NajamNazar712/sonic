@@ -97,7 +97,7 @@ class BotCallingController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 0, 'errors' => $validate->errors()],422);
         } 
-        $findShipmentId = Shipment::where('tracking_number', $request->input('tracking_number'))->whereIn('shipper_status_id', [12, 52, 66])->first();
+        $findShipmentId = Shipment::where('tracking_number', $request->input('tracking_number'))->whereIn('shipper_status_id', [12, 52, 66])->first();    
         if($findShipmentId){
             // RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 1]);
             $array = [
@@ -144,6 +144,7 @@ class BotCallingController extends Controller
                     $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->latest()->first();
                     //Dispatch Job Add with the delay for the unresponsive case second or third call
                     if ($request->input < 1) {
+                        unset($data['message']['rv_agent_call_history_record_id']);
 
                         if (RvShipmentAssignAgent::join('rv_shipment_tickets as rst', 'rst.shipment_id', 'rv_shipment_assign_agents.shipment_id')->where('rv_shipment_assign_agents.unresponsive_count', 1)->where('rv_shipment_assign_agents.shipment_id', $findShipmentId->id)->exists()) {
 
@@ -156,10 +157,13 @@ class BotCallingController extends Controller
                             $job = (new BotCallDispatch($findShipmentId->id))->delay(60 * $globalSettingValue['setting_value']);
                             $this->dispatch($job);
                         }
+                        unset($data['message']['rv_agent_call_history_record_id']);
+
                     }
                     $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey,  $status->id ?? $data['rv_agent_call_history_record_id']);
+                    unset($data['message']['rv_agent_call_history_record_id']);
+
                 }
-                unset($data['message']['rv_agent_call_history_record_id']);
             } else {
                 $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey, $status->id);
 
