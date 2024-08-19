@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\Webhook\WebhookLogController;
 use App\Http\Models\Shipment;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
@@ -43,11 +44,7 @@ class BotCallDispatch implements ShouldQueue
         //
         $environment = config('app.env');
 
-        if ($environment == 'production') {
-            // $base_uri = 'https://sonic.pk/api/shipment/book';
-        } else {
-            $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
-        }
+        $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
         RvShipmentTicket::where('shipment_id', $this->shipmentId)->update(['in_progress' => 1]);
         $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($this->shipmentId);
         $post = [
@@ -63,10 +60,10 @@ class BotCallDispatch implements ShouldQueue
                 'json' => $post
             ]);
         $status_code = $response->getStatusCode();
-
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
-        \Log::channel('cronJobLog')->info('s ' . 'status_code cap.zong.com'. json_encode($response));
+        WebhookLogController::shipment_status_log($shipment->user_id, $status_code,null);
+        // \Log::channel('cronJobLog')->info('s ' . 'status_code cap.zong.com'. json_encode($response));
 
     }
 }
