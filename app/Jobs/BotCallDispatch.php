@@ -62,8 +62,6 @@ class BotCallDispatch implements ShouldQueue
         $status_code = $response->getStatusCode();
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
-        WebhookLogController::shipment_status_log($shipment->user_id, $status_code,null);
-        // \Log::channel('cronJobLog')->info('s ' . 'status_code cap.zong.com'. json_encode($response));
-
+        WebhookLogController::shipment_status_log($shipment->user_id, $status_code, $response);
     }
 }

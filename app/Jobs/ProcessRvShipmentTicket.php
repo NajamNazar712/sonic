@@ -118,8 +118,6 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     $new->actual_productivity = 0;
                     $new->save();
                 }
-                Log::channel('cronJobLog')->info('s ' . 'rv_shipment_assign Saved1');
-
                 //Job implementation for the bot call.                
                 dispatch(new BotCallDispatch($this->shipment['shipment_id']));
             }
