@@ -122,7 +122,7 @@ class BotCallingController extends Controller
             ];
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->where('rv_state_id', 1)->latest()->first();
             $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot call add the ' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1]);
-            Log::channel('cronJobLog')->info('s ' . 'bot-call- parameters'. json_encode($request));
+            Log::channel('cronJobLog')->info('s ' . 'bot-call- parameters'. json_encode($request->all()));
 
             // if($shipment_assign_agent){
             if ($request->input > 0) {
@@ -162,7 +162,6 @@ class BotCallingController extends Controller
                         }
                     }
                     $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey,  $status->id ?? $data['rv_agent_call_history_record_id']);
-                    unset($data['message']['rv_agent_call_history_record_id']);
 
                 }
             } else {
