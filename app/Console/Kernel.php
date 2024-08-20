@@ -544,7 +544,7 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
 //        $schedule->command('hourly-logistic:shipper-bookings')->hourly()->runInBackground();
         $schedule->command('delete:short-url-data')->dailyAt('01:00')->runInBackground();
-        $schedule->command('supervisord:restart')->twiceDaily('09','16:25')->runInBackground();
+        $schedule->command('supervisord:restart')->twiceDaily('09','17')->runInBackground();
 
     }
     /**
