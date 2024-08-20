@@ -273,6 +273,7 @@
                         <th class="border-primary border-darken-1">Call Status</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Updated AT</th>
+                        <th class="border-primary border-darken-1">Requested Resource</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -1065,6 +1066,7 @@
                             head.push('Call Status');
                             head.push('Updated By');
                             head.push('Updated At');
+                            head.push('Requested Resource');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -1093,7 +1095,7 @@
                                 row.push(values.call_status);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
-
+                                row.push(values.via_channel);
                                 body.push(row);
                             });
                         },
@@ -1273,6 +1275,7 @@
                     {data: 'call_status', name: 'leads.call_status', class: 'align-middle call_status'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'leads.updated_at', class: 'align-middle updated_at'},
+                    {data: 'via_channel', name: 'leads.via_channel', class: 'align-middle via_channel'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -1291,6 +1294,12 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
                     var service_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    var requested_via_select =
+                        '<select name="requested_via_select" id="requested_via_select" class="select2 form-control">' +
+                        '<option value="Sonic">Sonic</option>' +
+                        '<option value="Website">Website</option>' +
+                        '</select>';
+
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
@@ -1307,7 +1316,13 @@
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        } else {
+                        } else if ($(header).is('.via_channel')) {
+                            $(requested_via_select).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                         else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -1340,6 +1355,14 @@
                     $("#service_select").prepend('<option value="" selected></option>').select2({
                         data: data2,
                         placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    $("#requested_via_select").prepend('<option selected></option>').select2({
+                        // data: data2,
+                        placeholder: "Select Requested Resource",
                         width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
@@ -2250,56 +2273,6 @@
             });
 
 
-            $('#edit_lead_form').validate({
-                ignore: [],
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function (error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                normalizer: function (value) {
-                    return $.trim(value);
-                },
-                submitHandler: function (form) {
-                    swal({
-                        text: 'Are you sure, you want to edit this lead?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            var lead_id = $('#edit_lead_id').val();
-
-                            if (lead_id != null) {
-                                blockPagePermanently();
-                                form.submit();
-                            } else {
-                                var error = 'Invalid Lead ID!';
-                                toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                        }
-                    });
-                }
-            });
-
             $('#add_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder:'Select City*',
@@ -2381,30 +2354,156 @@
                     return $.trim(value);
                 },
                 submitHandler: function (form) {
-                    swal({
-                        text: 'Are you sure, you want to add this lead?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
+                    let phoneNumber = $('#add_phone_number').val();
+                    let emailAddress = $('#add_email').val();
+                    let company = $('#add_company').val();
+
+                    $.ajax({
+                        url: '{{ route('admin.leads.check.lead') }}',
+                        method: 'POST',
+                        data: {
+                            phone: phoneNumber,
+                            email: emailAddress,
+                            company: company,
+                            _token: '{{ csrf_token() }}'
                         },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            blockPagePermanently();
-                            form.submit();
+                        success: function(response) {
+                            if (response.phone_number_exists || response.email_address_exists || response.company_exists)  {
+                                let errorMessage = '';
+
+                                if (response.phone_number_exists) {
+                                    errorMessage += 'Phone number already exists<br>';
+                                }
+                                if (response.email_address_exists) {
+                                    errorMessage += 'Email address already exists<br>';
+                                }
+                                if (response.company_exists) {
+                                    errorMessage += 'Company already exists';
+                                }
+                                toastr.error(errorMessage, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            } else {
+                                swal({
+                                    text: 'Are you sure you want to add this lead?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        blockPagePermanently();
+                                        form.submit();
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+
+            
+            $("#add_lead_form input[name='contact_person']").on('keyup', function() {
+                var currentValue = $(this).val();
+                var filteredValue = currentValue.replace(/[^a-zA-Z ]+/g, '');            
+                $(this).val(filteredValue);
+            });
+
+
+            $('#edit_lead_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function (value) {
+                    return $.trim(value);
+                },
+                submitHandler: function (form) {
+                    let phoneNumber = $('#edit_phone_number').val();
+                    let emailAddress = $('#edit_email').val();
+                    let company = $('#edit_company').val();
+                    let leadId = $('#edit_lead_id').val();
+
+                    $.ajax({
+                        url: '{{ route('admin.leads.check.lead') }}',
+                        method: 'POST',
+                        data: {
+                            phone: phoneNumber,
+                            email: emailAddress,
+                            company: company,
+                            lead_id: leadId,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            let errorMessages = [];
+
+                            if (response.phone_number_exists) {
+                                errorMessages.push('Phone number already exists<br>');
+                            }
+                            if (response.email_address_exists) {
+                                errorMessages.push('Email address already exists<br>');
+                            }
+                            if (response.company_exists) {
+                                errorMessages.push('Company already exists');
+                            }
+
+                            if (errorMessages.length > 0) {
+                                toastr.error(errorMessages.join('\n'), 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            } else {
+                                swal({
+                                    text: 'Are you sure you want to edit this lead?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        if (leadId != null) {
+                                            blockPagePermanently();
+                                            form.submit();
+                                        } else {
+                                            toastr.error('Invalid Lead ID!', 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+                                    }
+                                });
+                            }
                         }
                     });
                 }

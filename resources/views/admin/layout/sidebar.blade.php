@@ -1436,6 +1436,24 @@
                         <li class=" nav-item"><a href="{{ route('admin.barcode_generator.index') }}"><span class="menu-title">Barcode Generator</span></a>
                         </li>
                     @endif
+
+                    {{-- @if (session('role_id') == 1 /* || count(array_intersect([408, 409], session('permissions'))) !== 0 */) --}}
+                    @if (session('role_id') == 1 || in_array(995, session('permissions')) || in_array(996, session('permissions')))
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Retail Commission</span></a>
+                            <ul class="menu-content">
+                                <li>
+                                    <a class="menu-item" href="{{ route('admin.retail.franchise.franchise_wise_commission') }}">
+                                        Franchise wise commission
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="menu-item" href="{{ route('admin.retail.franchise.user_wise_commission') }}">
+                                        User wise commission
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
                 
                 </ul>
 
@@ -2727,8 +2745,6 @@
                                                                 href="{{ route('admin.user_management.fuel_management.index') }}">Fuel
                                                                 Management</a></li>
                                                     @endif
-
-
                                                 </ul>
                                             </li>
                                         @endif
@@ -2744,6 +2760,15 @@
                                                         class="menu-title">App-Notifications</span></a>
                                             </li>
                                         @endif
+
+                                        {{-- SMS logs --}}
+                                        @if (session('role_id') == 1 || in_array(1000, session('permissions')))
+                                            <li class=" nav-item"><a
+                                                    href="{{ route('admin.sms_logs.index') }}"><span
+                                                        class="menu-title">SMS logs</span></a>
+                                            </li>
+                                        @endif
+
                                         @if (session('role_id') == 1 || in_array(358, session('permissions')))
                                             <li class=" nav-item"><a
                                                     href="{{ route('admin.settings.holidays.index') }}"><span

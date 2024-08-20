@@ -125,8 +125,9 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\StationDepositeNoteActionLog;
 
 use App\Http\Traits\RvTrait;
-use App\Jobs\ProcessRemoveShipmentFromRvShipmentTicket;
 use App\Jobs\ProcessRvShipmentTicket;
+use App\RvShipmentTicket;
+use GuzzleHttp\Client;
 
 class DeliveryController extends Controller
 {
@@ -329,6 +330,7 @@ class DeliveryController extends Controller
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status)
+            ->whereNotNull('shipments.tracking_number')
             ->groupBy('shipments.id');
 
 
@@ -369,6 +371,10 @@ class DeliveryController extends Controller
                 } else {
                     return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
                 }
+            })
+            // type cast bigint into string
+            ->editColumn('tracking_number', function ($shipment) {
+                return (string)$shipment->tracking_number;
             })
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
@@ -796,7 +802,6 @@ class DeliveryController extends Controller
                             } else {
                                 $is_updateable = 0;
                             }
-
 
                             if ($is_updateable == 0) {
                                 if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && $shipment->shipper_status_id == 2) {
@@ -4308,7 +4313,9 @@ class DeliveryController extends Controller
                             ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
 
                             //Remove Shipment from RV Shipment Ticket
-                            dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment));
+                            RvShipmentTicket::where('shipment_id', $shipment)->delete();
+
+                            // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment));
                             
                         }
                     }
@@ -5508,7 +5515,7 @@ class DeliveryController extends Controller
                     $delivery_note->update();
 
                     //StationDepositeNoteActionLog
-                    self::sdn_action_logs($request->sdn_id, 1, Auth::id());
+                    self::sdn_action_logs($request->sdn_id, 1, Auth::id(),'added', $delivery_note->id, $delivery_note->received_cod_amount);
 
                     return back()->with(['success' => 'DNCC added to SDN']);
                 } else {
@@ -5570,6 +5577,9 @@ class DeliveryController extends Controller
                             $delivery_note->update();
 
                             DeliveryNoteStationDepositNote::where('station_deposit_note_id', $sdn->id)->where('delivery_note_id', $delivery_note->id)->delete();
+
+                            //StationDepositeNoteActionLog
+                            self::sdn_action_logs($request->sdn_id, 1, Auth::id(),'removed', $delivery_note->id, $delivery_note->received_cod_amount);
                         }
 
                         $sdn->dncc_count = $sdn->dncc_count - $total_dncc;
@@ -5816,7 +5826,7 @@ class DeliveryController extends Controller
                         'station_deposit_note_id' => $sdn->id,
                         'delivery_note_id' => $dncc
                     ]);
-                    DeliveryNote::where('id', $dncc)->update(['expense' => isset($request->expense[$dncc]) ? $request->expense[$dncc] : 0, 'net_amount' => isset($request->net_amount[$dncc]) ? $request->net_amount[$dncc] : 0, 'remarks' => isset($request->remarks[$dncc]) ? $request->remarks[$dncc] : '', 'dncc_status' => 1]);
+                    DeliveryNote::where('id', $dncc)->update(['expense' => $request->expense[$dncc] ?? null, 'net_amount' => $request->net_amount[$dncc] ?? null, 'remarks' => $request->remarks[$dncc] ?? null, 'dncc_status' => 1]);
                 }
 
                 self::add_sdn_logs($sdn->id, 0, $created_by);
@@ -6019,7 +6029,8 @@ class DeliveryController extends Controller
                 $view_logs = '<button type="button" class="dropdown-item view_logs"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">View Status History</div></button>';
 
                 if(session('role_id') == 1 || in_array(941, session('permissions'))){
-                    $sdn_action_log = '<button type="button" class="dropdown-item view_sdn_action_log"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">SDN action log</div></button>';
+                    $sdn_action_log = '<button type="button" class="dropdown-item view_sdn_action_log"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">SDN Action Log</div></button>';
+                    $sdn_deposit_slip_log = '<button type="button" class="dropdown-item view_sdn_deposit_slip_log"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">SDN Deposit Slip Log</div></button>';
                 }
 
                 $dropdown = '
@@ -6080,6 +6091,7 @@ class DeliveryController extends Controller
                 $dropdown .= $view_logs;
                 if(session('role_id') == 1 || in_array(941, session('permissions'))){
                     $dropdown .= $sdn_action_log;
+                    $dropdown .= $sdn_deposit_slip_log;
                 }
                 $dropdown .= '
                     </div>
@@ -8992,7 +9004,6 @@ class DeliveryController extends Controller
 
     public function add_shipments_in_receive_deliveries(Request $request)
     {
-
         $shipment_id = $request->shipment_id;
 
         $delivery_note_id = $request->delivery_note_id;
@@ -9108,6 +9119,7 @@ class DeliveryController extends Controller
             return response()->json(['status' => 1, 'error' => 'Shipments Not Found']);
         }
     }
+    
 
     public function operation_riders(Request $request)
     {
@@ -9557,12 +9569,15 @@ class DeliveryController extends Controller
         }
     }
 
-    static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
+    static public function sdn_action_logs($sdn_id, $status_id, $admin_id, $action = null, $dncc_id = null, $dncc_amount = null)
     {
         $sdn_log = new StationDepositeNoteActionLog();
         $sdn_log->sdn_id = $sdn_id;
         $sdn_log->status_id = $status_id;
         $sdn_log->admin_id = $admin_id;
+        $sdn_log->dncc_id = $dncc_id;
+        $sdn_log->dncc_amount = $dncc_amount;
+        $sdn_log->action = $action;
         $sdn_log->save();
     }
 
@@ -9572,7 +9587,47 @@ class DeliveryController extends Controller
         $sdn_id = $request->sdn_id;
         if ($sdn_id) {
             $sdn_actions_logs = array();
-            $logs = StationDepositeNoteActionLog::where('sdn_id', $sdn_id);
+            $logs = StationDepositeNoteActionLog::where('sdn_id', $sdn_id)
+            ->whereNull('previous_bank_id');
+            if ($logs->exists()) {
+                $logs = $logs->get();
+                foreach ($logs as $log) {
+                    if ($log->status_id == 1) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited SDN amount';
+                    } else if ($log->status_id == 2) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited deposit slips';
+                    } else if ($log->status_id == 3) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Added SDN adjustment';
+                    } else if ($log->status_id == 4) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited SDN adjustment';
+                    } else if ($log->status_id == 5) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Reverted from Resolved to Deposited';
+                    }
+
+                    //add padding 6 0 to dncc_id
+                    $sdn_actions_logs[$log->id]['dncc_no'] = $log->dncc_id ? str_pad(strval($log->dncc_id),6,0,STR_PAD_LEFT) : '-';
+                    $sdn_actions_logs[$log->id]['dncc_amount'] = $log->dncc_amount ?? '-';
+                    $sdn_actions_logs[$log->id]['action'] = $log->action ? title_case($log->action) : '-';
+                    $sdn_actions_logs[$log->id]['updated_by'] = $log->updated_by->name;
+                    $sdn_actions_logs[$log->id]['date'] = Carbon::parse($log->updated_at)->toDateTimeString();
+                }
+
+                return response()->json(['status' => 1, 'sdn_id' => str_pad($sdn_id, 6, '0', STR_PAD_LEFT), 'logs' => $sdn_actions_logs]);
+            }
+            return response()->json(['status' => 0, 'message' => 'No logs found!']);
+        }
+    }
+
+    public function sdn_deposit_slip_logs(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 751);
+        $sdn_id = $request->sdn_id;
+        if ($sdn_id) {
+            $sdn_actions_logs = array();
+            $logs = StationDepositeNoteActionLog::where('sdn_id', $sdn_id)
+            ->whereNull('dncc_id')
+            ->whereNotNull('new_bank_id')
+            ->whereNotNull('new_amount');
             if ($logs->exists()) {
                 $logs = $logs->get();
                 foreach ($logs as $log) {
@@ -9588,6 +9643,11 @@ class DeliveryController extends Controller
                         $sdn_actions_logs[$log->id]['status'] = 'Reverted from Resolved to Deposited';
                     }
                     $sdn_actions_logs[$log->id]['updated_by'] = $log->updated_by->name;
+                    $sdn_actions_logs[$log->id]['previous_bank'] = $log->previous_bank->name;
+                    $sdn_actions_logs[$log->id]['new_bank'] = $log->new_bank->name;
+                    $sdn_actions_logs[$log->id]['previous_amount'] = $log->previous_amount;
+                    $sdn_actions_logs[$log->id]['new_amount'] = $log->new_amount;
+                    $sdn_actions_logs[$log->id]['image'] = $log->updated_deposit_slip_image;
                     $sdn_actions_logs[$log->id]['date'] = Carbon::parse($log->updated_at)->toDateTimeString();
                 }
 

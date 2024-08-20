@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
-use App\BlockEmail;
 use Carbon\Carbon;
+use App\BlockEmail;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Client;
 use App\Http\Models\SMS;
@@ -19,7 +18,6 @@ use Illuminate\Support\Str;
 use App\Http\Models\Dispute;
 use App\Http\Models\Invoice;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Excel;
 use App\Http\Models\Shipment;
 use App\Jobs\ProcessOTPSMSITS;
@@ -44,6 +42,8 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\ShipmentStatus;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\CrmSmsLog;
@@ -51,6 +51,7 @@ use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\AppNotification;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\DailyFakeStatus;
+use App\Http\Models\ShipmentSmsLogs;
 use App\Jobs\ProcessOTPSMSForBotSMS;
 use App\ReturnDeliveredToShipperSms;
 use Illuminate\Support\Facades\Auth;
@@ -63,6 +64,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\Jobs\ProcessPushNotification;
 use App\Http\Models\RetailDonePayment;
 use App\Http\Models\ReturnNoteRequest;
+use App\Mail\NotificationsDispatchNow;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\DeliveryNoteOtpSms;
@@ -75,6 +77,7 @@ use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\MultipleSaleTagging;
 use App\Http\Models\NotificationSetting;
+use App\Http\Models\ShipmentsWeightType;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\ShipmentStatusReason;
@@ -89,6 +92,7 @@ use GuzzleHttp\Exception\RequestException;
 use App\Http\Models\Admin\ActivityTrailLog;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Controllers\ShortUrlController;
 use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Excel_reports\KaeNumber;
 use App\Http\Models\ShipmentsPaymentJourney;
@@ -119,6 +123,7 @@ use App\Http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminReportsController;
+use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Controllers\Admins\GlobalSettingsController;
@@ -126,11 +131,8 @@ use App\Http\Models\Excel_reports\MonthAverageDestination;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
-use App\Http\Models\ShipmentSmsLogs;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
-use App\Http\Models\ShipmentsWeightType;
-use App\Http\Controllers\ShortUrlController;
 
 
 class NotificationsController extends Controller
@@ -267,7 +269,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null)
+    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null, $id = null)
     {
         $block_email = BlockEmail::select('email')->pluck('email')->toArray();
         $filterBlockedEmails = function ($emails) use ($block_email) {
@@ -310,17 +312,38 @@ class NotificationsController extends Controller
             }
 
             if($to){
-                $mail = Mail::to($to);
-    
-                if ($cc) {
-                    $mail->cc($cc);
+
+                if($id == 230){
+
+                    $mail = new NotificationsDispatchNow($subject, $body);
+
+                    if ($cc) {
+                        $mail->cc($cc);
+                    }
+        
+                    if ($bcc) {
+                        $mail->bcc($bcc);
+                    }
+
+                    $mail = Mail::to($to)->send($mail);
+                    
+                }else{
+                    $mail = Mail::to($to);
+                
+                    if ($cc) {
+                        $mail->cc($cc);
+                    }
+        
+                    if ($bcc) {
+                        $mail->bcc($bcc);
+                    }
+
+                    $mail->send(new Notifications($subject, $body, $from));
                 }
+
+                
     
-                if ($bcc) {
-                    $mail->bcc($bcc);
-                }
-    
-                $mail->send(new Notifications($subject, $body, $from));
+              
             }
 
 
@@ -8654,7 +8677,7 @@ class NotificationsController extends Controller
                         $shipper_body = str_replace('[person_of_contact]', $user->name, $shipper_body);
                     }
                     $to = $user->email;
-                    self::email($subject, $shipper_body, $to);
+                    // self::email($subject, $shipper_body, $to);
 
                     $sale_person = SalePersonTag::join('admins as sale_person', 'sale_person.id', '=', 'sale_person_tags.admin_id')
                         ->where('sale_person_tags.user_id', $user_id)
@@ -10052,7 +10075,8 @@ class NotificationsController extends Controller
                     }
                     $to = array();
 
-                    $to[] = $admin->email;
+                    $to[] =
+                    $admin->email;
 
 
                     self::email($subject, $body, $to);
@@ -10714,7 +10738,7 @@ class NotificationsController extends Controller
                         $html .= '<tr style="background-color: #f2f2f2;">';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Request #</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Type</th>';
-                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolution</th>';
+                        // $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolution</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Status</th>';
                         $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolved Within</th>';
                         $html .= '</tr>';
@@ -10724,14 +10748,14 @@ class NotificationsController extends Controller
                         foreach ($items as $item) {
                             $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
                             $type = CrmRequestCaseNatureType::where('id', $item["case_nature_type_id"])->value('type');
-
-                            $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first();
-                            $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"])->latest()->first();
+          
+                            // $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first() ?? null;
+                            // $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"] ?? null)->latest()->first() ?? null;
 
                             $html .= '<tr>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $item["id"] . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($type ?? '-') . '</td>';
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolution['name'] ?? '-') . '</td>';
+                            // $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolution['name'] ?? '-') . '</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">Closed</td>';
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
                             $html .= '</tr>';
@@ -11157,35 +11181,39 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 } else if ($id == 230){
-                    // $subject = $notification->subject;
-                    // $body = $notification->body;
                     $lead_ids = $reference_1_id;
-                    $tokens = $reference_2_id;
 
+                    if(!is_array($lead_ids)){
+                        $lead_ids = [$lead_ids];
+                    }
+                    
                     foreach ($lead_ids as $key => $lead_id) {
                         $lead = Lead::find($lead_id);
-                        // if(isset($tokens[$key])){
-                            $route = route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]);
-                            $link = '<a href="' . $route . '">Click here to sign up</a>';
+                        $route = route('cod.signup', ['id' => $lead->id, 'token' => $lead->activation_code]);
+                        $link = '<a href="' . $route . '">Click here to sign up</a>';
+                    
+                        $body = $notification->body; // Reset $body to its original state
+                        $subject = $notification->subject;  // Reset $subject to its original state
 
-                            $body = $notification->body; // Reset $body to its original state
-                            $subject = $notification->subject;  // Reset $subject to its original state
+                        if (strpos($body, '[Link]') !== FALSE) {
+                            $body = str_replace('[Link]', $link, $body); // Use $body instead of $old_body
+                        }
+                        if (strpos($body, '[Company Name]') !== FALSE) {
+                            $body = str_replace('[Company Name]', $lead->company_name, $body); // Use $body instead of $old_body
+                        }
+                        if (strpos($body, '[Full Name]') !== FALSE) {
+                            $body = str_replace('[Full Name]', $lead->contact_person, $body); // Use $body instead of $old_body
+                        }
+                        if (strpos($subject, '[Company Name]') !== FALSE) {
+                            $subject = str_replace('[Company Name]', $lead->company_name, $subject);
+                        }
 
-                            if (strpos($body, '[Link]') !== FALSE) {
-                                $body = str_replace('[Link]', $link, $body); // Use $body instead of $old_body
-                            }
-                            if (strpos($body, '[Company Name]') !== FALSE) {
-                                $body = str_replace('[Company Name]', $lead->company_name, $body); // Use $body instead of $old_body
-                            }
-                            if (strpos($body, '[Full Name]') !== FALSE) {
-                                $body = str_replace('[Full Name]', $lead->contact_person, $body); // Use $body instead of $old_body
-                            }
-                            if (strpos($subject, '[Company Name]') !== FALSE) {
-                                $subject = str_replace('[Company Name]', $lead->company_name, $subject);
-                            }
-                            self::email($subject, $body, $lead->email_address); // Send email with $body
-                        // }
-                    }
+                        if ($lead->email_status != 1){
+                            $lead->email_status = 1;
+                            $lead->save();
+                        }
+                        self::email($subject, $body, $lead->email_address, null, null, null, 230); // Send email with $body
+                    }                    
                 } else if ($id == 231){
                     $subject = $notification->subject;
                     $body = $notification->body;

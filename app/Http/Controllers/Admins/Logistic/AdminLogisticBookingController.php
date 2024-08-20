@@ -76,7 +76,17 @@ class AdminLogisticBookingController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 792);
         }
+        if ($request->get('logistic_from_date') && $request->get('logistic_to_date')) {
+            $from = $request->get('logistic_from_date');
+            $to = $request->get('logistic_to_date');
+        }
+
         $hub_ids=session('hubs');
+        $city_ids=City::whereIn('hub_id',$hub_ids);
+        if($city_ids->exists())
+        {
+            $city_ids=$city_ids->pluck('id');
+        }
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
             ->leftjoin('riders as r','r.id','=','trax_logistic_bookings.rider_id')
             ->leftjoin('user_shipping_infos as usi','usi.id','=','trax_logistic_bookings.shipper_address_id')
@@ -89,7 +99,10 @@ class AdminLogisticBookingController extends Controller
 
         if (session('role_id') != 1)
         {
-            $logistic_bookings = $logistic_bookings->whereIn('trax_logistic_bookings.origin_id',$hub_ids);
+            $logistic_bookings = $logistic_bookings->whereIn('trax_logistic_bookings.origin_id',$city_ids);
+        }
+        if ($request->get('logistic_from_date') && $request->get('logistic_to_date')) {
+            $logistic_bookings = $logistic_bookings->whereBetween('trax_logistic_bookings.created_at', [$from, $to]);
         }
         $datatables = Datatables::of($logistic_bookings)
             ->addColumn('action',function ($logistic_bookings){
@@ -140,6 +153,11 @@ class AdminLogisticBookingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 794);
         }
         $hub_ids=session('hubs');
+        $city_ids=City::whereIn('hub_id',$hub_ids);
+        if($city_ids->exists())
+        {
+            $city_ids=$city_ids->pluck('id');
+        }
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
             ->join('trax_booking_batch_details as bd','bd.booking_id','trax_logistic_bookings.id')
             ->join('trax_booking_batches as bb','bb.id','bd.batch_id')
@@ -160,7 +178,7 @@ class AdminLogisticBookingController extends Controller
 
         if (session('role_id') != 1)
         {
-            $logistic_bookings = $logistic_bookings->whereIn('bb.city_id',$hub_ids);
+            $logistic_bookings = $logistic_bookings->whereIn('bb.city_id',$city_ids);
         }
 
         $datatables = Datatables::of($logistic_bookings)

@@ -117,6 +117,7 @@ use App\Http\Controllers\ShipmentsPaymentJourneyController;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Controllers\Admins\AdminDashboardController;
+use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Models\UserIbftCharge;
 use App\Http\Models\ShipmentServicesCharges;
 use App\Http\Models\Admin\StationDepositeNoteActionLog;
@@ -124,17 +125,25 @@ use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\ShipmentSmsLogs;
 use Illuminate\Support\Facades\Response;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\NotificationSetting;
+use Illuminate\Support\Facades\Log;
 use App\Http\Models\ShipmentLedger;
-use Illuminate\Support\Str;
-class AdminFinanceController extends Controller
+use Illuminate\Support\Str;class AdminFinanceController extends Controller
 {
-    static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
+    static public function sdn_action_logs($sdn_id, $status_id, $admin_id, $previous_bank_id = null, $new_bank_id = null, $previous_amount = null, $new_amount = null, $deposit_slip_image = null)
     {
         $sdn_log = new StationDepositeNoteActionLog();
         $sdn_log->sdn_id = $sdn_id;
         $sdn_log->status_id = $status_id;
         $sdn_log->admin_id = $admin_id;
+        $sdn_log->previous_bank_id = $previous_bank_id;
+        $sdn_log->new_bank_id = $new_bank_id;
+        $sdn_log->new_amount = $new_amount;
+        $sdn_log->previous_amount = $previous_amount;
+        $sdn_log->updated_deposit_slip_image = $deposit_slip_image;
         $sdn_log->save();
     }
 
@@ -1507,8 +1516,11 @@ class AdminFinanceController extends Controller
         $deposit_ids = explode(',', $request->deposit_rows);
         $total_amount = 0;
         foreach ($deposit_ids as $deposit_id) {
+            $oldData = null;
             $total_amount += $request->amount[$deposit_id];
             $slip = StationDepositNoteSlip::find($deposit_id);
+            $previous_bank_id = $slip->bank_id;
+            $previous_amount = $slip->amount;
             $slip->deposit_date = $request->date[$deposit_id];
             $slip->bank_id = $request->bank[$deposit_id];
             $slip->amount = $request->amount[$deposit_id];
@@ -1516,7 +1528,7 @@ class AdminFinanceController extends Controller
             $file_name = 'deposit_slip_' . $deposit_id;
             if ($request->has($file_name)) {
                 $image = $request->file($file_name);
-//                $extension = $image->getClientOriginalExtension();
+                //$extension = $image->getClientOriginalExtension();
                 $extension = 'png';
                 $random = rand(1000, 100000);
                 $now = Carbon::now();
@@ -1527,6 +1539,9 @@ class AdminFinanceController extends Controller
                 $slip->image = $slip_name;
             }
             $slip->save();
+
+            //StationDepositeNoteActionLog
+            self::sdn_action_logs($sdn_id, 4, Auth::id(), $previous_bank_id, $slip->bank_id, $previous_amount, $slip->amount, $slip->image);
 
         }
 
@@ -1556,14 +1571,15 @@ class AdminFinanceController extends Controller
                 }
             }
 
+            
+            //StationDepositeNoteActionLog
+            self::sdn_action_logs($sdn_id, 4, Auth::id());
+
         }
 
         $sdn_detail = StationDepositNote::find($sdn_id);
         $sdn_detail->sdn_deposit_amount = $total_amount;
         $sdn_detail->save();
-
-        //StationDepositeNoteActionLog
-        self::sdn_action_logs($sdn_id, 4, Auth::id());
 
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip edited successfully!']);
     }
@@ -5424,7 +5440,7 @@ class AdminFinanceController extends Controller
         if (empty($shipment)) {
             $shipment = Shipment::find($shipment_id);
         }
-        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
+        $faf_charges = ShipmentAdditionalCharges::apply_faf_charges($shipment_id,$type);
         $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
         if ($service_charges->exists()) {
             $service_charges = $service_charges->first();
@@ -8330,6 +8346,38 @@ class AdminFinanceController extends Controller
                         $shipment->payment_status_id = 3;
 
                         $shipment->save();
+
+                        //---------x-----------x-------------
+                        // Start Auto Close Complaints
+                        $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('status_id', 2)->first();
+                        
+                        if ($crm_request) { 
+                            $shipperName = User::find(Shipment::where('id', $shipment->id)->select('user_id')->first()->user_id)->name;
+                            
+                            if ($crm_request->status_id == 2) {//if crm request is in_process
+                                CrmRequest::where('id', $crm_request->id)->update([
+                                    'status_id' => 4 // Closed status
+                                ]);
+                                CrmRequestStatusHistory::create([
+                                    'crm_request_id' => $crm_request->id,
+                                    'status_id' => 4,
+                                    'agent_id' => Auth::id()
+                                ]);
+                                
+                                CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+
+                                $comment = 'Dear '.$shipperName.',
+                                        Thank you for reaching us out! 
+                                        Your complaint has been resolved, and the payment has been paid. We appreciate your patience and understanding throughout this process. In case of any further query regarding this shipment you may reach us out within 48 hrs.
+                                        Regards,
+                                        Team CRM
+                                        TRAX';
+                                
+                                CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                            }
+                        }
+                        // End Auto Close Complaints
+                        //---------x-----------x-------------
 
                         ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id);
                     }
@@ -15156,7 +15204,7 @@ class AdminFinanceController extends Controller
 
         $pending_payments = RetailPendingPayment::join('retail_shipper_infos as rsi', 'retail_pending_payments.user_id', '=', 'rsi.id')
             ->join('cities as c', 'rsi.city_id', '=', 'c.id')
-            ->join('banks_lists as ub', 'rsi.bank_id', '=', 'ub.id')
+            ->leftjoin('banks_lists as ub', 'rsi.bank_id', '=', 'ub.id')
             ->join('cities as bc', 'rsi.city_id', '=', 'bc.id')
             ->join('retail_pending_payment_shipments as pps', 'retail_pending_payments.id', '=', 'pps.retail_pending_payment_id')
             ->leftjoin('retail_pending_payment_calculations as ppc', 'ppc.retail_pending_payment_id', '=', 'retail_pending_payments.id')
