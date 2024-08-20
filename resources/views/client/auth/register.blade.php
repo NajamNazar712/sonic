@@ -243,9 +243,11 @@
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <div class="form-group">
-                                                            <label for="nature_of_account">Nature Of Account:
+                                                            <label for="nature_of_account"  data-toggle="tooltip" data-placement="top" title="" data-original-title="Cash on Delivery account refers to an account through which the service charges are deducted in COD payments, therefore Payments would be received minus the charges.
+Corporate Invoicing Amount refers to an account where Trax would send a monthly or weekly invoice of service charges and you will have to pay charges separately against that invoice.">Nature Of Account:
                                                                 <span class="danger">*</span>
                                                             </label>
+
                                                             <div>
                                                                 <select name="nature_of_account"
                                                                     id="nature_of_account"

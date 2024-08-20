@@ -348,10 +348,10 @@ class ShipperCRMController extends Controller
             }
         }
 
-//        if($complaint_id == 23 && $receiving_sheet_id != null){
+        // if($complaint_id == 23 && $receiving_sheet_id != null){
         if($complaint_id == 23){
             $description_text = $request->description ;
-//            $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
+            // $description = '<strong>' .'Receiving Sheet No: ' .$receiving_sheet_id. '</strong>'. PHP_EOL. $description_text;
             $description = $description_text;
         }
         else{

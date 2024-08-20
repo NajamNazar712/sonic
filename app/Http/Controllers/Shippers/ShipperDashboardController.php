@@ -694,7 +694,7 @@ class ShipperDashboardController extends Controller
         //  else {
         //      $connection = 'mysql';
         //  }
-        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
+        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
             $from = $request->get('booking_from_date');
             $to = $request->get('booking_to_date');
             $from_back = Carbon::parse($from)->subMonth()->format('Y-m-d H:i:s');
@@ -746,7 +746,7 @@ class ShipperDashboardController extends Controller
                 });
             }
         }
-        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
+        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
             $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
 

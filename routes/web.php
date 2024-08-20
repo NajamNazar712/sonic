@@ -121,7 +121,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     //        Route::post('add_request', 'Shippers\ShipperDashboardController@mentor_health_add_request')->name('add_request');
     //    });
     Route::prefix('shipment')->name('shipment.')->group(function () {
-        Route::prefix('book')->name('book.')->group(function () {
+        Route::middleware(['PauseShipperBooking'])->prefix('book')->name('book.')->group(function () {
             Route::get('index', 'Shippers\ShipperShipmentBookController@corporate_index')->name('corporate.index');
             Route::get('address_verify', 'Shippers\ShipperShipmentBookController@address_verify')->name('address_verify');
             Route::post('corporate_store', 'Shippers\ShipperShipmentBookController@corporate_store')->name('corporate.store');
@@ -175,9 +175,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
             });
         });
 
-        Route::resource('book', 'Shippers\ShipperShipmentBookController');
+        Route::middleware(['PauseShipperBooking'])->resource('book', 'Shippers\ShipperShipmentBookController');
 
-        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+        Route::middleware(['PauseShipperBooking'])->prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
             Route::get('list', 'Shippers\ShipperReceivingSheetController@list')->name('list');
             Route::get('receiving_sheet_list', 'Shippers\ShipperReceivingSheetController@receiving_sheet_list')->name('receiving_sheet_list');
             Route::get('all', 'Shippers\ShipperReceivingSheetController@all')->name('all');
@@ -201,7 +201,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             });
         });
 
-        Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
+        Route::middleware(['PauseShipperBooking'])->resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
 
         Route::prefix('receiving_sheet_history')->name('receiving_sheet_history.')->group(function () {
             Route::get('short_received_list', 'Shippers\ShipperReceivingSheetHistoryController@short_received_list')->name('short_received_list');
@@ -261,6 +261,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('{tracking_number?}', 'Shippers\ShipperTrackingController@index')->name('index');
         Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
         Route::post('call_status_history', 'Shippers\ShipperTrackingController@call_status_history')->name('call_status_history');
+
+        Route::post('case_nature_remarks', 'Shippers\ShipperTrackingController@case_nature_remarks')->name('case_nature_remarks');
+        Route::post('case_nature_service_remarks', 'Shippers\ShipperTrackingController@case_nature_service_remarks')->name('case_nature_service_remarks');
+        Route::post('case_nature_claim_remarks', 'Shippers\ShipperTrackingController@case_nature_claim_remarks')->name('case_nature_claim_remarks');
+
+        Route::post('shipper_visibility', 'Shippers\ShipperTrackingController@shipper_visibility')->name('shipper_visibility');
     });
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('{order_id?}', 'Shippers\ShipperTrackingController@order_index')->name('index');
