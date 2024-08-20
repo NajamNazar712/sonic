@@ -676,8 +676,9 @@ class RetailShipmentBookController extends Controller
         if($request->has('retail_discount_applied'))
         {
             if ($request->filled('retail_discount_percentage') && $request->retail_discount_percentage > 0) {
-                $details['discount_amount'] = $details['total_charges'] * $request->retail_discount_percentage/100;
-                $details['total_charges'] = $details['total_charges'] - $details['discount_amount'];
+                // $details['discount_amount'] = $details['total_charges'] * $request->retail_discount_percentage/100;
+                // $details['total_charges'] = $details['total_charges'] - $details['discount_amount'];
+                $details['total_charges'] = $details['total_charges'] - ($details['total_charges'] * $request->retail_discount_percentage/100);
             }
         }
 
