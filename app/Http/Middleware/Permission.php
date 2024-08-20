@@ -1031,6 +1031,7 @@ class Permission
             'settings.shipper_ibft_charges_settings.list' => 917,
 
             'settings.shipper_negative_payable.index' => 982,
+            'settings.faf_charges.index'=>997,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -1676,6 +1677,8 @@ class Permission
                 'get_agreement',
                 'welcome',
                 'orders.list',
+                'terms.download',
+                'updateSignOffCrf'
 
             ];
             

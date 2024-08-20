@@ -1431,6 +1431,24 @@
                         <li class=" nav-item"><a href="{{ route('admin.barcode_generator.index') }}"><span class="menu-title">Barcode Generator</span></a>
                         </li>
                     @endif
+
+                    {{-- @if (session('role_id') == 1 /* || count(array_intersect([408, 409], session('permissions'))) !== 0 */) --}}
+                    @if (session('role_id') == 1 || in_array(995, session('permissions')) || in_array(996, session('permissions')))
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Retail Commission</span></a>
+                            <ul class="menu-content">
+                                <li>
+                                    <a class="menu-item" href="{{ route('admin.retail.franchise.franchise_wise_commission') }}">
+                                        Franchise wise commission
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="menu-item" href="{{ route('admin.retail.franchise.user_wise_commission') }}">
+                                        User wise commission
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
                 
                 </ul>
 
@@ -1894,7 +1912,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 388, 375, 377, 378, 379, 380, 387, 384, 385, 394, 417, 418, 425, 438, 443, 447, 462, 477, 488, 491, 494, 498, 499, 526, 544, 558, 565, 580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674, 682, 683, 689, 697, 701, 708, 710, 714, 716, 747, 761, 788, 820, 826, 836, 846, 861, 887, 904, 889, 910,932,938,942,978,990,992], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 388, 375, 377, 378, 379, 380, 387, 384, 385, 394, 417, 418, 425, 438, 443, 447, 462, 477, 488, 491, 494, 498, 499, 526, 544, 558, 565, 580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674, 682, 683, 689, 697, 701, 708, 710, 714, 716, 747, 761, 788, 820, 826, 836, 846, 861, 887, 904, 889, 910,932,938,942,951,978,990,992,997], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
@@ -2558,6 +2576,11 @@
                                         </li>
                                     @endif
 
+                                    @if (session('role_id') == 1 || in_array(997, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.settings.faf_charges.index') }}">FAF Charges</a></li>
+                                    @endif
+
                                 </ul>
                             </li>
                         @endif
@@ -2717,8 +2740,6 @@
                                                                 href="{{ route('admin.user_management.fuel_management.index') }}">Fuel
                                                                 Management</a></li>
                                                     @endif
-
-
                                                 </ul>
                                             </li>
                                         @endif
@@ -2734,6 +2755,15 @@
                                                         class="menu-title">App-Notifications</span></a>
                                             </li>
                                         @endif
+
+                                        {{-- SMS logs --}}
+                                        @if (session('role_id') == 1 || in_array(1000, session('permissions')))
+                                            <li class=" nav-item"><a
+                                                    href="{{ route('admin.sms_logs.index') }}"><span
+                                                        class="menu-title">SMS logs</span></a>
+                                            </li>
+                                        @endif
+
                                         @if (session('role_id') == 1 || in_array(358, session('permissions')))
                                             <li class=" nav-item"><a
                                                     href="{{ route('admin.settings.holidays.index') }}"><span

@@ -151,7 +151,11 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\AgentSarNotification',
         'App\Console\Commands\SackBagStatusUpdate',
         'App\Console\Commands\AutoAssignCrmAgentNew',
-        'App\Console\Commands\ShipperLogisticBookingCron',
+//        'App\Console\Commands\ShipperLogisticBookingCron',
+//        'App\Console\Commands\HourlyShipperLogisticBookingEmailCron'
+
+        'App\Console\Commands\CalculateFranchiseCommission',
+        'App\Console\Commands\DeleteOldDataFromShortUrlTable'
         ];
 
     /**
@@ -227,7 +231,7 @@ class Kernel extends ConsoleKernel
 
         //SarNotification Email Cron
         $agent_sar_settings = GlobalSettings::where('type', 'agent_sar_notification');
-        $agent_sar_notify_time = '01:30'; //1:30 am
+        $agent_sar_notify_time = '23:15'; //1:30 am
         if ($agent_sar_settings->exists()) {
             $sar_setting = $agent_sar_settings->first();
             $agent_sar_notify_time = $sar_setting->setting_value . ':00';
@@ -530,11 +534,15 @@ class Kernel extends ConsoleKernel
 		$schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
 
 		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
-		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground();
+//		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground(); //ye filhal bnd ki hai due to r2 shutdown issue
 		$schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
 		$schedule->command('clean:7DaysQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
-        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
-        $schedule->command('logistic:shipper-bookings')->hourly()->runInBackground();
+
+        // Commission calculation schedule
+        $schedule->command('commission:calculate_commission')->monthlyOn(1, '00:00')->runInBackground();
+//        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
+//        $schedule->command('hourly-logistic:shipper-bookings')->hourly()->runInBackground();
+        $schedule->command('delete:short-url-data')->dailyAt('01:00')->runInBackground();
 
     }
     /**

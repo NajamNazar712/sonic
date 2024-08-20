@@ -5,6 +5,7 @@
 @section('content')
 
     <div class="card">
+
         @include('client.inc.messages')
         <div class="card-content" aria-expanded="true">
             <div class="card-body text-center">
@@ -19,9 +20,11 @@
 
                     <div style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; max-width: 600px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
                         <div style="text-align: left; flex-grow: 1;">
-                            <h2>Your Account Status: Signed Up</h2>
+                            @if ($short_description != "")
+                               <h2>Your Account Status: {{$short_description}}</h2> 
+                            @endif
                             <p style="margin-top:20px;">{{ $description }}</p>
-                            @if(isset($user->on_board_status) && $user->on_board_status == 0)
+                            @if(($user->on_board_status < 1 && session('request_custom_quotation') != 1))
                                 <a href="{{ route('cod.wordpress.register') }}" style="display: inline-block; padding: 10px 20px; color: white; background-color: #007bff; border-radius: 5px; text-decoration: none;">Start Onboarding</a>
                             @endif
                         </div>
@@ -29,6 +32,8 @@
                             <img src="{{ asset('img/proposed_lead_image_onboard.png') }}" alt="Onboarding Image" style="width: 150px; height: auto;">
                         </div>
                     </div>
+
+
                     
 
                 @endif
@@ -232,6 +237,40 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
+
+            @if ($user->lead_id)
+                @if (session('status') != 3 && $user->status == 3)
+                    var warning = 'Dear Shipper, We are pleased to inform you that your account has been successfully activated at 100%. Please log in again to use the portal. Thank you for choosing our services';
+                    toastr.warning(warning, 'Note!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center',
+                        timeOut: 30000 
+                    });
+
+                @endif
+
+
+                @if (session('status') == 0 && $user->agreement_signed == 0 && $user->request_custom_quotation == 1)
+                        var url = '{!! route('cod.updateSignOffCrf') !!}';
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            data: {
+                                _token: "{{ csrf_token() }}", 
+                                user_id: "{{ $user->id }}" 
+                            },
+                            success: function(response) {
+                                console.log('Success:', response);
+                            },
+                            error: function(xhr) {
+                                console.log('Error:', xhr.responseText);
+                            }
+                        });
+                @endif
+                
+            @endif
+
+            
             @if (session('user_type') == 1 && session()->has('phone_number_unverified'))
 
             $('#password_input').inputmask({
@@ -357,6 +396,8 @@
                     }
                 });
             });
+
+            
             @endif--}}
 
         });

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\UserLeadEmail;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use App\Http\Models\City;
@@ -58,7 +59,7 @@ class WebsiteLead extends Command
             $base_uri = 'http://trax_website.test/trax_website/wp-json/tl/v1/';
         }
         else{
-            $base_uri = 'http://trax_website.test/wp-json/tl/v1/';
+            $base_uri = 'http://trax.test/wp-json/tl/v1/';
         }
         $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
         $response = $client->post('leads', [
@@ -70,7 +71,6 @@ class WebsiteLead extends Command
         $response = json_decode($response);
         $leads_added = array();
         $old_leads = array();
-        $token_added = array();
 
         if($response->status == 0){
             $leads = $response->leads;
@@ -118,6 +118,7 @@ class WebsiteLead extends Command
                     $new_lead->service_id = $service_id;
                     $new_lead->ntn_number = $lead->data->ntn_number;
                     $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
+                    $new_lead->expected_shipments = $lead->data->avg_shipment;
                     $new_lead->average_parcel_cod_amount = $lead->data->avg_parcel;
                     $new_lead->business_address = $lead->data->business_address;
                     $new_lead->company = $lead->data->company_name;
@@ -126,6 +127,7 @@ class WebsiteLead extends Command
                     $new_lead->reference_id = $reference_id;
                     $new_lead->activation_code = $token;
                     $new_lead->cnic_number = $lead->data->cnic_number;
+                    $new_lead->via_channel = 'Website';
                     $new_lead->save();
 
                     $lead_log = new LeadLog();
@@ -135,7 +137,6 @@ class WebsiteLead extends Command
                     $lead_log->updated_by = 7;
                     $lead_log->save();
                     $leads_added[] = $new_lead->id;
-                    $token_added[$key] = $token;
                     $old_leads[] = $lead->id;
                                  
                 }
@@ -146,10 +147,10 @@ class WebsiteLead extends Command
         if(count($old_leads) > 0){
             self::old_api_request_delete($base_uri, $old_leads);
             NotificationsController::send(203, $leads_added, Carbon::today());
-            NotificationsController::send(230, $leads_added, $token_added);                
+            NotificationsController::send(230, $leads_added, Carbon::today());
         }
 
-        Log::channel('cronJobLog')->info('s ' .'website:leads Running');
+//        Log::channel('cronJobLog')->info('s ' .'website:leads Running');
 
     }
 

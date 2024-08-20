@@ -37,10 +37,7 @@
                                 </div>
                                 <div class="col-4">
                                     <fieldset class="form-group">
-                                        <select name="search_shipper" id="search_shipper" class="form-control select2" required data-rule-required="true" data-msg-required="This field is required">
-                                            @foreach($shippers as $shipper)
-                                                <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                            @endforeach
+                                        <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple>
                                         </select>
                                     </fieldset>
                                 </div>
@@ -100,6 +97,7 @@
                                         <th class="border-primary border-darken-1">Documents Rejected At</th>
                                         <th class="border-primary border-darken-1">Documents Status</th>
                                         <th class="border-primary border-darken-1">Documents Rejection Reason</th>
+                                        <th class="border-primary border-darken-1">FAF Charges Applied</th>
                                         <th class="border-primary border-darken-1">Duplicate</th>
                                         <th class="border-primary border-darken-1">Intl Rate Status</th>
                                         <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
@@ -604,6 +602,34 @@
     </div>
 
 
+    <div class="modal fade text-left" id="faf_charges_modal" data-backdrop="static" role="dialog" aria-labelledby=""
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">FaF Charges</h4>
+                </div>
+                <form id="faf_charges_form" class="form" novalidate="novalidate" method="post" action="{{ route('admin.accounts.faf_charges.submit') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="col text-center">
+                            <label class="font-medium-2 font-weight-bold block">Apply FAF Charges</label>
+                            <div class="form-group">
+                                <input type="hidden" name="user_id" id="faf_charges_user_id">
+                                <label for="" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                <input type="checkbox" name="faf_charges_checkbox" id="faf_charges_checkbox" class="switchery faf_charges_checkbox" data-size="sm" data-switchery="true">
+                                <label for="" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="faf_charges_submit">Submit</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -1029,10 +1055,27 @@ function checkboxStatus() {
             placeholder:"Select Sale Persons",
             allowClear:true,
         });
-        $('#search_shipper').prepend('<option value="" selected></option>').select2({
+        $('#search_shipper').select2({
             width:'100%',
             placeholder:"Select Shipper",
             allowClear:true,
+            multiple: true,
+            minimumInputLength: 2,
+            ajax: {
+                dataType: 'json',
+                url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                delay: 700,
+            }
          });
 
          $('#block_disable_reason').prepend('<option value="" selected></option>').select2({
@@ -1109,6 +1152,7 @@ function checkboxStatus() {
                         head.push('Documents Rejected At');
                         head.push('Documents Status');
                         head.push('Documents Rejection Reason');
+                        head.push('FAF Charges Applied');
                         head.push('Duplicate');
                         head.push('Intl Rates Status');
                         head.push('Intl Rates Status Remarks');
@@ -1163,6 +1207,7 @@ function checkboxStatus() {
                             row.push(values.documents_rejected_at);
                             row.push(values.documents_status);
                             row.push(values.documents_rejection_reason);
+                            row.push(values.fc_status);
                             row.push(values.duplication);
                             row.push(values.international_rate_status);
                             row.push(values.international_rejected_reason);    
@@ -1784,6 +1829,7 @@ function checkboxStatus() {
                 {data: 'documents_rejected_at', name: 'uda.rejected_at', class: 'align-middle documents_rejected_at', searchable: false},
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
+                {data: 'fc_status', name: 'faf_charges.status', class: 'align-middle fc_status'},
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
                 {data: 'international_rate_status', name: 'iui.status', class: 'align-middle international_rate_status'},
                 {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
@@ -1813,6 +1859,7 @@ function checkboxStatus() {
                 var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                     '<option value="3">Enable</option>' +
                     '<option value="4">Disable</option>' +
+                    '<option value="6">Booking Paused</option>' +
                     '</select>';
                 var documents_drop_select = '<select name="documents_status_select" id="documents_status_select" class="select2 form-control">' +
                     '<option value="0">Incomplete</option>' +
@@ -1836,6 +1883,13 @@ function checkboxStatus() {
                         '<option value="6">Fortnite</option>' +
 
                         '</select>';
+
+                var fc_status_drop_select = '<select name="fc_status_select" id="fc_status_select" class="select2 form-control">' +
+                    '<option value="1">Yes</option>' +
+                    '<option value="0">No</option>' +
+                    '</select>';
+
+
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
@@ -1854,6 +1908,11 @@ function checkboxStatus() {
                             } ).wrap(td);
                     }else if($(header).is('.documents_status')){
                         $(documents_drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    }else if($(header).is('.fc_status')){
+                        $(fc_status_drop_select).appendTo($(search))
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
@@ -1892,6 +1951,15 @@ function checkboxStatus() {
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'
                 });
+
+                
+                $("#fc_status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                
                 $("#intl_rate_status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select International Rate Status",
                     width:'100%',
@@ -2169,6 +2237,54 @@ function checkboxStatus() {
 
         });
 
+         //Pause User
+         $('body').on('click','button.pause_shipper_booking',function () {
+            var status  = "pause";
+            var id = $(this).parents('tr').attr('id');
+            swal({
+                title: 'Are You Sure?',
+                text: 'Select Yes to pause this account!',
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function (confirm) {
+                if(confirm){
+                    if(id){
+                        $.ajax({
+                            url: '{!! route('admin.accounts.status.change') !!}',
+                            method: 'POST',
+                            data: {
+                                'id':id,
+                                'status':status,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status === 1){
+                                table.draw('false');
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                    }
+                }
+            });
+        });
 
         $('#datatable').on('click', 'button.warehousing_enable', function(){
             var id = $(this).parents('tr').attr('id');
@@ -2930,6 +3046,32 @@ function checkboxStatus() {
                     $("#auto_cancelation_days_form #cancelation_days").val(auto_shipment_cancellation_days);
                     $("#auto_cancelation_days_form #user_id").val(id);
                     $("#AutoCancelationDaysModal").modal('show');
+                }
+            }
+        });
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            var id = $(this).parents('tr').attr('id');
+            if($(this).hasClass('faf_charges_status')){
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.accounts.faf_charges.info') !!}',
+                        method: 'POST',
+                        data: {
+                            'user_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            $('#faf_charges_checkbox').prop('checked',false);
+                            if (data.status == 1) {
+                                $('#faf_charges_checkbox').click();
+                            }
+                            $('#faf_charges_user_id').val(id);
+                            $('#faf_charges_modal').modal('show');
+
+
+                        });
                 }
             }
         });

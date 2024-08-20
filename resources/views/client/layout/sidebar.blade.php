@@ -5,49 +5,57 @@
             {{--<li class=" nav-item"><a href="{{route('cod.mentor_health.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-plus-circle"></i>TRAX Health</span><span class="font-weight-bold">Powered by Mentor Health</span></a></li>--}}
             <li class=" nav-item"><a href="{{route('cod.orders.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Order Management</span></a></li>
 
-            @if(session('on_board_status') == 0)
-                <li class=" nav-item"><a href="{{route('cod.wordpress.register')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Onboarding</span></a></li>
+            @if(session('lead'))
+                @if(session('status') == 0 && session('request_custom_quotation') != 1)
+                    <li class=" nav-item"><a href="{{route('cod.wordpress.register')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Onboarding</span></a></li>
+                @endif
             @endif
             
-            @if(session('status') === 3)
+            @if(session('status') === 3 || session('status') === 6)
                 <li class=" nav-item"><a href="{{route('cod.quick_search.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-search"></i>Quick Search</span></a></li>
-                @if (session('user_type') == 1 || count(array_intersect([1, 3], session('permissions'))) !== 0)
+                @if (session('user_type') == 1 || count(array_intersect([1, 3], session('permissions'))) !== 0 || session('status') === 6)
                     <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>
                         <ul class="menu-content">
-                            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Book</span></a>
-                                <ul class="menu-content">
-                                    @if (session('user_type') == 1 || in_array(1, session('permissions')))
-                                        @if (session('account_type') == 1 && session('rate_status') == 1)
-                                            <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Order Form</a></li>
-                                            <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Excel Sheet</a></li>
-                                        @elseif (session('account_type') == 2 && session('rate_status') == 1)
-                                            <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
-                                            @if(session('user_id') == 10354)
-                                                <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_distribution') }}">Excel Sheet</a></li>
-                                            @else
-                                                <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
-                                            @endif
-                                            @if(session('mms_excel_booking_shippers') != null)
-                                                @if (in_array(session('user_id'), session('mms_excel_booking_shippers')))
-                                                    <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_mms') }}">MMS Excel Sheet</a></li>
+                            @if (session('status') !== 6)
+                                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Book</span></a>
+                                    <ul class="menu-content">
+                                        @if (session('user_type') == 1 || in_array(1, session('permissions')))
+                                            @if (session('account_type') == 1 && session('rate_status') == 1)
+                                                <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Order Form</a></li>
+                                                <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Excel Sheet</a></li>
+                                            @elseif (session('account_type') == 2 && session('rate_status') == 1)
+                                                <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
+                                                @if(session('user_id') == 10354)
+                                                    <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_distribution') }}">Excel Sheet</a></li>
+                                                @else
+                                                    <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
+                                                @endif
+                                                @if(session('mms_excel_booking_shippers') != null)
+                                                    @if (in_array(session('user_id'), session('mms_excel_booking_shippers')))
+                                                        <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_mms') }}">MMS Excel Sheet</a></li>
+                                                    @endif
                                                 @endif
                                             @endif
+                                            @if(session('international_rates') == 1)
+                                                <li><a class="menu-item" href="{{ route('cod.shipment.book.international.index') }}">International Order Form</a></li>
+                                                <li><a class="menu-item" href="{{ route('cod.shipment.book.international.excel_index') }}">International Excel Sheet</a></li>
+                                            @endif
                                         @endif
-                                        @if(session('international_rates') == 1)
-                                            <li><a class="menu-item" href="{{ route('cod.shipment.book.international.index') }}">International Order Form</a></li>
-                                            <li><a class="menu-item" href="{{ route('cod.shipment.book.international.excel_index') }}">International Excel Sheet</a></li>
-                                        @endif
-                                    @endif
-                                </ul>
-                            </li>
-                            @if (session('user_type') == 1 || in_array(3, session('permissions')))
+                                    </ul>
+                                </li>
+                            @endif
+                            @if (session('user_type') == 1 || in_array(3, session('permissions')) || session('status') === 6)
                                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Receiving Sheet</span></a>
                                     <ul class="menu-content">
-                                        <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
-                                        <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
-                                        <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.excel.index') }}">Excel</a></li>
-                                        <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
-                                        <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.shipments.index') }}">Shipments</a></li>
+                                        @if (session('status') !== 6)
+                                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Create</a></li>
+                                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create By Scan</a></li>
+                                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.excel.index') }}">Excel</a></li>
+                                        @endif
+                                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">History</a></li>
+                                        @if (session('status') !== 6)
+                                            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.shipments.index') }}">Shipments</a></li>
+                                        @endif
                                     </ul>
                                 </li>
                             @endif

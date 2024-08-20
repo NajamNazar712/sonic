@@ -34,7 +34,9 @@
                             </div>
                             <div class="col-4">
                                 <fieldset class="form-group">
-                                    <input type="text" name="search_shipper" id="search_shipper" class="form-control shipper_name" placeholder="Shipper Name">
+                                    {{-- <input type="text" name="search_shipper[]" id="search_shipper" class="form-control shipper_name" placeholder="Shipper Name" multiple> --}}
+                                    <select name="search_shipper[]" id="search_shipper" class="form-control select2"  multiple>
+                                    </select>
                                 </fieldset>
                             </div>
                             <div class="col-4">
@@ -87,6 +89,7 @@
                                         <th class="border-primary border-darken-1">Documents Rejected At</th>
                                         <th class="border-primary border-darken-1">Documents Status</th>
                                         <th class="border-primary border-darken-1">Documents Rejection Reason</th>
+                                        <th class="border-primary border-darken-1">FAF Charges Applied</th>
                                         <th class="border-primary border-darken-1">Duplicate</th>
                                         <th class="border-primary border-darken-1">Intl Rate Status</th>
                                         <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
@@ -95,6 +98,7 @@
                                         <th class="border-primary border-darken-1">Referral Code</th>
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
+                                        <th class="border-primary border-darken-1">Lead Account Progress (%)</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -574,6 +578,36 @@
     </div>
 </div>
 {{-- End --}}
+
+    <div class="modal fade text-left" id="faf_charges_modal" data-backdrop="static" role="dialog" aria-labelledby=""
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">FaF Charges</h4>
+                </div>
+                <form id="faf_charges_form" class="form" novalidate="novalidate" method="post" action="{{ route('admin.accounts.faf_charges.submit') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="col text-center">
+                            <label class="font-medium-2 font-weight-bold block">Apply FAF Charges</label>
+                            <div class="form-group">
+                                <input type="hidden" name="user_id" id="faf_charges_user_id">
+                                <label for="" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                <input type="checkbox" name="faf_charges_checkbox" id="faf_charges_checkbox" class="switchery faf_charges_checkbox" data-size="sm" data-switchery="true">
+                                <label for="" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="faf_charges_submit">Submit</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 
 
 
@@ -1074,6 +1108,29 @@
             dropdownParent:$('#SalesTierTypeTagModal')
         });
 
+        $('#search_shipper').select2({
+            width:'100%',
+            placeholder:"Select Shipper",
+            allowClear:true,
+            multiple: true,
+            minimumInputLength: 2,
+            ajax: {
+                dataType: 'json',
+                url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'pending']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                delay: 700,
+            }
+         });
+
         $('#payment_cycles').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder: 'Select Payment Cycle',
@@ -1171,6 +1228,7 @@
                         head.push('Documents Rejected At');
                         head.push('Documents Status');
                         head.push('Documents Rejection Reason');
+                        head.push('FAF Charges Applied');
                         head.push('Duplicate');
                         head.push('International Rate Status');
                         head.push('International Rate Status Remarks');
@@ -1179,6 +1237,8 @@
                         head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
+                        head.push('Lead Account Progress (%)');
+
 
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -1217,6 +1277,7 @@
                             row.push(values.documents_rejected_at);
                             row.push(values.documents_status);
                             row.push(values.documents_rejection_reason);
+                            row.push(values.fc_status);
                             row.push(values.duplication);
                             row.push(values.international_rate_status);
                             row.push(values.international_rejected_reason);
@@ -1225,6 +1286,8 @@
                             row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
+                            row.push(values.lead_progress);
+
                             body.push(row);
                         });
                     },
@@ -1693,6 +1756,7 @@
                 {data: 'documents_rejected_at', name: 'uda.rejected_at', class: 'align-middle documents_rejected_at'},
                 {data: 'documents_status', name: 'users.documents_status', class: 'align-middle documents_status'},
                 {data: 'documents_rejection_reason', name: 'users.documents_status_reason', class: 'align-middle documents_rejection_reason'},
+                {data: 'fc_status', name: 'faf_charges.status', class: 'align-middle fc_status'},
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
                 {data: 'international_rate_status', name: 'international_rate_status', class: 'align-middle international_rate_status', orderable: false, searchable: false},
                 {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
@@ -1701,6 +1765,7 @@
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
+                {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
                rowCallback: function(row, data, index) {
@@ -1743,6 +1808,12 @@
                         '<option value="6">Fortnite</option>' +
 
                         '</select>';
+
+                var fc_status_drop_select = '<select name="fc_status_select" id="fc_status_select" class="select2 form-control">' +
+                    '<option value="1">Yes</option>' +
+                    '<option value="0">No</option>' +
+                    '</select>';
+
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
@@ -1764,7 +1835,12 @@
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
-                    } else if ($(header).is('.payment_cycle')) {
+                    }else if($(header).is('.fc_status')){
+                        $(fc_status_drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    }else if ($(header).is('.payment_cycle')) {
                             $(payment_cycle_select).appendTo($(search))
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
@@ -1780,6 +1856,13 @@
                     }
                 });
                 $("#documents_status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+
+                $("#fc_status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
                     width:'100%',
                     containerCssClass: 'select-xs',
@@ -2399,6 +2482,32 @@
                             }
                             $('#restrict_user_id').val(id);
                             $('#RestrictOrderIDModal').modal('show');
+                        });
+                }
+            }
+        });
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            var id = $(this).parents('tr').attr('id');
+            if($(this).hasClass('faf_charges_status')){
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.accounts.faf_charges.info') !!}',
+                        method: 'POST',
+                        data: {
+                            'user_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            $('#faf_charges_checkbox').prop('checked',false);
+                            if (data.status == 1) {
+                                $('#faf_charges_checkbox').click();
+                            }
+                            $('#faf_charges_user_id').val(id);
+                            $('#faf_charges_modal').modal('show');
+
+
                         });
                 }
             }

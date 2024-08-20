@@ -149,7 +149,7 @@
                                                             <input type="text" class="form-control required"
                                                                 placeholder="Person Name (Alphabet Only)"
                                                                 name="shipper_poc"
-                                                                value="@if (old('shipper_poc') != null) {{ old('shipper_poc') }}@elseif($lead != null){{ $lead->contact_person }}@else{{ old('shipper_poc') }} @endif">
+                                                                >
                                                         </div>
                                                     </div>
                                                 </div>
@@ -243,9 +243,11 @@
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <div class="form-group">
-                                                            <label for="nature_of_account">Nature Of Account:
+                                                            <label for="nature_of_account"  data-toggle="tooltip" data-placement="top" title="" data-original-title="Cash on Delivery account refers to an account through which the service charges are deducted in COD payments, therefore Payments would be received minus the charges.
+Corporate Invoicing Amount refers to an account where Trax would send a monthly or weekly invoice of service charges and you will have to pay charges separately against that invoice.">Nature Of Account:
                                                                 <span class="danger">*</span>
                                                             </label>
+
                                                             <div>
                                                                 <select name="nature_of_account"
                                                                     id="nature_of_account"
@@ -1110,7 +1112,7 @@
     <script src="{{ asset('app-assets/vendors/js/pickers/pickadate/legacy.js') }}" type="text/javascript"></script>
     <!-- END PAGE VENDOR JS-->
     <script src="{{ asset('app-assets/vendors/js/forms/select/select2.full.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('app-assets/js/scripts/forms/wizard-steps.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/js/scripts/forms/wizard-steps.js?id=1') }}" type="text/javascript"></script>
     <!-- BEGIN MODERN JS-->
     <script src="{{ asset('app-assets/js/core/app-menu.js') }}"></script>
     <script src="{{ asset('app-assets/js/core/app.js') }}"></script>
@@ -1660,7 +1662,7 @@
                         validator: '[a-zA-Z0-9]',
                     },
                 },
-            });
+        });
 
             $('#iban_no').on('input', function (e) {
                 var iban = $(this).val().replace(/\s+/g, '').toUpperCase(); // Remove white spaces and convert to uppercase
@@ -1682,6 +1684,12 @@
                     $('#iban_no_error').hide();
                 }
             });
+            
+        $("input[name='shipper_poc']").on('keyup', function() {
+            var currentValue = $(this).val();
+            var filteredValue = currentValue.replace(/[^a-zA-Z ]+/g, '');            
+            $(this).val(filteredValue);
+        });
 
     </script>
 </body>

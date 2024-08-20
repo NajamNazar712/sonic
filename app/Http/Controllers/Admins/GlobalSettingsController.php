@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\FafCharges;
+use App\FafChargesGlobal;
+use App\FafChargesGlobalHistory;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -164,6 +167,7 @@ use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyExcluded;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
 use App\RvShipmentTicket;
+use App\Http\Models\CrmCaseNatureRemark;
 
 class GlobalSettingsController extends Controller
 {
@@ -1692,7 +1696,7 @@ class GlobalSettingsController extends Controller
     {
         $case_nature_types = CrmRequestCaseNatureType::leftjoin('crm_request_case_nature as crcs', 'crcs.id', '=', 'crm_request_case_nature_types.nature_id')
             ->select('crm_request_case_nature_types.id', 'crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type', 'crm_request_case_nature_types.status_id as status')
-            ->where('crm_request_case_nature_types.id', '<>', 34);
+            ->orderBy('crm_request_case_nature_types.id', 'desc');
         $datatable = Datatables::of($case_nature_types)
             ->editColumn('status', function ($case_nature_types) {
                 if ($case_nature_types->status == 1) {
@@ -1711,6 +1715,49 @@ class GlobalSettingsController extends Controller
                     } else {
                         $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                     }
+                    
+
+                    $dropdown .= '
+                            <a href="' . route('admin.settings.crm_case_nature_types.edit', ['id' => $data->id]) . '" target="_blank" class="dropdown-item text-dark">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2">
+                                        <i class="ft-edit-2"></i>
+                                    </div>
+                                    <div class="col-9 offset-1">
+                                        Edit
+                                    </div>
+                                </div>
+                            </a>
+                        ';
+
+                    // if ($data->status == 0){
+                    //     $dropdown .= '
+                    //         <a href="#" class="dropdown-item text-dark disabled-link" onclick="event.preventDefault(); return false;">
+                    //         <div class="row no-gutters align-items-center">
+                    //             <div class="col-2">
+                    //                 <i class="ft-edit-2"></i>
+                    //             </div>
+                    //             <div class="col-9 offset-1">
+                    //                 Edit
+                    //             </div>
+                    //         </div>
+                    //     </a>
+                    //     ';
+                    // } else {
+                    //     $dropdown .= '
+                    //         <a href="' . route('admin.settings.crm_case_nature_types.edit', ['id' => $data->id]) . '" target="_blank" class="dropdown-item text-dark">
+                    //             <div class="row no-gutters align-items-center">
+                    //                 <div class="col-2">
+                    //                     <i class="ft-edit-2"></i>
+                    //                 </div>
+                    //                 <div class="col-9 offset-1">
+                    //                     Edit
+                    //                 </div>
+                    //             </div>
+                    //         </a>
+                    //     ';
+                    // }
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -1739,21 +1786,75 @@ class GlobalSettingsController extends Controller
         }
     }
 
+    public function crm_case_nature_types_add_form()
+    {
+        $case_nature = CrmRequestCaseNature::whereNotIn('id', [3])->select(['id', 'name'])->get();
+        $shipment_status = ShipmentStatus::where('status', 1)->get();
+        $admin_departments = AdminDepartment::get();
+        return view('admin.settings.crm_case_nature.add_form', compact('case_nature', 'shipment_status', 'admin_departments'));
+    }
+
+    public function crm_case_nature_types_edit_form()
+    {   
+        $case_nature = CrmRequestCaseNature::whereNotIn('id', [3])->select(['id', 'name'])->get();
+        $shipment_status = ShipmentStatus::where('status', 1)->get();
+        $admin_departments = AdminDepartment::get();
+        return view('admin.settings.crm_case_nature.edit_form', compact('case_nature', 'shipment_status', 'admin_departments'));
+    }
+
+    public function crm_case_nature_types_edit_ajax_list(Request $request) 
+    {   
+        $case_nature_id = $request->id;
+        $crm_case = CrmRequestCaseNatureType::where('id', $case_nature_id)->get();
+        $remarks = CrmCaseNatureRemark::where('case_nature_id', $case_nature_id)->get();
+
+        if (!$crm_case) {
+            $crm_case = [];
+            $remarks = [];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'case_nature' => $crm_case,
+                'remarks' => $remarks,
+            ],
+        ]);
+    }
+
     public function crm_case_nature_types_store(Request $request)
     {
+        $request->validate([
+            'case_nature' => 'required',
+            'case_nature_type' => 'required',
+            'remarks.*' => 'required_if:remarks_visibility,on',
+            'shipment_status.*' => 'required|min:1',
+            'admin_departments.*' => 'required|min:1'
+        ], [
+            'remarks.*.required_if' => 'Remarks are required when the remarks visibility checkbox is checked.',
+        ]);
+
+        // on means checbox is checked
+        if ($request->remarks_visibility == 'on' && (empty($request->remarks) || !is_array($request->remarks))) {
+            return redirect()->back()->with('error', 'Remarks are required when the remarks visibility checkbox is checked.');
+        }
+
         $nature = $request->case_nature;
         $type = $request->case_nature_type;
         if ($nature == null && $type == null && $nature == '' && $type == '') {
             if ($nature == null && $nature == '') {
-                return response()->json(['status' => 0, 'error' => 'Please select Case Nature!']);
+                // return response()->json(['status' => 0, 'error' => 'Please select Case Nature!']);
+                return redirect()->back()->with('error', 'Please select Case Nature!');
             }
             if ($type == null && $type == '') {
-                return response()->json(['status' => 0, 'error' => 'Please enter Case Nature Type!']);
+                // return response()->json(['status' => 0, 'error' => 'Please enter Case Nature Type!']);
+                return redirect()->back()->with('error', 'Please enter Case Nature Type!');
             }
         }
         $case_nature_types = CrmRequestCaseNatureType::where('type', $type);
         if ($case_nature_types->exists()) {
-            return response()->json(['status' => 0, 'error' => 'Same Case Nature Type already exists!']);
+            // return response()->json(['status' => 0, 'error' => 'Same Case Nature Type already exists!']);
+            return redirect()->back()->with('error', 'Same Case Nature Type already exists!');
         } else {
             $new_case_nature_type = new CrmRequestCaseNatureType();
             $new_case_nature_type->nature_id = $nature;
@@ -1761,10 +1862,107 @@ class GlobalSettingsController extends Controller
             $new_case_nature_type->updated_at = Carbon::now();
             $new_case_nature_type->updated_by = Auth::id();
             $new_case_nature_type->type = $type;
+            $new_case_nature_type->shipper_visibility = $request->has('shipper_visibility');
+            $new_case_nature_type->remarks_visibility = $request->has('remarks_visibility');
+
+            if ($request->has('shipment_status')) {
+                $new_case_nature_type->shipment_status = json_encode($request->shipment_status);
+            }
+
+            if ($request->has('admin_departments')) {
+                $new_case_nature_type->admin_departments = json_encode($request->admin_departments);
+            }
+
             $new_case_nature_type->save();
 
-            return response()->json(['status' => 1, 'success' => 'New Case Nature Type added successfully!']);
+            // store remarks
+            if ($request->has('remarks')) {
+                foreach ($request->remarks as $remark) {
+                    $crm_remarks = new CrmCaseNatureRemark();
+                    $crm_remarks->case_nature_id = $new_case_nature_type->id;
+                    $crm_remarks->remarks = $remark;
+                    $crm_remarks->save();
+                }
+            }
+
+            // return response()->json(['status' => 1, 'success' => 'New Case Nature Type added successfully!']);
+            return redirect()->route('admin.settings.crm_case_nature_types.index')->with('success', 'New Case Nature Type added successfully!');
         }
+    }
+
+
+    public function crm_case_nature_types_update(Request $request)
+    {
+        $request->validate([
+            'case_nature' => 'required',
+            'case_nature_type' => 'required',
+            'remarks.*' => 'required_if:remarks_visibility,on',
+            'shipment_status' => 'required|min:1',
+            'admin_departments' => 'required|min:1',
+        ], [
+            'remarks.*.required_if' => 'Remarks are required when the remarks visibility checkbox is checked.',
+        ]);
+
+        // on means checbox is checked
+        if ($request->remarks_visibility == 'on' && (empty($request->remarks) || !is_array($request->remarks))) {
+            return redirect()->back()->with('error', 'Remarks are required when the remarks visibility checkbox is checked.');
+        }
+
+        $type = $request->input('case_nature_type');
+        $case_nature_id = $request->input('case_nature_id');
+        $case_nature = $request->input('case_nature');
+        $shipment_status = json_encode($request->input('shipment_status'));
+        $admin_departments = json_encode($request->input('admin_departments'));
+        $shipper_visibility = $request->has('shipper_visibility');
+        $remarks_visibility = $request->has('remarks_visibility');
+        $remarks = $request->input('remarks');
+    
+        $caseNatureType = CrmRequestCaseNatureType::findOrFail($case_nature_id);
+
+        if ($caseNatureType->status_id == 0){
+            return redirect()->back()->with('error', 'Please enable the case nature first');
+        }
+    
+        if ($type !== $caseNatureType->type) {
+            $existingCaseNatureType = CrmRequestCaseNatureType::where('type', $type)->first();
+            if ($existingCaseNatureType && $existingCaseNatureType->id !== $case_nature_id) {
+                return redirect()->back()->with('error', 'Same Case Nature Type already exists!');
+            }
+        }
+        
+        $caseNatureType->type = $type;
+        $caseNatureType->shipment_status = $shipment_status;
+        $caseNatureType->admin_departments = $admin_departments;
+        $caseNatureType->shipper_visibility = $shipper_visibility;
+        $caseNatureType->remarks_visibility = $remarks_visibility;
+        $caseNatureType->nature_id = $case_nature;
+        $caseNatureType->save();
+    
+        // Handle remarks update
+        $existingRemarks = CrmCaseNatureRemark::where('case_nature_id', $caseNatureType->id)->get();
+        // Delete remarks that are not in the new remarks
+        foreach ($existingRemarks as $existingRemark) {
+            if (!in_array($existingRemark->remarks, $remarks)) {
+                $existingRemark->delete();
+            }
+        }
+
+        if ($remarks != null){
+            // Add or update remarks
+            foreach ($remarks as $remark) {
+                $existingRemark = CrmCaseNatureRemark::where('case_nature_id', $caseNatureType->id)->where('remarks', $remark)->first();
+                if ($existingRemark) {
+                    $existingRemark->remarks = $remark;
+                    $existingRemark->save();
+                } else {
+                    $crm_remark = new CrmCaseNatureRemark();
+                    $crm_remark->case_nature_id = $caseNatureType->id;
+                    $crm_remark->remarks = $remark;
+                    $crm_remark->save();
+                }
+            }
+        }
+        return redirect()->route('admin.settings.crm_case_nature_types.index')->with('success', 'Case Nature Type Updated successfully!');
     }
 
     public function return_delivered_to_shipper_email_cut_off_time_index()
@@ -9484,7 +9682,7 @@ class GlobalSettingsController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
                 $dropdown .= $edit_product_type;
-                $dropdown .= $delete_product_type;
+//                $dropdown .= $delete_product_type;
                 $dropdown .= '
                         </div>
                         </div>
@@ -9829,5 +10027,44 @@ class GlobalSettingsController extends Controller
 
             return redirect()->back()->with('success', 'Color/Percent Updated !!!');
         }
+    }
+
+    public function faf_charges_index()
+    {
+        $faf_charges = FafChargesGlobal::orderby('id','desc')->first();
+
+        return view('admin.settings.faf_charges')->with(['faf_charges'=>$faf_charges]);
+    }
+
+    public function faf_charges_store(Request $request)
+    {
+        $applied_faf_charges = $request->faf_charges;
+
+        $date_range_start = Carbon::createFromFormat('d F, Y', $request->date_range_start)->format('Y-m-d');
+        $date_range_end = Carbon::createFromFormat('d F, Y', $request->date_range_end)->format('Y-m-d');
+
+        $faf_charges = FafChargesGlobal::orderby('id','desc');
+        if($faf_charges->exists()) {
+            $faf_charges = $faf_charges->first();
+            $faf_charges_history =  new FafChargesGlobalHistory();
+            $faf_charges_history->faf_charges = $faf_charges->faf_charges;
+            $faf_charges_history->date_range_start = $faf_charges->date_range_start;
+            $faf_charges_history->date_range_end = $faf_charges->date_range_end;
+            $faf_charges_history->admin_id = $faf_charges->admin_id;
+            $faf_charges_history->save();
+        }else{
+            $faf_charges = new FafChargesGlobal();
+        }
+        $faf_charges->faf_charges = $applied_faf_charges;
+        $faf_charges->date_range_start = $date_range_start;
+        $faf_charges->date_range_end = $date_range_end;
+        $faf_charges->admin_id = Auth::user()->id;
+        $faf_charges->save();
+
+
+
+        return redirect()->back()->with('success', 'FaF Percent Updated !!!');
+
+
     }
 }
