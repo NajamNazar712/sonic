@@ -656,6 +656,7 @@
                     var old_date_formatted = $('input[name="booking_from_date_formatted"]').val();
                     var contractMoment = moment(old_date_formatted);
                     var current = moment(contractMoment).add(31, 'days');
+                    var current_max = moment(contractMoment).add(1, 'days');
                     booking_to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
                     booking_to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
                     booking_to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});

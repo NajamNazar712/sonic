@@ -41,6 +41,6 @@ class CreateInternationalEconomyStandardRetailRatesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('international_economy_standard_retail_rates');
+        Schema::dropIfExists('intl_economy_standard_retail_rates');
     }
 }

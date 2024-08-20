@@ -115,6 +115,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
         Route::get('active', 'Admins\AdminDashboardController@activeAccountsList')->name('active');
         Route::post('active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('active.ajax');
+        Route::get('shipper_names_for_dropdown/{type}','Admins\AdminDashboardController@shipperNamesForDropdown')->name('shipper_names.dropdown');
         Route::post('cancelation-days', 'Admins\AdminDashboardController@auto_cancelation_days')->name('auto_cancelation_days');
         Route::get('block', 'Admins\AdminDashboardController@blockAccountsList')->name('block');
         Route::get('block/ajax', 'Admins\AdminDashboardController@blockAccountListAjax')->name('block.ajax');
@@ -427,6 +428,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('check_zone_name/{id?}', 'Admins\AdminZonalManagementController@check_zone_name')->name('check_zone_name');
 
             Route::post('update_zone_cities_gst', 'Admins\AdminZonalManagementController@update_zone_cities_gst')->name('update_zone_cities_gst');
+            Route::post('add_cities','Admins\AdminZonalManagementController@add_cities')->name('add_cities');
+            Route::post('search_cities','Admins\AdminZonalManagementController@search_cities')->name('search_cities');
         });
 
         Route::prefix('territory')->name('territory.')->group(function () {
@@ -845,6 +848,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status_logs', 'Admins\DeliveryController@sdn_status_logs')->name('status_logs');
 
             Route::post('sdn_actions', 'Admins\DeliveryController@sdn_actions')->name('sdn_actions');
+
+            Route::post('sdn_deposit_slip_logs', 'Admins\DeliveryController@sdn_deposit_slip_logs')->name('sdn_deposit_slip_logs');
 
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('{id}/details', 'Admins\Retail\RetailCompletedDeliveries@sdn_details')->name('details');
@@ -1986,6 +1991,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('edit', 'Admins\AdminNotificationsController@app_notification_edit')->name('edit');
     });
 
+    // SMS logs
+    Route::prefix('sms_logs')->name('sms_logs.')->group(function () {
+        Route::get('', 'Admins\AdminNotificationsController@sms_logs_view')->name('index');
+        Route::post('list', 'Admins\AdminNotificationsController@sms_logs')->name('list');
+    });
+
     //Reports start
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::prefix('qsr')->name('qsr.')->group(function () {
@@ -2772,6 +2783,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\GlobalSettingsController@crm_case_nature_types_list')->name('list');
             Route::post('status', 'Admins\GlobalSettingsController@crm_case_nature_types_status')->name('status');
             Route::post('store', 'Admins\GlobalSettingsController@crm_case_nature_types_store')->name('store');
+
+            Route::get('add', 'Admins\GlobalSettingsController@crm_case_nature_types_add_form')->name('add');
+            Route::get('edit/{id}', 'Admins\GlobalSettingsController@crm_case_nature_types_edit_form')->name('edit');
+            Route::get('edit/ajax/{id}', 'Admins\GlobalSettingsController@crm_case_nature_types_edit_ajax_list')->name('edit_ajax');
+
+            Route::post('update', 'Admins\GlobalSettingsController@crm_case_nature_types_update')->name('update');
         });
 
         Route::prefix('return_delivered_to_shipper_email_cut_off_time')->name('return_delivered_to_shipper_email_cut_off_time.')->group(function () {
@@ -3520,6 +3537,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/lost/claim', 'Admins\AdminCRMController@lost_claim')->name('lost.claim');
             Route::post('request', 'Admins\AdminCRMController@special_request_appvove')->name('special_request_appvove');
             Route::post('request_adjusted', 'Admins\AdminCRMController@special_request_adjusted')->name('special_request_adjusted');
+
+            Route::post('case_nature_remarks', 'Admins\AdminTrackingController@case_nature_remarks')->name('case_nature_remarks');
+            Route::post('case_nature_service_remarks', 'Admins\AdminTrackingController@case_nature_service_remarks')->name('case_nature_service_remarks');
+            Route::post('case_nature_claim_remarks', 'Admins\AdminTrackingController@case_nature_claim_remarks')->name('case_nature_claim_remarks');
         });
         Route::prefix('feedback')->name('feedback.')->group(function () {
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
@@ -3858,6 +3879,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('edit', 'Admins\LeadManagementController@edit')->name('edit');
         Route::post('add', 'Admins\LeadManagementController@add')->name('add');
         Route::get('edit_service_list', 'Admins\LeadManagementController@edit_service_list')->name('edit_service_list');
+        Route::post('/check-lead', 'Admins\LeadManagementController@checkLead')->name('check.lead');
+
     });
 
     Route::prefix('pam_leads')->name('pam_leads.')->group(function () {
@@ -3874,6 +3897,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@franchise_add')->name('add');
             Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@franchise_edit')->name('edit');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@franchise_name')->name('name');
+
+            Route::get('{id}/franchise_details_excel_sheet', 'Admins\Retail\RetailAdminUserManagementController@franchise_details_excel_sheet')->name('franchise_details_excel_sheet');
+
+            Route::get('/retail_product_percentage', 'Admins\Retail\RetailAdminUserManagementController@retail_product_percentage')->name('retail_product_percentage');
+            Route::get('/retail_product_charges', 'Admins\Retail\RetailAdminUserManagementController@retail_product_charges')->name('retail_product_charges');
+            Route::get('/retail_product_attachments', 'Admins\Retail\RetailAdminUserManagementController@retail_product_attachments')->name('retail_product_attachments');
+
+            Route::get('commission', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_view')->name('franchise_wise_commission');
+            Route::get('franchise_commission/ajax', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_view_ajax_list')->name('commission.list');
+            Route::get('user_commission', 'Admins\Retail\RetailAdminUserManagementController@user_commission_view')->name('user_wise_commission');
+            Route::get('user_commission/ajax', 'Admins\Retail\RetailAdminUserManagementController@user_commission_view_ajax_list')->name('user_commission.list');
+
+            Route::post('print', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_invoice_print')->name('franchise_commission_invoice_print');
+
+            Route::post('show_commission', 'Admins\Retail\RetailAdminUserManagementController@show_commission')->name('show_commission');
+            Route::post('commission_payment', 'Admins\Retail\RetailAdminUserManagementController@commission_payment')->name('commission_payment');
+
+            Route::get('/cnic_status', 'Admins\Retail\RetailAdminUserManagementController@cnic_status')->name('cnic_status');
         });
         Route::prefix('trax_center')->name('trax_center.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');
@@ -3882,6 +3923,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@trax_center_add')->name('add');
             Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@trax_center_edit')->name('edit');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@trax_center_name')->name('name');
+
+            Route::get('/trax_center_edit_attachment', 'Admins\Retail\RetailAdminUserManagementController@trax_center_edit_attachment')->name('trax_center_edit_attachment');
+
+            Route::get('{id}/trax_center_details_excel_sheet', 'Admins\Retail\RetailAdminUserManagementController@trax_center_details_excel_sheet')->name('trax_center_details_excel_sheet');
         });
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@user_index')->name('index');
@@ -3892,6 +3937,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('update/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_update')->name('update');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@user_name')->name('name');
             Route::get('edit/name/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_edit_name')->name('edit.name');
+
+            Route::get('/retail_user_percentage', 'Admins\Retail\RetailAdminUserManagementController@retail_user_percentage')->name('retail_user_percentage');
+
+            Route::post('print', 'Admins\Retail\RetailAdminUserManagementController@user_commission_invoice_print')->name('user_commission_invoice_print');
+
+            Route::get('/retail_user_attachments', 'Admins\Retail\RetailAdminUserManagementController@retail_user_attachments')->name('retail_user_attachments');
+
+            Route::get('{id}/retail_history', 'Admins\Retail\RetailAdminUserManagementController@retail_history')->name('retail_history');
+
+            Route::post('show_retail_commission', 'Admins\Retail\RetailAdminUserManagementController@show_retail_commission')->name('show_retail_commission');
+            Route::post('retail_commission_payment', 'Admins\Retail\RetailAdminUserManagementController@retail_commission_payment')->name('retail_commission_payment');
+
+            Route::get('{id}/retail_user_excel_sheet', 'Admins\Retail\RetailAdminUserManagementController@retail_user_excel_sheet')->name('retail_user_excel_sheet');
+            Route::get('{id}/franchise_excel_sheet', 'Admins\Retail\RetailAdminUserManagementController@franchise_excel_sheet')->name('franchise_excel_sheet');
+
         });
 
         Route::prefix('international')->name('international.')->group(function () {
