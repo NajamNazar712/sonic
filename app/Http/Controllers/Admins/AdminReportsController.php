@@ -15293,6 +15293,7 @@ class AdminReportsController extends Controller
 
     public function shipment_reversal_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 803);
         if (session('role_id') == 1 || in_array(1001, session('permissions'))) {
             return view('admin.reports.shipment_reversal_report.index');
         } else {
@@ -15303,7 +15304,9 @@ class AdminReportsController extends Controller
 
     public function shipment_reversal_list(Request $request)
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 803);
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 804);
+        }
         $from_date = $request->has('search_date_from') && !empty($request->search_date_from)
             ? Carbon::parse($request->search_date_from)->startOfDay()
             : null;

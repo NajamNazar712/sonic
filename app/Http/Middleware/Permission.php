@@ -658,7 +658,6 @@ class Permission
 
             'reports.shipment_reversal_report.index' => 1001,
 
-
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,

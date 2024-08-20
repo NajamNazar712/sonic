@@ -14,11 +14,12 @@ class ActivityTrailForShipmentReversalReport extends Seeder
     {
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 803, 'screen_name' => 'Shipment Reversal Report', 'action'=> 'View'),
+            array('id' => 804, 'screen_name' => 'Shipment Reversal Report', 'action'=> 'Excel'),
         ));
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Shipment Reversal Report', 'url'=>'admin.reports.shipment_reversal_report.index', 'permission_id' => 894),           
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Shipment Reversal Report', 'url'=>'admin.reports.shipment_reversal_report.index', 'permission_id' => 1001),           
         ));
     }
 }
