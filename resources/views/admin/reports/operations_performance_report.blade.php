@@ -17,9 +17,7 @@
                     <div class="row mb-2 justify-content-center">
                         <div class="col-4">
                             <fieldset class="form-group">
-                                <select name="search_shippers[]" id="search_shippers" class="form-control select2"
-                                    multiple="multiple">
-
+                                <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple>
                                 </select>
                             </fieldset>
                         </div>
@@ -145,6 +143,29 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
+            $('#search_shippers').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    delay: 700,
+                }
+            });
+
             var select = $('#search_tracking_no').selectize({
                 placeholder: 'Tracking Number(s)*',
                 delimiter: ',',
@@ -205,8 +226,8 @@
                 method: 'GET',
                 success: function(data) {
                     // Reinitialize and set placeholders for the select2 elements
-                    initializeSelect2WithPlaceholder('#search_shippers', data.shippers,
-                        'Select Shippers');
+                    //initializeSelect2WithPlaceholder('#search_shippers', data.shippers,
+                    //     'Select Shippers');
                     initializeSelect2WithPlaceholder('#search_origin', data.cities,
                         'Select Origin City');
                     initializeSelect2WithPlaceholder('#search_destination', data.cities,

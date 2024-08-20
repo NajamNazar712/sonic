@@ -118,13 +118,10 @@ class AdminRetailReportController extends Controller
             if ($from_id->exists()) {
                 $from_id = $from_id->first()->id;
 
-                $to_id = DB::connection('reports')->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+                $to_id = DB::connection('reports')->table('shipments_journey')->whereBetween('created_at', [$from, $to])->max('id');
 
-                if ($to_id->exists()) {
-                    $to_id = $to_id->first()->id;
-
-                    $sales->where('sj.id', '>=', $from_id)
-                        ->where('sj.id', '<=', $to_id);
+                if (!empty($to_id)) {
+                    $sales->where('sj.id', '>=', $from_id)->where('sj.id', '<=', $to_id);
                 }
             }
         $datatable = Datatables::of($sales)

@@ -5976,10 +5976,10 @@ class AdminCargoManifestController extends Controller
         //        return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html]);
 
         // new code without restriction
-        Log::channel('cronJobLog')->info('cargo:check_start');
+//        Log::channel('cronJobLog')->info('cargo:check_start');
         try {
             DB::beginTransaction();
-            Log::channel('cronJobLog')->info('cargo:check_1');
+//            Log::channel('cronJobLog')->info('cargo:check_1');
 
         $shipment_status_array = [2,3,11,20,21,26,32,49,68];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
@@ -6016,7 +6016,7 @@ class AdminCargoManifestController extends Controller
                 if (!empty($shipment_data_success_ids)) {
                     Shipment::whereIn('id', $shipment_data_success_ids)->update(['open_box' => 1]);
                 }
-                Log::channel('cronJobLog')->info('cargo:check_2');
+//                Log::channel('cronJobLog')->info('cargo:check_2');
             }
             //todo : open box-work end
 
@@ -6291,7 +6291,7 @@ class AdminCargoManifestController extends Controller
                     }
                     //check previous bag received shipments end
                 }
-                Log::channel('cronJobLog')->info('cargo:check_3');
+//                Log::channel('cronJobLog')->info('cargo:check_3');
             }
             else {
                 foreach ($shipment_ids as $shipment_id) {
@@ -6512,7 +6512,7 @@ class AdminCargoManifestController extends Controller
                         }
                     }
                 }
-                Log::channel('cronJobLog')->info('cargo:check_4');
+//                Log::channel('cronJobLog')->info('cargo:check_4');
             }
 
             // received and short received
@@ -6562,7 +6562,7 @@ class AdminCargoManifestController extends Controller
                  $all_bag_ids = $all_bag_ids . ', ' .$bag->seal_number;
              }*/
             }
-            Log::channel('cronJobLog')->info('cargo:check_5');
+//            Log::channel('cronJobLog')->info('cargo:check_5');
             foreach ($bag_ids as $bag_id) {
                 $manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first();
                 if (!empty($manifest_bag)) {
@@ -6583,7 +6583,7 @@ class AdminCargoManifestController extends Controller
                 }
             }
             // received and short received end
-            Log::channel('cronJobLog')->info('cargo:check_6');
+//            Log::channel('cronJobLog')->info('cargo:check_6');
             $bag_shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id', $bag_ids)->where('status', 0);
             if ($bag_shipments->exists()) {
                 $shipment_ids = $bag_shipments->pluck('shipment_id')->toArray();
@@ -6594,7 +6594,7 @@ class AdminCargoManifestController extends Controller
                     }
                 }
             }
-            Log::channel('cronJobLog')->info('cargo:check_7');
+//            Log::channel('cronJobLog')->info('cargo:check_7');
             //remove misrouted shipment ids from $short_received_shipments_array
             $exclude_from_short_received = Shipment::whereIn('tracking_number',$short_received_shipments_array)->whereIn('shipper_status_id',[11,68])->pluck('tracking_number')->toArray();
             $short_received_shipments_array = array_diff($short_received_shipments_array, $exclude_from_short_received);
@@ -6612,7 +6612,7 @@ class AdminCargoManifestController extends Controller
                 }
                 $sr_html .= "</ul>";
             }
-            Log::channel('cronJobLog')->info('cargo:check_8');
+//            Log::channel('cronJobLog')->info('cargo:check_8');
             if (count($shipments_already_marked_received_array) > 0) {
                 $already_received_shipments_html = "Following Shipments(s) are already marked as received or processed .<br><ul>";
                 foreach ($shipments_already_marked_received_array as $v) {
@@ -6620,7 +6620,7 @@ class AdminCargoManifestController extends Controller
                 }
                 $already_received_shipments_html .= "</ul>";
             }
-            Log::channel('cronJobLog')->info('cargo:check_9');
+//            Log::channel('cronJobLog')->info('cargo:check_9');
             if (count($shipment_ids_array) > 0) {
                 $received_html = "Following Shipments(s) are marked as received. .<br><ul>";
                 foreach ($shipment_ids_array as $v) {
@@ -6628,7 +6628,7 @@ class AdminCargoManifestController extends Controller
                 }
                 $received_html .= "</ul>";
             }
-            Log::channel('cronJobLog')->info('cargo:check_10');
+//            Log::channel('cronJobLog')->info('cargo:check_10');
             if (count($shipment_ids_array_misrouted) > 0) {
                 $misrouted_html = "Following Shipments(s) are marked as misrouted.<br><ul>";
                 foreach ($shipment_ids_array_misrouted as $m) {
@@ -6636,9 +6636,9 @@ class AdminCargoManifestController extends Controller
                 }
                 $misrouted_html .= "</ul>";
             }
-            Log::channel('cronJobLog')->info('cargo:check_11');
+//            Log::channel('cronJobLog')->info('cargo:check_11');
             DB::commit();
-            Log::channel('cronJobLog')->info('cargo:completed');
+//            Log::channel('cronJobLog')->info('cargo:completed');
             //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
             return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html, 'misrouted_html' => $misrouted_html]);
         } catch (\Throwable $th) {

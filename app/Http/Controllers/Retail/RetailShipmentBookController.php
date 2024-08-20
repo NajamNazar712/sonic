@@ -54,6 +54,13 @@ use Validator;
 use Illuminate\Validation\Rule;
 use DNS2D;
 use App\Http\Models\RetailRequestCity;
+use App\Http\Models\RetailUserCommission;
+use App\Http\Models\RetailFranchiseCommission;
+use App\Http\Models\RetailUserHistory;
+use App\Http\Models\RetailUserProductPercentage;
+use App\Http\Models\TotalSumFranchiseCommission;
+use App\Http\Models\TotalSumRetailTraxCenter;
+use App\Http\Models\RetailFranchiseCharge;
 
 class RetailShipmentBookController extends Controller
 {
@@ -66,7 +73,7 @@ class RetailShipmentBookController extends Controller
 //        $this->middleware('Permission');
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $business_category_id, $length, $breadth, $height, $parcelAmoutInShipment) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $business_category_id, $length, $breadth, $height) {
 
         $shipment = new Shipment();
 
@@ -106,8 +113,6 @@ class RetailShipmentBookController extends Controller
         $shipment->pieces = $pieces;
         $shipment->business_category_id = $business_category_id;
         $shipment->shipment_type = 2;
-
-        $shipment->parcel_value = $parcelAmoutInShipment;
 
         $shipment->save();
 
@@ -358,17 +363,8 @@ class RetailShipmentBookController extends Controller
         $pieces_quantity = $request->input('pieces');
         $business_category_id = $request->input('business_category');
 
-        $parcelAmount = $request->input('parcel_amount');
-        $parcelAmount = trim($parcelAmount);
-        $parcelAmount = str_replace(',', '', $parcelAmount);
-        $parcelAmoutInShipment = (float)$parcelAmount;
 
-        $quantity = $request->input('quantity');
-        $quantity = trim($quantity);
-        $quantity = str_replace(',', '', $quantity);
-        $quantityForShipmentItem = (int)$quantity;
-
-        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height, $parcelAmoutInShipment);
+        $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
 
         if($request->input('business_category') == 2) {
             $international_shipment_booking = new InternationalShipment();
@@ -383,8 +379,7 @@ class RetailShipmentBookController extends Controller
 
         $item_description = NULL;
 
-        // $item_quantity = 1;
-        $item_quantity = $quantityForShipmentItem;
+        $item_quantity = 1;
 
         if ($request->input('insurance_offered') == 1) {
             $price = str_replace(',', '', $request->input('insurance_amount'));
@@ -553,9 +548,34 @@ class RetailShipmentBookController extends Controller
                 $retail_shipment->admin_discount_type = 1;
             }
         }
-        $retail_shipment->parcel_amount = $parcelAmount;
-        $retail_shipment->quantity = $quantity;
         $retail_shipment->save();
+
+        // retail user history
+        $shipping_mode_id = $retail_shipment->shipping_mode;
+        $shipping_mode = RetailShippingMode::where('id', $shipping_mode_id)->first();
+        $product_commission = RetailUserProductPercentage::where('retail_user_id', $retail_shipment->retail_user_id)
+            ->where('retail_shipping_mode_id', $shipping_mode->id)->first();
+        $retail_user_history = RetailUserHistory::where('retail_user_id', Auth::user()->id);
+
+        if ($retail_user_history->exists()) {
+            $history_data = $retail_user_history->latest()->first();
+            $joining_date = $history_data->joining_date; 
+        } else {
+            $joining_date = null;
+        }
+
+        $data = [
+            'retail_user_id' => $retail_shipment->retail_user_id,
+            'trax_center_name' => Auth::user()->store->name,
+            'trax_center_code' => Auth::user()->store->code,
+            'trax_center_id' => Auth::user()->store->id,
+            'joining_date' => $joining_date,
+            'retail_shipping_mode_id' => $shipping_mode_id,
+            'retail_shipping_mode_name' => $shipping_mode->name ?? NULL,
+            'product_commission' => $product_commission->product_percentage ?? NULL,
+            'booking_date' => $retail_shipment->created_at
+        ];
+        RetailUserHistory::create($data);
 
         $shipment = Shipment::find($shipment_id);
         if($shipment->charges_mode_id != 2){
@@ -1933,10 +1953,6 @@ class RetailShipmentBookController extends Controller
             'account_number' => 'Account Number',
             'bank_id' => 'Bank ID',
             'special_instruction' => 'Special Instruction',
-            'admin_discount' => 'Admin Discount',
-            'admin_discount_type' => 'Admin Discount Type',
-            'parcel_amount' => 'Parcel Value',
-            'quantity' => 'Quantity',
         ];
 
         $messages = [
@@ -1990,10 +2006,6 @@ class RetailShipmentBookController extends Controller
             'account_number' => ['nullable', 'numeric'],
             'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')],
             'special_instruction' => ['nullable', 'between:1,190'],
-            'admin_discount_type' => ['nullable'],
-            'admin_discount' => ['nullable', 'between:1,100'],
-            'parcel_amount' => ['required'],
-            'quantity' => ['required'],
             
         ];
 
@@ -2004,51 +2016,8 @@ class RetailShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-                // $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction'];
-
-            $fields = [
-                0 => 'product_id',
-                1 => 'business_category_id',
-                2 => 'shipping_mode_id',
-                3 => 'destination',
-                4 => 'volumetric_weight',
-                5 => 'weight',
-                6 => 'length',
-                7 => 'breadth',
-                8 => 'height',
-                9 => 'pieces',
-                10 => 'payment_mode_id',
-                11 => 'charges_mode_id',
-                12 => 'shipper_cell_number',
-                13 => 'shipper_name',
-                14 => 'shipper_cnic',
-                15 => 'shipper_address',
-                16 => 'consignee_cell_number',
-                17 => 'consignee_name',
-                18 => 'consignee_cnic',
-                19 => 'consignee_address',
-                20 => 'order_id',
-                21 => 'insurance_offered',
-                22 => 'insurance_value',
-                23 => 'packaging_charges',
-                24 => 'trax_box_id',
-                25 => 'iban_number',
-                26 => 'account_number',
-                27 => 'bank_id',
-                28 => 'special_instruction',
-                29 => 'admin_discount',
-                30 => 'admin_discount_type',
-                31 => 'parcel_amount',
-                32 => 'quantity'
-            ];
-
-            // dd($fields, $rules);
-
-            // if (count($spreadsheet[0]) != 29){
-            //     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
-            // }
-
-            if (count($spreadsheet[0]) != count($fields)){
+                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction'];
+            if (count($spreadsheet[0]) != 29){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
             unset($spreadsheet[0]);
@@ -2093,16 +2062,6 @@ class RetailShipmentBookController extends Controller
                 if(!isset($row['pieces']) || $row['pieces'] == null){
                     $row['pieces'] = 1;
                 }
-
-                if (!isset($row['parcel_amount']) || $row['parcel_amount'] == null){
-                    $errors[$row_id]['parcel_amount'] = 'Parcel Value is required';
-                }
-                $rows[$key]['parcel_amount'] = $row['parcel_amount'];
-
-                if (!isset($row['quantity']) || $row['quantity'] == null){
-                    $errors[$row_id]['quantity'] = 'Quantity is required';
-                }
-                $rows[$key]['quantity'] = $row['quantity'];
 
                 $rows[$key]['pieces'] = $row['pieces'];
                 $rows[$key]['packaging_charges'] = $row['packaging_charges'];
@@ -2411,5 +2370,571 @@ class RetailShipmentBookController extends Controller
         {
             return response()->json(['status' => 0, 'error' => 'Not found: ', 'data' => $retail_shipper]);
         }
+    }
+
+    public function retail_commission_index()
+    {
+        return view('retail.retail_commission.index');
+    }
+
+    public function retail_commission_list(Request $request)
+    {
+        $results = null;
+        $month = $request->month;
+        $user = auth()->user();
+        $paid_status = $request->paid_status;
+
+        $retail_user_commission = RetailUserCommission::where('franchise_id', $user->id)->first();
+        $retail_franchise_code = RetailFranchise::pluck('code');
+        $franchise_commission = RetailFranchiseCommission::whereIn('franchise_code', $retail_franchise_code)->first(); 
+
+        if ($retail_user_commission && $user->id == $retail_user_commission->franchise_id){
+            $query = RetailUserCommission::where('month', $month)
+            ->where('franchise_id', $user->id)
+            ->where('month', $month);
+            if (!empty($franchise)) {
+                $query->where('franchise_id', $franchise);
+            }
+            if (!empty($paid_status) || $paid_status == '0') {
+                $query->where('is_paid', $paid_status);
+            }
+            $retail_trax_center_commission = $query->get();
+            $results = $retail_trax_center_commission;
+            return response()->json([
+                'data' => $results,
+            ]);
+        }
+        elseif ($franchise_commission->franchise_code == $user->store->code)
+        {
+            $query = RetailFranchiseCommission::where('month', $month)
+            ->where('franchise_code', $user->store->code)
+            ->where('month', $month);
+            if (!empty($franchise)) {
+                $query->where('franchise_id', $franchise);
+            }
+            if (!empty($paid_status) || $paid_status == '0') {
+                $query->where('is_paid', $paid_status);
+            }
+            $retail_franchise_commission = $query->get();
+            $results = $retail_franchise_commission;
+            return response()->json([
+                'data' => $results,
+            ]);
+        }   
+    }
+
+    public function user_commission_invoice_print(Request $request)
+    {
+        $trax_user = $request->trax_users;
+        $data = explode(', ', $trax_user);
+        $retail_commissions = RetailUserCommission::whereIn('id', $data)->get();
+    
+        $html = '';
+        $html .= '<!doctype html>';
+        $html .= '<html lang="en">';
+        $html .= '<head>';
+        $html .= '<meta charset="utf-8">';
+        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">';
+        $html .= '<title>Invoice</title>';
+        
+        $html .= '<style>';
+        $html .= file_get_contents(public_path('app-assets/css/bootstrap.min.css'));
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}';
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{margin-top: 1rem; margin-bottom: 1rem;}.summary_header .header{width: 10%;}.summary_header .heading{width: 15%;}.summary_footer .footer{width: 75%;}';
+        $html .= '</style>';
+        
+        $html .= '</head>';
+        $html .= '<body style="padding:98px;">';
+    
+        $grouped_data = [];
+        foreach ($retail_commissions as $record) {
+            $grouped_data[$record->trax_center_name][] = $record;
+        }
+    
+        foreach ($grouped_data as $franchise_name => $records) {
+            $monthNumber = $records[0]->month;
+            $monthNames = [
+                '01' => 'January',
+                '02' => 'February',
+                '03' => 'March',
+                '04' => 'April',
+                '05' => 'May',
+                '06' => 'June',
+                '07' => 'July',
+                '08' => 'August',
+                '09' => 'September',
+                '10' => 'October',
+                '11' => 'November',
+                '12' => 'December',
+            ];
+            $monthName = isset($monthNames[$monthNumber]) ? $monthNames[$monthNumber] : '';
+
+            // Start the main container for a franchise
+            $html .= '<div class="row align-items-start justify-content-between summary my-4">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<tbody>';
+
+            $html .= '<tr>';
+            $html .= '<td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>';
+            $html .= '<td class="text-center align-middle color primary"><strong>User Details</strong></td>';
+            $html .= '<td class="text-center align-middle color secondary">Created at ' . $records[0]->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '</tr>';
+            
+            // Franchise details
+            $html .= '<tr><td>Retail User Name:</td><td>' . $franchise_name . '</td></tr>';
+            $html .= '<tr><td>Address:</td><td>' . $records[0]->franchise_address . '</td></tr>';
+            $html .= '<tr><td>Code:</td><td>' . $records[0]->franchise_code . '</td></tr>';
+            $html .= '<tr><td>CNIC:</td><td>' . $records[0]->trax_center_cnic . '</td></tr>';
+            $html .= '<tr><td>Phone #:</td><td>' . $records[0]->trax_center_phone . '</td></tr>';
+            $html .= '<tr><td><strong>Payment Month:</strong></td><td>' . $monthName . '</td></tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+        
+            // Start the table for product details
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th class="color primary">Product</th>';
+            $html .= '<th class="color primary">Approved Percentage</th>';
+            $html .= '<th class="color primary">Shipments</th>';
+            $html .= '<th class="color primary">Total Charges</th>';
+            $html .= '<th class="color primary">GST</th>';
+            $html .= '<th class="color primary">Weight Charges</th>';
+            $html .= '<th class="color primary">Commission</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+    
+            // Product records
+            $total_shipments = 0;
+            $total_charges = 0;
+            $total_gst = 0;
+            $total_weight_charges = 0;
+            $total_commission = 0;
+    
+            foreach ($records as $record) {
+                $data = TotalSumRetailTraxCenter::where('retail_user_id', $record->franchise_id)->first();
+
+                $html .= '<tr>';
+                $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
+                $html .= '<td>' . ($record->commission ?? '0') . '%</td>';
+                $html .= '<td>' . number_format(round($record->number_of_shipments)) . '</td>';
+                $html .= '<td>' . number_format(round($record->total_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->franchise_gst_amount)) . '</td>';
+                $html .= '<td>' . number_format(round($record->weight_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->net_commission)) . '</td>';
+                $html .= '</tr>';
+    
+                // Summing up totals
+                $total_shipments += $record->number_of_shipments;
+                $total_charges += $record->total_charges;
+                $total_gst += $record->franchise_gst_amount;
+                $total_weight_charges += $record->weight_charges;
+                $total_commission += $record->net_commission;
+            }
+    
+            // Totals row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="2"><strong>Total</strong></td>';
+            $html .= '<td><strong>' . $total_shipments . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_gst)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_weight_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_commission)) . '</strong></td>';
+            $html .= '</tr>';
+    
+            $gross_commission = $total_commission;
+    
+            // Gross commission row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6"><strong>Gross Commission</strong></td>';
+            $html .= '<td><strong>' . number_format(round($gross_commission)) . '</strong></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+        
+            // Third table: Deposits
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-12">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<thead>';
+            // $html .= '<tr>';
+            // $html .= '<th class="color primary">Deposits</th>';
+            // $html .= '<th class="color primary">Amount</th>';
+            // $html .= '<th class="color primary">Bank Name</th>';
+            // $html .= '<th class="color primary">Cheque #</th>';
+            // $html .= '</tr>';
+            // $html .= '</thead>';
+            // $html .= '<tbody>';
+            // $html .= '<tr><td>Security Deposit</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
+            // $html .= '<tr><td>License Fees</td><td>25,000</td><td>Meezan Bank</td><td>C-0123456789</td></tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
+        
+            // // Fourth table: Pending Sales
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
+            // $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
+    
+            // Prepared by and Checked by
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Prepared By:</strong>';
+            // $html .= '<strong>Checked By:</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
+            // $html .= '<strong>Verified By:</strong>';
+            // $html .= '<strong>Approved By:</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
+    
+            // $html .= '<div class="row col-6">';
+            // $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
+            // $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
+            // $html .= '</div>';
+    
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Retail Team</strong>';
+            // $html .= '<strong>Finance Team</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
+            // $html .= '<strong>Head of Retail</strong>';
+            // $html .= '<strong>COO</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
+    
+            // // Empty tables
+            // $html .= '<div class="row align-items-start summary">';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+    
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
+    
+            // Disclaimer after empty tables with page break
+            $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>';
+            $html .= '<div style="page-break-after: always;"></div>';
+        }
+
+        $html .= '</body>';
+        $html .= '</html>';
+        return $html;
+    }
+
+    public function franchise_commission_invoice_print(Request $request)
+    {
+        $franchise_code = $request->franchise;
+        $franchise = explode(', ', $franchise_code);
+        $franchise_names = RetailFranchiseCommission::whereIn('id', $franchise)->get();
+
+        $html = '';
+        $html .= '<!doctype html>';
+        $html .= '<html lang="en">';
+        $html .= '<head>';
+        $html .= '<meta charset="utf-8">';
+        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">';
+        $html .= '<title>Invoice</title>';
+        
+        $html .= '<style>';
+        $html .= file_get_contents(public_path('app-assets/css/bootstrap.min.css'));
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}';
+        $html .= '</style>';
+        
+        $html .= '<style>';
+        $html .= '@page{margin-top: 1rem; margin-bottom: 1rem;}.summary_header .header{width: 10%;}.summary_header .heading{width: 15%;}.summary_footer .footer{width: 75%;}';
+        $html .= '</style>';
+        
+        $html .= '</head>';
+        $html .= '<body>';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+        $html .= '<div>';
+        $html .= '<div class="p-1">';
+    
+        $grouped_data = [];
+        foreach ($franchise_names as $data) {
+            $grouped_data[$data->franchise_name][] = $data;
+        }
+
+        foreach ($grouped_data as $franchise_name => $records) {
+            $franchise_charges = RetailFranchiseCharge::where('franchise_id', $records[0]->franchise_id)->first();
+            $monthNumber = $records[0]->month;
+            $monthNames = [
+                '01' => 'January',
+                '02' => 'February',
+                '03' => 'March',
+                '04' => 'April',
+                '05' => 'May',
+                '06' => 'June',
+                '07' => 'July',
+                '08' => 'August',
+                '09' => 'September',
+                '10' => 'October',
+                '11' => 'November',
+                '12' => 'December',
+            ];
+            $monthName = isset($monthNames[$monthNumber]) ? $monthNames[$monthNumber] : '';
+            // Start the main container for a franchise
+            $html .= '<div class="row align-items-start justify-content-between summary my-4">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<tbody>';
+
+            $html .= '<tr>';
+            $html .= '<td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>';
+            $html .= '<td class="text-center align-middle color primary"><strong>Franchise Details</strong></td>';
+            $html .= '<td class="text-center align-middle color secondary">Created at ' . $records[0]->created_at . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>';
+            $html .= '</tr>';
+            
+            
+            // Franchise details
+            $html .= '<tr><td>Franchise Name:</td><td>' . $franchise_name . '</td></tr>';
+            $html .= '<tr><td>Address:</td><td>' . $records[0]->franchise_address . '</td></tr>';
+            $html .= '<tr><td>Code:</td><td>' . $records[0]->franchise_code . '</td></tr>';
+            $html .= '<tr><td>CNIC:</td><td>' . $records[0]->franchise_cnic . '</td></tr>';
+            $html .= '<tr><td>Phone #</td><td>' . $records[0]->franchise_phone . '</td></tr>';
+            $html .= '<tr><td><strong>Payment Month:</strong></td><td>' . $monthName . '</td></tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Start the table for product details
+            $html .= '<div class="row align-items-start justify-content-between summary">';
+            $html .= '<div class="col-12">';
+            $html .= '<table class="table table-sm table-bordered border">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th class="color primary">Product</th>';
+            $html .= '<th class="color primary">Approved Percentage</th>';
+            $html .= '<th class="color primary">Shipments</th>';
+            $html .= '<th class="color primary">Total Charges</th>';
+            $html .= '<th class="color primary">GST</th>';
+            $html .= '<th class="color primary">Weight Charges</th>';
+            $html .= '<th class="color primary">Commission</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+
+            // Product records
+            $total_shipments = 0;
+            $total_charges = 0;
+            $total_gst = 0;
+            $total_weight_charges = 0;
+            $total_commission = 0;
+
+            foreach ($records as $record) {
+                $data = TotalSumFranchiseCommission::where('franchise_id', $record->franchise_id)->first();
+
+                $html .= '<tr>';
+                $html .= '<td>' . $record->retail_shipping_mode_name . '</td>';
+                $html .= '<td>' . $record->product_percentage . '%</td>';
+                $html .= '<td>' . $record->number_of_shipments . '</td>';
+                $html .= '<td>' . number_format(round($record->total_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->franchise_gst_amount)) . '</td>';
+                $html .= '<td>' . number_format(round($record->weight_charges)) . '</td>';
+                $html .= '<td>' . number_format(round($record->commission)) . '</td>';
+                $html .= '</tr>';
+
+                $total_shipments += $record->number_of_shipments;
+                $total_charges += $record->total_charges;
+                $total_gst += $record->franchise_gst_amount;
+                $total_weight_charges += $record->weight_charges;
+                $total_commission += $record->commission;
+            }
+
+            // Totals row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="2"><strong>Total</strong></td>';
+            $html .= '<td><strong>' . $total_shipments . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_gst)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_weight_charges)) . '</strong></td>';
+            $html .= '<td><strong>' . number_format(round($total_commission)) . '</strong></td>';
+            $html .= '</tr>';
+
+            $withholding_amount = ($record->franchise_withholding_percentage / 100) * $total_commission;
+            $deduction_amount = ($record->deduction_percentage / 100) * $total_commission;
+            $gross_commission = $total_commission - ($withholding_amount + $deduction_amount);
+
+            // Withholding tax row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6"><strong>Withholding Income Tax ' . $data->withholding_tax_percent . '%</strong></td>';
+            $html .= '<td><strong>' . number_format(round($withholding_amount)) . '</strong></td>';
+            $html .= '</tr>';
+
+            // Deduction GST tax row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6"><strong>GST ' . $data->commission_gst_deduction_percent . '%</strong></td>';
+            $html .= '<td><strong>' . number_format(round($deduction_amount)) . '</strong></td>';
+            $html .= '</tr>';
+
+            // Gross commission row
+            $html .= '<tr>';
+            $html .= '<td class="text-center" colspan="6"><strong>Gross Commission</strong></td>';
+            $html .= '<td><strong>' . number_format(round($gross_commission)) . '</strong></td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Third table: Deposits
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-12">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<thead>';
+            // $html .= '<tr>';
+            // $html .= '<th class="color primary">Deposits</th>';
+            // $html .= '<th class="color primary">Amount</th>';
+            // $html .= '<th class="color primary">Bank Name</th>';
+            // $html .= '<th class="color primary">Cheque #</th>';
+            // $html .= '</tr>';
+            // $html .= '</thead>';
+            // $html .= '<tbody>';
+            // $html .= '<tr><td>Security Deposit</td><td>' . $franchise_charges->security_deposit . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->security_cheque_number . '</td></tr>';
+            // $html .= '<tr><td>License Fees</td><td>' . $franchise_charges->license_fees . '</td><td>' . $franchise_charges->bank_name . '</td><td>' . $franchise_charges->license_cheque_number . '</td></tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
+
+            // Fourth table: Pending Sales
+            // $html .= '<div class="row align-items-start justify-content-between summary">';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;">Pending Sales:</td>';
+            // $html .= '<td class="w-100" style="text-align: center;padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
+
+            // // Prepared by and Checked by
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Prepared By:</strong>';
+            // $html .= '<strong>Checked By:</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left:40px;">';
+            // $html .= '<strong>Verified By:</strong>';
+            // $html .= '<strong>Approved By:</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
+
+            // $html .= '<div class="row col-6">';
+            // $html .= '<div class="col-6"><div class="w-100"><strong><hr></strong></div></div>';
+            // $html .= '<div class="col-6" style="padding-left: 40px;"><div style="width: 16.3rem;"><strong><hr></strong></div></div>';
+            // $html .= '</div>';
+
+            // $html .= '<div class="row align-items-start justify-content-between summary col-6">';
+            // $html .= '<div class="col-6 d-flex justify-content-between">';
+            // $html .= '<strong>Retail Team</strong>';
+            // $html .= '<strong>Finance Team</strong>';
+            // $html .= '</div>';
+            // $html .= '<div class="col-6 d-flex justify-content-between" style="padding-left: 40px;">';
+            // $html .= '<strong>Head of Retail</strong>';
+            // $html .= '<strong>COO</strong>';
+            // $html .= '</div>';
+            // $html .= '</div>';
+
+            // // Empty tables
+            // $html .= '<div class="row align-items-start summary">';
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+
+            // $html .= '<div class="col-3">';
+            // $html .= '<table class="table table-sm table-bordered border" style="margin: 0px 0px 0px 12px;">';
+            // $html .= '<tbody>';
+            // $html .= '<tr>';
+            // $html .= '<td class="w-50" style="height: 3rem; padding-top: 1rem;"></td>';
+            // $html .= '<td class="w-100" style="text-align: center; padding: 1rem 0rem 0rem 0rem;"></td>';
+            // $html .= '</tr>';
+            // $html .= '</tbody>';
+            // $html .= '</table>';
+            // $html .= '</div>';
+            // $html .= '</div>';
+            
+            // Disclaimer after empty tables with page break
+            // $html .= '<div class="my-2 text-center font-italic"><strong>Disclaimer:</strong> * Cheque Will be made in favor of Mohammad Awais Rana</div>';
+            $html .= '<div style="page-break-after: always;"></div>';
+        }
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        $html .= '</body>';
+        $html .= '</html>';
+        return $html;
     }
 }
