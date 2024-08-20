@@ -74,6 +74,12 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-4 mb-1">
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_rncc_no" id="search_rncc_no" placeholder="Search RNCC Number">
+                        </fieldset>
+                    </div>
+
 
                     <div class="col-4">
 
@@ -99,7 +105,6 @@
                         </div>
 
                     </div>
-
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -160,6 +165,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
     <style>
         table.dataTable {
@@ -222,6 +228,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -427,6 +434,7 @@
                         d.search_destination = $('#search_destination').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_status = $('#search_status').val();
+                        d.search_rncc_no = $('#search_rncc_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
@@ -481,6 +489,35 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
+
+            var select_rncc = $('#search_rncc_no').selectize({
+                placeholder: 'RNCC Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+                    if (!regex.test(str)) {
+                        select_rncc[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 2 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            });
+
 
         });
     </script>
