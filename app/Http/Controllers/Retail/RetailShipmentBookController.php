@@ -552,7 +552,7 @@ class RetailShipmentBookController extends Controller
 
         if($request->has('apply_discount_code') && $request->apply_discount_code == 'on')
         {
-            $isCodeValid = $this->is_discount_available_to_apply($request->discount_code);
+            $isCodeValid = json_decode($this->is_discount_available_to_apply($request->discount_code));
             if($request->has('retail_discount_amount') && $isCodeValid['status'] == 1)
             {
                 $retail_shipment->retail_discount_amount = $request->retail_discount_amount;
