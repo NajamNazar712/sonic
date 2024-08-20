@@ -113,7 +113,7 @@ class BotCallingController extends Controller
                 ], // reattempt
                 2 => [
                     'status_id' => 1,
-                    'remarks' => 'retrurn'
+                    'remarks' => 'return Confirm'
                 ], // retrurn
                 3 => [
                     'status_id' => 3,
@@ -121,7 +121,7 @@ class BotCallingController extends Controller
                 ], // retrurn
             ];
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->where('rv_state_id', 1)->latest()->first();
-            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot call add the ' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1]);
+            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot call add the ' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1]);
             Log::channel('cronJobLog')->info('s ' . 'bot-call- parameters'. json_encode($request->all()));
 
             // if($shipment_assign_agent){
