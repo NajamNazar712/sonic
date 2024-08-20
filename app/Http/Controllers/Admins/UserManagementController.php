@@ -1369,8 +1369,9 @@ class UserManagementController extends Controller
             return redirect()->back()->with(['error' => 'Zone Doesn\'t Exist!']);
         }
         
-        $zonalHubs = City::where(['zone_id' => $zone_id, 'status' => 1,])->pluck('hub_id')->unique()->toArray();
+        $zonalHubs = City::where(['zone_id' => $zone_id, 'status' => 1])->pluck('hub_id')->toArray();
         $existingHubIds = AdminHub::where('admin_id', $adminId)->pluck('hub_id')->toArray();
+
 
         $insertData = [];
         foreach ($zonalHubs as $hubId) {
