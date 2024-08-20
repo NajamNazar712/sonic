@@ -53,6 +53,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\Datatables\Datatables;
 use SnappyPDF;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\ShipmentsEstimatedWeight;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Models\InternationalShipment;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
+use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 
 class AdminCargoManifestController extends Controller
 {
@@ -5344,6 +5352,63 @@ class AdminCargoManifestController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+            $shipment_id = $shipment->id;
+            //to do : saving shipper weight as arrival weight and calculating based on shipper weight incase of arrival missing at origin.
+            if(!$shipment->actual_weight) {
+                $actual_weight = $shipment->estimated_weight;
+                if ($shipment->booking_type_id == 4) {
+                    $international_shipment = InternationalShipment::where('shipment_id', $shipment->id);
+                    if ($international_shipment->exists()) {
+                        $city = City::find($shipment->consignee_city_id);
+                        $hub_id = $city->hub_id;
+                        $standard_charges_hub = WalkInInternationalStandardWeightChargeHub::where('hub_id', $hub_id)->first();
+                        $check = WalkInInternationalStandardWeightCharge::find($standard_charges_hub->international_charges_id);
+                        if ($shipment->walk_in_delivery_type_id == 1) {
+                            $check_actual_weight = $check->door_actual_weight;
+                        } else {
+                            $check_actual_weight = $check->hub_actual_weight;
+                        }
+                        if ($actual_weight < $check_actual_weight) {
+                            $actual_weight = $check_actual_weight;
+                        }
+                    } else {
+                        $check = WalkInStandardWeightCharge::where(['shipping_mode_id' => $shipment->shipping_mode_id, 'delivery_type_id' => $shipment->walk_in_delivery_type_id])->first();
+                        if ($actual_weight < $check['actual_weight']) {
+                            $actual_weight = $check['actual_weight'];
+                        }
+                    }
+                }
+
+                $shipment->actual_weight = $actual_weight;
+                $shipment->save();
+
+                if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
+                    if ($shipment->booking_type_id == 4) {
+                        ShipmentChargesController::walkin_weight($shipment_id);
+                    } else {
+                        ShipmentChargesController::weight($shipment_id);
+                        if($shipment->booking_type_id == 5){
+                            ShipmentChargesController::reverse_pickup($shipment_id);
+                        }
+                        if ($shipment->business_category_id == 1) {
+                            ShipmentChargesController::cash_handling($shipment_id);
+                            ShipmentChargesController::insurance($shipment_id);
+                            ShipmentChargesController::fuel_surcharge($shipment_id);
+                            ShipmentChargesController::faf_charges($shipment_id);
+                        } else {
+                            ShipmentChargesController::international_fuel_surcharge($shipment_id);
+                            ShipmentChargesController::international_faf_charges($shipment_id);
+                        }
+                    }
+
+                    if ($shipment->walk_in_status == 0) {
+                        InitialChargesWebhookController::webhook_subscription($shipment_id);
+                    }
+                }
+                
+            }
+            // end of calculation block
+
 
             // disabled this because ali requirment
             //  $misroute_history_count = $shipment->shipment_journey->where('shipper_status_id', 49)->count();
