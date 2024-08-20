@@ -1096,7 +1096,6 @@
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
                                 row.push(values.via_channel);
-
                                 body.push(row);
                             });
                         },
@@ -1276,7 +1275,7 @@
                     {data: 'call_status', name: 'leads.call_status', class: 'align-middle call_status'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'leads.updated_at', class: 'align-middle updated_at'},
-                    {data: 'request_resource', name: 'request_resource', class: 'align-middle request_resource'},
+                    {data: 'via_channel', name: 'leads.via_channel', class: 'align-middle via_channel'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -1295,6 +1294,12 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
                     var service_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    var requested_via_select =
+                        '<select name="requested_via_select" id="requested_via_select" class="select2 form-control">' +
+                        '<option value="Sonic">Sonic</option>' +
+                        '<option value="Website">Website</option>' +
+                        '</select>';
+
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
@@ -1311,7 +1316,13 @@
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        } else {
+                        } else if ($(header).is('.via_channel')) {
+                            $(requested_via_select).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                         else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -1344,6 +1355,14 @@
                     $("#service_select").prepend('<option value="" selected></option>').select2({
                         data: data2,
                         placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    $("#requested_via_select").prepend('<option selected></option>').select2({
+                        // data: data2,
+                        placeholder: "Select Requested Resource",
                         width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
