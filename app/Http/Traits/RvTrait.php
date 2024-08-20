@@ -258,7 +258,6 @@ trait RvTrait
             $rv_shipment_assign_agent_details->assigned_by  = $shipment_assign_agent->assigned_by;
             $rv_shipment_assign_agent_details->rv_agent_call_history_id  = $rv_agent_call_history_record_id ?? '';
             $rv_shipment_assign_agent_details->save();
-            Log::channel('cronJobLog')->info('s ' . ' bot-call- message-saved rv_shipment_assign_agent_details' . $rv_shipment_assign_agent_details);
 
             return true;
         } catch (\Throwable $th) {
@@ -1507,7 +1506,7 @@ trait RvTrait
                         return $query->orderBy('call_count','ASC');//These Agents will get shipments in order of call count to Agent of Both Call Type
                     }
                 })
-            ->where('in_progress', 0)
+                ->where('in_progress', 0)
                 ->where('is_completed',0)
                 ->where('is_bot',0)
                 ->orderBy('updated_at','desc')

@@ -121,7 +121,7 @@ class BotCallingController extends Controller
                 ], // retrurn
             ];
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->where('rv_state_id', 1)->latest()->first();
-            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => $request->call_status, 'remarks' => 'bot call add the ' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1]);
+            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'remarks' => 'bot call add the to ' . $array[$request->input]['remarks'].'-'.'bot status'. $request->call_status, 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1]);
             Log::channel('cronJobLog')->info('s ' . 'bot-call- parameters'. json_encode($request->all()));
 
             // if($shipment_assign_agent){
@@ -129,7 +129,7 @@ class BotCallingController extends Controller
                 $status = new RvAgentCallHistory();
                 $status->shipment_id = $request->shipment_id;
                 $status->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
-                $status->call_finding_id = 1; //call finding reasons
+                $status->call_finding_id = 32; //call finding reasons
                 $status->call_to_id = 1; //Shipper or Consignee
                 $status->remarks = $request->remarks;
                 $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
