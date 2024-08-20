@@ -2003,6 +2003,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('qsr')->name('qsr.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
+            Route::get('updated_shippers_list', 'Admins\AdminReportsController@updated_shippers_list')->name('updated_shippers_list');
+
         });
         Route::prefix('qsr_old')->name('qsr_old.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsrold_index')->name('index');
