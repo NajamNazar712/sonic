@@ -3986,6 +3986,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/bank_info', 'Admins\Retail\RetailAdminAccounts@retail_bank_info')->name('bank_info');
             Route::post('/bank_info_update', 'Admins\Retail\RetailAdminAccounts@retail_bank_info_update')->name('bank_info_update');
         });
+
+        Route::prefix('retail_discount_codes')->name('retail_discount_codes.')->group(function () {
+            Route::get('', 'Admins\Retail\RetailDiscountCodesController@index')->name('index');
+            Route::get('list', 'Admins\Retail\RetailDiscountCodesController@list')->name('list');
+            Route::post('store', 'Admins\Retail\RetailDiscountCodesController@add_bulk_retail_discount_codes_store')->name('bulk.store');
+        });
     });
     Route::prefix('human_resource')->name('human_resource.')->group(function () {
 
