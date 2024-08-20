@@ -5445,7 +5445,7 @@ class AdminFinanceController extends Controller
         if(empty($shipment)) {
             $shipment = Shipment::find($shipment_id);
         }
-        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
+        $faf_charges = ShipmentAdditionalCharges::apply_faf_charges($shipment_id,$type);
         $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
         if($service_charges->exists()){
             $service_charges = $service_charges->first();
