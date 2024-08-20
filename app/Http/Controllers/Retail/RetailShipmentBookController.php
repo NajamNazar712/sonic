@@ -640,6 +640,15 @@ class RetailShipmentBookController extends Controller
 
         $pickup_city_id = Auth::user()->store->pickup_address->city_id;
         $discount =  Auth::user()->store->discount;
+
+        if($request->has('retail_discount_applied'))
+        {
+            if ($request->filled('retail_discount_percentage') && $request->retail_discount_percentage > 0) {
+                $discount = $request->retail_discount_percentage;
+            }
+        }
+
+
         $insurance =  Auth::user()->store->insurance;
 
         if($request->weight != null){
@@ -673,14 +682,12 @@ class RetailShipmentBookController extends Controller
             }
         }
 
-        if($request->has('retail_discount_applied'))
-        {
-            if ($request->filled('retail_discount_percentage') && $request->retail_discount_percentage > 0) {
-                // $details['discount_amount'] = $details['total_charges'] * $request->retail_discount_percentage/100;
-                // $details['total_charges'] = $details['total_charges'] - $details['discount_amount'];
-                $details['total_charges'] = $details['total_charges'] - ($details['total_charges'] * $request->retail_discount_percentage/100);
-            }
-        }
+        // if($request->has('retail_discount_applied'))
+        // {
+        //     if ($request->filled('retail_discount_percentage') && $request->retail_discount_percentage > 0) {
+        //         $details['total_charges'] = $details['total_charges'] - ($details['total_charges'] * $request->retail_discount_percentage/100);
+        //     }
+        // }
 
         if ($details['total_charges'] <= 0)
         {
