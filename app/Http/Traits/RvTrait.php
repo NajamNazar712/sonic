@@ -262,7 +262,6 @@ trait RvTrait
             return true;
         } catch (\Throwable $th) {
             Log::channel('cronJobLog')->info('s ' . ' bot-call- message-failed rv_shipment_assign_agent_details' . $th->getMessage());
-
             return false;
         }
     }

@@ -122,7 +122,6 @@ class BotCallingController extends Controller
             ];
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->where('rv_state_id', 1)->latest()->first();
             $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'remarks' => 'bot call add to the ' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1]);
-            Log::channel('cronJobLog')->info('s ' . 'bot-call- parameters'. json_encode($request->all()));
 
             // if($shipment_assign_agent){
             if ($request->input > 0) {
@@ -178,9 +177,7 @@ class BotCallingController extends Controller
                 'status' => 0,
                 'message' => 'Shipment is in different status, Cannot mark it as Another Status!'
             ];
-        }
-        Log::channel('cronJobLog')->info('s ' . ' bot-call- message-status update' . json_encode($data));
-        
+        }        
         return response()->json(['status' => 1,'message' => $data]);
     }
 }
