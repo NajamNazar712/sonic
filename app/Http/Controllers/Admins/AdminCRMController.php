@@ -111,7 +111,6 @@ class AdminCRMController extends Controller
     }
 
     public function add_request(Request $request){
-        
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $channel_id = $request->channel_id;
@@ -229,15 +228,15 @@ class AdminCRMController extends Controller
                                                     if($shipment->shipper_status_id == 5)
                                                     {
                                                         $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description); 
+                                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
                                                     }
                                                     else
                                                     {
-                                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                                     }
                                                 }
                                                 else{
-                                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, session('user_id'), NULL, $description);
+                                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                                 }
                                                 
                                                 if($request->has('key_account')){
@@ -251,15 +250,15 @@ class AdminCRMController extends Controller
                                                 if($shipment->shipper_status_id == 5)
                                                 {
                                                     $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description); 
+                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
                                                 }
                                                 else
                                                 {
-                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                                 }
                                             }
                                             else{
-                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, session('user_id'), NULL, $description);
+                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                             }
                                              
                                             if($request->has('key_account')){
@@ -299,11 +298,11 @@ class AdminCRMController extends Controller
                                                 if($shipment->shipper_status_id == 5)
                                                 {
                                                     $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description); 
+                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
                                                 }
                                                 else
                                                 {
-                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                                 }
                                             }
                                             else{
@@ -321,11 +320,11 @@ class AdminCRMController extends Controller
                                             if($shipment->shipper_status_id == 5)
                                             {
                                                 $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description); 
+                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
                                             }
                                             else
                                             {
-                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                             }
                                         }
                                         else{
@@ -450,15 +449,15 @@ class AdminCRMController extends Controller
                                             if($shipment->shipper_status_id == 5)
                                             {
                                                 $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description); 
+                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
                                             }
                                             else
                                             {
-                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                             }
                                         }
                                         else{
-                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, session('user_id'), NULL, $description);
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                         }
 
                                         if($request->has('key_account')){
@@ -546,15 +545,15 @@ class AdminCRMController extends Controller
                                         if($shipment->shipper_status_id == 5)
                                         {
                                             $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description); 
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
                                         }
                                         else
                                         {
-                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                         }
                                     }
                                     else{
-                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, session('user_id'), NULL, $description);
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                     }
                                     
                                     if($request->has('key_account')){
@@ -653,15 +652,15 @@ class AdminCRMController extends Controller
                                         if($shipment->shipper_status_id == 5)
                                         {
                                             $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description); 
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
                                         }
                                         else
                                         {
-                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                         }
                                     }
                                     else{
-                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, session('user_id'), NULL, $description);
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                     }
 
                                     if($request->has('key_account')){
@@ -750,15 +749,15 @@ class AdminCRMController extends Controller
                                     if($shipment->shipper_status_id == 5)
                                     {
                                         $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                        $crm_request_padded_id =CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description); 
+                                        $crm_request_padded_id =CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
                                     }
                                     else
                                     {
-                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
                                     }
                                 }
                                 else{
-                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, session('user_id'), NULL, $description);
+                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                 }
                                 
                                 if($request->has('key_account')){

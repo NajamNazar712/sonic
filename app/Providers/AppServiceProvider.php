@@ -3,19 +3,20 @@
 namespace App\Providers;
 
 
-use App\DailyVisit;
-use App\Http\Models\Admin\AdminsScreenList;
-use App\Http\Models\Admin\NotificationReturnedDeliveredToShipper;
-use App\ReturnDeliveredToShipperSms;
-use App\ReturnDeliveredToShipperTicker;
+use Auth;
 use Carbon\Carbon;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
+use App\DailyVisit;
+use App\Http\Models\Shipper\User;
+use App\ReturnDeliveredToShipperSms;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Schema;
+use App\ReturnDeliveredToShipperTicker;
+use Illuminate\Support\ServiceProvider;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\AdminsScreenList;
 use App\Http\Models\Admin\Settings\GeneralSetting;
-use Auth;
+use App\Http\Models\Admin\NotificationReturnedDeliveredToShipper;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
             $search_sonic = NULL;
             $visit = NULL;
             $shipper_return_note_ticker = NULL;
+
             $return_notes = array();
 
             if (Auth::guard('admin')->check()) {
@@ -48,6 +50,8 @@ class AppServiceProvider extends ServiceProvider
               
                 $visit = DailyVisit::where('shipper_id', session('user_id'))->where('rated', 0);
 
+                $lead_logged_user = User::find(session('user_id'));
+                
                 $from =  Carbon::now()->startOfDay()->toDateTimeString();
                 $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
 
@@ -65,6 +69,11 @@ class AppServiceProvider extends ServiceProvider
                         }
                     }
                 }
+
+                if ($lead_logged_user) {
+                    $view->with('lead_logged_user', $lead_logged_user);
+                }
+
             } else {
                 $settings = NULL;
                 $search_sonic = NULL;

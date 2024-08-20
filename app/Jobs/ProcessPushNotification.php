@@ -71,9 +71,11 @@ class ProcessPushNotification implements ShouldQueue
                 'body' => json_encode($message)
             ]);
             $response = json_decode($response->getBody()->getContents(), true);
-            if ($response['success'] != 0) {
-                $push_notification->status = 1;
-                $push_notification->save();
+            if(isset($response['success'])) {
+                if ($response['success'] != 0) {
+                    $push_notification->status = 1;
+                    $push_notification->save();
+                }
             }
         }
     }

@@ -55,7 +55,6 @@
 
     <script>
         $(document).ready(function() {
-
             $('#shippers_select').select2({
                 placeholder:'Shippers',
                 width:'100%',

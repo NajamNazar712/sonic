@@ -31,6 +31,7 @@ Route::prefix('survey_form')->name('survey.')->group(function () {
 
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
 
+Route::get('trax_pk_validation/{company_name}/{email_address}/{phone_number}', 'APIController@trax_pk_validation')->name('trax_pk_validation');
 
 
 Auth::routes();
@@ -96,6 +97,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('opt_verify_close', 'Shippers\ShipperDashboardController@opt_verify_close')->name('opt_verify_close');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
+
+    Route::post('/crf/update', 'Shippers\ShipperDashboardController@updateCrfSign')->name('updateSignOffCrf');;
+
     Route::post('get_sub_segment', 'Auth\RegisterController@get_sub_segment')->name('get_sub_segment');
 
     Route::get('referral', 'Auth\RegisterController@referral_valid')->name('referral.valid');
@@ -257,6 +261,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('{tracking_number?}', 'Shippers\ShipperTrackingController@index')->name('index');
         Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
         Route::post('call_status_history', 'Shippers\ShipperTrackingController@call_status_history')->name('call_status_history');
+
+        Route::post('case_nature_remarks', 'Shippers\ShipperTrackingController@case_nature_remarks')->name('case_nature_remarks');
+        Route::post('case_nature_service_remarks', 'Shippers\ShipperTrackingController@case_nature_service_remarks')->name('case_nature_service_remarks');
+        Route::post('case_nature_claim_remarks', 'Shippers\ShipperTrackingController@case_nature_claim_remarks')->name('case_nature_claim_remarks');
+
+        Route::post('shipper_visibility', 'Shippers\ShipperTrackingController@shipper_visibility')->name('shipper_visibility');
     });
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('{order_id?}', 'Shippers\ShipperTrackingController@order_index')->name('index');

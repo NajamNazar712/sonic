@@ -78,7 +78,7 @@ class ShipperPaymentCalculation extends Command
                 $shipper_payment->total_paid = $total_paid_payments;
                 $shipper_payment->save();
             }
-            Log::channel('cronJobLog')->info('s ' .'report:shipper payment Running');
+//            Log::channel('cronJobLog')->info('s ' .'report:shipper payment Running');
         }
     }
 }
