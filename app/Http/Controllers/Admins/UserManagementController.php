@@ -1357,7 +1357,7 @@ class UserManagementController extends Controller
 
     private function assignZonalHubs($adminId, $defaultHub, $oldHubs)
     {
-        $city = City::where('hub_id', $defaultHub)->first();
+        $city = City::where(['hub_id' => $defaultHub, 'hub' => 1])->first();
 
         if (!$city) {
             return redirect()->back()->with(['error' => 'City Doesn\'t Exist!']);
@@ -1369,7 +1369,7 @@ class UserManagementController extends Controller
             return redirect()->back()->with(['error' => 'Zone Doesn\'t Exist!']);
         }
         
-        $zonalHubs = City::where(['zone_id' => $zone_id, 'status' => 1])->pluck('hub_id')->unique()->toArray();
+        $zonalHubs = City::where(['zone_id' => $zone_id, 'status' => 1,])->pluck('hub_id')->unique()->toArray();
         $existingHubIds = AdminHub::where('admin_id', $adminId)->pluck('hub_id')->toArray();
 
         $insertData = [];
