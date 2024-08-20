@@ -2297,22 +2297,29 @@ class RetailShipmentBookController extends Controller
     public function is_discount_available_to_apply($discountCode = null)
     {
 
-        $response = [
-            'status' => 0,
-            'message' => 'Discount code is not valid',
-            'data' => null
-        ];
+        $data = RetailDiscountCode::where('code', $discountCode)->first();
 
-        if($data = RetailDiscountCode::where('code', '=', $discountCode)->whereNull('shipment_id')->first())
-        {
-            $response = [
-                'status' => 1,
-                'message' => 'Discount code is valid',
-                'data' => $data
-            ];
+        if (!$data) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Discount code is not valid',
+                'data' => null,
+            ]);
         }
 
-        return response()->json($response);
+        if ($data->shipment_id) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Discount code is already used',
+                'data' => $data,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Discount code is valid',
+            'data' => $data,
+        ]);
     }
 
     static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address, $id)
