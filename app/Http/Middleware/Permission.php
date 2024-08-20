@@ -1251,6 +1251,10 @@ class Permission
             'retail.international.economy_rates.index' => 992,
             'retail.international.economy_rates.excel' => 992,
 
+            'retail.retail_discount_codes.index' => 1003,
+            'retail.retail_discount_codes.list' => 1003,
+            'retail.retail_discount_codes.bulk.store' => 1003,
+
             'debriefing.supervisor.index' => 495,
             'debriefing.supervisor.list' => 495,
             'debriefing.agents_call_monitoring.index' => 496,

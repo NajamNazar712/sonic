@@ -2933,6 +2933,11 @@
                                             </ul>
                                         </li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(1003, session('permissions')))
+                                        <li class=" nav-item"><a
+                                                href="{{ route('admin.retail.retail_discount_codes.index') }}"><span
+                                                    class="menu-title">Retail Discount Codes</span></a> </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
