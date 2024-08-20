@@ -1257,13 +1257,25 @@
                             url: '{{route('retail.shipment.book.discount_code_verify')}}'+`/${retail_discount_code}`,
                             method: 'get',
                         }).done(function (data) {
-                            console.log(data);
-                            
                             if (data.status == 1) {
                                 retail_discount_percentage = data.data.discount_percentage;
+
+                                calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage);
+
+                                toastr.success(retail_discount_percentage+'% Discount Applied', 'Success!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            else
+                            {
+                                var error = data.message;
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
                             }
 
-                            calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage);
 
                         });
                 }
