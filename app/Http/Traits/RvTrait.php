@@ -256,7 +256,7 @@ trait RvTrait
             $rv_shipment_assign_agent_details->call_to_id  = $request->call_to_id;
             $rv_shipment_assign_agent_details->assigned_to_type_id  = $shipment_assign_agent->assigned_to_type_id;
             $rv_shipment_assign_agent_details->assigned_by  = $shipment_assign_agent->assigned_by;
-            $rv_shipment_assign_agent_details->rv_agent_call_history_id  = $rv_agent_call_history_record_id;
+            $rv_shipment_assign_agent_details->rv_agent_call_history_id  = $rv_agent_call_history_record_id ?? '';
             $rv_shipment_assign_agent_details->save();
             Log::channel('cronJobLog')->info('s ' . ' bot-call- message-saved rv_shipment_assign_agent_details' . $rv_shipment_assign_agent_details);
 
