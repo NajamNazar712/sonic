@@ -260,20 +260,10 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-7">
-                                                    <label>Discount Code</label>
-                                                    <input type="text" name="discount_code" id="discount_code"
-                                                        class="form-control form-control-sm" placeholder="Discount Code">
-                                                        <input type="hidden" name="retail_discount_percentage" id="retail_discount_percentage" value="0">
-                                                </div>
-                                                <div class="col-md-5 align-self-end">
-                                                    <input type="checkbox" id="apply_discount_code" name="apply_discount_code" class="switchery"
-                                                    data-size="sm" data-switchery="true">
-                                                    <label for="" class="">Apply</label>
-                                                </div>
-                                            </div>
+                                        <div class="form-group" id="retail_discount_code_div">
+                                            <label>Discount Code</label>
+                                            <input type="text" name="discount_code" id="discount_code" class="form-control form-control-sm" placeholder="Discount Code">
+                                            <input type="hidden" name="retail_discount_percentage" id="retail_discount_percentage" value="0">
                                         </div>
                                         <div class="form-group">
                                             <label>Charges</label>
@@ -616,6 +606,27 @@
                 'allowPlus': false
             });
 
+
+            //if admin_discount is not empty then disable the retail_discount_code input field
+            $('#admin_discount').on('input', function () {
+                if ($(this).val() != '') {
+                    $('#discount_code').prop('disabled', true);
+                }
+                else {
+                    $('#discount_code').prop('disabled', false);
+                } 
+            });
+
+            //if discount_code is not empty then disable the retail_discount_code input field
+            $('#discount_code').on('input', function () {
+                if ($(this).val() != '') {
+                    $('#admin_discount').prop('disabled', true);
+                }
+                else {
+                    $('#admin_discount').prop('disabled', false);
+                } 
+            });
+
             $('#discount_code').inputmask('Regex', {regex: "^[A-Za-z0-9]*$"});
             var shipping_modes = @json($shipping_modes);
             var international_shipping_modes = @json($retail_international_shipping_modes);
@@ -700,8 +711,22 @@
                         $('#shipping_mode').append(newOption);
                     });
 
+                    if(!$('#retail_discount_code_div').hasClass('d-none'))
+                    {
+                        $('#retail_discount_code_div').addClass('d-none');
+                    };
+
+                    $('#admin_discount').prop('disabled', false);
+                    $('#discount_code').val('');
+
                 }
                 else{
+
+                    if(id == 1)
+                    {
+                        $('#retail_discount_code_div').removeClass('d-none');
+                        $('#discount_code').val('');
+                    }
 
                     $('#shipping_mode').empty();
                     $.each(shipping_modes, function (key, value) {
@@ -1239,19 +1264,11 @@
                 var destination = '';
                 var shipping_mode_id = $('#shipping_mode').val();
                 var business_category = $('#business_category').val();
-                var retail_discount_applied = $('#apply_discount_code').is(':checked');
                 var retail_discount_code = $('#discount_code').val();
                 var retail_discount_percentage = 0;
+                var retail_discount_applied = ($('#discount_code').val() == '') ? 0 : 1;
 
-                if(retail_discount_applied){
-                    if($('#discount_code').val() == ''){
-                        var error = 'Discount Code is Required';
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                        return false;
-                    }
+                if(retail_discount_code !== '' && business_category == 1){
 
                         $.ajax({
                             url: '{{route('retail.shipment.book.discount_code_verify')}}'+`/${retail_discount_code}`,
