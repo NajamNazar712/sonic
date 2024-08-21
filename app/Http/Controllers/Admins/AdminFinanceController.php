@@ -963,7 +963,6 @@ class AdminFinanceController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 97);
         }
-
         if ($recovery_status = $request->get('recovery_status')) {
             if ($recovery_status == 7) {
                 $count = DeliveryNoteShipment::where('status', '=', 7);
@@ -1242,6 +1241,18 @@ class AdminFinanceController extends Controller
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
+
+        $adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
+        if(Auth::id() == $adminId)
+        {
+            $mmsSettingShippers = GlobalSettings::where('type', 'mms_setting')->first();
+            if($mmsSettingShippers)
+            {
+                $shipperIds = array_map('intval', explode(',', $mmsSettingShippers->text));
+                $datatables->whereIn('u.id', $shipperIds);
+            }
+        }
+
 
         return $datatables->make(true);
     }
