@@ -163,7 +163,6 @@ trait RvTrait
         }
         catch(\Throwable $th)
         {
-            dd($th->getMessage());
             DB::rollBack();
         }
     }
