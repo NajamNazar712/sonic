@@ -717,6 +717,7 @@
                     };
 
                     $('#admin_discount').prop('disabled', false);
+                    $('#discount_code').val('');
 
                 }
                 else{
@@ -724,6 +725,7 @@
                     if(id == 1)
                     {
                         $('#retail_discount_code_div').removeClass('d-none');
+                        $('#discount_code').val('');
                     }
 
                     $('#shipping_mode').empty();
