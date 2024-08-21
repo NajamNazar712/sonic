@@ -105,7 +105,7 @@ class BotCallingController extends Controller
             $array = [
                 0 => [
                     'status_id' => 6,
-                    'remarks' => 'unresponsive'
+                    'remarks' => 'unresponsive',
                 ], // unresponsive
                 1 => [
                     'status_id' => 2,
@@ -120,8 +120,9 @@ class BotCallingController extends Controller
                     'remarks' => 'assign to the manual agent'
                 ], // retrurn
             ];
+            
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->where('rv_state_id', 1)->latest()->first();
-            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'remarks' => 'bot call add to the ' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1]);
+            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'remarks' => 'bot call add to the ' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1,'call_status'=> ($request->input < 1 ? 'Un-connected' : 'Connected')]);
 
             // if($shipment_assign_agent){
             if ($request->input > 0) {
@@ -133,6 +134,7 @@ class BotCallingController extends Controller
                 $status->remarks = $request->remarks;
                 $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
                 $status->updated_by_id = $request->admin_id;
+                $status->call_status = $request->call_status;
                 $status->save();
             }
 
