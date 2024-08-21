@@ -242,6 +242,14 @@ class RetailShipmentBookController extends Controller
         $information_display = TRUE;
 
         $discount =  Auth::user()->store->discount;
+
+        if($request->has('discount_code'))
+        {
+            if ($request->filled('retail_discount_percentage') && $request->retail_discount_percentage > 0) {
+                $discount = $request->retail_discount_percentage;
+            }
+        }
+
         $insurance = Auth::user()->store->insurance;
         $consignee_name = $request->input('consignee_name');
         $consignee_address = $request->input('consignee_address');
@@ -550,7 +558,7 @@ class RetailShipmentBookController extends Controller
             }
         }
 
-        if($request->has('apply_discount_code') && $request->apply_discount_code == 'on')
+        if($request->has('discount_code'))
         {
             $isCodeValid = $this->is_discount_available_to_apply($request->discount_code);
             $isCodeValid = $isCodeValid->getData();
@@ -642,7 +650,7 @@ class RetailShipmentBookController extends Controller
         $pickup_city_id = Auth::user()->store->pickup_address->city_id;
         $discount =  Auth::user()->store->discount;
 
-        if($request->has('retail_discount_applied'))
+        if($request->has('discount_code'))
         {
             if ($request->filled('retail_discount_percentage') && $request->retail_discount_percentage > 0) {
                 $discount = $request->retail_discount_percentage;
