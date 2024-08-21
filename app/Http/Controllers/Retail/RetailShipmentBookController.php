@@ -566,6 +566,7 @@ class RetailShipmentBookController extends Controller
             {
                 $retail_shipment->retail_discount_amount = $request->retail_discount_amount;
                 $retail_shipment->discount = $request->retail_discount_amount;
+                $retail_shipment->total_charges = $retail_shipment->total_charges - $request->retail_discount_amount;
                 RetailDiscountCode::where('code', '=', $request->discount_code)->update(['shipment_id' => $shipment_id]);
             }
         }
