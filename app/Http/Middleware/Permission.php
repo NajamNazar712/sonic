@@ -656,6 +656,7 @@ class Permission
             'reports.sack_bag_status.index' => 936,
             'reports.issuance_sack_bag.index' => 937,
 
+            'reports.shipment_reversal_report.index' => 1001,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

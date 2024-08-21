@@ -1546,7 +1546,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('phone_update', 'Admins\UserManagementController@user_phone_update')->name('phone_update');
             Route::post('lost_hub_user_shipment', 'Admins\UserManagementController@lost_hub_user_shipment')->name('lost_hub_user_shipment');
             Route::get('get_lost_hub_user_shipment', 'Admins\UserManagementController@get_lost_hub_user_shipment')->name('get_lost_hub_user_shipment');
-
+            Route::post('set_hub_access', 'Admins\UserManagementController@set_hub_access')->name('set_hub_access');
+            Route::get('get_hub_access', 'Admins\UserManagementController@get_hub_access')->name('get_hub_access');
 
         });
 
@@ -2002,6 +2003,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('qsr')->name('qsr.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
+            Route::get('updated_shippers_list', 'Admins\AdminReportsController@updated_shippers_list')->name('updated_shippers_list');
+
         });
         Route::prefix('qsr_old')->name('qsr_old.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsrold_index')->name('index');
@@ -2485,6 +2488,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('ops')->name('ops_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ops_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@ops_report_list')->name('list');
+        });
+
+        Route::prefix('shipment_reversal')->name('shipment_reversal_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@shipment_reversal_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@shipment_reversal_list')->name('list');
         });
     });
 
