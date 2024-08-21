@@ -18,8 +18,15 @@
  			<li><a class="menu-item" href="{{route('retail.parcel_receiving.other_index')}}"><i class="la la-dropbox"></i>Other Parcel Receiving</a></li>
             <li><a class="menu-item" href="{{route('retail.cash_deposit.index')}}"><i class="la la-money"></i>Cash Deposit</a></li>
             <li><a class="menu-item" href="{{route('retail.shipment.tracking_slip.index')}}"><i class="la la-image"></i>Tracking Slip</a></li>
-            <li><a class="menu-item" href="{{route('retail.flyer_shipper.other_index')}}"><i class="la la-image"></i>Prepaid Flyer Request</a></li>
-            
+
+             <li><a class="menu-item" href="{{route('retail.flyer_shipper.other_index')}}"><i class="la la-image"></i>Prepaid Flyer Request</a></li>
+				<li>
+                <a class="menu-item" href="{{route('retail.retail_commission.index')}}">
+                    <i class="la la-file-text-o"></i>
+                    Retail Commission View
+                </a>
+            </li>
+
             @if (session('category') == 2)
                 <li><a class="menu-item" href="{{route('retail.shipment.other_booking.index')}}"><i class="la la-cubes"></i>Other Bookings</a></li>
             @endif

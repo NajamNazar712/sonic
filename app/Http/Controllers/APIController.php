@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\PendingPayment;
 use DB;
 use SnappyPDF;
 use Validator;
@@ -14,6 +13,7 @@ use App\Http\Models\Zone;
 use Vectorface\Whip\Whip;
 use App\Http\Models\Rider;
 use App\Http\Models\Invoice;
+use App\Http\Traits\RvTrait;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
 use Illuminate\Validation\Rule;
@@ -26,17 +26,20 @@ use App\Http\Models\Consolidation;
 use App\Http\Models\ZoneClassCity;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\GulAhmedCities;
+use App\Http\Models\PendingPayment;
 use App\Http\Models\ReceivingSheet;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\WarehouseStock;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\InvoiceShipment;
 use App\Http\Models\ShipmentPrebook;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\ShipmentsJourney;
+use App\Jobs\ProcessRvShipmentTicket;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\Admin\DeliveryNote;
@@ -52,6 +55,7 @@ use phpDocumentor\Reflection\Types\Null_;
 use App\Http\Models\Admin\OneLink\OneLink;
 use App\Http\Models\GulAhmedPickupAddress;
 use App\Http\Models\InternationalShipment;
+use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\RcpAssignedAgent;
 use App\Http\Models\ConsolidationShipments;
@@ -64,7 +68,6 @@ use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\ReturnAssignedShipments;
-use App\Http\Traits\RvTrait;
 use App\ReturnConfirmationPendingSmsAttempt;
 use App\Http\Models\Admin\UserFintectCharges;
 use App\Http\Models\ShipmentShipperReference;
@@ -91,6 +94,8 @@ use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\Shipper\ReturnSheetShipments;
 use App\Jobs\ProcessGulAhmedShipmentConfirmation;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Settings\GeneralSetting;
+use App\Http\Models\Admin\ShipperInterceptExclude;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\standard_fintech_charges;
@@ -101,6 +106,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Controllers\Admins\ShipmentChargesController;
@@ -120,11 +126,6 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
-use App\Http\Models\RvShipmentAssignAgent;
-use App\Http\Models\Admin\UserShippingInfoStoreAddress;
-use App\Http\Models\Admin\Settings\GeneralSetting;
-use App\Jobs\ProcessRvShipmentTicket;
-use App\Http\Models\Admin\ShipperInterceptExclude;
 
 class APIController extends Controller
 {
@@ -626,7 +627,7 @@ class APIController extends Controller
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-                'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric', 'min:0'],
+                'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric','between:0,999999.00'],
                 // 'parcel_value' => ['nullable','numeric','digits_between:1,1000000'],
                 'parcel_value' => ['nullable', 'numeric', 'between:0,1000000.00'],
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
@@ -9820,4 +9821,32 @@ class APIController extends Controller
         return response()->json(['status' => 0, 'message' => $message, 'data' => $record]);
 
     }
+
+
+    public function trax_pk_validation($company_name = null, $email_address = null, $phone_number = null) {
+    
+        if ($company_name != 'none') {
+            $exists = User::where('name', $company_name)->exists();
+            if(!$exists){
+                $exists = Lead::where('company', $company_name)->exists();   
+            }
+        }
+    
+        if ($email_address != 'none') {
+            $exists = User::where('email', $email_address)->exists();
+            if(!$exists){
+                $exists = Lead::where('email_address', $email_address)->exists();
+            }
+        }
+    
+        if ($phone_number != 'none') {
+            $exists = User::where('phone', $phone_number)->exists();
+            if(!$exists){
+                $exists = Lead::where('phone_number', $phone_number)->exists();
+            }
+        }
+    
+        return response()->json(['exists' => $exists]);
+    }
+    
 }

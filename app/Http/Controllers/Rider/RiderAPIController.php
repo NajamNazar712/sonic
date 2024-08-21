@@ -176,7 +176,6 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TempRiderDelivery;
 use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
-use App\Jobs\ProcessRemoveShipmentFromRvShipmentTicket;
 use App\Jobs\ProcessRvShipmentTicket;
 use App\RvShipmentTicket;
 use App\Http\Models\PackagingMaterialTypes;
@@ -9268,7 +9267,8 @@ class RiderAPIController extends Controller
 
                 //Remove Shipment from RV Shipment Ticket if it exists.
                 if(RvShipmentTicket::where('shipment_id', $request->shipment_id)->exists()){
-                    dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+                    // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
+                     RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
                 }
 
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
@@ -11877,8 +11877,8 @@ class RiderAPIController extends Controller
                                                 $this->auto_return_confirm($shipment->id);
 
                                                 //Remove Shipment from RV Shipment Ticket
-                                                dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment->id));
-
+                                                // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment->id));
+                                                RvShipmentTicket::where('shipment_id', $shipment->id)->delete();
                                                 ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id, NULL, NULL, $remarks_id);
                                             } else {
 //                                                $arr['shipment_id'] = $request->shipment_id;

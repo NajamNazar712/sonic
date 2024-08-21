@@ -603,12 +603,12 @@
 <div class="modal fade" id="editRetailUser" data-backdrop="static" tabindex="-1" role="dialog"
      aria-labelledby="editRetailUser"
      aria-hidden="true">
-    <div class="modal-dialog modal-md" role="document">
+    <div class="modal-dialog editRetailUserModal" role="document" style="max-width: 1300px;">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="add_remarks_title">Edit User</h4>
 
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close edit_user_close_modal" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
