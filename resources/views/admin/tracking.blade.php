@@ -788,7 +788,7 @@
                                 row.append($('<td>').text(dateTimeParts[0])); // Display date
                                 row.append($('<td>').text(dateTimeParts[1])); // Display time
                                 // row.append($('<td>').text(value.data.call_finding_id));
-                                row.append($('<td>').text(value.data.call_status ?? 'Unresponsive'));
+                                row.append($('<td>').text(value.data.call_status ?? 'Un-connected'));
                                 row.append($('<td>').text(value.data.rv_call_finding.name));
                                 row.append($('<td>').text(value.data.remarks != null ? value.data.remarks : '-'));
                                 row.append($('<td>').text('Consigneee')); //call to

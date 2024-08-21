@@ -2231,7 +2231,7 @@
                                 var updated_at = value.data.updated_at;
                                 var trimmedDateTime = updated_at.substring(0, 10);
                                 var trimmedTime = updated_at.substring(11, 19);
-                                var call_finding_id = 'Unresponsive';
+                                var call_finding_id = value.data.call_status ?? 'Un-connected';
                                 var call_finding_reason_id = value.data.rv_call_finding.name;
 
                                 var remarks = value.data.remarks;
