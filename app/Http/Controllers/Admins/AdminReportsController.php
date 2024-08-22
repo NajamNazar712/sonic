@@ -10273,7 +10273,9 @@ class AdminReportsController extends Controller
             ->leftJoin('admins as user', 'user.id', '=', 'arv_date.admin_id')
             ->leftJoin('cities as hub', 'hub.id', '=', 'user.default_hub_id')
             ->leftJoin('city_areas as area', 'area.id', '=', 'user.area_id')
-            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight', 'hub.name as hub_name','area.name as area_name','sw.range_down_arrival_weight','sw.range_down_shipper_weight' ,'sw.shipper_weight_charges','shipments.weight_charges as arrival_weight_charges', 'sw.arrival_range_weight_charges','sw.shipper_range_weight_charges'])
+            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight', 'hub.name as hub_name','area.name as area_name'
+            // 'sw.range_down_arrival_weight','sw.range_down_shipper_weight' ,'sw.shipper_weight_charges','shipments.weight_charges as arrival_weight_charges', 'sw.arrival_range_weight_charges','sw.shipper_range_weight_charges'
+            ])
             ->where('arv_date.shipper_status_id', '=', 2)
             ->whereNotNull('shipments.actual_weight');
 
@@ -10305,22 +10307,22 @@ class AdminReportsController extends Controller
                     return 'Dense';
                 }
             })
-            ->addColumn('range_difference', function ($shipment) {
-                $range_difference = round($shipment->range_down_arrival_weight - $shipment->range_down_shipper_weight, 2);
-                return $range_difference;
-            })
+            // ->addColumn('range_difference', function ($shipment) {
+            //     $range_difference = round($shipment->range_down_arrival_weight - $shipment->range_down_shipper_weight, 2);
+            //     return $range_difference;
+            // })
             ->addColumn('difference', function ($shipment) {
                 $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
                 return $difference;
-            })
-            ->addColumn('charges_diff', function ($shipment){
-                $charges_diff = $shipment->arrival_weight_charges - $shipment->shipper_weight_charges;
-                return $charges_diff;
-            })
-            ->addColumn('weight_range_charges_diff', function ($shipment){
-                $range_charges_diff = $shipment->arrival_range_weight_charges - $shipment->shipper_range_weight_charges;
-                return $range_charges_diff;
             });
+            // ->addColumn('charges_diff', function ($shipment){
+            //     $charges_diff = $shipment->arrival_weight_charges - $shipment->shipper_weight_charges;
+            //     return $charges_diff;
+            // })
+            // ->addColumn('weight_range_charges_diff', function ($shipment){
+            //     $range_charges_diff = $shipment->arrival_range_weight_charges - $shipment->shipper_range_weight_charges;
+            //     return $range_charges_diff;
+            // });
 
 
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
