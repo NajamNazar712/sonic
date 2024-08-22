@@ -8691,7 +8691,7 @@ class GlobalSettingsController extends Controller
     
     public function aListShippersIndex()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 804);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 805);
         $shippers = User::where('status', '=', 3)
             ->where('blacklist', 0)
             //->whereNull('disable_at')
