@@ -105,24 +105,24 @@ class BotCallingController extends Controller
             $array = [
                 0 => [
                     'status_id' => 6,
-                    'remarks' => 'unresponsive',
+                    'remarks' => 'Not Answered',
                 ], // unresponsive
                 1 => [
                     'status_id' => 2,
-                    'remarks' => 'reattempt'
+                    'remarks' => 'Consignee has OPS to Reattempt'
                 ], // reattempt
                 2 => [
                     'status_id' => 1,
-                    'remarks' => 'return Confirm'
+                    'remarks' => 'Consignee has OPS to Return'
                 ], // retrurn
                 3 => [
                     'status_id' => 3,
-                    'remarks' => 'assign to the manual agent'
+                    'remarks' => 'Consignee has OPS to manual call'
                 ], // retrurn
             ];
             
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->where('rv_state_id', 1)->latest()->first();
-            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'remarks' => 'bot call add to the ' . $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1,'call_status'=> ($request->input < 1 ? 'Un-connected' : 'Connected')]);
+            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'remarks' => $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1,'call_status'=> ($request->input < 1 ? ' Not Connected' : 'Connected')]);
 
             // if($shipment_assign_agent){
             if ($request->input > 0) {
