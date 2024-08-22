@@ -15,11 +15,11 @@ class AlistShipperPermissionSeeder extends Seeder
         //
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
-        // DB::table('module_permissions')->insert(array(
-        //     array('id' => 1005, 'name' => 'Specified Shippers - View', 'module_id' => 25),
-        //     array('id' => 1006, 'name' => 'Specified Shipper (Add Request)', 'module_id' => 25),
-        //     array('id' => 1007, 'name' => 'Specified Shipper (Enable/Disable Request) - Action', 'module_id' => 14),
-        // ));
+        DB::table('module_permissions')->insert(array(
+            array('id' => 1005, 'name' => 'Specified Shippers - View', 'module_id' => 25),
+            array('id' => 1006, 'name' => 'Specified Shipper (Add Request)', 'module_id' => 25),
+            array('id' => 1007, 'name' => 'Specified Shipper (Enable/Disable Request) - Action', 'module_id' => 14),
+        ));
 
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 805, 'screen_name' => 'Specified Shippers', 'action' => 'View'),
