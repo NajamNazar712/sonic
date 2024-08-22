@@ -95,10 +95,11 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'delete_reason' => null
                 ]
             );
-            $adminId = 3399;
             //need to Continue This
             if($isBot)
             {
+                $adminId = 3399;
+
                 $shipmentJourneyId = ShipmentsJourney::where('shipment_id', $this->shipment['shipment_id'])->latest()->select('id')->first();
                 $data = [
                     'agent_id' => $adminId, // testing purpose
