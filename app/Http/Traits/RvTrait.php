@@ -813,7 +813,7 @@ trait RvTrait
                     return ['status' => 1, 'success'=> 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
                 }
                 //if unresponsive count is 2 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
-                else if ($rv_shipment_assign_agent->unresponsive_count == 2 && !$botCall) {
+                else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
                     //updating the shipment status to Shipper Advise Requested(65) in shipments table
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
                     //get the shipment journey table in reason validation id
@@ -826,23 +826,9 @@ trait RvTrait
                     ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id());
                     return ['status' => 1, 'success'=> 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
                 }
-                //if unresponsive count is 3 add request form bot then will be SAR mark 
 
-                else if ($rv_shipment_assign_agent->unresponsive_count == 3 && $botCall) {
-                    //updating the shipment status to Shipper Advise Requested(65) in shipments table
-                    Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
-                    //get the shipment journey table in reason validation id
-
-                    //Remove Shipment from RV Shipment Ticket
-                    // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
-                    RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
-
-                    // //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
-                    ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, $request->admin_id);
-                    return ['status' => 1, 'success'=> 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
-                }
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
-                else if ($rv_shipment_assign_agent->unresponsive_count > 2 && !$botCall) {
+                else if ($rv_shipment_assign_agent->unresponsive_count > 3 && !$botCall) {
 
                     request()->request->add([
                         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
