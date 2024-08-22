@@ -336,7 +336,6 @@ trait RvTrait
     protected function update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent)
     {
         $shipment_assign_agent_table_columns = $this->update_shipments_status($request, $assigned_agent);
-
         if ($admin_agent->employee) {
            
             // if $admin_agent is agent
@@ -787,7 +786,7 @@ trait RvTrait
                 $status = new RvAgentCallHistory();
                 $status->shipment_id = $request->shipment_id;
                 $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
-                $status->call_finding_id = $request->rv_assign_agent_sub_status_id ?? 30; //call finding reasons --bot call calling finding hard code id add
+                $status->call_finding_id = $request->rv_assign_agent_sub_status_id ?? $request->call_finding_id; //call finding reasons --bot call calling finding hard code id add
                 $status->call_to_id = $request->call_to_id ?? 1; //Shipper or Consignee
                 $status->remarks = $request->remarks;
                 $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;

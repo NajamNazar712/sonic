@@ -78,7 +78,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 $isShipperDisabled = 1;
             }
             // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
-            $isBot = ((array_key_exists($this->shipment['status_reason_id'], array_flip([8, 5, 1, 19, 38, 52, 60, 63])) && $this->shipment['shipper_status_id'] != 66) ? 1 : 0);
+            $isBot = ((array_key_exists($this->shipment['status_reason_id'], array_flip([8, 5, 1, 19, 38, 52, 60, 63]))) ? 1 : 0);
             
             RvShipmentTicket::withTrashed()->updateOrCreate(
                 ['shipment_id' => $this->shipment['shipment_id']],

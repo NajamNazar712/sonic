@@ -105,31 +105,36 @@ class BotCallingController extends Controller
             $array = [
                 0 => [
                     'status_id' => 6,
-                    'remarks' => 'Not Answered',
+                    'call_finding_id' => ($request->call_status == 'Answered' ? 34 : 33),
+                    'call_status_type' => ($request->call_status == 'Answered' ? 'Connected' : 'Not Connected'),
                 ], // unresponsive
                 1 => [
                     'status_id' => 2,
-                    'remarks' => 'Consignee has OPS to Reattempt'
+                    'call_finding_id' => 35,
+                    'call_status_type' => 'Connected',
                 ], // reattempt
                 2 => [
                     'status_id' => 1,
-                    'remarks' => 'Consignee has OPS to Return'
+                    'call_finding_id' => 36,
+                    'call_status_type' => 'Connected',
+
                 ], // retrurn
                 3 => [
                     'status_id' => 3,
-                    'remarks' => 'Consignee has OPS to manual call'
-                ], // retrurn
+                    'call_finding_id' => 37,
+                    'call_status_type' => 'Connected',
+                ], // manual
             ];
             
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->where('rv_state_id', 1)->latest()->first();
-            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'remarks' => $array[$request->input]['remarks'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1,'call_status'=> ($request->input < 1 ? ' Not Connected' : 'Connected')]);
+            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'call_finding_id' => $array[$request->input]['call_finding_id'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1,'call_status'=> $array[$request->input]['call_status_type']]);
 
             // if($shipment_assign_agent){
             if ($request->input > 0) {
                 $status = new RvAgentCallHistory();
                 $status->shipment_id = $request->shipment_id;
                 $status->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
-                $status->call_finding_id = 32; //call finding reasons
+                $status->call_finding_id = $request->call_finding_id; //call finding reasons
                 $status->call_to_id = 1; //Shipper or Consignee
                 $status->remarks = $request->remarks;
                 $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
