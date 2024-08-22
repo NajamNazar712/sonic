@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\ShipperInterceptExclude;
+use App\Http\Models\SpecifiedShipper;
 
 class ShipperReturnController extends Controller
 {
@@ -475,7 +476,13 @@ class ShipperReturnController extends Controller
 
                     //Update shipment status id to 66 (Shipment - Re-Attempt Call Requested)
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 66, 'consignee_status_id' => 66]);
+                   
+                    if(SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists() && $parcel->shipper_status_id != 20){ // If shipper is lay on AList then will be auto return confirm
+                        request()->request->add(['shipment_id'=> $request->shipment_id]);
+                        $this->return_confirm($request,null, $parcel->user_id);
+                        return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt"]);
 
+                    }
                     if (session('user_type') != 1) {
                         $reference_1_id = Auth::id();
                     } else {
@@ -489,7 +496,7 @@ class ShipperReturnController extends Controller
                         $last_reason_id = NULL;
                     }
                     // ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
-
+                    
                     //Update shipment status id to 66 (Shipment - Re-Attempt Call Requested)
                     ShipmentsJourneyController::add($request->shipment_id, 66, 66, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
 

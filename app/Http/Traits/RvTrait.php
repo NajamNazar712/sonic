@@ -527,7 +527,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function return_confirm($request, $globalAdminId = null)
+    protected function return_confirm($request, $globalAdminId = null,$userId = null)
     {
         // $remarks = (is_array($request) && isset($request['remarks']) && $request['remarks'] !== null)  ? $request['remarks'] : null;
         $remarks = $request->remarks;
@@ -590,8 +590,12 @@ trait RvTrait
                     AdminFinanceController::done_payment($request->shipment_id, 1);
                 }
             }
+            if($userId){ // AList Shipper Add on the condition
+                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks,$userId, null, null, null, 1, null, null, null, null, $consignee_refused_reasons);
+            }else{
+                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, null, $globalAdminId ?? Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
 
-            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, NULL, $globalAdminId ?? Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
+            }
 
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
         }
