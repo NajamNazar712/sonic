@@ -429,7 +429,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function update_shipment_status($request,$botCall = 0)
+    protected function update_shipment_status($request)
     {
         
         if (Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $request->shipment_id)->doesntExist()) {
@@ -453,7 +453,7 @@ trait RvTrait
                 } elseif ($shipment_status_id == 54) {
                     return $this->intercept($request);
                 } elseif ($shipment_status_id == null) {
-                    return $this->unresponsive($request, $botCall);
+                    return $this->unresponsive($request);
                 }
             } elseif ($shipment_status_id === null && $call_finding_id === null) {
                 return $this->refusal_on_call($request);
@@ -775,7 +775,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description: 
-    protected function unresponsive(Request $request,$botCall)
+    protected function unresponsive(Request $request)
     {
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
@@ -828,7 +828,7 @@ trait RvTrait
                 }
 
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
-                else if ($rv_shipment_assign_agent->unresponsive_count > 3 && !$botCall) {
+                else if ($rv_shipment_assign_agent->unresponsive_count > 3) {
 
                     request()->request->add([
                         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
