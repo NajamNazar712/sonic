@@ -127,7 +127,7 @@ class BotCallingController extends Controller
             ];
             
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->where('rv_state_id', 1)->latest()->first();
-            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'call_finding_id' => $array[$request->input]['call_finding_id'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1,'call_status'=> $array[$request->input]['call_status_type']]);
+            $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => $array[$request->input]['call_finding_id'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1,'call_to_id'=>1,'call_status'=> $array[$request->input]['call_status_type']]);
 
             // if($shipment_assign_agent){
             if ($request->input > 0) {
