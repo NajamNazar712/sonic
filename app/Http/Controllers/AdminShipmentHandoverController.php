@@ -75,7 +75,7 @@ class AdminShipmentHandoverController extends Controller
       foreach ($data as $row) {
           if ($type == 0 && $row->name) {
               $output .= '<option value="' . $row->admin_id . '">' . $row->name . '</option>';
-          } elseif ($type == 1 && !isset($row->name) && isset($row->admin_id)) {
+          } elseif ($type == 1 && /* !isset($row->name) && */ isset($row->admin_id)) {
               $output .= '<option value="' . $row->admin_id . '">' . $row->name . '</option>';
           }
       }
