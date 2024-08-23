@@ -15379,7 +15379,9 @@ class AdminReportsController extends Controller
             'shipment_status.name AS current_status',
             'admins.name AS admin_name',
             'cities.name AS consignee_city_name'
-        );
+        )
+        ->whereNotNull('shipments.tracking_number')
+        ;
 
         if ($from_date && $to_date){
             $query->whereBetween('reversion_delivered_shipments.created_at', [$from_date, $to_date]);
