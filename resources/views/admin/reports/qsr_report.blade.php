@@ -358,6 +358,7 @@
                     data: function (params) {
                         return {
                             search: params.term,
+                            sub_segment_select : $('#sub_segment_select').val()
                         }
                     },
                     processResults: function (data) {
@@ -814,24 +815,24 @@
 
             var sub_segment_select = $('#sub_segment_select');
             var shippers_select = $('#search_shippers');
-            sub_segment_select.on('change', function(){
-                var sub_segment_value = sub_segment_select.val();
-                $.ajax({
-                    url: "{{ route('admin.reports.qsr.updated_shippers_list') }}",
-                    data: {
-                        sub_segment_value
-                    },
-                    success: function (response) {
-                        var shippers = response.data;
-                        shippers_select.empty();
-                        shippers.forEach(function(shipper) {
-                            var newOption = new Option(shipper.name, shipper.id, false, false);
-                            shippers_select.append(newOption);
-                        });
-                        shippers_select.trigger('change');
-                    }
-                });
-            });
+            {{--sub_segment_select.on('change', function(){--}}
+            {{--    var sub_segment_value = sub_segment_select.val();--}}
+            {{--    $.ajax({--}}
+            {{--        url: "{{ route('admin.reports.qsr.updated_shippers_list') }}",--}}
+            {{--        data: {--}}
+            {{--            sub_segment_value--}}
+            {{--        },--}}
+            {{--        success: function (response) {--}}
+            {{--            var shippers = response.data;--}}
+            {{--            shippers_select.empty();--}}
+            {{--            shippers.forEach(function(shipper) {--}}
+            {{--                var newOption = new Option(shipper.name, shipper.id, false, false);--}}
+            {{--                shippers_select.append(newOption);--}}
+            {{--            });--}}
+            {{--            shippers_select.trigger('change');--}}
+            {{--        }--}}
+            {{--    });--}}
+            {{--});--}}
         });
 
     </script>
