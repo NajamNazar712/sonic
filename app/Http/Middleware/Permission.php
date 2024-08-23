@@ -656,6 +656,7 @@ class Permission
             'reports.sack_bag_status.index' => 936,
             'reports.issuance_sack_bag.index' => 937,
 
+            'reports.shipment_reversal_report.index' => 1001,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -1249,6 +1250,10 @@ class Permission
 
             'retail.international.economy_rates.index' => 992,
             'retail.international.economy_rates.excel' => 992,
+
+            'retail.retail_discount_codes.index' => 1003,
+            'retail.retail_discount_codes.list' => 1003,
+            'retail.retail_discount_codes.bulk.store' => 1003,
 
             'debriefing.supervisor.index' => 495,
             'debriefing.supervisor.list' => 495,

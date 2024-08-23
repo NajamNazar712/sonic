@@ -40,6 +40,7 @@ class AdminRetailReportController extends Controller
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
         return view('admin.reports.retail.sales')->with(['retail_centers' => $retail_centers, 'retail_franchises' => $retail_franchises ,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses]);
     }
+
     public function sales_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
@@ -50,6 +51,11 @@ class AdminRetailReportController extends Controller
         $from = Carbon::parse($from)->setTimeFromTimeString('05:59:59');
         $to = $request->get('search_date_to');
         $to = Carbon::parse($to)->addDay()->setTimeFromTimeString('06:00:00');
+
+        $rncc_numbers = $request->input('search_rncc_no', []);
+        if (!empty($rncc_numbers) && !is_array($rncc_numbers)) {
+            $rncc_numbers = explode(',', $rncc_numbers);
+        }
 
         $sales = DB::connection('reports')->table('shipments')->join('retail_shipments as rs', 'rs.shipment_id', '=','shipments.id')
             ->leftjoin('retail_users as ru','ru.id','=','rs.retail_user_id')
@@ -74,7 +80,7 @@ class AdminRetailReportController extends Controller
                 $join->on('pns.shipment_id','=','shipments.id')->where('pns.retail_pickup_note_id','=',
                         DB::connection('reports')->raw('(select max(retail_pickup_note_id) from retail_pickup_note_shipments where retail_pickup_note_shipments.shipment_id = shipments.id)'));
             })
-//            ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
+            // ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->join('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id','=',
@@ -103,8 +109,14 @@ class AdminRetailReportController extends Controller
             ->whereBetween('sj.created_at', [$from,$to])
             ->where('shipments.shipment_type', 2);
 
-            $from_id = DB::connection('reports')->table('shipments_journey')->where('created_at', '>=', $from)->min('id');
-            if (!empty($from_id)) {
+            if (!empty($rncc_numbers)) {
+                $sales->whereIn('pns.retail_pickup_note_id', $rncc_numbers);
+            }
+            $sales->groupBy('pns.retail_pickup_note_id');
+
+            $from_id = DB::connection('reports')->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
 
                 $to_id = DB::connection('reports')->table('shipments_journey')->whereBetween('created_at', [$from, $to])->max('id');
 
@@ -147,18 +159,18 @@ class AdminRetailReportController extends Controller
                 return number_format($shipment->collection_amount);
             })
             ->addColumn('franchise_center', function ($shipment) {
-//                if($shipment->retail_category){
-//
-//                    if ($shipment->retail_category == 2) {
-//                        return $shipment->retail_center;
-//                    }
-//                    else {
-//                        return $shipment->franchise;
-//                    }
-//                }
-//                else{
-//                    return $shipment->retail_trax_center_name;
-//                }
+            //    if($shipment->retail_category){
+
+            //        if ($shipment->retail_category == 2) {
+            //            return $shipment->retail_center;
+            //        }
+            //        else {
+            //            return $shipment->franchise;
+            //        }
+            //    }
+            //    else{
+            //        return $shipment->retail_trax_center_name;
+            //    }
                 if($shipment->retail_cat == 1){
                     return 'Franchise';
                 }
