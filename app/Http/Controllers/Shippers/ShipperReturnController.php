@@ -477,15 +477,11 @@ class ShipperReturnController extends Controller
 
                     //Update shipment status id to 66 (Shipment - Re-Attempt Call Requested)
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 66, 'consignee_status_id' => 66]);
-                    Log::channel('cronJobLog')->info('s ' . 'SpecifiedShippers checkconditions'. SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists());
 
-                    if(SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists()){ // If shipper is lay on AList then will be auto return confirm
-                               Log::channel('cronJobLog')->info('s ' . 'SpecifiedShippers update');
-
+                    if(SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists()){ // If shipper is lay on AList then will be auto re-attempt
                         request()->request->add(['shipment_id'=> $request->shipment_id]);
-                        $this->return_confirm($request,null, $parcel->user_id);
+                        $this->reattempt($request);
                         return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt"]);
-
                     }
                     if (session('user_type') != 1) {
                         $reference_1_id = Auth::id();

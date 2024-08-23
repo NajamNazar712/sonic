@@ -43,7 +43,7 @@ class BotCallDispatch implements ShouldQueue
 
         //
         $environment = config('app.env');
-        // if ($environment == 'production') {
+        if ($environment == 'production') {
             if(RvShipmentTicket::where('shipment_id', $this->shipmentId)->whereNull('deleted_at')->where('is_bot',1)->exists()){
                 $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
                 RvShipmentTicket::where('shipment_id', $this->shipmentId)->update(['in_progress' => 1]);
@@ -67,7 +67,7 @@ class BotCallDispatch implements ShouldQueue
             }else{
             return json_encode(['status'=>0,'message'=>'Shipment isn`t at the bot call prefernce']);
             }
-        // }
+        }
        
     }
 }
