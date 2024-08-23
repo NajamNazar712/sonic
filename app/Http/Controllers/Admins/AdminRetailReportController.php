@@ -112,12 +112,10 @@ class AdminRetailReportController extends Controller
             if (!empty($rncc_numbers)) {
                 $sales->whereIn('pns.retail_pickup_note_id', $rncc_numbers);
             }
-            $sales->groupBy('pns.retail_pickup_note_id');
+//            $sales->groupBy('pns.retail_pickup_note_id');
 
-            $from_id = DB::connection('reports')->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-            if ($from_id->exists()) {
-                $from_id = $from_id->first()->id;
-
+            $from_id = DB::connection('reports')->table('shipments_journey')->where('created_at', '>=', $from)->min('id');
+             if (!empty($from_id)) {
                 $to_id = DB::connection('reports')->table('shipments_journey')->whereBetween('created_at', [$from, $to])->max('id');
 
                 if (!empty($to_id)) {
