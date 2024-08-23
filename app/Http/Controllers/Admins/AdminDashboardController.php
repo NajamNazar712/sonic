@@ -11519,6 +11519,14 @@ class AdminDashboardController extends Controller
 
                     $junctions = V2Junctions::where('junction_mapping_id', $closestHubMapping->id)->get();
 
+                    // TO-6836 (Adding the reference hub as junction in new mappings)
+                    $newJunctions1[] = [
+                        'junction_mapping_id' => $mapping->id,
+                        'junction_id' => $closestHubId,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
+
                     foreach ($junctions as $j) {
                         $newJunctions1[] = [
                             'junction_mapping_id' => $mapping->id,
@@ -11612,6 +11620,14 @@ class AdminDashboardController extends Controller
                             'updated_at' => now()
                         ];
                     }
+
+                    // TO-6836 (Adding the reference hub as junction in new mappings)
+                    $newJunctions2[] = [
+                        'junction_mapping_id' => $mapping->id,
+                        'junction_id' => $closestHubId,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
 
                     $previous = $mapping->destination_id;
 
