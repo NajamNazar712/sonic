@@ -13,7 +13,7 @@ class ModulePermissionForHubAccessType extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 904, 'name' => 'Hub Access Type - View', 'module_id' => 14),
+            array('id' => 1004, 'name' => 'Hub Access Type - View', 'module_id' => 14),
         ));
 
     }

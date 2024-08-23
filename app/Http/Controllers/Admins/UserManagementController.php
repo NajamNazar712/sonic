@@ -220,7 +220,7 @@ class UserManagementController extends Controller
                         }
                     }
 
-                    if (session('role_id') == 1 || in_array(904, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(1004, session('permissions'))) {
                         if ($user->admin_dept_id == 6) {
                             $dropdown .= $set_hub_access;
                         }
