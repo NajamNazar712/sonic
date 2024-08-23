@@ -251,10 +251,10 @@
                                 row.push(values.consignee_address);
                                 row.push(values.consignee_city_name);
                                 row.push(values.amount);
-                                row.push(values.latest_delivery_note_id);
-                                row.push(values.latest_status_name);
-                                row.push(values.created_at_status_5);
-                                row.push(values.created_at_status_13);
+                                row.push(values.dncc);
+                                row.push(values.current_status);
+                                row.push(values.delivered_at);
+                                row.push(values.reverted_at);
                                 row.push(values.admin_name);
                                 body.push(row);
                             });
@@ -344,7 +344,7 @@
                 },
                 {
                     data: 'consignee_city_name',
-                    name: 'consignee_city_name',
+                    name: 'cities.name',
                     class: 'align-middle consignee_city_name',
                     orderable: false,
                     searchable: false
@@ -357,36 +357,36 @@
                     searchable: false
                 },
                 {
-                    data: 'latest_delivery_note_id',
-                    name: 'latest_delivery_note_id',
-                    class: 'align-middle latest_delivery_note_id',
+                    data: 'dncc',
+                    name: 'reversion_delivered_shipments.dncc',
+                    class: 'align-middle dncc',
                     orderable: false,
                     searchable: false
                 },
                 {
-                    data: 'latest_status_name',
-                    name: 'latest_status_name',
-                    class: 'align-middle latest_status_name',
+                    data: 'current_status',
+                    name: 'shipment_status.name',
+                    class: 'align-middle current_status',
                     orderable: false,
                     searchable: false
                 },
                 {
-                    data: 'created_at_status_5',
-                    name: 'created_at_status_5',
-                    class: 'align-middle created_at_status_5',
+                    data: 'delivered_at',
+                    name: 'dr.created_at',
+                    class: 'align-middle delivered_at',
                     orderable: false,
                     searchable: false
                 },
                 {
-                    data: 'created_at_status_13',
-                    name: 'created_at_status_13',
-                    class: 'align-middle created_at_status_13',
+                    data: 'reverted_at',
+                    name: 'reversion_delivered_shipments.created_at',
+                    class: 'align-middle reverted_at',
                     orderable: false,
                     searchable: false
                 },
                 {
                     data: 'admin_name',
-                    name: 'admin_name',
+                    name: 'admins.name',
                     class: 'align-middle admin_name',
                     orderable: false,
                     searchable: false
