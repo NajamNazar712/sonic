@@ -53,7 +53,7 @@ class AdminShipmentHandoverController extends Controller
         foreach($data as $row){
           if ($type == 0 && isset($row->name)){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
-          }else if ($type == 1 && !isset($row->name) && isset($row->admin_id)){
+          }else if ($type == 1 && isset($row->name) && isset($row->admin_id)){
             $output .= '<option value ="'.$row->id.'">' . Admin::where('id' ,$row->admin_id)->first()->name   . '</option> ';
 
           }
@@ -1247,5 +1247,14 @@ class AdminShipmentHandoverController extends Controller
       ->take(6)
       ->get();
       return response()->json($handover_bag_numbers);
+    }
+
+    public function unique_bag_number(Request $request)
+    {
+      $bag_number = $request->bag_number;
+      $stored_bag_numbers = Handover::whereNotNull('bag_number')->pluck('bag_number');
+      if ($stored_bag_numbers->contains($bag_number)) {
+        return ['status' => 1, 'error' => 'Bag Number should be unique'];
+      }
     }
 }

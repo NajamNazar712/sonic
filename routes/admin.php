@@ -3649,6 +3649,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'AdminShipmentHandoverController@bulk_handover_submit')->name('store');
             Route::post('shipments_pieces', 'AdminShipmentHandoverController@add_handover_shipments_pieces')->name('shipments_pieces');
             Route::post('sub_area', 'AdminShipmentHandoverController@sub_area')->name('sub_area');
+
+            Route::get('unique_bag_number', 'AdminShipmentHandoverController@unique_bag_number')->name('unique_bag_number');
         });
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');

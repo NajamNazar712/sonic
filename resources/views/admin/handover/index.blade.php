@@ -581,11 +581,19 @@
                 $('#arrival_of_shipments_form input.to_dept_area_desg').val(to_dept_area_desg);
                 var form = this;
 
+
+
+
+
+
+
+
                 if (errors != 1) {
                     var hubName = $('#hub').find(":selected").text();
                     $('#hub_name_modal').val(hubName);
                     $('#handoverModal').modal('show');
 
+                    // Sanitize input to only allow numeric values
                     $('#bag_number').on('keyup', function() {
                         var value = $(this).val();
                         var numericValue = value.replace(/[^0-9]/g, '');
@@ -597,48 +605,168 @@
                         $('input[name="bag_number"]').val(bagNumber);
 
                         if (bagNumber.trim() === '') {
-                            toastr.error('Bag Number is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            toastr.error('Bag Number is required', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
                             return;
                         }
 
-                        $('#handoverModal').modal('hide');
-                        swal({
-                            text: 'Are you sure, Select Yes to create the Handover Note?',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
+                        // Check if bag number is unique
+                        $.ajax({    
+                            url: "{{ route('admin.handover.create.unique_bag_number') }}",
+                            type: "GET",
+                            data: {
+                                'bag_number': bagNumber
+                            },
+                            success: function (response) {
+                                if (response.status === 1 && response.error) {
+                                    toastr.error(response.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                } else {
+                                    $('#handoverModal').modal('hide');
+                                    swal({
+                                        text: 'Are you sure, Select Yes to create the Handover Note?',
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Yes',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then(function (confirm) {
+                                        if (confirm) {
+                                            swal({
+                                                title: 'Please Wait!',
+                                                text: 'Handovers are being created!',
+                                                icon: 'info',
+                                                buttons: false,
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
+                                            });
+
+                                            blockPagePermanently();
+                                            form.submit();
+                                        }
+                                    });
                                 }
                             },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function (confirm) {
-                            if (confirm) {
-                                swal({
-                                    title: 'Please Wait!',
-                                    text: 'Handovers are being created!',
-                                    icon: 'info',
-                                    buttons: false,
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false
+                            error: function () {
+                                toastr.error('Error fetching data', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
                                 });
-
-                                blockPagePermanently();
-                                form.submit();
                             }
                         });
                     });
                 }
+
+
+
+
+
+
+
+
+
+
+
+
+                // if (errors != 1) {
+                //     var hubName = $('#hub').find(":selected").text();
+                //     $('#hub_name_modal').val(hubName);
+                //     $('#handoverModal').modal('show');
+                //     var confirmHandvoerBtn = $('#confirmHandover');
+
+                //     $('#bag_number').on('keyup', function() {
+                //         var value = $(this).val();
+                //         var numericValue = value.replace(/[^0-9]/g, '');
+                //         $(this).val(numericValue);
+                //     });
+
+                //     $('#confirmHandover').on('click', function () {
+                //         var bagNumber = $('#bag_number').val();
+                //         $('input[name="bag_number"]').val(bagNumber);
+
+                //         if (bagNumber.trim() === '') {
+                //             toastr.error('Bag Number is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                //             return;
+                //         }
+
+                //         confirmHandvoerBtn.on('click', function () {
+                //             $.ajax({    
+                //                 url: "{{ route('admin.handover.create.unique_bag_number') }}",
+                //                 data: {
+                //                     'bag_number': bagNumber
+                //                 },
+                //                 success: function (response) {
+                //                     if (response.status === 1 && response.error) {
+                //                         toastr.error(response.error, 'Error!', {
+                //                             positionClass: 'toast-top-center',
+                //                             containerId: 'toast-top-center'
+                //                         });
+                //                     }
+                //                 },
+                //                 error: function () {
+                //                     toastr.error('Error fetching data', 'Error!', {
+                //                         positionClass: 'toast-top-center',
+                //                         containerId: 'toast-top-center'
+                //                     });
+                //                 }
+                //             });
+                //         });
+
+                //         $('#handoverModal').modal('hide');
+                //         swal({
+                //             text: 'Are you sure, Select Yes to create the Handover Note?',
+                //             icon: 'warning',
+                //             buttons: {
+                //                 cancel: {
+                //                     text: 'No',
+                //                     value: null,
+                //                     visible: true,
+                //                     closeModal: true,
+                //                 },
+                //                 confirm: {
+                //                     text: 'Yes',
+                //                     value: true,
+                //                     visible: true,
+                //                     closeModal: true
+                //                 }
+                //             },
+                //             closeOnClickOutside: false,
+                //             closeOnEsc: false,
+                //             dangerMode: true
+                //         }).then(function (confirm) {
+                //             if (confirm) {
+                //                 swal({
+                //                     title: 'Please Wait!',
+                //                     text: 'Handovers are being created!',
+                //                     icon: 'info',
+                //                     buttons: false,
+                //                     closeOnClickOutside: false,
+                //                     closeOnEsc: false
+                //                 });
+
+                //                 blockPagePermanently();
+                //                 form.submit();
+                //             }
+                //         });
+                //     });
+                // }
 
 
 
