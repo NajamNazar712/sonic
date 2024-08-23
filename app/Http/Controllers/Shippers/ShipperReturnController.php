@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\ShipperInterceptExclude;
 use App\Http\Models\SpecifiedShipper;
+use Illuminate\Support\Facades\Log;
 
 class ShipperReturnController extends Controller
 {
@@ -476,8 +477,11 @@ class ShipperReturnController extends Controller
 
                     //Update shipment status id to 66 (Shipment - Re-Attempt Call Requested)
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 66, 'consignee_status_id' => 66]);
-                   
+                    Log::channel('cronJobLog')->info('s ' . 'SpecifiedShippers checkconditions'. SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists());
+
                     if(SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists()){ // If shipper is lay on AList then will be auto return confirm
+                               Log::channel('cronJobLog')->info('s ' . 'SpecifiedShippers update');
+
                         request()->request->add(['shipment_id'=> $request->shipment_id]);
                         $this->return_confirm($request,null, $parcel->user_id);
                         return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt"]);
