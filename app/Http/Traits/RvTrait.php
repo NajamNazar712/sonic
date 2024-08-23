@@ -275,6 +275,7 @@ trait RvTrait
             //if user has requested for intercept same conginee set rv_assign_agent_status_id to 4(Intercept Approved) else $request->rv_assign_agent_status_id
             'rv_assign_agent_status_id' => ($request->rv_assign_agent_status_id == 3 && $request->intercept_type == 2) ? 4 : $request->rv_assign_agent_status_id,
             'rv_assign_agent_sub_status_id' => $request->rv_assign_agent_sub_status_id,
+            'agent_id' => Auth::id() ?? $request->admin_id,
             'rv_fake_status_id' => $request->rv_fake_status_id,
             'remarks' => $request->remarks,
             'is_fake_status' => $request->is_fake_status,
