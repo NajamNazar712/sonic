@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Http\Controllers\Webhook\WebhookLogController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipment;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
@@ -43,7 +44,7 @@ class BotCallDispatch implements ShouldQueue
 
         //
         $environment = config('app.env');
-        if ($environment == 'production') {
+        if (GlobalSettings::where(['type'=> 'bot_open_closed', 'setting_value' => 1])->exists()) {
             if(RvShipmentTicket::where('shipment_id', $this->shipmentId)->whereNull('deleted_at')->where('is_bot',1)->exists()){
                 $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
                 RvShipmentTicket::where('shipment_id', $this->shipmentId)->update(['in_progress' => 1]);
