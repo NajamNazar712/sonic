@@ -15,13 +15,10 @@
                 <div class="row mb-2 justify-content-start">
 
                     <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
+                            <fieldset class="form-group">
+                                <select name="search_shipper[]" id="search_shippers" class="form-control select2" multiple required data-rule-required="true" data-msg-required="This field is required">
+                                </select>
+                            </fieldset>
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
@@ -340,6 +337,8 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
+
+
     <script type="text/javascript">
         $(document).ready(function () {
             $('#search_shipment_status').prepend('<option value="" selected="selected"></option>').select2({
@@ -349,9 +348,25 @@
             });
             $('#search_shippers').select2({
                 width:'100%',
-                placeholder:"Select Shipper(s)",
+                placeholder:"Select Shipper",
                 allowClear:true,
-                minimumInputLength: 3
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    delay: 700,
+                }
             });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
