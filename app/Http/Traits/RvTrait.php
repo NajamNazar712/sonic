@@ -467,8 +467,8 @@ trait RvTrait
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
-    // Description:
-    protected function reattempt($request)
+    // Description: userId variable used for the AlistShipper
+    protected function reattempt($request,$userId = null)
     {
         $remarks = $request->remarks;
         $parcel = Shipment::find($request->shipment_id);
@@ -485,10 +485,15 @@ trait RvTrait
         //Remove Shipment from RV Shipment Ticket
         // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
         RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
+        if ($userId) { // Alist Shipper is lay this shipper add on shipper advise requested
+            $shipperStatus = [12, 52,  65, 66];
+        } else {
+            $shipperStatus = [12, 52, 66];
+        }
+        if (in_array($parcel->shipper_status_id, $shipperStatus)) {
+            
 
-        if (in_array($parcel->shipper_status_id, [12, 52, 66])) {
-            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52,  66])->latest('id')->first();
-
+            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', $shipperStatus)->latest('id')->first();
             if ($journey) {
                 if ($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
                     $parcel->nsa_osa_status = 1;
@@ -509,7 +514,11 @@ trait RvTrait
                 $parcel->consignee_status_id = 13;
                 $parcel->save();
 
-                ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, Auth::id());
+                if($userId){
+                    ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, $userId, null);
+                }else{
+                    ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, Auth::id());
+                }
 
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
@@ -1929,12 +1938,12 @@ trait RvTrait
     /**
      * Reattempt attempt the shipper admin agent send the notification rider.
      */
-    function reattemptNotification($shipmentId)
+    protected function reattemptNotification($shipmentId)
     {
         // Retrieve the DeliveryNoteShipment with related DeliveryNote data
         $shipmentDeliveryNote = DeliveryNoteShipment::with('delivery_note:id,pending_status,rider_id')
             ->where('shipment_id', $shipmentId)
-            ->first();
+            ->latest()->first();
 
         // Check if the DeliveryNoteShipment record exists
         if ($shipmentDeliveryNote) {
@@ -1952,7 +1961,9 @@ trait RvTrait
             // Handle the case where the shipment delivery note is not found
             // This might involve logging an error or returning an error response
             // For example:
-            throw new Exception("Delivery note shipment not found for shipment ID: {$shipmentId}");
+            return response()->json(['status' => 0, 'success' => "Delivery note shipment not found for shipment ID: {$shipmentId}"]);
+
+            // throw new Exception("Delivery note shipment not found for shipment ID: {$shipmentId}");
         }
     }
 

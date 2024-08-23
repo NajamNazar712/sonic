@@ -474,15 +474,16 @@ class ShipperReturnController extends Controller
                 if ($parcel->shipper_status_id == 65) {
                     $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 65)->where('status_reason_id', 12)->latest('id')->first();
                     // Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
-
+                    
+                    
+                    if (SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists()) { // If shipper is lay on AList then will be auto re-attempt
+                        request()->request->add(['shipment_id' => $request->shipment_id]);
+                        $this->reattempt($request, session('user_id'));
+                        return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt"]);
+                    }
                     //Update shipment status id to 66 (Shipment - Re-Attempt Call Requested)
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 66, 'consignee_status_id' => 66]);
 
-                    if(SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists()){ // If shipper is lay on AList then will be auto re-attempt
-                        request()->request->add(['shipment_id'=> $request->shipment_id]);
-                        $this->reattempt($request);
-                        return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt"]);
-                    }
                     if (session('user_type') != 1) {
                         $reference_1_id = Auth::id();
                     } else {
