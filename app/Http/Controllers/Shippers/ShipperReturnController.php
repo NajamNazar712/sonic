@@ -479,7 +479,7 @@ class ShipperReturnController extends Controller
                     if (SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists()) { // If shipper is lay on AList then will be auto re-attempt
                         request()->request->add(['shipment_id' => $request->shipment_id]);
                         $this->reattempt($request, session('user_id'));
-                        return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt"]);
+                        return response()->json(['status' => 1, 'success' => "We're reattempting your shipment request directly, without a call request"]);
                     }
                     //Update shipment status id to 66 (Shipment - Re-Attempt Call Requested)
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 66, 'consignee_status_id' => 66]);
@@ -524,7 +524,9 @@ class ShipperReturnController extends Controller
                         NotificationsController::send(33, $request->shipment_id);
                     }
 
-                    return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+                    return response()->json(['status' => 1, 'success' =>
+                    // "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"
+                    "We’re reattempting your shipment with a call request; we'll proceed further once we get a response"]);
                 } else {
                     return ['status' => 0, 'error' => "Shipment is already updated for Re-attempt!"];
                 }
