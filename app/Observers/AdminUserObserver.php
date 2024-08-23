@@ -64,8 +64,6 @@ class AdminUserObserver
 
     public function saved(Admin $admin)
     {
-        //dd($admin->getOriginal(), Auth::user());
-    //Log::info($admin->getDirty());
         $dirtyAttributes = $admin->getDirty();
 
         // Iterate over each dirty attribute
@@ -75,12 +73,6 @@ class AdminUserObserver
 
             // Log the change
             Log::info("The attribute '$attribute' is changing from '$originalValue' to '$newValue'");
-
-            // You can add custom logic based on the attribute name and value changes
-            // For example:
-            // if ($attribute == 'status' && $originalValue == 0 && $newValue == 1) {
-            //     // Specific logic for enabling a user
-            // }
         }
     }
 }   
