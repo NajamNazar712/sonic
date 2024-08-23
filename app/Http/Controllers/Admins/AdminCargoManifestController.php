@@ -197,11 +197,13 @@ class AdminCargoManifestController extends Controller
 
             $previous = $rj;
 
-            foreach ($request->vehicles[$key] as $vehicle) {
-                $route_vehicle = new V2JunctionVehicles();
-                $route_vehicle->junction_route_id = $route_junction->id;
-                $route_vehicle->vehicle_id = $vehicle;
-                $route_vehicle->save();
+            if(isset($request->vehicles[$key])){ // TO-6836 (Entry Of Vehicles Made Optional)
+                foreach ($request->vehicles[$key] as $vehicle) {
+                    $route_vehicle = new V2JunctionVehicles();
+                    $route_vehicle->junction_route_id = $route_junction->id;
+                    $route_vehicle->vehicle_id = $vehicle;
+                    $route_vehicle->save();
+                }
             }
         }
 
@@ -294,11 +296,13 @@ class AdminCargoManifestController extends Controller
 
             $previous = $rj;
 
-            foreach ($request->vehicles[$key] as $vehicle) {
-                $route_vehicle = new V2JunctionVehicles();
-                $route_vehicle->junction_route_id = $route_junction->id;
-                $route_vehicle->vehicle_id = $vehicle;
-                $route_vehicle->save();
+            if(isset($request->vehicles[$key])){ // TO-6836 (Entry Of Vehicles Made Optional)
+                foreach ($request->vehicles[$key] as $vehicle) {
+                    $route_vehicle = new V2JunctionVehicles();
+                    $route_vehicle->junction_route_id = $route_junction->id;
+                    $route_vehicle->vehicle_id = $vehicle;
+                    $route_vehicle->save();
+                }
             }
         }
 
