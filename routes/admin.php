@@ -3386,8 +3386,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('alist_shippers')->name('alist_shippers.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@aListShippersIndex')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@aListShipperView')->name('list');
-            Route::post('add', 'Admins\GlobalSettingsController@aListShippersAdd')->name('add');
-            Route::post('enable_disable', 'Admins\GlobalSettingsController@alistShipperStatusUpdate')->name('enable_disable');
         });
 
         Route::prefix('airway_bill_address_visibility')->name('airway_bill_address_visibility.')->group(function () {

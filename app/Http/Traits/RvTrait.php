@@ -292,12 +292,11 @@ trait RvTrait
         $reattempt_requested_shipment = Shipment::where('id', $request->shipment_id)->where('shipper_status_id', 52)->latest()->first();
 
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
-
         //if bot call is unresponsive and again status is updated to the open
-        if($request->input < 1 && $request->rv_assign_agent_status_id == 6){
+        if($request->input === 0 && $request->rv_assign_agent_status_id == 6){
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 6; //set status to unresponive confirm again asign
             $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
-            $shipment_assign_agent_table_columns['rv_state_id'] = 1;
+            $shipment_assign_agent_table_columns['rv_state_id'] = 3;
             return $shipment_assign_agent_table_columns; // return assign again
         }
         //if shipment delivery count is 3 and again status is updated to unresponsive set the shipment to return confirm
