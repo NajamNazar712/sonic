@@ -32,6 +32,7 @@ Route::prefix('survey_form')->name('survey.')->group(function () {
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
 
 Route::get('trax_pk_validation/{company_name}/{email_address}/{phone_number}', 'APIController@trax_pk_validation')->name('trax_pk_validation');
+Route::get('wp_custom_select_dropdown_data', 'APIController@wp_custom_select_dropdown_data')->name('wp_custom_select_dropdown_data');
 
 
 Auth::routes();
