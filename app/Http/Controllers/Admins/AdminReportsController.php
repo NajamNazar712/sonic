@@ -14643,13 +14643,13 @@ class AdminReportsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 137);
         if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->where('blacklist', 0)->select('id', 'name')->get();
         } else {
-            $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+            $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->where('blacklist', 0)->select('id', 'name')->get();
         }
 
-        $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
-        $zones = DB::connection('reports')->table('zones')->select('id', 'name')->get();
+        $cities = DB::connection('reports')->table('cities')->where('status', 1)->select('id', 'name')->get();
+        $zones = DB::connection('reports')->table('zones')->where('status', 1)->select('id', 'name')->get();    
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $areas = DB::connection('reports')->table('city_areas')->where('status', 1)->select('id', 'name')->get();
         $service_types = DB::connection('reports')->table('booking_types')->get();    
@@ -14974,14 +14974,30 @@ class AdminReportsController extends Controller
             }
         }
 
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
+        // if ($request->get('search_from') && $request->get('search_to')) {
+        //     $from = $request->get('search_from');
+        //     $to = $request->get('search_to');
+        //     $shipments->whereBetween('journey.created_at', [$from, $to]);
+        // }
+        // if ($request->get('arrival_search_from') && $request->get('arrival_search_to')) {
+        //     $from1 = $request->get('arrival_search_from');
+        //     $to1 = $request->get('arrival_search_to');
+        //     $shipments->whereBetween('sj.created_at', [$from1, $to1]);
+        // }
+
+        $search_from = $request->get('search_from');
+        $search_to = $request->get('search_to');
+        if ($search_from && $search_to) {
+            $from = Carbon::parse($search_from)->format('Y-m-d H:i:s');
+            $to = Carbon::parse($search_to)->format('Y-m-d H:i:s');
             $shipments->whereBetween('journey.created_at', [$from, $to]);
         }
-        if ($request->get('arrival_search_from') && $request->get('arrival_search_to')) {
-            $from1 = $request->get('arrival_search_from');
-            $to1 = $request->get('arrival_search_to');
+
+        $arrival_search_from = $request->get('arrival_search_from');
+        $arrival_search_to = $request->get('arrival_search_to');
+        if ($arrival_search_from && $arrival_search_to) {
+            $from1 = Carbon::parse($arrival_search_from)->format('Y-m-d H:i:s');
+            $to1 = Carbon::parse($arrival_search_to)->format('Y-m-d H:i:s');
             $shipments->whereBetween('sj.created_at', [$from1, $to1]);
         }
 
@@ -15288,6 +15304,93 @@ class AdminReportsController extends Controller
 
         $datatable = Datatables::of($notifications);
  
+        return $datatable->make(true);
+    }
+
+    public function updated_shippers_list(Request $request)
+    {
+        $segment_id = $request->sub_segment_value;
+        if($segment_id){
+            $updated_shippers_list = DB::connection('reports')->table('users')
+            ->whereIn('status', [3, 4])
+            ->where('blacklist', 0)
+            ->where('segment_id', $segment_id)
+            ->select('id', 'name')
+            ->get();
+        } else {
+            if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
+                $updated_shippers_list = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->where('blacklist', 0)->select('id', 'name')->get();
+            } else {
+                $updated_shippers_list = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->where('blacklist', 0)->select('id', 'name')->get();
+            }
+        }
+        return response()->json([
+            'data' => $updated_shippers_list
+        ]);
+    }
+
+    public function shipment_reversal_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 803);
+        if (session('role_id') == 1 || in_array(1001, session('permissions'))) {
+            return view('admin.reports.shipment_reversal_report.index');
+        } else {
+            return redirect()->route('admin.access_denied');
+        }
+    }
+
+
+    public function shipment_reversal_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 804);
+        }
+        $from_date = $request->has('search_date_from') && !empty($request->search_date_from)
+            ? Carbon::parse($request->search_date_from)->startOfDay()
+            : null;
+        $to_date = $request->has('search_date_to') && !empty($request->search_date_to)
+            ? Carbon::parse($request->search_date_to)->endOfDay()
+            : null;
+
+        $query = DB::connection('reports')->table('reversion_delivered_shipments')
+        ->leftJoin('shipments','shipments.id','reversion_delivered_shipments.shipment_id')
+        ->leftJoin('shipments_journey as dr', function ($join)  {
+                $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('dr.shipper_status_id', [14, 30, 36, 37])
+                    ->where(
+                        'dr.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14, 30, 36, 37))')
+                    );
+         })
+        ->leftJoin('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
+        ->leftJoin('admins', 'admins.id', '=', 'reversion_delivered_shipments.reverted_by')
+        ->leftJoin('cities', 'cities.id', '=', 'shipments.consignee_city_id')
+        ->select(
+            'shipments.tracking_number',
+            'shipments.consignee_name',
+            'shipments.consignee_address',
+            'shipments.consignee_phone_number_1',
+            'shipments.consignee_city_id',
+            'shipments.amount',
+            'reversion_delivered_shipments.dncc',
+            'dr.created_at AS delivered_at',
+            'reversion_delivered_shipments.created_at AS reverted_at',
+            'shipment_status.name AS current_status',
+            'admins.name AS admin_name',
+            'cities.name AS consignee_city_name'
+        )
+        ->whereNotNull('shipments.tracking_number')
+        ;
+
+        if ($from_date && $to_date){
+            $query->whereBetween('reversion_delivered_shipments.created_at', [$from_date, $to_date]);
+        }
+        $datatable = Datatables::of($query)
+        ->editColumn('tracking_number', function ($shipments) {
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        });
         return $datatable->make(true);
     }
 }

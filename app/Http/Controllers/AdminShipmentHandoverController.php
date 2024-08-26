@@ -303,24 +303,22 @@ class AdminShipmentHandoverController extends Controller
            $from = date('Y-m-d 00:00:01',strtotime($date.'-6 month'));
            $to = date('Y-m-d 23:59:59',strtotime($date));
         }
-        $handover_list = Handover::join('cities as c','c.id','=','handovers.hub')
-       
-
-        ->leftjoin('admins as a', function ($join) {
-            $join->on('a.id',   '=', 'handovers.created_by')
-            ->where('a.role_id', '!=' , 1);
-          })
-
+        $handover_list = DB::connection('reports')->table('handovers')
+            ->leftjoin('cities as c','c.id','=','handovers.hub')
+            ->leftjoin('admins as a', function ($join) {
+                $join->on('a.id',   '=', 'handovers.created_by')
+                ->where('a.role_id', '!=' , 1);
+              })
           ->leftjoin('admins as ad', function ($join) {
             $join->on('ad.id',   '=', 'handovers.received_by')
             ->where('ad.role_id', '!=' ,1);
           })
       
-        ->join('handover_statuses as hs','hs.id','=','handovers.status_id')
-        ->join('handover_responsibilities as hr','hr.id','=','handovers.from')
-        ->join('handover_responsibilities as hor','hor.id','=','handovers.to')
-        ->join('handover_shipments as hss','hss.handover_id','=','handovers.id')
-        ->join('shipments as s','s.id','=','hss.shipment_id')
+        ->leftjoin('handover_statuses as hs','hs.id','=','handovers.status_id')
+        ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
+        ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
+        ->leftjoin('handover_shipments as hss','hss.handover_id','=','handovers.id')
+        ->leftjoin('shipments as s','s.id','=','hss.shipment_id')
         ->leftjoin('city_areas as c_from', function ($join) {
             $join->on('c_from.id', '=', 'hr.city_area_id');
 //                ->where('c_from.default', 1);
@@ -347,27 +345,29 @@ class AdminShipmentHandoverController extends Controller
               );
         })
 
-      ->leftJoin('shipment_scanning_journeys as ssj_hss_f', function ($join) {
-          $join->on('ssj_hss_f.shipment_id', '=', 'hsj_f.shipment_id')
-               ->where('ssj_hss_f.screen_location_id', '=', 26)
-               ->whereRaw('ssj_hss_f.id = (
-                select max(id) 
-                from shipment_scanning_journeys 
-                where shipment_scanning_journeys.updated_at <= hsj_f.updated_at 
-                AND shipment_scanning_journeys.shipment_id = hsj_f.shipment_id
-            )');
-        })
-      ->leftJoin('shipment_scanning_journeys as ssj_hss_r', function ($join) {
-          $join->on('ssj_hss_r.shipment_id', '=', 'hsj_r.shipment_id')
-               ->where('ssj_hss_r.screen_location_id', '=', 27)
-               ->whereRaw('ssj_hss_r.id = (
-                select max(id) 
-                from shipment_scanning_journeys 
-                where shipment_scanning_journeys.updated_at <= hsj_f.updated_at 
-                AND shipment_scanning_journeys.shipment_id = hsj_r.shipment_id
-            )');
-            
-      })
+            ->leftJoin('shipment_scanning_journeys as ssj_hss_f', function ($join) use ($from, $to) {
+                $join->on('ssj_hss_f.shipment_id', '=', 'hsj_f.shipment_id')
+                    ->where('ssj_hss_f.screen_location_id', '=', 26)
+                    ->whereRaw('ssj_hss_f.id = (
+            select max(id) 
+            from shipment_scanning_journeys 
+            where updated_at <= hsj_f.updated_at 
+            AND shipment_id = hsj_f.shipment_id
+            AND created_at between ? and ?
+        )', [$from, $to]); // Use bindings to prevent SQL injection
+            })
+            ->leftJoin('shipment_scanning_journeys as ssj_hss_r', function ($join) use ($from, $to) {
+                $join->on('ssj_hss_r.shipment_id', '=', 'hsj_r.shipment_id')
+                    ->where('ssj_hss_r.screen_location_id', '=', 27)
+                    ->whereRaw('ssj_hss_r.id = (
+            select max(id) 
+            from shipment_scanning_journeys 
+            where updated_at <= hsj_f.updated_at 
+            AND shipment_id = hsj_r.shipment_id
+            AND created_at between ? and ?
+        )', [$from, $to]); // Use bindings to prevent SQL injection
+            })
+
       ->leftJoin('shipment_scanning_journey_area_logs as ssj_f', 'ssj_f.shipment_scanning_journey_id', '=', 'ssj_hss_f.id')
       ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
 
