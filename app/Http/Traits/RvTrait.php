@@ -811,7 +811,7 @@ trait RvTrait
 
                 $rv_shipment_ticket = RvShipmentTicket::where('shipment_id',$request->shipment_id)->increment('call_count');
                 if($rv_shipment_assign_agent->unresponsive_count <= 3 && !$botCall){
-                    RvShipmentTicket::where('shipment_id', $request->shipment_id)->update('in_progress',0);
+                    RvShipmentTicket::where('shipment_id', $request->shipment_id)->update(['in_progress'=>0]);
                 }
                 $reattempt_count = BoltUndeliveredReasonMapCount::where('shipment_id', $request->shipment_id)->where('count',3)->first();
                 //if reattempt count is 3 then shipment status will be auto return confirm
