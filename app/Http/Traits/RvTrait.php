@@ -1380,16 +1380,16 @@ trait RvTrait
                         $shipment = null;
 
                          // skip this shipment if already is in progress
-                        if(RvShipmentTicket::where('shipment_id', $shipmentId)->where('in_progress', 1)->exists())
-                        {
-                            $shipment = null;
-                            continue;
-                        }
+                        // if(RvShipmentTicket::where('shipment_id', $shipmentId)->where('in_progress', 1)->exists())
+                        // {
+                        //     $shipment = null;
+                        //     continue;
+                        // }
                         //else update this shipment status in rv_shipment_tickets to in_progress = 1
-                        else
-                        {
-                            RvShipmentTicket::find($ticketId)->update(['in_progress'=>1]);
-                        }
+                        // else
+                        // {
+                        //     RvShipmentTicket::find($ticketId)->update(['in_progress'=>1]);
+                        // }
 
                         continue;
                     }
