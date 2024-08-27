@@ -150,7 +150,7 @@ class BotCallingController extends Controller
             $this->update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent);
             $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
             if ($request->input != 3) { // not for the further assistance
-                $data = $this->update_shipment_status($request);
+                $data = $this->update_shipment_status($request,1);
                 if ($data['status'] == 1) { //data add successfully
                     $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->latest()->first();
                     //Dispatch Job Add with the delay for the unresponsive case second or third call

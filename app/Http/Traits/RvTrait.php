@@ -429,7 +429,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function update_shipment_status($request)
+    protected function update_shipment_status($request,$botCall = 0)
     {
         
         if (Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $request->shipment_id)->doesntExist()) {
@@ -453,7 +453,7 @@ trait RvTrait
                 } elseif ($shipment_status_id == 54) {
                     return $this->intercept($request);
                 } elseif ($shipment_status_id == null) {
-                    return $this->unresponsive($request);
+                    return $this->unresponsive($request,$botCall);
                 }
             } elseif ($shipment_status_id === null && $call_finding_id === null) {
                 return $this->refusal_on_call($request);
@@ -785,7 +785,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description: 
-    protected function unresponsive(Request $request)
+    protected function unresponsive(Request $request, $botCall = null)
     {
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
@@ -810,7 +810,9 @@ trait RvTrait
                 $rv_shipment_assign_agent->save();
 
                 $rv_shipment_ticket = RvShipmentTicket::where('shipment_id',$request->shipment_id)->increment('call_count');
-
+                if($rv_shipment_assign_agent->unresponsive_count <= 3 && !$botCall){
+                    RvShipmentTicket::where('shipment_id', $request->shipment_id)->update('in_progress',0);
+                }
                 $reattempt_count = BoltUndeliveredReasonMapCount::where('shipment_id', $request->shipment_id)->where('count',3)->first();
                 //if reattempt count is 3 then shipment status will be auto return confirm
                 if ($rv_shipment_assign_agent->unresponsive_count > 0 && $reattempt_count) {
