@@ -13972,7 +13972,7 @@ class AdminReportsController extends Controller
                         ->where(
                             'ds.id',
                             '=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (14, 30, 36, 37) and verification = 1 AND id BETWEEN '.$shipment_journey_min_id.'  AND '.$shipmentJourneyMaxId.' )')
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (14, 30, 36, 37) and shipments_journey.verification = 1 and  shipments_journey.id between '.$shipment_journey_min_id.' and '.$shipmentJourneyMaxId.' )')
                         );
                 })
                 ->leftJoin('shipments_journey as cps', function ($join)  use ($shipment_journey_min_id,$shipmentJourneyMaxId){
@@ -13980,7 +13980,7 @@ class AdminReportsController extends Controller
                         ->where(
                             'cps.id',
                             '=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1 AND id BETWEEN '.$shipment_journey_min_id.'  AND '.$shipmentJourneyMaxId.')')
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and shipments_journey.verification = 1 and  shipments_journey.id between '.$shipment_journey_min_id.' and '.$shipmentJourneyMaxId.')')
                         );
                 })
                 ->leftJoin('shipments_journey as us', function ($join) use ($shipment_journey_min_id,$shipmentJourneyMaxId) {
@@ -13988,7 +13988,7 @@ class AdminReportsController extends Controller
                         ->where(
                             'us.id',
                             '=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,15,18,56) and verification = 1 AND id BETWEEN '.$shipment_journey_min_id.'  AND '.$shipmentJourneyMaxId.')')
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,15,18,56) and shipments_journey.verification = 1 and  shipments_journey.id between '.$shipment_journey_min_id.' and '.$shipmentJourneyMaxId.')')
                         );
                 })
                 ->select(DB::raw('count(s.id) as ofd_shipments'), DB::raw('count(ds.id) as delivered_shipments'),
