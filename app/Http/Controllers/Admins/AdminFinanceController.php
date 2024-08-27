@@ -7819,6 +7819,7 @@ class AdminFinanceController extends Controller
                     DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0 )')
                 );
             })
+            //leftJoin to join as admin will always present
             ->join('admins as sale_admin','sale_admin.id','=','spt.admin_id')
             ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 
             'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 
