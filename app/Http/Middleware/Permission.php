@@ -656,6 +656,7 @@ class Permission
             'reports.sack_bag_status.index' => 936,
             'reports.issuance_sack_bag.index' => 937,
 
+            'reports.shipment_reversal_report.index' => 1001,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -1250,6 +1251,10 @@ class Permission
             'retail.international.economy_rates.index' => 992,
             'retail.international.economy_rates.excel' => 992,
 
+            'retail.retail_discount_codes.index' => 1003,
+            'retail.retail_discount_codes.list' => 1003,
+            'retail.retail_discount_codes.bulk.store' => 1003,
+
             'debriefing.supervisor.index' => 495,
             'debriefing.supervisor.list' => 495,
             'debriefing.agents_call_monitoring.index' => 496,
@@ -1434,6 +1439,7 @@ class Permission
             'settings.consignee_refused_otp_bypass.index' => 826,
             'otp_history.index' => 827,
             'settings.star_shippers.index' => 846,
+            'settings.alist_shipper.index' => 846,
             'settings.auto_delivery_note_verification.index' => 836,
             'reports.revenue_report_by_invoice.index' => 839,
             'return.return_confirm_otp.index' => 849,

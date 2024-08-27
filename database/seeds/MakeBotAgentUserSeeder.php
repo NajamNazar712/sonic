@@ -17,7 +17,7 @@ class MakeBotAgentUserSeeder extends Seeder
     {
         $employee_id = null;
 
-        $name = 'Bot Calling Agent';
+        $name = 'Digital Voice Call';
         $email = 'bot@trax.pk';
         $defaultHub = 202;
         $cnic = '44444-0310000-1';

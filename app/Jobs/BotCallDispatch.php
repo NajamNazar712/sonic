@@ -2,6 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\Webhook\WebhookLogController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipment;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
@@ -24,7 +26,7 @@ class BotCallDispatch implements ShouldQueue
      */
     public function __construct($data)
     {
-        // $this->queue = 'bot_call_shipment';
+        $this->queue = 'bot_call_shipment';
         $this->shipmentId = $data;
 
     }
@@ -42,31 +44,31 @@ class BotCallDispatch implements ShouldQueue
 
         //
         $environment = config('app.env');
-
-        if ($environment == 'production') {
-            // $base_uri = 'https://sonic.pk/api/shipment/book';
-        } else {
-            $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
+        if (GlobalSettings::where(['type'=> 'bot_open_closed', 'setting_value' => 1])->exists()) {
+            if(RvShipmentTicket::where('shipment_id', $this->shipmentId)->whereNull('deleted_at')->where('is_bot',1)->exists()){
+                $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
+                RvShipmentTicket::where('shipment_id', $this->shipmentId)->update(['in_progress' => 1]);
+                $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($this->shipmentId);
+                $post = [
+                    'vpbx_id' => '66bdfd18cb67f',
+                    'caller_id' => preg_replace("/[^a-zA-Z0-9]+/", "", $shipment->consignee_phone_number_1),
+                    'tracking_number' => $shipment->tracking_number,
+                    'cod_amount' => $shipment->amount,
+                    'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,
+                    'customer_name' => $shipment->consignee_name,
+                ];
+                $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
+                $response = $client->post('', [
+                    'json' => $post
+                ]);
+                $status_code = $response->getStatusCode();
+                $response = $response->getBody()->getContents();
+                $response = json_decode($response);
+                WebhookLogController::shipment_status_log($shipment->user_id, $status_code, json_encode($response));
+            }else{
+            return json_encode(['status'=>0,'message'=>'Shipment isn`t at the bot call prefernce']);
+            }
         }
-        RvShipmentTicket::where('shipment_id', $this->shipmentId)->update(['in_progress' => 1]);
-        $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($this->shipmentId);
-        $post = [
-            'vpbx_id' => '66bdfd18cb67f',
-            'caller_id' => preg_replace("/[^a-zA-Z0-9]+/", "", $shipment->consignee_phone_number_1),
-            'tracking_number' => $shipment->tracking_number,
-            'cod_amount' => $shipment->amount,
-            'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,
-            'customer_name' => $shipment->consignee_name,
-        ];
-        $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
-        $response = $client->post('', [
-                'json' => $post
-            ]);
-        $status_code = $response->getStatusCode();
-
-        $response = $response->getBody()->getContents();
-        $response = json_decode($response);
-        \Log::channel('cronJobLog')->info('s ' . 'status_code cap.zong.com'. json_encode($response));
-
+       
     }
 }

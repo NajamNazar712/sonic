@@ -1546,7 +1546,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('phone_update', 'Admins\UserManagementController@user_phone_update')->name('phone_update');
             Route::post('lost_hub_user_shipment', 'Admins\UserManagementController@lost_hub_user_shipment')->name('lost_hub_user_shipment');
             Route::get('get_lost_hub_user_shipment', 'Admins\UserManagementController@get_lost_hub_user_shipment')->name('get_lost_hub_user_shipment');
-
+            Route::post('set_hub_access', 'Admins\UserManagementController@set_hub_access')->name('set_hub_access');
+            Route::get('get_hub_access', 'Admins\UserManagementController@get_hub_access')->name('get_hub_access');
 
         });
 
@@ -2002,6 +2003,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('qsr')->name('qsr.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
+            Route::get('updated_shippers_list', 'Admins\AdminReportsController@updated_shippers_list')->name('updated_shippers_list');
+
         });
         Route::prefix('qsr_old')->name('qsr_old.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsrold_index')->name('index');
@@ -2485,6 +2488,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('ops')->name('ops_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ops_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@ops_report_list')->name('list');
+        });
+
+        Route::prefix('shipment_reversal')->name('shipment_reversal_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@shipment_reversal_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@shipment_reversal_list')->name('list');
         });
     });
 
@@ -3383,6 +3391,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\GlobalSettingsController@star_shippers_add')->name('add');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
         });
+        Route::prefix('alist_shippers')->name('alist_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@aListShippersIndex')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@aListShipperView')->name('list');
+        });
 
         Route::prefix('airway_bill_address_visibility')->name('airway_bill_address_visibility.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
@@ -3985,6 +3997,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/slip', 'Admins\Retail\RetailAdminAccounts@retail_slip')->name('retail_slip');
             Route::post('/bank_info', 'Admins\Retail\RetailAdminAccounts@retail_bank_info')->name('bank_info');
             Route::post('/bank_info_update', 'Admins\Retail\RetailAdminAccounts@retail_bank_info_update')->name('bank_info_update');
+        });
+
+        Route::prefix('retail_discount_codes')->name('retail_discount_codes.')->group(function () {
+            Route::get('', 'Admins\Retail\RetailDiscountCodesController@index')->name('index');
+            Route::get('list', 'Admins\Retail\RetailDiscountCodesController@list')->name('list');
+            Route::post('store', 'Admins\Retail\RetailDiscountCodesController@add_bulk_retail_discount_codes_store')->name('bulk.store');
         });
     });
     Route::prefix('human_resource')->name('human_resource.')->group(function () {
