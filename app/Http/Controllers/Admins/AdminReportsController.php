@@ -13918,9 +13918,8 @@ class AdminReportsController extends Controller
         $from = '';
         $to = '';
 
-        $from = Carbon::parse($search_date)->subMonths(8)->setTime(21, 00, 00)->toDateTimeString();
+        $from = Carbon::parse($search_date)->subMonths(6)->setTime(21, 00, 00)->toDateTimeString();
         $to = Carbon::parse($search_date)->setTime(8, 59, 59)->toDateTimeString();
-        // $to_2 = Carbon::parse($search_date)->setTime(8, 59, 59);
 
         $regions = DB::connection('reports_2')->table('regions')->select('id','name')->get();
         $ops_data = [];
@@ -13948,32 +13947,17 @@ class AdminReportsController extends Controller
                 
             })
             ->whereBetween('sj.created_at', [$from, $to])->get();
-
-        // $shipments_2 = DB::connection('reports_2')->table('shipments')
-        //     ->leftJoin('shipments_journey as sj', function ($join) {
-        
-        //         $join->on('sj.shipment_id', '=', 'shipments.id')
-        //         ->where(
-        //             'sj.id',
-        //             '=',
-        //             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (14,30,36,12,20))')
-        //         );
-            
-                
-        //     })
-        //     ->whereBetween('sj.created_at', [$from, $to_2])->get();
-
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
         $re_attempt_and_intercept_status = array(52,55);
 
-        $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subMonths(8)->setTime(21, 00, 00);  //last 6 month
-        $re_attempt_and_intercept_endDate = Carbon::parse($search_date)->subDay(1)->setTime(19, 59, 59);
+        $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subMonths(6)->setTime(21, 00, 00);  //last 6 month
+        $re_attempt_and_intercept_endDate = Carbon::parse($search_date)->subDay(1)->setTime(20, 59, 59);
 
-        $other_pending_status_startDate = Carbon::parse($search_date)->subMonths(8)->setTime(9, 00, 00); // last 6 month
+        $other_pending_status_startDate = Carbon::parse($search_date)->subMonths(6)->setTime(9, 00, 00); // last 6 month
         $other_pending_status_endDate = Carbon::parse($search_date)->setTime(8, 59, 59);
 
-        $other_statuses_startDate = Carbon::parse($search_date)->startOfDay()->toDateTimeString(); // last 6 month
-        $other_statuses_endDate = Carbon::parse($search_date)->endOfDay()->toDateTimeString();
+        $other_statuses_startDate = Carbon::parse($search_date)->subMonths(6)->startOfDay()->toDateTimeString(); // last 6 month
+        $other_statuses_endDate = Carbon::parse($search_date)->subDay(1)->endOfDay()->toDateTimeString();
 
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
@@ -14036,7 +14020,6 @@ class AdminReportsController extends Controller
                 $data['undelivered_percentage'] = 0;
                 $data['rcp'] = 0;
                 $data['rcp_percentage'] = 0;                
-                $data['minus'] = 0;                
 
                 $zone_cities = DB::connection('reports_2')->table('cities')->where('zone_id',$zone->id)->pluck('id')->toArray();
 
@@ -14045,7 +14028,7 @@ class AdminReportsController extends Controller
                     if(in_array($shipment_data->consignee_city_id,$zone_cities))
                     {
                         $created_date = Carbon::parse($shipment_data->created_at);
-                        
+
                         if(in_array($shipment_data->consignee_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate,$re_attempt_and_intercept_endDate))
                         {
                             $data['ready_for_delivery'] += 1;
@@ -14054,23 +14037,9 @@ class AdminReportsController extends Controller
                         {
                             $data['ready_for_delivery'] += 1;
                         }
+
                     }
                 }
-
-
-                // foreach ($shipments_2 as $shipment_key => $shipment_data) {
-                    
-                //     if(in_array($shipment_data->consignee_city_id,$zone_cities))
-                //     {
-                //         $created_date = Carbon::parse($shipment_data->updated_at);
-                        
-                //         if(in_array($shipment_data->consignee_status_id, [14,30,36,12,20]) && $created_date->diffInDays($to_2) >= 1)
-                //         {
-                //             $data['ready_for_delivery'] -= 1;
-                //         }
-                       
-                //     }
-                // }
 
                 foreach ($route_distribution_summary as $rds_key => $rds_value) {
                     if($rds_value->zone_id == $zone->id)
@@ -14118,6 +14087,7 @@ class AdminReportsController extends Controller
         
         return $ops_data;
     }
+
 
 
     public function ibft_report_index(Request $request)
