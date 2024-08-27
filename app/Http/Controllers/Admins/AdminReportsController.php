@@ -13926,7 +13926,7 @@ class AdminReportsController extends Controller
             $regions = DB::connection('reports_2')->table('regions')->select('id','name')->get();
             $ops_data = [];
 
-            $shipment_journey_min_id = DB::table('shipments_journey')->whereDate('created_at', $from)->min('id');
+            $shipment_journey_min_id = DB::table('shipments_journey')->whereDate('created_at', $from)->min('id');;
             $shipmentJourneyMaxId = DB::table('shipments_journey')->whereDate('created_at', $to)->max('id');
 
             $shipments = DB::connection('reports_2')->table('shipments')
@@ -13967,28 +13967,28 @@ class AdminReportsController extends Controller
                 ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
                 ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
                 ->leftJoin('shipments as s', 's.id', '=', 'dns.shipment_id')
-                ->leftJoin('shipments_journey as ds', function ($join) {
+                ->leftJoin('shipments_journey as ds', function ($join) use ($shipment_journey_min_id,$shipmentJourneyMaxId) {
                     $join->on('ds.shipment_id', '=', 's.id')
                         ->where(
                             'ds.id',
                             '=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (14, 30, 36, 37) and verification = 1)')
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (14, 30, 36, 37) and verification = 1 AND id BETWEEN '.$shipment_journey_min_id.'  AND '.$shipmentJourneyMaxId.' )')
                         );
                 })
-                ->leftJoin('shipments_journey as cps', function ($join) {
+                ->leftJoin('shipments_journey as cps', function ($join)  use ($shipment_journey_min_id,$shipmentJourneyMaxId){
                     $join->on('cps.shipment_id', '=', 's.id')
                         ->where(
                             'cps.id',
                             '=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1)')
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1 AND id BETWEEN '.$shipment_journey_min_id.'  AND '.$shipmentJourneyMaxId.')')
                         );
                 })
-                ->leftJoin('shipments_journey as us', function ($join) {
+                ->leftJoin('shipments_journey as us', function ($join) use ($shipment_journey_min_id,$shipmentJourneyMaxId) {
                     $join->on('us.shipment_id', '=', 's.id')
                         ->where(
                             'us.id',
                             '=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,15,18,56) and verification = 1)')
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,15,18,56) and verification = 1 AND id BETWEEN '.$shipment_journey_min_id.'  AND '.$shipmentJourneyMaxId.')')
                         );
                 })
                 ->select(DB::raw('count(s.id) as ofd_shipments'), DB::raw('count(ds.id) as delivered_shipments'),
