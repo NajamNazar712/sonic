@@ -1377,7 +1377,8 @@ trait RvTrait
                 //  if shipment is found and unassigned(2) or completed(4) then update the current records
 
                 if (RvShipmentAssignAgent::where('shipment_id', $shipmentId)->whereIn('rv_state_id', [2, 4])->exists()) {
-                    if (RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('updated_at', '>=', Carbon::now()->subHours(2))->exists()) //if updated_at is already updated 2 hours ago due to any reason () by any agent then skip this shipment for all agents
+                    $time = Carbon::parse(now())->subHour(2)->format('Y-m-d H:i:s');
+                    if (RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('updated_at', '>=', $time)->exists()) //if updated_at is already updated 2 hours ago due to any reason () by any agent then skip this shipment for all agents
                     {
                         $shipment = null;
 
