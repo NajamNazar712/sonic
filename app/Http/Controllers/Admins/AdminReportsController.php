@@ -13950,7 +13950,7 @@ class AdminReportsController extends Controller
                     }
 
                 })
-                ->whereBetween('sj.id', [$shipmentJourneyMinId, $shipmentJourneyMaxId])->get();
+                ->whereBetween('sj.id', [$shipment_journey_min_id, $shipmentJourneyMaxId])->get();
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
             $re_attempt_and_intercept_status = array(52,55);
 
