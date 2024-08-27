@@ -94,7 +94,7 @@ class BotCallingController extends Controller
             'call_status' => $request->input('call_status'),
             'input' => $request->input('input')
         ];
-                    Log::channel('cronJobLog')->info('s ' . ' bot-call requested' . $data);
+        Log::channel('cronJobLog')->info('s ' . 'bot-call requested' . json_encode($data));
 
         $validate = Validator::make($data, $validations);
         if ($validate->fails()) {
