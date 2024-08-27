@@ -81,8 +81,8 @@ class AdminRetailReportController extends Controller
             //             DB::connection('reports')->raw('(select max(retail_pickup_note_id) from retail_pickup_note_shipments where retail_pickup_note_shipments.shipment_id = shipments.id)'));
             // })
             ->leftjoin('retail_cash_deposit_shipments as rcds',function($join){
-                $join->on('rcds.shipment_id','=','shipments.id')->where('rcds.cash_deposit_id','=',
-                        DB::connection('reports')->raw('(select max(cash_deposit_id) from retail_cash_deposit_shipments where retail_cash_deposit_shipments.shipment_id = shipments.id)'));
+                $join->on('rcds.shipment_id','=','shipments.id')->where('rcds.id','=',
+                        DB::connection('reports')->raw('(select max(id) from retail_cash_deposit_shipments where retail_cash_deposit_shipments.shipment_id = shipments.id)'));
             })
             // ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->join('shipments_journey as sj', function ($join) {
