@@ -1377,21 +1377,21 @@ trait RvTrait
                 //  if shipment is found and unassigned(2) or completed(4) then update the current records
 
                 if (RvShipmentAssignAgent::where('shipment_id', $shipmentId)->whereIn('rv_state_id', [2, 4])->exists()) {
-                    if (RvShipmentAssignAgent::where('shipment_id', $shipmentId)->whereDate('updated_at', date('Y-m-d'))->exists()) //if updated_at is already updated today due to any reason () by any agent then skip this shipment for all agents
+                    if (RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('updated_at', '>=', Carbon::now()->subHours(2))->exists()) //if updated_at is already updated 2 hours ago due to any reason () by any agent then skip this shipment for all agents
                     {
                         $shipment = null;
 
                          // skip this shipment if already is in progress
-                        if(RvShipmentTicket::where('shipment_id', $shipmentId)->where('in_progress', 1)->exists())
-                        {
-                            $shipment = null;
-                            continue;
-                        }
+                        // if(RvShipmentTicket::where('shipment_id', $shipmentId)->where('in_progress', 1)->exists())
+                        // {
+                        //     $shipment = null;
+                        //     continue;
+                        // }
                         //else update this shipment status in rv_shipment_tickets to in_progress = 1
-                        else
-                        {
-                            RvShipmentTicket::find($ticketId)->update(['in_progress'=>1]);
-                        }
+                        // else
+                        // {
+                        //     RvShipmentTicket::find($ticketId)->update(['in_progress'=>1]);
+                        // }
 
                         continue;
                     }
