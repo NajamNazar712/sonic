@@ -13926,7 +13926,7 @@ class AdminReportsController extends Controller
             $regions = DB::connection('reports_2')->table('regions')->select('id','name')->get();
             $ops_data = [];
 
-            $shipmentJourneyMinId = DB::table('shipments_journey')->whereDate('created_at', $from)->min('id');
+            $shipment_journey_min_id = DB::table('shipments_journey')->whereDate('created_at', $from)->min('id');
             $shipmentJourneyMaxId = DB::table('shipments_journey')->whereDate('created_at', $to)->max('id');
 
             $shipments = DB::connection('reports_2')->table('shipments')
