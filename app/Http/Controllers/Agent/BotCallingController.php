@@ -94,7 +94,7 @@ class BotCallingController extends Controller
             'call_status' => $request->input('call_status'),
             'input' => $request->input('input')
         ];
-        Log::channel('cronJobLog')->info('s ' . 'bot-call requested' . json_encode($data));
+        // Log::channel('cronJobLog')->info('s ' . 'bot-call requested' . json_encode($data));
 
         $validate = Validator::make($data, $validations);
         if ($validate->fails()) {
@@ -107,8 +107,8 @@ class BotCallingController extends Controller
             $array = [
                 0 => [
                     'status_id' => 6,
-                    'call_finding_id' => ($request->call_status == 'Answered' ? 34 : 33),
-                    'call_status_type' => ($request->call_status == 'Answered' ? 'Connected' : 'Not Connected'),
+                    'call_finding_id' => ($request->call_status == 'ANSWER' ? 34 : 33),
+                    'call_status_type' => ($request->call_status == 'ANSWER' ? 'Connected' : 'Not Connected'),
                 ], // unresponsive
                 1 => [
                     'status_id' => 2,
