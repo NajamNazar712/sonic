@@ -450,7 +450,7 @@
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
-                    { data:'pncc_id' ,name: 'pns.retail_pickup_note_id', class: 'align-middle pncc_id'},
+                    { data:'pncc_id' ,name: 'rcds.cash_depsoit_id', class: 'align-middle pncc_id'},
                     { data:'service_type' ,name: 'rsm.name', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
