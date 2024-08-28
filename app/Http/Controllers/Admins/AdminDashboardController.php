@@ -15,7 +15,6 @@ use App\ZeroCodDiscountCharges;
 use App\FafCharges;
 use Exception;
 use Carbon\Carbon;
-use App\FafCharges;
 use GuzzleHttp\Client;
 use App\RouteLocations;
 use App\Http\Models\City;
