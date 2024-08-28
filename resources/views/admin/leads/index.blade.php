@@ -1054,6 +1054,7 @@
                             head.push('Service');
                             head.push('Brand');
                             head.push('Company');
+                            head.push('Expected Shipments');
                             head.push('Lead Reference');
                             head.push('Requested Date/Time');
                             head.push('Aging');
@@ -1083,6 +1084,10 @@
                                 row.push(values.service);
                                 row.push(values.brand_name);
                                 row.push(values.company);
+
+                                //hotfix for expected_shipments
+                                row.push(values.expected_shipments);
+                                
                                 row.push(values.lead_reference);
                                 row.push(values.requested_date);
                                 row.push(values.aging);

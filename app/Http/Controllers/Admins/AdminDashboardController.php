@@ -1317,6 +1317,7 @@ class AdminDashboardController extends Controller
     public function shipperNamesForDropdown(Request $request, $type)
     {
         $keyword = $request->search;
+        $subSegment = $request->input('sub_segment_select', null);
         $shippers = User::where('name', 'like', '%' . $keyword . '%');
         
         if($type == 'active')
@@ -1326,6 +1327,9 @@ class AdminDashboardController extends Controller
         elseif($type == 'pending')
         {
             $shippers = $shippers->whereIn('status', [0, 1, 2, 5]);
+        }
+        if($subSegment){
+            $shippers = $shippers->where('segment_id', $subSegment);
         }
 
         $shippers = $shippers->select('id','name as text')->take(10)->get()->toArray();
@@ -11040,6 +11044,12 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $bank_history->save();
 
         }
+
+        //Update the latest bank info record default_bank value to 1 of this user 
+        $latestBankInfo = UserBankInfo::where('user_id', $user_id)->latest()->first();
+        $latestBankInfo->default_bank = 1;
+        $latestBankInfo->save();
+
         AdminLogs::create([
             'admin_id' => Auth::id(),
             'user_id' => $user_id

@@ -2781,18 +2781,32 @@ class ShipmentChargesController extends Controller
     }
 
     static public function faf_charges($id) {
-        $shipment = Shipment::find($id);
+        try {
+            $shipment = Shipment::find($id);
 
-        $result = self::calculate_faf_charges($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->weight_charges);
+            if ($shipment) {
+                $result = self::calculate_faf_charges(
+                    $shipment->user->account_type_id,
+                    $shipment->user_id,
+                    $shipment->shipping_mode_id,
+                    $shipment->weight_charges
+                );
 
-        if ($result) {
-            $shipment_Additional_charges=  ShipmentAdditionalCharges::where('shipment_id',$shipment->id);
-            $shipment_Additional_charges = ($shipment_Additional_charges->exists()) ? $shipment_Additional_charges->first() : new ShipmentAdditionalCharges();
-            $shipment_Additional_charges->shipment_id = $shipment->id;
-            $shipment_Additional_charges->faf_charges = $result['faf_charges'];
-            $shipment_Additional_charges->save();
+                if ($result) {
+                    $shipment_Additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment->id)->first();
+                    if (!$shipment_Additional_charges) {
+                        $shipment_Additional_charges = new ShipmentAdditionalCharges();
+                    }
+                    $shipment_Additional_charges->shipment_id = $shipment->id;
+                    $shipment_Additional_charges->faf_charges = $result['faf_charges'];
+                    $shipment_Additional_charges->save();
+                }
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle the error (e.g., log it, or simply suppress it to allow code to continue)
         }
     }
+
     static public function calculate_faf_charges($account_type_id, $user_id, $shipping_mode_id, $weight_charges) {
         $faf_charges_status = 0;
         $faf_charges = FafCharges::where('user_id',$user_id);
