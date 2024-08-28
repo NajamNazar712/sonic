@@ -26,37 +26,18 @@ class outForDeliveryJourney extends Seeder
     {
         //
         $shipmentId = [
-            152991398469,
-            20217441693579,
-            20217441698228,
-            22317441632015,
-            22317441685266,
-            17417441645505,
-            14417441685455,
-            20217441655041,
-            20217441625494,
-            152991398548,
-            14417441572791,
-            20217441575601,
-            22317441583019,
-            20217441590779,
-            22317441597613,
-            20217441554806,
-            20217441544054,
-            28317441504536,
-            22317441501922,
-            14417441414725
+            22617440980487,
+            22320241010259,
+            22317441500424,
             ];
         
         if ($shipmentId) {
-            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
+            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id', 5)->get();
             echo count($shipmentId);
             $serial = 53; 
 
             foreach ($shipmentId as $shipment) {
-                $shipment->shipper_status_id = 8;
-                $shipment->consignee_status_id = 8;
-                $shipment->save();
+
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
                 if(!$deliveryNoteId){
                     $deliveryNoteId =  new DeliveryNoteShipment();
@@ -74,7 +55,7 @@ class outForDeliveryJourney extends Seeder
                 if($delivertNote->request_note_id){
                     $rider_for_delivery = RiderDeliveryNoteRequest::find($delivertNote->request_note_id);
                 }
-                ShipmentsJourneyController::add($shipment->id, 8, 8, null, null,null, 346, $deliveryNoteId->delivery_note_id, $rider_for_delivery->rider_id);
+                ShipmentsJourneyController::add($shipment->id, 5, 5, null, null,null, 346, $deliveryNoteId->delivery_note_id, $rider_for_delivery->rider_id);
             }
         }
     }
