@@ -12629,6 +12629,7 @@ class AdminReportsController extends Controller
             $join->on('sj_for_reason.id', '=', 'rv_shipment_assign_agent_details.shipments_journey_id');
         })
         ->leftjoin('shipment_status_reason as rv_reason', 'sj_for_reason.status_reason_id', 'rv_reason.id')
+        ->leftjoin('rv_agent_call_histories as rach', 'rach.id', 'rv_shipment_assign_agent_details.rv_agent_call_history_id')
 
         ->select('shipments.id as shipment_id','sjj.created_at as arrival_date', 'shipments.tracking_number as tracking_number',
         'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub',
@@ -12636,7 +12637,7 @@ class AdminReportsController extends Controller
         'rv_shipment_assign_agent_details.remarks as remarks', 'rv_shipment_assign_agent_details.created_at as action_date',
         'rv_shipment_assign_agent_details.updated_type_id as updated_type_id','rv_shipment_assign_agent_details.updated_by_id as updated_by_id',
         'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date',
-        'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 'add.id as agent_id', 'rv_reason.name as rv_reason')
+        'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 'add.id as agent_id', 'rv_reason.name as rv_reason','rach.call_status as call_findings')
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
         ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
         ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')

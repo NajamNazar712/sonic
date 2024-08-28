@@ -96,6 +96,7 @@
                                     <th class="border-primary border-darken-1">Service Type</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
                                     <th class="border-primary border-darken-1">Action</th>
+                                    <th class="border-primary border-darken-1">Call Finding</th>
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Remarks</th>
                                     <th class="border-primary border-darken-1">Action Date</th>
@@ -454,6 +455,7 @@
                             head.push('Service Type');
                             head.push('Arrival Date');
                             head.push('Action');
+                            head.push('Call Finding');
                             head.push('Reason');
                             head.push('Remarks');
                             head.push('Action Date');
@@ -556,6 +558,7 @@
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type',searchable: false},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date',searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action',searchable: false},
+                    {data: 'call_findings', name: 'call_findings', class: 'align-middle reason',searchable: false},
                     {data: 'reason', name: 'reason', class: 'align-middle reason',searchable: false},
                     {data: 'remarks', name: 'remarks', class: 'align-middle remarks',searchable: false},
                     {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false},
@@ -608,7 +611,7 @@
                             var row = $('<tr>');
                             row.append($('<td>').text(dateTimeParts[0])); // Display date
                             row.append($('<td>').text(dateTimeParts[1])); // Display time
-                            row.append($('<td>').text('Unresponsive')); //Call Findings
+                            row.append($('<td>').text(rowData.data.call_status)); //Call Findings
                             row.append($('<td>').text(rowData.data.rv_call_finding.name)); //Call Finding reasons
                             row.append($('<td>').text(rowData.data.remarks != null ? rowData.data.remarks : '-')); //Reamrks
                             row.append($('<td>').text('Consignee')); //Call To
