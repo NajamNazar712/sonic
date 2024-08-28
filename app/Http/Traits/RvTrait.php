@@ -1378,7 +1378,9 @@ trait RvTrait
 
                 if (RvShipmentAssignAgent::where('shipment_id', $shipmentId)->whereIn('rv_state_id', [2, 4])->exists()) {
                     $time = Carbon::parse(now())->subHour(2)->format('Y-m-d H:i:s');
-                    if (RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('updated_at', '>=', $time)->exists()) //if updated_at is already updated 2 hours ago due to any reason () by any agent then skip this shipment for all agents
+                    dd(Carbon::parse(now())->addHour(2));
+                    dd(RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('updated_at', '>=', Carbon::parse(now())->subHour(2))->exists());
+                    if (RvShipmentAssignAgent::where('shipment_id', $shipmentId)->where('updated_at', '>=', Carbon::parse(now())->subHour(2))->exists()) //if updated_at is already updated 2 hours ago due to any reason () by any agent then skip this shipment for all agents
                     {
                         $shipment = null;
 
