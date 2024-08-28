@@ -68,13 +68,14 @@ class ShipmentScanningJourneyController extends Controller
         ShipmentReportingAreaStatusJob::dispatch($latestShipmentScanningId);
     }
 
-    static public function seal_number_add($bag_id, $screen_location_id, $admin_id)
+    static public function seal_number_add($bag_id, $screen_location_id, $admin_id, $action = Null)
     {
-        if(session('role_id') != 1){
+        // if(session('role_id') != 1){
             $add_scanning_history = new BagScanningJourney();
             $add_scanning_history->bag_id = $bag_id;
             $add_scanning_history->screen_location_id = $screen_location_id;
             $add_scanning_history->admin_id = $admin_id;
+            $add_scanning_history->entry_method = $action; 
 
             $whip = new Whip();
             $client_address = $whip->getValidIpAddress();
@@ -89,7 +90,7 @@ class ShipmentScanningJourneyController extends Controller
             }
 
             $add_scanning_history->save();
-        }
+        // }
     }
 
     
