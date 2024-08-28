@@ -1181,7 +1181,7 @@
                 dropdownParent: $('#add_request_form')
             }).on('change', function() {
                 var id = parseInt($(this).val());
-                
+                $('#AddNewRequest').attr('disabled',false);
                 $.ajax({
                     url: '{{ route('cod.tracking.shipper_visibility') }}',
                     type: 'GET',
@@ -2185,6 +2185,7 @@
                 $('#alternate_phone').val('');
                 // $('#cod_amount_input').addClass('d-none');
                 // $('#cod_amount').val('');
+                $('#AddNewRequest').attr('disabled',false);
             });
 
 
