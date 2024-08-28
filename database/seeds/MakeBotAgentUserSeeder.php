@@ -27,7 +27,7 @@ class MakeBotAgentUserSeeder extends Seeder
         $departmentId = 3;
         $shiftId = 3;
         $pin = bcrypt(315513);
-        $apiToken = uniqid(base64_encode(str_random(60)));
+        $apiToken = 'dXhTblBlMFZDYTJGbkR4MENTaWg5dWZFV250Z29leDZoaEU4MDJkT0xGZEx6d3IydGgwWHdRVjBIWDB666bb6c93c2dfe'; //uniqid(base64_encode(str_random(60)));
 
         $admin = new Admin();
 
