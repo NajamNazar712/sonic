@@ -49,7 +49,7 @@ class RiderFuelAllocationDeliveryNoteCalculation extends Command
             $delivery_notes = $delivery_notes->get();
             foreach ($delivery_notes as $delivery_note){
                 if($delivery_note->received_cod_amount == null){
-                    $t = 0;
+                    $received_cod_amount = 0;
                 }
                 else{
                     $received_cod_amount = $delivery_note->received_cod_amount;
