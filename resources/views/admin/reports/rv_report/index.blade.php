@@ -485,6 +485,7 @@
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
                                 row.push(values.action);
+                                row.push(values.call_findings);
                                 row.push(values.reason);
                                 row.push(values.remarks);
                                 row.push(values.action_date);
