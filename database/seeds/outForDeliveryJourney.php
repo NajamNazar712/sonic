@@ -34,7 +34,7 @@ class outForDeliveryJourney extends Seeder
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id', 5)->get();
             echo count($shipmentId);
-            $serial = 53;
+            $serial = 53; 
 
             foreach ($shipmentId as $shipment) {
 
