@@ -118,7 +118,7 @@ class WebsiteLead extends Command
                     $new_lead->phone_number = $lead->data->phone_number;
                     $new_lead->email_address = $lead->data->email;
                     $new_lead->requested_date = Carbon::now();
-                    $new_lead->sale_person_id = $lead_tagging->sale_person_id ? $lead_tagging->sale_person_id : null;
+                    $new_lead->sale_person_id = !empty($lead_tagging->sale_person_id) ? $lead_tagging->sale_person_id : null;
                     $new_lead->service_id = $service_id;
                     $new_lead->ntn_number = $lead->data->ntn_number;
                     $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
