@@ -5606,37 +5606,51 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
                     );
             })
-            ->leftJoin('pending_payment_shipments as pps', function ($join) use ($connection) {
-                $join->on('pps.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'pps.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id and pending_payment_shipments.type != 2)')
-                    );
+            ->leftJoin(DB::raw("
+        (SELECT shipment_id, 
+                SUM(amount) as p_collection_amount, 
+                SUM(gst) as p_gst, 
+                SUM(charges) as p_total_charges, 
+                SUM(payable) as p_net_payable,
+                SUM(sms_charges) as pps_sms_charges
+         FROM pending_payment_shipments
+         WHERE type != 2
+         GROUP BY shipment_id
+        ) as pps"), function($join) {
+                $join->on('pps.shipment_id', '=', 'shipments.id');
             })
-            ->leftJoin('done_payment_shipments as dps', function ($join) use ($connection) {
-                $join->on('dps.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'dps.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id and done_payment_shipments.type != 2)')
-                    );
+            ->leftJoin(DB::raw("
+        (SELECT shipment_id, 
+                SUM(amount) as d_collection_amount, 
+                SUM(gst) as d_gst, 
+                SUM(charges) as d_total_charges, 
+                SUM(payable) as d_net_payable,
+                SUM(sms_charges) as dps_sms_charges
+         FROM done_payment_shipments
+         WHERE type != 2
+         GROUP BY shipment_id
+        ) as dps"), function($join) {
+                $join->on('dps.shipment_id', '=', 'shipments.id');
             })
-            ->leftJoin('pending_invoice_shipments as pis', function ($join) use ($connection) {
-                $join->on('pis.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'pis.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from pending_invoice_shipments where pending_invoice_shipments.shipment_id = shipments.id and pending_invoice_shipments.type != 2)')
-                    );
+            ->leftJoin(DB::raw("
+        (SELECT shipment_id, 
+                SUM(gst) as pis_gst,
+                SUM(sms_charges) as pis_sms_charges
+         FROM pending_invoice_shipments
+         WHERE type != 2
+         GROUP BY shipment_id
+        ) as pis"), function($join) {
+                $join->on('pis.shipment_id', '=', 'shipments.id');
             })
-            ->leftJoin('invoice_shipments as is', function ($join) use ($connection) {
-                $join->on('is.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'is.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id and invoice_shipments.type != 2)')
-                    );
+            ->leftJoin(DB::raw("
+        (SELECT shipment_id, 
+                SUM(gst) as is_gst,
+                SUM(sms_charges) as is_sms_charges
+         FROM invoice_shipments
+         WHERE type != 2
+         GROUP BY shipment_id
+        ) as is"), function($join) {
+                $join->on('is.shipment_id', '=', 'shipments.id');
             })
             ->leftjoin('invoices', 'is.invoice_id', '=', 'invoices.id');
         //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
