@@ -1898,10 +1898,11 @@
                         @if (session('role_id') == 1 || in_array(937, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.issuance_sack_bag.index') }}">Issuance of Canvas Bag</a></li>
                         @endif
-{{-- 
-                        @if (session('role_id') == 1 || in_array(899, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.reports.reused_sack_bag.index') }}">Reused Sack Bag's</a></li>
-                        @endif --}}
+                        {{-- 
+                            @if (session('role_id') == 1 || in_array(899, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.reused_sack_bag.index') }}">Reused Sack Bag's</a></li>
+                            @endif 
+                        --}}
 
                          @if (session('role_id') == 1 || in_array(933, session('permissions')))
                            <li><a class="menu-item" href="{{ route('admin.reports.cargo_manifest.index') }}">Cargo Manifest Report</a></li>
@@ -1909,6 +1910,14 @@
 
                         @if (session('role_id') == 1 || in_array(945, session('permissions')))
                            <li><a class="menu-item" href="{{ route('admin.reports.sms.index') }}">SMS Count Report</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(1001, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.shipment_reversal_report.index') }}">
+                                    Shipment Reversal Report
+                                </a>
+                            </li>
                         @endif
                     </ul>
                 </li>
@@ -2925,6 +2934,11 @@
 
                                             </ul>
                                         </li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(1003, session('permissions')))
+                                        <li class=" nav-item"><a
+                                                href="{{ route('admin.retail.retail_discount_codes.index') }}"><span
+                                                    class="menu-title">Retail Discount Codes</span></a> </li>
                                     @endif
                                 </ul>
                             </li>
