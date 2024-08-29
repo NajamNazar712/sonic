@@ -25,6 +25,7 @@
 										<th class="border-primary border-darken-1">Changed By (Trax ID)</th>
 										<th class="border-primary border-darken-1">Changed In Record</th>
 										<th class="border-primary border-darken-1">Changed In Record (Trax ID)</th>
+										<th class="border-primary border-darken-1">Role's Department Name</th>
 										<th class="border-primary border-darken-1">Data</th>
 										<th class="border-primary border-darken-1">Created At</th>
 									</tr>
@@ -73,6 +74,7 @@
 					{data: 'changed_by_trax_id', name: 'changed_by.trax_id', class: 'align-middle changed_by_trax_id'},
 					{data: 'changed_in_name', name: 'changed_in.name', class: 'align-middle changed_in_name'},
 					{data: 'trax_id', name: 'changed_in.trax_id', class: 'align-middle trax_id'},
+					{data: 'dept_name', name: 'd.name', class: 'align-middle dept_name'},
 					{data: 'data', name: 'user_role_management_logs.data', class: 'align-middle data'},
 					{data: 'created_at', name: 'user_role_management_logs.created_at', class: 'align-middle created_at'},
 				],
@@ -94,7 +96,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.screen_name') || $(header).is('.changed_by_name') || $(header).is('.changed_in_name') || $(header).is('.changed_by_trax_id ') || $(header).is('.trax_id')  ) {
+						if ($(header).is('.screen_name') || $(header).is('.changed_by_name') || $(header).is('.changed_in_name') || $(header).is('.changed_by_trax_id ') || $(header).is('.trax_id')  ||  $(header).is('.dept_name') ) {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
 							}).wrap(td).after(icon);

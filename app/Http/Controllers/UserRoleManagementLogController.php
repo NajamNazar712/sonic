@@ -34,7 +34,8 @@ class UserRoleManagementLogController extends Controller
         $data = UserRoleManagementLog::leftJoin('admins as changed_by', 'user_role_management_logs.changed_by_id', '=', 'changed_by.id')
         ->leftJoin('admins as changed_in', 'user_role_management_logs.changed_in_record_id', '=','changed_in.id')
         ->leftJoin('admin_roles as changed_in_role', 'user_role_management_logs.changed_in_record_id', '=','changed_in_role.id')
-        ->select('user_role_management_logs.*','changed_by.name as changed_by_name','changed_by.trax_id as changed_by_trax_id','changed_in.name as changed_in_name','changed_in_role.name as changed_in_role_name','changed_in.trax_id as trax_id')->orderBy('user_role_management_logs.created_at', 'desc');
+        ->leftJoin('admin_departments as d', 'd.id' , '=', 'changed_in_role.department_id')
+        ->select('user_role_management_logs.*','changed_by.name as changed_by_name','changed_by.trax_id as changed_by_trax_id','changed_in.name as changed_in_name','changed_in_role.name as changed_in_role_name','changed_in.trax_id as trax_id', 'd.name as dept_name')->orderBy('user_role_management_logs.created_at', 'desc');
 
         $datatable = Datatables::of($data)
         ->editColumn('changed_in_name', function ($data) {
