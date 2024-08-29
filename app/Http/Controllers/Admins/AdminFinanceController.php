@@ -18667,7 +18667,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             }
 
             $account_type_id = $shipment->user->account_type_id;
-
+            $current_sms_charges = $shipment->user->sms_charges;
+            $sms_charges_status = $shipment->user->sms_charges_status;
+            $sms_charges = 0;
             $valid = TRUE;
 
             if ($account_type_id == 1) {
@@ -18681,6 +18683,27 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             }
 
             if ($valid) {
+                if($sms_charges_status == 1) {
+                    $shipment_sms_count = 0;
+                    $shipment_sms = ShipmentSmsLogs::select('notification_id', DB::raw('count(*) as count'))->where('shipment_id' , $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
+
+
+                    foreach($shipment_sms as $notification) {
+                        $notification_setting = NotificationSetting::where('notification_id', $notification->notification_id)->where('charged_sms_toggle',1);
+                        if ($notification_setting->exists()) {
+                            $notification_setting = $notification_setting->first();
+                            $charging_frequency = $notification_setting->charging_frequency;
+                            if($notification->count <= $charging_frequency ) {
+                                $shipment_sms_count += $notification->count;
+                            } else {
+                                $shipment_sms_count += $charging_frequency;
+                            }
+                        }
+                    }
+                    $sms_charges = $current_sms_charges * $shipment_sms_count;
+                    $payable = $payable - $sms_charges;
+                    ShipmentSmsLogs::where('shipment_id', $shipment->id)->update(['paid'=>1]);
+                }
                 if($type == 1){
                     self::adjust_return_discount_charges($shipment,17,$transaction_id);
                 }
@@ -18746,9 +18769,10 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $pending_payment_shipment->wht = 0;
                         $pending_payment_shipment->payable = $payable;
                         $pending_payment_shipment->transaction_id = $transaction_id;
+                        $pending_payment_shipment->sms_charges = $sms_charges;
                         $pending_payment_shipment->save();
 
-                        self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht);
+                        self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL, $sms_charges);
                     } else {
                         if (!$shipment->packaging_material_request) {
 
@@ -18761,19 +18785,21 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 $pending_payment_shipment->gst = $gst;
                                 $pending_payment_shipment->wht = $wht;
                                 $pending_payment_shipment->payable = $payable;
+                                $pending_payment_shipment->sms_charges = $sms_charges;
                             } else {
                                 $pending_payment_shipment->charges = 0;
                                 $pending_payment_shipment->gst = 0;
                                 $pending_payment_shipment->wht = 0;
                                 $pending_payment_shipment->payable = $amount;
+                                $pending_payment_shipment->sms_charges = 0;
                             }
                             $pending_payment_shipment->transaction_id = $transaction_id;
                             $pending_payment_shipment->save();
 
                             if ($crs) {
-                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht);
+                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL ,$sms_charges);
                             } else {
-                                self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount, 0);
+                                self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount, 0, NULL, 0);
                             }
 
                             $pending_invoice_shipment = new PendingInvoiceShipment();
@@ -18782,8 +18808,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             $pending_invoice_shipment->type = $type;
                             $pending_invoice_shipment->charges = $charges;
                             $pending_invoice_shipment->gst = $gst;
-                            $pending_invoice_shipment->invoice_amount = $charges + $gst;
                             $pending_invoice_shipment->transaction_id = $transaction_id;
+                            $pending_invoice_shipment->sms_charges = $sms_charges;
+                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                             $pending_invoice_shipment->save();
                         } else {
                             if ($crs) {
@@ -18795,7 +18822,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 $pending_payment_shipment->transaction_id = $transaction_id;
                                 $pending_payment_shipment->save();
 
-                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht);
+                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL, $sms_charges);
                             }
 
                             $pending_invoice_shipment = new PendingInvoiceShipment();
@@ -18804,7 +18831,8 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             $pending_invoice_shipment->type = $type;
                             $pending_invoice_shipment->charges = $charges;
                             $pending_invoice_shipment->gst = $gst;
-                            $pending_invoice_shipment->invoice_amount = $charges + $gst;
+                            $pending_invoice_shipment->sms_charges = $sms_charges;
+                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                             $pending_invoice_shipment->transaction_id = $transaction_id;
                             $pending_invoice_shipment->save();
                         }
@@ -18821,7 +18849,8 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 $pending_invoice_shipment->type = $type;
                                 $pending_invoice_shipment->charges = $charges;
                                 $pending_invoice_shipment->gst = $gst;
-                                $pending_invoice_shipment->invoice_amount = $charges + $gst;
+                                $pending_invoice_shipment->sms_charges = $sms_charges;
+                                $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                                 $pending_invoice_shipment->transaction_id = $transaction_id;
                                 $pending_invoice_shipment->save();
                             }
@@ -18833,7 +18862,8 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $pending_invoice_shipment->type = $type;
                         $pending_invoice_shipment->charges = $charges;
                         $pending_invoice_shipment->gst = $gst;
-                        $pending_invoice_shipment->invoice_amount = $charges + $gst;
+                        $pending_invoice_shipment->sms_charges = $sms_charges;
+                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
                         $pending_invoice_shipment->transaction_id = $transaction_id;
                         $pending_invoice_shipment->save();
                     }
