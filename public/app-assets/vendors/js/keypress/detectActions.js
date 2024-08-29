@@ -24,13 +24,10 @@ $.fn.ConvertToBarcodeTextbox = function () {
     }, 25));
 };
 
-$('#add_shipment_form input, #add_bag_form input').ConvertToBarcodeTextbox();
+$('#add_shipment_form input, #add_bag_form input, #scan_shipment_form input').ConvertToBarcodeTextbox();
 
-$('#add_shipment_form, #add_bag_form').on('submit', function (event) {
+$('#add_shipment_form, #add_bag_form, #scan_shipment_form').on('submit', function (event) {
     var isScanned = keyupFiredCount <= 1;
-    
-    console.log(lastKeyAction);
-    console.log(keyupFiredCount);
     
      if ((lastKeyAction == 'Enter' || lastKeyAction == '') && isScanned) {
         window.lastAction = 'Scanned';
