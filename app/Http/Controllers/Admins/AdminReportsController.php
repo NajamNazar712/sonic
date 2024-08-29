@@ -5609,14 +5609,9 @@ class AdminReportsController extends Controller
             ->leftJoin('pending_payment_shipments as pps', function ($join) use ($connection) {
                 $join->on('pps.shipment_id', '=', 'shipments.id')
                     ->where(
-                        DB::raw('1'),
+                        'pps.id',
                         '=',
-                        DB::connection($connection)->raw('1')
-                    )
-                    ->where(
-                        'pps.type',
-                        '!=',
-                        2
+                        DB::connection($connection)->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id and pending_payment_shipments.type != 2)')
                     );
             })
             ->leftJoin('done_payment_shipments as dps', function ($join) use ($connection) {
@@ -5676,8 +5671,8 @@ class AdminReportsController extends Controller
             });
         }
 
-        $sales->selectRaw('shipments.id as shipment_id, shipments.tracking_number, shipments.fintech_charges as fintech_amount, shipments.order_id as order_id, shipments.tracking_number as tracking_number_link, u.id as account_no, u.name as shipper, ss.name as current_status, bt.booking_type as service_type, sj.created_at as arrival_date, oc.name as origin, dc.name as destination, h.name as hub, shipments.amount as s_collection_amount, sps.name as payment_status, SUM(pps.amount) as p_collection_amount, shipments.actual_weight, shipments.weight_charges, shipments.cash_handling_charges, shipments.insurance_charges, shipments.return_charges, shipments.replacement_charges, shipments.fuel_surcharge, shipments.try_and_buy_charges, shipments.packaging_material_charges, SUM(pps.gst) as p_gst, SUM(pps.charges) as p_total_charges, SUM(pps.payable) as p_net_payable, SUM(pps.sms_charges) as pps_sms_charges,SUM(dps.amount) as d_collection_amount, SUM(dps.gst) as d_gst, SUM(dps.charges) as d_total_charges, SUM(dps.payable) as d_net_payable, SUM(dps.sms_charges) as dps_sms_charges, sm.mode as shipping_mode, shipments.chargeable_weight, dr.created_at as delivered_or_returned, z.name as zone, zcc.class, oc.id as origin_city_id, dc.id as destination_city_id, dnsdn.station_deposit_note_id as sdn_id, dps.done_payment_id as payment_id, shipments.booking_type_id, usi.poc, shipments.shipper_status_id as shipment_status, shipments.nsa_osa_charges, u.account_type_id as account_type_id, SUM(pis.gst) as pis_gst, SUM(pis.sms_charges) as pis_sms_charges,SUM(is.gst) as is_gst, SUM(is.sms_charges) as is_sms_charges,shipments.packaging_charges, shipments.intercept_charges, bc.name, dr.shipper_status_id as shipment_status_id')
-            ->whereNotIn('shipments.shipper_status_id', [1, 17])
+        $sales->selectRaw('shipments.id as shipment_id, shipments.tracking_number, shipments.fintech_charges as fintech_amount, shipments.order_id as order_id, shipments.tracking_number as tracking_number_link, u.id as account_no, u.name as shipper, ss.name as current_status, bt.booking_type as service_type, sj.created_at as arrival_date, oc.name as origin, dc.name as destination, h.name as hub, shipments.amount as s_collection_amount, sps.name as payment_status, SUM(pps.amount) as p_collection_amount, shipments.actual_weight, shipments.weight_charges, shipments.cash_handling_charges, shipments.insurance_charges, shipments.return_charges, shipments.replacement_charges, shipments.fuel_surcharge, shipments.try_and_buy_charges, shipments.packaging_material_charges, SUM(pps.gst) as p_gst, SUM(pps.charges) as p_total_charges, SUM(pps.payable) as p_net_payable, SUM(dps.amount) as d_collection_amount, SUM(dps.gst) as d_gst, SUM(dps.charges) as d_total_charges, SUM(dps.payable) as d_net_payable, sm.mode as shipping_mode, shipments.chargeable_weight, dr.created_at as delivered_or_returned, z.name as zone, zcc.class, oc.id as origin_city_id, dc.id as destination_city_id, dnsdn.station_deposit_note_id as sdn_id, dps.done_payment_id as payment_id, shipments.booking_type_id, usi.poc, shipments.shipper_status_id as shipment_status, shipments.nsa_osa_charges, u.account_type_id as account_type_id, SUM(pis.gst) as pis_gst, SUM(is.gst) as is_gst, shipments.packaging_charges, shipments.intercept_charges, bc.name, dr.shipper_status_id as dr_status_id, shipments.shipment_type, invoices.invoice_number, rc.name as return_city,ss_charge.reverse_pickup_charges, SUM(pps.sms_charges) as pps_sms_charges,SUM(dps.sms_charges) as dps_sms_charges, SUM(pis.sms_charges) as pis_sms_charges, SUM(is.sms_charges) as is_sms_charges')
+        ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358]);
 
         if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
