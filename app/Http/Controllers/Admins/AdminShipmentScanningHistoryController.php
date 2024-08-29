@@ -131,7 +131,8 @@ class AdminShipmentScanningHistoryController extends Controller
                                 : 'Not-Picked'
                         )
                         : '-';
-                    
+                        $details[$index]['entry_method'] = $scanning_history->entry_method ?? '-';
+
 
                     }
                     $data['tracking_number'] = $request->tracking_number;

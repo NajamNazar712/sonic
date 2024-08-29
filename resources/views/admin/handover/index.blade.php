@@ -185,6 +185,8 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/keypress/detectActions.js')}}" type="text/javascript"></script>
+
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
 
     <script>
@@ -366,6 +368,7 @@
                             data: {
                                 'tracking_number': tracking_number,
                                 'delivery_location_mapping': delivery_location_mapping,
+                                'action': window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
@@ -726,6 +729,7 @@
                             data: {
                                 'shipment_id': shipment_id,
                                 'piece_id': item,
+                                'action': window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             },
                             timeout: 5000,
