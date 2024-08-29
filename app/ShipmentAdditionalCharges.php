@@ -29,8 +29,10 @@ class ShipmentAdditionalCharges extends Model
 
     static function additional_charges_apply($shipment_ids,$arrival = false ,$zero_cod = false,$return_discount =false){
         foreach ($shipment_ids as $shipment_id) {
-            $shipment_Additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment_id);
-            $shipment_Additional_charges = ($shipment_Additional_charges->exists()) ? $shipment_Additional_charges->first() : new ShipmentAdditionalCharges();
+            $shipment_Additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment_id)->first();
+            if(empty($shipment_Additional_charges)){
+                $shipment_Additional_charges = new  ShipmentAdditionalCharges();
+            }
             $shipment_Additional_charges->shipment_id = $shipment_id;
             if ($arrival) {
                 $shipment_Additional_charges->arrival_charges_applied = 1;
