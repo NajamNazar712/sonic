@@ -131,7 +131,7 @@ class AdminShipmentScanningHistoryController extends Controller
                                 : 'Not-Picked'
                         )
                         : '-';
-                        $details[$index]['entry_method'] = $scanning_history->entry_method ?? '-';
+                        $details[$index]['entry_method'] = ($scanning_history->entry_method == 1) ? 'Scanned' : 'Manual';
 
 
                     }

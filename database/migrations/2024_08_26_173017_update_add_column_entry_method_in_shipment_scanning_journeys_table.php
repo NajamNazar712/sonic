@@ -14,11 +14,11 @@ class UpdateAddColumnEntryMethodInShipmentScanningJourneysTable extends Migratio
     public function up()
     {
         Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
-            $table->string('entry_method')->nullable()->after('updated_via');
+            $table->boolean('entry_method')->nullable()->after('updated_via');
         });
 
         Schema::table('bag_scanning_journeys', function (Blueprint $table) {
-            $table->string('entry_method')->nullable()->after('longitude');
+            $table->boolean('entry_method')->nullable()->after('longitude');
         });
     }
 
