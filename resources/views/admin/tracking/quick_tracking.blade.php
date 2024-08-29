@@ -499,6 +499,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/keypress/detectActions.js')}}" type="text/javascript"></script>
 
 
 
@@ -739,7 +740,6 @@
                 var tracking = scan.val();
            
                 if (tracking != '') {
-                    scan.attr('disabled', true);
                     if(selection === false){
                         $('#multiple_div').removeClass('d-none');
                         if(table.row().count() == 0) {
@@ -748,6 +748,7 @@
                                 type:'POST',
                                 data: {
                                     'tracking':tracking,
+                                    // 'action': window.lastAction,
                                     '_token': '{!! csrf_token() !!}'
                                 }
                             }).done(function (data) {
@@ -774,6 +775,7 @@
                                     type:'POST',
                                     data: {
                                         'tracking':tracking,
+                                        // 'action': window.lastAction,
                                         '_token':'{!! csrf_token() !!}'
                                     }
                                 }).done(function (data) {
@@ -809,6 +811,7 @@
                             type:'POST',
                             data: {
                                 'tracking':tracking,
+                                'action': window.lastAction,
                                 '_token': '{!! csrf_token() !!}'
                             }
                         }).done(function (data) {
@@ -893,7 +896,6 @@
 
 
                 if (bag != '') {
-                    scan.attr('disabled', true);
                     if(selection === false){
                         $('#bag_multiple_div').removeClass('d-none');
                         if(bag_table.row().count() == 0) {

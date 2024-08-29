@@ -24,15 +24,15 @@ $.fn.ConvertToBarcodeTextbox = function () {
     }, 25));
 };
 
-$('#add_shipment_form input, #add_bag_form input, #scan_shipment_form input').ConvertToBarcodeTextbox();
+$('#add_shipment_form input, #add_bag_form input, #scan_shipment_form input, #quick_tracking_form  input').ConvertToBarcodeTextbox();
 
-$('#add_shipment_form, #add_bag_form, #scan_shipment_form').on('submit', function (event) {
-    var isScanned = keyupFiredCount <= 1;
+$('#add_shipment_form, #add_bag_form, #scan_shipment_form, #quick_tracking_form').on('submit', function (event) {
+    var isScanned = keyupFiredCount <= 1
+    
 
     console.log(keyupFiredCount);
     console.log(lastKeyAction);
 
-    
      if ((lastKeyAction == 'Enter' || lastKeyAction == '') && isScanned) {
         window.lastAction = 'Scanned';
     } else {
