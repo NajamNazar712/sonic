@@ -15,6 +15,7 @@ use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\LeadReference;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\LeadTaggingController;
+use App\Http\Models\Admin\Lead\LeadTagging;
 use App\Http\Models\Admin\Lead\LeadZone;
 use App\Http\Models\Admin\SalePersonTag;
 
@@ -108,6 +109,8 @@ class WebsiteLead extends Command
 
 
                     $token = Str::random(8);
+
+                    $lead_tagging = LeadTagging::where(['city_id' => $city_id, 'status' => 1])->first();
                     
                     $new_lead = new Lead();
                     $new_lead->contact_person = $lead->data->contact_person;
@@ -115,6 +118,7 @@ class WebsiteLead extends Command
                     $new_lead->phone_number = $lead->data->phone_number;
                     $new_lead->email_address = $lead->data->email;
                     $new_lead->requested_date = Carbon::now();
+                    $new_lead->sale_person_id = $lead_tagging->sale_person_id;
                     $new_lead->service_id = $service_id;
                     $new_lead->ntn_number = $lead->data->ntn_number;
                     $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
