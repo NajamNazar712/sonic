@@ -5682,7 +5682,7 @@ class AdminReportsController extends Controller
                 $sales = $sales->whereIn('dc.hub_id', session('hubs'));
             }
         }
-        $sales = $sales->whereNotNull('shipments.tracking_number');
+        $sales = $sales->whereNotNull('shipments.tracking_number')->groupBy('shipments.id');
         $datatable = Datatables::of($sales)
             ->setTotalRecords($count)
 
