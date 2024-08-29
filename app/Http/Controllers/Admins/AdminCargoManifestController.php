@@ -1196,7 +1196,6 @@ class AdminCargoManifestController extends Controller
 
     public function create_shipment_details(Request $request) //create bag -> shipment details
     {
-
         $misrouted_history_hub = 0;
         $intercept_re_book_history_hub = 0;
 
@@ -1481,7 +1480,7 @@ class AdminCargoManifestController extends Controller
 
                                     $details['total'] = $shipments->count;
                                 }
-                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null, null);
+                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null, null, null, null, null, null, null,  $request->action);
 
                                 return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                                 /*}
@@ -5781,7 +5780,7 @@ class AdminCargoManifestController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
-                ShipmentScanningJourneyController::add($shipment_id, $request->screen_location_id, 1, Auth::id(), NULL, NULL, $shipment_piece->id, NULL, session('latitude'), session('longitude'), NULL);
+                ShipmentScanningJourneyController::add($shipment_id, $request->screen_location_id, 1, Auth::id(), NULL, NULL, $shipment_piece->id, NULL, session('latitude'), session('longitude'), NULL,'Manual');
 
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {

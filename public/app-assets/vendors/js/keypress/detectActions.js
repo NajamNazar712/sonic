@@ -28,6 +28,10 @@ $('#add_shipment_form input, #add_bag_form input, #scan_shipment_form input').Co
 
 $('#add_shipment_form, #add_bag_form, #scan_shipment_form').on('submit', function (event) {
     var isScanned = keyupFiredCount <= 1;
+
+    console.log(keyupFiredCount);
+    console.log(lastKeyAction);
+
     
      if ((lastKeyAction == 'Enter' || lastKeyAction == '') && isScanned) {
         window.lastAction = 'Scanned';

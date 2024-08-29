@@ -538,6 +538,7 @@
                         data: {
                             'tracking_number': tracking_number,
                             'pieces_confirm': 1,
+                            'action':window.lastAction,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
