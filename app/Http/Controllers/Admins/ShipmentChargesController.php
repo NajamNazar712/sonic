@@ -921,7 +921,6 @@ class ShipmentChargesController extends Controller
                 $shipment->weight_charges = $result['weight_charges'];
                 $shipment->chargeable_weight = $result['chargeable_weight'];
             }
-            $shipment->zero_cod_discount_applied = isset($result['zero_cod_discount_applied']) ? 1 : 0;
             $shipment->save();
             if($result && $shipment->business_category_id == 1) {
                 $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id);
