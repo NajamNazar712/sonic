@@ -1478,7 +1478,7 @@
 
 						var re_shipper = '{{ ($re_shipper) ? 1 : 0 }}';
 
-						if(re_shipper){
+						if(re_shipper == '1'){
 							var search_shippers = $('#search_shipper').val();
 							if(search_shippers.length > 0){
 								return true;
