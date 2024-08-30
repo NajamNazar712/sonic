@@ -785,8 +785,7 @@
 								isInitialLoad = false;
 								return true; // Allow initial load
 							}
-
-							if (!check_sale_shippers()) {
+							if (check_sale_shippers()) {
 								toastr.error('Select One Shipper', 'Error!', {
 									positionClass: 'toast-top-center',
 									containerId: 'toast-top-center'
@@ -1478,15 +1477,15 @@
 
 						var re_shipper = '{{ ($re_shipper) ? 1 : 0 }}';
 
-						if(re_shipper == '1'){
+						if (re_shipper == 1) { // Compare as a number
 							var search_shippers = $('#search_shipper').val();
-							if(search_shippers.length > 0){
+							if (search_shippers.length > 0) {
 								return true;
-							}else{
-								return  false;
+							} else {
+								return false;
 							}
 						}
-						return  false;
+						return false; // If not re_shipper, always allow
 					}
 					$('#search_filter_btn').on('click',function () {
 						table.draw(true);
