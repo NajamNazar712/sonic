@@ -1242,7 +1242,8 @@ class AdminFinanceController extends Controller
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
 
-        $adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
+        //$adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
+        $adminId = 3335;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)] for testing in staging
         if(Auth::id() == $adminId)
         {
             $mmsSettingShippers = GlobalSettings::where('type', 'mms_setting')->first();
