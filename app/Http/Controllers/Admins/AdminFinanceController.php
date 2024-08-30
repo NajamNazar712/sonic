@@ -129,6 +129,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\NotificationSetting;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 
 class AdminFinanceController extends Controller
@@ -1242,8 +1243,14 @@ class AdminFinanceController extends Controller
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
 
-        //$adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
-        $adminId = 3335;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)] for testing in staging
+        //------x-------x------------x------TO-6827---------x----------x-----------
+        $adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
+
+        if(!App::environment('production'))
+        {
+            $adminId = 3335;//if admin is 3335 for testing in staging
+        }
+
         if(Auth::id() == $adminId)
         {
             $mmsSettingShippers = GlobalSettings::where('type', 'mms_setting')->first();
@@ -1253,6 +1260,8 @@ class AdminFinanceController extends Controller
                 $datatables->whereIn('u.id', $shipperIds);
             }
         }
+
+        //------x-------x------------x------!TO-6827!---------x----------x-----------
 
 
         return $datatables->make(true);
@@ -14598,6 +14607,26 @@ class AdminFinanceController extends Controller
                 $revert_status_request_log->previous_status = $previous_status;
                 $revert_status_request_log->updated_by = Auth::id();
                 $revert_status_request_log->save();
+
+                //----------x---------x-----------TO-6827--------x------------x--------x
+                $adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
+                if(!App::environment('production'))
+                {
+                    $adminId = 3335;//if admin is 3335 for testing in staging environment
+                }
+
+                if(Auth::id() == $adminId)
+                {
+                    Shipment::find($shipment_id)->update([
+                        'shipper_status_id' => 13,
+                        'consignee_status_id' => 13
+                    ]);
+
+                    ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
+                }       
+                //-------x--------------!TO-6827!------------x-------------x-------
+                
+
 
             }
             return redirect()->back()->with(['success' => 'Shipments updated to Revert Request Status!']);
