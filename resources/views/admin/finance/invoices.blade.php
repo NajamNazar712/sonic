@@ -1476,7 +1476,7 @@
 						}
 						?>
 
-						var re_shipper = '{{$re_shipper}}';
+						var re_shipper = '{{ ($re_shipper) ? 1 : 0 }}';
 
 						if(re_shipper){
 							var search_shippers = $('#search_shipper').val();
