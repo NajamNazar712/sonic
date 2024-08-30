@@ -1326,6 +1326,22 @@ class AdminDashboardController extends Controller
         return response()->json($shippers);
     }
 
+    public function shipperNamesForDropdown_invoice(Request $request, $type)
+    {
+        $keyword = $request->search;
+        $shippers = User::where('name', 'like', '%' . $keyword . '%');
+
+        if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
+            $shippers = $shippers->whereIn('id', session('tagged_shippers'));
+        } else {
+            $shippers = $shippers->whereIn('status', [3, 4]);
+        }
+
+        $shippers = $shippers->select('id','name as text')->take(10)->get()->toArray();
+
+        return response()->json($shippers);
+    }
+
     public function shipperExclude(Request $request)
     {
         $request->validate([
