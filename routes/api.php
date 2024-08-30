@@ -166,8 +166,7 @@ use App\Http\Models\Shippers\ShipperPickupController;
                 Route::post('shipper_shipment_detail', 'Rider\RiderAPIController@shipper_shipment_detail')->name('shipper_shipment_detail');
                 Route::post('shipper_payment_detail', 'Rider\RiderAPIController@shipper_payment_detail')->name('shipper_payment_detail');
                 Route::post('shipment_tracking_validation', 'Rider\RiderAPIController@shipment_tracking_number_validation')->name('shipment_tracking_number_validation');
-        
-
+           
             });
         });
         
@@ -657,6 +656,8 @@ use App\Http\Models\Shippers\ShipperPickupController;
         });
     });
 
+
+    
     Route::prefix('shipper')->name('shipper.')->group(function () {
         Route::post('login', 'ShipperAPIController@login')->name('login');
         Route::post('test', 'ShipperAPIController@test')->name('test');
@@ -747,6 +748,8 @@ use App\Http\Models\Shippers\ShipperPickupController;
         Route::post('reset_pin', 'APIController@reset_pin')->name('reset_pin');
         
     });
+
+
 
     
 

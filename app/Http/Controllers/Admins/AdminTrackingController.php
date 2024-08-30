@@ -1115,17 +1115,28 @@ class AdminTrackingController extends Controller
                                 $retail_rider_id = $retail_shipment->rider_id;
                                 if ($retail_user_id) {
                                     $retail_user = RetailUser::find($retail_user_id);
+                                    
+                                    try{
+
                                     if ($retail_user->category == 1) {
                                         $franchise = RetailFranchise::find($retail_user->category_id);
                                         $details['retail_user']['name'] = $franchise->name;
                                         $details['retail_user']['code'] = 'Franchise';
                                         $details['shipper']['city'] = $franchise->pickup_address->city->name;
+                                        
                                     } else {
                                         $trax_center = RetailTraxCenter::find($retail_user->category_id);
                                         $details['retail_user']['name'] = $trax_center->name;
                                         $details['retail_user']['code'] = 'Trax Center';
                                         $details['shipper']['city'] = $trax_center->pickup_address->city->name;
                                     }
+                                }catch(\Exception $ex){
+                                        $trax_retail_shipper = RetailShipperInfo::find($retail_user_id);
+                                        $details['retail_user']['name'] = $trax_retail_shipper->shipper_name;
+                                        $details['retail_user']['code'] = 'Retail Shipper';
+                                        $cities = City::find($trax_retail_shipper->city_id);
+                                        $details['shipper']['city'] = $cities->name;
+                                }
                                 } elseif ($retail_admin_id) {
                                     $admin_id = $retail_shipment->admin_id;
                                     $admin_info = Admin::find($admin_id);
