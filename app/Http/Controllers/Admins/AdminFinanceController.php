@@ -13208,7 +13208,7 @@ class AdminFinanceController extends Controller
             $reim_invoice->whereIn('invoice_for_reimbursements.user_id', $request->search_shipper);
         }else{
             if(!empty($search_shipper)){
-                $invoice->whereIn('invoice_for_reimbursements.user_id', $request->search_shipper);
+                $reim_invoice->whereIn('invoice_for_reimbursements.user_id', $request->search_shipper);
             }
         }
 
