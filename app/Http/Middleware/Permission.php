@@ -1271,6 +1271,7 @@ class Permission
             'reports.debriefing.agent_list' => 676,
             'reports.debriefing.agent_index' => 676,
             'reports.rvr_call_history.index'=>950,
+            'reports.rvr_reattempt.index'=>1008,
 
             'finance.ftl_invoice.index' => 509,
             'settings.debriefing_time_setting.index' => 526,

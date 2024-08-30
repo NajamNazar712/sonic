@@ -1923,6 +1923,13 @@
                                 </a>
                             </li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(1008, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.rvr_reattempt.index') }}">
+                                    Reattempt RVR Report
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif
