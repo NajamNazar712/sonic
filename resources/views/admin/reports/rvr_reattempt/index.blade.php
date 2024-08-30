@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Reattempt RVR Report')
+@section('title', 'Reattempt Analysis Report')
 
 @section('content')
 <div class="app-content content">
@@ -12,7 +12,7 @@
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            <h1>Reattempt RVR Report</h1>
+                            <h1>Reattempt Analysis Report</h1>
                             @include('admin.inc.messages')
                             <div class="col mt-2">
                                 <form id="search_form" class="row mb-2 justify-content-center" novalidate="novalidate">
@@ -435,7 +435,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     extend: 'excelHtml5',
-                    title: 'Reattempt RV Report',
+                    title: 'Reattempt Analysis Report',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                     className: 'btn btn-primary datatable_excel_btn',
                     
