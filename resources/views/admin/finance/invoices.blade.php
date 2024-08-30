@@ -18,11 +18,8 @@
 					<div class="row">
 						<div class="col-3">
 							<fieldset class="form-group">
-
 								<select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple >
-									@foreach ($shippers as $shipper)
-										<option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
-									@endforeach
+
 								</select>
 							</fieldset>
 						</div>
@@ -386,8 +383,26 @@
 				$(document).ready(function () {
 
 					$('#search_shipper').select2({
-						placeholder:'Select Shipper',
-						width:'100%'
+						width:'100%',
+						placeholder:"Select Shipper",
+						allowClear:true,
+						multiple: true,
+						minimumInputLength: 2,
+						ajax: {
+							dataType: 'json',
+							url:  '{!! route('admin.accounts.shipper_names.dropdown_invoice',['type'=>'active']) !!}',
+							data: function (params) {
+								return {
+									search: params.term,
+								}
+							},
+							processResults: function (data) {
+								return {
+									results: data
+								};
+							},
+							delay: 700,
+						}
 					});
 
 					$('#search_filter').prepend('<option value="" selected="selected"></option>').select2({
