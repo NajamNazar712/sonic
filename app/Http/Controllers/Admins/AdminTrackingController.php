@@ -1170,7 +1170,15 @@ class AdminTrackingController extends Controller
 
 
                         $pickup = $shipment->pickup_address;
-
+                        if($details['retail_user']['code'] == 'Retail Shipper'){
+                            $details['pickup']['person_of_contact'] = '';
+                            $details['pickup']['vendor'] = '';
+                            $details['pickup']['pickup_brand_name'] = '';
+                            $details['pickup']['phone_number'] = '';
+                            $details['pickup']['email'] = '';
+                            $details['pickup']['origin'] = '';
+                            $details['pickup']['address'] = '';
+                        }else {
                         $details['pickup']['person_of_contact'] = $pickup->poc;
                         $details['pickup']['vendor'] = $pickup->vendor;
                         $details['pickup']['pickup_brand_name'] = $pickup->pickup_brand_name;
@@ -1178,7 +1186,7 @@ class AdminTrackingController extends Controller
                         $details['pickup']['email'] = $pickup->email;
                         $details['pickup']['origin'] = $pickup->city->name;
                         $details['pickup']['address'] = $pickup->pickup_address;
-
+                        }
                         $details['consignee']['name'] = $shipment->consignee_name;
                         $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
                         $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
