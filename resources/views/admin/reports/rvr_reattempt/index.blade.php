@@ -395,11 +395,10 @@
                             head.push('Arrival Date');
                             head.push('Destination Arrival Date');
                             head.push('RVR Time & Date');
-
                             head.push('RVR Action Time & Date');
                             head.push('OFD Time & Date');
                             head.push('Last Status');
-                            head.push('Last Status Time &Date');
+                            head.push('Last Status Time & Date');
                            
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -417,7 +416,6 @@
                                 row.push(values.rvr_date_time);
                                 row.push(values.action_date);
                                 row.push(values.ofd_date_time);
-                                row.push(values.rv_status_date);
                                 row.push(values.current_status);
                                 row.push(values.current_status_date);
                                 body.push(row);
@@ -481,7 +479,7 @@
                     {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false},
                     {data: 'ofd_date_time', name: 'ofd_date_time', class: 'align-middle action_updated_by',searchable: false},
                     {data: 'current_status', name: 's_status.name', class: 'align-middle current_status',searchable: false},
-                    {data: 'current_status_date', name: 'shipments.updated_at', class: 'align-middle current_status_date',searchable: false},
+                    {data: 'current_status_date', name: 'current_status_date', class: 'align-middle current_status_date',searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

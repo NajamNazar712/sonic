@@ -12994,14 +12994,14 @@ class AdminReportsController extends Controller
 
         ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_number',
         'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub',
-        'z.name as zone_name',
-            'shipments.consignee_phone_number_1 as consignee_phon_no',
+        'z.name as zone_name','shipments.consignee_phone_number_1 as consignee_phon_no',
         'sjj.created_at  as arrival_date','sj_destination.created_at as arrival_destination_date','sj_rvr.created_at as rvr_date_time',
-        'rv_shipment_assign_agent_details.created_at as action_date','sj_ofd.created_at as ofd_date_time', 's_status.name as current_status', 'shipments.updated_at as current_status_date')
+        'rv_shipment_assign_agent_details.updated_at as action_date','sj_ofd.created_at as ofd_date_time', 's_status.name as current_status', 'shipments.updated_at as current_status_date')
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
         ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
         ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
-        ->groupBy('rv_shipment_assign_agent_details.shipment_id');
+        ->groupBy('rv_shipment_assign_agent_details.shipment_id')
+        ->orderBy('rv_shipment_assign_agent_details.id','desc');
 
         $datatable = Datatables::of($rv_report)
             ->editColumn('tracking_number', function($rv_report) {
