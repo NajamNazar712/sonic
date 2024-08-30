@@ -16,6 +16,16 @@
 
 				<div class="container">
 					<div class="row">
+						<div class="col-3">
+							<fieldset class="form-group">
+
+								<select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple >
+									@foreach ($shippers as $shipper)
+										<option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
+									@endforeach
+								</select>
+							</fieldset>
+						</div>
 						<div class="col-md-3">
 							<div class="form-group input-group">
 								<div class="input-group-prepend">
@@ -363,10 +373,23 @@
 			<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 			<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
+			<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+			<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+			<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+			<script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+			<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+
+
 
 			<script>
 
 				$(document).ready(function () {
+
+					$('#search_shipper').select2({
+						placeholder:'Select Shipper',
+						width:'100%'
+					});
+
 					$('#search_filter').prepend('<option value="" selected="selected"></option>').select2({
 						placeholder: 'Search',
 						width: '100%',
@@ -498,6 +521,7 @@
 									d.invoice_to = $('#invoice_to').val();
 									d.generation_from = $('#generation_from').val();
 									d.generation_to = $('#generation_to').val();
+									d.search_shipper = $('#search_shipper').val();
 								},
 
 								data: params,
@@ -577,7 +601,7 @@
 							return {body: body, header: head};
 						}
 					});
-
+					let isInitialLoad = true;
 					var selected_rows = [];
 					var table = $('#datatable').DataTable({
 						dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -736,10 +760,26 @@
 								d.generation_from = $('#generation_from').val();
 								d.generation_to = $('#generation_to').val();
 								d.star_shipper_filter = $('#star_shippers_filter').val();
+								d.search_shipper = $('#search_shipper').val();
 							}
 						},
 						rowId: 'id',
 						order: [[12	, 'desc']],
+						"preDrawCallback": function(settings) {
+							if (isInitialLoad) {
+								isInitialLoad = false;
+								return true; // Allow initial load
+							}
+
+							if (!check_sale_shippers()) {
+								toastr.error('Select One Shipper', 'Error!', {
+									positionClass: 'toast-top-center',
+									containerId: 'toast-top-center'
+								});
+								return false; // Prevent the redraw
+							}
+							return true; // Allow redraw
+						},
 						columns: [
 							{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 							{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -1412,6 +1452,27 @@
 							}
 						}
 					});
+
+					function check_sale_shippers(){
+						<?php
+						$re_shipper = false;
+						if(session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))){
+							$re_shipper = true;
+						}
+						?>
+
+						var re_shipper = '{{$re_shipper}}';
+
+						if(re_shipper){
+							var search_shippers = $('#search_shipper').val();
+							if(search_shippers.length > 0){
+								return true;
+							}else{
+								return  false;
+							}
+						}
+						return  false;
+					}
 					$('#search_filter_btn').on('click',function () {
 						table.draw(true);
 					});
