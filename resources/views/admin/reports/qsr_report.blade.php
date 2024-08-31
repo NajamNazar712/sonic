@@ -222,6 +222,7 @@
                         <th class="border-primary border-darken-1">Last Location Screen Name</th>
                         <th class="border-primary border-darken-1">Sub Hub</th>
                         <th class="border-primary border-darken-1">Last Location Updated At</th>
+                        <th class="border-primary border-darken-1">Entry Method</th>
 
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
@@ -678,6 +679,7 @@
                     {data: 'last_location_screen_location_name', name: 'shipment_scanning_screen_locations.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name',text:'Last Location Screen Location Name',value:'last_location_screen_location_name',download:true},
                     {data: 'ca_scanning_last_location_name', name: 'ca_scanning_last_location_name.name', as:'ca_scanning_last_location_name', class: 'align-middle ca_scanning_last_location_name',text:'Sub Hub',value:'ca_scanning_last_location_name',download:true},
                     {data: 'last_location_updated_at', name: 'ssjal_last_location.updated_at', as:'last_location_updated_at', class: 'align-middle last_location_updated_at',text:'Last Location Updated At',value:'last_location_updated_at',download:true},
+                    {data: 'entry_method', name: 'ssjal_last_location.entry_method', as:'entry_method', class: 'align-middle entry_method',text:'Entry Method',value:'entry_method',download:true},
 
                     {data: 'reason', name: 'ssr.name', as:'reason', class: 'align-middle reason',text:'Reason',value:'reason',download:true},
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks',text:'Remarks',value:'remarks',download:true},

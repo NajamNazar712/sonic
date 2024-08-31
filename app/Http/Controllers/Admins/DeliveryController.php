@@ -322,8 +322,8 @@ class DeliveryController extends Controller
                 'ca_scanning_last_location_name.name as ca_scanning_last_location_name',
                 'ssj_last_location.user_type as scanned_by_user_type',
                 'ssj_last_location.admin_id as scanned_by_id',
-                'last_screen_location.name as last_location_screen_location_name'
-
+                'last_screen_location.name as last_location_screen_location_name',
+                'ssj_last_location.entry_method as entry_method'
             )
 
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
@@ -529,6 +529,10 @@ class DeliveryController extends Controller
                 }else{
                     return '-';
                 }
+            })->editColumn('entry_method', function ($shipment) {
+                return $shipment->entry_method === null
+                    ? 'Not Scanned'
+                    : ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             });
             
         if ($mode = $request->get('search_shipping_mode')) {
