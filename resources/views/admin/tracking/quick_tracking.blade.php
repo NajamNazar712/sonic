@@ -740,6 +740,7 @@
                 var tracking = scan.val();
            
                 if (tracking != '') {
+                    scan.attr('disabled', true);
                     if(selection === false){
                         $('#multiple_div').removeClass('d-none');
                         if(table.row().count() == 0) {
@@ -748,7 +749,7 @@
                                 type:'POST',
                                 data: {
                                     'tracking':tracking,
-                                    // 'action': window.lastAction,
+                                    'action': window.lastAction,
                                     '_token': '{!! csrf_token() !!}'
                                 }
                             }).done(function (data) {
@@ -775,7 +776,7 @@
                                     type:'POST',
                                     data: {
                                         'tracking':tracking,
-                                        // 'action': window.lastAction,
+                                        'action': window.lastAction,
                                         '_token':'{!! csrf_token() !!}'
                                     }
                                 }).done(function (data) {
@@ -896,6 +897,7 @@
 
 
                 if (bag != '') {
+                    scan.attr('disabled', true);
                     if(selection === false){
                         $('#bag_multiple_div').removeClass('d-none');
                         if(bag_table.row().count() == 0) {

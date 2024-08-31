@@ -892,7 +892,7 @@ class DeliveryController extends Controller
                                         if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                             $class = 'complaint_row';
                                         }
-                                        ShipmentScanningJourneyController::add($shipment->id ,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+                                        ShipmentScanningJourneyController::add($shipment->id ,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
                                         $consolidation_details = self::check_consolidation($shipment->id);
                                         $consolidation_flag = FALSE;
 
@@ -972,7 +972,7 @@ class DeliveryController extends Controller
                                     if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                         $class = 'complaint_row';
                                     }
-                                    ShipmentScanningJourneyController::add($shipment->id ,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+                                    ShipmentScanningJourneyController::add($shipment->id ,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
                                     $consolidation_details = self::check_consolidation($shipment->id);
 
                                     $consolidation_flag = FALSE;
