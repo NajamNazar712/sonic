@@ -1209,12 +1209,20 @@
                         // },
                         maxlength: 255,
                     },
+                    parcel_amount: {
+                        required: true,
+                        min: 2
+                    }
                 },
                 messages: {
                     consignee_address: {
                         required: "Address Is Required",
                         maxlength :"Address can be maximum 255 characters",
                     },
+                    parcel_amount: {
+                        required: "Parcel Value is required",
+                        min: "Parcel Value must be greater than 1"
+                    }
                 },
                 normalizer: function(value) {
                     return $.trim(value);

@@ -13254,8 +13254,13 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 34);
         $company_banks = BanksList::where('affiliate', 1)->get();
         $invoice_statuses = InvoiceStatus::get();
+        if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
+            $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
+        } else {
+            $shippers = User::select('id', 'name')->get();
+        }
         $adjustment_reasons = InvoiceAdjustmentReasons::all();
-        return view('admin.finance.invoices')->with(['company_banks' => $company_banks, 'invoice_statuses' => $invoice_statuses, 'adjustment_reasons' => $adjustment_reasons]);
+        return view('admin.finance.invoices')->with(['shippers'=>$shippers,'company_banks' => $company_banks, 'invoice_statuses' => $invoice_statuses,'adjustment_reasons' => $adjustment_reasons]);
     }
 
     public function reimbursement_invoices_index()
@@ -13278,7 +13283,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 94);
         }
-
+        $search_shipper = $request->input('search_shipper',null);
         $invoice = Invoice::leftjoin('users as u', 'invoices.user_id', '=', 'u.id')
             ->leftjoin('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('sale_person_tags as spt', function ($join) {
@@ -13306,7 +13311,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
 
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
-            $invoice->whereIn('invoices.user_id', session('tagged_shippers'));
+            $invoice->whereIn('invoices.user_id', $request->search_shipper);
+        }else{
+            if(!empty($search_shipper)){
+                $invoice->whereIn('invoices.user_id', $request->search_shipper);
+            }
         }
 
         $reim_invoice = InvoiceForReimbursement::join('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
@@ -13321,7 +13330,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ->where('invoice_for_reimbursements.to_show', 1);
 
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
-            $reim_invoice->whereIn('invoice_for_reimbursements.user_id', session('tagged_shippers'));
+            $reim_invoice->whereIn('invoice_for_reimbursements.user_id', $request->search_shipper);
+        }else{
+            if(!empty($search_shipper)){
+                $reim_invoice->whereIn('invoice_for_reimbursements.user_id', $request->search_shipper);
+            }
         }
 
         $invoices = DB::query()->fromSub($reim_invoice->union($invoice), 'invoices');
