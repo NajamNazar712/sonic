@@ -3429,7 +3429,6 @@ class AdminMasterCargoController extends Controller
 
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
-
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 

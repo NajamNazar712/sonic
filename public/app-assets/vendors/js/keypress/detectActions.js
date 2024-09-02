@@ -1,11 +1,11 @@
-var keyupFiredCount = 0;
-var lastKeyAction = '';
+let keyupFiredCount = 0;
+let lastKeyAction = '';
 window.lastAction = '';
 
 function DelayExecution(f, delay) {
-    var timer = null;
+    let timer = null;
     return function () {
-        var context = this, args = arguments;
+        let context = this, args = arguments;
         clearTimeout(timer);
         timer = window.setTimeout(function () {
             f.apply(context, args);
@@ -13,7 +13,7 @@ function DelayExecution(f, delay) {
     };
 }
 
-$.fn.ConvertToBarcodeTextbox = function () {
+$.fn.ConvertToBarcodeTextField = function () {
     $(this).focus(function () {
         $(this).select();
     });
@@ -29,13 +29,13 @@ $.fn.ConvertToBarcodeTextbox = function () {
     }, 40));
 };
 
-$('#add_shipment_form input, #add_bag_form input, #scan_shipment_form input, #quick_tracking_form input, #delivery_note_form input').ConvertToBarcodeTextbox();
+$('#add_shipment_form input, #add_bag_form input, #scan_shipment_form input, #quick_tracking_form input, #delivery_note_form input, #quick_receive_form input, #return_note_form input').ConvertToBarcodeTextField();
+$('#add_shipment_form, #add_bag_form, #scan_shipment_form, #quick_tracking_form, #delivery_note_form, #quick_receive_form, #return_note_form').on('submit', function (event) {
+    event.preventDefault();
+    let isScanned = keyupFiredCount <= 1;
 
-$('#add_shipment_form, #add_bag_form, #scan_shipment_form, #quick_tracking_form, #delivery_note_form').on('submit', function (event) {
-    let isScanned = keyupFiredCount <= 1
-
-
-    if ((lastKeyAction === 'Enter' || lastKeyAction === '') && isScanned) {
+    //'Tab' in case of scan.attr disabled
+    if ((lastKeyAction === 'Enter' || lastKeyAction === '' || lastKeyAction === 'Tab') && isScanned) {
         window.lastAction = 1;
     } else {
         window.lastAction = 0;

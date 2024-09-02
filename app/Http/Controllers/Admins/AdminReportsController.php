@@ -14913,7 +14913,7 @@ class AdminReportsController extends Controller
             // ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
             // ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
             ->select($select)
-            ->groupBy('shipments.id')->where('shipments.id', 1153);
+            ->groupBy('shipments.id');
 
         $type = $request->get('search_types');
 
