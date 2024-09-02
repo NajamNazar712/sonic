@@ -60,23 +60,9 @@ use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
-use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
-use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
-use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
-use App\Http\Models\Rates\InternationalEconomyRate;
-use App\Http\Models\Rates\InternationalEconomyRateStatus;
-use App\Http\Models\Rates\RateDestinationHub;
-use App\Http\Models\Rates\RateOriginHub;
-use App\Http\Models\RateStatus;
-use App\Http\Models\ReturnCharge;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\ShippingMode;
-use App\Http\Models\WeightCharge;
-use App\Http\Models\Zone;
 use App\ShipmentReturnDiscountCharges;
 use App\ZeroCodDiscountCharges;
-use Barryvdh\Snappy\Facades\SnappyPdf;
-use Illuminate\Http\Request;
+
 
 class ShipperAgreementController extends Controller
 {
