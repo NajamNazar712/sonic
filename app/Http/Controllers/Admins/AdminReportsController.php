@@ -13007,7 +13007,12 @@ class AdminReportsController extends Controller
             ->editColumn('tracking_number', function($rv_report) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$rv_report->tracking_number' class='tracking' target='_blank'>$rv_report->tracking_number</a></u>";
-        });
+                
+            })
+            ->addColumn('rvr_count', function($rv_report) use ($request) {
+                        $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->whereBetween('created_at',[$request->get('search_date_from'),$request->get('search_date_to')])->whereIn('shipper_status_id', [52,12,66])->count();
+                        return $rvr_count;
+            });
                     
                     
         if ($tracking_num = $request->get('search_tracking_no')) {

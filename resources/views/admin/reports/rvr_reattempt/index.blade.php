@@ -82,6 +82,7 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Tracking Number</th>
+                                    <th class="border-primary border-darken-1">RVR Count</th>
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
@@ -386,6 +387,7 @@
 
                             head.push('S.No');  
                             head.push('Tracking No.');
+                            head.push('RVR Count');
                             head.push('Shipper');
                             head.push('Origin');
                             head.push('Destination');
@@ -405,6 +407,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number.split(">")[2].slice(0,-3));
+                                row.push(values.rvr_count);
                                 row.push(values.shipper_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -467,6 +470,7 @@
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle tracking_number',searchable: false},
+                    {data: 'rvr_count', name: 'rvr_count', class: 'align-middle shipper_name',searchable: false},
                     {data: 'shipper_name', name: 'shipper_name', class: 'align-middle shipper_name',searchable: false},
                     {data: 'origin', name: 'origin', class: 'text-center align-middle origin',searchable: false},
                     {data: 'destination', name: 'destination', class: 'align-middle destination',searchable: false},
