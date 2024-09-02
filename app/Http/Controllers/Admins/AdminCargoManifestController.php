@@ -5780,7 +5780,7 @@ class AdminCargoManifestController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
-                ShipmentScanningJourneyController::add($shipment_id, $request->screen_location_id, 1, Auth::id(), NULL, NULL, $shipment_piece->id, NULL, session('latitude'), session('longitude'), NULL,'Manual');
+                ShipmentScanningJourneyController::add($shipment_id, $request->screen_location_id, 1, Auth::id(), NULL, NULL, $shipment_piece->id, NULL, session('latitude'), session('longitude'), NULL, 0);
 
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {
