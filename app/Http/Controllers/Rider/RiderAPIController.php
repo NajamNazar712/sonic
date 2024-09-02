@@ -16058,7 +16058,11 @@ where  sp.id=66;
         // $consignee_address = $request->input('consignee_address');
         // $consignee_phone_number_1 = $request->input('consignee_phone_no');
         // $consignee_id = $request->consignee_id;
-
+        $shipper_address = '--';
+        if($request->shipper_address){
+            $shipper_address = $request->shipper_address;
+        }
+        // return response()->json(['status' => 1, 'message' => 'Shipment Booked with Tracking Number: ' . $shipper_address]);
         $retail_shipment = new RetailShipment();
         $retail_shipment->shipment_id = $shipment_id;
         $retail_shipment->product_type_id = $request->product_type_id;
@@ -16068,7 +16072,7 @@ where  sp.id=66;
         $retail_shipment->shipper_phone_no = $request->shipper_phone_no;
         $retail_shipment->shipper_name = $request->shipper_name;
         $retail_shipment->shipper_cnic = $request->shipper_cnic;
-        $retail_shipment->shipper_address = $request->shipper_address ?? ($pickup_address ?? "--");
+        $retail_shipment->shipper_address =$shipper_address;
         $retail_shipment->trax_box_id = $request->trax_box;
         $retail_shipment->total_charges_without_gst = $rates['charges'];
         $retail_shipment->gst = $rates['gst_charges'];
