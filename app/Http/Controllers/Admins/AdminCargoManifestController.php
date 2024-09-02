@@ -1287,7 +1287,7 @@ class AdminCargoManifestController extends Controller
 
             if ($misroute_history_count == 0) //for support screen misroute
             {
-                if (($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1)) {
+                if ( ($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1)  && (($shipment->return_address_id == null) || ($shipment->return_address_id == $shipment->pickup_address->city->id )) ) {
                     return ['status' => 1, 'error' => 'Shipment`s origin and destination are same !'];
                 }
             }
