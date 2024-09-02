@@ -30,8 +30,6 @@ class AdminRetailReportController extends Controller
 
         $retail_centers = DB::connection('reports')->table('retail_trax_centers')->where('status', 1)->select('id','name')->get();
         $retail_franchises = DB::connection('reports')->table('retail_franchises')->where('status', 1)->select('id','name')->get();
-
-
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id',[1,17])->get();
@@ -250,7 +248,7 @@ class AdminRetailReportController extends Controller
             $datatable->where('shipments.tracking_number', '=', $tracking);
         }
         if($center = $request->get('search_retail_center')){
-            $datatable->where('rf.id', '=', $center);
+            $datatable->where('rc.id', '=', $center);
         }
         if($franchise = $request->get('search_retail_franchise')){
             $datatable->where('rf.id', '=', $franchise);
