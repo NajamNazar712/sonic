@@ -260,6 +260,11 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="form-group" id="retail_discount_code_div">
+                                            <label>Discount Code</label>
+                                            <input type="text" name="discount_code" id="discount_code" class="form-control form-control-sm" placeholder="Discount Code">
+                                            <input type="hidden" name="retail_discount_percentage" id="retail_discount_percentage" value="0">
+                                        </div>
                                         <div class="form-group">
                                             <label>Charges</label>
                                             <input type="text" name="charges" id="charges" class="form-control form-control-sm" placeholder="Charges" disabled>
@@ -267,6 +272,7 @@
                                         <div class="form-group">
                                             <label>Discount</label>
                                             <input type="text" name="discount" id="discount" class="form-control form-control-sm" placeholder="Discount" disabled>
+                                            <input type="hidden" name="retail_discount_amount" id="retail_discount_amount" value="0">
                                         </div>
                                         <div class="form-group">
                                             <label>Charges with Discount</label>
@@ -599,6 +605,29 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+
+
+            //if admin_discount is not empty then disable the retail_discount_code input field
+            $('#admin_discount').on('input', function () {
+                if ($(this).val() != '') {
+                    $('#discount_code').prop('disabled', true);
+                }
+                else {
+                    $('#discount_code').prop('disabled', false);
+                } 
+            });
+
+            //if discount_code is not empty then disable the retail_discount_code input field
+            $('#discount_code').on('input', function () {
+                if ($(this).val() != '') {
+                    $('#admin_discount').prop('disabled', true);
+                }
+                else {
+                    $('#admin_discount').prop('disabled', false);
+                } 
+            });
+
+            $('#discount_code').inputmask('Regex', {regex: "^[A-Za-z0-9]*$"});
             var shipping_modes = @json($shipping_modes);
             var international_shipping_modes = @json($retail_international_shipping_modes);
 
@@ -682,8 +711,22 @@
                         $('#shipping_mode').append(newOption);
                     });
 
+                    if(!$('#retail_discount_code_div').hasClass('d-none'))
+                    {
+                        $('#retail_discount_code_div').addClass('d-none');
+                    };
+
+                    $('#admin_discount').prop('disabled', false);
+                    $('#discount_code').val('');
+
                 }
                 else{
+
+                    if(id == 1)
+                    {
+                        $('#retail_discount_code_div').removeClass('d-none');
+                        $('#discount_code').val('');
+                    }
 
                     $('#shipping_mode').empty();
                     $.each(shipping_modes, function (key, value) {
@@ -1022,6 +1065,21 @@
                 }
             });
 
+            $('#apply_discount_code').change(function () {
+                if($(this).is(':checked')){
+                    $('#admin_discount').attr('disabled', true);
+                    $('#admin_discount_type').attr('disabled', true);
+                    $('#admin_discount').val('');
+                    $('#admin_discount_type').val('');
+
+                }
+                else{
+                    $('#admin_discount').attr('disabled', false);
+                    $('#admin_discount_type').attr('disabled', false);
+                }
+            });
+
+
             var shipment_ids = [];
             $('#book').on('click', function () {
                var validator = $('#booking_form').valid();
@@ -1151,12 +1209,20 @@
                         // },
                         maxlength: 255,
                     },
+                    parcel_amount: {
+                        required: true,
+                        min: 2
+                    }
                 },
                 messages: {
                     consignee_address: {
                         required: "Address Is Required",
                         maxlength :"Address can be maximum 255 characters",
                     },
+                    parcel_amount: {
+                        required: "Parcel Value is required",
+                        min: "Parcel Value must be greater than 1"
+                    }
                 },
                 normalizer: function(value) {
                     return $.trim(value);
@@ -1206,6 +1272,48 @@
                 var destination = '';
                 var shipping_mode_id = $('#shipping_mode').val();
                 var business_category = $('#business_category').val();
+                var retail_discount_code = $('#discount_code').val();
+                var retail_discount_percentage = 0;
+                var retail_discount_applied = ($('#discount_code').val() == '') ? 0 : 1;
+
+                if(retail_discount_code !== '' && business_category == 1){
+
+                        $.ajax({
+                            url: '{{route('retail.shipment.book.discount_code_verify')}}'+`/${retail_discount_code}`,
+                            method: 'get',
+                        }).done(function (data) {
+                            if (data.status == 1) {
+                                retail_discount_percentage = data.data.discount_percentage;
+
+                                calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage);
+
+                                toastr.success(retail_discount_percentage+'% Discount Applied', 'Success!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            else
+                            {
+                                var error = data.message;
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+
+
+                        });
+                }
+                else
+                {
+                    calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage);
+                }
+
+            });
+
+            function calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage)
+            {
+                
                 if(business_category == 1){
                     if(shipping_mode_id == 1){
                         destination = $('#domestic_overland_destination').val();
@@ -1256,7 +1364,7 @@
                             containerId: 'toast-top-center'
                         });
                         return false;
-                    }
+                    }                 
                     $.ajax({
                         url: '{!! route('retail.shipment.book.calculate_rates') !!}',
                         method: 'POST',
@@ -1273,10 +1381,12 @@
                             'height': height,
                             'admin_discount': admin_discount,
                             'admin_discount_type1': admin_discount_type,
+                            'retail_discount_applied': retail_discount_applied,
+                            'retail_discount_percentage': retail_discount_percentage,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
-                        .done(function (data) {
+                .done(function (data) {
                             if (data.status === 1)
                             {
                                 var total_charges = '';
@@ -1287,7 +1397,7 @@
                                     $('#charges_with_discount').val(data.details.charges_with_discount);
                                     $('#gst').val(data.details.gst_charges);
                                     $('#packaging_and_insurance_charges').val(data.details.packaging_and_insurance_charges);
-
+                                    $('#retail_discount_amount').val(data.details.discount_amount);
                                     $('#total_charges').val(data.details.total_charges);
 
                             }
@@ -1309,7 +1419,7 @@
                                 $('#admin_discount').val('');
                             }
 
-                        });
+                });
                 }
                 else{
                     var error = 'Shipping Mode,Business Category,Destination and Weight/Volumetric weight should not be empty';
@@ -1318,8 +1428,7 @@
                         containerId: 'toast-top-center'
                     });
                 }
-
-            });
+            }
 
             $('#print').on('click', function () {
                 if(shipment_ids.length > 0){
