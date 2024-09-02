@@ -2,6 +2,7 @@ let keyupFiredCount = 0;
 let lastKeyAction = '';
 window.lastAction = '';
 
+alert(1);
 function DelayExecution(f, delay) {
     let timer = null;
     return function () {
@@ -34,6 +35,7 @@ $('#add_shipment_form, #add_bag_form, #scan_shipment_form, #quick_tracking_form,
     event.preventDefault();
     let isScanned = keyupFiredCount <= 1;
 
+    console.log('1')
     //'Tab' in case of scan.attr disabled
     if ((lastKeyAction === 'Enter' || lastKeyAction === '' || lastKeyAction === 'Tab') && isScanned) {
         window.lastAction = 1;
