@@ -1181,7 +1181,12 @@
                 dropdownParent: $('#add_request_form')
             }).on('change', function() {
                 var id = parseInt($(this).val());
-                
+                $('#AddNewRequest').attr('disabled',false);
+                $('#case_nature_claim').val('').trigger('change');
+                $('#case_nature_complaints').val('').trigger('change');
+                $('#case_nature_requests').val('').trigger('change');
+                $('#claim_product_cost').val('');
+                $('#claim_description_new').val('');
                 $.ajax({
                     url: '{{ route('cod.tracking.shipper_visibility') }}',
                     type: 'GET',
@@ -2185,6 +2190,7 @@
                 $('#alternate_phone').val('');
                 // $('#cod_amount_input').addClass('d-none');
                 // $('#cod_amount').val('');
+                $('#AddNewRequest').attr('disabled',false);
             });
 
 
