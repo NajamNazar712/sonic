@@ -1,22 +1,43 @@
 <?php
 
-use App\CronDonePayment;
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\Webhook\InitialChargesWebhookController;
-use App\Http\Models\Shipment;
-use Illuminate\Database\Seeder;
-use \App\ShipmentsArchieve;
-use Carbon\Carbon;
+namespace App\Console\Commands;
 
-class UpdateArrivalChargesSeeder extends Seeder
+use Illuminate\Console\Command;
+use Carbon\Carbon;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Models\Shipment;
+class UpdateArrivalChargesCommand extends Command
 {
     /**
-     * Run the database seeds.
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'update:zero_arrival_charges';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Command description';
+
+    /**
+     * Create a new command instance.
      *
      * @return void
      */
-    public function run()
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
     {
 
         $startDate =  Carbon::now()->subDays(2)->format('Y-m-d 00:00:00');
