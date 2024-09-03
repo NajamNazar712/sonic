@@ -20018,4 +20018,227 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
         return redirect()->route('admin.finance.make_payments.index')->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
     }
+
+    static function update_payment($shipment_id, $type, $shipment = array())
+    {
+        if (empty($shipment)) {
+            $shipment = Shipment::find($shipment_id);
+        }
+        $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
+        $check_arrival = ShipmentAdditionalCharges::check_additional_charges($shipment_id, true);
+        $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
+        $transaction_id = (string)Str::uuid();
+        if ($service_charges->exists()) {
+            $service_charges = $service_charges->first();
+            $service_charges = $service_charges->reverse_pickup_charges;
+        } else {
+            $service_charges = 0;
+        }
+        $setting = CorporateReimbursementSetting::where('user_id', $shipment->user_id);
+        $crs = false;
+        if ($setting->exists()) {
+            $setting = $setting->first();
+            if ($setting->setting_on == 1 && $shipment->user->account_type_id == 2) {
+                $crs = true;
+            }
+        }
+        $amount = $shipment->amount;
+        if ($shipment->shipment_type == 1) {
+            if (!$shipment->packaging_material_request) {
+                if ($type == 3) {
+                    $charges = $shipment->weight_charges + $shipment->fuel_surcharge + $faf_charges;
+                    if ($shipment->business_category_id == 1) {
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id, $shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
+                    } else {
+                        $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                    }
+
+                    if ($crs) {
+                        $wht = (($charges + $gst) * 3) / 100;
+                    } else {
+                        $wht = 0;
+                    }
+                    $payable = 0 - ($charges + $gst - $wht);
+                    $amount = 0;
+                }
+            } else {
+                $charges = $shipment->packaging_material_charges;
+                $gst = 0;
+
+                if ($crs) {
+                    $wht = (($charges + $gst) * 3) / 100;
+                } else {
+                    $wht = 0;
+                }
+
+                $payable = $amount - ($charges + $gst - $wht);
+            }
+
+            $account_type_id = $shipment->user->account_type_id;
+            $current_sms_charges = $shipment->user->sms_charges;
+            $sms_charges_status = $shipment->user->sms_charges_status;
+            $sms_charges = 0;
+            $valid = FALSE;
+
+            if ($account_type_id == 1) {
+                if (PendingPaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()) {
+                    $valid = TRUE;
+                }
+            } else {
+                if (PendingInvoiceShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()) {
+                    $valid = TRUE;
+                }
+            }
+
+            if ($valid) {
+                if ($sms_charges_status == 1) {
+                    $shipment_sms_count = 0;
+                    $shipment_sms = ShipmentSmsLogs::select('notification_id', DB::raw('count(*) as count'))->where('shipment_id', $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
+
+
+                    foreach ($shipment_sms as $notification) {
+                        $notification_setting = NotificationSetting::where('notification_id', $notification->notification_id)->where('charged_sms_toggle', 1);
+                        if ($notification_setting->exists()) {
+                            $notification_setting = $notification_setting->first();
+                            $charging_frequency = $notification_setting->charging_frequency;
+                            if ($notification->count <= $charging_frequency) {
+                                $shipment_sms_count += $notification->count;
+                            } else {
+                                $shipment_sms_count += $charging_frequency;
+                            }
+                        }
+                    }
+                    $sms_charges = $current_sms_charges * $shipment_sms_count;
+                    $payable = $payable - $sms_charges;
+                    ShipmentSmsLogs::where('shipment_id', $shipment->id)->update(['paid' => 1]);
+                }
+                if ($account_type_id == 1 || ($account_type_id == 2 && !$shipment->packaging_material_request) || $crs) {
+                    $pending_payment = PendingPayment::where('user_id', $shipment->user_id)->first();
+
+                    if (!empty($pending_payment)) {
+                        $pending_payment_shipment = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->where('shipment_id', $shipment_id)->where('type', $type)->latest()->first();
+                        if (!empty($pending_payment_shipment)) {
+                            if ($account_type_id == 1) {
+                                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                                $pending_payment_shipment->shipment_id = $shipment_id;
+                                $pending_payment_shipment->type = $type;
+                                $pending_payment_shipment->amount = $amount;
+                                $pending_payment_shipment->charges = $charges;
+                                $pending_payment_shipment->gst = $gst;
+                                $pending_payment_shipment->wht = 0;
+                                $pending_payment_shipment->payable = $payable;
+                                $pending_payment_shipment->transaction_id = $transaction_id;
+                                $pending_payment_shipment->sms_charges = $sms_charges;
+                                $pending_payment_shipment->save();
+
+                                self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL, $sms_charges);
+                            } else {
+                                if (!$shipment->packaging_material_request) {
+
+                                    $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                                    $pending_payment_shipment->shipment_id = $shipment_id;
+                                    $pending_payment_shipment->type = $type;
+                                    $pending_payment_shipment->amount = $amount;
+                                    if ($crs) {
+                                        $pending_payment_shipment->charges = $charges;
+                                        $pending_payment_shipment->gst = $gst;
+                                        $pending_payment_shipment->wht = $wht;
+                                        $pending_payment_shipment->payable = $payable;
+                                        $pending_payment_shipment->sms_charges = $sms_charges;
+                                    } else {
+                                        $pending_payment_shipment->charges = 0;
+                                        $pending_payment_shipment->gst = 0;
+                                        $pending_payment_shipment->wht = 0;
+                                        $pending_payment_shipment->payable = $amount;
+                                        $pending_payment_shipment->sms_charges = 0;
+                                    }
+                                    $pending_payment_shipment->transaction_id = $transaction_id;
+                                    $pending_payment_shipment->save();
+
+                                    if ($crs) {
+                                        self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL, $sms_charges);
+                                    } else {
+                                        self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $amount, 0, NULL, 0);
+                                    }
+
+                                    $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id)->where('type', $type)->latest()->first();
+                                    if (!empty($pending_invoice_shipment)) {
+
+                                        $pending_invoice_shipment->shipment_id = $shipment_id;
+                                        $pending_invoice_shipment->type = $type;
+                                        $pending_invoice_shipment->charges = $charges;
+                                        $pending_invoice_shipment->gst = $gst;
+                                        $pending_invoice_shipment->transaction_id = $transaction_id;
+                                        $pending_invoice_shipment->sms_charges = $sms_charges;
+                                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
+                                        $pending_invoice_shipment->save();
+                                    }
+                                } else {
+                                    if ($crs) {
+                                        $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                                        $pending_payment_shipment->shipment_id = $shipment_id;
+                                        $pending_payment_shipment->type = $type;
+                                        $pending_payment_shipment->amount = $amount;
+                                        $pending_payment_shipment->payable = $payable;
+                                        $pending_payment_shipment->transaction_id = $transaction_id;
+                                        $pending_payment_shipment->save();
+
+                                        self::add_pending_payment_charges($pending_payment->id, $amount, $charges, $gst, $payable, $wht, NULL, $sms_charges);
+                                    }
+
+                                    $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id)->where('type', $type)->latest()->first();
+                                    if (!empty($pending_invoice_shipment)) {
+                                        $pending_invoice_shipment->shipment_id = $shipment_id;
+                                        $pending_invoice_shipment->type = $type;
+                                        $pending_invoice_shipment->charges = $charges;
+                                        $pending_invoice_shipment->gst = $gst;
+                                        $pending_invoice_shipment->sms_charges = $sms_charges;
+                                        $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
+                                        $pending_invoice_shipment->transaction_id = $transaction_id;
+                                        $pending_invoice_shipment->save();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }else{
+                    if ($shipment->packaging_material_request == 1) {
+                        $packaging_check = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number);
+                        if ($packaging_check->exists()) {
+                            $packaging_check = $packaging_check->first();
+                            if ($packaging_check->packaging_payment_mode_id == 2) {
+                                $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id)->where('type', $type)->latest()->first();
+                                if (!empty($pending_invoice_shipment)) {
+
+                                    $pending_invoice_shipment->shipment_id = $shipment_id;
+                                    $pending_invoice_shipment->type = $type;
+                                    $pending_invoice_shipment->charges = $charges;
+                                    $pending_invoice_shipment->gst = $gst;
+                                    $pending_invoice_shipment->sms_charges = $sms_charges;
+                                    $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
+                                    $pending_invoice_shipment->transaction_id = $transaction_id;
+                                    $pending_invoice_shipment->save();
+                                }
+                            }
+                        }
+                    } else {
+                        $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id)->where('type', $type)->latest()->first();
+                        if (!empty($pending_invoice_shipment)) {
+
+                            $pending_invoice_shipment->shipment_id = $shipment_id;
+                            $pending_invoice_shipment->type = $type;
+                            $pending_invoice_shipment->charges = $charges;
+                            $pending_invoice_shipment->gst = $gst;
+                            $pending_invoice_shipment->sms_charges = $sms_charges;
+                            $pending_invoice_shipment->invoice_amount = $charges + $gst + $sms_charges;
+                            $pending_invoice_shipment->transaction_id = $transaction_id;
+                            $pending_invoice_shipment->save();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }
