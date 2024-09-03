@@ -28,16 +28,13 @@ class UpdateArrivalChargesSeeder extends Seeder
             ->where('pending_payment_shipments.type', 3)
             ->whereBetween('pending_payment_shipments.created_at', [$startDate, $endDate])
             ->where('users.account_type_id', 1)
-            ->where('shipments.weight_charges', '>',0)
+            ->whereIn('shipments.shipper_status_id',[2,5,3,8,14])
             ->where('pending_payment_shipments.payable', 0)->get();
         foreach ($data as $shipment){
             if($shipment){
                 $shipment_id = $shipment->id;
-                if (in_array($shipment->shipper_status_id, [3,5,2])) {
-                    if ($shipment->booking_type_id != 4) {
-                        AdminFinanceController::update_payment($shipment_id, 3);
-                    }
-
+                if ($shipment->booking_type_id != 4) {
+                    AdminFinanceController::update_payment($shipment_id, 3);
                 }
             }
         }
