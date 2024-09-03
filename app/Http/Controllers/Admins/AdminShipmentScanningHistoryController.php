@@ -181,12 +181,14 @@ class AdminShipmentScanningHistoryController extends Controller
                         $details[$index]['scanned_by'] = $scanned_by;
                         $details[$index]['city'] = $city;
                         $details[$index]['area'] = $area;
+                        $details[$index]['updated_via'] = DB::table('shipment_scanning_journey_vias')->whereId($scanning_history->updated_via)->pluck('name')->first() ?? '-';
                         $details[$index]['scanned_at'] = Carbon::parse($scanning_history->created_at)->format('Y-m-d H:i:s');
-
                         $details[$index]['ip_address'] = $scanning_history->ip_address;
-
-                        $details[$index]['latitude'] = $scanning_history->latitude;
-                        $details[$index]['longitude'] = $scanning_history->longitude;
+                        $details[$index]['latitude'] = $scanning_history->latitude ?? '-';
+                        $details[$index]['longitude'] = $scanning_history->longitude ?? '-';
+                        $details[$index]['entry_method'] =  $scanning_history->entry_method === null
+                            ? 'Not Scanned'
+                            : ($scanning_history->entry_method == 1 ? 'Scanned' : 'Manual');
                     }
                     $data['tracking_number'] = $request->tracking_number;
                     $data['history'] = $details;
