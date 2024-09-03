@@ -811,7 +811,7 @@ class V2AdminPickupsController extends Controller
             $user = $shipment->user;
             $by_passed_users_setting = GlobalSettings::where('type', 'bypass_weight_setting')->first();
             $bypassed_users = $by_passed_users_setting ? explode(',', $by_passed_users_setting->text) : [];
-            
+
             if ($user->sub_segment_id == 2 || (in_array($user->id, $bypassed_users))) {
                 $settings = GlobalSettings::where('type', 'global_rider_id')->first();
                 
@@ -989,6 +989,7 @@ class V2AdminPickupsController extends Controller
     public function bulk_arrival_submit(Request $request)
     {
         $shipment_ids = explode(',', $request->shipment_ids);
+        $shipment_ids = array_unique($shipment_ids);
 
         $pickup_request_ids = array();
 
@@ -1802,7 +1803,7 @@ class V2AdminPickupsController extends Controller
                 }
             }
         }
-        
+
         $walkin_shipment_ids = array();
         $print_shipment_ids = array();
         $pickup_request_ids = array();
@@ -2425,6 +2426,7 @@ class V2AdminPickupsController extends Controller
     public function individual_arrival_submit(Request $request)
     {
         $shipment_ids = explode(',', $request->shipment_ids);
+        $shipment_ids = array_unique($shipment_ids);
 
         $pickup_request_ids = array();
 
