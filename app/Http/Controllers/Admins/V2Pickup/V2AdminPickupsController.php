@@ -1809,7 +1809,7 @@ class V2AdminPickupsController extends Controller
         $pickup_request_ids = array();
         $unassigned_pickup_requests = array();
 
-        $this->add_weight_bypass($shipments_to_be_bypassed, $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests,$request);
+        $this->add_weight_bypass(array_unique($shipments_to_be_bypassed), $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests,$request);
         return response()->json(['status' => 0, 'shipments_to_be_bypassed'=> $shipments_to_be_bypassed, 'shipments_to_be_not_bypassed' => $shipments_to_be_not_bypassed]);
     }
     
