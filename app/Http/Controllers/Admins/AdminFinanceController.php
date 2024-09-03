@@ -10455,8 +10455,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         $invoice = InvoiceForReimbursement::find($id);
 
         $shipper = $invoice->shipper;
-        $arrival_charges_applied = $shipper->arrival_charges_applied;
-
         $shipper_bank = $shipper->bank()->where('default_bank', 1)->first();
 
         $account_type_id = $shipper->account_type_id;
@@ -10606,6 +10604,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
+            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
             if ($shipment_journey->exists()) {
