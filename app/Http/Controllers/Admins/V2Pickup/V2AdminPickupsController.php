@@ -1403,7 +1403,6 @@ class V2AdminPickupsController extends Controller
 
     public function add_weight_bypass($shipments, $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests,Request $request)
     {
-        $shipments = array_unique($shipments);
         $settings = GlobalSettings::where('type', 'global_rider_id');
         $pickup_rider_id = null;
         if ($settings->exists()) {
@@ -1810,7 +1809,7 @@ class V2AdminPickupsController extends Controller
         $pickup_request_ids = array();
         $unassigned_pickup_requests = array();
 
-        $this->add_weight_bypass($shipments_to_be_bypassed, $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests,$request);
+        $this->add_weight_bypass(array_unique($shipments_to_be_bypassed), $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests,$request);
         return response()->json(['status' => 0, 'shipments_to_be_bypassed'=> $shipments_to_be_bypassed, 'shipments_to_be_not_bypassed' => $shipments_to_be_not_bypassed]);
     }
     
