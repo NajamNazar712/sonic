@@ -156,7 +156,8 @@ class Kernel extends ConsoleKernel
 
         'App\Console\Commands\CalculateFranchiseCommission',
         'App\Console\Commands\DeleteOldDataFromShortUrlTable',
-        'App\Console\Commands\RestartSupervisordProcesses'
+        'App\Console\Commands\RestartSupervisordProcesses',
+        'App\Console\Commands\UpdateArrivalChargesCommand'
         ];
 
     /**
@@ -548,6 +549,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('supervisord:restart')
             ->cron('0 9,13,16 * * *')
             ->runInBackground();
+
+        $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
     }
     /**
      * Register the commands for the application.
