@@ -9170,6 +9170,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $service_charges = 0;
             }
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
+            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
 
@@ -9244,17 +9245,23 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             $total_return_charges += $shipment->return_charges;
                         }
 
-                        $total_weight_charges += $shipment->weight_charges;
-
-                        if ($shipment->packaging_material_request) {
-                            $total_packaging_material_charges += $shipment->packaging_material_charges;
+                        if($done_payment_shipment->type == 3) {
+                            $total_weight_charges += $shipment->weight_charges;
+                            $total_fuel_surcharge += $shipment->fuel_surcharge;
+                            $total_faf_charges += $faf_charges;
+                        }else{
+                            if ($shipment->packaging_material_request) {
+                                $total_packaging_material_charges += $shipment->packaging_material_charges;
+                            }
+                            $total_insurance_charges += $shipment->insurance_charges;
+                            $total_intercept_charges += $shipment->intercept_charges;
+                            $total_nsa_osa_charges += $shipment->nsa_osa_charges;
+                            if(!$arrival_charges_applied){
+                                $total_weight_charges += $shipment->weight_charges;
+                                $total_fuel_surcharge += $shipment->fuel_surcharge;
+                                $total_faf_charges += $faf_charges;
+                            }
                         }
-
-                        $total_insurance_charges += $shipment->insurance_charges;
-                        $total_fuel_surcharge += $shipment->fuel_surcharge;
-                        $total_intercept_charges += $shipment->intercept_charges;
-                        $total_nsa_osa_charges += $shipment->nsa_osa_charges;
-                        $total_faf_charges += $faf_charges;
                     } else if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
                     }
