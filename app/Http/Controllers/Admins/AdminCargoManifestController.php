@@ -1287,7 +1287,7 @@ class AdminCargoManifestController extends Controller
 
             if ($misroute_history_count == 0) //for support screen misroute
             {
-                if (($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1)) {
+                if (($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1) && $shipment->return_address_id == null) {
                     return ['status' => 1, 'error' => 'Shipment`s origin and destination are same !'];
                 }
             }
@@ -1397,9 +1397,9 @@ class AdminCargoManifestController extends Controller
                     }
                     
                     if ($allowed || 1) {
-                        if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55,70, 73]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20) || 1) {
+                        if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55,70, 73]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20) || 1) {  
                             if ($shipment->return_address_id != NULL) {
-                                if (($shipment->shipper_status_id == 20) && ($shipment->consignee_city->hub_id == $shipment->return_address->city->hub_id)) {
+                                if (($shipment->consignee_city->hub_id == $shipment->return_address->city->hub_id)) {
                                     return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
                                 }
                             } else if (($shipment->shipper_status_id == 20) && ($shipment->consignee_city->hub_id == $shipment->pickup_address->city->hub_id)) {
@@ -2722,8 +2722,9 @@ class AdminCargoManifestController extends Controller
             if (in_array($bag->status_id, [1, 3, 5])) {
                 $origin_id = Auth::user()->default_hub_id;
                 $destination_hub_id = $bag->destination_hub_id;
-                $mapping = V2JunctionMapping::where('origin_id', $origin_id)->where('destination_id', $destination_hub_id)->where('status', 1);
-
+                $assigned_hubs = array_merge(session('hubs'), [$origin_id]);
+                $mapping = V2JunctionMapping::whereIn('origin_id', $assigned_hubs)->where('destination_id', $destination_hub_id)->where('status', 1);
+                //dd($assigned_hubs);
                 $allowed = FALSE;
 
                 if ($mapping->exists()) {
@@ -2826,6 +2827,7 @@ class AdminCargoManifestController extends Controller
         if ($bags->exists() && $bags->count() == count($request->bag_ids)) {
             $bags = $bags->get();
             $origin_id = Auth::user()->default_hub_id;
+            $assigned_hubs = array_merge(session('hubs'), [$origin_id]);
             $details = [];
             $pieces_sum = 0;
             $remarks = $request->remarks;
@@ -2854,7 +2856,8 @@ class AdminCargoManifestController extends Controller
                 //                $details[$bag->destination_hub_id]["destination_id"] = $bag->destination_hub_id;
                 $details[$bag->destination_hub_id]["destination"] = $bag->destination_hub->name;
 
-                $mapping = V2JunctionMapping::where([['origin_id', $origin_id], ['destination_id', $bag->destination_hub_id], ['status', 1]]);
+                $mapping = V2JunctionMapping::whereIn('origin_id', $assigned_hubs)->where([['destination_id', $bag->destination_hub_id], ['status', 1]]);
+                
                 if ($mapping->exists()) {
                     $mapping = $mapping->first();
                 } else if ($bag->junction_mapping_id != null) {
@@ -3060,9 +3063,9 @@ class AdminCargoManifestController extends Controller
                             }
                         }
                     }
-
+                    $assigned_hubs = array_merge(session('hubs'), [Auth::user()->default_hub_id]);
                     if ($bag->junction_mapping_id == null) {
-                        $mapping = V2JunctionMapping::where([['origin_id', Auth::user()->default_hub_id], ['destination_id', $hub_id], ['status', 1]])->first();
+                        $mapping = V2JunctionMapping::whereIn('origin_id', $assigned_hubs)->where([['destination_id', $hub_id], ['status', 1]])->first();
                         $bag->junction_mapping_id = $mapping->id;
                         $master_cargo->junction_mapping_id = $mapping->id;
                         $master_cargo->update();
