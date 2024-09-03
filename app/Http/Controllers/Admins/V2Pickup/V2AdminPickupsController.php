@@ -1403,6 +1403,7 @@ class V2AdminPickupsController extends Controller
 
     public function add_weight_bypass($shipments, $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests,Request $request)
     {
+        $shipments = array_unique($shipments);
         $settings = GlobalSettings::where('type', 'global_rider_id');
         $pickup_rider_id = null;
         if ($settings->exists()) {
