@@ -14,6 +14,7 @@ use App\HistoryShipmentReturnDiscountCharges;
 use App\HistoryZeroCodDiscountCharges;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Models\PendingPaymentShipment;
 use App\PendingCorporateDefaultShipmentReturnDiscountCharges;
 use App\PendingCorporateDefaultZeroCodDiscountCharges;
 use App\PendingCorporateShipmentReturnDiscountCharges;
@@ -252,7 +253,9 @@ trait RateReusableTrait
             if ($parcel->booking_type_id != 4) {
                 if (($parcel->packaging_material_request == 1 && $parcel->packaging_material_charges != '') || $parcel->packaging_material_request == 0) {
                     if($parcel->shipment_type == 1) {
-                        AdminFinanceController::add_payment($shipment, 3, $parcel);
+                        if(!PendingPaymentShipment::where('shipment_id', $shipment)->where('type', 3)->exists()) {
+                            AdminFinanceController::add_payment($shipment, 3, $parcel);
+                        }
                     }
                 }
             }
