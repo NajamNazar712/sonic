@@ -1284,8 +1284,10 @@ class V2AdminPickupsController extends Controller
                 //shipment calculate arrival charges
                 $shipment->refresh();
                 if(in_array($shipment->shipper_status_id,[2,15])){
-                    self::arrival_chagres($request,$shipment);
-                    array_push($arrival_charges_shipment,$shipment_id);;
+                    if(!in_array($shipment_id,$arrival_charges_shipment)) {
+                        array_push($arrival_charges_shipment, $shipment_id);
+                        self::arrival_chagres($request, $shipment);
+                    }
                 }
             } else {
                 unset($shipment_ids[$key]);
@@ -1673,8 +1675,10 @@ class V2AdminPickupsController extends Controller
                 }
                 $shipment->refresh();
                 if(in_array($shipment->shipper_status_id,[2,15])){
-                    self::arrival_chagres($request,$shipment);
-                    array_push($arrival_charges_shipment,$shipment_id);;
+                    if(!in_array($shipment_id,$arrival_charges_shipment)) {
+                        array_push($arrival_charges_shipment, $shipment_id);
+                        self::arrival_chagres($request, $shipment);
+                    }
                 }
             } else {
                 unset($shipments[$key]);
@@ -2635,8 +2639,10 @@ class V2AdminPickupsController extends Controller
                 //shipment calculate arrival charges
                 $shipment->refresh();
                 if(in_array($shipment->shipper_status_id,[2,15])){
-                    self::arrival_chagres($request,$shipment);
-                    array_push($arrival_charges_shipment,$shipment_id);;
+                    if(!in_array($shipment_id,$arrival_charges_shipment)) {
+                        array_push($arrival_charges_shipment, $shipment_id);
+                        self::arrival_chagres($request, $shipment);
+                    }
                 }
             } else {
                 unset($shipment_ids[$key]);
