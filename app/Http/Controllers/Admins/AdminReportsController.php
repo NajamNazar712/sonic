@@ -3638,9 +3638,9 @@ class AdminReportsController extends Controller
             })
             ->editColumn('p_collection_amount', function ($sale) {
                 $amount = '';
-                if ($sale->p_collection_amount != null) {
+                if ($sale->p_collection_amount != null && !empty($sale->p_collection_amount)) {
                     $amount = $sale->p_collection_amount;
-                } else if ($sale->d_collection_amount != null) {
+                } else if ($sale->d_collection_amount != null && !empty($sale->d_collection_amount)) {
                     $amount = $sale->d_collection_amount;
                 } else {
                     $amount = $sale->s_collection_amount;
