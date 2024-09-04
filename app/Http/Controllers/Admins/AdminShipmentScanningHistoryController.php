@@ -131,9 +131,7 @@ class AdminShipmentScanningHistoryController extends Controller
                                 : 'Not-Picked'
                         )
                         : '-';
-                        $details[$index]['entry_method'] =  $scanning_history->entry_method === null
-                            ? 'Not Scanned'
-                            : ($scanning_history->entry_method == 1 ? 'Scanned' : 'Manual');
+                        $details[$index]['entry_method'] =  $scanning_history->entry_method == 1 ? 'Scanned' : 'Manual';
 
 
                     }
@@ -186,9 +184,7 @@ class AdminShipmentScanningHistoryController extends Controller
                         $details[$index]['ip_address'] = $scanning_history->ip_address;
                         $details[$index]['latitude'] = $scanning_history->latitude ?? '-';
                         $details[$index]['longitude'] = $scanning_history->longitude ?? '-';
-                        $details[$index]['entry_method'] =  $scanning_history->entry_method === null
-                            ? 'Not Scanned'
-                            : ($scanning_history->entry_method == 1 ? 'Scanned' : 'Manual');
+                        $details[$index]['entry_method'] =  $scanning_history->entry_method == 1 ? 'Scanned' : 'Manual';
                     }
                     $data['tracking_number'] = $request->tracking_number;
                     $data['history'] = $details;
