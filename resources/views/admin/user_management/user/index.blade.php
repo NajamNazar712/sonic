@@ -81,6 +81,51 @@
 							</div>
 						</div>
 					</div>
+					
+
+					<div class="modal fade text-left" id="set_hub_access" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="set_hub_access" aria-hidden="true">
+						<div class="modal-dialog modal-md" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h4 class="modal-title" id="">Set Hub Access</h4>
+								</div>
+								<form id="set_hub_access_form" action="{{ route('admin.user_management.users.set_hub_access') }}" method="POST">
+									@method('POST')
+									@csrf
+									<div class="modal-body">
+										<input type="hidden" id="set_hub_admin_id" name="set_hub_admin_id">
+										<div class="col-12 form-group">
+											<div class="d-none text-danger" id="assign_hubs_msg_error_1">Please Select Hub(s)</div>
+											<!-- Radio buttons for hub access -->
+											<div class="form-check">
+												<input class="form-check-input" type="radio" id="multiple_hubs" name="hub_access" value="1">
+												<label class="form-check-label" for="multiple_hubs">
+													Multiple Hubs
+												</label>
+											</div>
+											<div class="form-check">
+												<input class="form-check-input" type="radio" id="default_hub_only" name="hub_access" value="2">
+												<label class="form-check-label" for="default_hub_only">
+													Default Hub only
+												</label>
+											</div>
+											<div class="form-check">
+												<input class="form-check-input" type="radio" id="zonal_hubs" name="hub_access" value="3">
+												<label class="form-check-label" for="zonal_hubs">
+													Zonal hubs
+												</label>
+											</div>
+										</div>
+									</div>
+									<div class="modal-footer">
+										<button type="submit" class="btn btn-success" id="set_hub_access_submit">Submit</button>
+										<button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+					
 				
 
 
@@ -154,6 +199,7 @@
 										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Updated by</th>
 										<th class="border-primary border-darken-1">Status</th>
+										<th class="border-primary border-darken-1">Hub Access Type</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -225,6 +271,25 @@
 			</div>
 		</div>
 	</div>
+
+	<div id="get_hub_access_type" class="modal fade" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+			<h5 class="modal-title">Hubs</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+			</div>
+			<div id="modal-content" class="modal-body">
+			</div>
+			<div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+		</div>
+  	</div>
+  
 	
 @endsection
 
@@ -333,6 +398,8 @@
                             head.push('Updated Datetime');
                             head.push('Updated by');
                             head.push('Status');
+							head.push('Hub Access Type');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
@@ -348,6 +415,7 @@
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
                                 row.push(values.status);
+                                row.push(values.ahat_excel);
 
                                 body.push(row);
                             });
@@ -544,6 +612,7 @@
 					{data: 'updated_at', name: 'admins.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data: 'status', name: 'admins.status', class: 'align-middle status'},
+					{data: 'ahat', name: 'ahat', class: 'align-middle ahat', orderable:false },
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -574,7 +643,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select-checkbox')) {
+						if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select-checkbox') || $(header).is('.ahat')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -846,9 +915,6 @@
                 table.draw();
             });
 
-
-
-			
 			$(document).on('click', '.lost_hub_user_shipment', function() {
 				var id = $(this).data('target-id');
 				$('#admin_id').val(id);
@@ -909,6 +975,50 @@
 				$('#admin_id ').val('');
 				$('#select_lost_hub_user_shipment').val([]).trigger('change');
 			});
+
+
+			
+			$(document).on('click', '.set_hub_access', function() {
+				var id = $(this).data('target-id');
+				var hat = $(this).data('target-hub_access_type');
+
+				if (hat == 1 || hat == '') {
+					$('#set_hub_access #multiple_hubs').prop('checked', true);
+				} else if (hat == 2) {
+					$('#set_hub_access #default_hub_only').prop('checked', true);
+				} else if (hat == 3) {
+					$('#set_hub_access #zonal_hubs').prop('checked', true);
+				}
+
+				$('#set_hub_access #set_hub_admin_id').val(id);
+
+				$('#set_hub_access').modal('show');
+			});
+
+			$('#set_hub_access').on('hidden.bs.modal', function (e) {
+				$('#set_hub_admin_id ').val('');
+			});
+
+			$(document).on('click', '.get_hub_access_type', function() {
+				var id = $(this).data('target-id');
+
+				// Make the AJAX request
+				$.ajax({
+					url: '{!! route('admin.user_management.users.get_hub_access') !!}',
+					method: 'GET',
+					data: { id: id },
+					success: function(response) {
+						
+						$('#get_hub_access_type #modal-content').html(response.hubs_name);
+						$('#get_hub_access_type').modal('show');
+					},
+					error: function() {
+						alert('An error occurred while fetching data.');
+					}
+				});
+			});
+
+
 
 
 		});

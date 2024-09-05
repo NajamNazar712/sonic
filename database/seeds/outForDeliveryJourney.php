@@ -26,15 +26,30 @@ class outForDeliveryJourney extends Seeder
     {
         //
         $shipmentId = [
-           
+            22617440980487,
+            22320241010259,
+            22317441500424,
             ];
         
         if ($shipmentId) {
-            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id',5)->get();
+            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id', 5)->get();
             echo count($shipmentId);
+            $serial = 53; 
+
             foreach ($shipmentId as $shipment) {
 
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
+                if(!$deliveryNoteId){
+                    $deliveryNoteId =  new DeliveryNoteShipment();
+                    $deliveryNoteId->delivery_note_id = 2333515;
+                    $deliveryNoteId->status = 1;
+                    $deliveryNoteId->shipment_id = $shipment->id;
+                    $deliveryNoteId->notification = 1;
+                    $deliveryNoteId->rider_information = 1;
+                    $deliveryNoteId->ordering = $serial;
+                    $deliveryNoteId->save();
+                    $serial++;
+                }
                 $delivertNote   = DeliveryNote::find($deliveryNoteId->delivery_note_id);
                 
                 if($delivertNote->request_note_id){

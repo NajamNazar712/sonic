@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admins;
 
+use LDAP\Result;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
+use App\AdminHubAccessType;
 use App\UserLostShipmentHub;
 use Illuminate\Http\Request;
 use App\Http\Models\Admin\Admin;
@@ -12,6 +14,8 @@ use App\Http\Models\HR\Employee;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\Module;
 use App\Http\Models\EmployeeShift;
+use App\Http\Models\ZoneClassCity;
+use Illuminate\Support\Facades\DB;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AdminRole;
@@ -21,7 +25,6 @@ use App\Http\Models\ReportingLocation;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\HR\EmployeeBloodGroup;
-
 use App\Http\Models\Admin\ModulePermission;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Controllers\NotificationsController;
@@ -30,6 +33,8 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminHumanResourseController;
 use App\Http\Models\Admin\UserRoleManagementLog;
 
+use Illuminate\Support\Facades\Log;
+use PhpParser\Parser\Multiple;
 
 class UserManagementController extends Controller
 {
@@ -102,7 +107,11 @@ class UserManagementController extends Controller
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'admins.trax_id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'emp.blood_group')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','ed.name as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person','admins.management_user as management_user');
+            ->leftjoin('admin_hub_access_types as ahat', function ($join) {
+                $join->on('ahat.admin_id', '=', 'admins.id')
+                    ->where('ahat.id', '=', DB::raw('(SELECT MAX(id) FROM admin_hub_access_types WHERE admin_hub_access_types.admin_id = admins.id)'));
+            })
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','ed.name as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person','admins.management_user as management_user', 'ad.id as admin_dept_id', 'ahat.hub_access_type as hat');
 
         if (!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
@@ -137,6 +146,29 @@ class UserManagementController extends Controller
                 $query->where('bg.id', $keyword);
             })
             ->removeColumn('department')
+            ->addColumn('ahat', function ($user) {
+                $type = '-';
+
+                if($user->hat == 1 || empty($user->hat)){
+                    $type = 'Multiple Hubs';
+                }else if ($user->hat == 2){
+                    $type = 'Default Hubs';
+                }else if ($user->hat == 3){
+                    $type = 'Zonal Hubs';
+                }
+
+                $admin_hubs = AdminHub::where('admin_id', $user->id)->pluck('hub_id');
+
+                if($admin_hubs->isNotEmpty()){
+                    return '<button class="btn btn-sm btn-outline-info align-middle get_hub_access_type" data-target-id="' . $user->id . '">' . $type . '</button>';
+                }else{
+                    return 'No Hub Assigned';
+                }
+            })
+
+            ->addColumn('ahat_excel', function ($user) {
+               return $this->getHubsNameForUser($user->id);
+            })
             ->addColumn('action', function ($user) {
                 if (session('role_id') == 1 || count(array_intersect([83, 84, 542, 620], session('permissions'))) !== 0) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
@@ -148,6 +180,9 @@ class UserManagementController extends Controller
                     $rejoin_button = '<button type="button" class="dropdown-item rejoin" data-target-id="' . $user->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Rejoin Admin</div></button>';
 
                     $lost_hub_user_shipment_button = '<button type="button" class="dropdown-item lost_hub_user_shipment" data-target-id="' . $user->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">User Lost Shipment Hub</div></button>';
+
+
+                    $set_hub_access = '<button type="button" class="dropdown-item set_hub_access" data-target-id="' . $user->id . '" data-target-hub_access_type="' . $user->hat . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Set Hub Access</div></button>';
 
                     $dropdown = '
                     <div class="btn-group">
@@ -178,6 +213,18 @@ class UserManagementController extends Controller
                     if (session('role_id') == 1 || in_array(620, session('permissions'))) {
                         if ($user->status == 0 && $user->first_inactive == 1) {
                             $dropdown .= $rejoin_button;
+                        }
+                    }
+
+                    if (session('role_id') == 1 || in_array(620, session('permissions'))) {
+                        if ($user->status == 0 && $user->first_inactive == 1) {
+                            $dropdown .= $rejoin_button;
+                        }
+                    }
+
+                    if (session('role_id') == 1 || in_array(1004, session('permissions'))) {
+                        if ($user->admin_dept_id == 6) {
+                            $dropdown .= $set_hub_access;
                         }
                     }
 
@@ -572,6 +619,13 @@ class UserManagementController extends Controller
 
             AdminHub::where('admin_id', $id)->whereIn('hub_id', $delete_hub_ids)->delete();
 
+            $admin_hub_access = AdminHubAccessType::where('admin_id', $id);
+
+            if($admin_hub_access->exists()) {
+                $admin_hub_access->latest()->first()->update([
+                    'hub_access_type' => 1
+                ]);
+            }
             foreach ($new_hub_ids as $hub_id) {
                 $admin_hub = new AdminHub();
 
@@ -582,6 +636,8 @@ class UserManagementController extends Controller
             }
             $deleted_name_hubs = City::whereIn('id', $delete_hub_ids)->pluck('name')
             ->implode(', ');
+
+
         } else {
             $current_hub_ids = AdminHub::where('admin_id', $id)->pluck('hub_id')->toArray();
             $deleted_name_hubs = City::whereIn('id', $delete_hub_ids)->pluck('name')
@@ -1257,7 +1313,139 @@ class UserManagementController extends Controller
         }
 
         return response()->json(['status' => 1, 'success' => 'Added Successfully!']);
-
     }
 
+
+
+    public function set_hub_access(Request $request)
+    {
+        $hubAccessType = $request->input('hub_access');
+        $adminId = $request->input('set_hub_admin_id');
+        $admin = Admin::find($adminId);
+
+
+        if (empty($admin->default_hub_id)) {
+            return redirect()->back()->with('error', 'Please assign a default hub first!');
+        }
+        
+        $defaultHub = $admin->default_hub_id;
+    
+        $oldHubs = AdminHub::where('admin_id', $adminId)->pluck('hub_id')->toArray();
+
+        DB::transaction(function () use ($adminId, $hubAccessType, $defaultHub, $oldHubs) {
+            try {
+                switch ($hubAccessType) {
+                    case 1:
+                        $this->assignMultipleHubs($adminId, $oldHubs);
+                        break;
+        
+                    case 2:
+                        AdminHub::where('admin_id', $adminId)->delete();
+                        $this->assignDefaultHub($adminId, $defaultHub, $oldHubs);
+                        break;
+        
+                    case 3:
+                        AdminHub::where('admin_id', $adminId)->delete();
+                        $this->assignZonalHubs($adminId, $defaultHub, $oldHubs);
+                        break;
+        
+                    default:
+                        throw new \InvalidArgumentException('Invalid hub access type');
+                }
+            } catch (\Exception $e) {
+                Log::error('Transaction failed: ' . $e->getMessage());
+            }
+        });
+        
+
+        return redirect()->back()->with(['success' => 'Hub has been updated!']);
+    }
+
+    private function assignMultipleHubs($adminId, $oldHubs)
+    {
+        AdminHubAccessType::create([
+            'admin_id' => $adminId,
+            'hub_access_type' => 1,
+            'previous_assigned_hubs' => implode(',' , $oldHubs),
+            'new_assigned_hubs' => implode(',' , $oldHubs),
+            'updated_by' => Auth::id()
+        ]);
+    }
+
+    private function assignDefaultHub($adminId, $defaultHub, $oldHubs)
+    {
+        AdminHub::insert([
+            'admin_id' => $adminId,
+            'hub_id' => $defaultHub
+        ]);
+
+        AdminHubAccessType::create([
+            'admin_id' => $adminId,
+            'hub_access_type' => 2,
+            'previous_assigned_hubs' => implode(',' , $oldHubs),
+            'new_assigned_hubs' => $defaultHub,
+            'updated_by' => Auth::id()
+        ]);
+    }
+
+    private function assignZonalHubs($adminId, $defaultHub, $oldHubs)
+    {
+        $city = City::where(['hub_id' => $defaultHub, 'hub' => 1])->first();
+
+        if (!$city) {
+            return redirect()->back()->with(['error' => 'City Doesn\'t Exist!']);
+        }
+        
+        $zone_id = $city->zone_id;
+        
+        if (!$zone_id) {
+            return redirect()->back()->with(['error' => 'Zone Doesn\'t Exist!']);
+        }
+        
+        $zonalHubs = City::where(['zone_id' => $zone_id, 'status' => 1, 'hub' => 1])->pluck('id')->toArray();
+        $existingHubIds = AdminHub::where('admin_id', $adminId)->pluck('hub_id')->toArray();
+        
+        $insertData = [];
+        foreach ($zonalHubs as $hubId) {
+            if (!in_array($hubId, $existingHubIds)) {
+                $insertData[] = [
+                    'admin_id' => $adminId,
+                    'hub_id' => $hubId,
+                ];
+            }   
+        }
+
+        if(!empty($insertData)){
+            AdminHub::insert($insertData);
+        }
+
+        AdminHubAccessType::create([
+            'admin_id' => $adminId,
+            'hub_access_type' => 3,
+            'previous_assigned_hubs' => implode(',' , $oldHubs),
+            'new_assigned_hubs' => implode(',' , $zonalHubs),
+            'updated_by' => Auth::id()
+        ]);   
+    }
+
+    public function get_hub_access(Request $request) {
+        return response()->json([
+            'status' => 1,
+            'hubs_name' => $this->getHubsNameForUser($request->id)
+        ]);
+    }
+
+    private function getHubsNameForUser($user)
+    {
+        $adminHubs = AdminHub::where('admin_id', $user)->pluck('hub_id');
+
+        if ($adminHubs->isEmpty()) {
+            return 'No Hub Assigned';
+        }
+
+        $hubsNames = City::whereIn('id', $adminHubs)->pluck('name');
+        return $hubsNames->implode(', ');
+    }
+
+    
 }

@@ -15,13 +15,10 @@
                 <div class="row mb-2 justify-content-start">
 
                     <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
+                            <fieldset class="form-group">
+                                <select name="search_shipper[]" id="search_shippers" class="form-control select2" multiple required data-rule-required="true" data-msg-required="This field is required">
+                                </select>
+                            </fieldset>
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
@@ -266,6 +263,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
         table.dataTable {
             font-size: 12px;
@@ -303,7 +301,7 @@
             white-space: normal;
         }
 
-        #toast-bottom-center.toast-container {
+        /* #toast-bottom-center.toast-container {
             text-align: center;
         }
 
@@ -311,7 +309,25 @@
             display: table;
             width: auto !important;
             text-align: left;
+        } */
+
+        #toast-top-full-width {
+            position: fixed !important;
+            width: 100% !important;
+            top: 0 !important;
+            left: 0 !important;
+            text-align: center !important;
         }
+        .toast-top-full-width .toast {
+            width: 90rem !important;
+        }
+        .toast-top-full-width .toast-message {
+            font-size: 24px !important;
+        }
+        .toast-title{
+            display: none !important;
+        }
+
     </style>
 @endsection
 @section('js')
@@ -319,6 +335,9 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -329,8 +348,26 @@
             });
             $('#search_shippers').select2({
                 width:'100%',
-                placeholder:"Select Multiple Shippers",
+                placeholder:"Select Shipper",
                 allowClear:true,
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                            sub_segment_select : $('#sub_segment_select').val()
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    delay: 700,
+                }
             });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
@@ -373,7 +410,8 @@
             });
             $('#sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Sub Segment*'
+                placeholder: 'Sub Segment',
+                allowClear: true
             });
             $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -719,9 +757,39 @@
                 }
             });
 
-
             $('#search_filter_btn').on('click',function () {
-                table.draw();
+                var from_date = $('#from_date').val();
+                var to_date = $('#to_date').val();
+                var arrival_from_date = $('#from_date1').val();
+                var arrival_to_date = $('#to_date1').val();
+
+                var search_qsr = $('#search_qsr').val();
+                var search_types = $('#search_types').val();
+                var search_shippimg_modes = $('#search_shippimg_modes').val();
+                var search_shipment_status = $('#search_shipment_status').val();
+
+                // Check if any dropdown has a selected value
+                var isDropdownSelected = search_qsr || search_types || search_shippimg_modes || search_shipment_status;
+
+                // Check if either pair of dates is filled
+                var isFromDateFilled = from_date && to_date;
+                var isArrivalDateFilled = arrival_from_date && arrival_to_date;
+
+                if (isDropdownSelected) {
+                    if (!isFromDateFilled && !isArrivalDateFilled) {
+                        toastr.error('Please fill in either the "From Date" and "To Date" pair or the "Arrival From Date" and "Arrival To Date" pair.', 'Error!', {
+                            positionClass: 'toast-top-full-width',
+                            containerId: 'toast-top-full-width'
+                        });
+                        return false;
+                    } else {
+                        table.draw();
+                    }
+                } else {
+                    table.draw();
+                }
+
+                // table.draw();
             });
 
             let option = '';
@@ -745,6 +813,26 @@
                 selectAll: true
             });
 
+            var sub_segment_select = $('#sub_segment_select');
+            var shippers_select = $('#search_shippers');
+            {{--sub_segment_select.on('change', function(){--}}
+            {{--    var sub_segment_value = sub_segment_select.val();--}}
+            {{--    $.ajax({--}}
+            {{--        url: "{{ route('admin.reports.qsr.updated_shippers_list') }}",--}}
+            {{--        data: {--}}
+            {{--            sub_segment_value--}}
+            {{--        },--}}
+            {{--        success: function (response) {--}}
+            {{--            var shippers = response.data;--}}
+            {{--            shippers_select.empty();--}}
+            {{--            shippers.forEach(function(shipper) {--}}
+            {{--                var newOption = new Option(shipper.name, shipper.id, false, false);--}}
+            {{--                shippers_select.append(newOption);--}}
+            {{--            });--}}
+            {{--            shippers_select.trigger('change');--}}
+            {{--        }--}}
+            {{--    });--}}
+            {{--});--}}
         });
 
     </script>
