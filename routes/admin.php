@@ -3561,6 +3561,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('case_nature_remarks', 'Admins\AdminTrackingController@case_nature_remarks')->name('case_nature_remarks');
             Route::post('case_nature_service_remarks', 'Admins\AdminTrackingController@case_nature_service_remarks')->name('case_nature_service_remarks');
             Route::post('case_nature_claim_remarks', 'Admins\AdminTrackingController@case_nature_claim_remarks')->name('case_nature_claim_remarks');
+            Route::post('updated_crm_request_nature_types', 'Admins\AdminTrackingController@updated_crm_request_nature_types')->name('updated_crm_request_nature_types');
+
         });
         Route::prefix('feedback')->name('feedback.')->group(function () {
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
