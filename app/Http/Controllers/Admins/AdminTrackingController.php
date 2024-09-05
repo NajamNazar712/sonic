@@ -94,6 +94,34 @@ class AdminTrackingController extends Controller
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
+        $dept_id = Auth::user()->role->department_id;
+        if($dept_id != 1 ) {
+        
+            $case_nature_type_complaints = $case_nature_type_complaints->filter(function ($case_nature_type_complaints) use ($dept_id) {
+                $complaints_dept = json_decode($case_nature_type_complaints->admin_departments, true);
+                if (is_null($complaints_dept)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return in_array($dept_id, $complaints_dept);
+            });
+            $case_nature_type_service_requests = $case_nature_type_service_requests->filter(function ($case_nature_type_service_requests) use ($dept_id) {
+                $services_dept = json_decode($case_nature_type_service_requests->admin_departments, true);
+                if (is_null($services_dept)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return in_array($dept_id, $services_dept);
+            });
+            $case_nature_type_claims = $case_nature_type_claims->filter(function ($case_nature_type_claims) use ($dept_id) {
+                $claims_dept = json_decode($case_nature_type_claims->admin_departments, true);
+                if (is_null($claims_dept)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return in_array($dept_id, $claims_dept);
+            });
+        }
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55,56,13])->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
@@ -140,7 +168,50 @@ class AdminTrackingController extends Controller
     }
 
 
-
+    public function updated_crm_request_nature_types(Request $request)
+    {
+        $shipment_id = $request->input('shipment_id');
+        $shipment_status = Shipment::where('id', $shipment_id)->pluck('shipper_status_id')->first();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
+        $dept_id = Auth::user()->role->department_id;
+        if($dept_id != 1) {
+            $case_nature_type_complaints = $case_nature_type_complaints->filter(function ($case_nature_type_complaints) use ($dept_id, $shipment_status) {
+                $complaints_dept = json_decode($case_nature_type_complaints->admin_departments, true);
+                $complaints_status = json_decode($case_nature_type_complaints->shipment_status, true);
+                
+                if (is_null($complaints_dept) || is_null($complaints_status)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return (in_array($dept_id, $complaints_dept) && in_array($shipment_status, $complaints_status));
+            });
+            $case_nature_type_service_requests = $case_nature_type_service_requests->filter(function ($case_nature_type_service_requests) use ($dept_id, $shipment_status) {
+                $services_dept = json_decode($case_nature_type_service_requests->admin_departments, true);
+                $services_status = json_decode($case_nature_type_service_requests->shipment_status, true);
+                if (is_null($services_dept) || is_null($services_status)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return (in_array($dept_id, $services_dept) && in_array($shipment_status, $services_status)) ;
+            });
+            $case_nature_type_claims = $case_nature_type_claims->filter(function ($case_nature_type_claims) use ($dept_id, $shipment_status) {
+                $claims_dept = json_decode($case_nature_type_claims->admin_departments, true);
+                $claims_status = json_decode($case_nature_type_claims->shipment_status, true);
+                if (is_null($claims_dept) || is_null($claims_status)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return (in_array($dept_id, $claims_dept) && in_array($shipment_status, $claims_status));
+            });
+        }   
+        return response()->json([
+            'case_nature_type_complaints' => $case_nature_type_complaints,
+            'case_nature_type_service_requests' => $case_nature_type_service_requests,
+            'case_nature_type_claims' => $case_nature_type_claims
+        ]);
+    }
     public function track(Request $request)
     {
         $tracking_numbers = explode(',', $request->tracking_numbers);

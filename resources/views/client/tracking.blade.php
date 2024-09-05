@@ -1181,10 +1181,14 @@
                 dropdownParent: $('#add_request_form')
             }).on('change', function() {
                 var id = parseInt($(this).val());
-                
+                var shipment_id = $('#requested_shipment_id').val();
                 $.ajax({
                     url: '{{ route('cod.tracking.shipper_visibility') }}',
-                    type: 'GET',
+                    type: 'POST',
+                    data: { 
+                        'id': id,
+                        'shipment_id': shipment_id,
+                    },
                     headers: {
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1198,7 +1202,7 @@
                             $('#request_claims').addClass('d-none');
 
                             // Update options based on response.case_nature_type_complaints
-                            updateOptions('#request_complaints_select', response.case_nature_type_complaints);
+                            updateOptions('#case_nature_complaints', response.case_nature_types);
                         } else if (id === 2) {
                             $('#request_complaints').addClass('d-none');
                             $('#request_service').removeClass('d-none');
@@ -1207,7 +1211,7 @@
                             $('#request_claims').addClass('d-none');
 
                             // Update options based on response.case_nature_type_service_requests
-                            updateOptions('#request_service_select', response.case_nature_type_service_requests);
+                            updateOptions('#case_nature_requests', response.case_nature_types);
                         } else if (id === 3) {
                             $('#request_complaints').addClass('d-none');
                             $('#request_service').addClass('d-none');
@@ -1224,7 +1228,7 @@
                             $('#AddNewRequest').removeClass('d-none');
 
                             // Update options based on response.case_nature_type_claims
-                            updateOptions('#request_claims_select', response.case_nature_type_claims);
+                            updateOptions('#case_nature_claim', response.case_nature_types);
                         } else {
                             $('#request_complaints').addClass('d-none');
                             $('#request_service').addClass('d-none');
@@ -1244,12 +1248,13 @@
             function updateOptions(selectElementId, optionsData) {
                 var $select = $(selectElementId);
                 // Clear existing options
-                $select.empty();
+                //$select.empty();
+                $select.find('option:not(:first)').remove();
                 // Append new options
                 $.each(optionsData, function(index, option) {
                     $select.append($('<option>', {
                         value: option.id,
-                        text: option.name
+                        text: option.type
                     }));
                 });
                 // Trigger change event
