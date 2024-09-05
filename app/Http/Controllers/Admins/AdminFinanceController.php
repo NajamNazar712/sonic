@@ -6599,7 +6599,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $dropdown .= $view_details_button;
 
                 if (($pending_payment->documents_status == 2) && (session('role_id') == 1 || in_array(60, session('permissions')))) {
-                    $dropdown .= $make_payments_button;
+//                    $dropdown .= $make_payments_button;
                     $dropdown .= $make_payments_button_modal;
                 }
 
