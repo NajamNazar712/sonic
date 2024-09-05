@@ -7875,6 +7875,16 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
             ->join('payment_cycles as pc', 'u.payment_cycle_id', '=', 'pc.id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->leftJoin('sale_person_tags as spt', function($join){
+                $join->on('spt.user_id','u.id')
+                ->where(
+                    'spt.id',
+                    '=',
+                    DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0 )')
+                );
+            })
+            //leftJoin to join as admin will always present
+            ->join('admins as sale_admin','sale_admin.id','=','spt.admin_id')
             ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 
             'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 
             'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 
@@ -7884,7 +7894,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges', 'sale_admin.name as sale_person_name');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
