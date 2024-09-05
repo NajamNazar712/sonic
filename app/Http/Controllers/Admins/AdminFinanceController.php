@@ -4325,7 +4325,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id)->where('type','!=',3);
 
                 if (!$pending_payment_shipment->exists()) {
-                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
+                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id)->where('type','!=',3);
 
                     if (!$done_payment_shipment->exists()) {
                         $account_type_id = $shipment->user->account_type_id;
@@ -4336,7 +4336,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             if ($pending_invoice_shipment->exists()) {
                                 return ['status' => 1, 'error' => 'A Invoice Payment of given Shipment is in Pending'];
                             } else {
-                                $invoice_shipment = InvoiceShipment::where('shipment_id', $shipment->id);
+                                $invoice_shipment = InvoiceShipment::where('shipment_id', $shipment->id)->where('type','!=',3);
 
                                 if ($invoice_shipment->exists()) {
                                     return ['status' => 1, 'error' => 'A Invoice Payment of given Shipment has already been Processed'];
