@@ -3251,7 +3251,7 @@ class V2AdminPickupsController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
-                ShipmentScanningJourneyController::add($shipment_id, 1, 1, Auth::id(), null, null, $shipment_piece->id);
+                ShipmentScanningJourneyController::add($shipment_id, 1, 1, Auth::id(), null, null, $shipment_piece->id, null, null, null, null, 0);
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {
                 return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
@@ -3357,7 +3357,7 @@ class V2AdminPickupsController extends Controller
                     $details['city'] = $shipment->consignee_city->name;
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
 
-                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, 0);
 
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                 } else {

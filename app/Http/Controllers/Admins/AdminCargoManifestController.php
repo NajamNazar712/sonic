@@ -1200,7 +1200,6 @@ class AdminCargoManifestController extends Controller
 
     public function create_shipment_details(Request $request) //create bag -> shipment details
     {
-
         $misrouted_history_hub = 0;
         $intercept_re_book_history_hub = 0;
 
@@ -1485,7 +1484,7 @@ class AdminCargoManifestController extends Controller
 
                                     $details['total'] = $shipments->count;
                                 }
-                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null, null);
+                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null, null, null, null, null, null, null,  $request->action);
 
                                 return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                                 /*}
@@ -2648,11 +2647,10 @@ class AdminCargoManifestController extends Controller
     {
         $bag = CargoManifestBag::with('shipment', 'shipment.shipment')->where('seal_number', $request->bag_number);
         $bag_destinations = $request->bag_destinations;
-
         if ($bag->exists()) {
             $bag = $bag->latest()->first();
 
-            ShipmentScanningJourneyController::seal_number_add($bag->id, 1, Auth::id());
+            ShipmentScanningJourneyController::seal_number_add($bag->id, 1, Auth::id(), $request->action);
 
             if (in_array($bag->status_id, [1, 3, 5])) {
                 $origin_id = Auth::user()->default_hub_id;
@@ -3810,14 +3808,14 @@ class AdminCargoManifestController extends Controller
         $bag_manifest_exists = 1;
         $admin_default_hub_id = Auth::user()->default_hub_id;
 
-        $bag = CargoManifestBag::where('seal_number', $request->bag_number);
 
+        $bag = CargoManifestBag::where('seal_number', $request->bag_number);
         if ($bag->exists()) {
             $bag = $bag->whereIn('status_id', $this->bag_can_be_received_statuses);
             if ($bag->exists()) {
                 $bag = $bag->latest()->first();
 
-                ShipmentScanningJourneyController::seal_number_add($bag->id, 2, Auth::id());
+                ShipmentScanningJourneyController::seal_number_add($bag->id, 2, Auth::id(), $request->action);
 
                 $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb', function ($join) use ($bag) {
                     $join->on('mb.cargo_manifest_id', 'cargo_manifests.id');
@@ -5291,7 +5289,7 @@ class AdminCargoManifestController extends Controller
                             $details['tracking_number'] = $shipment->tracking_number;
                             $details['pieces_count'] = $shipment->pieces;
                             $details['pieces_tracking_numbers'] = $shipment_pieces;
-                            ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
+                            ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null, null, null, null, null, null, $request->action);
                             return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                         }
                     }
@@ -5320,7 +5318,7 @@ class AdminCargoManifestController extends Controller
                     $details['shipping_mode'] = $shipment->shipping_mode->mode;
                     $details['amount'] = number_format($shipment->amount);
                     $details['service_type'] = $shipment->booking_type->booking_type;
-                    ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), NULL, NULL, NULL, NULL, session('latitude'), session('longitude'), NULL);
+                    ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), NULL, NULL, NULL, NULL, session('latitude'), session('longitude'), NULL, $request->action);
                     return ['status' => 0, 'success' => 'Shipment has been Added!', 'details' => $details];
                 } else {
                     //return ['status' => 1, 'error' => 'Given Bag Number\'s has already been Received'];
@@ -5335,7 +5333,7 @@ class AdminCargoManifestController extends Controller
                             $details['tracking_number'] = $shipment->tracking_number;
                             $details['pieces_count'] = $shipment->pieces;
                             $details['pieces_tracking_numbers'] = $shipment_pieces;
-                            ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
+                            ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null, null, null, null, null, null, $request->action);
                             return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                         }
                     }
@@ -5364,7 +5362,7 @@ class AdminCargoManifestController extends Controller
                     $details['shipping_mode'] = $shipment->shipping_mode->mode;
                     $details['amount'] = number_format($shipment->amount);
                     $details['service_type'] = $shipment->booking_type->booking_type;
-                    ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null, null, null, null, null, null,  $request->action);
                     return ['status' => 0, 'success' => 'Shipment has been Added!', 'details' => $details];
                 }
             } else {
@@ -5408,7 +5406,7 @@ class AdminCargoManifestController extends Controller
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['pieces_count'] = $shipment->pieces;
                         $details['pieces_tracking_numbers'] = $shipment_pieces;
-                        ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null, null, null, null, null, null, $request->action);
                         return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                     }
                 }
@@ -5448,7 +5446,7 @@ class AdminCargoManifestController extends Controller
                 $details['amount'] = number_format($shipment->amount);
                 $details['service_type'] = $shipment->booking_type->booking_type;
                 $details['misroute'] = $misroute;
-                ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
+                ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null, null, null, null, null, null, $request->action);
                 return ['status' => 0, 'success' => 'Shipment has been Added!', 'details' => $details];
             }
         } else {
@@ -5624,7 +5622,7 @@ class AdminCargoManifestController extends Controller
                             $details['tracking_number'] = $shipment->tracking_number;
                             $details['pieces_count'] = $shipment->pieces;
                             $details['pieces_tracking_numbers'] = $shipment_pieces;
-                            ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
+                            ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null, null, null, null, null, null, $request->action);
                             return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                         }
                     }
@@ -5653,7 +5651,7 @@ class AdminCargoManifestController extends Controller
                     $details['shipping_mode'] = $shipment->shipping_mode->mode;
                     $details['amount'] = number_format($shipment->amount);
                     $details['service_type'] = $shipment->booking_type->booking_type;
-                    ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null, null, null, null, null, null, $request->action);
                     return ['status' => 0, 'success' => 'Shipment has been Added!', 'details' => $details];
                 } else // new bag found or fresh bag found
                 {
@@ -5684,7 +5682,7 @@ class AdminCargoManifestController extends Controller
                             $details['tracking_number'] = $shipment->tracking_number;
                             $details['pieces_count'] = $shipment->pieces;
                             $details['pieces_tracking_numbers'] = $shipment_pieces;
-                            ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
+                            ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null, null, null, null, null, null, $request->action);
                             return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                         }
                     }
@@ -5713,7 +5711,7 @@ class AdminCargoManifestController extends Controller
                     $details['shipping_mode'] = $shipment->shipping_mode->mode;
                     $details['amount'] = number_format($shipment->amount);
                     $details['service_type'] = $shipment->booking_type->booking_type;
-                    ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null, null, null, null, null, null, $request->action);
                     return ['status' => 0, 'success' => 'Shipment has been Added!', 'details' => $details];
                 }
             } else // no previous exists
@@ -5729,7 +5727,7 @@ class AdminCargoManifestController extends Controller
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['pieces_count'] = $shipment->pieces;
                         $details['pieces_tracking_numbers'] = $shipment_pieces;
-                        ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null, null, null, null, null, null, $request->action);
                         return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                     }
                 }
@@ -5767,7 +5765,7 @@ class AdminCargoManifestController extends Controller
                 $details['amount'] = number_format($shipment->amount);
                 $details['service_type'] = $shipment->booking_type->booking_type;
                 $details['misroute'] = $misroute;
-                ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
+                ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null, null, null, null, null, null, $request->action);
                 return ['status' => 0, 'success' => 'Shipment has been Added!', 'details' => $details];
             }
         } else {
@@ -5786,7 +5784,7 @@ class AdminCargoManifestController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
-                ShipmentScanningJourneyController::add($shipment_id, $request->screen_location_id, 1, Auth::id(), NULL, NULL, $shipment_piece->id, NULL, session('latitude'), session('longitude'), NULL);
+                ShipmentScanningJourneyController::add($shipment_id, $request->screen_location_id, 1, Auth::id(), NULL, NULL, $shipment_piece->id, NULL, session('latitude'), session('longitude'), NULL, 0);
 
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {

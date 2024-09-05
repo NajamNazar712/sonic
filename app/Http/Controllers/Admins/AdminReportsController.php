@@ -14647,8 +14647,8 @@ class AdminReportsController extends Controller
             'ca_scanning_last_location_name.name as ca_scanning_last_location_name',
             'ssj_last_location.user_type as scanned_by_user_type',
             'ssj_last_location.admin_id as scanned_by_id',
-            'last_screen_location.name as last_location_screen_location_name'
-
+            'last_screen_location.name as last_location_screen_location_name',
+            'ssj_last_location.entry_method as entry_method'
         ];
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('sale_person_tags as spt', function($join){
@@ -15075,6 +15075,10 @@ class AdminReportsController extends Controller
                 }else{
                     return '-';
                 }
+            })->editColumn('entry_method', function ($shipment) {
+                return $shipment->entry_method === null
+                    ? 'Not Scanned'
+                    : ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             });
       
 
@@ -15144,7 +15148,7 @@ class AdminReportsController extends Controller
                 $rowArray['aging_last_status'] = ($days == 0) ? "-" : $days;
 
                 $rowArray['kam'] = $rowArray['stt_kam_id'] != null ?  $rowArray['stt_kam_name'] : $rowArray['scu_kam_name'];
-        
+
                 if (isset($rowArray['crm_request_id'])) {
                     $rowArray['crm_id_padded'] = str_pad($rowArray['crm_request_id'], 6, '0', STR_PAD_LEFT);
                 } else {
@@ -15173,8 +15177,11 @@ class AdminReportsController extends Controller
                         $rowArray['ca_scanning_last_location_name'] = '-';
                     }
                 }
-             
-                
+
+                $rowArray['entry_method'] = $rowArray['entry_method'] === null
+                    ? 'Not Scanned'
+                    : ($rowArray['entry_method'] == 1 ? 'Scanned' : 'Manual');
+
                 $filteredArray = [];
 
                 // Iterate over $fieldsToRetrieve to maintain sequence

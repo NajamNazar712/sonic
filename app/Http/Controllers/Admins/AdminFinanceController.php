@@ -237,7 +237,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         if ($day % 100 >= 11 && $day % 100 <= 13) {
             return $day . 'th';
         } else {
-            switch ($day % 10) {    
+            switch ($day % 10) {
                 case 1:
                     return $day . 'st';
                 case 2:
