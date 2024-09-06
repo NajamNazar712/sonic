@@ -219,9 +219,9 @@ class CRMDashboardController extends Controller
             ->get()
             ->keyBy('status_id');
         $total_tickets = $ticketCounts->sum('count');
-        $total_launch = $ticketCounts->get(1)->count ?? 0;
-        $total_in_process = $ticketCounts->get(2)->count ?? 0;
-        $total_resolved = $ticketCounts->get(3)->count ?? 0;
+        $total_launch = $ticketCounts->has(1) ? $ticketCounts->get(1)->count : 0;
+        $total_in_process = $ticketCounts->has(2) ? $ticketCounts->get(2)->count : 0;
+        $total_resolved = $ticketCounts->has(3) ? $ticketCounts->get(3)->count : 0;
         //end
 
         //Tickets Ratio
