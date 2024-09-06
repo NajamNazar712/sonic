@@ -7471,16 +7471,19 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
                         $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
                         if ($pending_payment_shipment) {
-                            $total_shipments++;
+
 
                             if ($pending_payment_shipment->type == 0) {
                                 $delivered_shipments++;
+                                $total_shipments++;
                             } else if ($pending_payment_shipment->type == 1) {
                                 $returned_shipments++;
+                                $total_shipments++;
                             } else if ($pending_payment_shipment->type == 3) {
                                 $arrival_shipments++;
                             } else {
                                 $adjusted_shipments++;
+                                $total_shipments++;
                             }
 
                             $done_payment_shipment = new DonePaymentShipment();
@@ -7828,6 +7831,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         }
 
         $count = $count->count();
+
 
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
