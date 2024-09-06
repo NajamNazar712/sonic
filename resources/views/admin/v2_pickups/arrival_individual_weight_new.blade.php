@@ -1278,7 +1278,7 @@
 
             $('#arrival_of_shipments_form').bind('submit', function(e) {
                 e.preventDefault();
-
+                $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
                 $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
 
                 var form = this;
