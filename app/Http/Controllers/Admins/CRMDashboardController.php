@@ -214,17 +214,18 @@ class CRMDashboardController extends Controller
         // Total Tickets, Launch, In Process, Resolved
         $ticketCounts = CrmRequest::selectRaw('status_id, COUNT(*) as count')
             ->whereIn('status_id', [1, 2, 3])
+            ->whereIn('case_nature_id', [1, 2, 4])
             ->groupBy('status_id')
             ->get()
             ->keyBy('status_id');
         $total_tickets = $ticketCounts->sum('count');
         $total_launch = $ticketCounts->get(1)->count ?? 0;
-        $total_inprocess = $ticketCounts->get(2)->count ?? 0;
+        $total_in_process = $ticketCounts->get(2)->count ?? 0;
         $total_resolved = $ticketCounts->get(3)->count ?? 0;
         //end
 
         //Tickets Ratio
-        $case_nature_type_last_2_days = CrmRequest::where('status_id', 1)->whereIn('case_nature_id', [1, 2, 3, 4])
+        $case_nature_type_last_2_days = CrmRequest::whereIn('case_nature_id', [1, 2, 4])
             ->where('created_at', '>=', Carbon::now()->subDays(2))
             ->count();
         $shipment_arrived_last_2_days = Shipment::where('shipper_status_id', 2)
@@ -240,28 +241,30 @@ class CRMDashboardController extends Controller
             ->where('updated_at', '>=', Carbon::now()->subDays(2))
             ->get();
         $turnaround_closed_counts = $this->get_turn_around_counts($tickets_closed_last_2_days);
-        $turnaround_0_days = $turnaround_closed_counts[0];
-        $turnaround_1_days = $turnaround_closed_counts[1];
-        $turnaround_2_days = $turnaround_closed_counts[2];
-        $kpi_achieved = ($turnaround_0_days + $turnaround_1_days + $turnaround_2_days) / $tickets_closed_last_2_days->count() * 100;
+        $kpi_achieved = $tickets_closed_last_2_days->count() > 0 ? (array_sum($turnaround_closed_counts) / $tickets_closed_last_2_days->count()) * 100 : 0;
         //end
 
         //Avg Aging (Ticket Launch-Closure) 48hrs
-        $launch_closed_ticket_histories = CrmRequestStatusHistory::whereIn('status_id', [1,4])->get();
+        $launch_closed_ticket_histories = CrmRequestStatusHistory::whereIn('status_id', [1, 4])->orderByDesc('id')->get();
         $launch_closed_ticket = [];
-        foreach($launch_closed_ticket_histories as $launch_closed_ticket_history){
-            if($launch_closed_ticket_history->status_id == 1){
-                $launch_closed_ticket[$launch_closed_ticket_history->crm_request_id]['created_at'] = $launch_closed_ticket_history->created_at;
-            }else{
-                $launch_closed_ticket[$launch_closed_ticket_history->crm_request_id]['updated_at'] = $launch_closed_ticket_history->updated_at;
+        foreach ($launch_closed_ticket_histories as $history) {
+            $request_id = $history->crm_request_id;
+            if (!isset($launch_closed_ticket[$request_id])) {
+                $launch_closed_ticket[$request_id] = [];
+            }
+            if (!isset($launch_closed_ticket[$request_id]['created_at']) && $history->status_id == 1) {
+                $launch_closed_ticket[$request_id]['created_at'] = $history->created_at;
+            }
+            if (!isset($launch_closed_ticket[$request_id]['updated_at']) && $history->status_id == 4) {
+                $launch_closed_ticket[$request_id]['updated_at'] = $history->updated_at;
             }
         }
-        $count_closed_filtered = array_filter($launch_closed_ticket, function($item) {
-            return count($item) === 2;
+        $count_closed_filtered = array_filter($launch_closed_ticket, function ($item) {
+            return isset($item['created_at']) && isset($item['updated_at']);
         });
         $turnaround_launched_closed_counts = $this->get_turn_around_counts($count_closed_filtered);
-        $total_duration = $turnaround_launched_closed_counts[0] + $turnaround_launched_closed_counts[1] + $turnaround_launched_closed_counts[2];
-        $average_aging = $total_duration / count($count_closed_filtered);
+        $total_duration = array_sum($turnaround_launched_closed_counts);
+        $average_aging = count($count_closed_filtered) > 0 ? $total_duration / count($count_closed_filtered) : 0;
         //end
 
         // Today’s Closure
@@ -270,7 +273,7 @@ class CRMDashboardController extends Controller
             ->count();
         //end
 
-        dd($kpi_achieved, $average_aging, $tickets_closed_last_1_day);
+        dd($kpi_achieved, $average_aging, $tickets_closed_last_1_day, $ticket_ratio);
 
 //        return view('admin.crm.dashboard')->with(['case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'dates' => $dates,'cities' => $cities,'crm_request_statuses' => $crm_request_statuses,'crm' => $crm]);
     }
