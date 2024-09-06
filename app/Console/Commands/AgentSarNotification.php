@@ -61,7 +61,8 @@ class AgentSarNotification extends Command
             $nowSub16Hours = Carbon::now()->subHours(16)->toDateTimeString();
             $nowSub24Hours = Carbon::now()->subHours(24)->toDateTimeString();
             $nowSub48Hours = Carbon::now()->subHours(48)->toDateTimeString();
-
+            $nowSub48Hours = Carbon::parse($nowSub48Hours)->addMinutes(44)->format('Y-m-d H:i:s');
+           
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
