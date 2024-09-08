@@ -16,6 +16,7 @@ use App\RvAgentCallHistory;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentAgent;
 use App\RvShipmentTicket;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -83,6 +84,13 @@ class BotCallingController extends Controller
 
     public function bot_submit_ticket(Request $request)
     {
+        // $job = DB::table('jobs')->latest()->first();
+        // $createdAt = $job->created_at;
+        // $availableAt = $job->available_at;
+        // $availableAt = Carbon::createFromTimestamp($job->available_at);
+        // $formattedDate = $availableAt->format('Y-m-d H:i:s');
+
+        // dd($formattedDate);
         $validations = [
             'tracking_number' => 'required|exists:shipments,tracking_number',
             'call_status' => 'required',
@@ -101,7 +109,6 @@ class BotCallingController extends Controller
             return response()->json(['status' => 0, 'errors' => $validate->errors()],422);
         } 
         $findShipmentId = Shipment::where('tracking_number', $request->input('tracking_number'))->whereIn('shipper_status_id', [12, 52, 66])->first();    
-        
         if($findShipmentId && RvShipmentTicket::where('shipment_id', $findShipmentId->id)->whereNull('deleted_at')->where('is_bot', 1)->exists()){
             // RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 1]);
             $array = [
@@ -156,16 +163,16 @@ class BotCallingController extends Controller
                     //Dispatch Job Add with the delay for the unresponsive case second or third call
                     if ($request->input < 1) {
                         unset($data['message']['rv_agent_call_history_record_id']);
-
+                        
                         if (RvShipmentAssignAgent::join('rv_shipment_tickets as rst', 'rst.shipment_id', 'rv_shipment_assign_agents.shipment_id')->where('rv_shipment_assign_agents.unresponsive_count', 1)->where('rv_shipment_assign_agents.shipment_id', $findShipmentId->id)->exists()) {
 
                             $globalSettingValue = GlobalSettings::where('type', 'second_bot_call')->select('setting_value')->first();
-                            $job = (new BotCallDispatch($findShipmentId->id))->delay(60 * 60 * $globalSettingValue['setting_value']);
+                            $job = (new BotCallDispatch($findShipmentId->id))->delay(60 * 60);
                             $this->dispatch($job);
                         } elseif (RvShipmentAssignAgent::join('rv_shipment_tickets as rst', 'rst.shipment_id', 'rv_shipment_assign_agents.shipment_id')->where('rv_shipment_assign_agents.unresponsive_count', 2)->where('rv_shipment_assign_agents.shipment_id', $findShipmentId->id)->exists()) {
 
                             $globalSettingValue = GlobalSettings::where('type', 'third_bot_call')->select('setting_value')->first();
-                            $job = (new BotCallDispatch($findShipmentId->id))->delay(60 * 60  * $globalSettingValue['setting_value']);
+                            $job = (new BotCallDispatch($findShipmentId->id))->delay(60 * $globalSettingValue['setting_value']);
                             $this->dispatch($job);
                         }
                     }

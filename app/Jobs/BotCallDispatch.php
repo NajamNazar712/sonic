@@ -44,8 +44,6 @@ class BotCallDispatch implements ShouldQueue
 
         //
         $environment = config('app.env');
-        $data = [1,1];
-        WebhookLogController::shipment_status_log($this->shipmentId, 'status_code', json_encode($data));
 
         if (GlobalSettings::where(['type'=> 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             if(RvShipmentTicket::where('shipment_id', $this->shipmentId)->whereNull('deleted_at')->where('is_bot',1)->exists()){
