@@ -1271,6 +1271,7 @@ class Permission
             'reports.debriefing.agent_list' => 676,
             'reports.debriefing.agent_index' => 676,
             'reports.rvr_call_history.index'=>950,
+            'reports.rvr_reattempt.index'=>1008,
 
             'finance.ftl_invoice.index' => 509,
             'settings.debriefing_time_setting.index' => 526,
@@ -1439,6 +1440,7 @@ class Permission
             'settings.consignee_refused_otp_bypass.index' => 826,
             'otp_history.index' => 827,
             'settings.star_shippers.index' => 846,
+            'settings.alist_shipper.index' => 846,
             'settings.auto_delivery_note_verification.index' => 836,
             'reports.revenue_report_by_invoice.index' => 839,
             'return.return_confirm_otp.index' => 849,

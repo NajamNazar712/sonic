@@ -2454,7 +2454,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('rvr_call_history')->name('rvr_call_history.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@rvr_call_history_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@rvr_call_history_list')->name('list');
-            });
+        });
+        
+        Route::prefix('rvr_reattempt')->name('rvr_reattempt.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@reattemptRvReport')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@rvReattemptList')->name('list');
+        });
 
         Route::prefix('ordinary_discrepancy_report')->name('ordinary_discrepancy_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ordinary_discrepancy_report_index')->name('index');
@@ -3404,6 +3409,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\GlobalSettingsController@star_shippers_list')->name('list');
             Route::post('add', 'Admins\GlobalSettingsController@star_shippers_add')->name('add');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
+        });
+        Route::prefix('alist_shippers')->name('alist_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@aListShippersIndex')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@aListShipperView')->name('list');
         });
 
         Route::prefix('airway_bill_address_visibility')->name('airway_bill_address_visibility.')->group(function () {
