@@ -169,10 +169,11 @@ use App\Http\Models\Admin\TempRiderDelivery;
 use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
 use App\RvShipmentTicket;
+use App\Http\Traits\RvTrait;
 
 class RiderAPIController extends Controller
 {
-    use LastMileAppReportTrait;
+    use LastMileAppReportTrait, RvTrait;
 
     private $names = [
         'phone_number' => 'Phone Number',
