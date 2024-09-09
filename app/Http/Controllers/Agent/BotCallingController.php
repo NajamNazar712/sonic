@@ -84,7 +84,6 @@ class BotCallingController extends Controller
 
     public function bot_submit_ticket(Request $request)
     {
-        dd('data');
         // $job = DB::table('jobs')->latest()->first();
         // $createdAt = $job->created_at;
         // $availableAt = $job->available_at;
