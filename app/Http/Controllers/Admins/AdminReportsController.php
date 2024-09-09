@@ -12954,7 +12954,7 @@ class AdminReportsController extends Controller
                 
             })
             ->addColumn('rvr_count', function($rv_report) use ($request) {
-                        $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->whereBetween('created_at',[$request->get('search_date_from'),$request->get('search_date_to')])->whereIn('shipper_status_id', [52,12,66])->where('verification',1)->count();
+                        $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->whereBetween('created_at',[$request->get('search_date_from'),$request->get('search_date_to')])->whereIn('shipper_status_id', [52,12,66])->count();
                         return $rvr_count;
             });
                     
