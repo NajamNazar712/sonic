@@ -100,7 +100,7 @@ trait RvTrait
                 $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = $data['rv_assign_agent_sub_status_id'];
                 $rv_shipment_assign_agent->rv_state_id = $data['rv_state_id'];
                 $rv_shipment_assign_agent->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
-                $rv_shipment_assign_agent->updated_by_id = Auth::id();
+                $rv_shipment_assign_agent->updated_by_id = Auth::id() ?? $data['agent_id'];
                 $rv_shipment_assign_agent->assigned_to_type_id = $data['assigned_to_type_id'] ?? 0;
                 $rv_shipment_assign_agent->assigned_by = $data['assigned_by'] ?? 0;
                 $rv_shipment_assign_agent->save();
@@ -115,7 +115,7 @@ trait RvTrait
                     'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'],
                     'rv_state_id' => $data['rv_state_id'],
                     'updated_type_id' => Auth::guard('agent')->check() ? 2 : 1,
-                    'updated_by_id' => Auth::id(),
+                    'updated_by_id' => Auth::id() ?? $data['agent_id'],
                     'assigned_to_type_id' => $data['assigned_to_type_id'] ?? 0,
                     'assigned_by' => $data['assigned_by'] ?? 0,
                     'created_at' => Carbon::now(),
