@@ -21,6 +21,7 @@ class ShipmentPaymentStatusTableSeeder extends Seeder
 			array('id' => 5, 'code' => 'C-PR', 'name' => 'Charges - Processed', 'description' => 'Charges for the shipment is processed by TRAX'),
 			array('id' => 6, 'code' => 'C-RE', 'name' => 'Charges - Reverted', 'description' => 'Charges is reverted from the bank\'s end'),
 			array('id' => 7, 'code' => 'C-DE', 'name' => 'Charges - Deducted', 'description' => 'Charges have been deducted of the Return Shipment'),
+			array('id' => 8, 'code' => 'P-AR', 'name' => 'Payment - Arrival', 'description' => 'Payment for the shipment is arrived by TRAX'),
         ));
     }
 }
