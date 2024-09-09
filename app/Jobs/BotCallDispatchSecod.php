@@ -45,6 +45,7 @@ class BotCallDispatchSecod implements ShouldQueue
 
         //
         $environment = config('app.env');
+        Log::channel('cronJobLog')->info('s ' . 'bot-call Second Unresponsive');
 
         if (GlobalSettings::where(['type'=> 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             if(RvShipmentTicket::where('shipment_id', $this->shipmentId)->whereNull('deleted_at')->where('is_bot',1)->exists()){
@@ -66,10 +67,10 @@ class BotCallDispatchSecod implements ShouldQueue
                 $status_code = $response->getStatusCode();
                 $response = $response->getBody()->getContents();
                 $response = json_decode($response);
-                Log::channel('cronJobLog')->info('s ' . 'Log after call dispatched with response' . json_encode($response));
+                Log::channel('cronJobLog')->info('s ' . 'Log after call dispatched with response -second' . json_encode($response));
                 WebhookLogController::shipment_status_log($shipment->user_id, $status_code, json_encode($response));
             }else{
-            return json_encode(['status'=>0,'message'=>'Shipment isn`t at the bot call prefernce']);
+                return json_encode(['status'=>0,'message'=>'Shipment isn`t at the bot call prefernce']);
             }
         }
        
