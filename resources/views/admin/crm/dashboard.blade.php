@@ -225,251 +225,164 @@
 {{--                                </div>--}}
 {{--                            </form>--}}
 
-                            //checkpoint
-{{--                            <div class="row justify-content-center">--}}
-{{--                                <div class="col-3" id="launch_div">--}}
-{{--                                    <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="icon-grid text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        <h3 class="text-white"><p id="launched" class="d-inline">{{$crm['launched']}}</p> --}}
-{{--                                                            --}}{{-- (100%) --}}
-{{--                                                        </h3>--}}
-{{--                                                        <span>Launch</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                --}}
-{{--                                <div class="col-3" id="in_process_div">--}}
-{{--                                    <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="icon-clock text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        <h3 class="text-white">--}}
-{{--                                                            <p id="in_process" class="d-inline">{{$crm['in_process']}}</p> --}}
-{{--                                                            --}}{{-- (<p id="in_process_percentage" class="d-inline">{{$crm['in_process_percentage']}}</p>%) --}}
-{{--                                                        </h3>--}}
-{{--                                                        <span>In Process</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-3" id="resolved_div">--}}
-{{--                                    <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="icon-flag text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        <h3 class="text-white"><p id="resolved" class="d-inline">{{$crm['resolved']}}</p> --}}
-{{--                                                            --}}{{-- (<p id="received_percentage" class="d-inline">{{$crm['resolved_percentage']}}</p>%) --}}
-{{--                                                        </h3>--}}
-{{--                                                        <span>Resolved</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-3" id="closed_div">--}}
-{{--                                    <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="icon-close text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        <h3 class="text-white"><p id="closed" class="d-inline">{{$crm['closed']}}</p>--}}
-{{--                                                            --}}{{-- (<p id="in_process_for_activation_percentage" class="d-inline">{{$crm['closed_percentage']}}</p> %) --}}
-{{--                                                        </h3>--}}
-{{--                                                        <span>Closed</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--            --}}
-{{--                            </div>--}}
-{{--                            <div class="row justify-content-center">--}}
-{{--                                <div class="col-3" id="">--}}
-{{--                                    <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="la la-thumbs-o-up text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        --}}{{-- <h3 class="text-white"><p id="valid" class="d-inline">0 </p></h3> --}}
-{{--                                                        <h3 class="text-white"><p id="valid" class="d-inline">{{$crm['valid']}} </p></h3>--}}
-{{--                                                        <span>Valid</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-3" id="">--}}
-{{--                                    <div class="card bg-gradient-directional-return_confirm pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="la la-thumbs-o-down text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        --}}{{-- <h3 class="text-white"><p id="in_valid" class="d-inline">0 </p>--}}
-{{--                                                            (<p id="in_valid_percentage"--}}
-{{--                                                            class="d-inline">0</p>--}}
-{{--                                                        %)</h3> --}}
-{{--                                                        <h3 class="text-white"><p id="in_valid" class="d-inline">{{$crm['in_valid']}} </p>--}}
-{{--                                                            (<p id="in_valid_percentage"--}}
-{{--                                                            class="d-inline">{{$crm['in_valid_percentage']}}</p>--}}
-{{--                                                        %)</h3>--}}
-{{--                                                        <span>InValid</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-3" id="">--}}
-{{--                                    <div class="card bg-gradient-directional-pending_shipments pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        <h3 class="text-white">--}}
-{{--                                                                --}}{{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
-{{--                                                            <span id="closed_rate_percentage">{{ $crm['closed_rate_percentage']}}</span>%--}}
-{{--                                                        </h3>--}}
-{{--                                                        <span>Closure Rate</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-3" id="">--}}
-{{--                                    <div class="card bg-gradient-directional-destination pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        <h3 class="text-white"><p id="in_process_ratio" class="d-inline">{{$crm['in_process_ratio']}} </p>(<span id="in_process_ratio_percentage">{{$crm['in_process_ratio_percentage']}}</span>%)</h3>--}}
-{{--                                                        <span>Ratio</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-3" id="">--}}
-{{--                                    <div class="card bg-gradient-directional-re-open pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        <h3 class="text-white">--}}
-{{--                                                                --}}{{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
-{{--                                                            <span id="re_open_rate_percentage">{{ $crm['re_open_rate_percentage']}}</span>%--}}
-{{--                                                        </h3>--}}
-{{--                                                        <span>Re-open Ratio</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-3" id="">--}}
-{{--                                    <div class="card bg-gradient-directional-launch-in-process pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        <h3 class="text-white">--}}
-{{--                                                                --}}{{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
-{{--                                                            <span id="launch-in-process">{{ $crm['launch_in_process_rate_percentage']}}</span>%--}}
-{{--                                                        </h3>--}}
-{{--                                                        <span>Launch-In Process</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-3" id="">--}}
-{{--                                    <div class="card bg-gradient-directional-launch-resolved pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        <h3 class="text-white">--}}
-{{--                                                                --}}{{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
-{{--                                                            <span id="launch-resolved">{{ $crm['launch_resolved_rate_percentage']}}</span>%--}}
-{{--                                                        </h3>--}}
-{{--                                                        <span>Launch-Resolved</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-3" id="">--}}
-{{--                                    <div class="card bg-gradient-directional-launch-closed pull-up cursor-pointer">--}}
-{{--                                        <div class="card-content">--}}
-{{--                                            <div class="card-body">--}}
-{{--                                                <div class="media d-flex">--}}
-{{--                                                    <div class="align-self-center">--}}
-{{--                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="media-body text-white text-right">--}}
-{{--                                                        <h3 class="text-white">--}}
-{{--                                                                --}}{{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
-{{--                                                            <span id="launch-closed">{{ $crm['launch_closed_rate_percentage']}}</span>%--}}
-{{--                                                        </h3>--}}
-{{--                                                        <span>Launch-Closed</span>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
+{{--                            //checkpoint--}}
+                            <div class="row justify-content-center">
+                                <div class="col-3" id="launch_div">
+                                    <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="icon-grid text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white"><p id="launched" class="d-inline">{{$total_tickets}}</p>
+                                                        </h3>
+                                                        <span>Total Tickets</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            //end
+                                <div class="col-3" id="in_process_div">
+                                    <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="icon-clock text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                             <p id="in_process_percentage" class="d-inline">{{$total_launch}}</p>
+                                                        </h3>
+                                                        <span>Launch</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="resolved_div">
+                                    <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="icon-flag text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                             <p id="received_percentage" class="d-inline">{{$total_in_process}}</p>
+                                                        </h3>
+                                                        <span>In Process</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="closed_div">
+                                    <div class="card  bg-gradient-directional-return_delivered pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="icon-check text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                             <p id="in_process_for_activation_percentage" class="d-inline">{{$total_resolved}}</p>
+                                                        </h3>
+                                                        <span>Resolved</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3" id="">
+                                    <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-thumbs-o-up text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white"><p id="valid" class="d-inline">{{round($ticket_ratio, 3)}} </p>%</h3>
+                                                        <span>Tickets Ratio</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="">
+                                    <div class="card bg-gradient-directional-pending_return pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                            <p id="in_valid_percentage"
+                                                            class="d-inline">{{round($kpi_achieved, 3)}}</p>
+                                                        %</h3>
+                                                        <span>KPI Achieved (48 hrs. closure)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="">
+                                    <div class="card bg-gradient-directional-pending_shipments pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                            <span id="closed_rate_percentage">{{round($average_aging, 3)}}</span>%
+                                                        </h3>
+                                                        <span>Avg Aging (Launch-Closure)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="">
+                                    <div class="card bg-gradient-directional-launch-closed pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-close text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white"><span id="in_process_ratio_percentage">{{$tickets_closed_last_1_day}}</span></h3>
+                                                        <span>Today’s closure</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+{{--                            //end--}}
 {{--                            @include('admin.inc.messages')--}}
 
                             {{-- <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
@@ -794,7 +707,7 @@
           href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css"
           href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
-  
+
     <style type="text/css">
         .selectize-control {
             width: 300px !important;
@@ -805,14 +718,16 @@
             border-color: #5587b4 !important;
             color: #FFFFFF;
         }
-        tr.highalert_row{
+
+        tr.highalert_row {
             background-color: #ff6326;
             color: whitesmoke;
         }
-        tr.highalert_row a{
+
+        tr.highalert_row a {
             color: whitesmoke;
         }
-        
+
         table.dataTable {
             font-size: 12px;
         }
@@ -879,7 +794,7 @@
         }
 
         .bg-gradient-directional-destination {
-            background-image: linear-gradient(45deg, #027d8a, #01e4e4);
+            background-image: linear-gradient(45deg, #f7f9fa, #a03e3e);
             background-repeat: repeat-x;
         }
 
@@ -887,21 +802,24 @@
             background-image: linear-gradient(45deg, #3421c7, #7a77d7);
             background-repeat: repeat-x;
         }
+
         .bg-gradient-directional-launch-in-process {
             background-image: linear-gradient(45deg, #21abc7, #77bcd7);
             background-repeat: repeat-x;
         }
+
         .bg-gradient-directional-launch-resolved {
             background-image: linear-gradient(45deg, #029c07, #78d777);
             background-repeat: repeat-x;
         }
+
         .bg-gradient-directional-launch-closed {
             background-image: linear-gradient(45deg, #ba0630, #de7575);
             background-repeat: repeat-x;
         }
 
         .bg-gradient-directional-out_for_delivery {
-            background-image: linear-gradient(45deg, #ff9819, #fff824);
+            background-image: linear-gradient(45deg, #032e64, #17dfd6);
             background-repeat: repeat-x;
         }
 
@@ -996,8 +914,9 @@
             background-color: #154360;
         }
 
-    
+
     </style>
+
 @endsection
 
 {{--@section('js')--}}

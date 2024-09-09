@@ -2020,6 +2020,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('updated_shippers_list', 'Admins\AdminReportsController@updated_shippers_list')->name('updated_shippers_list');
 
         });
+        Route::prefix('rvr_reattempt')->name('rvr_reattempt.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@qsrold_index')->name('index');
+        });
         Route::prefix('qsr_old')->name('qsr_old.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsrold_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsrold_list')->name('list');
@@ -2560,6 +2563,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@show_vendors')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@store_vendors')->name('store');
             // Route::post('udpate', 'Admins\GlobalSettingsController@delivery_revert_access_update')->name('update');
+        });
+
+        Route::prefix('alist_shippers')->name('alist_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@show_vendors')->name('index');
         });
 
         Route::prefix('delivery_revert_access')->name('delivery_revert_access.')->group(function () {
@@ -3567,7 +3574,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('launched_re_open')->name('launched_re_open.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@launched_re_open_index')->name('index');
-            Route::get('list', 'Admins\AdminCRMController@launched_re_open_list')->name('list');
+            Route::post('list', 'Admins\AdminCRMController@launched_re_open_list')->name('list');
         });
         Route::prefix('in_process')->name('in_process.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@in_process_index')->name('index');

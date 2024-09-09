@@ -1364,7 +1364,26 @@ class AdminCRMController extends Controller
                     ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
             })
 			->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-			->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr', 'ss.name as shipment_status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'dh.name as hub', 'z.name as zone', 'resby.name as agent_assigned_by', 'crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude' ,'crsh.created_at as reopen_date','crm_requests.shipment_id','sts.status as star_status')
+            ->leftjoin('shipments_journey as last_updated_sj', function ($join) {
+                $join->on('last_updated_sj.shipment_id', '=', 's.id')
+                    ->where('last_updated_sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)'));
+            })
+            ->leftjoin('admins as last_status_upd_by', 'last_status_upd_by.id', '=', 'last_updated_sj.admin_id')
+            ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 's.id')
+            ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
+            ->leftjoin('users as us','us.id','=','s.user_id')
+            ->leftjoin('segments as seg','us.segment_id','seg.id')
+            ->leftjoin('admins as ad1', 'ad1.id', '=', 'crm_requests.agent_id')
+            ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
+            ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
+            ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
+            ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crt.tagged_id')
+            ->leftjoin('shipments_journey as sj', function ($join){
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.shipper_status_id',2);
+            })
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr', 'ss.name as shipment_status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'dh.name as hub', 'z.name as zone', 'resby.name as agent_assigned_by', 'crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude' ,'crsh.created_at as reopen_date','crm_requests.shipment_id','sts.status as star_status', 'sj.updated_at as arrival_date','crm_requests.updated_at as last_status_date','s.updated_at as last_status_today','last_status_upd_by.name as last_status_updated_by','ca.name as sub_hub','s.parcel_value as parcel_value','s.amount as cod_value','seg.name as segment','s.actual_weight as actual_weight','ad1.name as sale_person','ad2.name as kae','adp.name as tagged_department')
             ->whereIn('crm_requests.status_id', [1, 5])
             ->groupBy('crm_requests.id');
 
@@ -1387,7 +1406,7 @@ class AdminCRMController extends Controller
             }
         }
         // dd($launched_request);
-
+        $current_date = Carbon::now();
         $datatables = Datatables::of($launched_request)
             ->setRowAttr([
                 'nature' => function ($requests) {
@@ -1793,6 +1812,61 @@ class AdminCRMController extends Controller
                     $responsible_zone = '-';
                 }
                 return $responsible_zone;
+            })
+            ->addColumn('arrival_date', function ($request)use($current_date) {
+                return ($request->arrival_date && $current_date) ? with((new Carbon($request->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+                        $date->isSunday();
+                    }, $current_date)) : '-';
+            })
+            ->addColumn('arrival_today', function ($requests)use($current_date) {
+                return ($requests->arrival_date && $current_date) ? with((new Carbon($requests->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($requests->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+                        $date->isSunday();
+                    }, $current_date)) : '-';
+            })
+            ->addColumn('last_status_today', function ($request)use($current_date) {
+                return ($request->last_status_today && $current_date) ? with((new Carbon($request->last_status_today, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->last_status_today, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+                        $date->isSunday();
+                    }, $current_date)) : '-';
+            })
+            ->addColumn('shipper_category', function($requests){
+                if($requests->kae != null){
+                    return 'Key Account';
+                }else{
+                    return 'Non-Key Account';
+                }
+            })
+            ->addColumn('tagged_to_operation', function($requests){
+                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',5)->get()->first();
+                if($crm_tagging){
+                    $admin = Admin::find($crm_tagging->tagged_id);
+                    if($admin){
+                        return $admin->name;
+
+                    }else{
+
+                        return '-';
+                    }
+                }else{
+                    return '-';
+                }
+            })
+            ->addColumn('tagged_to_manual', function($requests){
+                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->whereIn('crm_request_tagging_type_id', [1,2])->get()->first();
+                if($crm_tagging){
+                    if($crm_tagging->crm_request_tagging_type_id == 1){
+
+                        $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name;
+                        return $tagged_name;
+                    }elseif($crm_tagging->crm_request_tagging_type_id == 2){
+                        $tagged_name = Admin::find($crm_tagging->tagged_id)->name;
+                        return $tagged_name;
+
+                    }else{
+                        return '-';
+                    }
+                }else{
+                    return '-';
+                }
             });
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));

@@ -211,6 +211,7 @@ class CRMDashboardController extends Controller
 //        $dates['old_date'] = Carbon::now()->subDays(1);
 
 
+        $two_days_old = Carbon::now()->subDays(2);
         // Total Tickets, Launch, In Process, Resolved
         $ticketCounts = CrmRequest::selectRaw('status_id, COUNT(*) as count')
             ->whereIn('status_id', [1, 2, 3])
@@ -226,26 +227,29 @@ class CRMDashboardController extends Controller
 
         //Tickets Ratio
         $case_nature_type_last_2_days = CrmRequest::whereIn('case_nature_id', [1, 2, 4])
-            ->where('created_at', '>=', Carbon::now()->subDays(2))
+            ->where('created_at', '>=', $two_days_old)
             ->count();
-        $shipment_arrived_last_2_days = Shipment::where('shipper_status_id', 2)
-            ->where('created_at', '>=', Carbon::now()->subDays(2))
+        $shipment_arrived_last_2_days = Shipment::whereIn('shipper_status_id', [2, 4, 22, 27, 33])
+            ->where('updated_at', '>=', $two_days_old)
             ->count();
         $ticket_ratio = $shipment_arrived_last_2_days > 0
             ? ($case_nature_type_last_2_days / $shipment_arrived_last_2_days) * 100
             : 0;
         //end
 
-        // KPI Achieved (48 hrs. closure)
+        //KPI Achieved (48 hrs. closure)
         $tickets_closed_last_2_days = CrmRequest::where('status_id', 4)
-            ->where('updated_at', '>=', Carbon::now()->subDays(2))
+            ->where('updated_at', '>=', $two_days_old)
             ->get();
         $turnaround_closed_counts = $this->get_turn_around_counts($tickets_closed_last_2_days);
         $kpi_achieved = $tickets_closed_last_2_days->count() > 0 ? (array_sum($turnaround_closed_counts) / $tickets_closed_last_2_days->count()) * 100 : 0;
         //end
 
         //Avg Aging (Ticket Launch-Closure) 48hrs
-        $launch_closed_ticket_histories = CrmRequestStatusHistory::whereIn('status_id', [1, 4])->orderByDesc('id')->get();
+        $launch_closed_ticket_histories = CrmRequestStatusHistory::whereIn('status_id', [1, 4])
+            ->where('created_at', '>=', $two_days_old)
+            ->orderByDesc('id')
+            ->get();
         $launch_closed_ticket = [];
         foreach ($launch_closed_ticket_histories as $history) {
             $request_id = $history->crm_request_id;
@@ -259,12 +263,13 @@ class CRMDashboardController extends Controller
                 $launch_closed_ticket[$request_id]['updated_at'] = $history->updated_at;
             }
         }
+
         $count_closed_filtered = array_filter($launch_closed_ticket, function ($item) {
             return isset($item['created_at']) && isset($item['updated_at']);
         });
         $turnaround_launched_closed_counts = $this->get_turn_around_counts($count_closed_filtered);
-        $total_duration = array_sum($turnaround_launched_closed_counts);
-        $average_aging = count($count_closed_filtered) > 0 ? $total_duration / count($count_closed_filtered) : 0;
+        $total_duration = ($turnaround_launched_closed_counts[1]) + ($turnaround_launched_closed_counts[2] * 2);
+        $average_aging = count($count_closed_filtered) > 0 ? ($total_duration / count($count_closed_filtered)) : 0;
         //end
 
         // Today’s Closure
@@ -273,9 +278,8 @@ class CRMDashboardController extends Controller
             ->count();
         //end
 
-        dd($kpi_achieved, $average_aging, $tickets_closed_last_1_day, $ticket_ratio);
 
-//        return view('admin.crm.dashboard')->with(['case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'dates' => $dates,'cities' => $cities,'crm_request_statuses' => $crm_request_statuses,'crm' => $crm]);
+        return view('admin.crm.dashboard')->with(['total_tickets' => $total_tickets, 'total_launch' => $total_launch, 'total_in_process' => $total_in_process, 'total_resolved' => $total_resolved, 'kpi_achieved' => $kpi_achieved, 'average_aging' => $average_aging, 'tickets_closed_last_1_day' => $tickets_closed_last_1_day, 'ticket_ratio' => $ticket_ratio]); //'case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'dates' => $dates,'cities' => $cities,'crm_request_statuses' => $crm_request_statuses,'crm' => $crm]);
     }
 
     public function crm_dashboard_list(Request $request){
@@ -1626,6 +1630,7 @@ class CRMDashboardController extends Controller
                 } elseif ($turnaround_days == 2) {
                     $turnaround_counts[2]++;
                 }
+
             }
         }
         return $turnaround_counts;

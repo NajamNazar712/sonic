@@ -4,91 +4,100 @@
 
 @section('content')
     <section>
-    <div class="app-content content">
-        <div class="content-wrapper">
-            <div class="content-header row">
-            </div>
-            <div class="content-body">
-                <h1 class="mb-1">
-                    Launched/Re-Open Requests
-                </h1>
+        <div class="app-content content">
+            <div class="content-wrapper">
+                <div class="content-header row">
+                </div>
+                <div class="content-body">
+                    <h1 class="mb-1">
+                        Launched/Re-Open Requests
+                    </h1>
 
-                <div class="card">
-                    <div class="card-content" aria-expanded="true">
-                        <div class="card-body">
-                            @include('admin.inc.messages')
+                    <div class="card">
+                        <div class="card-content" aria-expanded="true">
+                            <div class="card-body">
+                                @include('admin.inc.messages')
 
-                            <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 
-                                <div class="form-group">
-                                    <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
-                                           placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
-                                </div>
-                                <div class="form-group justify-content-center">
-                                    <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
-                                                class="la la-search"></i> Search
-                                    </button>
-                                </div>
-                            </form>
+                                    <div class="form-group">
+                                        <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
+                                               placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                                    </div>
+                                    <div class="form-group justify-content-center">
+                                        <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
+                                                    class="la la-search"></i> Search
+                                        </button>
+                                    </div>
+                                </form>
 
-                            <div class="col justify-content-end">
-                                <div class="card-header">
-                                    <div class="heading-elements">
-                                        <ul class="list-inline" style="margin-top: -10px">
-                                            <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
-                                                    Star Shippers</a>
-                                            </li>
-                                        </ul>
+                                <div class="col justify-content-end">
+                                    <div class="card-header">
+                                        <div class="heading-elements">
+                                            <ul class="list-inline" style="margin-top: -10px">
+                                                <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
+                                                        Star Shippers</a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
+
+
+                                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                    <b><label class="ml-1" id="count"></label></b>
+                                    <thead>
+                                    <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1"></th>
+                                        <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Request No.</th>
+                                        <th class="border-primary border-darken-1">Tracking No.</th>
+                                        <th class="border-primary border-darken-1">Shipper Name</th>
+                                        <th class="border-primary border-darken-1">Origin</th>
+                                        <th class="border-primary border-darken-1">Destination</th>
+                                        <th class="border-primary border-darken-1">Hub</th>
+                                        <th class="border-primary border-darken-1">Zone</th>
+                                        <th class="border-primary border-darken-1">Arrival Date</th>
+                                        <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>
+                                        <th class="border-primary border-darken-1">Shipment Status</th>
+                                        <th class="border-primary border-darken-1">Last Status Date</th>
+                                        <th class="border-primary border-darken-1">Last status to Today (TAT)</th>
+                                        <th class="border-primary border-darken-1">Last status by</th>
+                                        <th class="border-primary border-darken-1">Case Nature</th>
+                                        <th class="border-primary border-darken-1">Case Nature Type</th>
+                                        <th class="border-primary border-darken-1">Description</th>
+                                        <th class="border-primary border-darken-1">Launched Date</th>
+                                        <th class="border-primary border-darken-1">Aging (From Launched Date To Today)</th>
+                                        <th class="border-primary border-darken-1">Responsible Hub</th>
+                                        <th class="border-primary border-darken-1">Sub Hub</th>
+                                        <th class="border-primary border-darken-1">Responsible Zone</th>
+                                        <th class="border-primary border-darken-1">Agent</th>
+                                        <th class="border-primary border-darken-1">Agent Assigned By</th>
+                                        <th class="border-primary border-darken-1">Parcel Value</th>
+                                        <th class="border-primary border-darken-1">COD Value</th>
+                                        <th class="border-primary border-darken-1">Segment</th>
+                                        <th class="border-primary border-darken-1">Weight</th>
+                                        <th class="border-primary border-darken-1">Salesperson</th>
+                                        <th class="border-primary border-darken-1">Key account category</th>
+                                        <th class="border-primary border-darken-1">KAE</th>
+                                        <th class="border-primary border-darken-1">Launched By</th>
+                                        <th class="border-primary border-darken-1">Launched By Type</th>
+                                        <th class="border-primary border-darken-1">Auto Tagged to Operation</th>
+                                        <th class="border-primary border-darken-1">Manual Tagged To</th>
+                                        <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
+                                        <th class="border-primary border-darken-1">Last Comment By</th>
+                                        <th class="border-primary border-darken-1">Last Comment</th>
+
+                                        <th class="border-primary border-darken-1"></th>
+                                    </tr>
+                                    </thead>
+                                </table>
                             </div>
-
-
-                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                                <b><label class="ml-1" id="count"></label></b>
-                                <thead>
-                                <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
-                                    <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Request No.</th>
-                                    <th class="border-primary border-darken-1">Tracking No.</th>
-                                    <th class="border-primary border-darken-1">Shipper Name</th>
-                                    <th class="border-primary border-darken-1">Origin</th>
-                                    <th class="border-primary border-darken-1">Destination</th>
-                                    <th class="border-primary border-darken-1">Hub</th>
-                                    <th class="border-primary border-darken-1">Zone</th>
-                                    <th class="border-primary border-darken-1">Responsible Hub</th>
-                                    <th class="border-primary border-darken-1">Responsible Zone</th>
-                                    <th class="border-primary border-darken-1">Shipment Status</th>
-                                    <th class="border-primary border-darken-1">Case Nature</th>
-                                    <th class="border-primary border-darken-1">Case Nature Type</th>
-                                    <th class="border-primary border-darken-1">Description</th>
-                                    <th class="border-primary border-darken-1">Channel</th>
-                                    <th class="border-primary border-darken-1">Request Status</th>
-                                    <th class="border-primary border-darken-1">Complaint Re-open Date</th>
-                                    <th class="border-primary border-darken-1">Agent</th>
-                                    <th class="border-primary border-darken-1">Launched By</th>
-                                    <th class="border-primary border-darken-1">Launched By Type</th>
-                                    <th class="border-primary border-darken-1">Launched Date</th>
-                                    <th class="border-primary border-darken-1">Agent Assigned Date</th>
-                                    <th class="border-primary border-darken-1">Agent Assigned By</th>
-                                    <th class="border-primary border-darken-1">Address</th>
-                                    <th class="border-primary border-darken-1">Address Latitude</th>
-                                    <th class="border-primary border-darken-1">Address Longitude</th>
-                                    <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
-                                    <th class="border-primary border-darken-1">Last Comment By</th>
-                                    <th class="border-primary border-darken-1">Last Comment</th>
-                                    <th class="border-primary border-darken-1">Last Comment Date</th>
-                                    <th class="border-primary border-darken-1"></th>
-                                </tr>
-                                </thead>
-                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </section>
     <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
          aria-hidden="true">
@@ -101,9 +110,9 @@
                     <select name="Sale_person" id="assign_agent" class="form-control select2">
                         @foreach($agents as $agent)
                             <option value="{{ $agent->id }}" >
-                            {{ $agent->trax_id ? $agent->trax_id . ' - ' : '' }}
-                            {{ $agent->name ? $agent->name . ' - ' : '' }}
-                            {{ $agent->department }}
+                                {{ $agent->trax_id ? $agent->trax_id . ' - ' : '' }}
+                                {{ $agent->name ? $agent->name . ' - ' : '' }}
+                                {{ $agent->department }}
                             </option>
                         @endforeach
                     </select>
@@ -169,106 +178,106 @@
             </div>
         </div>
     </div>
-{{--        --}}
+    {{--        --}}
 
     {{--<div class="modal fade text-left" id="UpdateRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UpdateRequestModal"--}}
-         {{--aria-hidden="true">--}}
-        {{--<div class="modal-dialog modal-lg" role="document">--}}
-            {{--<div class="modal-content">--}}
-                {{--<div class="modal-header bg-primary white">--}}
-                    {{--<h4 class="modal-title white">Update Request</h4>--}}
-                    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-                        {{--<span aria-hidden="true">&times;</span>--}}
-                    {{--</button>--}}
-                {{--</div>--}}
-                {{--<div class="modal-body text-center">--}}
-                    {{--<form id="update_request_form" method="post">--}}
-                        {{--@method('POST')--}}
-                        {{--@csrf--}}
-                        {{--<div class="container">--}}
-                            {{--<div class="row">--}}
-                                {{--<h3 class="heading">Tracking Number</h3>--}}
-                            {{--</div>--}}
-                            {{--<input type="hidden" id="update_request_id_selected">--}}
-                            {{--<div class="row old_scroll justify-content-center" id="requested_shipments">--}}
-                            {{--<h3 id="requested_shipment_tracking" class="text-center font-weight-bold"></h3>--}}
-                            {{--</div>--}}
-                            {{--<hr>--}}
-                            {{--<div class="row justify-content-center">--}}
-                                {{--<div class="col-8">--}}
-                                    {{--<fieldset class="form-group">--}}
-                                        {{--<select name="case_nature_select" id="case_nature_select" class="form-control select2">--}}
-                                            {{--@foreach($case_nature as $nature)--}}
-                                                {{--<option value="{{$nature->id}}">{{$nature->name}}</option>--}}
-                                            {{--@endforeach--}}
-                                        {{--</select>--}}
-                                    {{--</fieldset>--}}
-                                {{--</div>--}}
-                            {{--</div>--}}
-                            {{--<div class="complaints d-none" id="request_complaints">--}}
-                                {{--<div class="row justify-content-center">--}}
-                                    {{--<div class="col-6">--}}
-                                        {{--<fieldset class="form-group">--}}
-                                            {{--<select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">--}}
-                                                {{--@foreach($case_nature_complaints as $complaints)--}}
-                                                    {{--<option value="{{$complaints->id}}">{{$complaints->type}}</option>--}}
-                                                {{--@endforeach--}}
-                                            {{--</select>--}}
-                                        {{--</fieldset>--}}
-                                    {{--</div>--}}
-                                    {{--<div class="col-6">--}}
-                                        {{--<fieldset class="form-group">--}}
-                                            {{--<select name="complaint_channel" id="complaint_channels" class="form-control select2">--}}
-                                                {{--@foreach($channels as $channel1)--}}
-                                                    {{--<option value="{{$channel1->id}}">{{$channel1->channel}}</option>--}}
-                                                {{--@endforeach--}}
-                                            {{--</select>--}}
-                                        {{--</fieldset>--}}
-                                    {{--</div>--}}
-                                    {{--<div class="col-6">--}}
-                                        {{--<fieldset class="form-group">--}}
-                                            {{--<textarea class="form-control info" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..." disabled></textarea>--}}
-                                        {{--</fieldset>--}}
-                                    {{--</div>--}}
-                                {{--</div>--}}
-                            {{--</div>--}}
-                            {{--<div class="service d-none" id="request_service">--}}
-                                {{--<div class="row justify-content-center">--}}
-                                    {{--<div class="col-6">--}}
-                                        {{--<fieldset class="form-group">--}}
-                                            {{--<select name="case_nature_request" id="case_nature_requests" class="form-control select2">--}}
-                                                {{--@foreach($case_nature_service_requests as $service)--}}
-                                                    {{--<option value="{{$service->id}}">{{$service->type}}</option>--}}
-                                                {{--@endforeach--}}
-                                            {{--</select>--}}
-                                        {{--</fieldset>--}}
-                                    {{--</div>--}}
-                                    {{--<div class="col-6">--}}
-                                        {{--<fieldset class="form-group">--}}
-                                            {{--<select name="request_channel" id="request_channels" class="form-control select2">--}}
-                                                {{--@foreach($channels as $channel2)--}}
-                                                    {{--<option value="{{$channel2->id}}">{{$channel2->channel}}</option>--}}
-                                                {{--@endforeach--}}
-                                            {{--</select>--}}
-                                        {{--</fieldset>--}}
-                                    {{--</div>--}}
-                                    {{--<div class="col-6">--}}
-                                        {{--<fieldset class="form-group">--}}
-                                            {{--<textarea class="form-control info" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..." disabled></textarea>--}}
-                                        {{--</fieldset>--}}
-                                    {{--</div>--}}
-                                {{--</div>--}}
-                            {{--</div>--}}
-                            {{--<div class="row justify-content-center">--}}
-                                {{--<div class="col-3">--}}
-                                    {{--<button id="UpdateRequestBtn" type="submit" class="btn btn-primary btn-block d-none">Update</button>--}}
-                                {{--</div>--}}
-                            {{--</div>--}}
-                        {{--</div>--}}
-                    {{--</form>--}}
-                {{--</div>--}}
-            {{--</div>--}}
-        {{--</div>--}}
+    {{--aria-hidden="true">--}}
+    {{--<div class="modal-dialog modal-lg" role="document">--}}
+    {{--<div class="modal-content">--}}
+    {{--<div class="modal-header bg-primary white">--}}
+    {{--<h4 class="modal-title white">Update Request</h4>--}}
+    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+    {{--<span aria-hidden="true">&times;</span>--}}
+    {{--</button>--}}
+    {{--</div>--}}
+    {{--<div class="modal-body text-center">--}}
+    {{--<form id="update_request_form" method="post">--}}
+    {{--@method('POST')--}}
+    {{--@csrf--}}
+    {{--<div class="container">--}}
+    {{--<div class="row">--}}
+    {{--<h3 class="heading">Tracking Number</h3>--}}
+    {{--</div>--}}
+    {{--<input type="hidden" id="update_request_id_selected">--}}
+    {{--<div class="row old_scroll justify-content-center" id="requested_shipments">--}}
+    {{--<h3 id="requested_shipment_tracking" class="text-center font-weight-bold"></h3>--}}
+    {{--</div>--}}
+    {{--<hr>--}}
+    {{--<div class="row justify-content-center">--}}
+    {{--<div class="col-8">--}}
+    {{--<fieldset class="form-group">--}}
+    {{--<select name="case_nature_select" id="case_nature_select" class="form-control select2">--}}
+    {{--@foreach($case_nature as $nature)--}}
+    {{--<option value="{{$nature->id}}">{{$nature->name}}</option>--}}
+    {{--@endforeach--}}
+    {{--</select>--}}
+    {{--</fieldset>--}}
+    {{--</div>--}}
+    {{--</div>--}}
+    {{--<div class="complaints d-none" id="request_complaints">--}}
+    {{--<div class="row justify-content-center">--}}
+    {{--<div class="col-6">--}}
+    {{--<fieldset class="form-group">--}}
+    {{--<select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">--}}
+    {{--@foreach($case_nature_complaints as $complaints)--}}
+    {{--<option value="{{$complaints->id}}">{{$complaints->type}}</option>--}}
+    {{--@endforeach--}}
+    {{--</select>--}}
+    {{--</fieldset>--}}
+    {{--</div>--}}
+    {{--<div class="col-6">--}}
+    {{--<fieldset class="form-group">--}}
+    {{--<select name="complaint_channel" id="complaint_channels" class="form-control select2">--}}
+    {{--@foreach($channels as $channel1)--}}
+    {{--<option value="{{$channel1->id}}">{{$channel1->channel}}</option>--}}
+    {{--@endforeach--}}
+    {{--</select>--}}
+    {{--</fieldset>--}}
+    {{--</div>--}}
+    {{--<div class="col-6">--}}
+    {{--<fieldset class="form-group">--}}
+    {{--<textarea class="form-control info" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..." disabled></textarea>--}}
+    {{--</fieldset>--}}
+    {{--</div>--}}
+    {{--</div>--}}
+    {{--</div>--}}
+    {{--<div class="service d-none" id="request_service">--}}
+    {{--<div class="row justify-content-center">--}}
+    {{--<div class="col-6">--}}
+    {{--<fieldset class="form-group">--}}
+    {{--<select name="case_nature_request" id="case_nature_requests" class="form-control select2">--}}
+    {{--@foreach($case_nature_service_requests as $service)--}}
+    {{--<option value="{{$service->id}}">{{$service->type}}</option>--}}
+    {{--@endforeach--}}
+    {{--</select>--}}
+    {{--</fieldset>--}}
+    {{--</div>--}}
+    {{--<div class="col-6">--}}
+    {{--<fieldset class="form-group">--}}
+    {{--<select name="request_channel" id="request_channels" class="form-control select2">--}}
+    {{--@foreach($channels as $channel2)--}}
+    {{--<option value="{{$channel2->id}}">{{$channel2->channel}}</option>--}}
+    {{--@endforeach--}}
+    {{--</select>--}}
+    {{--</fieldset>--}}
+    {{--</div>--}}
+    {{--<div class="col-6">--}}
+    {{--<fieldset class="form-group">--}}
+    {{--<textarea class="form-control info" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..." disabled></textarea>--}}
+    {{--</fieldset>--}}
+    {{--</div>--}}
+    {{--</div>--}}
+    {{--</div>--}}
+    {{--<div class="row justify-content-center">--}}
+    {{--<div class="col-3">--}}
+    {{--<button id="UpdateRequestBtn" type="submit" class="btn btn-primary btn-block d-none">Update</button>--}}
+    {{--</div>--}}
+    {{--</div>--}}
+    {{--</div>--}}
+    {{--</form>--}}
+    {{--</div>--}}
+    {{--</div>--}}
+    {{--</div>--}}
     {{--</div>--}}
     <div class="modal fade text-left" id="CloseReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CloseReasonModal"
          aria-hidden="true">
@@ -329,79 +338,98 @@
                         $.ajax({
                             url: '{{ route('admin.crm.launched_re_open.list') }}',
                             data: params,
-                        success: function (result) {
-                            head = [];
+                            method : 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function (result) {
+                                head = [];
+                                head.push('S No.');
+                                head.push('Request No.');
+                                head.push('Tracking No.');
+                                head.push('Shipper Name');
+                                head.push('Origin');
+                                head.push('Destination');
+                                head.push('Hub');
+                                head.push('Zone');
+                                head.push('Arrival Date');
+                                head.push('Arrival to Today (TAT)');
+                                head.push('Shipment Status');
+                                head.push('Last Status Date');
+                                head.push('Last status to Today (TAT)');
+                                head.push('Last status by');
+                                head.push('Case Nature');
+                                head.push('Case Nature Type');
+                                head.push('Description');
+                                head.push('Launched Date');
+                                head.push('Aging (From Launched Date To Today)');
+                                head.push('Responsible Hub');
+                                head.push('Sub Hub');
+                                head.push('Responsible Zone');
+                                head.push('Agent');
+                                head.push('Agent Assigned By');
+                                head.push('Parcel Value');
+                                head.push('COD Value');
+                                head.push('Segment');
+                                head.push('Weight');
+                                head.push('Salesperson');
+                                head.push('Key account category');
+                                head.push('KAE');
+                                head.push('Launched By');
+                                head.push('Launched By Type');
+                                head.push('Auto Tagged to Operation');
+                                head.push('Manual Tagged To');
+                                head.push('Tagged (Admin/Department)');
+                                head.push('Last Comment By');
+                                head.push('Last Comment');
 
-                            head.push('S No.');
-                            head.push('Request No.');
-                            head.push('Tracking No.');
-                            head.push('Shipper Name');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Hub');
-                            head.push('Zone');
-                            head.push('Responsible Hub');
-                            head.push('Responsible Zone');
-                            head.push('Shipment Status');
-                            head.push('Case Nature');
-                            head.push('Case Nature Type');
-                            head.push('Description');
-                            head.push('Channel');
-                            head.push('Request Status');
-                            head.push('Complaint Re-Open Date');
-                            head.push('Agent');
-                            head.push('Launched By');
-                            head.push('Launched By Type');
-                            head.push('Launched Date');
-                            head.push('Agent Assigned Date');
-                            head.push('Agent Assigned By');
-                            head.push('Address');
-                            head.push('Address Latitude');
-                            head.push('Address Longitude');
-                            head.push('Launched To Today (TAT)');
-                            head.push('Last Comment By');
-                            head.push('Last Comment');
-                            head.push('Last Comment Date');
 
-                            $.each(result.data, function(index, values) {
-                                row = [];
+                                $.each(result.data, function(index, values) {
+                                    row = [];
 
-                                row.push(index + 1);
-                                row.push(values.id_padded);
-                                row.push(values.tracking_number);
-                                row.push(values.shipper_name);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.zone);
-                                row.push(values.responsible_hub);
-                                row.push(values.responsible_zone);
-                                row.push(values.shipment_status);
-                                row.push(values.case_nature);
-                                row.push(values.case_nature_type);
-                                row.push(values.descr);
-                                row.push(values.channel);
-                                row.push(values.status);
-                                row.push(values.reopen_date);
-                                row.push(values.agent);
-                                row.push(values.launched_by_name);
-                                row.push(values.added_by);
-                                row.push(values.created_at);
-                                row.push(values.agent_assigned_date);
-                                row.push(values.agent_assigned_by);
-                                row.push(values.address);
-                                row.push(values.address_latitude);
-                                row.push(values.address_longitude);
-                                row.push(values.current_tat);
-                                row.push(values.last_comment_name);
-                                row.push(values.last_comment.replace(/<br>/gi, '\n'));
-                                row.push(values.last_comment_date);
-
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
+                                    row.push(index + 1);
+                                    row.push(values.id_padded); // {data: 'id_padded_link', name: 'crm_requests.id'}
+                                    row.push(values.tracking_number); // {data: 'tracking_number_hyperlink', name: 's.tracking_number'}
+                                    row.push(values.shipper_name); // {data: 'shipper_name', name: 'user.name'}
+                                    row.push(values.origin); // {data: 'origin', name: 'oc.name'}
+                                    row.push(values.destination); // {data: 'destination', name: 'dc.name'}
+                                    row.push(values.hub); // {data: 'hub', name: 'dh.name'}
+                                    row.push(values.zone); // {data: 'zone', name: 'zones'}
+                                    row.push(values.arrival_date); // {data: 'arrival_date', name: 's.updated_at'}
+                                    row.push(values.arrival_today); // {data: 'arrival_today', name: 'arrival_today'}
+                                    row.push(values.shipment_status); // {data: 'shipment_status', name: 'shipment_status'}
+                                    row.push(values.last_status_date); // {data: 'last_status_date', name: 'crm_requests.updated_at'}
+                                    row.push(values.last_status_today); // {data: 'last_status_today', name: 's.updated_at'}
+                                    row.push(values.last_status_updated_by); // {data: 'last_status_updated_by', name: 'last_status_upd_by.name'}
+                                    row.push(values.case_nature); // {data: 'case_nature', name: 'crcn.id'}
+                                    row.push(values.case_nature_type); // {data: 'case_nature_type', name: 'case_nature_type'}
+                                    row.push(values.descr); // {data: 'description', name: 'crm_requests.description'}
+                                    row.push(values.created_at); // {data: 'created_at', name: 'crm_requests.created_at'}
+                                    row.push(values.current_tat); // {data: 'current_tat', name: 'current_tat'}
+                                    row.push(values.responsible_hub); // {data: 'responsible_hub', name: 'responsible_hub'}
+                                    row.push(values.sub_hub); // {data: 'sub_hub', name: 'ca.name'}
+                                    row.push(values.responsible_zone); // {data: 'responsible_zone', name: 'responsible_zone'}
+                                    row.push(values.agent); // {data: 'agent', name: 'ad.name'}
+                                    row.push(values.agent_assigned_by); // {data: 'agent_assigned_by', name: 'resby.name'}
+                                    row.push(values.parcel_value); // {data: 'parcel_value', name: 'parcel_value'}
+                                    row.push(values.cod_value); // {data: 'cod_value', name: 'cod_value'}
+                                    row.push(values.segment); // {data: 'segment', name: 'seg.name'}
+                                    row.push(values.actual_weight); // {data: 'actual_weight', name: 's.actual_weight'}
+                                    row.push(values.sale_person); // {data: 'sale_person', name: 'ad1.name'}
+                                    row.push(values.shipper_category); // {data: 'shipper_category', name: 'shipper_category'}
+                                    row.push(values.kae); // {data: 'kae', name: 'ad2.name'}
+                                    row.push(values.launched_by_name); // {data: 'launched_by_name', name: 'launched_by_name'}
+                                    row.push(values.added_by); // {data: 'added_by', name: 'crm_requests.launched_by'}
+                                    row.push(values.tagged_to_operation); // {data: 'tagged_to_operation', name: 'tagged_to_operation'}
+                                    row.push(values.manual_tagged_to); // {data: 'tagged_to_manual', name: 'tagged_to_manual'}
+                                    row.push(values.tagged_department); // {data: 'tagged_department', name: 'adp.name'}
+                                    row.push(values.last_comment_name); // {data: 'last_comment_name', name: 'last_comment_name'}
+                                    row.push(values.last_comment.replace(/<br>/gi, '\n')); // {data: 'last_comment', name: 'ccs.comment'}
+                                    body.push(row);
+                                });
+                            },
+                            async: false
+                        });
 
                     return {body: body, header: head};
                 }
@@ -413,7 +441,7 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                    @if(session('role_id') == 1 || in_array(201, session('permissions')))
+                        @if(session('role_id') == 1 || in_array(201, session('permissions')))
                     {
                         text: 'Bulk Internal Comment',
                         className: 'btn btn-primary bulk_internal_comment',
@@ -430,8 +458,8 @@
                             $('#BulkExternalCommentModal').modal('show');
                         }
                     },
-                    @endif
-                    @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
+                        @endif
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
                     {
                         text: 'Valid',
                         className: 'btn btn-primary valid',
@@ -439,7 +467,7 @@
                         action: function (e, dt, node, config) {
 
                             mark_valid_invalid(1);
-                                
+
                         }
                     },{
                         text: 'In-Valid',
@@ -455,14 +483,14 @@
                                     '_token': '{{ csrf_token() }}'
                                 }
                             })
-                            .done(function (data) {
-                                if(data.status == 1){
-                                    $('#close_reason_crm_ids').val(data.crm_ids);
-                                    $('#CloseReasonModal').modal('show');
-                                }else{
-                                    mark_valid_invalid(0);
-                                }
-                            });
+                                .done(function (data) {
+                                    if(data.status == 1){
+                                        $('#close_reason_crm_ids').val(data.crm_ids);
+                                        $('#CloseReasonModal').modal('show');
+                                    }else{
+                                        mark_valid_invalid(0);
+                                    }
+                                });
                         }
                     },
                         @endif
@@ -544,7 +572,7 @@
                                             });
                                         }
                                     }
-                                    });
+                                });
                             });
                         }
                     },
@@ -616,7 +644,7 @@
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
-                'reset'],
+                    'reset'],
                 select: {
                     info: false,
                     style: 'multi',
@@ -634,6 +662,10 @@
                 },
                 ajax: {
                     url: '{{ route('admin.crm.launched_re_open.list') }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
@@ -646,33 +678,41 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle id_padded_link'},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'hub', name: 'dh.name', class: 'align-middle hub'},
-                    {data: 'zone', name: 'zones', class: 'align-middle zone'},
-                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub'},
-                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone'},
-                    {data: 'shipment_status', name: 'shipment_status', class: 'align-middle shipment_status'},
-                    {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
-                    {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
-                    {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
-                    {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
-                    {data: 'status', name: 'crs.id', class: 'align-middle status'},
-                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
-                    {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
-                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
-                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
-                    {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
-                    {data: 'agent_assigned_date', name: 'res.created_at', class: 'align-middle agent_assigned_date'},
-                    {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
-                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
-                    {data: 'address_latitude', name: 'crm_requests.address_latitude', class: 'align-middle address_latitude'},
-                    {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
-                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
-                    {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
-                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
-                    {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
+                    {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'}, // Shipper Name
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'}, // Origin
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'}, // Destination
+                    {data: 'hub', name: 'dh.name', class: 'align-middle hub'}, // Hub
+                    {data: 'zone', name: 'zones', class: 'align-middle zone'}, // Zone
+                    {data: 'arrival_date', name: 's.updated_at', class: 'align-middle arrival_date'}, // Arrival Date
+                    {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today'}, // Arrival to Today (TAT)
+                    {data: 'shipment_status', name: 'shipment_status', class: 'align-middle shipment_status'}, // Shipment Status
+                    {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'}, // Last Status Date
+                    {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false, searchable: false}, // Last status to Today (TAT)
+                    {data: 'last_status_updated_by', name: 'last_status_upd_by.name', class: 'align-middle last_status_updated_by', orderable: false, searchable: false}, // Last status by
+                    {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'}, // Case Nature
+                    {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'}, // Case Nature Type
+                    {data: 'description', name: 'crm_requests.description', class: 'align-middle description'}, // Description
+                    {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'}, // Launched Date
+                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false}, // Aging (From Launched Date To Today)
+                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub'}, // Responsible Hub
+                    {data: 'sub_hub', name: 'ca.name', class: 'align-middle sub_hub', orderable: false}, // Sub Hub
+                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone'}, // Responsible Zone
+                    {data: 'agent', name: 'ad.name', class: 'align-middle agent'}, // Agent
+                    {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'}, // Agent Assigned By
+                    {data: 'parcel_value', name: 'parcel_value', class: 'align-middle parcel_value'}, // Parcel Value
+                    {data: 'cod_value', name: 'cod_value', class: 'align-middle cod_value'}, // COD Value
+                    {data: 'segment', name: 'seg.name', class: 'align-middle segment'}, // Segment
+                    {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight'}, // Weight
+                    {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'}, // Salesperson
+                    {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'}, // Key account category
+                    {data: 'kae', name: 'ad2.name', class: 'align-middle kae'}, // KAE
+                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'}, // Launched By
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'}, // Launched By Type
+                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
+                    {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'}, // Manual Tagged To
+                    {data: 'tagged_department', name: 'adp.name', class: 'align-middle tagged_department'}, // Tagged (Admin/Department)
+                    {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'}, // Last Comment By
+                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'}, // Last Comment
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -958,7 +998,7 @@
                             table.button('.bulk_internal_comment').disable();
                         });
                 }
-                 else {
+                else {
                     var error = "Add Comment First!";
                     toastr.error(error, 'Error!', {
                         positionClass: 'toast-top-center',
@@ -1090,44 +1130,44 @@
             });
 
             {{--$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.assign', function() {--}}
-                {{--$('#AssignAgentModal').modal('show');--}}
-                {{--var crm_request_id = parseInt($(this).parents('tr').attr('id'));--}}
+            {{--$('#AssignAgentModal').modal('show');--}}
+            {{--var crm_request_id = parseInt($(this).parents('tr').attr('id'));--}}
 
-                {{--$('#AssignAgentModal').on('shown.bs.modal',function (e) {--}}
-                {{--});--}}
-                {{--$('#AssignAgentModal').on('hide.bs.modal', function (e) {--}}
-                    {{--$('#assign_agent').val('').trigger('change');--}}
-                {{--});--}}
-                {{--$('#assign_agentSubmit').on('click',function () {--}}
-                    {{--var assign = parseInt($('#assign_agent').val());--}}
-                    {{--if(assign){--}}
-                        {{--$.ajax({--}}
-                            {{--url: '{!! route('admin.crm.assign') !!}',--}}
-                            {{--method: 'POST',--}}
-                            {{--data: {--}}
-                                {{--'admin_id': assign,--}}
-                                {{--'crm_request_id':crm_request_id,--}}
-                                {{--'multiple': 0,--}}
-                                {{--'_token': '{{ csrf_token() }}'--}}
-                            {{--}--}}
-                        {{--})--}}
-                            {{--.done(function(data) {--}}
-                                {{--if(data.status == 0){--}}
-                                    {{--$('#AssignAgentModal').modal('hide');--}}
-                                    {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                                {{--}--}}
-                                {{--else {--}}
-                                    {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                                {{--}--}}
-                                {{--$('#assign_agent').val('').trigger('change');--}}
-                                {{--table.draw('false');--}}
-                            {{--});--}}
-                    {{--}else{--}}
-                        {{--var error = "Agent Not Selected!";--}}
-                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                    {{--}--}}
+            {{--$('#AssignAgentModal').on('shown.bs.modal',function (e) {--}}
+            {{--});--}}
+            {{--$('#AssignAgentModal').on('hide.bs.modal', function (e) {--}}
+            {{--$('#assign_agent').val('').trigger('change');--}}
+            {{--});--}}
+            {{--$('#assign_agentSubmit').on('click',function () {--}}
+            {{--var assign = parseInt($('#assign_agent').val());--}}
+            {{--if(assign){--}}
+            {{--$.ajax({--}}
+            {{--url: '{!! route('admin.crm.assign') !!}',--}}
+            {{--method: 'POST',--}}
+            {{--data: {--}}
+            {{--'admin_id': assign,--}}
+            {{--'crm_request_id':crm_request_id,--}}
+            {{--'multiple': 0,--}}
+            {{--'_token': '{{ csrf_token() }}'--}}
+            {{--}--}}
+            {{--})--}}
+            {{--.done(function(data) {--}}
+            {{--if(data.status == 0){--}}
+            {{--$('#AssignAgentModal').modal('hide');--}}
+            {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+            {{--}--}}
+            {{--else {--}}
+            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
+            {{--$('#assign_agent').val('').trigger('change');--}}
+            {{--table.draw('false');--}}
+            {{--});--}}
+            {{--}else{--}}
+            {{--var error = "Agent Not Selected!";--}}
+            {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
 
-                {{--});--}}
+            {{--});--}}
             {{--});--}}
 
 
@@ -1185,194 +1225,194 @@
 
 
             {{--$('body').on('click', '.dropdown-item.update_request', function () {--}}
-                {{--var nature = parseInt($(this).parents('tr').attr('nature'));--}}
-                {{--var request_id = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--if(nature == 1 || nature == 2){--}}
-                    {{--$('#UpdateRequestModal').modal('show');--}}
-                    {{--$('#update_request_id_selected').val(request_id);--}}
-                    {{--$.ajax({--}}
-                        {{--url: '{!! route('admin.crm.request.get_request') !!}',--}}
-                        {{--method: 'POST',--}}
-                        {{--data: {--}}
-                            {{--'request_id': request_id,--}}
-                            {{--'_token': '{{ csrf_token() }}'--}}
-                        {{--}--}}
-                    {{--}).done(function (data) {--}}
-                            {{--if(data.status){--}}
-                                {{--if(data.details.case_nature_id == 1){--}}
-                                    {{--$('#case_nature_select').val(data.details.case_nature_id).trigger('change');--}}
-                                    {{--$('#case_nature_complaints').val(data.details.case_nature_type_id).trigger('change');--}}
-                                    {{--$('#complaint_channels').val(data.details.channel_id).trigger('change');--}}
-                                    {{--$('#complaint_description').val(data.details.description);--}}
+            {{--var nature = parseInt($(this).parents('tr').attr('nature'));--}}
+            {{--var request_id = parseInt($(this).parents('tr').attr('id'));--}}
+            {{--if(nature == 1 || nature == 2){--}}
+            {{--$('#UpdateRequestModal').modal('show');--}}
+            {{--$('#update_request_id_selected').val(request_id);--}}
+            {{--$.ajax({--}}
+            {{--url: '{!! route('admin.crm.request.get_request') !!}',--}}
+            {{--method: 'POST',--}}
+            {{--data: {--}}
+            {{--'request_id': request_id,--}}
+            {{--'_token': '{{ csrf_token() }}'--}}
+            {{--}--}}
+            {{--}).done(function (data) {--}}
+            {{--if(data.status){--}}
+            {{--if(data.details.case_nature_id == 1){--}}
+            {{--$('#case_nature_select').val(data.details.case_nature_id).trigger('change');--}}
+            {{--$('#case_nature_complaints').val(data.details.case_nature_type_id).trigger('change');--}}
+            {{--$('#complaint_channels').val(data.details.channel_id).trigger('change');--}}
+            {{--$('#complaint_description').val(data.details.description);--}}
 
-                                    {{--$('#requested_shipment_tracking').text(data.tracking_number);--}}
-                                {{--}else if(data.details.case_nature_id == 2){--}}
-                                    {{--$('#case_nature_select').val(data.details.case_nature_id).trigger('change');--}}
-                                    {{--$('#case_nature_requests').val(data.details.case_nature_type_id).trigger('change');--}}
-                                    {{--$('#request_channels').val(data.details.channel_id).trigger('change');--}}
-                                    {{--$('#service_description').val(data.details.description);--}}
+            {{--$('#requested_shipment_tracking').text(data.tracking_number);--}}
+            {{--}else if(data.details.case_nature_id == 2){--}}
+            {{--$('#case_nature_select').val(data.details.case_nature_id).trigger('change');--}}
+            {{--$('#case_nature_requests').val(data.details.case_nature_type_id).trigger('change');--}}
+            {{--$('#request_channels').val(data.details.channel_id).trigger('change');--}}
+            {{--$('#service_description').val(data.details.description);--}}
 
-                                    {{--$('#requested_shipment_tracking').text(data.tracking_number);--}}
-                                {{--}--}}
-                            {{--}else{--}}
-                                {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                            {{--}--}}
-                    {{--});--}}
-                {{--}--}}
+            {{--$('#requested_shipment_tracking').text(data.tracking_number);--}}
+            {{--}--}}
+            {{--}else{--}}
+            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
+            {{--});--}}
+            {{--}--}}
             {{--});--}}
 
             {{--$( "#update_request_form" ).bind('submit', function (e) {--}}
-                {{--e.preventDefault();--}}
-                {{--var case_nature_id = parseInt($('#case_nature_select').val());--}}
-                {{--var request_id = $('#update_request_id_selected').val();--}}
-                {{--if(case_nature_id === 1){--}}
-                    {{--var nature_flag = true;--}}
-                    {{--var case_nature_complaint_id = $('#case_nature_complaints').val();--}}
-                    {{--var case_nature_channel_id = $('#complaint_channels').val();--}}
+            {{--e.preventDefault();--}}
+            {{--var case_nature_id = parseInt($('#case_nature_select').val());--}}
+            {{--var request_id = $('#update_request_id_selected').val();--}}
+            {{--if(case_nature_id === 1){--}}
+            {{--var nature_flag = true;--}}
+            {{--var case_nature_complaint_id = $('#case_nature_complaints').val();--}}
+            {{--var case_nature_channel_id = $('#complaint_channels').val();--}}
 
-                    {{--if(!case_nature_complaint_id){--}}
-                        {{--nature_flag = false;--}}
-                        {{--var error = "Please select Complaint type!";--}}
-                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                    {{--}--}}
-                    {{--if(!case_nature_channel_id){--}}
-                        {{--nature_flag = false;--}}
-                        {{--var error = "Please select Channel!";--}}
-                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                    {{--}--}}
-                    {{--if(nature_flag){--}}
-                        {{--$.ajax({--}}
-                            {{--url: '{!! route('admin.crm.request.update') !!}',--}}
-                            {{--method: 'POST',--}}
-                            {{--data: {--}}
-                                {{--'_token': '{{ csrf_token() }}',--}}
-                                {{--'request_id' : request_id,--}}
-                                {{--'case_nature_id' : case_nature_id,--}}
-                                {{--'complaint_id' : case_nature_complaint_id,--}}
-                                {{--'channel_id': case_nature_channel_id--}}
-                            {{--}--}}
-                        {{--})--}}
-                            {{--.done(function(data) {--}}
-                                {{--if (data.status) {--}}
-                                    {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                                {{--}--}}
-                                {{--else {--}}
-                                    {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                                {{--}--}}
-                                {{--table.draw('false');--}}
+            {{--if(!case_nature_complaint_id){--}}
+            {{--nature_flag = false;--}}
+            {{--var error = "Please select Complaint type!";--}}
+            {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
+            {{--if(!case_nature_channel_id){--}}
+            {{--nature_flag = false;--}}
+            {{--var error = "Please select Channel!";--}}
+            {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
+            {{--if(nature_flag){--}}
+            {{--$.ajax({--}}
+            {{--url: '{!! route('admin.crm.request.update') !!}',--}}
+            {{--method: 'POST',--}}
+            {{--data: {--}}
+            {{--'_token': '{{ csrf_token() }}',--}}
+            {{--'request_id' : request_id,--}}
+            {{--'case_nature_id' : case_nature_id,--}}
+            {{--'complaint_id' : case_nature_complaint_id,--}}
+            {{--'channel_id': case_nature_channel_id--}}
+            {{--}--}}
+            {{--})--}}
+            {{--.done(function(data) {--}}
+            {{--if (data.status) {--}}
+            {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+            {{--}--}}
+            {{--else {--}}
+            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
+            {{--table.draw('false');--}}
 
-                                {{--$('#UpdateRequestModal').modal('hide');--}}
-                            {{--});--}}
-                    {{--}--}}
+            {{--$('#UpdateRequestModal').modal('hide');--}}
+            {{--});--}}
+            {{--}--}}
 
-                {{--}else if(case_nature_id == 2){--}}
-                    {{--var nature_flag = true;--}}
-                    {{--var case_nature_complaint_id = $('#case_nature_requests').val();--}}
-                    {{--var case_nature_channel_id = $('#request_channels').val();--}}
-                    {{--if(!case_nature_complaint_id){--}}
-                        {{--nature_flag = false;--}}
-                        {{--var error = "Please select Complaint type!";--}}
-                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                    {{--}--}}
-                    {{--if(!case_nature_channel_id){--}}
-                        {{--nature_flag = false;--}}
-                        {{--var error = "Please select Channel!";--}}
-                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                    {{--}--}}
+            {{--}else if(case_nature_id == 2){--}}
+            {{--var nature_flag = true;--}}
+            {{--var case_nature_complaint_id = $('#case_nature_requests').val();--}}
+            {{--var case_nature_channel_id = $('#request_channels').val();--}}
+            {{--if(!case_nature_complaint_id){--}}
+            {{--nature_flag = false;--}}
+            {{--var error = "Please select Complaint type!";--}}
+            {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
+            {{--if(!case_nature_channel_id){--}}
+            {{--nature_flag = false;--}}
+            {{--var error = "Please select Channel!";--}}
+            {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
 
-                    {{--if(nature_flag){--}}
-                        {{--$.ajax({--}}
-                            {{--url: '{!! route('admin.crm.request.update') !!}',--}}
-                            {{--method: 'POST',--}}
-                            {{--data: {--}}
-                                {{--'_token': '{{ csrf_token() }}',--}}
-                                {{--'request_id' : request_id,--}}
-                                {{--'case_nature_id' : case_nature_id,--}}
-                                {{--'complaint_id' : case_nature_complaint_id,--}}
-                                {{--'channel_id': case_nature_channel_id--}}
-                            {{--}--}}
-                        {{--})--}}
-                            {{--.done(function(data) {--}}
-                                {{--if (data.status) {--}}
-                                    {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                                {{--}--}}
-                                {{--else {--}}
-                                    {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                                {{--}--}}
-                                {{--table.draw('false');--}}
-                                {{--$('#UpdateRequestModal').modal('hide');--}}
-                            {{--});--}}
-                    {{--}--}}
-                {{--}else{--}}
-                    {{--var error = "Please select case nature!";--}}
-                    {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--}--}}
+            {{--if(nature_flag){--}}
+            {{--$.ajax({--}}
+            {{--url: '{!! route('admin.crm.request.update') !!}',--}}
+            {{--method: 'POST',--}}
+            {{--data: {--}}
+            {{--'_token': '{{ csrf_token() }}',--}}
+            {{--'request_id' : request_id,--}}
+            {{--'case_nature_id' : case_nature_id,--}}
+            {{--'complaint_id' : case_nature_complaint_id,--}}
+            {{--'channel_id': case_nature_channel_id--}}
+            {{--}--}}
+            {{--})--}}
+            {{--.done(function(data) {--}}
+            {{--if (data.status) {--}}
+            {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+            {{--}--}}
+            {{--else {--}}
+            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
+            {{--table.draw('false');--}}
+            {{--$('#UpdateRequestModal').modal('hide');--}}
+            {{--});--}}
+            {{--}--}}
+            {{--}else{--}}
+            {{--var error = "Please select case nature!";--}}
+            {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
             {{--});--}}
             function mark_valid_invalid(valid){
-                
+
                 if(valid == 0){
                     valid_text = 'Invalid';
                 }else{
                     valid_text = 'Valid';
 
                 }
-                
+
                 var closed_reason_status = $('#closed_reason_status').val();
                 var close_reason_crm_ids = $('#close_reason_crm_ids').val();
                 swal({
-                text: 'Are you sure, you want to Mark these Request(s) '+valid_text+'?',
-                icon: 'info',
-                buttons: {
-                    cancel: {
-                        text: 'No',
-                        value: null,
-                        visible: true,
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: 'Yes',
-                        value: true,
-                        visible: true,
-                        closeModal: true
-                    }
-                },
-                closeOnClickOutside: false,
-                closeOnEsc: false,
-                dangerMode: true
-            }).then(function(confirm) {
-                if (confirm) {
-                    $.ajax({
-                        url: '{!! route('admin.crm.bulk_valid_invalid') !!}',
-                        method: 'POST',
-                        data: {
-                            'crm_request_ids[]': selected_rows,
-                            'closed_reason_status': closed_reason_status,
-                            'close_reason_crm_ids': close_reason_crm_ids,
-                            'valid': valid,
-                            '_token': '{{ csrf_token() }}'
+                    text: 'Are you sure, you want to Mark these Request(s) '+valid_text+'?',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
                         }
-                    })
-                        .done(function (data) {
-                            if (data.status == 1) {
-                                $('#AssignAgentModal').modal('hide');
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center'
-                                });
-                            } else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.crm.bulk_valid_invalid') !!}',
+                            method: 'POST',
+                            data: {
+                                'crm_request_ids[]': selected_rows,
+                                'closed_reason_status': closed_reason_status,
+                                'close_reason_crm_ids': close_reason_crm_ids,
+                                'valid': valid,
+                                '_token': '{{ csrf_token() }}'
                             }
-                            selected_rows = [];
+                        })
+                            .done(function (data) {
+                                if (data.status == 1) {
+                                    $('#AssignAgentModal').modal('hide');
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                selected_rows = [];
 
-                            table.rows().deselect();
+                                table.rows().deselect();
 
-                            table.draw();
-                            $('#CloseReasonModal').modal('hide');
+                                table.draw();
+                                $('#CloseReasonModal').modal('hide');
 
-                        });
+                            });
                     }
                 });
             }
