@@ -21,9 +21,9 @@
                                 <div class="col-2">
                                     <fieldset class="form-group">
                                         <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                            @foreach ($shippers as $shipper)
-                                                <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
-                                            @endforeach
+{{--                                            @foreach ($shippers as $shipper)--}}
+{{--                                                <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>--}}
+{{--                                            @endforeach--}}
                                         </select>
                                     </fieldset>
                                 </div>
@@ -575,13 +575,31 @@
             var initial_total_hold = 0;
             var initial_ibft_charges = 0;
 
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Shipper',
-                width: '100%',
-                allowClear: true
+            $('#search_shipper').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    delay: 700,
+                }
             }).bind('change', function() {
                 table.draw(false);
             });;
+
+
             $('#positive_negative_filter_form select.positive_negative_filter').prepend(
                 '<option value="" selected></option>').select2({
                 placeholder: 'Select Positive/Negative Filter',
