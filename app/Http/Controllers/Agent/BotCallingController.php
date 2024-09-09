@@ -128,7 +128,6 @@ class BotCallingController extends Controller
                         'status_id' => 1,
                         'call_finding_id' => 37,
                         'call_status_type' => 'Connected',
-
                     ], // retrurn
                     3 => [
                         'status_id' => 3,
