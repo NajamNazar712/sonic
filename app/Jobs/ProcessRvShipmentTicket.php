@@ -110,6 +110,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'assigned_to_type_id' => 0,
                     'assigned_by' => 0,
                     'rv_state_id' => 1,
+                    'updated_by_id' => $adminId
                 ];
                 $this->rv_shipment_assign($data);
                 if(RvShipmentAgent::where('agent_id', $adminId)->doesntExist()){
