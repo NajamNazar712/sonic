@@ -14,7 +14,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
 
-class BotCallDispatchSecod implements ShouldQueue
+class BotCallDispatchThird implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -27,7 +27,7 @@ class BotCallDispatchSecod implements ShouldQueue
      */
     public function __construct($data)
     {
-        $this->queue = 'bot_call_shipment_second';
+        $this->queue = 'bot_call_shipment_third';
         $this->shipmentId = $data;
 
     }
@@ -45,7 +45,7 @@ class BotCallDispatchSecod implements ShouldQueue
 
         //
         $environment = config('app.env');
-        Log::channel('cronJobLog')->info('s ' . 'bot-call Second Unresponsive');
+        Log::channel('cronJobLog')->info('s ' . 'bot-call Third Unresponsive');
 
         if (GlobalSettings::where(['type'=> 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             if(RvShipmentTicket::where('shipment_id', $this->shipmentId)->whereNull('deleted_at')->where('is_bot',1)->exists()){
@@ -67,7 +67,7 @@ class BotCallDispatchSecod implements ShouldQueue
                 $status_code = $response->getStatusCode();
                 $response = $response->getBody()->getContents();
                 $response = json_decode($response);
-                Log::channel('cronJobLog')->info('s ' . 'Log after call dispatched with response -second' . json_encode($response));
+                Log::channel('cronJobLog')->info('s ' . 'Log after call dispatched with response -third' . json_encode($response));
                 WebhookLogController::shipment_status_log($shipment->user_id, $status_code, json_encode($response));
             }else{
                 return json_encode(['status'=>0,'message'=>'Shipment isn`t at the bot call prefernce']);
