@@ -169,11 +169,13 @@ class BotCallingController extends Controller
 
                                 $globalSettingValue = GlobalSettings::where('type', 'second_bot_call')->select('setting_value')->first();
                                 $job = (new BotCallDispatch($findShipmentId->id))->delay(60 * $globalSettingValue['setting_value']);
+                                Log::channel('cronJobLog')->info('s ' . 'bot-call requested (unreponsive count 1)' . $findShipmentId->id);
                                 $this->dispatch($job);
                             } elseif (RvShipmentAssignAgent::join('rv_shipment_tickets as rst', 'rst.shipment_id', 'rv_shipment_assign_agents.shipment_id')->where('rv_shipment_assign_agents.unresponsive_count', 2)->where('rv_shipment_assign_agents.shipment_id', $findShipmentId->id)->exists()) {
 
                                 $globalSettingValue = GlobalSettings::where('type', 'third_bot_call')->select('setting_value')->first();
                                 $job = (new BotCallDispatch($findShipmentId->id))->delay(60 * $globalSettingValue['setting_value']);
+                                Log::channel('cronJobLog')->info('s ' . 'bot-call requested (unreponsive count 2)' . $findShipmentId->id);
                                 $this->dispatch($job);
                             }
                         }
