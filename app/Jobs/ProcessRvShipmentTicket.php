@@ -77,7 +77,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
             if (in_array($this->shipment['shipment_user_id'], $onlyShippers)) { //Mark Shipper Disabled if It's user id found in Only Shippers
                 $isShipperDisabled = 1;
             }
-            // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
+            Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
             $isBot = ((array_key_exists($this->shipment['status_reason_id'], array_flip([8, 5, 1, 19, 38, 52, 60, 63]))) ? 1 : 0);
             Log::channel('cronJobLog')->info('s ' . '$isBot Saved'. $isBot . 'condition'. (array_key_exists($this->shipment['status_reason_id'], array_flip([8, 5, 1, 19, 38, 52, 60, 63])) && GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()));
 
