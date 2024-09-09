@@ -12,6 +12,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Traits\RvTrait;
 use App\Jobs\BotCallDispatch;
+use App\Jobs\BotCallDispatchSecod;
 use App\RvAgentCallHistory;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentAgent;
@@ -168,15 +169,15 @@ class BotCallingController extends Controller
                             if (RvShipmentAssignAgent::join('rv_shipment_tickets as rst', 'rst.shipment_id', 'rv_shipment_assign_agents.shipment_id')->where('rv_shipment_assign_agents.unresponsive_count', 1)->where('rv_shipment_assign_agents.shipment_id', $findShipmentId->id)->exists()) {
 
                                 $globalSettingValue = GlobalSettings::where('type', 'second_bot_call')->select('setting_value')->first();
-                                $job = (new BotCallDispatch($findShipmentId->id))->delay(60 * $globalSettingValue['setting_value']);
-                                Log::channel('cronJobLog')->info('s ' . 'bot-call requested (unreponsive count 1)' . $findShipmentId->id);
+                                $job = (new BotCallDispatchSecod($findShipmentId->id))->delay(60 * $globalSettingValue['setting_value']);
+                                // Log::channel('cronJobLog')->info('s ' . 'bot-call requested (unreponsive count 1)' . $findShipmentId->id);
                                 $this->dispatch($job);
                             } elseif (RvShipmentAssignAgent::join('rv_shipment_tickets as rst', 'rst.shipment_id', 'rv_shipment_assign_agents.shipment_id')->where('rv_shipment_assign_agents.unresponsive_count', 2)->where('rv_shipment_assign_agents.shipment_id', $findShipmentId->id)->exists()) {
 
                                 $globalSettingValue = GlobalSettings::where('type', 'third_bot_call')->select('setting_value')->first();
-                                $job = (new BotCallDispatch($findShipmentId->id))->delay(60 * $globalSettingValue['setting_value']);
-                                Log::channel('cronJobLog')->info('s ' . 'bot-call requested (unreponsive count 2)' . $findShipmentId->id);
-                                $this->dispatch($job);
+                                // $job = (new BotCallDispatch($findShipmentId->id))->delay(60 * $globalSettingValue['setting_value']);
+                                // Log::channel('cronJobLog')->info('s ' . 'bot-call requested (unreponsive count 2)' . $findShipmentId->id);
+                                // $this->dispatch($job);
                             }
                         }
                         $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey,  $status->id ?? $data['rv_agent_call_history_record_id']);
