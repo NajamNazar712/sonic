@@ -163,6 +163,8 @@ trait RvTrait
         }
         catch(\Throwable $th)
         {
+            $this->createDeliveryNoteErrorLog('12121', $data['shipment_id'], $th->getMessage());
+
             DB::rollBack();
         }
     }
