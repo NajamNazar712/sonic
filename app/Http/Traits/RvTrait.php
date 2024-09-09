@@ -163,7 +163,8 @@ trait RvTrait
         }
         catch(\Throwable $th)
         {
-            $this->createDeliveryNoteErrorLog('12121', $data['shipment_id'], $th->getMessage());
+            // $this->createDeliveryNoteErrorLog('12121', $data['shipment_id'], $th->getMessage());
+            Log::channel('cronJobLog')->info('s ' . 'rv_shipment_assign Saved' . $th->getMessage());
 
             DB::rollBack();
         }
