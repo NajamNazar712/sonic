@@ -77,10 +77,9 @@ class ProcessRvShipmentTicket implements ShouldQueue
             if (in_array($this->shipment['shipment_user_id'], $onlyShippers)) { //Mark Shipper Disabled if It's user id found in Only Shippers
                 $isShipperDisabled = 1;
             }
-            Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
-            $isBot = ((array_key_exists($this->shipment['status_reason_id'], array_flip([8, 5, 1, 19, 38, 52, 60, 63]))) ? 1 : 0);
-            Log::channel('cronJobLog')->info('s ' . '$isBot Saved'. $isBot . 'condition check '. (array_key_exists($this->shipment['status_reason_id'], array_flip([8, 5, 1, 19, 38, 52, 60, 63])) && GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()));
-
+            // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
+            $isBot = ((array_key_exists($this->shipment['status_reason_id'], array_flip([8, 5, 1, 19, 38, 52, 60, 63])) && GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) ? 1 : 0);
+            
             RvShipmentTicket::withTrashed()->updateOrCreate(
                 ['shipment_id' => $this->shipment['shipment_id']],
                 [
@@ -99,7 +98,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
             //need to Continue This
             if($isBot)
             {
-                $adminId = 4620;
+                $adminId = 3399;
 
                 $shipmentJourneyId = ShipmentsJourney::where('shipment_id', $this->shipment['shipment_id'])->latest()->select('id')->first();
                 $data = [
