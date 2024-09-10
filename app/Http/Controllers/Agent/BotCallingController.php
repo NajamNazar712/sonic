@@ -136,9 +136,14 @@ class BotCallingController extends Controller
                         'call_status_type' => 'Connected',
                     ], // manual
                 ];
-
+                DB::table('api_zong_logs')->insert([
+                    'name' => 'zong',
+                    'api_request' => json_encode($request->all()), // log the request data
+                    'status_code' => 200,
+                    'created_at' => now(),
+                ]);
                 $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->whereIn('rv_state_id', [1, 3])->latest()->first();
-                $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => $array[$request->input]['call_finding_id'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1, 'call_to_id' => 1, 'call_status' => $array[$request->input]['call_status_type']]);
+                $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => $array[$request->input]['call_finding_id'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1, 'call_to_id' => 1, 'call_status' => $array[$request->input]['call_status_type'],'end_date' => $request->end_date]);
 
                 // if($shipment_assign_agent){
                 if ($request->input > 0) {
@@ -151,6 +156,7 @@ class BotCallingController extends Controller
                     $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
                     $status->updated_by_id = $request->admin_id;
                     $status->call_status = $request->call_status;
+                    $status->updated_at = $request->end_date;
                     $status->save();
                 }
 
@@ -192,6 +198,12 @@ class BotCallingController extends Controller
                     ];
                 }
             } else {
+                DB::table('api_zong_logs')->insert([
+                    'name' => 'zong',
+                    'api_request' => json_encode($request->all()), // log the request data
+                    'status_code' => 200,
+                    'created_at' => now(),
+                ]);
                 $data = [
                     'status' => 0,
                     'message' => 'Shipment is in different status, Cannot mark it as Another Status!'
@@ -199,6 +211,13 @@ class BotCallingController extends Controller
             }
             return response()->json(['status' => 1, 'message' => $data]);
         } catch (\Throwable $th) {
+            DB::table('api_zong_logs')->insert([
+                'name' => 'zong',
+                'api_request' => json_encode($request->all()), // log the request data
+                'error' => json_encode($th->getMessage()), // log the request data
+                'status_code' => 400,
+                'created_at' => now(),
+            ]);
             // Log::channel('cronJobLog')->info('s ' . 'OPS LOG' . $th->getMessage());
             return response()->json(['status' => 0, 'message' => $th->getMessage()]);
 

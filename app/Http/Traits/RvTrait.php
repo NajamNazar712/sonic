@@ -805,7 +805,7 @@ trait RvTrait
                 $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
                 $status->updated_by_id = Auth::id() ?? $request->admin_id;
                 $status->call_status = $request->call_status ?? 'Not Connected';
-
+                $status->updated_at = $request->end_date ?? Carbon::now();
                 $status->save();
 
                 $rv_shipment_assign_agent->increment('unresponsive_count');
