@@ -5927,7 +5927,9 @@ class AdminReportsController extends Controller
         /*        $from = Carbon::today()->subMonth(1)->toDateTimeString();
                 $to = Carbon::parse($from)->addMonth(1)->addDay(1)->endOfDay()->toDateTimeString();*/
 
-        $sales = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
+        $connection = 'reports';
+
+        $sales = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
