@@ -192,14 +192,14 @@ class AdminCRMController extends Controller
                         $shipment = Shipment::find($shipment_id);
                         if($shipment){
 
-                            
+
                             if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                             {
                                 return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
                             }
 
                             $already_lodged = false;
-                            $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();                            
+                            $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                             if($is_shipment){
                                 $already_lodged = true;
                                 $complain = $is_shipment->id;
@@ -228,7 +228,7 @@ class AdminCRMController extends Controller
                                                     if($shipment->shipper_status_id == 5)
                                                     {
                                                         $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
+                                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description);
                                                     }
                                                     else
                                                     {
@@ -238,7 +238,7 @@ class AdminCRMController extends Controller
                                                 else{
                                                     $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                                 }
-                                                
+
                                                 if($request->has('key_account')){
                                                     $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                                 }
@@ -250,7 +250,7 @@ class AdminCRMController extends Controller
                                                 if($shipment->shipper_status_id == 5)
                                                 {
                                                     $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
+                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description);
                                                 }
                                                 else
                                                 {
@@ -260,7 +260,7 @@ class AdminCRMController extends Controller
                                             else{
                                                 $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                             }
-                                             
+
                                             if($request->has('key_account')){
                                                 $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                             }
@@ -278,14 +278,14 @@ class AdminCRMController extends Controller
                                         $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_claim_product_cost, $request->file('missing_product_picture'), $request->file('product_packaging_picture_content_short'), $request->file('actual_product_picture_content_short'), $request->claim_content_product_cost);
                                     }
                                     else {
-                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                                     }
                                     if($request->has('key_account')){
                                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                     }
                                 }
                                 else{
-                                    
+
                                     if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
                                         if(in_array($complaint_id, [11, 13])){
                                             $present_shipments[] = $shipment->tracking_number;
@@ -298,7 +298,7 @@ class AdminCRMController extends Controller
                                                 if($shipment->shipper_status_id == 5)
                                                 {
                                                     $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
+                                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description);
                                                 }
                                                 else
                                                 {
@@ -320,7 +320,7 @@ class AdminCRMController extends Controller
                                             if($shipment->shipper_status_id == 5)
                                             {
                                                 $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
+                                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description);
                                             }
                                             else
                                             {
@@ -330,7 +330,7 @@ class AdminCRMController extends Controller
                                         else{
                                             $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
                                         }
-                                        
+
                                         if($request->has('key_account')){
                                             $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                         }
@@ -355,11 +355,11 @@ class AdminCRMController extends Controller
                                                         Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
                                                         
                                                         CRM automated Comment";
-                                            
+
                                             $old_amount = $shipment->amount;
                                             $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                             $shipment->amount = $request->cod_new_amount;
-                                            
+
                                             if($request->is_zero_cod == 1  && $request->cod_parcel_value > 0)
                                             {
                                                 $comment = "Dear Customer,
@@ -393,7 +393,7 @@ class AdminCRMController extends Controller
                                 //            }else{
                                 //             $shipment->amount = $cod_amount;
                                 //            }
-                                //            $shipment->save(); 
+                                //            $shipment->save();
                                 //         }
                                 //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
                                 //         //mark reattempt
@@ -405,7 +405,7 @@ class AdminCRMController extends Controller
                                 //         }
                                 //     }
                                 // }
-                                 
+
                                 else if($complaint_id == 32){
                                     $shipment->special_instructions = 'Allow to Open Shipment';
                                     $shipment->save();
@@ -430,7 +430,7 @@ class AdminCRMController extends Controller
                         {
                             return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
                         }
-                        
+
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                         $already_lodged = false;
                         if($is_shipment){
@@ -449,7 +449,7 @@ class AdminCRMController extends Controller
                                             if($shipment->shipper_status_id == 5)
                                             {
                                                 $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
+                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description);
                                             }
                                             else
                                             {
@@ -481,7 +481,7 @@ class AdminCRMController extends Controller
                                                                     Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
                                                         
                                                                     CRM automated Comment";
-                                                     
+
                                                         $old_amount = $shipment->amount;
                                                         $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                         $shipment->amount = $request->cod_new_amount;
@@ -506,7 +506,7 @@ class AdminCRMController extends Controller
                                                         CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
                                                     }
                                                 }
-                                                
+
                                             }
                                             // else if($complaint_id == 12){
                                             //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
@@ -518,11 +518,11 @@ class AdminCRMController extends Controller
                                             //            }else{
                                             //             $shipment->amount = $cod_amount;
                                             //            }
-                                            //            $shipment->save(); 
+                                            //            $shipment->save();
                                             //         }
                                             //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
                                             //         //mark reattempt
-            
+
                                             //             $shipment->shipper_status_id = 13;
                                             //             $shipment->consignee_status_id = 13;
                                             //             $shipment->save();
@@ -545,7 +545,7 @@ class AdminCRMController extends Controller
                                         if($shipment->shipper_status_id == 5)
                                         {
                                             $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description);
                                         }
                                         else
                                         {
@@ -555,7 +555,7 @@ class AdminCRMController extends Controller
                                     else{
                                         $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                     }
-                                    
+
                                     if($request->has('key_account')){
                                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                     }
@@ -577,7 +577,7 @@ class AdminCRMController extends Controller
                                                                 Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system 
                                                         
                                                                 CRM automated Comment";
-                                                    
+
                                                     $old_amount = $shipment->amount;
                                                     $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                     $shipment->amount = $request->cod_new_amount;
@@ -602,7 +602,7 @@ class AdminCRMController extends Controller
                                                     CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
                                                 }
                                             }
-                                            
+
                                         }
                                         // else if($complaint_id == 12){
                                         //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
@@ -614,11 +614,11 @@ class AdminCRMController extends Controller
                                         //            }else{
                                         //             $shipment->amount = $cod_amount;
                                         //            }
-                                        //            $shipment->save(); 
+                                        //            $shipment->save();
                                         //         }
                                         //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
                                         //         //mark reattempt
-        
+
                                         //             $shipment->shipper_status_id = 13;
                                         //             $shipment->consignee_status_id = 13;
                                         //             $shipment->save();
@@ -652,7 +652,7 @@ class AdminCRMController extends Controller
                                         if($shipment->shipper_status_id == 5)
                                         {
                                             $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description);
                                         }
                                         else
                                         {
@@ -709,7 +709,7 @@ class AdminCRMController extends Controller
                                                     CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
                                                 }
                                             }
-                                            
+
                                         }
                                         // else if($complaint_id == 12){
                                         //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
@@ -721,11 +721,11 @@ class AdminCRMController extends Controller
                                         //            }else{
                                         //             $shipment->amount = $cod_amount;
                                         //            }
-                                        //            $shipment->save(); 
+                                        //            $shipment->save();
                                         //         }
                                         //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
                                         //         //mark reattempt
-        
+
                                         //             $shipment->shipper_status_id = 13;
                                         //             $shipment->consignee_status_id = 13;
                                         //             $shipment->save();
@@ -733,7 +733,7 @@ class AdminCRMController extends Controller
                                         //         }
                                         //     }
                                         // }
-                                         
+
                                         else if($complaint_id == 32){
                                             $shipment->special_instructions = 'Allow to Open Shipment';
                                             $shipment->save();
@@ -749,7 +749,7 @@ class AdminCRMController extends Controller
                                     if($shipment->shipper_status_id == 5)
                                     {
                                         $description = $description. " (change old amouunt $shipment->amount to new amount $request->cod_new_amount )";
-                                        $crm_request_padded_id =CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description); 
+                                        $crm_request_padded_id =CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, $shipment->user_id, NULL, $description);
                                     }
                                     else
                                     {
@@ -759,7 +759,7 @@ class AdminCRMController extends Controller
                                 else{
                                     $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL, $description);
                                 }
-                                
+
                                 if($request->has('key_account')){
                                     $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                 }
@@ -781,7 +781,7 @@ class AdminCRMController extends Controller
                                                             Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system 
                                                         
                                                             CRM automated Comment";
-                                              
+
                                                 $old_amount = $shipment->amount;
                                                 $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                 $shipment->amount = $request->cod_new_amount;
@@ -806,7 +806,7 @@ class AdminCRMController extends Controller
                                                 CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
                                             }
                                         }
-                                        
+
                                     }
                                     // else if($complaint_id == 12){
                                     //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
@@ -818,11 +818,11 @@ class AdminCRMController extends Controller
                                     //            }else{
                                     //             $shipment->amount = $cod_amount;
                                     //            }
-                                    //            $shipment->save(); 
+                                    //            $shipment->save();
                                     //         }
                                     //         if($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
                                     //         //mark reattempt
-    
+
                                     //             $shipment->shipper_status_id = 13;
                                     //             $shipment->consignee_status_id = 13;
                                     //             $shipment->save();
@@ -830,7 +830,7 @@ class AdminCRMController extends Controller
                                     //         }
                                     //     }
                                     // }
-                                     
+
                                     else if($complaint_id == 32){
                                         $shipment->special_instructions = 'Allow to Open Shipment';
                                         $shipment->save();
@@ -914,7 +914,7 @@ class AdminCRMController extends Controller
 
     public function request_details(Request $request,$id){
 
-    
+
         $crm_request = CrmRequest::find($id);
         if($crm_request){
             $shipment_status = null;
@@ -978,7 +978,7 @@ class AdminCRMController extends Controller
                     $tagged_name = Admin::find($tagged['tagged_id'])->name;
                 }
             }
-            
+
             $tagged_kae = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->where('crm_request_tagging_type_id', 4)->get()->first();
             if($tagged_kae){
                 $tagged_kae_name = Admin::find($tagged_kae->tagged_id)->name;
@@ -1054,9 +1054,9 @@ class AdminCRMController extends Controller
             $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
             $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
             $crm_histories = CrmRequestCaseNatureAndTypeHistory::join('crm_request_case_nature as a','a.id','=','crm_request_case_nature_and_type_histories.case_nature_id')
-            ->join('crm_request_case_nature_types as b','b.id','=','crm_request_case_nature_and_type_histories.case_nature_type_id')
-            ->where('crm_request_case_nature_and_type_histories.crm_request_id',$id)
-            ->select('a.name as casenature','b.type as casenaturetype')->get();
+                ->join('crm_request_case_nature_types as b','b.id','=','crm_request_case_nature_and_type_histories.case_nature_type_id')
+                ->where('crm_request_case_nature_and_type_histories.crm_request_id',$id)
+                ->select('a.name as casenature','b.type as casenaturetype')->get();
 
             $sale_person = SalePersonTag::where('user_id', $crm_request->shipper_id)->where('status', 0)->first();
 
@@ -1078,11 +1078,11 @@ class AdminCRMController extends Controller
                 $crm_request_escalation_log = $crm_request_escalation_log->latest()->first();
                 $previous_levels = CrmRequestEscalationLog::where('crm_request_id', $crm_request->id)->where('escalation_tagging_id', $crm_request_escalation_log->escalation_tagging_id)->pluck('level_id')->toArray();
                 $crm_request_escalation_tagging = CrmEscalationTaggingLevel::where('escalation_tagging_id', $crm_request_escalation_log->escalation_tagging_id)->whereNotIn('level_id', $previous_levels)->pluck('level_id')->toArray();
-                    $crm_escalation_levels = CrmEscalationLevel::whereIn('id', $crm_request_escalation_tagging)->get();
-                    if(count($crm_escalation_levels) > 0){
-                        $escalation_log_flag = true;
-                        $escalation_tagging_id = $crm_request_escalation_log->escalation_tagging_id;
-                    }
+                $crm_escalation_levels = CrmEscalationLevel::whereIn('id', $crm_request_escalation_tagging)->get();
+                if(count($crm_escalation_levels) > 0){
+                    $escalation_log_flag = true;
+                    $escalation_tagging_id = $crm_request_escalation_log->escalation_tagging_id;
+                }
             }
 
             $crm_images_count = $crm_request->images->count();
@@ -1108,21 +1108,21 @@ class AdminCRMController extends Controller
             foreach ($special_request_percent as $sp_key => $sp_value) {
                 $percentage += $sp_value;
             }
-            
+
             if($percentage < 100)
             {
 
                 $special_request = SpecialApprovalRequest::where('crm_request_id',$id)
-                ->where('status',1)
-                ->where('approved_status',1)
-                ->select('id', 'special_request_reason_id', 'requested_by', 'approved_status', 'adjusted_percentage as percentage');
+                    ->where('status',1)
+                    ->where('approved_status',1)
+                    ->select('id', 'special_request_reason_id', 'requested_by', 'approved_status', 'adjusted_percentage as percentage');
 
                 if($special_request->exists())
                 {
                     $special_request = $special_request->first();
                     $special_request_agent_data = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->where('admin_id',Auth::id())->first();
                     $special_request_agent = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->get();
-                    
+
                     $special_request_approval_options = SpecialRequestOption::where('special_request_id',$special_request->id)->pluck('reason_option_id')->toArray();
 
                     if(Auth::id() != $special_request->requested_by)
@@ -1130,14 +1130,14 @@ class AdminCRMController extends Controller
                         $special_request_editable = false;
                     }
                     foreach ($special_request_agent as $key => $value) {
-                        
+
                         if($value->approved_status != 1)
                         {
                             $special_request_editable = false;
                             break;
                         }
                     }
-                    
+
                     $special_request_agent = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->pluck('admin_id')->toArray();
                 }
                 else{
@@ -1148,8 +1148,8 @@ class AdminCRMController extends Controller
                 $special_request_percentage_exceed = true;
                 $special_request = [];
             }
-            
-            
+
+
 
             // dd($special_request);
 
@@ -1174,39 +1174,39 @@ class AdminCRMController extends Controller
                 'crm_status_history' => $crm_status_history,
                 'crm_tagging_history' => $crm_tagging_history,
                 'agent' => $agent_name,
-                'tag_check' => $tagged, 
+                'tag_check' => $tagged,
                 'tag_permission' => $tag_permission,
                 'shipment_status' => $shipment_status,
                 'shipper' => $shipper,
                 'case_nature' => $case_nature,
                 'case_nature_complaints' => $case_nature_type_complaints,
                 'case_nature_service_requests' => $case_nature_type_service_requests,
-                'arrival_date' => $arrival_date, 
-                'shipment_status_date' => $shipment_status_date, 
-                'sale_person' => $sale_person, 
-                'case_nature_type_claims' => $case_nature_type_claims, 
-                'hubs' => $hubs, 
-                'escalation_tagged_check' => $escalation_tagged_check, 
-                'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 
-                'escalation_status_flag' => $escalation_status_flag, 
-                'escalation_log_flag' => $escalation_log_flag, 
-                'escalation_tagging_id' => $escalation_tagging_id, 
-                'crm_escalation_levels' => $crm_escalation_levels, 
+                'arrival_date' => $arrival_date,
+                'shipment_status_date' => $shipment_status_date,
+                'sale_person' => $sale_person,
+                'case_nature_type_claims' => $case_nature_type_claims,
+                'hubs' => $hubs,
+                'escalation_tagged_check' => $escalation_tagged_check,
+                'crm_escalation_tagging_history' => $crm_escalation_tagging_history,
+                'escalation_status_flag' => $escalation_status_flag,
+                'escalation_log_flag' => $escalation_log_flag,
+                'escalation_tagging_id' => $escalation_tagging_id,
+                'crm_escalation_levels' => $crm_escalation_levels,
                 'crm_images_count' => $crm_images_count,
                 'insurance' => $insurance,
                 'special_request' => $special_request,
                 'special_request_agent' => $special_request_agent,
-                'ratings' => $ratings, 
-                'crm_sms_history' => $crm_sms_history, 
-                'closed_reason_statuses' => $closed_reason_statuses, 
-                'special_request_reasons' => $special_request_reasons, 
+                'ratings' => $ratings,
+                'crm_sms_history' => $crm_sms_history,
+                'closed_reason_statuses' => $closed_reason_statuses,
+                'special_request_reasons' => $special_request_reasons,
                 'special_request_admins' => $special_request_admins,
                 'special_request_reason_options' => $special_request_reason_options,
                 'special_request_approval_options' => $special_request_approval_options,
                 'special_request_editable' => $special_request_editable,
                 'special_request_agent_data' => $special_request_agent_data,
                 'special_request_percentage_exceed' => $special_request_percentage_exceed,
-                ]);
+            ]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -1283,19 +1283,19 @@ class AdminCRMController extends Controller
         $status = CrmRequestStatus::whereIn('id', [1,5])->select('id', 'name')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $agents = AdminRole::leftJoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-        ->leftJoin('admin_departments', 'admin_departments.id', '=', 'admin_roles.department_id')
-        ->whereIn('admin_roles.department_id', [3, 7])
-        ->where(function ($query) {
-            // Select all admins from department ID 3
-            $query->where('admin_roles.department_id', 3);
+            ->leftJoin('admin_departments', 'admin_departments.id', '=', 'admin_roles.department_id')
+            ->whereIn('admin_roles.department_id', [3, 7])
+            ->where(function ($query) {
+                // Select all admins from department ID 3
+                $query->where('admin_roles.department_id', 3);
 
-            // Select specific admins from department ID 7 based on role ID
-            $query->orWhere(function ($innerQuery) {
-                $innerQuery->where('admin_roles.department_id', 7)
-                            ->whereIn('a.role_id', [115, 43, 75]);
-            });
-        })
-        ->select(['a.id as id', 'a.name as name','a.trax_id as trax_id','admin_departments.name as department' ])->get();
+                // Select specific admins from department ID 7 based on role ID
+                $query->orWhere(function ($innerQuery) {
+                    $innerQuery->where('admin_roles.department_id', 7)
+                        ->whereIn('a.role_id', [115, 43, 75]);
+                });
+            })
+            ->select(['a.id as id', 'a.name as name','a.trax_id as trax_id','admin_departments.name as department' ])->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $zones = Zone::where('status', 1)->get();
@@ -1359,11 +1359,11 @@ class AdminCRMController extends Controller
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
-			->leftjoin('crm_request_status_histories as crsh', function($join){
+            ->leftjoin('crm_request_status_histories as crsh', function($join){
                 $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
                     ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
             })
-			->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
             ->leftjoin('shipments_journey as last_updated_sj', function ($join) {
                 $join->on('last_updated_sj.shipment_id', '=', 's.id')
                     ->where('last_updated_sj.id','=',
@@ -1391,10 +1391,10 @@ class AdminCRMController extends Controller
             $launched_request = $launched_request
                 ->where(function ($sub_query) {
                     $sub_query->where('crm_requests.agent_id', Auth::id())
-                    ->orWhere(function ($sub_query) {
-                        $sub_query->where('crm_requests.launched_by', 0)
-                            ->where('crm_requests.launched_by_id', Auth::id());
-                    });
+                        ->orWhere(function ($sub_query) {
+                            $sub_query->where('crm_requests.launched_by', 0)
+                                ->where('crm_requests.launched_by_id', Auth::id());
+                        });
                 });
         }
         else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
@@ -1496,18 +1496,18 @@ class AdminCRMController extends Controller
                         $sub_query->where('crm_requests.launched_by', '=', 0)
                             ->where('a.name', 'like', '%' . $keyword . '%');
                     })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('crm_requests.launched_by', '=', 1)
-                            ->where('u.name', 'like', '%' . $keyword . '%');
-                    })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('crm_requests.launched_by', '=', 2)
-                            ->where('su.name', 'like', '%' . $keyword . '%');
-                    })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('crm_requests.launched_by', '=', 3)
-                            ->where('cu.name', 'like', '%' . $keyword . '%');
-                    });
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('crm_requests.launched_by', '=', 1)
+                                ->where('u.name', 'like', '%' . $keyword . '%');
+                        })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('crm_requests.launched_by', '=', 2)
+                                ->where('su.name', 'like', '%' . $keyword . '%');
+                        })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('crm_requests.launched_by', '=', 3)
+                                ->where('cu.name', 'like', '%' . $keyword . '%');
+                        });
                 }
                 else {
                     $query->whereRaw('false');
@@ -1683,21 +1683,21 @@ class AdminCRMController extends Controller
             })
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
-                    $dropdown = '
+                $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
-                    $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
+                $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
 //                    if($requests->nature_id == 1 || $requests->nature_id == 2){
 //                        $dropdown .= '<button type="button" class="dropdown-item update_request"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update</div></button>';
 //                    }
 
 
-                    $dropdown .= '</div>
+                $dropdown .= '</div>
                   </div>
                 ';
 
-                    return $dropdown;
+                return $dropdown;
             })
             ->addColumn('responsible_hub', function ($requests) {
                 $responsible_hub = "";
@@ -1805,7 +1805,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                
+
                 elseif(in_array($status, $status_destination_array) && $requests->case_nature != 'Service Request'){
                     $responsible_zone = $destination_zone;
                 }else{
@@ -1814,6 +1814,7 @@ class AdminCRMController extends Controller
                 return $responsible_zone;
             })
             ->addColumn('arrival_date', function ($request)use($current_date) {
+//                dd($request);
                 return ($request->arrival_date && $current_date) ? with((new Carbon($request->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
                         $date->isSunday();
                     }, $current_date)) : '-';
@@ -1886,18 +1887,18 @@ class AdminCRMController extends Controller
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $agents = AdminRole::leftJoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-        ->whereIn('admin_roles.department_id', [3, 7])
-        ->where(function ($query) {
-            // Select all admins from department ID 3
-            $query->where('admin_roles.department_id', 3);
+            ->whereIn('admin_roles.department_id', [3, 7])
+            ->where(function ($query) {
+                // Select all admins from department ID 3
+                $query->where('admin_roles.department_id', 3);
 
-            // Select specific admins from department ID 7 based on role ID
-            $query->orWhere(function ($innerQuery) {
-                $innerQuery->where('admin_roles.department_id', 7)
-                            ->whereIn('a.role_id', [115, 43, 75]); // Replace with the specific role ID
-            });
-        })
-        ->get();
+                // Select specific admins from department ID 7 based on role ID
+                $query->orWhere(function ($innerQuery) {
+                    $innerQuery->where('admin_roles.department_id', 7)
+                        ->whereIn('a.role_id', [115, 43, 75]); // Replace with the specific role ID
+                });
+            })
+            ->get();
         $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
             ->select('a.id as id', 'a.name as name')
             ->where('a.status', 1)
@@ -1907,7 +1908,7 @@ class AdminCRMController extends Controller
         $hubs = City::where('hub', 1)->get();
         $zones = Zone::where('status', 1)->get();
         $closed_reason_statuses  = CrmClosedReasonStatus::all();
-                return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses]);
+        return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses]);
     }
 
     public function in_process_list(Request $request){
@@ -1940,10 +1941,6 @@ class AdminCRMController extends Controller
                     ->where('crm_requests.launched_by', '=', DB::raw(4));
             })
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->leftjoin('shipments_journey as sj', function ($join){
-                $join->on('sj.shipment_id', '=', 's.id')
-                ->where('sj.shipper_status_id',2);
-            })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
             ->leftjoin('users as user', 'user.id', '=', 'crm_requests.shipper_id')
             ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
@@ -1983,12 +1980,36 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('crm_request_escalation_taggings as cret', 'cret.crm_request_id', '=', 'crm_requests.id')
-			->leftjoin('crm_request_status_histories as crsh', function($join){
+            ->leftjoin('crm_request_status_histories as crsh', function($join){
                 $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
                     ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
             })
-			->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-			->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status')
+            ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->leftjoin('shipments_journey as last_updated_sj', function ($join) {
+                $join->on('last_updated_sj.shipment_id', '=', 's.id')
+                    ->where('last_updated_sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)'));
+            })
+            ->leftjoin('admins as last_status_upd_by', 'last_status_upd_by.id', '=', 'last_updated_sj.admin_id')
+            ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 's.id')
+            ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
+            ->leftjoin('users as us','us.id','=','s.user_id')
+            ->leftjoin('segments as seg','us.segment_id','seg.id')
+            ->leftjoin('admins as ad1', 'ad1.id', '=', 'crm_requests.agent_id')
+            ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
+            ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
+            ->leftjoin('shipments_journey as sj', function ($join){
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.shipper_status_id',2);
+            })
+            ->leftjoin('shipments_journey as last_rider_updated_sj', function ($join) {
+                $join->on('last_rider_updated_sj.shipment_id', '=', 's.id')
+                    ->where('last_rider_updated_sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and rider_id is not NULL)'));
+            })
+            ->leftjoin('riders as last_rider_status_upd_by', 'last_rider_status_upd_by.id', '=', 'last_rider_updated_sj.rider_id')
+            ->leftjoin('shipment_status_reason as ssr', 'ssr.id', '=', 'last_rider_updated_sj.status_reason_id')
+            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status', 'sj.updated_at as arrival_date','crm_requests.updated_at as last_status_date','s.updated_at as last_status_today','last_status_upd_by.name as last_status_updated_by','ca.name as sub_hub','s.parcel_value as parcel_value','s.amount as cod_value','seg.name as segment','s.actual_weight as actual_weight','ad1.name as sale_person','ad2.name as kae' ,'last_rider_status_upd_by.name as last_updated_rider', 'ssr.name as last_rider_reason')
             ->where('crm_requests.status_id', 2)
             ->groupBy('crm_requests.id');
 
@@ -2001,36 +2022,36 @@ class AdminCRMController extends Controller
                                 ->where('crm_requests.launched_by_id', Auth::id());
                         });
                 })
-                ->orWhere(function ($sub_query) {
-                    $sub_query->where('spt.admin_id', '=', Auth::id());
-                })
-                ->orWhere(function ($sub_query) {
-                    $sub_query->where('crt.crm_request_tagging_type_id', 2)
-                        ->where('crt.tagged_id', '=', Auth::id());
-                })
-                ->orWhere(function ($sub_query) {
-                    $sub_query->where('crt.crm_request_tagging_type_id', 1)
-                        ->where('adp.id', '=', session('department_id'))
-                        ->where(function ($sub_sub_query) {
-                            $sub_sub_query->whereIn('oc.hub_id', session('hubs'))
-                                ->orWhereIn('dc.hub_id', session('hubs'))
-                                ->orWhereIn('crt.hub_id', session('hubs'));
-                        });
-                })
-                ->orWhere(function ($sub_query) {
-                    $sub_query->where('cret.role_id', '=', session('role_id'))
-                        ->where(function ($sub_sub_query) {
-                            $sub_sub_query->whereNull('cret.hub_id')
-                                ->orWhereNotNull('cret.hub_id')
-                                ->whereIn('cret.hub_id', session('hubs'));
-                        });
-                })
-                ->orWhere(function ($sub_query) {
-                    if(in_array(session('role_id'), [8, 9 ,10])){
-                        $sub_query->whereIn('oc.hub_id', session('hubs'))
-                            ->orWhereIn('dc.hub_id', session('hubs'));
-                    }
-                });
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('spt.admin_id', '=', Auth::id());
+                    })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', 2)
+                            ->where('crt.tagged_id', '=', Auth::id());
+                    })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', 1)
+                            ->where('adp.id', '=', session('department_id'))
+                            ->where(function ($sub_sub_query) {
+                                $sub_sub_query->whereIn('oc.hub_id', session('hubs'))
+                                    ->orWhereIn('dc.hub_id', session('hubs'))
+                                    ->orWhereIn('crt.hub_id', session('hubs'));
+                            });
+                    })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('cret.role_id', '=', session('role_id'))
+                            ->where(function ($sub_sub_query) {
+                                $sub_sub_query->whereNull('cret.hub_id')
+                                    ->orWhereNotNull('cret.hub_id')
+                                    ->whereIn('cret.hub_id', session('hubs'));
+                            });
+                    })
+                    ->orWhere(function ($sub_query) {
+                        if(in_array(session('role_id'), [8, 9 ,10])){
+                            $sub_query->whereIn('oc.hub_id', session('hubs'))
+                                ->orWhereIn('dc.hub_id', session('hubs'));
+                        }
+                    });
             });
         }
         else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
@@ -2044,6 +2065,8 @@ class AdminCRMController extends Controller
                 $in_process_request = $in_process_request->where('spt.admin_id', Auth::id());
             }
         }
+
+        $current_date = Carbon::now();
         $datatables = Datatables::of($in_process_request)
             ->setRowAttr([
                 'class' => function ($shipments) {
@@ -2254,10 +2277,10 @@ class AdminCRMController extends Controller
                         $sub_query->where('crt.crm_request_tagging_type_id', '=', 1)
                             ->where('adp.name', 'like', '%' . $keyword . '%');
                     })
-                    ->orWhere(function($sub_query) use ($keyword) {
-                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 2)
-                            ->where('at.name', 'like', '%' . $keyword . '%');
-                    });
+                        ->orWhere(function($sub_query) use ($keyword) {
+                            $sub_query->where('crt.crm_request_tagging_type_id', '=', 2)
+                                ->where('at.name', 'like', '%' . $keyword . '%');
+                        });
                 }
             })
             ->orderColumn('tagged_to', DB::raw('IF (crt.crm_request_tagging_type_id = 1, adp.name, IF (crt.crm_request_tagging_type_id = 2, at.name, ""))') . ' $1')
@@ -2358,11 +2381,11 @@ class AdminCRMController extends Controller
                 }
             })
             ->orderColumn('last_comment_name', DB::raw('IF (ccs.comment_by = 0, accs.name, IF (ccs.comment_by = 1, uccs.name, ""))') . ' $1')
-          /*  ->addColumn('special_request', function ($shipments){
-                return '<div class="text-center">
-                                <button type="button" class="btn btn-primary btn-sm"><a class="white" ><i class="la la-dollar align-middle"></i></a></button>
-                        </div>';
-            })*/
+            /*  ->addColumn('special_request', function ($shipments){
+                  return '<div class="text-center">
+                                  <button type="button" class="btn btn-primary btn-sm"><a class="white" ><i class="la la-dollar align-middle"></i></a></button>
+                          </div>';
+              })*/
             ->editColumn('last_comment', function($requests){
                 if($requests->last_comment != null){
                     return $requests->last_comment;
@@ -2375,7 +2398,7 @@ class AdminCRMController extends Controller
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->whereIn('crm_request_tagging_type_id', [1,2])->get()->first();
                 if($crm_tagging){
                     if($crm_tagging->crm_request_tagging_type_id == 1){
-                        
+
                         $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name;
                         return $tagged_name;
                     }elseif($crm_tagging->crm_request_tagging_type_id == 2){
@@ -2395,14 +2418,14 @@ class AdminCRMController extends Controller
                         $sub_query->where('crt.crm_request_tagging_type_id', '=', 1)
                             ->where('adp.name', 'like', '%' . $keyword . '%');
                     })
-                    ->orWhere(function($sub_query) use ($keyword) {
-                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 2)
-                            ->where('at.name', 'like', '%' . $keyword . '%');
-                    });
+                        ->orWhere(function($sub_query) use ($keyword) {
+                            $sub_query->where('crt.crm_request_tagging_type_id', '=', 2)
+                                ->where('at.name', 'like', '%' . $keyword . '%');
+                        });
                 }
             })
             ->orderColumn('tagged_to_manual', DB::raw('IF (crt.crm_request_tagging_type_id = 1, adp.name, IF (crt.crm_request_tagging_type_id = 2, at.name, ""))') . ' $1')
-            
+
             ->addColumn('tagged_to_kae', function($requests){
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',4)->get()->first();
                 if($crm_tagging){
@@ -2428,7 +2451,7 @@ class AdminCRMController extends Controller
                 }
             })
             ->orderColumn('tagged_to_kae', DB::raw('IF (crt.crm_request_tagging_type_id = 4, at.name, "")') . ' $1')
-            
+
             ->addColumn('tagged_to_operation', function($requests){
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',5)->first();
                 if($crm_tagging){
@@ -2455,16 +2478,16 @@ class AdminCRMController extends Controller
             ->orderColumn('tagged_to_operation', DB::raw('IF (crt.crm_request_tagging_type_id = 5, at.name, "")') . ' $1')
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
-                    $dropdown = '
+                $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
-                    $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
-                    $dropdown .= '</div>
+                $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
+                $dropdown .= '</div>
                   </div>
                 ';
 
-                    return $dropdown;
+                return $dropdown;
             })
             ->addColumn('responsible_hub', function ($requests) {
                 $responsible_hub = "";
@@ -2579,7 +2602,29 @@ class AdminCRMController extends Controller
                     $responsible_zone = '-';
                 }
                 return $responsible_zone;
-            });
+            })  ->addColumn('arrival_date', function ($request)use($current_date) {
+                return ($request->arrival_date && $current_date) ? with((new Carbon($request->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+                        $date->isSunday();
+                    }, $current_date)) : '-';
+            })
+            ->addColumn('arrival_today', function ($requests)use($current_date) {
+                return ($requests->arrival_date && $current_date) ? with((new Carbon($requests->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($requests->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+                        $date->isSunday();
+                    }, $current_date)) : '-';
+            })
+            ->addColumn('last_status_today', function ($request)use($current_date) {
+                return ($request->last_status_today && $current_date) ? with((new Carbon($request->last_status_today, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->last_status_today, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+                        $date->isSunday();
+                    }, $current_date)) : '-';
+            })
+            ->addColumn('shipper_category', function($requests){
+                if($requests->kae != null){
+                    return 'Key Account';
+                }else{
+                    return 'Non-Key Account';
+                }
+            })
+        ;
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
@@ -2600,18 +2645,18 @@ class AdminCRMController extends Controller
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $agents = AdminRole::leftJoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-        ->whereIn('admin_roles.department_id', [3, 7])
-        ->where(function ($query) {
-            // Select all admins from department ID 3
-            $query->where('admin_roles.department_id', 3);
+            ->whereIn('admin_roles.department_id', [3, 7])
+            ->where(function ($query) {
+                // Select all admins from department ID 3
+                $query->where('admin_roles.department_id', 3);
 
-            // Select specific admins from department ID 7 based on role ID
-            $query->orWhere(function ($innerQuery) {
-                $innerQuery->where('admin_roles.department_id', 7)
-                            ->whereIn('a.role_id', [115, 43, 75]);
-            });
-        })
-        ->get();
+                // Select specific admins from department ID 7 based on role ID
+                $query->orWhere(function ($innerQuery) {
+                    $innerQuery->where('admin_roles.department_id', 7)
+                        ->whereIn('a.role_id', [115, 43, 75]);
+                });
+            })
+            ->get();
         $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
             ->select('a.id as id', 'a.name as name')
             ->where('a.status', 1)
@@ -2657,7 +2702,7 @@ class AdminCRMController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
             ->leftjoin('shipments_journey as sj', function ($join){
                 $join->on('sj.shipment_id', '=', 's.id')
-                ->where('sj.shipper_status_id',2);
+                    ->where('sj.shipper_status_id',2);
             })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
             ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
@@ -2683,6 +2728,12 @@ class AdminCRMController extends Controller
                 $join->on('ccs.crm_request_id', '=', 'crm_requests.id')
                     ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id)'));
             })
+            ->leftjoin('crm_request_agent_histories as resa', function ($join) {
+                $join->on('resa.crm_request_id', '=', 'crm_requests.id')
+                    ->where('resa.id','=',
+                        DB::raw('(select max(id) from crm_request_agent_histories where crm_request_agent_histories.crm_request_id = crm_requests.id and crm_request_agent_histories.agent_id = crm_requests.agent_id)'));
+            })
+            ->leftjoin('admins as resby', 'resby.id', '=', 'resa.assigned_by')
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
             ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
@@ -2701,8 +2752,21 @@ class AdminCRMController extends Controller
                 $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
                     ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
             })
-			->leftjoin('star_shippers as sts','sts.user_id','=','user.id')
-			->select('at.name as tagged_to','at.name as tagged_admin', 'adp.name as tagged_department','crt.crm_request_tagging_type_id as crm_request_tagging_type_id','crth.created_at as tagged_date','sj.created_at as arrival', 'crm_requests.id as id', 's.tracking_number as tracking_number','s.amount as cod_amount', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name','oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'ra.name as resolved_by', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id','crm_requests.description as descr','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','crsh.created_at as reopen_date', 'at.id as tagged_to_id','crm_requests.shipment_id', 'dh.name as hub', 'z.name as zone','ss.id as shipment_status_id','sts.status as star_status')
+            ->leftjoin('shipments_journey as last_updated_sj', function ($join) {
+                $join->on('last_updated_sj.shipment_id', '=', 's.id')
+                    ->where('last_updated_sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)'));
+            })
+            ->leftjoin('star_shippers as sts','sts.user_id','=','user.id')
+            ->leftjoin('admins as last_status_upd_by', 'last_status_upd_by.id', '=', 'last_updated_sj.admin_id')
+            ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 's.id')
+            ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
+            ->leftjoin('users as us','us.id','=','s.user_id')
+            ->leftjoin('segments as seg','us.segment_id','seg.id')
+            ->leftjoin('admins as ad1', 'ad1.id', '=', 'crm_requests.agent_id')
+            ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
+            ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
+            ->select('at.name as tagged_to','at.name as tagged_admin', 'adp.name as tagged_department','crt.crm_request_tagging_type_id as crm_request_tagging_type_id','crth.created_at as tagged_date','sj.created_at as arrival', 'crm_requests.id as id', 's.tracking_number as tracking_number','s.amount as cod_amount', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name','oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'ra.name as resolved_by', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id','crm_requests.description as descr','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','crsh.created_at as reopen_date', 'at.id as tagged_to_id','crm_requests.shipment_id', 'dh.name as hub', 'z.name as zone','ss.id as shipment_status_id','sts.status as star_status','s.parcel_value as parcel_value','s.amount as cod_value','seg.name as segment','s.actual_weight as actual_weight','ad1.name as sale_person','ad2.name as kae','s.updated_at as last_status_today', 'last_status_upd_by.name as last_status_updated_by' ,'ca.name as sub_hub', 'resby.name as agent_assigned_by','crm_requests.updated_at as last_status_date', 'sj.updated_at as arrival_date' )
             ->where('crm_requests.status_id', 3)
             ->groupBy('crm_requests.id');
 
@@ -2726,20 +2790,20 @@ class AdminCRMController extends Controller
                                     ->orWhereIn('crt.hub_id', session('hubs'));
                             });
                     })
-                ->orWhere(function ($parent_sub_query){
-                    $parent_sub_query->orWhere(function ($sub_query) {
+                    ->orWhere(function ($parent_sub_query){
+                        $parent_sub_query->orWhere(function ($sub_query) {
                             $sub_query->where('crth.crm_request_tagging_type_id', 2)
                                 ->where('crth.tagged_id', '=', Auth::id());
-                    })
-                        ->orWhere(function ($sub_query) {
-                            $sub_query->where('crth.crm_request_tagging_type_id', 1)
-                                ->where('adp.id', '=', session('department_id'))
-                                ->where(function ($sub_sub_query) {
-                                    $sub_sub_query->whereIn('oc.hub_id', session('hubs'))
-                                        ->orWhereIn('dc.hub_id', session('hubs'));
-                                });
-                        });
-                });
+                        })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('crth.crm_request_tagging_type_id', 1)
+                                    ->where('adp.id', '=', session('department_id'))
+                                    ->where(function ($sub_sub_query) {
+                                        $sub_sub_query->whereIn('oc.hub_id', session('hubs'))
+                                            ->orWhereIn('dc.hub_id', session('hubs'));
+                                    });
+                            });
+                    });
             });
         }
         else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
@@ -2754,6 +2818,7 @@ class AdminCRMController extends Controller
             }
         }
 
+        $current_date = Carbon::now();
         $datatables = Datatables::of($resolved_request)
             ->setRowAttr([
                 'class' => function ($requests) {
@@ -2793,7 +2858,7 @@ class AdminCRMController extends Controller
             ->addColumn('tracking_number_hyperlink', function ($requests) {
                 return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
             })
-            
+
             ->editColumn('added_by', function($requests){
                 if($requests->launched_added_by == 0) {
                     return 'Admin';
@@ -2812,9 +2877,9 @@ class AdminCRMController extends Controller
                 }
             })
             ->editColumn('in_process_resolved_tat', function ($requests){
-                    Carbon::setWeekendDays([
-                        Carbon::SUNDAY,
-                    ]);
+                Carbon::setWeekendDays([
+                    Carbon::SUNDAY,
+                ]);
                 $in_process_count = CrmRequestStatusHistory::where('crm_request_id', $requests->id)->where('status_id' ,2)->latest('id');
                 if($in_process_count->exists()) {
                     $in_process_count = $in_process_count->first();
@@ -2835,7 +2900,7 @@ class AdminCRMController extends Controller
                     $resolved_tat = 0;
 
                 }
-                    return $resolved_tat;
+                return $resolved_tat;
             })
             ->addColumn('launched_by_name', function ($requests){
                 $name = '';
@@ -2904,10 +2969,10 @@ class AdminCRMController extends Controller
                         $sub_query->where('crt.crm_request_tagging_type_id', '=', 1)
                             ->where('adp.name', 'like', '%' . $keyword . '%');
                     })
-                    ->orWhere(function($sub_query) use ($keyword) {
-                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 2)
-                            ->where('at.name', 'like', '%' . $keyword . '%');
-                    });
+                        ->orWhere(function($sub_query) use ($keyword) {
+                            $sub_query->where('crt.crm_request_tagging_type_id', '=', 2)
+                                ->where('at.name', 'like', '%' . $keyword . '%');
+                        });
                 }
             })
             ->orderColumn('tagged_to', DB::raw('IF (crt.crm_request_tagging_type_id = 1, adp.name, IF (crt.crm_request_tagging_type_id = 2, at.name, ""))') . ' $1')
@@ -2977,7 +3042,7 @@ class AdminCRMController extends Controller
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->whereIn('crm_request_tagging_type_id', [1,2])->get()->first();
                 if($crm_tagging){
                     if($crm_tagging->crm_request_tagging_type_id == 1){
-                        
+
                         $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name;
                         return $tagged_name;
                     }elseif($crm_tagging->crm_request_tagging_type_id == 2){
@@ -2997,14 +3062,14 @@ class AdminCRMController extends Controller
                         $sub_query->where('crt.crm_request_tagging_type_id', '=', 1)
                             ->where('adp.name', 'like', '%' . $keyword . '%');
                     })
-                    ->orWhere(function($sub_query) use ($keyword) {
-                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 2)
-                            ->where('at.name', 'like', '%' . $keyword . '%');
-                    });
+                        ->orWhere(function($sub_query) use ($keyword) {
+                            $sub_query->where('crt.crm_request_tagging_type_id', '=', 2)
+                                ->where('at.name', 'like', '%' . $keyword . '%');
+                        });
                 }
             })
             ->orderColumn('tagged_to_manual', DB::raw('IF (crt.crm_request_tagging_type_id = 1, adp.name, IF (crt.crm_request_tagging_type_id = 2, at.name, ""))') . ' $1')
-            
+
             ->addColumn('tagged_to_kae', function($requests){
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',4)->get()->first();
                 if($crm_tagging){
@@ -3028,7 +3093,7 @@ class AdminCRMController extends Controller
                 }
             })
             ->orderColumn('tagged_to_kae', DB::raw('IF (crt.crm_request_tagging_type_id = 4, at.name, "")') . ' $1')
-            
+
             ->addColumn('tagged_to_operation', function($requests){
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',5)->get()->first();
                 if($crm_tagging){
@@ -3051,19 +3116,19 @@ class AdminCRMController extends Controller
                 }
             })
             ->orderColumn('tagged_to_operation', DB::raw('IF (crt.crm_request_tagging_type_id = 5, at.name, "")') . ' $1')
-            
+
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
-                    $dropdown = '
+                $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
-                    $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
-                    $dropdown .= '</div>
+                $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
+                $dropdown .= '</div>
                   </div>
                 ';
 
-                    return $dropdown;
+                return $dropdown;
             })
             ->addColumn('responsible_hub', function ($requests) {
                 $responsible_hub = "";
@@ -3178,7 +3243,122 @@ class AdminCRMController extends Controller
                     $responsible_zone = '-';
                 }
                 return $responsible_zone;
-            });
+            })
+            ->addColumn('arrival_today', function ($requests)use($current_date) {
+                return ($requests->arrival_date && $current_date) ? with((new Carbon($requests->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($requests->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+                        $date->isSunday();
+                    }, $current_date)) : '-';
+            })
+
+            ->addColumn('last_status_today', function ($request)use($current_date) {
+                return ($request->last_status_today && $current_date) ? with((new Carbon($request->last_status_today, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->last_status_today, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+                        $date->isSunday();
+                    }, $current_date)) : '-';
+            })
+            ->addColumn('shipper_category', function($requests){
+                if($requests->kae != null){
+                    return 'Key Account';
+                }else{
+                    return 'Non-Key Account';
+                }
+            })
+            ->addColumn('current_tat', function ($requests){
+                if($requests->created_at){
+                    Carbon::setWeekendDays([
+                        Carbon::SUNDAY,
+                    ]);
+
+                    $re_open_count = CrmRequestStatusHistory::where('crm_request_id', $requests->id)->where('status_id' ,5)->latest('id');
+                    if($re_open_count->exists()){
+                        $re_open_count = $re_open_count->first();
+
+                        $launched = Carbon::parse($re_open_count->created_at);
+                        $last_closed = CrmRequestStatusHistory::where('crm_request_id', $requests->id)->where('status_id' ,4)->where('created_at', '>=', $re_open_count->created_at)->first();
+                        if($last_closed){
+                            $current = $last_closed->created_at;
+                        }
+                        else{
+                            $current = Carbon::now();
+                        }
+                        $time_format = 'H:i';
+                        $time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
+                        $time_to = CrmSettings::where('name','TAT Cut-Off Time To')->first();
+                        $to_formatted = date($time_format, strtotime($time_to->setting_value));
+                        $cut_off_check = $requests->created_at->format($time_format);
+                        $additional_tat = $current->diffInWeekdays($launched);
+                        $current_tat = $additional_tat;
+                        $launched_check = $launched->toDateString();
+                        $current_check = $current->toDateString();
+                        if($launched_check <= $current_check){
+                            if($to_formatted < $cut_off_check){
+                                $after_cut_off = $current_tat - 1;
+                                $current_tat = $after_cut_off;
+                            }
+                        }
+                        $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
+                        foreach($holidays as $holiday){
+                            $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                            $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                            $launched_formatted_check = date('Y-m-d', strtotime($launched));
+                            if($launched < $holiday_formatted || $current > $holiday_formatted){
+                                if($holiday_formatted_check == $launched_formatted_check){
+                                    if($to_formatted < $cut_off_check){
+                                        $after_cut_off = $current_tat + 1;
+                                        $current_tat = $after_cut_off;
+                                    }
+                                }
+                                $after_holidays = $current_tat - 1;
+                                $current_tat = $after_holidays;
+                            }
+                        }
+                    }
+                    else {
+                        $launched = Carbon::parse($requests->created_at)->startOfDay();
+                        $first_closed = CrmRequestStatusHistory::where('crm_request_id', $requests->id)->where('status_id' ,4)->first();
+                        if($first_closed){
+                            $current = $first_closed->created_at;
+                        }
+                        else{
+                            $current = Carbon::now();
+                        }
+                        $time_format = 'H:i';
+                        $time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
+                        $time_to = CrmSettings::where('name','TAT Cut-Off Time To')->first();
+                        $to_formatted = date($time_format, strtotime($time_to->setting_value));
+                        $cut_off_check = $requests->created_at->format($time_format);
+                        $current_tat = $current->diffInWeekdays($launched);
+
+                        $launched_check = $launched->toDateString();
+                        $current_check = $current->toDateString();
+                        if($launched_check <= $current_check){
+                            if($to_formatted < $cut_off_check){
+                                $after_cut_off = $current_tat - 1;
+                                $current_tat = $after_cut_off;
+                            }
+                        }
+                        $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
+                        foreach($holidays as $holiday){
+                            $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                            $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                            $launched_formatted_check = date('Y-m-d', strtotime($launched));
+                            if($launched < $holiday_formatted || $current > $holiday_formatted){
+                                if($holiday_formatted_check == $launched_formatted_check){
+                                    if($to_formatted < $cut_off_check){
+                                        $after_cut_off = $current_tat + 1;
+                                        $current_tat = $after_cut_off;
+                                    }
+                                }
+                                $after_holidays = $current_tat - 1;
+                                $current_tat = $after_holidays;
+                            }
+                        }
+                    }
+
+                    return $current_tat;
+                }
+                return "-";
+            })
+        ;
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
@@ -3266,10 +3446,10 @@ class AdminCRMController extends Controller
                 $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
                     ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
             })
-			->leftjoin('star_shippers as sts','sts.user_id','=','user.id')
-			->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'crm_requests.launched_by_id','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','crsh.created_at as reopen_date','crm_requests.shipment_id', 'dh.name as hub', 'z.name as zone','ss.id as shipment_status_id','sts.status as star_status')
+            ->leftjoin('star_shippers as sts','sts.user_id','=','user.id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'crm_requests.launched_by_id','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','crsh.created_at as reopen_date','crm_requests.shipment_id', 'dh.name as hub', 'z.name as zone','ss.id as shipment_status_id','sts.status as star_status')
             ->where('crm_requests.status_id', 4);
-            
+
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $closed_request = $closed_request->where(function ($sub_query) {
@@ -3307,7 +3487,7 @@ class AdminCRMController extends Controller
             if ($request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
-                
+
                 $closed_request->whereBetween('res.created_at', [$from, $to]);
             } else {
                 $from = $request->get('search_date_from');
@@ -3358,9 +3538,9 @@ class AdminCRMController extends Controller
                 }
             })
             ->editColumn('total_tat', function ($requests){
-                    Carbon::setWeekendDays([
-                        Carbon::SUNDAY,
-                    ]);
+                Carbon::setWeekendDays([
+                    Carbon::SUNDAY,
+                ]);
 
                 $current_tat = null;
                 $re_open_count = CrmRequestStatusHistory::where('crm_request_id', $requests->id)->where('status_id' ,5)->latest('id');
@@ -3448,7 +3628,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                    return $current_tat;
+                return $current_tat;
             })
             ->addColumn('launched_by_name', function ($requests){
                 $name = '';
@@ -3520,16 +3700,16 @@ class AdminCRMController extends Controller
             })
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
-                    $dropdown = '
+                $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
-                    $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
-                    $dropdown .= '</div>
+                $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
+                $dropdown .= '</div>
                   </div>
                 ';
 
-                    return $dropdown;
+                return $dropdown;
             })
             ->addColumn('responsible_hub', function ($requests) {
                 $responsible_hub = "";
@@ -3758,51 +3938,33 @@ class AdminCRMController extends Controller
 
                         }
                     }
-                        if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
-                            $crm_city_id = $crm_request->shipment->pickup_address->city->id;
-                            $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id;
+                    if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
+                        $crm_city_id = $crm_request->shipment->pickup_address->city->id;
+                        $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id;
 
-                        }else{
-                            $crm_city_id = $crm_request->shipment->consignee_city_id;
-                            $crm_city_area_id = ConsigneeAddressArea::where('shipment_id',$crm_request->shipment->id)->pluck('city_area_id')->first() ?? 0;
-                        }
-                        if($crm_request->case_nature_type_id != 1){
-                            $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
-                            if($crm_auto_tag_user->exists()){
+                    }else{
+                        $crm_city_id = $crm_request->shipment->consignee_city_id;
+                        $crm_city_area_id = ConsigneeAddressArea::where('shipment_id',$crm_request->shipment->id)->pluck('city_area_id')->first() ?? 0;
+                    }
+                    if($crm_request->case_nature_type_id != 1){
+                        $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
+                        if($crm_auto_tag_user->exists()){
 
-                                $crm_auto_tag_user_with_case_details = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1)->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$crm_request->case_nature_id)->where('crm_case_nature_type_id',$crm_request->case_nature_type_id);
-        
-                                if($crm_auto_tag_user_with_case_details->exists()){
-                                    $crm_auto_tag_user = $crm_auto_tag_user_with_case_details->first();
-                                }
-                                else{
-                                    $crm_auto_tag_user = $crm_auto_tag_user->first();
-                                }
+                            $crm_auto_tag_user_with_case_details = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1)->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$crm_request->case_nature_id)->where('crm_case_nature_type_id',$crm_request->case_nature_type_id);
 
-                                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
-                                if(!empty($tagged_crm_request)){
-                                    if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
-                                        CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->update([
-                                            'crm_request_tagging_type_id' => 5,
-                                            'tagged_id' => $crm_auto_tag_user->admin_id
-                                        ]);
+                            if($crm_auto_tag_user_with_case_details->exists()){
+                                $crm_auto_tag_user = $crm_auto_tag_user_with_case_details->first();
+                            }
+                            else{
+                                $crm_auto_tag_user = $crm_auto_tag_user->first();
+                            }
 
-                                        CrmRequestTaggingHistory::create([
-                                            'crm_request_id' => $crm_request->id,
-                                            'crm_request_tagging_type_id' => 5,
-                                            'tagged_id' => $crm_auto_tag_user->admin_id,
-                                            'agent_id' => 306,
-                                            'hub_id' => NULL
-                                        ]);
-                                        NotificationsController::send(31,$crm_request->id);
-                                    }
-                                }
-                                else{
-                                    CrmRequestTagging::create([
-                                        'crm_request_id' => $crm_request->id,
+                            $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
+                            if(!empty($tagged_crm_request)){
+                                if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
+                                    CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->update([
                                         'crm_request_tagging_type_id' => 5,
-                                        'tagged_id' => $crm_auto_tag_user->admin_id,
-                                        'hub_id' => NULL
+                                        'tagged_id' => $crm_auto_tag_user->admin_id
                                     ]);
 
                                     CrmRequestTaggingHistory::create([
@@ -3815,9 +3977,27 @@ class AdminCRMController extends Controller
                                     NotificationsController::send(31,$crm_request->id);
                                 }
                             }
+                            else{
+                                CrmRequestTagging::create([
+                                    'crm_request_id' => $crm_request->id,
+                                    'crm_request_tagging_type_id' => 5,
+                                    'tagged_id' => $crm_auto_tag_user->admin_id,
+                                    'hub_id' => NULL
+                                ]);
+
+                                CrmRequestTaggingHistory::create([
+                                    'crm_request_id' => $crm_request->id,
+                                    'crm_request_tagging_type_id' => 5,
+                                    'tagged_id' => $crm_auto_tag_user->admin_id,
+                                    'agent_id' => 306,
+                                    'hub_id' => NULL
+                                ]);
+                                NotificationsController::send(31,$crm_request->id);
+                            }
                         }
-                        
-                    
+                    }
+
+
                     return redirect()->back()->with(['success' => 'Request marked as In-Process']);
                 }
                 else {
@@ -3961,7 +4141,7 @@ TRAX-Customer Experience';
                     if(!$check_exists->exists()){
 
                         $crm_closed_reason = new CrmClosedReason;
-                        $crm_closed_reason->crm_request_id = $request->req_id; 
+                        $crm_closed_reason->crm_request_id = $request->req_id;
                         $crm_closed_reason->status_id = $request->close_reason_status;
                         $crm_closed_reason->added_by = Auth::id();
                         $crm_closed_reason->save();
@@ -3989,7 +4169,7 @@ TRAX-Customer Experience';
                 else{
                     if($crm_request->case_nature_id == 4){
                         NotificationsController::send(117, $crm_request->id, 4);
-                        
+
                     }
                 }
                 CrmRequestStatusHistory::create([
@@ -4002,29 +4182,29 @@ TRAX-Customer Experience';
                 CrmRequestTagging::where('crm_request_id', $request->id)->delete();
 
                 // Notification 191 send email noticifaction on CRM Request Close to complaint shippers start
-                $settings = GlobalSettings::where('type', 'complaint_portal_shippers');  
+                $settings = GlobalSettings::where('type', 'complaint_portal_shippers');
                 if($settings->exists())
                 {
                     $settings= $settings->first();
                     if($settings->text != "")
                     {
                         $complaint_shipper_ids = explode(',',$settings->text);
-                        
+
                         $crm_data = CrmRequest::join('shipments','shipments.id','crm_requests.shipment_id')
-                        ->join('crm_closed_reasons','crm_closed_reasons.crm_request_id','crm_requests.id')
-                        ->join('crm_closed_reason_statuses','crm_closed_reason_statuses.id','crm_closed_reasons.status_id')
-                        ->join('users','users.id','crm_requests.shipper_id')
-                        ->where('crm_requests.id',$request->req_id)
-                        ->where('crm_requests.shipper_id',$complaint_shipper_ids)
-                        ->select(['crm_requests.id','shipments.tracking_number','crm_requests.updated_at','crm_closed_reason_statuses.name as reason','users.email','users.poc as shipper_name']);
+                            ->join('crm_closed_reasons','crm_closed_reasons.crm_request_id','crm_requests.id')
+                            ->join('crm_closed_reason_statuses','crm_closed_reason_statuses.id','crm_closed_reasons.status_id')
+                            ->join('users','users.id','crm_requests.shipper_id')
+                            ->where('crm_requests.id',$request->req_id)
+                            ->where('crm_requests.shipper_id',$complaint_shipper_ids)
+                            ->select(['crm_requests.id','shipments.tracking_number','crm_requests.updated_at','crm_closed_reason_statuses.name as reason','users.email','users.poc as shipper_name']);
                         if($crm_data->exists())
                         {
                             $crm_data = $crm_data->first();
                             NotificationsController::send(191,$crm_data);
                         }
-                        
+
                     }
-                
+
                 }
                 // Notification 191 end
                 return redirect()->back()->with(['success' => 'Request marked as Closed']);
@@ -4038,25 +4218,25 @@ TRAX-Customer Experience';
     }
 
     public function close(Request $request){
-        
+
         if($request->closed_reason_status != null){
-           $close_reason_crm_ids =  explode(',', $request->close_reason_crm_ids);
+            $close_reason_crm_ids =  explode(',', $request->close_reason_crm_ids);
             foreach ($close_reason_crm_ids as $value) {
                 $check_exists = CrmClosedReason::where('crm_request_id',$value);
-                    if(!$check_exists->exists()){
+                if(!$check_exists->exists()){
 
-                        $crm_closed_reason = new CrmClosedReason;
-                        $crm_closed_reason->crm_request_id = $value; 
-                        $crm_closed_reason->status_id = $request->closed_reason_status;
-                        $crm_closed_reason->added_by = Auth::id();
-                        $crm_closed_reason->save();
-                    }else{
-                        $check_exists = $check_exists->first();
-                        $check_exists->status_id = $request->closed_reason_status;
-                        $check_exists->added_by = Auth::id();
-                        $check_exists->save();
-                    }
-               
+                    $crm_closed_reason = new CrmClosedReason;
+                    $crm_closed_reason->crm_request_id = $value;
+                    $crm_closed_reason->status_id = $request->closed_reason_status;
+                    $crm_closed_reason->added_by = Auth::id();
+                    $crm_closed_reason->save();
+                }else{
+                    $check_exists = $check_exists->first();
+                    $check_exists->status_id = $request->closed_reason_status;
+                    $check_exists->added_by = Auth::id();
+                    $check_exists->save();
+                }
+
             }
         }
 
@@ -4085,28 +4265,28 @@ TRAX-Customer Experience';
                 NotificationsController::send(142,$crm_request_id);
 
                 // Notification 191 send email noticifaction on CRM Request Close to complaint shippers start
-                $settings = GlobalSettings::where('type', 'complaint_portal_shippers');  
+                $settings = GlobalSettings::where('type', 'complaint_portal_shippers');
                 if($settings->exists())
                 {
                     $settings= $settings->first();
                     if($settings->text != "")
                     {
                         $complaint_shipper_ids = explode(',',$settings->text);
-                        
+
                         $crm_data = CrmRequest::join('shipments','shipments.id','crm_requests.shipment_id')
-                        ->join('crm_closed_reasons','crm_closed_reasons.crm_request_id','crm_requests.id')
-                        ->join('crm_closed_reason_statuses','crm_closed_reason_statuses.id','crm_closed_reasons.status_id')
-                        ->join('users','users.id','crm_requests.shipper_id')
-                        ->where('crm_requests.id',$crm_request_id)
-                        ->where('crm_requests.shipper_id',$complaint_shipper_ids)
-                        ->select(['crm_requests.id','shipments.tracking_number','crm_requests.updated_at','crm_closed_reason_statuses.name as reason','users.email','users.poc as shipper_name']);
+                            ->join('crm_closed_reasons','crm_closed_reasons.crm_request_id','crm_requests.id')
+                            ->join('crm_closed_reason_statuses','crm_closed_reason_statuses.id','crm_closed_reasons.status_id')
+                            ->join('users','users.id','crm_requests.shipper_id')
+                            ->where('crm_requests.id',$crm_request_id)
+                            ->where('crm_requests.shipper_id',$complaint_shipper_ids)
+                            ->select(['crm_requests.id','shipments.tracking_number','crm_requests.updated_at','crm_closed_reason_statuses.name as reason','users.email','users.poc as shipper_name']);
                         if($crm_data->exists())
                         {
                             $crm_data = $crm_data->first();
                             NotificationsController::send(191,$crm_data);
                         }
                     }
-                
+
                 }
                 // Notification 191 end
             }
@@ -4183,19 +4363,19 @@ TRAX-Customer Experience';
         }
         return ['status' => 0, 'success' => 'Request successfully tagged to ' . $name['name']];
     }
-   // public function request_info(Request $request){
-   //     $request_id = $request->request_id;
-   //     $request_details = CrmRequest::find($request_id);
-   //     if($request_details){
-   //         $tracking_number = '';
-   //         if($request_details->shipment_id != null){
-   //             $tracking_number = Shipment::find($request_details->shipment_id)->tracking_number;
-   //         }
-   //         return ['status' => 1, 'details' => $request_details, 'tracking_number' => $tracking_number];
-   //     }else{
-   //         return ['status' => 0, 'error' => 'Request ID not found!'];
-   //     }
-   // }
+    // public function request_info(Request $request){
+    //     $request_id = $request->request_id;
+    //     $request_details = CrmRequest::find($request_id);
+    //     if($request_details){
+    //         $tracking_number = '';
+    //         if($request_details->shipment_id != null){
+    //             $tracking_number = Shipment::find($request_details->shipment_id)->tracking_number;
+    //         }
+    //         return ['status' => 1, 'details' => $request_details, 'tracking_number' => $tracking_number];
+    //     }else{
+    //         return ['status' => 0, 'error' => 'Request ID not found!'];
+    //     }
+    // }
     public function bulk_admin_tag(Request $request){
         if(count($request->crm_request_ids) > 0){
             $tagged_hub = null;
@@ -4213,7 +4393,7 @@ TRAX-Customer Experience';
                 $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
                 if(!empty($tagged_crm_request)){
                     if($tagged_crm_request['tagged_id'] != $request->tagged_id) {
-                        
+
                         CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
 
                         CrmRequestTagging::create([
@@ -4257,7 +4437,7 @@ TRAX-Customer Experience';
                     NotificationsController::send(31,$crm_request_id);
                 }
             }
-            
+
             return ['status' => 0, 'success' => 'Request(s) successfully tagged to ' . $name['name']];
         }
     }
@@ -4269,7 +4449,7 @@ TRAX-Customer Experience';
                     $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
                     if($check_previous){
                         CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
-                       
+
                         CrmRequestTagging::create([
                             'crm_request_id' => $crm_request_id,
                             'crm_request_tagging_type_id' => 3,
@@ -4293,13 +4473,13 @@ TRAX-Customer Experience';
             $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
             if($check_previous){
                 CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
-                        CrmRequestTagging::create([
-                            'crm_request_id' => $crm_request_id,
-                            'crm_request_tagging_type_id' => 3,
-                            'tagged_id' => null
-                        ]);
+                CrmRequestTagging::create([
+                    'crm_request_id' => $crm_request_id,
+                    'crm_request_tagging_type_id' => 3,
+                    'tagged_id' => null
+                ]);
 
-               
+
                 CrmRequestTaggingHistory::create([
                     'crm_request_id' => $crm_request_id,
                     'crm_request_tagging_type_id' => 3,
@@ -4320,7 +4500,7 @@ TRAX-Customer Experience';
         $roles = AdminRole::join('admin_departments as ad', 'admin_roles.department_id', '=', 'ad.id')
             ->join('admins as a', 'admin_roles.updated_by', '=', 'a.id')
             ->select('admin_roles.id', 'admin_roles.name', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by')
-            
+
             ->where('admin_roles.department_id', '!=', 1);
 
         $datatables = Datatables::of($roles)
@@ -4475,7 +4655,7 @@ TRAX-Customer Experience';
             $crm_request = CrmRequest::find($crm_request_id);
             if ($crm_request->agent_id != null) {
                 if (session('role_id') == 1 || session('role_id') == 6 || $crm_request->agent_id == Auth::id() || in_array(184, session('permissions')))
-                    {
+                {
                     if ($crm_request->status_id == 1 || $crm_request->status_id == 2 || $crm_request->status_id == 5) {
                         if($request->valid == 1){
                             CrmRequest::where('id', $crm_request->id)->update([
@@ -4508,7 +4688,7 @@ TRAX-Customer Experience';
                             if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
                                 $crm_city_id = $crm_request->shipment->pickup_address->city->id;
                                 $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id;
-    
+
                             }else{
                                 $crm_city_id = $crm_request->shipment->consignee_city_id;
                                 $crm_city_area_id = ConsigneeAddressArea::where('shipment_id',$crm_request->shipment->id)->pluck('city_area_id')->first() ?? 0;
@@ -4529,7 +4709,7 @@ TRAX-Customer Experience';
                                                             'crm_request_tagging_type_id' => 4,
                                                             'tagged_id' => $tagged_id
                                                         ]);
-        
+
                                                         CrmRequestTaggingHistory::create([
                                                             'crm_request_id' => $crm_request->id,
                                                             'crm_request_tagging_type_id' => 4,
@@ -4547,7 +4727,7 @@ TRAX-Customer Experience';
                                                         'tagged_id' => $tagged_id,
                                                         'hub_id' => NULL
                                                     ]);
-        
+
                                                     CrmRequestTaggingHistory::create([
                                                         'crm_request_id' => $crm_request->id,
                                                         'crm_request_tagging_type_id' => 4,
@@ -4560,12 +4740,12 @@ TRAX-Customer Experience';
                                             }
                                         }
                                     }
-        
+
                                 }
                             }
 
                             if($crm_request->case_nature_type_id != 1){
-                            
+
                                 $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
 
                                 if($crm_auto_tag_user->exists()){
@@ -4610,9 +4790,9 @@ TRAX-Customer Experience';
                                         {
                                             $crm_auto_tag_ids = $crm_auto_tag_user->pluck('admin_id')->toArray();
                                             $min_tagged_user = CrmRequestTagging::select("tagged_id",DB::raw("count('tagged_id') as tagged_count"))->whereIn('tagged_id', $crm_auto_tag_ids)->groupBy('tagged_id')->orderBy('tagged_count','asc');
-                                            
+
                                             if($min_tagged_user->exists())
-                                            {   
+                                            {
                                                 $min_tagged_user = $min_tagged_user->first();
                                                 $admin_id = $min_tagged_user->tagged_id;
                                             }
@@ -4625,7 +4805,7 @@ TRAX-Customer Experience';
                                             $crm_auto_tag_user = $crm_auto_tag_user->first();
                                             $admin_id = $crm_auto_tag_user->admin_id;
                                         }
-            
+
                                         $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
                                         if(!empty($tagged_crm_request)){
                                             if($tagged_crm_request['tagged_id'] != $admin_id) {
@@ -4633,7 +4813,7 @@ TRAX-Customer Experience';
                                                     'crm_request_tagging_type_id' => 5,
                                                     'tagged_id' => $admin_id
                                                 ]);
-            
+
                                                 CrmRequestTaggingHistory::create([
                                                     'crm_request_id' => $crm_request->id,
                                                     'crm_request_tagging_type_id' => 5,
@@ -4651,7 +4831,7 @@ TRAX-Customer Experience';
                                                 'tagged_id' => $admin_id,
                                                 'hub_id' => NULL
                                             ]);
-            
+
                                             CrmRequestTaggingHistory::create([
                                                 'crm_request_id' => $crm_request->id,
                                                 'crm_request_tagging_type_id' => 5,
@@ -4661,18 +4841,18 @@ TRAX-Customer Experience';
                                             ]);
                                             NotificationsController::send(31,$crm_request->id);
                                         }
-                                    } 
+                                    }
                                 }
                             }
                         }
                         elseif ($request->valid == 0){
                             if($request->closed_reason_status != null){
                                 $close_reason_crm_ids =  explode(',', $request->close_reason_crm_ids);
-                                 foreach ($close_reason_crm_ids as $value) {
+                                foreach ($close_reason_crm_ids as $value) {
                                     $check_exists = CrmClosedReason::where('crm_request_id',$value);
                                     if(!$check_exists->exists()){
                                         $crm_closed_reason = new CrmClosedReason;
-                                        $crm_closed_reason->crm_request_id = $value; 
+                                        $crm_closed_reason->crm_request_id = $value;
                                         $crm_closed_reason->status_id = $request->closed_reason_status;
                                         $crm_closed_reason->added_by = Auth::id();
                                         $crm_closed_reason->save();
@@ -4682,9 +4862,9 @@ TRAX-Customer Experience';
                                         $check_exists->added_by = Auth::id();
                                         $check_exists->save();
                                     }
-                                     
-                                 }
-                             }
+
+                                }
+                            }
                             CrmRequest::where('id', $crm_request->id)->update([
                                 'status_id' => 4,
                             ]);
@@ -5766,7 +5946,7 @@ TRAX-Customer Experience';
                             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
                 ';
                 }
-                
+
                 if ($type != 'pdf') {
                     $table_start .= '
                             <td class="color primary"><strong>Datetime</strong></td>
@@ -5776,7 +5956,7 @@ TRAX-Customer Experience';
                             <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
                             <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
                 ';
-               
+
                     $table_start .= '
                             <td class="color primary"><strong>Order ID</strong></td>
                             <td>' . $shipment->order_id . '</td>
@@ -5954,7 +6134,7 @@ TRAX-Customer Experience';
                           </tr>
                           <tr>
                     ';
-                    } 
+                    }
                     elseif ($shipment->booking_type_id == 3) {
                         $table_end .= '
                             <td class="border twice-top twice-bottom twice-left" colspan="2" rowspan="2" style="height: 32px;"></td>
@@ -5972,15 +6152,15 @@ TRAX-Customer Experience';
                             <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
                     ';
                     }
-                        if($shipment->shipment_detail()->exists()){
-                            if($shipment->shipment_detail->is_open==1){
-                        $table_end .= '<tr>
+                    if($shipment->shipment_detail()->exists()){
+                        if($shipment->shipment_detail->is_open==1){
+                            $table_end .= '<tr>
                         <td colspan="2" class="color primary border twice-top twice-bottom twice-left"><strong>Open Box</strong></td>
                         <td colspan="4" class="border twice-top twice-bottom twice-left"><strong> Yes <span><img src="'.asset('img/open_box_icon.png').'" ></span></strong></td>
                         
                         </tr>';
+                        }
                     }
-                }
                 } else {
                     $table_end = '
                           <tr>
@@ -6143,8 +6323,8 @@ TRAX-Customer Experience';
                     $shipment_details .= $table_end;
 
                 }
-                
-                
+
+
                 if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                     $shipment_pieces = '';
 
@@ -6332,19 +6512,19 @@ TRAX-Customer Experience';
             }
 
             foreach ($image_ids as $id){
-                    $file_name = 'crm_image_'.$id;
-                    $image = $request->file($file_name);
-                    $extension = $image->getClientOriginalExtension();
-                    $random = rand(1000, 100000);
-                    $now = Carbon::now();
-                    $time = $now->year . '_' . $now->month;
-                    $generated_file_name = $time . $random . Auth::id() . '.' . $extension;
-                    $image->move(public_path('uploads/crm_request_images'), $generated_file_name);
-                    $crm_image = new CrmRequestImage();
-                    $crm_image->crm_request_id = $crm_request_id;
-                    $crm_image->added_by = Auth::id();
-                    $crm_image->image = $generated_file_name;
-                    $crm_image->save();
+                $file_name = 'crm_image_'.$id;
+                $image = $request->file($file_name);
+                $extension = $image->getClientOriginalExtension();
+                $random = rand(1000, 100000);
+                $now = Carbon::now();
+                $time = $now->year . '_' . $now->month;
+                $generated_file_name = $time . $random . Auth::id() . '.' . $extension;
+                $image->move(public_path('uploads/crm_request_images'), $generated_file_name);
+                $crm_image = new CrmRequestImage();
+                $crm_image->crm_request_id = $crm_request_id;
+                $crm_image->added_by = Auth::id();
+                $crm_image->image = $generated_file_name;
+                $crm_image->save();
             }
 
             return redirect()->back()->with(['status' => 1, 'success' => 'CRM Attachments Uploaded successfully']);
@@ -6455,13 +6635,13 @@ TRAX-Customer Experience';
         $shipment = Shipment::find($request->shipment_id);
         if($shipment){
 //            if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17){
-                if($shipment->receiving_sheet_shipment){
-                    $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
-                    return response()->json(['status' => 1,'receiving_sheet_id' => $receiving_sheet_id]);
-                }
-                else{
-                    return response()->json(['status' => 0,'error'=>'Receiving Sheet does not exists']);
-                }
+            if($shipment->receiving_sheet_shipment){
+                $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+                return response()->json(['status' => 1,'receiving_sheet_id' => $receiving_sheet_id]);
+            }
+            else{
+                return response()->json(['status' => 0,'error'=>'Receiving Sheet does not exists']);
+            }
 //            }
 //            else{
 //                return response()->json(['status' => 0,'error'=>'Only Booked and Cancelled Shipments Allowed']);
@@ -6491,7 +6671,7 @@ TRAX-Customer Experience';
                 $percentage += $sp_value;
             }
 
-            $remaining_percent = (100 - $percentage ); 
+            $remaining_percent = (100 - $percentage );
             if($remaining_percent >= $adjusted_percentage)
             {
 
@@ -6516,7 +6696,7 @@ TRAX-Customer Experience';
                 foreach ($admin_id as $key => $admin) {
 
                     NotificationsController::send(131,$request_id,$admin);
-                    
+
                     $special_approval_request_admin = new SpecialApprovalRequestAdmin();
                     $special_approval_request_admin->special_request_id = $special_request->id ?? $approval_request->id;
                     $special_approval_request_admin->admin_id = $admin;
@@ -6525,7 +6705,7 @@ TRAX-Customer Experience';
                 }
 
                 foreach ($special_request_reason_option as $key => $option) {
-                    
+
                     $special_request_option = new SpecialRequestOption();
                     $special_request_option->special_request_id = $special_request->id ?? $approval_request->id;
                     $special_request_option->reason_option_id = $option;
@@ -6567,7 +6747,7 @@ TRAX-Customer Experience';
                     break;
                 }
             }
-            
+
             if($approved_status)
             {
                 SpecialApprovalRequest::where('id',$special_approval_request_id)->update(['approved_status' => 3]);
@@ -6579,29 +6759,29 @@ TRAX-Customer Experience';
         {
             SpecialApprovalRequest::where('id',$special_approval_request_id)->update(['approved_status' => 2]);
             $res = SpecialApprovalRequestAdmin::where(['special_request_id' => $special_approval_request_id, 'admin_id' => $admin_id])->update(['reason' => $special_approve_reject_reason,'approved_date' => $approved_date,'approved_status' => $request->reject]); // status 2 is for reject
-            return redirect()->back()->with(['success'=> "Request Rejected"]);  
+            return redirect()->back()->with(['success'=> "Request Rejected"]);
         }
-        
+
 
     }
 
-   /* public function special_request_tag(Request $request){
-     $request_id = $request->crm_request_id;
-     $approval_request = SpecialApprovalRequest::where('crm_request_id',$request_id)->latest();
-     if($approval_request->exists()){
-       $approval_request = $approval_request->get();
-       $admin = array();
-       foreach ($approval_request as $sr){
-           $admin[] = Admin::find($sr->admin_id)->name;
-       }
-         return response()->json(['status' => 1,'admin' => $admin]);
-     }
-     else{
-         return response()->json(['status' => 0,'error'=>'No Request Found']);
-     }
+    /* public function special_request_tag(Request $request){
+      $request_id = $request->crm_request_id;
+      $approval_request = SpecialApprovalRequest::where('crm_request_id',$request_id)->latest();
+      if($approval_request->exists()){
+        $approval_request = $approval_request->get();
+        $admin = array();
+        foreach ($approval_request as $sr){
+            $admin[] = Admin::find($sr->admin_id)->name;
+        }
+          return response()->json(['status' => 1,'admin' => $admin]);
+      }
+      else{
+          return response()->json(['status' => 0,'error'=>'No Request Found']);
+      }
 
 
-    }*/
+     }*/
 
     public function close_reason(Request $request){
 
@@ -6612,11 +6792,11 @@ TRAX-Customer Experience';
             if ($settings->exists()) {
                 $settings = $settings->first();
                 if($settings->text != NULL){
-                    
+
                     $shippers = array_map('intval', explode(',', $settings->text));
                 }
             }
-    
+
             $crm_requests = CrmRequest::where('id',$request->crm_request_id)->whereIn('shipper_id',$shippers);
             if ($crm_requests->exists()) {
                 return response()->json(['status'=>1]);
@@ -6632,11 +6812,11 @@ TRAX-Customer Experience';
             if ($settings->exists()) {
                 $settings = $settings->first();
                 if($settings->text != NULL){
-                    
+
                     $shippers = array_map('intval', explode(',', $settings->text));
                 }
             }
-    
+
             foreach ($crm_request_ids as $crm_request_id){
                 $crm_requests = CrmRequest::where('id',$crm_request_id)->whereIn('shipper_id',$shippers);
                 if ($crm_requests->exists()) {
@@ -6645,7 +6825,7 @@ TRAX-Customer Experience';
             }
             if(count($crm_ids) > 0){
                 return response()->json(['status'=>1,'crm_ids'=>$crm_ids]);
-    
+
             }else{
                 return response()->json(['status'=>0]);
             }
@@ -6653,7 +6833,7 @@ TRAX-Customer Experience';
     }
 
     public function bulk_claim_index(){
-        
+
         ActivityTrailController::createActivityTrailLog(Auth::id(),585);
         $case_nature_type = CrmRequestCaseNatureType::where('nature_id',4)->select('id', 'type')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
@@ -6682,7 +6862,7 @@ TRAX-Customer Experience';
     }
 
     public function bulk_claim_submit(Request $request){
-        
+
         $shipment_ids = explode(',', $request->shipment_ids);
         $present_shipments = [];
 
@@ -6695,17 +6875,17 @@ TRAX-Customer Experience';
                     $present_shipments[] = $shipment->tracking_number;
                 }else{
                     $crm_request_padded_id = CRMController::add(4, $request->case_nature_type_id[$shipment_id], $request->channel_id[$shipment_id], 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $request->description[$shipment_id], $request->claim_product_cost[$shipment_id],  $request->file('product_picture')[$shipment_id], $request->file('invoice_picture')[$shipment_id]);
-                                      
+
                     if($request->has('key_account')){
                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $request->channel_id[$shipment_id], $request->case_nature_type_id[$shipment_id]);
                     }
                     $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
                     // return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                 }
-                
+
 
             }
-        
+
         }
         if(count($present_shipments) > 0){
             return redirect()->back()->with('success', 'Request(s) successfully added. Request againts these shipment already exits '.implode(',', $present_shipments));

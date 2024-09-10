@@ -4,93 +4,100 @@
 
 @section('content')
     <section>
-    <div class="app-content content">
-        <div class="content-wrapper">
-            <div class="content-header row">
-            </div>
-            <div class="content-body">
-                <h1 class="mb-1">
-                    Resolved Requests
-                </h1>
+        <div class="app-content content">
+            <div class="content-wrapper">
+                <div class="content-header row">
+                </div>
+                <div class="content-body">
+                    <h1 class="mb-1">
+                        Resolved Requests
+                    </h1>
 
-                <div class="card">
-                    <div class="card-content" aria-expanded="true">
-                        <div class="card-body">
-                            @include('admin.inc.messages')
+                    <div class="card">
+                        <div class="card-content" aria-expanded="true">
+                            <div class="card-body">
+                                @include('admin.inc.messages')
 
-                            <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                <div class="form-group">
-                                    <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
-                                           placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
-                                </div>
-                                <div class="form-group justify-content-center">
-                                    <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
-                                                class="la la-search"></i> Search
-                                    </button>
-                                </div>
-                            </form>
+                                <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                    <div class="form-group">
+                                        <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
+                                               placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                                    </div>
+                                    <div class="form-group justify-content-center">
+                                        <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
+                                                    class="la la-search"></i> Search
+                                        </button>
+                                    </div>
+                                </form>
 
-                            <div class="col justify-content-end">
-                                <div class="card-header">
-                                    <div class="heading-elements">
-                                        <ul class="list-inline" style="margin-top: -10px">
-                                            <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
-                                                    Star Shippers</a>
-                                            </li>
-                                        </ul>
+                                <div class="col justify-content-end">
+                                    <div class="card-header">
+                                        <div class="heading-elements">
+                                            <ul class="list-inline" style="margin-top: -10px">
+                                                <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
+                                                        Star Shippers</a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                                <b><label class="ml-1" id="count"></label></b>
-                                <thead>
-                                <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
-                                    <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Request No.</th>
-                                    <th class="border-primary border-darken-1">Tracking No.</th>
-                                    <th class="border-primary border-darken-1">Shipper Name</th>
-                                    <th class="border-primary border-darken-1">Origin</th>
-                                    <th class="border-primary border-darken-1">Destination</th>
-                                    <th class="border-primary border-darken-1">Responsible Hub</th>
-                                    <th class="border-primary border-darken-1">Responsible Zone</th>
-                                    <th class="border-primary border-darken-1">Shipment Status</th>
-                                    <th class="border-primary border-darken-1">Arrival Date</th>
-                                    <th class="border-primary border-darken-1">COD Amount</th>
-                                    <th class="border-primary border-darken-1">Case Nature</th>
-                                    <th class="border-primary border-darken-1">Case Nature Type</th>
-                                    <th class="border-primary border-darken-1">Description</th>
-                                    <th class="border-primary border-darken-1">Channel</th>
-                                    <th class="border-primary border-darken-1">Agent</th>
-                                    <th class="border-primary border-darken-1">Launched By</th>
-                                    <th class="border-primary border-darken-1">Launched By Type</th>
-                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
-                                    <th class="border-primary border-darken-1">Manual Tagged To</th>
-                                    {{-- <th class="border-primary border-darken-1">Tagged At</th> --}}
-                                    <th class="border-primary border-darken-1">Auto Tagged To KAE</th>
-                                    <th class="border-primary border-darken-1">Auto Tagged To Operation</th>
-                                    <th class="border-primary border-darken-1">Launched Date</th>
-                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
-                                    <th class="border-primary border-darken-1">Resolved By</th>
-                                    <th class="border-primary border-darken-1">Resolved Date</th>
-                                    <th class="border-primary border-darken-1">Address</th>
-                                    <th class="border-primary border-darken-1">Address Latitude</th>
-                                    <th class="border-primary border-darken-1">Address Longitude</th>
-                                    <th class="border-primary border-darken-1">In-Process To Resolved (TAT)</th>
-                                    <th class="border-primary border-darken-1">Last Comment By</th>
-                                    <th class="border-primary border-darken-1">Last Comment</th>
-                                    <th class="border-primary border-darken-1">Last Comment Date</th>
-                                    <th class="border-primary border-darken-1"></th>
-                                </tr>
-                                </thead>
-                            </table>
+                                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                    <b><label class="ml-1" id="count"></label></b>
+                                    <thead>
+                                    <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1"></th>
+                                        <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Request No.</th>
+                                        <th class="border-primary border-darken-1">Tracking No.</th>
+                                        <th class="border-primary border-darken-1">Shipper Name</th>
+                                        <th class="border-primary border-darken-1">Origin</th>
+                                        <th class="border-primary border-darken-1">Destination</th>
+                                        <th class="border-primary border-darken-1">Hub</th>
+                                        <th class="border-primary border-darken-1">Zone</th>
+                                        <th class="border-primary border-darken-1">Arrival Date</th>
+                                        <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>
+                                        <th class="border-primary border-darken-1">Shipment Status</th>
+                                        <th class="border-primary border-darken-1">Last Status Date</th>
+                                        <th class="border-primary border-darken-1">Last Status to Today (TAT)</th>
+                                        <th class="border-primary border-darken-1">Last Status By</th>
+                                        <th class="border-primary border-darken-1">Case Nature</th>
+                                        <th class="border-primary border-darken-1">Case Nature Type</th>
+                                        <th class="border-primary border-darken-1">Description</th>
+                                        <th class="border-primary border-darken-1">Launched Date</th>
+                                        <th class="border-primary border-darken-1">Aging (From Launched Date To Today)</th>
+                                        <th class="border-primary border-darken-1">Responsible Hub</th>
+                                        <th class="border-primary border-darken-1">Sub Hub</th>
+                                        <th class="border-primary border-darken-1">Responsible Zone</th>
+                                        <th class="border-primary border-darken-1">Agent</th>
+                                        <th class="border-primary border-darken-1">Agent Assigned By</th>
+                                        <th class="border-primary border-darken-1">Parcel Value</th>
+                                        <th class="border-primary border-darken-1">COD Value</th>
+                                        <th class="border-primary border-darken-1">Segment</th>
+                                        <th class="border-primary border-darken-1">Weight</th>
+                                        <th class="border-primary border-darken-1">Salesperson</th>
+                                        <th class="border-primary border-darken-1">Key Account Category</th>
+                                        <th class="border-primary border-darken-1">KAE</th>
+                                        <th class="border-primary border-darken-1">Launched By</th>
+                                        <th class="border-primary border-darken-1">Launched By Type</th>
+                                        <th class="border-primary border-darken-1">Auto Tagged to Operation</th>
+                                        <th class="border-primary border-darken-1">Manual Tagged To</th>
+                                        <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
+                                        <th class="border-primary border-darken-1">Last Comment By</th>
+                                        <th class="border-primary border-darken-1">Last Comment</th>
+                                        <th class="border-primary border-darken-1">Resolved Date</th>
+                                        <th class="border-primary border-darken-1">In Process-Resolved TAT</th>
+
+                                        <th class="border-primary border-darken-1"></th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </section>
     <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
          aria-hidden="true">
@@ -168,88 +175,88 @@
         </div>
     </div>
     <div class="modal fade text-left" id="tagModal" data-backdrop="static" tabindex="-1" role="dialog"
-             aria-labelledby="tagModal"
-             aria-hidden="true">
-            <div class="modal-dialog modal-md" role="document">
-                <div class="modal-content ">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Tag</h4>
-                    </div>
-                    <div class="modal-body text-center">
-                        <form id="tag_submit_form" method="post">
-                            @method('POST')
-                            @csrf
-                            <div class="row justify-content-center">
-                                <div class="col-11">
-                                    <fieldset class="form-group">
-                                        <input type="hidden" id="crm_request_ids" value="">
-                                        <input type="hidden" id="prev_status" name="prev_status"
-                                               value="">
-                                        <select name="tag_type" id="tag_type" class="form-control select2">
-                                            @foreach($types as $type)
-                                                <option value="{{$type->id}}"> {{$type->name}} </option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
+         aria-labelledby="tagModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content ">
+                <div class="modal-header">
+                    <h4 class="modal-title">Tag</h4>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="tag_submit_form" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="row justify-content-center">
+                            <div class="col-11">
+                                <fieldset class="form-group">
+                                    <input type="hidden" id="crm_request_ids" value="">
+                                    <input type="hidden" id="prev_status" name="prev_status"
+                                           value="">
+                                    <select name="tag_type" id="tag_type" class="form-control select2">
+                                        @foreach($types as $type)
+                                            <option value="{{$type->id}}"> {{$type->name}} </option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
                             </div>
-                            <div class="row justify-content-center">
-                                <div class="col-8">
-                                    <fieldset class="form-group">
-                                        <div class="d-none" id="admin_tag_div">
-                                            <div class="">
-                                                <select id="admin_tag_department"
-                                                        class="form-control  select2">
-                                                    @foreach($departments as $department)
-                                                        <option value="{{$department->id}}"> {{$department->name}} </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="mt-1">
-                                                <select id="admin_tag_hub"
-                                                        class="form-control select2">
-                                                    @foreach($hubs as $hub)
-                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="mt-1">
-                                                <select name="tag_admin" id="tag_admin" class="form-control select2">
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-8">
+                                <fieldset class="form-group">
+                                    <div class="d-none" id="admin_tag_div">
+                                        <div class="">
+                                            <select id="admin_tag_department"
+                                                    class="form-control  select2">
+                                                @foreach($departments as $department)
+                                                    <option value="{{$department->id}}"> {{$department->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mt-1">
+                                            <select id="admin_tag_hub"
+                                                    class="form-control select2">
+                                                @foreach($hubs as $hub)
+                                                    <option value="{{$hub->id}}"> {{$hub->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mt-1">
+                                            <select name="tag_admin" id="tag_admin" class="form-control select2">
 
-                                                </select>
-                                            </div>
+                                            </select>
                                         </div>
-                                        <div class="d-none" id="department_tag_div">
-                                            <div class="">
-                                                <select name="tag_department" id="tag_department"
-                                                        class="form-control  select2">
-                                                    @foreach($departments as $department)
-                                                        <option value="{{$department->id}}"> {{$department->name}} </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="mt-1">
-                                                <select name="tag_hub" id="tag_hub"
-                                                        class="form-control select2">
-                                                    @foreach($hubs as $hub)
-                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
+                                    </div>
+                                    <div class="d-none" id="department_tag_div">
+                                        <div class="">
+                                            <select name="tag_department" id="tag_department"
+                                                    class="form-control  select2">
+                                                @foreach($departments as $department)
+                                                    <option value="{{$department->id}}"> {{$department->name}} </option>
+                                                @endforeach
+                                            </select>
                                         </div>
-                                    </fieldset>
-                                </div>
+                                        <div class="mt-1">
+                                            <select name="tag_hub" id="tag_hub"
+                                                    class="form-control select2">
+                                                @foreach($hubs as $hub)
+                                                    <option value="{{$hub->id}}"> {{$hub->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </fieldset>
                             </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>
-                        <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
-                    </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>
+                    <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
-        <div class="modal fade text-left" id="CloseReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CloseReasonModal"
+    </div>
+    <div class="modal fade text-left" id="CloseReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CloseReasonModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
@@ -321,72 +328,86 @@
                             head.push('Shipper Name');
                             head.push('Origin');
                             head.push('Destination');
-                            head.push('Responsible Hub');
-                            head.push('Responsible Zone');
-                            head.push('Shipment Status');
+                            head.push('Hub');
+                            head.push('Zone');
                             head.push('Arrival Date');
-                            head.push('COD Amount');
+                            head.push('Arrival to Today (TAT)');
+                            head.push('Shipment Status');
+                            head.push('Last Status Date');
+                            head.push('Last Status to Today (TAT)');
+                            head.push('Last Status By');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
                             head.push('Description');
-                            head.push('Channel');
+                            head.push('Launched Date');
+                            head.push('Aging (From Launched Date To Today)');
+                            head.push('Responsible Hub');
+                            head.push('Sub Hub');
+                            head.push('Responsible Zone');
                             head.push('Agent');
+                            head.push('Agent Assigned By');
+                            head.push('Parcel Value');
+                            head.push('COD Value');
+                            head.push('Segment');
+                            head.push('Weight');
+                            head.push('Salesperson');
+                            head.push('Key Account Category');
+                            head.push('KAE');
                             head.push('Launched By');
                             head.push('Launched By Type');
-                            head.push('Tagged (Admin/Department)');
+                            head.push('Auto Tagged to Operation');
                             head.push('Manual Tagged To');
-                            // head.push('Tagged At');
-                            head.push('Auto Tagged To KAE');
-                            head.push('Auto Tagged To Operation');
-                            head.push('Launched Date');
-                            head.push('Complaint Re-Open Date');
-                            head.push('Resolved By');
-                            head.push('Resolved Date');
-                            head.push('Address');
-                            head.push('Address Latitude');
-                            head.push('Address Longitude');
-                            head.push('In-Process To Resolved (TAT)');
+                            head.push('Tagged (Admin/Department)');
                             head.push('Last Comment By');
                             head.push('Last Comment');
-                            head.push('Last Comment Date');
+                            head.push('Resolved Date');
+                            head.push('In Process-Resolved TAT');
+
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
                                 row.push(values.id_padded);
-                                row.push(values.tracking_number);
-                                row.push(values.shipper_name);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.responsible_hub);
-                                row.push(values.responsible_zone);
-                                row.push(values.status);
-                                row.push(values.arrival);
-                                row.push(values.cod_amount);
-                                row.push(values.case_nature);
-                                row.push(values.case_nature_type);
-                                row.push(values.descr);
-                                row.push(values.channel);
-                                row.push(values.agent);
-                                row.push(values.launched_by_name);
-                                row.push(values.added_by);
-                                row.push(values.crm_request_tagging_type_id);
-                                row.push(values.tagged_to_manual);
-                                // row.push(values.tagged_date);
-                                row.push(values.tagged_to_kae);
-                                row.push(values.tagged_to_operation);
-                                row.push(values.created_at);
-                                row.push(values.reopen_date);
-                                row.push(values.resolved_by);
-                                row.push(values.resolved_date);
-                                row.push(values.address);
-                                row.push(values.address_latitude);
-                                row.push(values.address_longitude);
-                                row.push(values.in_process_resolved_tat);
-                                row.push(values.last_comment_name);
-                                row.push(values.last_comment.replace(/<br\\s*[\\/]?>/gi, '\n'));
-                                row.push(values.last_comment_date);
+                                row.push(values.tracking_number); // Tracking No.
+                                row.push(values.shipper_name); // Shipper Name
+                                row.push(values.origin); // Origin
+                                row.push(values.destination); // Destination
+                                row.push(values.hub); // Hub
+                                row.push(values.zone); // Zone
+                                row.push(values.arrival); // Arrival Date
+                                row.push(values.arrival_today); // Arrival to Today (TAT)
+                                row.push(values.status); // Shipment Status
+                                row.push(values.last_status_date); // Last Status Date
+                                row.push(values.last_status_today); // Last Status to Today (TAT)
+                                row.push(values.last_status_updated_by); // Last Status By
+                                row.push(values.case_nature); // Case Nature
+                                row.push(values.case_nature_type); // Case Nature Type
+                                row.push(values.description); // Description
+                                row.push(values.created_at); // Launched Date
+                                row.push(values.current_tat); // Aging (From Launched Date To Today)
+                                row.push(values.responsible_hub); // Responsible Hub
+                                row.push(values.sub_hub); // Sub Hub
+                                row.push(values.responsible_zone); // Responsible Zone
+                                row.push(values.agent); // Agent
+                                row.push(values.agent_assigned_by); // Agent Assigned By
+                                row.push(values.parcel_value); // Parcel Value
+                                row.push(values.cod_value); // COD Value
+                                row.push(values.segment); // Segment
+                                row.push(values.actual_weight); // Weight
+                                row.push(values.sale_person); // Salesperson
+                                row.push(values.shipper_category); // Key Account Category
+                                row.push(values.kae); // KAE
+                                row.push(values.launched_by_name); // Launched By
+                                row.push(values.added_by); // Launched By Type
+                                row.push(values.tagged_to_operation); // Auto Tagged to Operation
+                                row.push(values.tagged_to_manual); // Manual Tagged To
+                                row.push(values.tagged_department); // Tagged (Admin/Department)
+                                row.push(values.last_comment_by); // Last Comment By
+                                row.push(values.last_comment); // Last Comment
+                                row.push(values.resolved_date); // Resolved Date
+                                row.push(values.in_process_resolved_tat); // In Process-Resolved TAT
+
 
                                 body.push(row);
                             });
@@ -404,7 +425,7 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                    @if(session('role_id') == 1 || in_array(201, session('permissions')))
+                        @if(session('role_id') == 1 || in_array(201, session('permissions')))
 
                     {
                         text: 'Bulk Internal Comment',
@@ -422,9 +443,9 @@
                             $('#BulkExternalCommentModal').modal('show');
                         }
                     },
-                    @endif
+                        @endif
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(309, session('permissions')))
-                        {
+                    {
                         text: 'Tag',
                         className: 'btn btn-primary tag',
                         enabled: false,
@@ -507,11 +528,11 @@
                                             }
                                             table.draw('false');
                                         });
-                                    }
+                                }
                             });
                         }
                     },
-                    @endif
+                        @endif
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(179, session('permissions')))
                     {
                         text: 'Assign Agent',
@@ -607,14 +628,14 @@
                                     '_token': '{{ csrf_token() }}'
                                 }
                             })
-                            .done(function (data) {
-                                if(data.status == 1){
-                                    $('#close_reason_crm_ids').val(data.crm_ids);
-                                    $('#CloseReasonModal').modal('show');
-                                }else{
-                                    mark_close();
-                                }
-                            });
+                                .done(function (data) {
+                                    if(data.status == 1){
+                                        $('#close_reason_crm_ids').val(data.crm_ids);
+                                        $('#CloseReasonModal').modal('show');
+                                    }else{
+                                        mark_close();
+                                    }
+                                });
                         }
                     },
                         @endif
@@ -687,7 +708,7 @@
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
-                'reset'],
+                    'reset'],
                 select: {
                     info: false,
                     style: 'multi',
@@ -719,43 +740,44 @@
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle id_padded_link'},
-                    {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false, searchable: false,},
-                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
-                    {data: 'status', name: 'status', class: 'align-middle shipment_status'},
-                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
-                    {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
-                    {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
-                    {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
-                    {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
-                    {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
-                    {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
-                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
-                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
-                    {data: 'crm_request_tagging_type_id', name: 'crth.crm_request_tagging_type_id', class: 'align-middle tagged'},
-                    // {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
-                    {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'},
-                  /*  {data: 'special_request', name: 'sar.admin_id', class: 'align-middle special_request'},*/
-                    // {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
-                    {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae', orderable: false, searchable: false,},
-                    // {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
-                    // {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
-                    // {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'},
-                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation', orderable: false, searchable: false,},
-                    {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
-                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
-                    {data: 'resolved_by', name: 'ra.name', class: 'align-middle resolved_by'},
-                    {data: 'resolved_date', name: 'res.created_at', class: 'align-middle resolved_date'},
-                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
-                    {data: 'address_latitude', name: 'crm_requests.address_latitude', class: 'align-middle address_latitude'},
-                    {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
-                    {data: 'in_process_resolved_tat', name: 'in_process_resolved_tat', class: 'align-middle in_process_resolved_tat', orderable: false, searchable: false},
-                    {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
-                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
-                    {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
+                    {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'}, // Tracking No.
+                    {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'}, // Shipper Name
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'}, // Origin
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'}, // Destination
+                    {data: 'hub', name: 'hub', class: 'align-middle hub', orderable: false, searchable: false}, // Hub
+                    {data: 'zone', name: 'zone', class: 'align-middle zone', orderable: false, searchable: false}, // Zone
+                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'}, // Arrival Date
+                    {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today'}, // Arrival to Today (TAT)
+                    {data: 'status', name: 'status', class: 'align-middle shipment_status'}, // Shipment Status
+                    {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'}, // Last Status Date
+                    {data: 'last_status_today', name: 's.updated_by', class: 'align-middle last_status_today'}, // Last Status to Today (TAT)
+                    {data: 'last_status_updated_by', name: 'last_status_upd_by.name', class: 'align-middle last_status_updated_by'},                // Last status by
+                    {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'}, // Case Nature
+                    {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'}, // Case Nature Type
+                    {data: 'description', name: 'crm_requests.description', class: 'align-middle description'}, // Description
+                    {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'}, // Launched Date
+                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false}, // Aging (From Launched Date To Today)
+                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub'}, // Responsible Hub
+                    {data: 'sub_hub', name: 'ca.name', class: 'align-middle sub_hub'}, // Sub Hub
+                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone'}, // Responsible Zone
+                    {data: 'agent', name: 'agent', class: 'align-middle agent'}, // Agent
+                    {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},              // Agent Assigned By
+                    {data: 'parcel_value', name: 'parcel_value', class: 'align-middle parcel_value'}, // Parcel Value
+                    {data: 'cod_value', name: 'cod_value', class: 'align-middle cod_value'}, // COD Value
+                    {data: 'segment', name: 'segment', class: 'align-middle segment'}, // Segment
+                    {data: 'actual_weight', name: 'a.actual_weight', class: 'align-middle actual_weight'}, // Weight
+                    {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'}, // Salesperson
+                    {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'}, // Key account category
+                    {data: 'kae', name: 'kae', class: 'align-middle kae'}, // KAE
+                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},                      // Launched By
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},                  // Launched By Type
+                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'}, // Tagged To Operation
+                    {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'}, // Manual Tagged To
+                    {data: 'tagged_department', name: 'tagged_department', class: 'align-middle tagged_department'}, // Tagged (Admin/Department)
+                    {data: 'last_comment_by', name: 'last_comment_by', class: 'align-middle last_comment_by'}, // Last Comment By
+                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'}, // Last Comment
+                    {data: 'resolved_date', name: 'resolved_date', class: 'align-middle resolved_date'}, // Resolved Date
+                    {data: 'in_process_resolved_tat', name: 'in_process_resolved_tat', class: 'align-middle in_process_resolved_tat'}, // In Process-Resolved TAT
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -786,7 +808,7 @@
                         '<option value="2">Shipper Substitute User</option>' +
                         '<option value="3">Consignee</option>' +
                         '</select>';
-                        var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
+                    var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
                         '<option value="1">Department</option>' +
                         '<option value="2">Admin</option>' +
                         '</select>';
@@ -1303,111 +1325,111 @@
 
             });
             {{--$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.assign', function() {--}}
-                {{--$('#AssignAgentModal').modal('show');--}}
-                {{--var crm_request_id = parseInt($(this).parents('tr').attr('id'));--}}
+            {{--$('#AssignAgentModal').modal('show');--}}
+            {{--var crm_request_id = parseInt($(this).parents('tr').attr('id'));--}}
 
-                {{--$('#AssignAgentModal').on('shown.bs.modal',function (e) {--}}
-                {{--});--}}
-                {{--$('#AssignAgentModal').on('hide.bs.modal', function (e) {--}}
-                    {{--$('#assign_agent').val('').trigger('change');--}}
-                {{--});--}}
-                {{--$('#assign_agentSubmit').on('click',function () {--}}
-                    {{--var assign = parseInt($('#assign_agent').val());--}}
-                    {{--if(assign){--}}
-                        {{--$.ajax({--}}
-                            {{--url: '{!! route('admin.crm.assign') !!}',--}}
-                            {{--method: 'POST',--}}
-                            {{--data: {--}}
-                                {{--'admin_id': assign,--}}
-                                {{--'crm_request_id':crm_request_id,--}}
-                                {{--'multiple': 0,--}}
-                                {{--'_token': '{{ csrf_token() }}'--}}
-                            {{--}--}}
-                        {{--})--}}
-                            {{--.done(function(data) {--}}
-                                {{--if(data.status == 0){--}}
-                                    {{--$('#AssignAgentModal').modal('hide');--}}
-                                    {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                                {{--}--}}
-                                {{--else {--}}
-                                    {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                                {{--}--}}
-                                {{--$('#assign_agent').val('').trigger('change');--}}
-                                {{--table.draw(true);--}}
-                            {{--});--}}
-                    {{--}else{--}}
-                        {{--var error = "Agent Not Selected!";--}}
-                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                    {{--}--}}
+            {{--$('#AssignAgentModal').on('shown.bs.modal',function (e) {--}}
+            {{--});--}}
+            {{--$('#AssignAgentModal').on('hide.bs.modal', function (e) {--}}
+            {{--$('#assign_agent').val('').trigger('change');--}}
+            {{--});--}}
+            {{--$('#assign_agentSubmit').on('click',function () {--}}
+            {{--var assign = parseInt($('#assign_agent').val());--}}
+            {{--if(assign){--}}
+            {{--$.ajax({--}}
+            {{--url: '{!! route('admin.crm.assign') !!}',--}}
+            {{--method: 'POST',--}}
+            {{--data: {--}}
+            {{--'admin_id': assign,--}}
+            {{--'crm_request_id':crm_request_id,--}}
+            {{--'multiple': 0,--}}
+            {{--'_token': '{{ csrf_token() }}'--}}
+            {{--}--}}
+            {{--})--}}
+            {{--.done(function(data) {--}}
+            {{--if(data.status == 0){--}}
+            {{--$('#AssignAgentModal').modal('hide');--}}
+            {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+            {{--}--}}
+            {{--else {--}}
+            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
+            {{--$('#assign_agent').val('').trigger('change');--}}
+            {{--table.draw(true);--}}
+            {{--});--}}
+            {{--}else{--}}
+            {{--var error = "Agent Not Selected!";--}}
+            {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
 
-                {{--});--}}
+            {{--});--}}
             {{--});--}}
 
             function mark_close(){
                 var closed_reason_status = $('#closed_reason_status').val();
                 var close_reason_crm_ids = $('#close_reason_crm_ids').val();
                 swal({
-                                    text: 'Are you sure, you want to Close these Request(s)?',
-                                    icon: 'info',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function(confirm) {
-                                    swal({
-                                        title: 'Please Wait!',
-                                        text: 'Request(s) are being marked Closed.',
-                                        icon: 'info',
-                                        buttons: false,
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false
+                    text: 'Are you sure, you want to Close these Request(s)?',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Request(s) are being marked Closed.',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.crm.close') !!}',
+                            method: 'POST',
+                            data: {
+                                'crm_request_ids[]': selected_rows,
+                                'closed_reason_status': closed_reason_status,
+                                'close_reason_crm_ids': close_reason_crm_ids,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
                                     });
-                                    if (confirm) {
-                                        $.ajax({
-                                            url: '{!! route('admin.crm.close') !!}',
-                                            method: 'POST',
-                                            data: {
-                                                'crm_request_ids[]': selected_rows,
-                                                'closed_reason_status': closed_reason_status,
-                                                'close_reason_crm_ids': close_reason_crm_ids,
-                                                '_token': '{{ csrf_token() }}'
-                                            }
-                                        })
-                                            .done(function (data) {
-                                                if (data.status == 0) {
-                                                    toastr.success(data.success, 'Success!', {
-                                                        positionClass: 'toast-bottom-center',
-                                                        containerId: 'toast-bottom-center'
-                                                    });
-                                                } else {
-                                                    toastr.error(data.error, 'Error!', {
-                                                        positionClass: 'toast-top-center',
-                                                        containerId: 'toast-top-center'
-                                                    });
-                                                }
-                                                selected_rows = [];
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                selected_rows = [];
 
-                                                table.rows().deselect();
-                                                $('#CloseReasonModal').modal('hide');
+                                table.rows().deselect();
+                                $('#CloseReasonModal').modal('hide');
 
-                                                table.draw('false');
-                                                swal.close();
-                                            });
-                                    }
-                                });
+                                table.draw('false');
+                                swal.close();
+                            });
+                    }
+                });
             }
             $('#star_shippers_filter').on('click',function () {
                 $('#star_shippers_filter').val(1);
