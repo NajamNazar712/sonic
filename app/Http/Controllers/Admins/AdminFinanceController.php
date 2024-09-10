@@ -18720,7 +18720,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $valid = FALSE;
                 }
             }
-
+            if($shipment->packaging_material_request && $type == 3){
+                $valid = FALSE;
+            }
             if ($valid) {
                 if($sms_charges_status == 1) {
                     $shipment_sms_count = 0;
