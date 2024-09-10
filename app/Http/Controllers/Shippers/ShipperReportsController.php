@@ -114,13 +114,11 @@ class ShipperReportsController extends Controller
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'cj.shipper_status_id')
             ->leftJoin('pending_payment_shipments as pps', function ($join) use ($connection) {
                 $join->on('pps.shipment_id', '=', 'shipments.id')
-                    ->where('pps.id', '=',
-                        DB::connection($connection)->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id and pending_payment_shipments.type != 2)'));
+                    ->where('pps.type', '!=',2 );
             })
             ->leftJoin('done_payment_shipments as dps', function ($join) use ($connection) {
                 $join->on('dps.shipment_id', '=', 'shipments.id')
-                    ->where('dps.id', '=',
-                        DB::connection($connection)->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id and done_payment_shipments.type != 2)'));
+                    ->where('dps.type', '!=',2 );
             })
             ->leftjoin('shipment_items as si', function ($join) use ($connection) {
                 $join->on('si.shipment_id', '=', 'shipments.id')
@@ -130,13 +128,11 @@ class ShipperReportsController extends Controller
             ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
             ->leftJoin('pending_invoice_shipments as pis', function ($join) use ($connection) {
                 $join->on('pis.shipment_id', '=', 'shipments.id')
-                    ->where('pis.id','=',
-                        DB::connection($connection)->raw('(select max(id) from pending_invoice_shipments where pending_invoice_shipments.shipment_id = shipments.id and pending_invoice_shipments.type != 2)'));
+                    ->where('pis.type', '!=',2 );
             })
             ->leftJoin('invoice_shipments as is', function ($join) use ($connection) {
                 $join->on('is.shipment_id', '=', 'shipments.id')
-                    ->where('is.id','=',
-                        DB::connection($connection)->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id and invoice_shipments.type != 2)'));
+                    ->where('is.type', '!=',2 );
             })
             ->leftJoin('shipment_order_dates as sod', 'shipments.id', '=', 'sod.shipment_id')
             ->leftJoin('shipment_shipper_references as ssr', 'shipments.id', '=', 'ssr.shipment_id');
