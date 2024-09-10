@@ -112,32 +112,16 @@ class ShipperReportsController extends Controller
             ->leftJoin('shipment_status_reason as ssreason', 'ssreason.id', '=', 'cj.status_reason_id')
 
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'cj.shipper_status_id')
-            ->leftJoin('pending_payment_shipments as pps', function ($join) use ($connection) {
-                $join->on('pps.shipment_id', '=', 'shipments.id')
-                    ->where('pps.id', '=',
-                        DB::connection($connection)->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id and pending_payment_shipments.type != 2)'));
-            })
-            ->leftJoin('done_payment_shipments as dps', function ($join) use ($connection) {
-                $join->on('dps.shipment_id', '=', 'shipments.id')
-                    ->where('dps.id', '=',
-                        DB::connection($connection)->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id and done_payment_shipments.type != 2)'));
-            })
+            ->leftJoin(DB::raw("(SELECT shipment_id, SUM(amount) as p_total_amount, SUM(gst) as p_gst, SUM(charges) as p_total_charges, SUM(payable) as p_net_payable, SUM(sms_charges) as pps_sms_charges FROM pending_payment_shipments WHERE type != 2 GROUP BY shipment_id) as pps"), function($join) { $join->on('pps.shipment_id', '=', 'shipments.id'); })
+            ->leftJoin(DB::raw("(SELECT shipment_id, SUM(amount) as d_collection_amount, SUM(gst) as d_gst, SUM(charges) as d_total_charges, SUM(payable) as d_net_payable, SUM(sms_charges) as dps_sms_charges, done_payment_id as payment_id FROM done_payment_shipments WHERE type != 2 GROUP BY shipment_id) as dps"), function($join) { $join->on('dps.shipment_id', '=', 'shipments.id'); })
             ->leftjoin('shipment_items as si', function ($join) use ($connection) {
                 $join->on('si.shipment_id', '=', 'shipments.id')
                     ->where('si.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
             })
             ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
-            ->leftJoin('pending_invoice_shipments as pis', function ($join) use ($connection) {
-                $join->on('pis.shipment_id', '=', 'shipments.id')
-                    ->where('pis.id','=',
-                        DB::connection($connection)->raw('(select max(id) from pending_invoice_shipments where pending_invoice_shipments.shipment_id = shipments.id and pending_invoice_shipments.type != 2)'));
-            })
-            ->leftJoin('invoice_shipments as is', function ($join) use ($connection) {
-                $join->on('is.shipment_id', '=', 'shipments.id')
-                    ->where('is.id','=',
-                        DB::connection($connection)->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id and invoice_shipments.type != 2)'));
-            })
+            ->leftJoin(DB::raw("(SELECT shipment_id, SUM(gst) as pis_gst, SUM(sms_charges) as pis_sms_charges FROM pending_invoice_shipments WHERE type != 2 GROUP BY shipment_id) as pis"), function($join) { $join->on('pis.shipment_id', '=', 'shipments.id'); })
+            ->leftJoin(DB::raw("(SELECT shipment_id,invoice_id, SUM(gst) as is_gst, SUM(sms_charges) as is_sms_charges FROM invoice_shipments WHERE type != 2 GROUP BY shipment_id) as invoice_summary"), function($join) { $join->on('invoice_summary.shipment_id', '=', 'shipments.id'); })
             ->leftJoin('shipment_order_dates as sod', 'shipments.id', '=', 'sod.shipment_id')
             ->leftJoin('shipment_shipper_references as ssr', 'shipments.id', '=', 'ssr.shipment_id');
 
@@ -191,7 +175,7 @@ class ShipperReportsController extends Controller
             });
         }
 
-        $sales->select('p.product_name as product_name', 'ssreason.name as reason_name', 'si.description as description', 'shipments.tracking_number', 'shipments.order_id as order_id', 'u.id as account_no', 'u.name as shipper', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.charges as p_total_charges','pps.amount as p_total_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'dps.amount as d_collection_amount', 'sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor', 'dps.done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status', 'shipments.chargeable_weight', 'shipments.insurance_charges', 'shipments.packaging_material_charges', 'shipments.fuel_surcharge', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.try_and_buy_charges', 'shipments.nsa_osa_charges', 'shipments.gst', 'shipments.intercept_charges', 'shipments.packaging_charges', 'pps.payable as p_net_payable', 'dps.charges as d_total_charges','dps.payable as d_net_payable', 'pps.gst as p_gst', 'dps.gst as d_gst','u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','usi.pickup_address as pickup_address','dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'spjpaid_date.created_at as paid_date','spjproceed_date.created_at as processed_date','si.quantity as item_quantity','shipments.pieces as pieces')
+        $sales->select('p.product_name as product_name', 'ssreason.name as reason_name', 'si.description as description', 'shipments.tracking_number', 'shipments.order_id as order_id', 'u.id as account_no', 'u.name as shipper', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.p_total_charges','pps.p_total_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'dps.d_collection_amount', 'sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor', 'dps.payment_id', 'shipments.shipper_status_id as shipment_status', 'shipments.chargeable_weight', 'shipments.insurance_charges', 'shipments.packaging_material_charges', 'shipments.fuel_surcharge', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.try_and_buy_charges', 'shipments.nsa_osa_charges', 'shipments.gst', 'shipments.intercept_charges', 'shipments.packaging_charges', 'pps.p_net_payable', 'dps.d_total_charges','dps.d_net_payable', 'pps.p_gst', 'dps.d_gst','u.account_type_id as account_type_id', 'pis.pis_gst', 'invoice_summary.is_gst','usi.pickup_address as pickup_address','dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'spjpaid_date.created_at as paid_date','spjproceed_date.created_at as processed_date','si.quantity as item_quantity','shipments.pieces as pieces')
             ->whereNotIn('shipments.shipper_status_id', [1, 17]);
 
         if (session('user_type') == 2) {
