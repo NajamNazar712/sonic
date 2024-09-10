@@ -273,7 +273,7 @@ class ShipmentsJourneyController extends Controller
             if ($crm_request && $crm_request->case_nature_id == 1) { //against complaint only.
                 $shipperName = User::find(Shipment::where('id', $shipment_id)->select('user_id')->first()->user_id)->name;
                 
-                if ($crm_request->status_id == 2 && $crm_request->case_nature_type == 37) {//if crm request is in_process and case nature type is Delay in return id == 37
+                if ($crm_request->status_id == 2 && $crm_request->case_nature_type_id == 37) {//if crm request is in_process and case nature type is Delay in return id == 37
                     CrmRequest::where('id', $crm_request->id)->update([
                         'status_id' => 4 // Closed status
                     ]);
