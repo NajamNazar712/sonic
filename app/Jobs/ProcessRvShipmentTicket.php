@@ -123,8 +123,8 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     $new->save();
                 }
                 //Job implementation for the bot call.                
-                // dispatch(new BotCallDispatch($this->shipment['shipment_id']));
-                dispatch(new BotCallDispatch($this->shipment['shipment_id']))->onConnection('jobs_2');      
+                dispatch(new BotCallDispatch($this->shipment['shipment_id']));
+                // dispatch(new BotCallDispatch($this->shipment['shipment_id']))->onConnection('jobs_2');      
             }
 
         }
