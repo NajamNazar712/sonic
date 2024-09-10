@@ -40,8 +40,8 @@ class AdminRevenueReportsController extends Controller
         $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('created_at', '>=', $from)->first()->id;
 
         $to_id = DB::table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->first()->id;
-
-        $sales = DB::connection('reports')->table('shipments_journey as sj')
+        $connection = 'reports';
+        $sales = DB::connection($connection)->table('shipments_journey as sj')
             ->join('shipments', 'shipments.id', 'sj.shipment_id')
             ->leftJoin('users as u', 'u.id', '=', 'shipments.user_id')
             ->leftjoin('segments as seg', 'seg.id', '=', 'u.segment_id')
@@ -67,27 +67,23 @@ class AdminRevenueReportsController extends Controller
                         DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id and delivery_note_shipments.status > 3 and  delivery_note_shipments.status != 8)'));
             })
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-            ->leftJoin('pending_payment_shipments as pps', function ($join) {
+            ->leftJoin('pending_payment_shipments as pps', function ($join) use ($connection) {
                 $join->on('pps.shipment_id', '=', 'shipments.id')
-                    ->where('pps.id', '=',
-                        DB::connection('reports')->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id and pending_payment_shipments.type != 2)'));
+                    ->where('pps.type', '!=',2 );
             })
-            ->leftJoin('done_payment_shipments as dps', function ($join) {
+            ->leftJoin('done_payment_shipments as dps', function ($join) use ($connection) {
                 $join->on('dps.shipment_id', '=', 'shipments.id')
-                    ->where('dps.id', '=',
-                        DB::connection('reports')->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id and done_payment_shipments.type != 2)'));
+                    ->where('dps.type', '!=',2 );
             })
-            ->leftJoin('pending_invoice_shipments as pis', function ($join) {
+            ->leftJoin('pending_invoice_shipments as pis', function ($join) use ($connection) {
                 $join->on('pis.shipment_id', '=', 'shipments.id')
-                    ->where('pis.id', '=',
-                        DB::connection('reports')->raw('(select max(id) from pending_invoice_shipments where pending_invoice_shipments.shipment_id = shipments.id and pending_invoice_shipments.type != 2)'));
+                    ->where('pis.type', '!=',2 );
             })
-            ->leftJoin('invoice_shipments as is', function ($join) {
+            ->leftJoin('invoice_shipments as is', function ($join) use ($connection) {
                 $join->on('is.shipment_id', '=', 'shipments.id')
-                    ->where('is.id', '=',
-                        DB::connection('reports')->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id and invoice_shipments.type != 2)'));
+                    ->where('is.type', '!=',2 );
             })
-            ->select('shipments.tracking_number', 'u.id as account_no', 'bc.name as buisness_category', 'u.name as shipper', 'shipments.order_id as order_id', 'ss.name as current_status', 'sps.name as payment_status', 'dps.done_payment_id as payment_number', 'dnsdn.station_deposit_note_id as sdn_number', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'z.name as zone', 'zcc.class', 'sm.mode as shipping_mode', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.chargeable_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.packaging_material_charges', 'shipments.fuel_surcharge', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.packaging_charges', 'shipments.try_and_buy_charges', 'shipments.nsa_osa_charges', 'shipments.intercept_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'shipments.amount as s_collection_amount', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sj.created_at as delivered_or_returned', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'sj.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'seg.name as segment', 'seg_sub.name as sub_segment')
+            ->select('shipments.tracking_number','u.id as account_no','bc.name as buisness_category','u.name as shipper','shipments.order_id as order_id','ss.name as current_status','sps.name as payment_status','dps.done_payment_id as payment_number','dnsdn.station_deposit_note_id as sdn_number','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','z.name as zone','zcc.class','sm.mode as shipping_mode','pps.amount as p_collection_amount','shipments.actual_weight','shipments.chargeable_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.packaging_material_charges','shipments.fuel_surcharge','shipments.return_charges','shipments.replacement_charges','shipments.packaging_charges','shipments.try_and_buy_charges','shipments.nsa_osa_charges','shipments.intercept_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','shipments.amount as s_collection_amount','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable','sj.created_at as delivered_or_returned','oc.id as origin_city_id','dc.id as destination_city_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','u.account_type_id as account_type_id','pis.gst as pis_gst','is.gst as is_gst','sj.shipper_status_id as dr_status_id','shipments.shipment_type','seg.name as segment','seg_sub.name as sub_segment')
             ->whereIn('sj.shipper_status_id', [14,20,30,36,37])
             ->where('sj.verification', '=', 1)
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
@@ -95,6 +91,7 @@ class AdminRevenueReportsController extends Controller
             ->whereBetween('sj.created_at', [$from, $to])
             ->where('sj.id', '>=', $from_id)
             ->where('sj.id', '<=', $to_id)
+            ->groupBy('shipments.id')
             ->get();
 
 
