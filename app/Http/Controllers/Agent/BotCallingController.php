@@ -136,7 +136,7 @@ class BotCallingController extends Controller
                         'call_status_type' => 'Connected',
                     ], // manual
                 ];
-                DB::table('api_logs')->insert([
+                DB::table('api_zong_logs')->insert([
                     'name' => 'zong',
                     'api_request' => json_encode($request->all()), // log the request data
                     'status_code' => 200,
@@ -198,7 +198,7 @@ class BotCallingController extends Controller
                     ];
                 }
             } else {
-                DB::table('api_logs')->insert([
+                DB::table('api_zong_logs')->insert([
                     'name' => 'zong',
                     'api_request' => json_encode($request->all()), // log the request data
                     'status_code' => 200,
@@ -211,9 +211,10 @@ class BotCallingController extends Controller
             }
             return response()->json(['status' => 1, 'message' => $data]);
         } catch (\Throwable $th) {
-            DB::table('api_logs')->insert([
+            DB::table('api_zong_logs')->insert([
                 'name' => 'zong',
-                'api_request' => json_encode($request->all() .'error'. $th->getMessage()), // log the request data
+                'api_request' => json_encode($request->all()), // log the request data
+                'error' => json_encode($th->getMessage()), // log the request data
                 'status_code' => 400,
                 'created_at' => now(),
             ]);

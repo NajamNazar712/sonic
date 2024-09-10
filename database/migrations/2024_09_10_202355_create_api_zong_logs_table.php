@@ -17,6 +17,7 @@ class CreateApiZongLogsTable extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->json('api_request')->nullable();
+            $table->json('error')->nullable();
             $table->integer('status_code');
             $table->ipAddress('ip_address')->nullable();
             $table->timestamp('created_at')->useCurrent();
