@@ -169,7 +169,7 @@ class BotCallingController extends Controller
                     if ($data['status'] == 1) { //data add successfully
                         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->latest()->first();
 
-                        if ($request->input < 1) {
+                        if ($request->input == 0) {
                             unset($data['message']['rv_agent_call_history_record_id']);
 
                             // if (RvShipmentAssignAgent::join('rv_shipment_tickets as rst', 'rst.shipment_id', 'rv_shipment_assign_agents.shipment_id')->where('rv_shipment_assign_agents.unresponsive_count', 1)->where('rv_shipment_assign_agents.shipment_id', $findShipmentId->id)->exists()) {
