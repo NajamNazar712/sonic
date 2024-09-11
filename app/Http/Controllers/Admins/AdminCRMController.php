@@ -1565,7 +1565,7 @@ class AdminCRMController extends Controller
                         }
                     }
                     else {
-                        $launched = Carbon::parse($requests->created_at);
+                        $launched = Carbon::parse($requests->created_at)->startOfDay();
                         $first_closed = CrmRequestStatusHistory::where('crm_request_id', $requests->id)->where('status_id' ,4)->first();
                         if($first_closed){
                             $current = $first_closed->created_at;
@@ -1579,6 +1579,7 @@ class AdminCRMController extends Controller
                         $to_formatted = date($time_format, strtotime($time_to->setting_value));
                         $cut_off_check = $requests->created_at->format($time_format);
                         $current_tat = $current->diffInWeekdays($launched);
+
                         $launched_check = $launched->toDateString();
                         $current_check = $current->toDateString();
                         if($launched_check <= $current_check){
@@ -1604,7 +1605,19 @@ class AdminCRMController extends Controller
                             }
                         }
                     }
-                    return $current_tat;
+
+                    if($current_tat >= 0 && $current_tat <= 1)
+                    {
+                        return $current_tat.' Day';
+                    }
+                    else if($current_tat > 1 && $current_tat <= 5)
+                    {
+                        return $current_tat.' Days';
+                    }
+                    else{
+                        return '5+ Days';
+                    }
+
                 }
                 return "-";
             })
@@ -1813,18 +1826,12 @@ class AdminCRMController extends Controller
                 }
                 return $responsible_zone;
             })
-            ->addColumn('arrival_date', function ($request)use($current_date) {
-//                dd($request);
-                return ($request->arrival_date && $current_date) ? with((new Carbon($request->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
-                        $date->isSunday();
-                    }, $current_date)) : '-';
-            })
-            ->addColumn('arrival_today', function ($requests)use($current_date) {
+            ->editColumn('arrival_today', function ($requests)use($current_date) {
                 return ($requests->arrival_date && $current_date) ? with((new Carbon($requests->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($requests->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
                         $date->isSunday();
                     }, $current_date)) : '-';
             })
-            ->addColumn('last_status_today', function ($request)use($current_date) {
+            ->editColumn('last_status_today', function ($request)use($current_date) {
                 return ($request->last_status_today && $current_date) ? with((new Carbon($request->last_status_today, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->last_status_today, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
                         $date->isSunday();
                     }, $current_date)) : '-';
@@ -2239,7 +2246,18 @@ class AdminCRMController extends Controller
                         }
                     }
 
-                    return $current_tat;
+                    if($current_tat >= 0 && $current_tat <= 1)
+                    {
+                        return $current_tat.' Day';
+                    }
+                    else if($current_tat > 1 && $current_tat <= 5)
+                    {
+                        return $current_tat.' Days';
+                    }
+                    else{
+                        return '5+ Days';
+                    }
+
                 }
                 return "-";
             })
@@ -2602,17 +2620,13 @@ class AdminCRMController extends Controller
                     $responsible_zone = '-';
                 }
                 return $responsible_zone;
-            })  ->addColumn('arrival_date', function ($request)use($current_date) {
-                return ($request->arrival_date && $current_date) ? with((new Carbon($request->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
-                        $date->isSunday();
-                    }, $current_date)) : '-';
             })
-            ->addColumn('arrival_today', function ($requests)use($current_date) {
+            ->editColumn('arrival_today', function ($requests)use($current_date) {
                 return ($requests->arrival_date && $current_date) ? with((new Carbon($requests->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($requests->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
                         $date->isSunday();
                     }, $current_date)) : '-';
             })
-            ->addColumn('last_status_today', function ($request)use($current_date) {
+            ->editColumn('last_status_today', function ($request)use($current_date) {
                 return ($request->last_status_today && $current_date) ? with((new Carbon($request->last_status_today, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->last_status_today, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
                         $date->isSunday();
                     }, $current_date)) : '-';
@@ -2700,10 +2714,7 @@ class AdminCRMController extends Controller
                     ->where('crm_requests.launched_by', '=', DB::raw(4));
             })
             ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->leftjoin('shipments_journey as sj', function ($join){
-                $join->on('sj.shipment_id', '=', 's.id')
-                    ->where('sj.shipper_status_id',2);
-            })
+
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
             ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
             ->leftjoin('users as user', 'user.id', '=', 'crm_requests.shipper_id')
@@ -2766,7 +2777,11 @@ class AdminCRMController extends Controller
             ->leftjoin('admins as ad1', 'ad1.id', '=', 'crm_requests.agent_id')
             ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
             ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
-            ->select('at.name as tagged_to','at.name as tagged_admin', 'adp.name as tagged_department','crt.crm_request_tagging_type_id as crm_request_tagging_type_id','crth.created_at as tagged_date','sj.created_at as arrival', 'crm_requests.id as id', 's.tracking_number as tracking_number','s.amount as cod_amount', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name','oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'ra.name as resolved_by', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id','crm_requests.description as descr','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','crsh.created_at as reopen_date', 'at.id as tagged_to_id','crm_requests.shipment_id', 'dh.name as hub', 'z.name as zone','ss.id as shipment_status_id','sts.status as star_status','s.parcel_value as parcel_value','s.amount as cod_value','seg.name as segment','s.actual_weight as actual_weight','ad1.name as sale_person','ad2.name as kae','s.updated_at as last_status_today', 'last_status_upd_by.name as last_status_updated_by' ,'ca.name as sub_hub', 'resby.name as agent_assigned_by','crm_requests.updated_at as last_status_date', 'sj.updated_at as arrival_date' )
+            ->leftjoin('shipments_journey as sj', function ($join){
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.shipper_status_id',2);
+            })
+            ->select('at.name as tagged_to','at.name as tagged_admin', 'adp.name as tagged_department','crt.crm_request_tagging_type_id as crm_request_tagging_type_id','crth.created_at as tagged_date', 'crm_requests.id as id', 's.tracking_number as tracking_number','s.amount as cod_amount', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as resolved_date', 'ss.name as status', 'user.name as shipper_name','oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'ra.name as resolved_by', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id','crm_requests.description as descr','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','crsh.created_at as reopen_date' ,'sj.created_at as arrival' ,'sj.updated_at as arrival_date', 'at.id as tagged_to_id','crm_requests.shipment_id', 'dh.name as hub', 'z.name as zone','ss.id as shipment_status_id','sts.status as star_status','s.parcel_value as parcel_value','s.amount as cod_value','seg.name as segment','s.actual_weight as actual_weight','ad1.name as sale_person','ad2.name as kae','s.updated_at as last_status_today', 'last_status_upd_by.name as last_status_updated_by' ,'ca.name as sub_hub', 'resby.name as agent_assigned_by','crm_requests.updated_at as last_status_date')
             ->where('crm_requests.status_id', 3)
             ->groupBy('crm_requests.id');
 
@@ -3022,7 +3037,6 @@ class AdminCRMController extends Controller
                 }
             })
             ->orderColumn('last_comment_name', DB::raw('IF (ccs.comment_by = 0, accs.name, IF (ccs.comment_by = 1, uccs.name, ""))') . ' $1')
-
             ->editColumn('last_comment', function($requests){
                 if($requests->last_comment != null){
                     return $requests->last_comment;
@@ -3244,13 +3258,13 @@ class AdminCRMController extends Controller
                 }
                 return $responsible_zone;
             })
-            ->addColumn('arrival_today', function ($requests)use($current_date) {
-                return ($requests->arrival_date && $current_date) ? with((new Carbon($requests->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($requests->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+            ->editColumn('arrival_today', function ($request)use($current_date) {
+                return ($request->arrival_date && $current_date) ? with((new Carbon($request->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
                         $date->isSunday();
                     }, $current_date)) : '-';
             })
 
-            ->addColumn('last_status_today', function ($request)use($current_date) {
+            ->editColumn('last_status_today', function ($request)use($current_date) {
                 return ($request->last_status_today && $current_date) ? with((new Carbon($request->last_status_today, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->last_status_today, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
                         $date->isSunday();
                     }, $current_date)) : '-';
@@ -3354,7 +3368,18 @@ class AdminCRMController extends Controller
                         }
                     }
 
-                    return $current_tat;
+                    if($current_tat >= 0 && $current_tat <= 1)
+                    {
+                        return $current_tat.' Day';
+                    }
+                    else if($current_tat > 1 && $current_tat <= 5)
+                    {
+                        return $current_tat.' Days';
+                    }
+                    else{
+                        return '5+ Days';
+                    }
+
                 }
                 return "-";
             })

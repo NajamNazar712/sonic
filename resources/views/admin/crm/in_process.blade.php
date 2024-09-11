@@ -763,7 +763,7 @@
                     {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'}, // Key account category
                     {data: 'kae', name: 'ad2.name', class: 'align-middle kae'}, // KAE
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},                      // Launched By
-                    {data: 'added_by', name: 'added_by', class: 'align-middle added_by'},                  // Launched By Type
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},                  // Launched By Type
                     {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'}, //Tagged To Operation
                     {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'}, // Manual Tagged To
                     {data: 'tagged_department', name: 'adp.name', class: 'align-middle tagged_department'}, // Tagged (Admin/Department)

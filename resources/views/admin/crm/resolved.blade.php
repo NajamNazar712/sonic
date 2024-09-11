@@ -747,7 +747,7 @@
                     {data: 'hub', name: 'hub', class: 'align-middle hub', orderable: false, searchable: false}, // Hub
                     {data: 'zone', name: 'zone', class: 'align-middle zone', orderable: false, searchable: false}, // Zone
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'}, // Arrival Date
-                    {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today'}, // Arrival to Today (TAT)
+                    {data: 'arrival_today', name: 'sj.updated_at', class: 'align-middle arrival_today', orderable: false, searchable: false}, // Arrival to Today (TAT)
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'}, // Shipment Status
                     {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'}, // Last Status Date
                     {data: 'last_status_today', name: 's.updated_by', class: 'align-middle last_status_today'}, // Last Status to Today (TAT)
