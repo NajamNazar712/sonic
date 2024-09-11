@@ -8362,6 +8362,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $shipment->save();
 
                         ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
+                    } else if ($done_payment_shipment->type == 3) {
+                        $shipment->payment_status_id = 9;
+
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 9, Auth::id(), '', $done_payment->id);
                     } else {
                         $shipment->payment_status_id = 3;
 
