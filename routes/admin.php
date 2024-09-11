@@ -3651,6 +3651,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('sub_area', 'AdminShipmentHandoverController@sub_area')->name('sub_area');
 
             Route::get('unique_bag_number', 'AdminShipmentHandoverController@unique_bag_number')->name('unique_bag_number');
+
+            Route::get('check_bag_type', 'AdminShipmentHandoverController@check_bag_type')->name('check_bag_type');
         });
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');

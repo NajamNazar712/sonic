@@ -1254,7 +1254,53 @@ class AdminShipmentHandoverController extends Controller
       $bag_number = $request->bag_number;
       $stored_bag_numbers = Handover::whereNotNull('bag_number')->pluck('bag_number');
       if ($stored_bag_numbers->contains($bag_number)) {
-        return ['status' => 1, 'error' => 'Bag Number should be unique'];
+        return ['status' => 1, 'error' => 'This bag number already exists.'];
+      }
+    }
+
+    public function check_bag_type(Request $request)
+    {
+      $selected_bag_type = $request->selected_bag_type;
+      $tracking_number = $request->tracking_number;
+
+      $shipment = Shipment::where('tracking_number', $tracking_number)
+      ->select('id')
+      ->first();
+
+      // Check if the shipment exists
+      if (!$shipment) {
+        return ['status' => 1, 'error' => 'Shipment not found.'];
+      }
+
+      $normal_status_ids = [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+        11, 12, 13, 14, 15, 17, 19, 49, 
+        50, 51, 52, 53, 54, 55, 56,
+        58, 59, 61, 62, 65, 67, 68
+      ];
+
+      $return_status_ids = [
+        18, 20, 21, 22, 23, 24, 25, 26, 
+        27, 28, 29, 30, 31, 32, 33, 34,
+        35, 36, 37, 38, 44, 45, 46, 47,
+        48, 51, 56, 57
+      ];
+
+      // normal shipments
+      if ($selected_bag_type == 1){
+        $allowed_status_ids = $normal_status_ids;
+      } 
+      // return shipments
+      else {
+        $allowed_status_ids = $return_status_ids;
+      }
+      $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
+      ->latest('created_at')
+      ->select('shipper_status_id')
+      ->first();
+
+      if ($shipment_journey && !in_array($shipment_journey->shipper_status_id, $allowed_status_ids)) {
+        return ['status' => 1, 'error' => 'Shipment type is not correct.'];
       }
     }
 }
