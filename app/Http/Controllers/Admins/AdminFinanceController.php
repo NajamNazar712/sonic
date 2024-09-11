@@ -7883,7 +7883,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -7976,6 +7976,13 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ->editColumn('adjusted_shipments', function ($done_payment) {
                 if ($done_payment->adjusted_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->adjusted_shipments . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->editColumn('arrival_shipment', function ($done_payment) {
+                if ($done_payment->arrival_shipment != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->arrival_shipment . '</button>';
                 } else {
                     return 0;
                 }
@@ -8658,6 +8665,20 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         $tracking_numbers = array();
 
         $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 2)->get();
+
+        foreach ($done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+    public function done_payments_arrival_shipment(Request $request)
+    {
+        $tracking_numbers = array();
+
+        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 3)->get();
 
         foreach ($done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
