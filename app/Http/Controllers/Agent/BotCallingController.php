@@ -136,15 +136,15 @@ class BotCallingController extends Controller
                         'call_status_type' => 'Connected',
                     ], // manual
                 ];
+                
+                $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->whereIn('rv_state_id', [1, 3])->latest()->first();
+                $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => $array[$request->input]['call_finding_id'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1, 'call_to_id' => 1, 'call_status' => $array[$request->input]['call_status_type'],'end_date' => $request->end_date]);
                 DB::table('api_zong_logs')->insert([
                     'name' => 'zong',
                     'api_request' => json_encode($request->all()), // log the request data
                     'status_code' => 200,
                     'created_at' => now(),
                 ]);
-                $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->whereIn('rv_state_id', [1, 3])->latest()->first();
-                $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => $array[$request->input]['call_finding_id'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1, 'call_to_id' => 1, 'call_status' => $array[$request->input]['call_status_type'],'end_date' => $request->end_date]);
-
                 // if($shipment_assign_agent){
                 if ($request->input > 0) {
                     $status = new RvAgentCallHistory();
@@ -169,7 +169,7 @@ class BotCallingController extends Controller
                     if ($data['status'] == 1) { //data add successfully
                         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->latest()->first();
 
-                        if ($request->input < 1) {
+                        if ($request->input == 0) {
                             unset($data['message']['rv_agent_call_history_record_id']);
 
                             // if (RvShipmentAssignAgent::join('rv_shipment_tickets as rst', 'rst.shipment_id', 'rv_shipment_assign_agents.shipment_id')->where('rv_shipment_assign_agents.unresponsive_count', 1)->where('rv_shipment_assign_agents.shipment_id', $findShipmentId->id)->exists()) {

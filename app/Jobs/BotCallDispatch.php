@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 class BotCallDispatch implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    
 
     protected $shipmentId;
 
@@ -31,7 +32,7 @@ class BotCallDispatch implements ShouldQueue
         $this->shipmentId = $data;
 
     }
-
+        
     /**
      * Execute the job.
      *
