@@ -1720,6 +1720,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('delivered_shipments', 'Admins\AdminFinanceController@done_payments_delivered_shipments')->name('delivered_shipments');
             Route::post('returned_shipments', 'Admins\AdminFinanceController@done_payments_returned_shipments')->name('returned_shipments');
             Route::post('adjusted_shipments', 'Admins\AdminFinanceController@done_payments_adjusted_shipments')->name('adjusted_shipments');
+            Route::post('arrival_shipment', 'Admins\AdminFinanceController@done_payments_arrival_shipment')->name('arrival_shipment');
             Route::post('details_print', 'Admins\AdminFinanceController@done_payments_details_print')->name('details_print');
             Route::post('details', 'Admins\AdminFinanceController@done_payments_details')->name('details');
             Route::put('update_details', 'Admins\AdminFinanceController@done_payments_update_details')->name('update_details');
