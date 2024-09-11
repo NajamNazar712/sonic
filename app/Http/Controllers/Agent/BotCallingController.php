@@ -15,6 +15,7 @@ use App\Jobs\BotCallDispatch;
 use App\Jobs\BotCallDispatchSecod;
 use App\RvAgentCallHistory;
 use App\RvAssignAgentSubStatus;
+use App\RvCronLog;
 use App\RvShipmentAgent;
 use App\RvShipmentTicket;
 use Carbon\Carbon;
@@ -136,14 +137,16 @@ class BotCallingController extends Controller
                         'call_status_type' => 'Connected',
                     ], // manual
                 ];
-                
-                $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->whereIn('rv_state_id', [1, 3])->latest()->first();
-                $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => $array[$request->input]['call_finding_id'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1, 'call_to_id' => 1, 'call_status' => $array[$request->input]['call_status_type'],'end_date' => $request->end_date]);
                 DB::table('api_zong_logs')->insert([
                     'name' => 'zong',
                     'api_request' => json_encode($request->all()), // log the request data
                     'status_code' => 200,
                     'created_at' => now(),
+                ]);
+                $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->whereIn('rv_state_id', [1, 3])->latest()->first();
+                $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => $array[$request->input]['call_finding_id'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1, 'call_to_id' => 1, 'call_status' => $array[$request->input]['call_status_type'],'end_date' => $request->end_date]);
+                RvCronLog::create([
+                    'message' => json_encode($request->all()),
                 ]);
                 // if($shipment_assign_agent){
                 if ($request->input > 0) {
