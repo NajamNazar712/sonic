@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Http\Controllers\Webhook\WebhookLogController;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Shipment;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
@@ -19,7 +18,6 @@ class BotCallDispatch implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     
-    // public $queue = 'queue_1';
 
     protected $shipmentId;
 
