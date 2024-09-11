@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Shipment;
 use App\RvShipmentAgent;
+use Illuminate\Support\Facades\Bus;
 
 class ProcessRvShipmentTicket implements ShouldQueue
 {
@@ -122,9 +123,13 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     $new->actual_productivity = 0;
                     $new->save();
                 }
-                //Job implementation for the bot call.                
+                //Job implementation for the bot call.  
+                // $job = new BotCallDispatch($this->shipment['shipment_id']); // Assuming SomeJob takes parameters
+                // dispatchNow($job); 
+                // Bus::dispatchNow(new BotCallDispatch($this->shipment['shipment_id']));
+             
                 dispatch(new BotCallDispatch($this->shipment['shipment_id']));
-                // dispatch(new BotCallDispatch($this->shipment['shipment_id']))->onConnection('jobs_2');      
+                   
             }
 
         }

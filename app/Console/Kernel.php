@@ -149,6 +149,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\NotificationReturnedDeliveredToShipper',
         // 'App\Console\Commands\AgentUnassignedTicket ',
         'App\Console\Commands\AgentSarNotification',
+        'App\Console\Commands\BotCallInitiate',
         'App\Console\Commands\SackBagStatusUpdate',
         'App\Console\Commands\AutoAssignCrmAgentNew',
         // 'App\Console\Commands\ShipperLogisticBookingCron',
@@ -242,6 +243,12 @@ class Kernel extends ConsoleKernel
         $schedule->command('agent:sarnotification')->dailyAt($agent_sar_notify_time)->runInBackground();
 
         //rv agent cron jobs end
+
+        // rv cron job for the call
+        // if(GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists())
+        // {
+            $schedule->command('agent:botcallunresponsive')->everyTwoHours()->runInBackground();
+        // }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
