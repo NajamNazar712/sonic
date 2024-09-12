@@ -399,10 +399,10 @@
                                 row.push(values.shipper_category); // Key Account Category
                                 row.push(values.kae); // KAE
                                 row.push(values.launched_by_name); // Launched By
-                                row.push(values.added_by); // Launched By Type
+                                row.push(values.tagged); // Launched By Type
                                 row.push(values.tagged_to_operation); // Auto Tagged to Operation
                                 row.push(values.tagged_to_manual); // Manual Tagged To
-                                row.push(values.tagged_department); // Tagged (Admin/Department)
+                                row.push(values.added_by); // Tagged (Admin/Department)
                                 row.push(values.last_comment_by); // Last Comment By
                                 row.push(values.last_comment); // Last Comment
                                 row.push(values.resolved_date); // Resolved Date
@@ -779,6 +779,7 @@
                     {data: 'resolved_date', name: 'crm_requests.created_at', class: 'align-middle resolved_date'}, // Resolved Date
                     {data: 'in_process_resolved_tat', name: 'in_process_resolved_tat', class: 'align-middle in_process_resolved_tat'}, // In Process-Resolved TAT
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+
 
                 ],
                 rowCallback: function(row, data, index) {
