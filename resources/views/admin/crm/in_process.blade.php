@@ -428,10 +428,10 @@
                                 row.push(values.shipper_category);                            // Key account category
                                 row.push(values.kae);                                        // KAE
                                 row.push(values.launched_by_name);                            // Launched By
-                                row.push(values.added_by);                                   // Launched By Type
+                                row.push(values.tagged);                                   // Launched By Type
                                 row.push(values.tagged_to_operation);                         // Tagged To Operation
                                 row.push(values.tagged_to_manual);                            // Manual Tagged To
-                                row.push(values.tagged_department);                           // Tagged (Admin/Department)
+                                row.push(values.added_by);                           // Tagged (Admin/Department)
                                 row.push(values.last_comment_name);                           // Last Comment By
                                 row.push(values.last_comment.replace(/<br>/gi, '\n'));       // Last Comment
                                 row.push(values.last_comment_date);                           // Last Comment Date

@@ -2687,6 +2687,17 @@ class AdminCRMController extends Controller
                     $query->whereNull('ad2.name');
                 }
             })
+            ->addColumn('tagged', function ($requests) {
+                if($requests->tagged_type == 1){
+                    return 'Department';
+                }
+                else if($requests->tagged_type == 2){
+                    return 'Admin';
+                }
+                else{
+                    return '-';
+                }
+            })
         ;
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
