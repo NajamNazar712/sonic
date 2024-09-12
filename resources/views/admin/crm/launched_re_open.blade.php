@@ -419,10 +419,10 @@
                                     row.push(values.shipper_category); // {data: 'shipper_category', name: 'shipper_category'}
                                     row.push(values.kae); // {data: 'kae', name: 'ad2.name'}
                                     row.push(values.launched_by_name); // {data: 'launched_by_name', name: 'launched_by_name'}
-                                    row.push(values.added_by); // {data: 'added_by', name: 'crm_requests.launched_by'}
+                                    row.push(values.tagged); // {data: 'tagged'}
                                     row.push(values.tagged_to_operation); // {data: 'tagged_to_operation', name: 'tagged_to_operation'}
                                     row.push(values.manual_tagged_to); // {data: 'tagged_to_manual', name: 'tagged_to_manual'}
-                                    row.push(values.tagged_department); // {data: 'tagged_department', name: 'adp.name'}
+                                    row.push(values.added_by); // {data: 'added_by'}
                                     row.push(values.last_comment_name); // {data: 'last_comment_name', name: 'last_comment_name'}
                                     row.push(values.last_comment.replace(/<br>/gi, '\n')); // {data: 'last_comment', name: 'ccs.comment'}
                                     body.push(row);
@@ -684,11 +684,11 @@
                     {data: 'hub', name: 'dh.name', class: 'align-middle hub'}, // Hub
                     {data: 'zone', name: 'zones', class: 'align-middle zone'}, // Zone
                     {data: 'arrival_date', name: 's.updated_at', class: 'align-middle arrival_date'}, // Arrival Date
-                    {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today'}, // Arrival to Today (TAT)
+                    {data: 'arrival_today', name: 'sj.updated_at', class: 'align-middle arrival_today'}, // Arrival to Today (TAT)
                     {data: 'shipment_status', name: 'shipment_status', class: 'align-middle shipment_status'}, // Shipment Status
                     {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'}, // Last Status Date
-                    {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false, searchable: false}, // Last status to Today (TAT)
-                    {data: 'last_status_updated_by', name: 'last_status_upd_by.name', class: 'align-middle last_status_updated_by', orderable: false, searchable: false}, // Last status by
+                    {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false}, // Last status to Today (TAT)
+                    {data: 'last_status_updated_by', name: 'last_status_upd_by.name', class: 'align-middle last_status_updated_by', orderable: false}, // Last status by
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'}, // Case Nature
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'}, // Case Nature Type
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'}, // Description
@@ -699,21 +699,22 @@
                     {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone'}, // Responsible Zone
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'}, // Agent
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'}, // Agent Assigned By
-                    {data: 'parcel_value', name: 'parcel_value', class: 'align-middle parcel_value'}, // Parcel Value
-                    {data: 'cod_value', name: 'cod_value', class: 'align-middle cod_value'}, // COD Value
+                    {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value'}, // Parcel Value
+                    {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'}, // COD Value
                     {data: 'segment', name: 'seg.name', class: 'align-middle segment'}, // Segment
                     {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight'}, // Weight
                     {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'}, // Salesperson
                     {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'}, // Key account category
                     {data: 'kae', name: 'ad2.name', class: 'align-middle kae'}, // KAE
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'}, // Launched By
-                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'}, // Launched By Type
+                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
                     {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'}, // Manual Tagged To
-                    {data: 'tagged_department', name: 'adp.name', class: 'align-middle tagged_department'}, // Tagged (Admin/Department)
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'}, // Launched By Type
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'}, // Last Comment By
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'}, // Last Comment
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -747,12 +748,23 @@
                         '<option value="4">External</option>' +
                         '</select>';
 
+                    var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
+                        '<option value="1">Department</option>' +
+                        '<option value="2">Admin</option>' +
+                        '</select>';
+
+                    var kac = '<select name="key_account" id="key_account" class="select2 form-control">' +
+                        '<option value="0">Non-Key Account</option>' +
+                        '<option value="1">Key Account</option>' +
+                        '</select>';
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat')|| $(header).is('.responsible_hub')|| $(header).is('.responsible_zone')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat')|| $(header).is('.responsible_hub')|| $(header).is('.responsible_zone')  || $(header).is('.last_status_today') || $(header).is('.arrival_today')) {
                             $(td).appendTo($(search));
+
                         }
                         else if ($(header).is('.status')) {
                             $(status).appendTo($(search))
@@ -792,6 +804,19 @@
                         }
                         else if ($(header).is('.added_by')) {
                             $(added_by).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else if ($(header).is('.tagged')) {
+                            $(tagging_type).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+
+                        else if ($(header).is('.shipper_category')) {
+                            $(kac).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -929,6 +954,19 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
+                    $('#key_account').prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    $('#tagging_type').prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Tagged Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 
                     this.api().table().columns.adjust();
                 }

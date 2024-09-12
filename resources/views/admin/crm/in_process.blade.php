@@ -742,8 +742,8 @@
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},                               // Arrival Date
                     {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today', orderable: false, searchable: false}, // Arrival to Today (TAT)
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},                               // Shipment Status
-                    {data: 'last_status_date', name: 'last_status_date', class: 'align-middle last_status_date'},          // Last Status Date
-                    {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false, searchable: false}, // Last status to Today (TAT)
+                    {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},          // Last Status Date
+                    {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false}, // Last status to Today (TAT)
                     {data: 'last_status_updated_by', name: 'last_status_upd_by.name', class: 'align-middle last_status_updated_by'},                // Last status by
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},                             // Case Nature
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},          // Case Nature Type
@@ -755,18 +755,18 @@
                     {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone', orderable: false, searchable: false}, // Responsible Zone
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},                                         // Agent
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},              // Agent Assigned By
-                    {data: 'parcel_value', name: 'parcel_value', class: 'align-middle parcel_value'},                      // Parcel Value
-                    {data: 'cod_value', name: 'cod_value', class: 'align-middle cod_value'},                              // COD Value
+                    {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value'},                      // Parcel Value
+                    {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'},                              // COD Value
                     {data: 'segment', name: 'seg.name', class: 'align-middle segment'}, // Segment
                     {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight'}, // Weight
                     {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'}, // Salesperson
                     {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'}, // Key account category
                     {data: 'kae', name: 'ad2.name', class: 'align-middle kae'}, // KAE
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},                      // Launched By
-                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},                  // Launched By Type
+                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'}, //Tagged To Operation
                     {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'}, // Manual Tagged To
-                    {data: 'tagged_department', name: 'adp.name', class: 'align-middle tagged_department'}, // Tagged (Admin/Department)
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'}, // Launched By Type
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},       // Last Comment By
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},                       // Last Comment
                     {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},          // Last Comment Date
@@ -808,11 +808,17 @@
                         '<option value="2">Admin</option>' +
                         '</select>';
 
+                    var kac = '<select name="key_account" id="key_account" class="select2 form-control">' +
+                        '<option value="0">Non-Key Account</option>' +
+                        '<option value="1">Key Account</option>' +
+                        '</select>';
+
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat') || $(header).is('.responsible_hub')|| $(header).is('.responsible_zone') ) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat') || $(header).is('.responsible_hub')|| $(header).is('.responsible_zone') || $(header).is('.last_status_today') || $(header).is('.arrival_today')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.case_nature')) {
@@ -853,6 +859,12 @@
                         }
                         else if ($(header).is('.tagged')) {
                             $(tagging_type).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else if ($(header).is('.shipper_category')) {
+                            $(kac).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -960,6 +972,15 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+                    $('#key_account').prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+
 
                     var data5 = $.map({!! $zones !!}, function (obj) {
                         obj.id = obj.id;
