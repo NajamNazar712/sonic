@@ -66,7 +66,7 @@ class AgentSarNotification extends Command
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
-                ->where('unresponsive_count', 2)
+                ->where('unresponsive_count', 3)
                 //selects older records, i.e., records that were updated more than 16 hours ago.            
                 ->where('updated_at', '>=', $nowSub16Hours)
                 ->where('unresponsive_email_count', '<', 1);
@@ -100,7 +100,7 @@ class AgentSarNotification extends Command
                 })
                 ->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 7)
                 ->where('rv_shipment_assign_agents.rv_state_id', 2)
-                ->where('rv_shipment_assign_agents.unresponsive_count', 2)
+                ->where('rv_shipment_assign_agents.unresponsive_count', 3)
                 ->where('rv_shipment_assign_agents.unresponsive_email_count', '>', 0)
                 ->where('rv_shipment_assign_agents.unresponsive_email_time', '<=', $nowSub48Hours)
                 ->select('rv_shipment_assign_agents.*') // Select only columns from rv_shipment_assign_agents
