@@ -854,8 +854,7 @@
 					{data:'total_charges', name: 'dpc.charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'dpc.gst', class: 'align-middle text-center total_gst', orderable: false},
 					{data:'total_wht', name: 'dpc.wht', class: 'align-middle text-center total_wht', orderable: false},
-					{data:'total_sms_charges', name:'dpc.sms_charges', class: 'align-middle text-center total_sms_charges', orderable: false
-                    },
+					{data:'total_sms_charges', name:'dpc.sms_charges', class: 'align-middle text-center total_sms_charges', orderable: false},
 					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'ibft_charges', name: 'done_payments.ibft_charges', class: 'align-middle text-center ibft_charges', orderable: false},
