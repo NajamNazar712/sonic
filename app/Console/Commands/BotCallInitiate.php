@@ -56,9 +56,12 @@ class BotCallInitiate extends Command
     public function handle()
     {
         try {
-            $time = Carbon::parse(now())->subHour(2)->format('Y-m-d H:i:s'); // Get the timestamp of two hours ago
+            $timeEnd = Carbon::parse(now())->subHour(2)->format('Y-m-d H:i:s'); // Get the timestamp of two hours ago
+            $timeStart = Carbon::parse($timeEnd)->subMinute(15)->format('Y-m-d H:i:s');
+
             // Now, re-initiate process for the retrieved shipment_ids after unresponsive one
-            $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $time],'unresponsive_count' => 1, 'rv_assign_agent_status_id'=>1])->pluck('shipment_id');
+            $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=',$timeStart], ['unresponsive_attempt_time', '<=', $timeEnd],'unresponsive_count' => 1, 'rv_assign_agent_status_id'=>6])->toSql();
+
             if (count($shipments) > 0) {            
                 foreach($shipments as $shipmentId){
                     if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
@@ -91,7 +94,7 @@ class BotCallInitiate extends Command
             }
 
             //  Now, re-initiate process for the retrieved shipment_ids after unresponsive two            
-            $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $time], 'unresponsive_count' =>  2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
+            $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 1, 'rv_assign_agent_status_id' => 6])->toSql();
 
             if(count($shipments) > 0){
                 foreach($shipments as $shipmentId){
