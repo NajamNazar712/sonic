@@ -7957,6 +7957,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ->addColumn('total_deductable', function ($done_payment) {
                 return number_format(($done_payment->total_charges + $done_payment->total_gst + $done_payment->total_sms_charges + $done_payment->ibft_charges - $done_payment->total_wht), 2);
             })
+            ->editColumn('total_shipments', function ($done_payment) {
+                $done_payment->total_shipments+=$done_payment->arrival_shipment_shipments_count;
+            })
             ->editColumn('delivered_shipments', function ($done_payment) {
 
 
