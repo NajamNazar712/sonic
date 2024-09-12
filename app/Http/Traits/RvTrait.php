@@ -297,12 +297,12 @@ trait RvTrait
 
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
         //if bot call is unresponsive and again status is updated to the open
-        if($request->input === 0 && $request->rv_assign_agent_status_id == 6){
-            $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 6; //set status to unresponive confirm again asign
-            $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
-            $shipment_assign_agent_table_columns['rv_state_id'] = 3;
-            return $shipment_assign_agent_table_columns; // return assign again
-        }
+        // if($request->input === 0 && $request->rv_assign_agent_status_id == 6){
+        //     $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 6; //set status to unresponive confirm again asign
+        //     $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
+        //     $shipment_assign_agent_table_columns['rv_state_id'] = 3;
+        //     return $shipment_assign_agent_table_columns; // return assign again
+        // }
         //if shipment delivery count is 3 and again status is updated to unresponsive set the shipment to return confirm
         if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count > 0 && $reattempt_count) {
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 1; //set status to return confirm
