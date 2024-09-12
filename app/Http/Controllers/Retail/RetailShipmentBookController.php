@@ -630,7 +630,8 @@ class RetailShipmentBookController extends Controller
 
 
         AdminPickupsController::generate($shipment_id);
-        NotificationsController::send(115, $tracking_number, $shipper_info->id);
+        // NotificationsController::send(115, $tracking_number, $shipper_info->id);
+        NotificationsController::send(115, $tracking_number, $retail_shipment->total_charges);
 
         $retail_reference = new RetailReference;
         $retail_reference->shipment_id = $shipment_id;
