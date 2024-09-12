@@ -81,7 +81,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
             }
 
             // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
-            $isBot = ((array_key_exists($this->shipment['status_reason_id'], array_flip([8, 5, 1, 19, 38, 52, 60, 63])) && GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists() && $this->shipment['shipment_user_id'] == 1049) ? 1 : 0);
+            $isBot = ((array_key_exists($this->shipment['status_reason_id'], array_flip([8, 5, 1, 19, 38, 52, 60, 63])) && GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists() && $this->shipment['shipment_user_id'] == 10378) ? 1 : 0);
             
             RvShipmentTicket::withTrashed()->updateOrCreate(
                 ['shipment_id' => $this->shipment['shipment_id']],
@@ -128,7 +128,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 // dispatchNow($job); 
                 // Bus::dispatchNow(new BotCallDispatch($this->shipment['shipment_id']));
              
-                dispatch(new BotCallDispatch($this->shipment['shipment_id']));
+                // dispatch(new BotCallDispatch($this->shipment['shipment_id']));
                    
             }
 
