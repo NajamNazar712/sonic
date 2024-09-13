@@ -67,7 +67,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                         $excludedShippers = array_merge($excludedShippers, explode(',', $globalSetting->text));
                         break;
                     case 'rv_disable_shippers_only_shippers':
-                        $onlyShippers = array_merge($onlyShippers, explode(',', $globalSetting->text));
+                    $onlyShippers = array_merge($onlyShippers, explode(',', $globalSetting->text));
                         break;
                 }
             }

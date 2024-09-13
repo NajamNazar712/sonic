@@ -245,10 +245,10 @@ class Kernel extends ConsoleKernel
         //rv agent cron jobs end
 
         // rv cron job for the call every two hours execute
-        // if(GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists())
-        // {
-            // $schedule->command('agent:botcallunresponsive')->everyFiveMinutes()->runInBackground();
-        // }
+        if(GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists())
+        {
+            $schedule->command('agent:botcallunresponsive')->everyFiveMinutes()->runInBackground();
+        }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
