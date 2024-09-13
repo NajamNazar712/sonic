@@ -119,7 +119,7 @@ class BotCallingController extends Controller
                     0 => [
                         'status_id' => 6,
                         'call_finding_id' => ($request->call_status == 'ANSWER' ? 35 : 34),
-                        'call_status_type' => ($request->call_status == 'ANSWER' ? 'Connected' : 'Not Connected'),
+                        'call_status_type' => ($request->call_status == 'ANSWER' || $request->call_status == 'BUSY'  ? $request->call_status ?? 'Connected' : 'Not Connected'),
                     ], // unresponsive
                     1 => [
                         'status_id' => 2,
@@ -145,6 +145,7 @@ class BotCallingController extends Controller
                 ]);
                 $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->whereIn('rv_state_id', [1, 3])->latest()->first();
                 $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => $array[$request->input]['call_finding_id'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1, 'call_to_id' => 1, 'call_status' => $array[$request->input]['call_status_type'],'end_date' => $request->end_date]);
+                
                 RvCronLog::create([
                     'message' => json_encode($request->all()),
                 ]);
