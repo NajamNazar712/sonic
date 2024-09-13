@@ -678,7 +678,7 @@ class V2AdminPickupsController extends Controller
             return redirect()->back()->with('error', 'Pickup Request(s) already assigned!');
         } catch (\Throwable $th){
             Log::channel('cronJobLog')->error('v2pickupfailed'.json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
-            return response()->json(['status' => 1, 'message' => 'Pickup(s) are Saved!', 'information' => $e->getMessage()]);
+            return response()->json(['status' => 1, 'message' => 'Pickup(s) are Saved!', 'information' => $th->getMessage()]);
         }
     }
 
