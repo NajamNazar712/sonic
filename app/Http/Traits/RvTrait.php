@@ -299,7 +299,7 @@ trait RvTrait
         //if bot call is unresponsive and again status is updated to the open
         if($request->input === 0 && $request->rv_assign_agent_status_id == 6){
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 6; //set status to unresponive confirm again asign
-            $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
+            $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = $request->rv_assign_agent_sub_status_id;
             $shipment_assign_agent_table_columns['rv_state_id'] = 3;
             return $shipment_assign_agent_table_columns; // return assign again
         }
