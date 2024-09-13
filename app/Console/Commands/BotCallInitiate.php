@@ -59,7 +59,7 @@ class BotCallInitiate extends Command
             $timeEnd = Carbon::parse(now())->subHour(2)->format('Y-m-d H:i').':00'; // Get the timestamp of two hours ago
             $timeStart = Carbon::parse($timeEnd)->subMinute(15)->format('Y-m-d H:i').':59';
             // Now, re-initiate process for the retrieved shipment_ids after unresponsive one
-            $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', '2024-09-13 15:15:00'], ['unresponsive_attempt_time', '<=', '2024-09-13 19:15:59'],'unresponsive_count' => 1, 'rv_assign_agent_status_id'=>6])->pluck('shipment_id');
+            $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=',$timeStart], ['unresponsive_attempt_time', '<=', $timeEnd],'unresponsive_count' => 1, 'rv_assign_agent_status_id'=>6])->pluck('shipment_id');
             Log::channel('cronJobLog')->info('s ' . 'Log after second call  record' . count($shipments));
 
             if (count($shipments) > 0) {            
@@ -94,7 +94,7 @@ class BotCallInitiate extends Command
             }
 
             //  Now, re-initiate process for the retrieved shipment_ids after unresponsive two            
-            $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', '2024-09-13 15:15:00'], ['unresponsive_attempt_time', '<=', '2024-09-13 19:15:59'], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
+            $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', '2024-09-13 15:15:00'], ['unresponsive_attempt_time', '<=', '2024-09-13 19:15:00'], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
             Log::channel('cronJobLog')->info('s ' . 'Log after third call  record' . count($shipments));
 
             if(count($shipments) > 0){
