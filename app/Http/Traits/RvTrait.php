@@ -823,9 +823,9 @@ trait RvTrait
                     if($botCall){
                         $rv_shipment_assign_agent->rv_assign_agent_status_id = 1;
                         $rv_shipment_assign_agent->rv_state_id = 4;
-                        $co->save();
+                        $rv_shipment_assign_agent->save();
                     }
-                    RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
+
                     request()->request->add([
                         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
                         'remarks' => $request->remarks,
