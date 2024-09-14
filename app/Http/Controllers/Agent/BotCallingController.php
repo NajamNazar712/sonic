@@ -118,8 +118,8 @@ class BotCallingController extends Controller
                 $array = [
                     0 => [
                         'status_id' => 6,
-                        'call_finding_id' => ($request->call_status == 'ANSWER' ? 35 : 34),
-                        'call_status_type' => ($request->call_status == 'ANSWER' ? 'Connected' : ($request->call_status == 'BUSY' ? 'Busy' : 'Not Connected')),
+                        'call_finding_id' => ($request->call_status == 'ANSWER' ? 35 : ($request->call_status == 'BUSY' ? 39 : 34)),
+                        'call_status_type' => ($request->call_status == 'ANSWER' ? 'Connected' :  'Not Connected'),
                     ], // unresponsive
                     1 => [
                         'status_id' => 2,
