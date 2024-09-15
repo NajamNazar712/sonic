@@ -14,9 +14,9 @@ class BotCallAddRVAsginAgentSubStatusOneMore extends Seeder
     public function run()
     {
         //
-        $timestamp = Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('rv_assign_agent_sub_statuses')->insert(array(
-            array('name' => 'Busy', 'rv_assign_agent_status_id' => 6, 'is_active' => 1, 'created_at' => $timestamp, 'updated_at' => $timestamp),
-        ));
+        // $timestamp = Carbon::now()->format('Y-m-d H:i:s');
+        // DB::table('rv_assign_agent_sub_statuses')->insert(array(
+        //     array('name' => 'Busy', 'rv_assign_agent_status_id' => 6, 'is_active' => 1, 'created_at' => $timestamp, 'updated_at' => $timestamp),
+        // ));
     }
 }
