@@ -1647,6 +1647,8 @@ class ShipperDashboardController extends Controller
             }
             elseif($shipments->type == 1) {
                 return 'Returned';
+            }elseif($shipments->type == 3) {
+                return 'Arrival';
             }
             else{
                 return 'Adjusted';

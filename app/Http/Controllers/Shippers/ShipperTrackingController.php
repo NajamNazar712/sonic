@@ -78,11 +78,22 @@ class ShipperTrackingController extends Controller
 
     public function shipper_visibility(Request $request)
     {
-        $nature_id = $request->input('nature_id');
+        $nature_id = $request->input('id');
+        $shipment_id = $request->input('shipment_id');
+        //dd($shipment_id);
+        $shipment_status = Shipment::where('id', $shipment_id)->pluck('shipper_status_id')->first();
         $case_nature_types = CrmRequestCaseNatureType::where('nature_id', '=', $nature_id)
             ->where('status_id', 1)
             ->where('shipper_visibility', 1)
-            ->get();
+            ->get()->filter(function ($case_nature_types) use ($shipment_status) {
+                $status = json_decode($case_nature_types->shipment_status, true);
+                if (is_null($status)) {
+                    return false;
+                }
+                // Check if the dept_id is in the admin_departments array
+                return in_array($shipment_status, $status);
+            });
+            //dd($case_nature_types);
         return response()->json([
             'case_nature_types' => $case_nature_types,
         ]);

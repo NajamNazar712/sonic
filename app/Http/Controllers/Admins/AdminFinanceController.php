@@ -6599,7 +6599,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $dropdown .= $view_details_button;
 
                 if (($pending_payment->documents_status == 2) && (session('role_id') == 1 || in_array(60, session('permissions')))) {
-                    $dropdown .= $make_payments_button;
+//                    $dropdown .= $make_payments_button;
                     $dropdown .= $make_payments_button_modal;
                 }
 
@@ -7428,6 +7428,14 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 $shipment->save();
 
                                 ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
+                            } else if ($done_payment_shipment->type == 3) {
+                                $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                                $shipment->payment_status_id = 8;
+
+                                $shipment->save();
+
+                                ShipmentsPaymentJourneyController::add($shipment->id, 8, Auth::id(), '', $done_payment->id);
                             }
                         }
                     }
@@ -7471,16 +7479,19 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
                         $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
                         if ($pending_payment_shipment) {
-                            $total_shipments++;
+
 
                             if ($pending_payment_shipment->type == 0) {
                                 $delivered_shipments++;
+                                $total_shipments++;
                             } else if ($pending_payment_shipment->type == 1) {
                                 $returned_shipments++;
+                                $total_shipments++;
                             } else if ($pending_payment_shipment->type == 3) {
                                 $arrival_shipments++;
                             } else {
                                 $adjusted_shipments++;
+                                $total_shipments++;
                             }
 
                             $done_payment_shipment = new DonePaymentShipment();
@@ -7533,6 +7544,14 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 $shipment->save();
 
                                 ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
+                            }else if ($done_payment_shipment->type == 3) {
+                                $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                                $shipment->payment_status_id = 8;
+
+                                $shipment->save();
+
+                                ShipmentsPaymentJourneyController::add($shipment->id, 8, Auth::id(), '', $done_payment->id);
                             } else {
                                 $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
@@ -7829,6 +7848,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
         $count = $count->count();
 
+
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('done_payment_calculations as dpc', 'dpc.done_payment_id', '=', 'done_payments.id')
@@ -7863,7 +7883,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -7937,6 +7957,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ->addColumn('total_deductable', function ($done_payment) {
                 return number_format(($done_payment->total_charges + $done_payment->total_gst + $done_payment->total_sms_charges + $done_payment->ibft_charges - $done_payment->total_wht), 2);
             })
+            ->editColumn('total_shipments', function ($done_payment) {
+               return $done_payment->total_shipments+=$done_payment->arrival_shipment;
+            })
             ->editColumn('delivered_shipments', function ($done_payment) {
 
 
@@ -7956,6 +7979,13 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ->editColumn('adjusted_shipments', function ($done_payment) {
                 if ($done_payment->adjusted_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->adjusted_shipments . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->editColumn('arrival_shipment', function ($done_payment) {
+                if ($done_payment->arrival_shipment != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->arrival_shipment . '</button>';
                 } else {
                     return 0;
                 }
@@ -8342,6 +8372,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $shipment->save();
 
                         ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
+                    } else if ($done_payment_shipment->type == 3) {
+                        $shipment->payment_status_id = 9;
+
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 9, Auth::id(), '', $done_payment->id);
                     } else {
                         $shipment->payment_status_id = 3;
 
@@ -8632,6 +8668,20 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         $tracking_numbers = array();
 
         $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 2)->get();
+
+        foreach ($done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+    public function done_payments_arrival_shipment(Request $request)
+    {
+        $tracking_numbers = array();
+
+        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 3)->get();
 
         foreach ($done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
@@ -18700,7 +18750,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $valid = FALSE;
                 }
             }
-
+            if($shipment->packaging_material_request && $type == 3){
+                $valid = FALSE;
+            }
             if ($valid) {
                 if($sms_charges_status == 1) {
                     $shipment_sms_count = 0;

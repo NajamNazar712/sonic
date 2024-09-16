@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Overall RV Action Report')
+@section('title', 'Reattempt Analysis Report')
 
 @section('content')
 <div class="app-content content">
@@ -12,7 +12,7 @@
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            <h1>Overall RV Action Report</h1>
+                            <h1>Reattempt Analysis Report</h1>
                             @include('admin.inc.messages')
                             <div class="col mt-2">
                                 <form id="search_form" class="row mb-2 justify-content-center" novalidate="novalidate">
@@ -82,36 +82,20 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Tracking Number</th>
+                                    <th class="border-primary border-darken-1">RVR Count</th>
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
-                                    {{-- <th class="border-primary border-darken-1">Area</th> --}}
-                                    {{-- <th class="border-primary border-darken-1">Consignee Name</th> --}}
-                                    {{-- <th class="border-primary border-darken-1">Number</th> --}}
-                                    {{-- <th class="border-primary border-darken-1">Address</th> --}}
-                                    <th class="border-primary border-darken-1">COD Amount</th>
-                                    {{-- <th class="border-primary border-darken-1">Weight</th> --}}
-                                    <th class="border-primary border-darken-1">Shipping Mode</th>
-                                    <th class="border-primary border-darken-1">Service Type</th>
+                                    <th class="border-primary border-darken-1">Zone</th>
+                                    <th class="border-primary border-darken-1">Consignee Mobile#</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
-                                    <th class="border-primary border-darken-1">Action</th>
-                                    <th class="border-primary border-darken-1">Call Status</th>
-                                    <th class="border-primary border-darken-1">Call Findings</th>
-                                    <th class="border-primary border-darken-1">Remarks</th>
-                                    <th class="border-primary border-darken-1">Action Date</th>
-                                    <th class="border-primary border-darken-1">Action Updated By</th>
-                                    <th class="border-primary border-darken-1">RCP Agent Updated By</th>
-                                    <th class="border-primary border-darken-1">RV Status</th>
-                                    <th class="border-primary border-darken-1">RV Reason</th>
-                                    <th class="border-primary border-darken-1">RV Status Date</th>
-                                    <th class="border-primary border-darken-1">Current Status</th>
-                                    <th class="border-primary border-darken-1">Current Status Date</th>
-                                    <th class="border-primary border-darken-1">Fake Status</th>
-                                    <th class="border-primary border-darken-1">Delivery Attempt Count</th>
-                                    <th class="border-primary border-darken-1">Re-Attempt Count</th>
-                                    <th class="border-primary border-darken-1">Call History</th>
-                                    <th class="border-primary border-darken-1">Call Count</th>
+                                    <th class="border-primary border-darken-1">Destiantion Arrival Date</th>
+                                    <th class="border-primary border-darken-1">RVR Time & Date</th>
+                                    <th class="border-primary border-darken-1">RVR Action Time & Date</th>
+                                    <th class="border-primary border-darken-1">OFD Time & Date</th>
+                                    <th class="border-primary border-darken-1">Last Status</th>
+                                    <th class="border-primary border-darken-1">Last Status Date</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -122,44 +106,6 @@
         </div>
     </div>
 
-    
-    <div class="modal fade" id="unresponsive_count" data-backdrop="static" role="dialog" aria-labelledby="unresponsive_count" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Call History</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Calling Date</th>
-                                <th>Calling Time</th>
-                                <th>Call Findings</th>
-                                <th>Call Finding Reasons</th>
-                                <th>Remarks</th>
-                                <th>Call To</th>
-                                <th>Status</th>
-                                <th>User</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                       
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
     
 @endsection
 
@@ -430,7 +376,7 @@
                         }
                     }
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.rv_report.list') }}',
+                        url: '{{ route('admin.reports.rvr_reattempt.list') }}',
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -441,66 +387,40 @@
 
                             head.push('S.No');  
                             head.push('Tracking No.');
+                            head.push('RVR Count');
                             head.push('Shipper');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
-                            // head.push('Area');
-                            // head.push('Consignee');
-                            // head.push('Number');
-                            // head.push('Address');
-                            head.push('COD Amount');
-                            // head.push('Weight');
-                            head.push('Shipping Mode');
-                            head.push('Service Type');
+                            head.push('Zone');
+                            head.push('Consignee Mobile#');
                             head.push('Arrival Date');
-                            head.push('Action');
-                            head.push('Call Status');
-                            head.push('Call Findings');
-                            head.push('Remarks');
-                            head.push('Action Date');
-                            head.push('Action Updated By');
-                            head.push('RCP Agent Updated By');
-                            head.push('RV Status');
-                            head.push('RV Reason');
-                            head.push('RV Status Date');
-                            head.push('Current Status');
-                            head.push('Current Status Date');
-                            head.push('Fake Status');
-                            head.push('Delivery Attempt Count');
-                            head.push('Re Attempt Count');
-                            head.push('Call Count');
-                            
+                            head.push('Destination Arrival Date');
+                            head.push('RVR Time & Date');
+                            head.push('RVR Action Time & Date');
+                            head.push('OFD Time & Date');
+                            head.push('Last Status');
+                            head.push('Last Status Time & Date');
+                           
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number.split(">")[2].slice(0,-3));
+                                row.push(values.rvr_count);
                                 row.push(values.shipper_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
-                                row.push(values.cod_amount);
-                                row.push(values.shipping_mode);
-                                row.push(values.service_type);
+                                row.push(values.zone_name);
+                                row.push(values.consignee_phon_no);
                                 row.push(values.arrival_date);
-                                row.push(values.action);
-                                row.push(values.call_status);
-                                row.push(values.reason);
-                                row.push(values.remarks);
+                                row.push(values.arrival_destination_date);
+                                row.push(values.rvr_date_time);
                                 row.push(values.action_date);
-                                row.push(values.action_updated_by);
-                                row.push(values.rcp_agent_updated_by);
-                                row.push(values.rv_status_name);
-                                row.push(values.rv_reason);
-                                row.push(values.rv_status_date);
+                                row.push(values.ofd_date_time);
                                 row.push(values.current_status);
                                 row.push(values.current_status_date);
-                                row.push(values.fake_status);
-                                row.push(values.delivery_attempt_count);
-                                row.push(values.re_attempt_count);
-                                row.push(values.call_count);
-
                                 body.push(row);
                             });
                         },
@@ -516,7 +436,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     extend: 'excelHtml5',
-                    title: 'RV Report',
+                    title: 'Reattempt Analysis Report',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                     className: 'btn btn-primary datatable_excel_btn',
                     
@@ -533,7 +453,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.reports.rv_report.list')}}',
+                    url: '{{ route('admin.reports.rvr_reattempt.list')}}',
                     method: 'POST',
                     headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -550,31 +470,20 @@
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle tracking_number',searchable: false},
+                    {data: 'rvr_count', name: 'rvr_count', class: 'align-middle shipper_name',searchable: false},
                     {data: 'shipper_name', name: 'shipper_name', class: 'align-middle shipper_name',searchable: false},
                     {data: 'origin', name: 'origin', class: 'text-center align-middle origin',searchable: false},
                     {data: 'destination', name: 'destination', class: 'align-middle destination',searchable: false},
                     {data: 'hub', name: 'hub', class: 'align-middle hub',searchable: false},
-                    {data: 'cod_amount', name: 'cod_amount', class: 'align-middle cod_amount',searchable: false},
-                    {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode',searchable: false},
-                    {data: 'service_type', name: 'service_type', class: 'align-middle service_type',searchable: false},
+                    {data: 'zone_name', name: 'zone_name', class: 'align-middle hub',searchable: false},
+                    {data: 'consignee_phon_no', name: 'consignee_phon_no', class: 'align-middle cod_amount',searchable: false},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date',searchable: false},
-                    {data: 'action', name: 'action', class: 'align-middle action',searchable: false},
-                    {data: 'call_status', name: 'call_status', class: 'align-middle reason',searchable: false},
-                    {data: 'reason', name: 'reason', class: 'align-middle reason',searchable: false},
-                    {data: 'remarks', name: 'remarks', class: 'align-middle remarks',searchable: false},
+                    {data: 'arrival_destination_date', name: 'arrival_destination_date', class: 'align-middle action',searchable: false},
+                    {data: 'rvr_date_time', name: 'rvr_date_time', class: 'align-middle reason',searchable: false},
                     {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false},
-                    {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle action_updated_by',searchable: false},
-                    {data: 'rcp_agent_updated_by', name: 'ad.name', class: 'align-middle rcp_agent_updated_by',searchable: false},
-                    {data: 'rv_status_name', name: 'rv_status.name', class: 'align-middle rv_status_name',searchable: false},
-                    {data: 'rv_reason', name: 'rv_reason.name', class: 'align-middle rv_reason',searchable: false},
-                    {data: 'rv_status_date', name: 'sj.updated_at', class: 'align-middle rv_status_date',searchable: false},
+                    {data: 'ofd_date_time', name: 'ofd_date_time', class: 'align-middle action_updated_by',searchable: false},
                     {data: 'current_status', name: 's_status.name', class: 'align-middle current_status',searchable: false},
-                    {data: 'current_status_date', name: 'shipments.updated_at', class: 'align-middle current_status_date',searchable: false},
-                    {data: 'fake_status', name: 'fake_status', class: 'align-middle fake_status',searchable: false},
-                    {data: 'delivery_attempt_count', name: 'delivery_attempt_count', class: 'align-middle delivery_attempt_count',searchable: false},
-                    {data: 're_attempt_count', name: 're_attempt_count', class: 'align-middle re_attempt_count',searchable: false},
-                    {data: 'unresponsive_count', name: 'unresponsive_count', class: 'align-middle unresponsive_count',searchable: false},
-                    {data: 'call_count', name: 'call_count', class: 'align-middle call_count',searchable: false},
+                    {data: 'current_status_date', name: 'current_status_date', class: 'align-middle current_status_date',searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -582,52 +491,20 @@
                 },
         });
 
-            $('#search_form').bind('submit', function (e) {
-                e.preventDefault();
-                var tracking_number = $('#search_form #search_tracking_no').val();
-                var shipper_name = $('#search_form #search_shipper_name').val();
-                var agent_name = $('#search_form #search_agent_name').val();
-                var search_date_from = $('#search_form #search_date_from').val();
-                var search_date_to = $('#search_form #search_date_to').val();
+        $('#search_form').bind('submit', function (e) {
+            e.preventDefault();
+            var tracking_number = $('#search_form #search_tracking_no').val();
+            var shipper_name = $('#search_form #search_shipper_name').val();
+            var agent_name = $('#search_form #search_agent_name').val();
+            var search_date_from = $('#search_form #search_date_from').val();
+            var search_date_to = $('#search_form #search_date_to').val();
 
-                if (shipper_name !== '' || agent_name !== '' || tracking_number != ''  || (search_date_from != '' && search_date_to != '' )) {
-                    table.draw();
-                }
+            if (shipper_name !== '' || agent_name !== '' || tracking_number != ''  || (search_date_from != '' && search_date_to != '' )) {
+                table.draw();
+            }
 
-            });
+        });
 
-            $('body').on('click', '.unresponsive_count_label', function() {
-                var dataId = $(this).attr('data-shipments');
-                $.ajax({
-                    url: '{!! route('admin.reports.rv_report.rv_call_history') !!}',
-                    method: 'GET',
-                    data: { shipment_id: dataId },
-                    dataType: 'json',
-                    success: function(response) {
-                        var tableBody = $('#unresponsive_count').find('tbody');
-                        tableBody.empty();
-                        $.each(response.data, function(index, rowData) {
-
-                            var dateTimeParts = rowData.data.updated_at.split(' ');
-                            var row = $('<tr>');
-                            row.append($('<td>').text(dateTimeParts[0])); // Display date
-                            row.append($('<td>').text(dateTimeParts[1])); // Display time
-                            row.append($('<td>').text(rowData.data.call_status)); //Call Findings
-                            row.append($('<td>').text(rowData.data.rv_call_finding.name)); //Call Finding reasons
-                            row.append($('<td>').text(rowData.data.remarks != null ? rowData.data.remarks : '-')); //Reamrks
-                            row.append($('<td>').text('Consignee')); //Call To
-                            row.append($('<td>').text(rowData.data.shipment.status_shipper.name != null ? rowData.data.shipment.status_shipper.name : '-')); //Status
-                            row.append($('<td>').text(rowData.user_name)); //User
-                            tableBody.append(row);
-                        });
-
-                        $("#unresponsive_count").modal('show');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(xhr, status, error);
-                    }
-                });
-            });
         });
     </script>
     @endsection
