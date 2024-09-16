@@ -59,42 +59,42 @@ class BotCallInitiate extends Command
             $timeEnd = Carbon::parse(now())->subHour(2)->format('Y-m-d H:i').':00'; // Get the timestamp of two hours ago
             $timeStart = Carbon::parse($timeEnd)->subMinute(15)->format('Y-m-d H:i').':59';
             // Now, re-initiate process for the retrieved shipment_ids after unresponsive one
-            $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=',$timeStart], ['unresponsive_attempt_time', '<=', $timeEnd],'unresponsive_count' => 1, 'rv_assign_agent_status_id'=>6])->pluck('shipment_id');
-            Log::channel('cronJobLog')->info('s ' . 'Log after second call  record' . count($shipments));
+            // $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=',$timeStart], ['unresponsive_attempt_time', '<=', $timeEnd],'unresponsive_count' => 1, 'rv_assign_agent_status_id'=>6])->pluck('shipment_id');
+            // Log::channel('cronJobLog')->info('s ' . 'Log after second call  record' . count($shipments));
 
-            if (count($shipments) > 0) {            
-                foreach($shipments as $shipmentId){
-                    if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
-                        if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
-                            $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
-                            RvShipmentTicket::where('shipment_id', $shipmentId)->update(['in_progress' => 1]);
-                            $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
-                            $post = [
-                                'vpbx_id' => '66bdfd18cb67f',
-                                'caller_id' => preg_replace("/[^a-zA-Z0-9]+/", "", $shipment->consignee_phone_number_1),
-                                'tracking_number' => $shipment->tracking_number,
-                                'cod_amount' => $shipment->amount,
-                                'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,
-                                'customer_name' => $shipment->consignee_name,
-                            ];
-                            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
-                            $response = $client->post('', [
-                                    'json' => $post
-                                ]);
-                            $status_code = $response->getStatusCode();
-                            $response = $response->getBody()->getContents();
-                            $response = json_decode($response);
-                            Log::channel('cronJobLog')->info('s ' . 'Log after second call  with response' . json_encode($response));
-                            WebhookLogController::shipment_status_log($shipment->user_id, $status_code, json_encode($response));
-                        } else {
-                            return json_encode(['status' => 0, 'message' => 'Shipment isn`t at the bot call prefernce']);
-                        }
-                    }
-                }
-            }
+            // if (count($shipments) > 0) {            
+            //     foreach($shipments as $shipmentId){
+            //         if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
+            //             if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
+            //                 $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
+            //                 RvShipmentTicket::where('shipment_id', $shipmentId)->update(['in_progress' => 1]);
+            //                 $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
+            //                 $post = [
+            //                     'vpbx_id' => '66bdfd18cb67f',
+            //                     'caller_id' => preg_replace("/[^a-zA-Z0-9]+/", "", $shipment->consignee_phone_number_1),
+            //                     'tracking_number' => $shipment->tracking_number,
+            //                     'cod_amount' => $shipment->amount,
+            //                     'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,
+            //                     'customer_name' => $shipment->consignee_name,
+            //                 ];
+            //                 $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
+            //                 $response = $client->post('', [
+            //                         'json' => $post
+            //                     ]);
+            //                 $status_code = $response->getStatusCode();
+            //                 $response = $response->getBody()->getContents();
+            //                 $response = json_decode($response);
+            //                 Log::channel('cronJobLog')->info('s ' . 'Log after second call  with response' . json_encode($response));
+            //                 WebhookLogController::shipment_status_log($shipment->user_id, $status_code, json_encode($response));
+            //             } else {
+            //                 return json_encode(['status' => 0, 'message' => 'Shipment isn`t at the bot call prefernce']);
+            //             }
+            //         }
+            //     }
+            // }
 
             //  Now, re-initiate process for the retrieved shipment_ids after unresponsive two            
-            $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620,['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
+            $shipments = RvShipmentAssignAgent::where(['agent_id' => 4620,['unresponsive_attempt_time', '>=', '2024-09-14 00:00:00'], ['unresponsive_attempt_time', '<=', '2024-09-16 18:15:59'], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
             Log::channel('cronJobLog')->info('s ' . 'Log after third call  record' . count($shipments));
 
             if(count($shipments) > 0){
