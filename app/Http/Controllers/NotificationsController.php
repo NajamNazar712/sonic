@@ -7088,8 +7088,8 @@ class NotificationsController extends Controller
                     self::sms($body, $to, NULL, NULL, $id);
                 } else if ($id == 115) {
                     $tracking_number = $reference_1_id;
-                    $shipment = Shipment::where('tracking_number', $tracking_number)->first('id');
-                    // $shipment = Shipment::where('tracking_number', $tracking_number)->pluck('id')->first();
+                    // $shipment = Shipment::where('tracking_number', $tracking_number)->first('id');
+                    $shipment = Shipment::where('tracking_number', $tracking_number)->pluck('id')->first();
                     $shipper_info_id = $reference_2_id;
                     $total_charges = RetailShipment::where('shipment_id', $shipment)->first()->total_charges;
 
