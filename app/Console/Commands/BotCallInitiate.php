@@ -95,7 +95,6 @@ class BotCallInitiate extends Command
                 }
             }
             
-            Log::channel('cronJobLog')->info('s ' . 'Log third Call start ');
              Log::channel('cronJobLog')->info('s ' . 'Log after third call  record' . count($shipmentThirds));
 
             if(count($shipmentThirds) > 0){
