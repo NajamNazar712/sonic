@@ -447,6 +447,7 @@
                                                 positionClass: 'toast-bottom-center',
                                                 containerId: 'toast-bottom-center'
                                             });
+                                            $('input[name="tracking_number"]').val('');
                                         } else if (data.status === 3) {
                                             $('#scan_piece_tracking_number').prop('disabled', true);
                                             $('#piece_confirm').prop('disabled', true);
@@ -477,6 +478,7 @@
                                                     $('#ShipmentPiecesModal').modal('hide');
                                                 }
                                             });
+                                            $('input[name="tracking_number"]').val('');
                                         } else {
                                             toastr.error(data.error, 'Error!', {
                                                 positionClass: 'toast-top-center',
