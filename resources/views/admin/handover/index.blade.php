@@ -404,8 +404,8 @@
                 submitHandler: function(form) {
                     event.preventDefault();
                     var selected_bag_type = $('#bag_type').val();
-                    var tracking_number_value = $('#tracking_number_input').val();
-
+                    // var tracking_number_value = $('#add_shipment_form input.tracking_number').val();
+                    var tracking_number_value = $('#add_shipment_form input[name="tracking_number"]').val();
                     $.ajax({
                         type: "GET",
                         url: "{{ route('admin.handover.create.check_bag_type') }}",
@@ -420,7 +420,8 @@
                                     containerId: 'toast-top-center'
                                 });
                             } else {
-                                var tracking_number = $('#tracking_number_input').val();
+                                // var tracking_number = $('#tracking_number_input').val();
+                                var tracking_number = $('#add_shipment_form input[name="tracking_number"]').val();
                                 if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                                     $.ajax({
                                         url: '{!! route('admin.handover.create.shipment_details') !!}',
@@ -901,7 +902,8 @@
 
             $('#datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
-                var id = parseInt(parent.attr('id'));
+                // var id = parseInt(parent.attr('id'));
+                var id = parent.find('td:eq(1)').text().trim().substring(6);
 
                 $.ajax({
                     url: '{!! route('admin.pickups.receive.shipment_remove') !!}',
