@@ -34,7 +34,7 @@
 
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
-                                            <a href="{{ asset('file/Retail International Economy Rates Upload Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                            <a href="{{ asset('file/Retail International Economy Rates Upload Template.xlsx') }}?id=16-09-2024" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                         </div>
                                     </div>
                                 </div>
@@ -56,6 +56,8 @@
                                     <th class="border-primary border-darken-1">Zone 9 </th>
                                     <th class="border-primary border-darken-1">Zone 10 </th>
                                     <th class="border-primary border-darken-1">Zone 11 </th>
+                                    <th class="border-primary border-darken-1">Zone 12 </th>
+                                    <th class="border-primary border-darken-1">Zone 13 </th>
 
                                 </tr>
                                 </thead>
@@ -255,7 +257,9 @@
                 {data: 'zone_8', name: 'zone_8', class: 'align-middle zone_8'},
                 {data: 'zone_9', name: 'zone_9', class: 'align-middle zone_9'},
                 {data: 'zone_10', name: 'zone_10', class: 'align-middle zone_10'},
-                {data: 'zone_11', name: 'zone_11', class: 'align-middle zone_11'}
+                {data: 'zone_11', name: 'zone_11', class: 'align-middle zone_11'},
+                {data: 'zone_12', name: 'zone_12', class: 'align-middle zone_12'},
+                {data: 'zone_13', name: 'zone_13', class: 'align-middle zone_13'},
             ],
             rowCallback: function(row, data, index) {
 
