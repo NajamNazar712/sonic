@@ -1268,9 +1268,9 @@ class AdminShipmentHandoverController extends Controller
       ->first();
 
       // Check if the shipment exists
-      if (!$shipment) {
-        return ['status' => 1, 'error' => 'Shipment not found.'];
-      }
+      // if (!$shipment) {
+      //   return ['status' => 1, 'error' => 'Shipment not found.'];
+      // }
 
       $normal_status_ids = [
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
