@@ -13,6 +13,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Traits\RvTrait;
 use App\Jobs\BotCallDispatch;
 use App\Jobs\BotCallDispatchSecod;
+use App\Jobs\ProcessRvShipmentTicket;
 use App\RvAgentCallHistory;
 use App\RvAssignAgentSubStatus;
 use App\RvCronLog;
@@ -112,7 +113,7 @@ class BotCallingController extends Controller
                 return response()->json(['status' => 0, 'errors' => $validate->errors()], 422);
             }
             $findShipmentId = Shipment::where('tracking_number', $request->input('tracking_number'))->whereIn('shipper_status_id', [12, 52, 66])->first();
-            
+          
             if ($findShipmentId && RvShipmentTicket::where('shipment_id', $findShipmentId->id)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
                 // RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 1]);
                 $array = [
