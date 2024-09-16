@@ -26,6 +26,8 @@ class InternationalDHLZoneMapTableSeeder extends Seeder
             array('id' => 9, 'zone_id' => 14, 'zone_name' => 9, 'created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 10, 'zone_id' => 15, 'zone_name' => 10, 'created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 11, 'zone_id' => 16, 'zone_name' => 11, 'created_at'=>$timestamp,'updated_at'=>$timestamp),
+            array('id' => 12, 'zone_id' => 28, 'zone_name' => 12, 'created_at'=>$timestamp,'updated_at'=>$timestamp),
+            array('id' => 13, 'zone_id' => 29, 'zone_name' => 13, 'created_at'=>$timestamp,'updated_at'=>$timestamp),
 
         ));
     }
