@@ -8450,6 +8450,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $shipment->save();
 
                         ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
+                    } else if ($done_payment_shipment->type == 3) {
+                        $shipment->payment_status_id = 11; //Arrival charges reverted
+
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 11, Auth::id(), '', $done_payment->id);
                     } else {
                         $shipment->payment_status_id = 2;
 
@@ -8572,11 +8578,17 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 $shipment = $done_payment_shipment->shipment;
 
                                 if ($done_payment_shipment->type == 1) {
-                                    $shipment->payment_status_id = 7;
+                                    $shipment->payment_status_id = 7; //charges deducted
 
                                     $shipment->save();
 
                                     ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
+                                } else if ($done_payment_shipment->type == 3) {
+                                    $shipment->payment_status_id = 12; //Arrival charges deducted
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 12, Auth::id(), '', $done_payment->id);
                                 } else {
                                     $shipment->payment_status_id = 3;
 
@@ -8609,6 +8621,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                     $shipment->save();
 
                                     ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
+                                } else if ($done_payment_shipment->type == 3) {
+                                    $shipment->payment_status_id = 11; //Arrival charges reverted
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 11, Auth::id(), '', $done_payment->id);
                                 } else {
                                     $shipment->payment_status_id = 2;
 
