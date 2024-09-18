@@ -393,6 +393,7 @@
             bag_type.on('change', function () {
                 add_shipment_btn.prop('disabled', false);
                 tracking_number_input.prop('disabled', false);
+                bag_type.attr('disabled', 'disabled');
             });
 
             $('#add_shipment_form').validate({
@@ -908,7 +909,8 @@
                 var id = parent.find('td:eq(1)').text().trim().substring(6);
 
                 $.ajax({
-                    url: '{!! route('admin.pickups.receive.shipment_remove') !!}',
+                    // url: '{!! route('admin.pickups.receive.shipment_remove') !!}',
+                    url: '{!! route('admin.handover.create.receive_shipment_remove_handover') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
