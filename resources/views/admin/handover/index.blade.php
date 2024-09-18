@@ -18,7 +18,7 @@
                         <input type="hidden" name="delivery_location_mapping" id="delivery_location_mapping">
                         <div class="form-group">
                             <select name="bag_type" id="bag_type" class="form-control select2" placeholder="Bag type*" data-rule-required="true" data-msg-required="Bag Number is required">
-                                <option value="1">Regular</option>
+                                <option value="1">Normal</option>
                                 <option value="2">Return</option>
                             </select>
                         </div>
