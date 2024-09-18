@@ -7431,11 +7431,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             } else if ($done_payment_shipment->type == 3) {
                                 $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
-                                $shipment->payment_status_id = 8;
+                                $shipment->payment_status_id = 10;
 
                                 $shipment->save();
 
-                                ShipmentsPaymentJourneyController::add($shipment->id, 8, Auth::id(), '', $done_payment->id);
+                                ShipmentsPaymentJourneyController::add($shipment->id, 10, Auth::id(), '', $done_payment->id);
                             }
                         }
                     }
@@ -7547,11 +7547,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             }else if ($done_payment_shipment->type == 3) {
                                 $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
-                                $shipment->payment_status_id = 8;
+                                $shipment->payment_status_id = 10;
 
                                 $shipment->save();
 
-                                ShipmentsPaymentJourneyController::add($shipment->id, 8, Auth::id(), '', $done_payment->id);
+                                ShipmentsPaymentJourneyController::add($shipment->id, 10, Auth::id(), '', $done_payment->id);
                             } else {
                                 $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
@@ -8373,11 +8373,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
                         ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
                     } else if ($done_payment_shipment->type == 3) {
-                        $shipment->payment_status_id = 9;
+                        $shipment->payment_status_id = 12;
 
                         $shipment->save();
 
-                        ShipmentsPaymentJourneyController::add($shipment->id, 9, Auth::id(), '', $done_payment->id);
+                        ShipmentsPaymentJourneyController::add($shipment->id, 12, Auth::id(), '', $done_payment->id);
                     } else {
                         $shipment->payment_status_id = 3;
 
