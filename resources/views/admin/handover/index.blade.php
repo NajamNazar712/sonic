@@ -393,7 +393,7 @@
             bag_type.on('change', function () {
                 add_shipment_btn.prop('disabled', false);
                 tracking_number_input.prop('disabled', false);
-                bag_type.attr('disabled', 'disabled');
+                bag_type.attr('disabled', 'disabled');  
             });
 
             $('#add_shipment_form').validate({
