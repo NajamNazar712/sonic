@@ -570,7 +570,6 @@ class RetailShipmentBookController extends Controller
                 RetailDiscountCode::where('code', '=', $request->discount_code)->update(['shipment_id' => $shipment_id]);
             }
         }
-
         $retail_shipment->save();
 
         // retail user history

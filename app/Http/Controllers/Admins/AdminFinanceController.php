@@ -7431,11 +7431,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             } else if ($done_payment_shipment->type == 3) {
                                 $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
-                                $shipment->payment_status_id = 8;
+                                $shipment->payment_status_id = 10;
 
                                 $shipment->save();
 
-                                ShipmentsPaymentJourneyController::add($shipment->id, 8, Auth::id(), '', $done_payment->id);
+                                ShipmentsPaymentJourneyController::add($shipment->id, 10, Auth::id(), '', $done_payment->id);
                             }
                         }
                     }
@@ -7547,11 +7547,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             }else if ($done_payment_shipment->type == 3) {
                                 $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
-                                $shipment->payment_status_id = 8;
+                                $shipment->payment_status_id = 10;
 
                                 $shipment->save();
 
-                                ShipmentsPaymentJourneyController::add($shipment->id, 8, Auth::id(), '', $done_payment->id);
+                                ShipmentsPaymentJourneyController::add($shipment->id, 10, Auth::id(), '', $done_payment->id);
                             } else {
                                 $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
@@ -8373,11 +8373,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
                         ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
                     } else if ($done_payment_shipment->type == 3) {
-                        $shipment->payment_status_id = 9;
+                        $shipment->payment_status_id = 12;
 
                         $shipment->save();
 
-                        ShipmentsPaymentJourneyController::add($shipment->id, 9, Auth::id(), '', $done_payment->id);
+                        ShipmentsPaymentJourneyController::add($shipment->id, 12, Auth::id(), '', $done_payment->id);
                     } else {
                         $shipment->payment_status_id = 3;
 
@@ -8450,6 +8450,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $shipment->save();
 
                         ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
+                    } else if ($done_payment_shipment->type == 3) {
+                        $shipment->payment_status_id = 11; //Arrival charges reverted
+
+                        $shipment->save();
+
+                        ShipmentsPaymentJourneyController::add($shipment->id, 11, Auth::id(), '', $done_payment->id);
                     } else {
                         $shipment->payment_status_id = 2;
 
@@ -8572,11 +8578,17 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 $shipment = $done_payment_shipment->shipment;
 
                                 if ($done_payment_shipment->type == 1) {
-                                    $shipment->payment_status_id = 7;
+                                    $shipment->payment_status_id = 7; //charges deducted
 
                                     $shipment->save();
 
                                     ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
+                                } else if ($done_payment_shipment->type == 3) {
+                                    $shipment->payment_status_id = 12; //Arrival charges deducted
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 12, Auth::id(), '', $done_payment->id);
                                 } else {
                                     $shipment->payment_status_id = 3;
 
@@ -8609,6 +8621,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                     $shipment->save();
 
                                     ShipmentsPaymentJourneyController::add($shipment->id, 6, Auth::id(), '', $done_payment->id);
+                                } else if ($done_payment_shipment->type == 3) {
+                                    $shipment->payment_status_id = 11; //Arrival charges reverted
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 11, Auth::id(), '', $done_payment->id);
                                 } else {
                                     $shipment->payment_status_id = 2;
 
@@ -8906,9 +8924,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                               <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
                               <td>' . $done_fintech_charges . '</td>
-                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0') . '</td>
-                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0') . '</td>
-                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->sms_charges != 0) ? number_format($done_payment_shipment->sms_charges, 2) : '0') . '</td>
                               <td>' . number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) . '</td>
                               <td>' . number_format($done_payment_shipment->payable, 2) . '</td>
@@ -9271,12 +9289,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             $row[] = (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
             $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
 
-            $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0');
-            $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0');
-            $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0');
+            $row[] = (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0');
+            $row[] = (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0');
+            $row[] = (($done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0');
             $row[] = (($done_payment_shipment->sms_charges != 0) ? number_format($done_payment_shipment->sms_charges, 2) : '0');
-            $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) : '0');
-            $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->payable, 2) : '0');
+            $row[] = (($done_payment_shipment->amount != 0) ? number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) : '0');
+            $row[] = (($done_payment_shipment->payable != 0) ? number_format($done_payment_shipment->payable, 2) : '0');
 
             $details[] = $row;
 
