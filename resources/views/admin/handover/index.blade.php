@@ -444,6 +444,9 @@
                                                 data.details.special_instructions,
                                                 '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>'
                                             ]).draw(false);
+                                            $('#delivery_location_mapping').val(data.details.delivery_area);
+                                            $('#add_shipment_form button.add').prop('disabled', false);
+                                            $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
                                             toastr.success(data.success, 'Success!', {
                                                 positionClass: 'toast-bottom-center',
                                                 containerId: 'toast-bottom-center'
@@ -453,6 +456,8 @@
                                             $('#scan_piece_tracking_number').prop('disabled', true);
                                             $('#piece_confirm').prop('disabled', true);
                                             $('#delivery_location_mapping').val(data.details.delivery_area);
+                                            $('#add_shipment_form button.add').prop('disabled', false);
+                                            $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
                                             $('#piece_shipment_id').val(data.details.id);
                                             $('#piece_tracking_number').val(data.details.tracking_number);
                                             $('#piece_shipment_count').val(data.details.pieces_count);
