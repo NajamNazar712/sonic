@@ -8392,8 +8392,71 @@ class AdminReportsController extends Controller
                         return '-';
                     }
                 }
-            });
+            })
+            ->addColumn('excel_ecom_cod', function($result){
+                $count = 0;
+                $dn_ids = explode(',' , $result->dn_ids);
+                foreach ($dn_ids as $dn_id){
+                    $count += DeliveryController::get_segment_type('delivery_note_shipments', $dn_id, 2, 5, null,'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_retail', function($result){
+                $count = 0;
+                $dn_ids = explode(',' , $result->dn_ids);
+                foreach ($dn_ids as $dn_id){
+                    $count += DeliveryController::get_segment_type('delivery_note_shipments', $dn_id, 1, 12, null, 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
 
+                $dn_ids = explode(',' , $result->dn_ids);
+                foreach ($dn_ids as $dn_id){
+                    $count_general += DeliveryController::get_segment_type('delivery_note_shipments', $dn_id, 1, 2, null,'delivery_note_id');
+                    $count_ecomm += DeliveryController::get_segment_type('delivery_note_shipments', $dn_id, 2, 7, null,'delivery_note_id');
+                }
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('delivered_excel_ecom_cod', function($result){
+                $count = 0;
+                $dn_ids = explode(',' , $result->dn_ids);
+                foreach ($dn_ids as $dn_id){
+                    $delivered_shipments = DeliveryController::get_delivered_shipments($dn_id);
+                    if (!empty($delivered_shipments)) {
+                        $count += DeliveryController::get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 5, 'delivered', 'delivery_note_id');
+                    }
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_retail', function($result){
+                $count = 0;
+                $dn_ids = explode(',' , $result->dn_ids);
+                foreach ($dn_ids as $dn_id) {
+                    $delivered_shipments = DeliveryController::get_delivered_shipments($dn_id);
+                    if (!empty($delivered_shipments)) {
+                        $count += DeliveryController::get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 12, 'delivered', 'delivery_note_id');
+                    }
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $dn_ids = explode(',' , $result->dn_ids);
+                foreach ($dn_ids as $dn_id) {
+                    $delivered_shipments = DeliveryController::get_delivered_shipments($dn_id);
+                    if (!empty($delivered_shipments)) {
+                        $count_general += DeliveryController::get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 2, 'delivered', 'delivery_note_id');
+                        $count_ecomm += DeliveryController::get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 7, 'delivered', 'delivery_note_id');
+                    }
+                }
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
+            });
 
         if ($rider = $request->get('search_rider')) {
             $datatables = $datatables->where('r.id', '=', $rider);

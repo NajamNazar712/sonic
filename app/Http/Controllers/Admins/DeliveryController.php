@@ -1483,6 +1483,52 @@ class DeliveryController extends Controller
                 $total_weight = Shipment::whereIn('id',$shipments)->sum('actual_weight');
                 return $total_weight;
             })
+            ->addColumn('excel_ecom_cod', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 2, 5, null,'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_retail', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 1, 12, null, 'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $count_general = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 1, 2, null,'delivery_note_id');
+                $count_ecomm = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 2, 7, null,'delivery_note_id');
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
+            })
+
+            ->addColumn('delivered_excel_ecom_cod', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 5, 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_retail', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 12, 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
+                if (!empty($delivered_shipments)) {
+                    $count_general = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 2, 'delivered', 'delivery_note_id');
+                    $count_ecomm = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 7, 'delivered', 'delivery_note_id');
+                }
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
+            })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.delivery.receive.status', ['id' => $result->delivery_note]);
                 $route = route('admin.delivery.receive.update', ['note' => $result->delivery_note]);
@@ -2962,7 +3008,7 @@ class DeliveryController extends Controller
                             /* if(in_array(session('role_id'),[18,19]) && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
                                 dispatch(new RCPSmsToConsignee($shipment));
                             }*/
-                        } 
+                        }
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
                             if ($shipment_status->packaging_material_request == 0) {
 
@@ -4309,14 +4355,14 @@ class DeliveryController extends Controller
                                     AdminFinanceController::done_payment($shipment, 1);
                                 }
                             }
-                            
+
                             ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
 
                             //Remove Shipment from RV Shipment Ticket
                             RvShipmentTicket::where('shipment_id', $shipment)->delete();
 
                             // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($shipment));
-                            
+
                         }
                     }
 
@@ -5025,11 +5071,11 @@ class DeliveryController extends Controller
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
             ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
 
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'delivery_notes.one_link_payment_count', 'oc.id as hub_id', 
-            'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 
-            'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 
-            'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 
-            'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'hktdn.transactions_amount as transactions_amount', 
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'delivery_notes.one_link_payment_count', 'oc.id as hub_id',
+            'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by',
+            'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link',
+            'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link',
+            'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'hktdn.transactions_amount as transactions_amount',
             'hktdn.cash_amount as cash_amount', 'rt.name as rider_type', 'zn.name as zone_name', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount', 'riders.trax_id'])
 
             ->where('delivery_notes.cash_collection_status', 0)
@@ -5045,7 +5091,7 @@ class DeliveryController extends Controller
             ->editColumn('count_fintech_shipments', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
 
-                
+
                 $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
 
                 if($amount > 0)
@@ -5057,7 +5103,7 @@ class DeliveryController extends Controller
                 {
                     return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
-                }            
+                }
             })
 
             ->editColumn('delivery_note', function ($deliveries) {
@@ -5352,7 +5398,7 @@ class DeliveryController extends Controller
                 {
                     return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
-                }     
+                }
 
             })
 
@@ -5449,6 +5495,52 @@ class DeliveryController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
+            })
+            ->addColumn('excel_ecom_cod', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 2, 5, null,'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_retail', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 1, 12, null, 'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $count_general = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 1, 2, null,'delivery_note_id');
+                $count_ecomm = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 2, 7, null,'delivery_note_id');
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
+            })
+
+            ->addColumn('delivered_excel_ecom_cod', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 5, 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_retail', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
+                if (!empty($delivery_note_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 12, 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
+                if (!empty($delivery_note_shipments)) {
+                    $count_general = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 2, 'delivered', 'delivery_note_id');
+                    $count_ecomm = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 7, 'delivered', 'delivery_note_id');
+                }
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
             });
         //        if ($tracking_number = $request->get('search_tracking')) {
         //            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -6273,7 +6365,7 @@ class DeliveryController extends Controller
                     return '-';
                 }
             });
-            
+
         // ->filterColumn('zone', function ($query, $keyword) {
         //     if ($keyword == 0) {
         //         $query->where('station_deposit_notes.status', '=', $keyword);
@@ -7415,16 +7507,16 @@ class DeliveryController extends Controller
             ->leftjoin('zones as zn', 'zn.id', '=', 'c.zone_id')
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
-            
-            
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id', 
-            'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 
-            'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 
-            'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status', 
-            'delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by', 
-            'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 
-            'rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path', 'rt.name as rider_type', 
-            'zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count', 
+
+
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id',
+            'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at',
+            'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount',
+            'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status',
+            'delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by',
+            'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone',
+            'rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path', 'rt.name as rider_type',
+            'zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count',
             'delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount'])
 
             ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
@@ -7449,7 +7541,7 @@ class DeliveryController extends Controller
                 {
                     return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
-                }             
+                }
             })
             ->addColumn('total_weight', function($deliveries){
                 $shipments = DeliveryNoteShipment::where('delivery_note_id',$deliveries->delivery_note)->pluck('shipment_id')->toArray();
@@ -7469,7 +7561,7 @@ class DeliveryController extends Controller
                 else
                 {
                     return '-';
-                }     
+                }
             })
             ->editColumn('hbl_konnect_amount_percent', function ($deliveries) {
                 $dncc_amount = $deliveries->amount;
@@ -7483,9 +7575,9 @@ class DeliveryController extends Controller
                 else
                 {
                     return '-';
-                }     
+                }
             })
-            
+
             ->editColumn('delivery_note', function ($deliveries) {
                 $link = "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
                 if ($deliveries->pending_status == 1) {
@@ -7682,6 +7774,52 @@ class DeliveryController extends Controller
                 }else{
                     return '-';
                 }
+            })
+            ->addColumn('excel_ecom_cod', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 2, 5, null,'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_retail', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 1, 12, null, 'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $count_general = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 1, 2, null,'delivery_note_id');
+                $count_ecomm = $this->get_segment_type('delivery_note_shipments', $result->delivery_note, 2, 7, null,'delivery_note_id');
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
+            })
+
+            ->addColumn('delivered_excel_ecom_cod', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 5, 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_retail', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
+                if (!empty($delivery_note_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 12, 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
+                if (!empty($delivery_note_shipments)) {
+                    $count_general = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 2, 'delivered', 'delivery_note_id');
+                    $count_ecomm = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 7, 'delivered', 'delivery_note_id');
+                }
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -10505,4 +10643,33 @@ class DeliveryController extends Controller
             return response()->json(['status' => 0, 'error' => 'These delivery notes could not be updated!', 'notes' => $notes]);
         }
     }
+
+    public static function get_segment_type($table, $ids, $segment, $sub_segment, $type = null, $column)
+    {
+        $shipment_ids = [];
+
+        if ($type == null) {
+            $shipment_ids = DB::table($table)
+                ->where($column, $ids)
+                ->pluck('shipment_id')
+                ->toArray();
+        } else {
+            $shipment_ids = $ids;
+        }
+
+        return Shipment::whereIn('id', $shipment_ids)
+            ->whereHas('user', function ($query) use ($segment, $sub_segment) {
+                $query->where('segment_id', $segment)
+                    ->where('sub_segment_id', $sub_segment);
+            })
+            ->count();
+    }
+
+    public static function get_delivered_shipments($dn_id){
+        $dncc_status = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38);
+        $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $dn_id)->where('status', '>', 1)->whereNotIn('status', [8, 10, 11])->select('shipment_id')->get();
+        return Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->pluck('id');
+    }
+
+
 }
