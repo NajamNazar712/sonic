@@ -8070,7 +8070,7 @@ class ReturnController extends Controller
     //returning call remarks in Remarks Log Modal on admin/return screen  
     public function call_status_history(Request $request)
     {
-        $mergedArray = DeliveryController::get_call_status_history($request);
+        $mergedArray = $this->get_call_status_history($request);
         return response()->json(['data' => $mergedArray]);
     }
 
