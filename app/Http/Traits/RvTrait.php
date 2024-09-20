@@ -520,7 +520,7 @@ trait RvTrait
                 if($userId){
                     ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, $userId, null);
                 }else{
-                    ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, Auth::id());
+                    ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, Auth::id() ?? $request->agent_id);
                 }
 
                 NotificationsController::send(15, 0, $request->shipment_id);
@@ -603,7 +603,7 @@ trait RvTrait
                 }
             }
             
-            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, null, $globalAdminId ?? Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
+            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, null, $globalAdminId ?? Auth::id() ?? $request->agent_id, null, null, 1, null, null, null, null, $consignee_refused_reasons);
 
 
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
@@ -851,7 +851,7 @@ trait RvTrait
                     RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
                     
                     // //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
-                    ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id());
+                    ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id() ?? $request->agent_id);
                     return ['status' => 1, 'success'=> 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
                 }
 

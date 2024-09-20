@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\ZoneCitiesGst;
+use App\MakePaymentTempTable;
 use App\ShipmentAdditionalCharges;
 use Auth;
 use DateTime;
@@ -7297,299 +7298,327 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
     public function make_payments_store(Request $request)
     {
-        $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', explode(',', $request->pending_payment_shipment_ids))->select('pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
-            return [$item['pending_payment_id'] => $item['id']];
-        })->toArray();
-        $company_bank = $request->get('company_bank_id');
 
-        $done_payment_ids = array();
-        //        $present_consolidation_shipments = array();
-        //        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
-        //            foreach ($pending_payment_shipment_ids as $shipment_id){
-        //                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
-        //                if($present->exists()){
-        //                    $present = $present->first();
-        //                    $consolidation_id = $present->consolidation_id;
-        //
-        //                }
-        //            }
-        //        }
+        $requestPendingShipmentIds = explode(',', $request->pending_payment_shipment_ids);
+        $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $requestPendingShipmentIds)->pluck('pending_payment_shipment_id')->toArray();
+        $idsToInsert = array_diff($requestPendingShipmentIds, $existingShipmentIds);
+        $final_Array = [];
+        if (!empty($idsToInsert)) {
+            foreach ($idsToInsert as $pending_payment_shipment_id) {
+                $insertData = [
+                    'pending_payment_shipment_id' => $pending_payment_shipment_id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                try
+                {
+                    MakePaymentTempTable::insert($insertData);
+                    $final_Array[] = $pending_payment_shipment_id;
+                } catch (\Throwable $th) {
 
-
-        foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
-            $total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();
-            $selected_shipments = count($pending_payment_shipment_ids);
-
-            $pending_payment = PendingPayment::find($pending_payment_id);
-
-            if ($pending_payment) {
-                $user_bank_id = NULL;
-
-                if ($request->has('make_payments_pickup_wise')) {
-                    $pickup_address_map = PickupAddressIbanMapping::where('pickup_address_id', $request->pickup_address_id)->select('bank_info_id as id');
-                    if ($pickup_address_map->exists()) {
-                        $user_bank_id = $pickup_address_map->first();
-                    } else {
-                        $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id')->first();
-                    }
-                } else {
-                    $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id')->first();
-
-                }
-
-                if ($user_bank_id) {
-                    $user_bank_id = $user_bank_id->id;
-                }
-
-                if ($total_shipments == $selected_shipments) {
-
-
-                    $done_payment = new DonePayment();
-
-                    $done_payment->user_id = $pending_payment->user_id;
-                    $done_payment->total_shipments = $pending_payment->total_shipments;
-                    $done_payment->delivered_shipments = $pending_payment->delivered_shipments;
-                    $done_payment->returned_shipments = $pending_payment->returned_shipments;
-                    $done_payment->adjusted_shipments = $pending_payment->adjusted_shipments;
-                    $done_payment->arrival_shipment = $pending_payment->arrival_shipment;
-                    $done_payment->user_bank_info_id = $user_bank_id;
-                    $done_payment->company_bank_id = $company_bank;
-
-
-                    $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
-                    if ($user_ibft_charge) {
-                        $done_payment->ibft_charges = $user_ibft_charge->current_charges;
-                    } else {
-                        $settings = GlobalSettings::where('type', 'ibft_charges');
-
-                        if ($settings->exists()) {
-                            $settings = $settings->first();
-
-                            $done_payment->ibft_charges = $settings->setting_value;
-                        }
-                    }
-
-                    $done_payment->save();
-
-                    $pending_payment->delete();
-
-                    foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
-                        $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
-                        
-                        if ($pending_payment_shipment) {
-                            $done_payment_shipment = new DonePaymentShipment();
-
-                            $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
-                            $done_payment_shipment->done_payment_id = $done_payment->id;
-                            $done_payment_shipment->shipment_id = $pending_payment_shipment->shipment_id;
-                            $done_payment_shipment->type = $pending_payment_shipment->type;
-                            $done_payment_shipment->amount = $pending_payment_shipment->amount;
-                            $done_payment_shipment->charges = $pending_payment_shipment->charges;
-                            $done_payment_shipment->gst = $pending_payment_shipment->gst;
-                            $done_payment_shipment->wht = $pending_payment_shipment->wht;
-                            $done_payment_shipment->payable = $pending_payment_shipment->payable;
-                            $done_payment_shipment->sms_charges = $pending_payment_shipment->sms_charges;
-                            $done_payment->company_bank_id = $company_bank;
-
-                            $done_payment_shipment->save();
-
-                            $packaging_material_charges = 0;
-                            $adjustment_amount = 0;
-                            if ($pending_payment_shipment->type == 2) {
-                                $adjustment_amount = $pending_payment_shipment->payable;
-                            }
-                            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
-
-                            if ($shipment->packaging_material_request) {
-                                $packaging_material_charges = $shipment->packaging_material_charges;
-                                if ($packaging_material_charges == null) {
-                                    $packaging_material_charges = 0;
-                                }
-                            }
-                            
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0) ,$done_payment_shipment->sms_charges);
-                            $pending_payment_shipment->delete();
-
-                            self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
-
-                            if ($done_payment_shipment->type == 0) {
-                                $shipment = Shipment::find($pending_payment_shipment->shipment_id);
-
-                                $shipment->payment_status_id = 1;
-
-                                $shipment->save();
-
-                                ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id(), '', $done_payment->id);
-                            } else if ($done_payment_shipment->type == 1) {
-                                $shipment = Shipment::find($pending_payment_shipment->shipment_id);
-
-                                $shipment->payment_status_id = 5;
-
-                                $shipment->save();
-
-                                ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
-                            } else if ($done_payment_shipment->type == 3) {
-                                $shipment = Shipment::find($pending_payment_shipment->shipment_id);
-
-                                $shipment->payment_status_id = 10;
-
-                                $shipment->save();
-
-                                ShipmentsPaymentJourneyController::add($shipment->id, 10, Auth::id(), '', $done_payment->id);
-                            }
-                        }
-                    }
-
-                    $done_payment_ids[] = $done_payment->id;
-
-                    NotificationsController::send(20, $done_payment->id);
-                } else {
-                    $done_payment = new DonePayment();
-
-                    $done_payment->user_id = $pending_payment->user_id;
-                    $done_payment->total_shipments = 0;
-                    $done_payment->delivered_shipments = 0;
-                    $done_payment->returned_shipments = 0;
-                    $done_payment->adjusted_shipments = 0;
-                    $done_payment->user_bank_info_id = $user_bank_id;
-                    $done_payment->company_bank_id = $company_bank;
-
-                    $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
-                    if ($user_ibft_charge) {
-                        $done_payment->ibft_charges = $user_ibft_charge->current_charges;
-                    } else {
-                        $settings = GlobalSettings::where('type', 'ibft_charges');
-
-                        if ($settings->exists()) {
-                            $settings = $settings->first();
-
-                            $done_payment->ibft_charges = $settings->setting_value;
-                        }
-                    }
-
-
-                    $done_payment->save();
-
-                    $total_shipments = 0;
-                    $delivered_shipments = 0;
-                    $returned_shipments = 0;
-                    $adjusted_shipments = 0;
-                    $arrival_shipments = 0;
-
-                    foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
-                        $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
-                        if ($pending_payment_shipment) {
-
-
-                            if ($pending_payment_shipment->type == 0) {
-                                $delivered_shipments++;
-                                $total_shipments++;
-                            } else if ($pending_payment_shipment->type == 1) {
-                                $returned_shipments++;
-                                $total_shipments++;
-                            } else if ($pending_payment_shipment->type == 3) {
-                                $arrival_shipments++;
-                            } else {
-                                $adjusted_shipments++;
-                                $total_shipments++;
-                            }
-
-                            $done_payment_shipment = new DonePaymentShipment();
-
-                            $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
-                            $done_payment_shipment->done_payment_id = $done_payment->id;
-                            $done_payment_shipment->shipment_id = $pending_payment_shipment->shipment_id;
-                            $done_payment_shipment->type = $pending_payment_shipment->type;
-                            $done_payment_shipment->amount = $pending_payment_shipment->amount;
-                            $done_payment_shipment->charges = $pending_payment_shipment->charges;
-                            $done_payment_shipment->gst = $pending_payment_shipment->gst;
-                            $done_payment_shipment->wht = $pending_payment_shipment->wht;
-                            $done_payment_shipment->payable = $pending_payment_shipment->payable;
-                            $done_payment_shipment->sms_charges = $pending_payment_shipment->sms_charges;
-                            $done_payment->company_bank_id = $company_bank;
-
-                            $done_payment_shipment->save();
-
-                            $packaging_charges = 0;
-
-                            $packaging_material_charges = 0;
-
-                            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
-
-                            if ($shipment->packaging_material_request) {
-                                $packaging_material_charges = $shipment->packaging_material_charges;
-                                if ($packaging_material_charges == null) {
-                                    $packaging_material_charges = 0;
-                                }
-                            }
-
-                            $adjustment_amount = 0;
-                            if ($pending_payment_shipment->type == 2) {
-                                $adjustment_amount = $pending_payment_shipment->amount;
-                            }
-
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0), $pending_payment_shipment->sms_charges);
-
-                            self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
-
-                            $pending_payment_shipment->delete();
-
-                            self::sub_pending_payment_charges($pending_payment_shipment->pending_payment_id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, null, $pending_payment_shipment->wht, $pending_payment_shipment->sms_charges);
-
-                            if ($done_payment_shipment->type == 1) {
-                                $shipment = Shipment::find($pending_payment_shipment->shipment_id);
-
-                                $shipment->payment_status_id = 5;
-
-                                $shipment->save();
-
-                                ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
-                            }else if ($done_payment_shipment->type == 3) {
-                                $shipment = Shipment::find($pending_payment_shipment->shipment_id);
-
-                                $shipment->payment_status_id = 10;
-
-                                $shipment->save();
-
-                                ShipmentsPaymentJourneyController::add($shipment->id, 10, Auth::id(), '', $done_payment->id);
-                            } else {
-                                $shipment = Shipment::find($pending_payment_shipment->shipment_id);
-
-                                $shipment->payment_status_id = 1;
-
-                                $shipment->save();
-
-                                ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id(), '', $done_payment->id);
-                            }
-                        }
-                    }
-
-                    $done_payment->total_shipments = $total_shipments;
-                    $done_payment->delivered_shipments = $delivered_shipments;
-                    $done_payment->returned_shipments = $returned_shipments;
-                    $done_payment->adjusted_shipments = $adjusted_shipments;
-                    $done_payment->arrival_shipment = $arrival_shipments;
-                    $done_payment->user_bank_info_id = $user_bank_id;
-
-
-                    $done_payment->save();
-
-                    $pending_payment->total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();
-                    $pending_payment->delivered_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('type', 0)->count();
-                    $pending_payment->returned_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('type', 1)->count();
-                    $pending_payment->adjusted_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('type', 2)->count();
-                    $pending_payment->arrival_shipment = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('type', 3)->count();
-
-                    $pending_payment->save();
-
-                    $done_payment_ids[] = $done_payment->id;
-
-                    NotificationsController::send(20, $done_payment->id);
                 }
             }
+
         }
 
-        return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
+        if(count($final_Array) > 0) {
+
+            $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', $final_Array)->select('pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
+                return [$item['pending_payment_id'] => $item['id']];
+            })->toArray();
+            $company_bank = $request->get('company_bank_id');
+
+            $done_payment_ids = array();
+            //        $present_consolidation_shipments = array();
+            //        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
+            //            foreach ($pending_payment_shipment_ids as $shipment_id){
+            //                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
+            //                if($present->exists()){
+            //                    $present = $present->first();
+            //                    $consolidation_id = $present->consolidation_id;
+            //
+            //                }
+            //            }
+            //        }
+
+
+            foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
+                $total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();
+                $selected_shipments = count($pending_payment_shipment_ids);
+
+                $pending_payment = PendingPayment::find($pending_payment_id);
+
+                if ($pending_payment) {
+                    $user_bank_id = NULL;
+
+                    if ($request->has('make_payments_pickup_wise')) {
+                        $pickup_address_map = PickupAddressIbanMapping::where('pickup_address_id', $request->pickup_address_id)->select('bank_info_id as id');
+                        if ($pickup_address_map->exists()) {
+                            $user_bank_id = $pickup_address_map->first();
+                        } else {
+                            $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id')->first();
+                        }
+                    } else {
+                        $user_bank_id = UserBankInfo::where('user_id', $pending_payment->user_id)->where('default_bank', 1)->select('id')->first();
+
+                    }
+
+                    if ($user_bank_id) {
+                        $user_bank_id = $user_bank_id->id;
+                    }
+
+                    if ($total_shipments == $selected_shipments) {
+
+
+                        $done_payment = new DonePayment();
+
+                        $done_payment->user_id = $pending_payment->user_id;
+                        $done_payment->total_shipments = $pending_payment->total_shipments;
+                        $done_payment->delivered_shipments = $pending_payment->delivered_shipments;
+                        $done_payment->returned_shipments = $pending_payment->returned_shipments;
+                        $done_payment->adjusted_shipments = $pending_payment->adjusted_shipments;
+                        $done_payment->arrival_shipment = $pending_payment->arrival_shipment;
+                        $done_payment->user_bank_info_id = $user_bank_id;
+                        $done_payment->company_bank_id = $company_bank;
+
+
+                        $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
+                        if ($user_ibft_charge) {
+                            $done_payment->ibft_charges = $user_ibft_charge->current_charges;
+                        } else {
+                            $settings = GlobalSettings::where('type', 'ibft_charges');
+
+                            if ($settings->exists()) {
+                                $settings = $settings->first();
+
+                                $done_payment->ibft_charges = $settings->setting_value;
+                            }
+                        }
+
+                        $done_payment->save();
+
+                        $pending_payment->delete();
+
+                        foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
+                            $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
+
+                            if ($pending_payment_shipment) {
+                                $done_payment_shipment = new DonePaymentShipment();
+
+                                $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
+                                $done_payment_shipment->done_payment_id = $done_payment->id;
+                                $done_payment_shipment->shipment_id = $pending_payment_shipment->shipment_id;
+                                $done_payment_shipment->type = $pending_payment_shipment->type;
+                                $done_payment_shipment->amount = $pending_payment_shipment->amount;
+                                $done_payment_shipment->charges = $pending_payment_shipment->charges;
+                                $done_payment_shipment->gst = $pending_payment_shipment->gst;
+                                $done_payment_shipment->wht = $pending_payment_shipment->wht;
+                                $done_payment_shipment->payable = $pending_payment_shipment->payable;
+                                $done_payment_shipment->sms_charges = $pending_payment_shipment->sms_charges;
+                                $done_payment->company_bank_id = $company_bank;
+
+                                $done_payment_shipment->save();
+
+                                $packaging_material_charges = 0;
+                                $adjustment_amount = 0;
+                                if ($pending_payment_shipment->type == 2) {
+                                    $adjustment_amount = $pending_payment_shipment->payable;
+                                }
+                                $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                                if ($shipment->packaging_material_request) {
+                                    $packaging_material_charges = $shipment->packaging_material_charges;
+                                    if ($packaging_material_charges == null) {
+                                        $packaging_material_charges = 0;
+                                    }
+                                }
+
+                                self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0), $done_payment_shipment->sms_charges);
+                                $pending_payment_shipment->delete();
+
+                                self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
+
+                                if ($done_payment_shipment->type == 0) {
+                                    $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                                    $shipment->payment_status_id = 1;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id(), '', $done_payment->id);
+                                } else if ($done_payment_shipment->type == 1) {
+                                    $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                                    $shipment->payment_status_id = 5;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
+                                } else if ($done_payment_shipment->type == 3) {
+                                    $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                                    $shipment->payment_status_id = 10;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 10, Auth::id(), '', $done_payment->id);
+                                }
+                            }
+                        }
+
+                        $done_payment_ids[] = $done_payment->id;
+
+                        NotificationsController::send(20, $done_payment->id);
+                    } else {
+                        $done_payment = new DonePayment();
+
+                        $done_payment->user_id = $pending_payment->user_id;
+                        $done_payment->total_shipments = 0;
+                        $done_payment->delivered_shipments = 0;
+                        $done_payment->returned_shipments = 0;
+                        $done_payment->adjusted_shipments = 0;
+                        $done_payment->user_bank_info_id = $user_bank_id;
+                        $done_payment->company_bank_id = $company_bank;
+
+                        $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
+                        if ($user_ibft_charge) {
+                            $done_payment->ibft_charges = $user_ibft_charge->current_charges;
+                        } else {
+                            $settings = GlobalSettings::where('type', 'ibft_charges');
+
+                            if ($settings->exists()) {
+                                $settings = $settings->first();
+
+                                $done_payment->ibft_charges = $settings->setting_value;
+                            }
+                        }
+
+
+                        $done_payment->save();
+
+                        $total_shipments = 0;
+                        $delivered_shipments = 0;
+                        $returned_shipments = 0;
+                        $adjusted_shipments = 0;
+                        $arrival_shipments = 0;
+
+                        foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
+                            $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
+                            if ($pending_payment_shipment) {
+
+
+                                if ($pending_payment_shipment->type == 0) {
+                                    $delivered_shipments++;
+                                    $total_shipments++;
+                                } else if ($pending_payment_shipment->type == 1) {
+                                    $returned_shipments++;
+                                    $total_shipments++;
+                                } else if ($pending_payment_shipment->type == 3) {
+                                    $arrival_shipments++;
+                                } else {
+                                    $adjusted_shipments++;
+                                    $total_shipments++;
+                                }
+
+                                $done_payment_shipment = new DonePaymentShipment();
+
+                                $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
+                                $done_payment_shipment->done_payment_id = $done_payment->id;
+                                $done_payment_shipment->shipment_id = $pending_payment_shipment->shipment_id;
+                                $done_payment_shipment->type = $pending_payment_shipment->type;
+                                $done_payment_shipment->amount = $pending_payment_shipment->amount;
+                                $done_payment_shipment->charges = $pending_payment_shipment->charges;
+                                $done_payment_shipment->gst = $pending_payment_shipment->gst;
+                                $done_payment_shipment->wht = $pending_payment_shipment->wht;
+                                $done_payment_shipment->payable = $pending_payment_shipment->payable;
+                                $done_payment_shipment->sms_charges = $pending_payment_shipment->sms_charges;
+                                $done_payment->company_bank_id = $company_bank;
+
+                                $done_payment_shipment->save();
+
+                                $packaging_charges = 0;
+
+                                $packaging_material_charges = 0;
+
+                                $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                                if ($shipment->packaging_material_request) {
+                                    $packaging_material_charges = $shipment->packaging_material_charges;
+                                    if ($packaging_material_charges == null) {
+                                        $packaging_material_charges = 0;
+                                    }
+                                }
+
+                                $adjustment_amount = 0;
+                                if ($pending_payment_shipment->type == 2) {
+                                    $adjustment_amount = $pending_payment_shipment->amount;
+                                }
+
+                                self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0), $pending_payment_shipment->sms_charges);
+
+                                self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
+
+                                $pending_payment_shipment->delete();
+
+                                self::sub_pending_payment_charges($pending_payment_shipment->pending_payment_id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, null, $pending_payment_shipment->wht, $pending_payment_shipment->sms_charges);
+
+                                if ($done_payment_shipment->type == 1) {
+                                    $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                                    $shipment->payment_status_id = 5;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
+                                } else if ($done_payment_shipment->type == 3) {
+                                    $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                                    $shipment->payment_status_id = 10;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 10, Auth::id(), '', $done_payment->id);
+                                } else {
+                                    $shipment = Shipment::find($pending_payment_shipment->shipment_id);
+
+                                    $shipment->payment_status_id = 1;
+
+                                    $shipment->save();
+
+                                    ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id(), '', $done_payment->id);
+                                }
+                            }
+                        }
+
+                        $done_payment->total_shipments = $total_shipments;
+                        $done_payment->delivered_shipments = $delivered_shipments;
+                        $done_payment->returned_shipments = $returned_shipments;
+                        $done_payment->adjusted_shipments = $adjusted_shipments;
+                        $done_payment->arrival_shipment = $arrival_shipments;
+                        $done_payment->user_bank_info_id = $user_bank_id;
+
+
+                        $done_payment->save();
+
+                        $pending_payment->total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();
+                        $pending_payment->delivered_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('type', 0)->count();
+                        $pending_payment->returned_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('type', 1)->count();
+                        $pending_payment->adjusted_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('type', 2)->count();
+                        $pending_payment->arrival_shipment = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('type', 3)->count();
+
+                        $pending_payment->save();
+
+                        $done_payment_ids[] = $done_payment->id;
+
+                        NotificationsController::send(20, $done_payment->id);
+                    }
+                }
+            }
+
+            return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
+        }else{
+            return redirect()->with(['success' => 'Given Ids Already Processed']);
+        }
     }
 
     static public function make_done_payment($done_payment_id, $user_id, $total_shipments, $delivered_shipments, $returned_shipments, $adjusted_shipments, $user_bank_id, $company_bank)
