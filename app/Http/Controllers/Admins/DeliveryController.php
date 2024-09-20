@@ -5526,7 +5526,7 @@ class DeliveryController extends Controller
             ->addColumn('delivered_excel_general_retail', function($result){
                 $count = 0;
                 $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
-                if (!empty($delivery_note_shipments)) {
+                if (!empty($delivered_shipments)) {
                     $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 12, 'delivered', 'delivery_note_id');
                 }
                 return $count > 0 ? $count : '-';
@@ -5535,7 +5535,7 @@ class DeliveryController extends Controller
                 $count_general = 0;
                 $count_ecomm = 0;
                 $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
-                if (!empty($delivery_note_shipments)) {
+                if (!empty($delivered_shipments)) {
                     $count_general = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 2, 'delivered', 'delivery_note_id');
                     $count_ecomm = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 7, 'delivered', 'delivery_note_id');
                 }
@@ -7805,7 +7805,7 @@ class DeliveryController extends Controller
             ->addColumn('delivered_excel_general_retail', function($result){
                 $count = 0;
                 $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
-                if (!empty($delivery_note_shipments)) {
+                if (!empty($delivered_shipments)) {
                     $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 12, 'delivered', 'delivery_note_id');
                 }
                 return $count > 0 ? $count : '-';
@@ -7814,7 +7814,7 @@ class DeliveryController extends Controller
                 $count_general = 0;
                 $count_ecomm = 0;
                 $delivered_shipments = $this->get_delivered_shipments($result->delivery_note);
-                if (!empty($delivery_note_shipments)) {
+                if (!empty($delivered_shipments)) {
                     $count_general = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 1, 2, 'delivered', 'delivery_note_id');
                     $count_ecomm = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, 2, 7, 'delivered', 'delivery_note_id');
                 }
