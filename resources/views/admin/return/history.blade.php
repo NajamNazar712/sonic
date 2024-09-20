@@ -296,7 +296,7 @@
                                 row.push(values.submitted_by);
                                 row.push(values.submitted_at);
 
-                                row.push(values.delivered_to_shipper_count);
+                                row.push(values.excel_delivered_to_shipper_count);
                                 row.push(values.delivered_excel_ecom_cod);
                                 row.push(values.delivered_excel_general_retail);
                                 row.push(values.delivered_excel_general_ecom_express);
@@ -353,7 +353,7 @@
                     { data:'submitted_by' ,name: 'sb.name', class: 'align-middle submitted_by'},
                     { data:'submitted_at' ,name: 'return_notes.updated_at', class: 'align-middle submitted_at'},
                     { data:'image' ,name: 'image', class: 'align-middle text-center image', orderable: false, searchable: false},
-                    { data:'delivered_to_shipper_count_link' ,name: 'delivered_to_shipper_count_link', class: 'align-middle text-center delivered_to_shipper_count_link', orderable: false, searchable: false},
+                    { data:'delivered_to_shipper_count' ,name: 'delivered_to_shipper_count', class: 'align-middle text-center delivered_to_shipper_count', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
