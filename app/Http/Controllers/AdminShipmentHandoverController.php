@@ -1303,4 +1303,40 @@ class AdminShipmentHandoverController extends Controller
         return ['status' => 1, 'error' => 'Shipment type is not correct.'];
       }
     }
+
+    public function handover_exists(Request $request)
+    {
+      $tracking_number = $request->tracking_number;
+      $shipment = Shipment::where('tracking_number', $tracking_number)
+      ->select('id')
+      ->first();
+
+      // if shipment doesn't exist
+      if (!$shipment){
+        return ['status' => 1, 'error' => 'Shipment does not exist'];
+      }
+
+      $handover_exists = HandoverShipments::where('shipment_id', $shipment->id)
+      ->latest('created_at')
+      ->where('status', 1)
+      ->first();
+      
+      if ($handover_exists) {
+        return ['status' => 1, 'error' => 'Handover is already created.'];
+      }
+    }
+
+    public function same_hub_handover_count(Request $request)
+    {
+      $shipment_id = Shipment::where('tracking_number', $request->tracking_number)
+      ->select('id')
+      ->first();
+      $handover_shipments = HandoverShipments::where('shipment_id', $shipment_id)->get();
+      $handovers = Handover::whereIn('id', $handover_shipments)->get();
+      $hub_count = $handovers->where('hub', $request->hub_id)->count();
+      dd($hub_count);
+      if ($hub_count >= 3) {
+        return ['status' => 1, 'error' => 'You cannot add more handovers for this hub.'];
+      }
+    }
 }
