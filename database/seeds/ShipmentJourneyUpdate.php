@@ -20,8 +20,9 @@ class ShipmentJourneyUpdate extends Seeder
             ->where('rv_shipment_assign_agents.agent_id', 4620)
             ->limit(100)
             ->pluck('sj.admin_id');
-        // Update sj.admin_id for the retrieved IDs
-        ShipmentsJourney::whereIn('id', $rvAdminIds)
-        ->update(['admin_id' => 4620]);
+        dd($rvAdminIds);
+            // Update sj.admin_id for the retrieved IDs
+        // ShipmentsJourney::whereIn('id', $rvAdminIds)
+        // ->update(['admin_id' => 4620]);
     }
 }
