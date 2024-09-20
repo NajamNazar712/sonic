@@ -1328,13 +1328,18 @@ class AdminShipmentHandoverController extends Controller
 
     public function same_hub_handover_count(Request $request)
     {
-      $shipment_id = Shipment::where('tracking_number', $request->tracking_number)
+      $shipment = Shipment::where('tracking_number', $request->tracking_number)
       ->select('id')
       ->first();
-      $handover_shipments = HandoverShipments::where('shipment_id', $shipment_id)->get();
-      $handovers = Handover::whereIn('id', $handover_shipments)->get();
+      if (!$shipment) {
+          return ['status' => 0, 'error' => 'Shipment not found.'];
+      }
+      $handover_shipments = HandoverShipments::where('shipment_id', $shipment->id)
+      ->select('handover_id')
+      ->get();
+      $handover_ids = $handover_shipments->pluck('handover_id');
+      $handovers = Handover::whereIn('id', $handover_ids)->get();
       $hub_count = $handovers->where('hub', $request->hub_id)->count();
-      dd($hub_count);
       if ($hub_count >= 3) {
         return ['status' => 1, 'error' => 'You cannot add more handovers for this hub.'];
       }
