@@ -18,7 +18,7 @@ class ShipmentJourneyUpdate extends Seeder
             ->whereIn('sj.shipper_status_id', [13, 20, 65])
             ->whereNull('sj.admin_id')
             ->where('rv_shipment_assign_agents.agent_id', 4620)
-            ->limit(100)
+            ->limit(10000)
             ->pluck('sj.id');
         
             // Update sj.admin_id for the retrieved IDs
