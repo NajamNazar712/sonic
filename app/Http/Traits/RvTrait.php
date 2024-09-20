@@ -851,7 +851,7 @@ trait RvTrait
                     RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
                     
                     // //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
-                    ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id());
+                    ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id() ?? $request->agent_id);
                     return ['status' => 1, 'success'=> 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
                 }
 
