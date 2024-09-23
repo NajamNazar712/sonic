@@ -32,7 +32,7 @@ class ApiCallZongLog extends Migration
     public function down()
     {
         //
-        Schema::dropIfExists('shipper_webhook_logs');
+        Schema::dropIfExists('api_call_logs');
 
     }
 }
