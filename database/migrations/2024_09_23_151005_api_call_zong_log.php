@@ -16,9 +16,10 @@ class ApiCallZongLog extends Migration
         //
         Schema::create('api_call_logs', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
-            $table->integer('shipment_id');
+            $table->integer('user_id')->index();
+            $table->integer('shipment_id')->index();
             $table->integer('status_code');
+            $table->integer('call_count_logs')->nullable();
             $table->json('payload')->nullable();
             $table->timestamps();
         });
