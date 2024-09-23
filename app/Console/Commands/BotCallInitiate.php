@@ -59,16 +59,13 @@ class BotCallInitiate extends Command
             // $timeEnd = Carbon::parse(now())->subHour(5)->format('Y-m-d H:i').':00'; // Get the timestamp of two hours ago
             // $timeStart = Carbon::parse(now())->subMinute(60)->format('Y-m-d H:i').':59';
             // dd($timeStart);
-            $timeStart = '2024-09-23 10:59' . ':00'; // Get the timestamp of two hours ago
-            $timeEnd = Carbon::parse(now())->subHour(2)->format('Y-m-d H:i') . ':59';
-            
+            $timeStart = Carbon::parse(now())->subHour(2)->format('Y-m-d H:i') . ':00';
+            $timeEnd = Carbon::parse(now())->addMinute(15)->format('Y-m-d H:i') . ':59'; // Get the timestamp of two hours ago
             // Now, re-initiate process for the retrieved shipment_ids after unresponsive one
             $shipmentSeconds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=',$timeStart], ['unresponsive_attempt_time', '<=', $timeEnd],'unresponsive_count' => 1, 'rv_assign_agent_status_id'=>6])->pluck('shipment_id');
-            Log::channel('cronJobLog')->info('s ' . 'Log after second call  record' . count($shipmentSeconds));
             //  Now, re-initiate process for the retrieved shipment_ids after unresponsive two            
             $shipmentThirds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
-            Log::channel('cronJobLog')->info('s ' . 'Log after third call  record' . count($shipmentThirds));
-
+            $second_count = 1;
             if (count($shipmentSeconds) > 0) {            
                 foreach($shipmentSeconds as $shipmentId){
                     if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
@@ -91,7 +88,8 @@ class BotCallInitiate extends Command
                             $status_code = $response->getStatusCode();
                             $response = $response->getBody()->getContents();
                             $response = json_decode($response);
-                            
+                            Log::channel('cronJobLog')->info('s ' . 'Log after second call  record' . $second_count);
+                            $second_count++;    
                             // WebhookLogController::shipment_status_log($shipment->user_id, $status_code, json_encode($response));
                             // Log::channel('cronJobLog')->info('s ' . 'Log after second call  with response' . $shipment->tracking_number);
                             WebhookLogController::zong_call_log($shipment->user_id,  $status_code, $shipmentId, 2, json_encode($response));
@@ -102,7 +100,7 @@ class BotCallInitiate extends Command
                 }
             }
             
-
+            $third_count =1;
             if(count($shipmentThirds) > 0){
                 foreach($shipmentThirds as $shipmentId){
                     if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
@@ -125,6 +123,8 @@ class BotCallInitiate extends Command
                             $status_code = $response->getStatusCode();
                             $response = $response->getBody()->getContents();
                             $response = json_decode($response);
+                            Log::channel('cronJobLog')->info('s ' . 'Log after third call  record' . $third_count);
+                            $third_count++;    
                             // Log::channel('cronJobLog')->info('s ' . 'Log after call dispatched with response third-call' . json_encode($response));
                             WebhookLogController::zong_call_log($shipment->user_id,  $status_code, $shipmentId, 3, json_encode($response));
                         } else {
