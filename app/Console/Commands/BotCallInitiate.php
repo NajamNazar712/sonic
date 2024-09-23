@@ -88,7 +88,7 @@ class BotCallInitiate extends Command
                             $response = json_decode($response);
                             
                             // WebhookLogController::shipment_status_log($shipment->user_id, $status_code, json_encode($response));
-                            Log::channel('cronJobLog')->info('s ' . 'Log after second call  with response' . $shipment->tracking_number);
+                            // Log::channel('cronJobLog')->info('s ' . 'Log after second call  with response' . $shipment->tracking_number);
                             WebhookLogController::zong_call_log($shipment->user_id,  $status_code, $shipmentId, 2, json_encode($response));
                         } else {
                             return json_encode(['status' => 0, 'message' => 'Shipment isn`t at the bot call prefernce']);
