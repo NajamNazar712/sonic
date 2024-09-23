@@ -59,9 +59,10 @@ class BotCallInitiate extends Command
             // $timeEnd = Carbon::parse(now())->subHour(5)->format('Y-m-d H:i').':00'; // Get the timestamp of two hours ago
             // $timeStart = Carbon::parse(now())->subMinute(60)->format('Y-m-d H:i').':59';
             // dd($timeStart);
-            $timeStart = Carbon::parse(now())->subHour(2)->format('Y-m-d H:i'). ':00';
+            $timeEnd = Carbon::parse(now())->subHour(2)->format('Y-m-d H:i'). ':59';
             // Carbon::parse(now())->subHour(2)->format('Y-m-d H:i') 
-            $timeEnd = Carbon::parse(now())->addMinute(15)->format('Y-m-d H:i') . ':59'; // Get the timestamp of two hours ago
+            $timeStart = Carbon::parse($timeEnd)->subMinute(15)->format('Y-m-d H:i') . ':00'; // Get the timestamp of two hours ago
+            
             // Now, re-initiate process for the retrieved shipment_ids after unresponsive one
             $shipmentSeconds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=',$timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'rv_assign_agent_status_id'=>6])->whereIn('unresponsive_count', [1, 2])->pluck('shipment_id', 'unresponsive_count');
             // dd($shipmentSeconds);
