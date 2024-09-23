@@ -10229,9 +10229,7 @@ class AdminReportsController extends Controller
             ->leftJoin('admins as user', 'user.id', '=', 'arv_date.admin_id')
             ->leftJoin('cities as hub', 'hub.id', '=', 'user.default_hub_id')
             ->leftJoin('city_areas as area', 'area.id', '=', 'user.area_id')
-            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight', 'hub.name as hub_name','area.name as area_name'
-            // 'sw.range_down_arrival_weight','sw.range_down_shipper_weight' ,'sw.shipper_weight_charges','shipments.weight_charges as arrival_weight_charges', 'sw.arrival_range_weight_charges','sw.shipper_range_weight_charges'
-            ])
+            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight', 'hub.name as hub_name','area.name as area_name','sw.range_down_arrival_weight','sw.range_down_shipper_weight' ,'sw.shipper_weight_charges','shipments.weight_charges as arrival_weight_charges', 'sw.arrival_range_weight_charges','sw.shipper_range_weight_charges'])
             ->where('arv_date.shipper_status_id', '=', 2)
             ->whereNotNull('shipments.actual_weight');
 
@@ -10263,22 +10261,22 @@ class AdminReportsController extends Controller
                     return 'Dense';
                 }
             })
-            // ->addColumn('range_difference', function ($shipment) {
-            //     $range_difference = round($shipment->range_down_arrival_weight - $shipment->range_down_shipper_weight, 2);
-            //     return $range_difference;
-            // })
+            ->addColumn('range_difference', function ($shipment) {
+                $range_difference = round($shipment->range_down_arrival_weight - $shipment->range_down_shipper_weight, 2);
+                return $range_difference;
+            })
             ->addColumn('difference', function ($shipment) {
                 $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
                 return $difference;
+            })
+            ->addColumn('charges_diff', function ($shipment){
+                $charges_diff = $shipment->arrival_weight_charges - $shipment->shipper_weight_charges;
+                return $charges_diff;
+            })
+            ->addColumn('weight_range_charges_diff', function ($shipment){
+                $range_charges_diff = $shipment->arrival_range_weight_charges - $shipment->shipper_range_weight_charges;
+                return $range_charges_diff;
             });
-            // ->addColumn('charges_diff', function ($shipment){
-            //     $charges_diff = $shipment->arrival_weight_charges - $shipment->shipper_weight_charges;
-            //     return $charges_diff;
-            // })
-            // ->addColumn('weight_range_charges_diff', function ($shipment){
-            //     $range_charges_diff = $shipment->arrival_range_weight_charges - $shipment->shipper_range_weight_charges;
-            //     return $range_charges_diff;
-            // });
 
 
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
@@ -14788,8 +14786,8 @@ class AdminReportsController extends Controller
             'ca_scanning_last_location_name.name as ca_scanning_last_location_name',
             'ssj_last_location.user_type as scanned_by_user_type',
             'ssj_last_location.admin_id as scanned_by_id',
-            'last_screen_location.name as last_location_screen_location_name',
-            'ssj_last_location.entry_method as entry_method'
+            'last_screen_location.name as last_location_screen_location_name'
+
         ];
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('sale_person_tags as spt', function($join){
@@ -15216,10 +15214,6 @@ class AdminReportsController extends Controller
                 }else{
                     return '-';
                 }
-            })->editColumn('entry_method', function ($shipment) {
-                return $shipment->entry_method === null
-                    ? 'Not Scanned'
-                    : ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             });
       
 
@@ -15289,7 +15283,7 @@ class AdminReportsController extends Controller
                 $rowArray['aging_last_status'] = ($days == 0) ? "-" : $days;
 
                 $rowArray['kam'] = $rowArray['stt_kam_id'] != null ?  $rowArray['stt_kam_name'] : $rowArray['scu_kam_name'];
-
+        
                 if (isset($rowArray['crm_request_id'])) {
                     $rowArray['crm_id_padded'] = str_pad($rowArray['crm_request_id'], 6, '0', STR_PAD_LEFT);
                 } else {
@@ -15318,11 +15312,8 @@ class AdminReportsController extends Controller
                         $rowArray['ca_scanning_last_location_name'] = '-';
                     }
                 }
-
-                $rowArray['entry_method'] = $rowArray['entry_method'] === null
-                    ? 'Not Scanned'
-                    : ($rowArray['entry_method'] == 1 ? 'Scanned' : 'Manual');
-
+             
+                
                 $filteredArray = [];
 
                 // Iterate over $fieldsToRetrieve to maintain sequence

@@ -126,8 +126,6 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
-
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
 
     <script>
@@ -196,7 +194,6 @@
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
-                                'action' : window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
@@ -308,7 +305,6 @@
                             data: {
                                 'shipment_id': shipment_id,
                                 'piece_id': item,
-                                'action' : window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             },
                             timeout: 5000,

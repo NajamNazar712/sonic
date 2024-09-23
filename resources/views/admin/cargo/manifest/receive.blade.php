@@ -120,8 +120,6 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
-
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
 
     <script>
@@ -193,7 +191,6 @@
                             method: 'POST',
                             data: {
                                 'bag_number': bag_number,
-                                'action': window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })

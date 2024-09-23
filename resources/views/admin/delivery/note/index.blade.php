@@ -299,7 +299,6 @@
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -622,7 +621,6 @@
                             data: {
                                 'tracking':tracking,
                                 'rider_id':rider_id,
-                                'action' : window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
@@ -787,7 +785,6 @@
                                     'tracking':tracking,
                                     'hub_id':hub_id,
                                     'rider_id':rider_id,
-                                    'action' : window.lastAction,
                                     '_token':'{!! csrf_token() !!}'
                                 }
                             }).done(function (data) {
@@ -1489,7 +1486,6 @@
                                 'tracking': tracking_number,
                                 'pieces_confirm': 1,
                                 'rider_id': rider_id,
-                                'action' : window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
@@ -1570,7 +1566,6 @@
                                 'tracking':tracking_number,
                                 'hub_id':hub_id,
                                 'pieces_confirm':1,
-                                'action' : window.lastAction,
                                 '_token':'{!! csrf_token() !!}'
                             }
                         }).done(function (data) {
