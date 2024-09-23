@@ -59,7 +59,7 @@ class BotCallInitiate extends Command
             // $timeEnd = Carbon::parse(now())->subHour(5)->format('Y-m-d H:i').':00'; // Get the timestamp of two hours ago
             // $timeStart = Carbon::parse(now())->subMinute(60)->format('Y-m-d H:i').':59';
             // dd($timeStart);
-            $timeStart = '2024-09-23 10:00'. ':00';
+            $timeStart = Carbon::parse(now())->subHour(2)->format('Y-m-d H:i'). ':00';
             // Carbon::parse(now())->subHour(2)->format('Y-m-d H:i') 
             $timeEnd = Carbon::parse(now())->addMinute(15)->format('Y-m-d H:i') . ':59'; // Get the timestamp of two hours ago
             // Now, re-initiate process for the retrieved shipment_ids after unresponsive one
