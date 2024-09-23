@@ -130,7 +130,6 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\NotificationSetting;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use App\Http\Models\ShipmentLedger;
 use Illuminate\Support\Str;class AdminFinanceController extends Controller
@@ -238,7 +237,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         if ($day % 100 >= 11 && $day % 100 <= 13) {
             return $day . 'th';
         } else {
-            switch ($day % 10) {
+            switch ($day % 10) {    
                 case 1:
                     return $day . 'st';
                 case 2:
@@ -965,6 +964,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 97);
         }
+
         if ($recovery_status = $request->get('recovery_status')) {
             if ($recovery_status == 7) {
                 $count = DeliveryNoteShipment::where('status', '=', 7);
@@ -1243,27 +1243,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
-
-        //------x-------x------------x------TO-6827---------x----------x-----------
-        $adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
-
-        if(!App::environment('production'))
-        {
-            $adminId = 3335;//if admin is 3335 for testing in staging
-        }
-
-        if(Auth::id() == $adminId)
-        {
-            $mmsSettingShippers = GlobalSettings::where('type', 'mms_setting')->first();
-            if($mmsSettingShippers)
-            {
-                $shipperIds = array_map('intval', explode(',', $mmsSettingShippers->text));
-                $datatables->whereIn('u.id', $shipperIds);
-            }
-        }
-
-        //------x-------x------------x------!TO-6827!---------x----------x-----------
-
 
         return $datatables->make(true);
     }
@@ -7924,16 +7903,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
             ->join('payment_cycles as pc', 'u.payment_cycle_id', '=', 'pc.id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->leftJoin('sale_person_tags as spt', function($join){
-                $join->on('spt.user_id','u.id')
-                ->where(
-                    'spt.id',
-                    '=',
-                    DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0 )')
-                );
-            })
-            //leftJoin to join as admin will always present
-            ->join('admins as sale_admin','sale_admin.id','=','spt.admin_id')
             ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 
             'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 
             'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 
@@ -7943,7 +7912,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -14871,26 +14840,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $revert_status_request_log->previous_status = $previous_status;
                 $revert_status_request_log->updated_by = Auth::id();
                 $revert_status_request_log->save();
-
-                //----------x---------x-----------TO-6827--------x------------x--------x
-                $adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
-                if(!App::environment('production'))
-                {
-                    $adminId = 3335;//if admin is 3335 for testing in staging environment
-                }
-
-                if(Auth::id() == $adminId)
-                {
-                    Shipment::find($shipment_id)->update([
-                        'shipper_status_id' => 13,
-                        'consignee_status_id' => 13
-                    ]);
-
-                    ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
-                }       
-                //-------x--------------!TO-6827!------------x-------------x-------
-                
-
 
             }
             return redirect()->back()->with(['success' => 'Shipments updated to Revert Request Status!']);

@@ -2767,10 +2767,6 @@
                                                                 href="{{ route('admin.user_management.fuel_management.index') }}">Fuel
                                                                 Management</a></li>
                                                     @endif
-                                                    @if (session('role_id') == 1)
-                                                        <li><a class="menu-item"
-                                                                href="{{ route('admin.user_management.index') }}">User/Role Management Logs</a></li>
-                                                    @endif
                                                 </ul>
                                             </li>
                                         @endif

@@ -23,18 +23,16 @@
                             <span class="text-danger font-small-3 myError" id="delivery_note_error"></span>
                         </fieldset>
                     </div>
-
                     <div class="col-3">
-                        <form id="quick_receive_form">
-                            <fieldset class="position-relative has-icon-left">
-                                <input type="text" readonly autocomplete="off" class="form-control" placeholder="Scan Tracking Number" id="scan_tracking">
-                                <div class="form-control-position">
-                                    <i class="ft-search"></i>
-                                </div>
-                                <span class="text-danger font-small-3 myError" id="scan_tracking_error"></span>
-                            </fieldset>
-                        </form>
+                        <fieldset class="position-relative has-icon-left">
+                            <input type="text" readonly autocomplete="off" class="form-control" placeholder="Scan Tracking Number" id="scan_tracking">
+                            <div class="form-control-position">
+                                <i class="ft-search"></i>
+                            </div>
+                            <span class="text-danger font-small-3 myError" id="scan_tracking_error"></span>
+                        </fieldset>
                     </div>
+
 
                 </div>
                 <div class="row mb-2 justify-content-center">
@@ -73,7 +71,7 @@
                     <form id="submit_form" action="{{route('admin.delivery.quick_receiving.submit')}}" method="post">
                         @csrf
                         <input type="hidden" name="delivery_note" id="submit_delivery_note_id" value="">
-                        {{--                        <input type="hidden" name="tracking_numbers" id="submit_tracking_numbers" value="">--}}
+{{--                        <input type="hidden" name="tracking_numbers" id="submit_tracking_numbers" value="">--}}
                         <button type="button" id="submit_button" class="btn btn-primary">Receive</button>
                     </form>
                 </div>
@@ -156,7 +154,6 @@
     {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -187,7 +184,7 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).on('change', function(e) {
+            }).on('change', function() {
                 blockPagePermanently();
                 var tracking_number = this.value;
                 var delivery_note_id = $("#scan_delivery_note").val();
@@ -198,8 +195,6 @@
                         '_token': '{{ csrf_token() }}',
                         'delivery_note_id': delivery_note_id,
                         'tracking_number': tracking_number,
-                        'action': window.lastAction,
-
                     }
                 }).done(function(data){
                     UnblockPagePermanently();
@@ -249,7 +244,7 @@
                         $("#delivery_note_label").html(data.delivery_note_number);
                         $("#total_to_scan").html(data.total_shipments);
                         $.each(data.tracking_numbers,function (i,v) {
-                            all_tracking_numbers.push(v);
+                           all_tracking_numbers.push(v);
                         });
                         $("#scan_delivery_note").attr("readonly",true);
                         $("#scan_tracking").attr("readonly",false);
@@ -275,56 +270,56 @@
                     return;
                 }
                 if(all_tracking_numbers.length != tracking_numbers.length)
-                {
-                    var html = "There are Shipments that are not scanned from delivery note number# "+delivery_note;
-
-                    var dtrows = $('#datatable').DataTable().rows().count();
-
-                    if(dtrows == 0)
                     {
-                        toastr.error("Please Scan at least 1(one) tracking number", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        return;
-                    }
+                        var html = "There are Shipments that are not scanned from delivery note number# "+delivery_note;
 
-                    jQuery.grep(all_tracking_numbers, function(el) {
-                        if (jQuery.inArray(el, tracking_numbers) == -1) html += "</br>"+el;
-                    });
+                        var dtrows = $('#datatable').DataTable().rows().count();
 
-                    html += "</br>Are you sure, You want to scan incomplete delivery note?";
-
-                    var content = document.createElement('div');
-                    content.innerHTML = html;
-                    swal({
-                        content: content,
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            $('#submit_delivery_note_id').val(delivery_note);
-                            $('#submit_form').submit();
+                        if(dtrows == 0)
+                        {
+                            toastr.error("Please Scan at least 1(one) tracking number", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            return;
                         }
-                    });
-                }
-                else {
-                    $('#submit_delivery_note_id').val(delivery_note);
-                    $('#submit_form').submit();
-                }
+                        
+                        jQuery.grep(all_tracking_numbers, function(el) {
+                            if (jQuery.inArray(el, tracking_numbers) == -1) html += "</br>"+el;
+                        });
+
+                        html += "</br>Are you sure, You want to scan incomplete delivery note?";
+
+                        var content = document.createElement('div');
+                        content.innerHTML = html;
+                        swal({
+                            content: content,
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function(confirm) {
+                            if (confirm) {
+                                $('#submit_delivery_note_id').val(delivery_note);
+                                $('#submit_form').submit();
+                            }
+                        });
+                    }
+                    else {
+                        $('#submit_delivery_note_id').val(delivery_note);
+                        $('#submit_form').submit();
+                    }
             });
 
         });

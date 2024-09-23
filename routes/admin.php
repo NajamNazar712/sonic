@@ -1616,9 +1616,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
             Route::post('forward', 'Admins\AdminUserRequestController@forward')->name('forward');
         });
-        Route::get('/logs/index', 'UserRoleManagementLogController@index')->name('index');
-        Route::get('/logs/list', 'UserRoleManagementLogController@list')->name('logs.list');
-
     });
 
     Route::prefix('finance')->name('finance.')->group(function () {

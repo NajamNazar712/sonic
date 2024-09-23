@@ -52,7 +52,6 @@
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">COD Amount</th>
                                     <th class="border-primary border-darken-1">Last Scanned Location</th>
-                                    <th class="border-primary border-darken-1">Entry Method</th>
                                     <th class="border-primary border-darken-1">Last Scanned City</th>
                                     <th class="border-primary border-darken-1">Sub Hub</th>
                                     <th class="border-primary border-darken-1">Trax Id</th>
@@ -198,7 +197,6 @@
                             head.push('Shipper Name');
                             head.push('COD Amount');
                             head.push('Last Scanned Location');
-                            head.push('Entry Method');
                             head.push('Last Scanned City');
                             head.push('Sub Hub');
                             head.push('Trax Id');
@@ -231,7 +229,6 @@
                                 row.push(values.shipper_name);
                                 row.push(values.cod_value);
                                 row.push(values.screen_location);
-                                row.push(values.entry_method);
                                 row.push(values.city);
                                 row.push(values.scanning_city_area_name);
                                 row.push(values.trax_id);
@@ -296,7 +293,6 @@
                     {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
                     {data: 'cod_value', name: 's.amount', class: 'align-middle shipper_name'},
                     {data: 'screen_location', name: 'shipment_positions.screen_location', class: 'align-middle screen_location'},
-                    {data: 'entry_method', name: 'ssj.entry_method', class: 'align-middle entry_method'},
                     {data: 'city', name: 'shipment_positions.city', class: 'align-middle city'},
                     {data: 'scanning_city_area_name', name: 'ca_scanning.name', class: 'align-middle scanning_city_area_name'},
                     {data: 'trax_id', name: 'trax_id', class: 'align-middle trax_id'},
