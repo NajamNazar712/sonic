@@ -156,6 +156,7 @@
 										<th class="border-primary border-darken-1">Payment ID</th>
 										<th class="border-primary border-darken-1">Account ID</th>
 										<th class="border-primary border-darken-1">Shipper</th>
+										<th class="border-primary border-darken-1">Sale Person</th>
 										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Phone No(s).</th>
 										<th class="border-primary border-darken-1">Address</th>
@@ -554,6 +555,7 @@
                             head.push('Payment ID');
                             head.push('Account ID');
                             head.push('Shipper');
+							head.push('Sale Person');
                             head.push('City');
                             head.push('Phone No(s).');
                             head.push('Address');
@@ -561,6 +563,7 @@
                             head.push('Delivered Shipments');
                             head.push('Returned Shipments');
                             head.push('Adjusted Shipments');
+							head.push('Fintech Charges');
                             head.push('Arrival Shipments');
                             head.push('Total Amount');
                             head.push('Total Charges');
@@ -590,6 +593,7 @@
                                 row.push(values.id_padded);
                                 row.push(values.user_id_padded);
                                 row.push(values.shipper);
+								row.push(values.sale_person_name);
                                 row.push(values.city);
                                 row.push(values.phone_numbers);
                                 row.push(values.address);
@@ -597,6 +601,7 @@
                                 row.push(values.delivered_shipments_count);
                                 row.push(values.returned_shipments_count);
                                 row.push(values.adjusted_shipments_count);
+								row.push(values.done_fintech_charges);
                                 row.push(values.arrival_shipment_shipments_count);
                                 row.push(values.total_amount);
                                 row.push(values.total_charges);
@@ -840,6 +845,7 @@
 					{data:'payment_id', name: 'done_payments.id', class: 'align-middle text-center payment_id'},
 					{data:'user_id_padded', name: 'done_payments.user_id', class: 'align-middle text-center user_id_padded'},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
+					{data:'sale_person_name', name: 'sale_admin.name', class: 'align-middle text-center sale_person_name'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
 					{data:'address', name: 'u.address', class: 'align-middle text-center address'},
