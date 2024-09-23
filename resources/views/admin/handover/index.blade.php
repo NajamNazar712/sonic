@@ -425,7 +425,6 @@
                             'hub_id': hub_id
                         },
                         success: function (response) {
-                            console.log(response);
                             if (response.status === 1 && response.error) {
                                 toastr.error(response.error, 'Error!', {
                                     positionClass: 'toast-top-center',
@@ -739,12 +738,20 @@
                     $('#to_dept_area_desg_error').css('display', 'block');
                 } 
                 
-                $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
+                // $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
                 $('#arrival_of_shipments_form input.hub_id').val(hub_id);
                 $('#arrival_of_shipments_form input.from_dept_area_desg').val(from_dept_area_desg);
                 $('#arrival_of_shipments_form input.from').val(from);
                 $('#arrival_of_shipments_form input.to').val(to);
                 $('#arrival_of_shipments_form input.to_dept_area_desg').val(to_dept_area_desg);
+                
+                var trackingNumbers = [];
+                $('#datatable tbody tr').each(function() {
+                    var trackingNumber = $(this).find('td:eq(1)').text().trim(); // Assuming tracking number is in the second column
+                    trackingNumbers.push(trackingNumber);
+                });
+                $('#arrival_of_shipments_form input.shipment_ids').val(JSON.stringify(trackingNumbers));
+
                 var form = this;
 
                 if (errors != 1) {
@@ -956,46 +963,56 @@
                 // }
             });
 
+            // $('#datatable tbody').on('click', 'tr td.remove button', function() {
+            //     var parent = $(this).parents('tr');
+            //     // var id = parseInt(parent.attr('id'));
+            //     var id = parent.find('td:eq(1)').text().trim().substring(6);
+
+            //     $.ajax({
+            //             // url: '{!! route('admin.pickups.receive.shipment_remove') !!}',
+            //             url: '{!! route('admin.handover.create.receive_shipment_remove_handover') !!}',
+            //             method: 'POST',
+            //             data: {
+            //                 'id': id,
+            //                 '_token': '{{ csrf_token() }}'
+            //             }
+            //         }) .done(function(data) {
+            //             if (data.status == 0) {
+            //                 table.row(parent).remove();
+            //                 table.draw(false);
+
+            //                 var index = $.inArray(id, shipment_ids);
+
+            //                 if (index !== -1) {
+            //                     shipment_ids.splice(index, 1);
+
+            //                     if (shipment_ids.length == 0) {
+            //                         $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
+            //                     }
+            //                 }
+
+            //                 if (table.rows().count() === 0) {
+            //                     // Disable the confirm button if no rows are left
+            //                     $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
+            //                 }
+
+            //                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+            //             }
+            //             else {
+            //                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            //             }
+            //     });
+            // });
+
+            var removedShipments = [];
             $('#datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
-                // var id = parseInt(parent.attr('id'));
                 var id = parent.find('td:eq(1)').text().trim().substring(6);
-
-                $.ajax({
-                    // url: '{!! route('admin.pickups.receive.shipment_remove') !!}',
-                    url: '{!! route('admin.handover.create.receive_shipment_remove_handover') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        if (data.status == 0) {
-                            table.row(parent).remove();
-                            table.draw(false);
-
-                            var index = $.inArray(id, shipment_ids);
-
-                            if (index !== -1) {
-                                shipment_ids.splice(index, 1);
-
-                                if (shipment_ids.length == 0) {
-                                    $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
-                                }
-                            }
-
-                            if (table.rows().count() === 0) {
-                                // Disable the confirm button if no rows are left
-                                $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
-                            }
-
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        }
-                        else {
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                    });
+                removedShipments.push(id);
+                table.row(parent).remove().draw(false);
+                if (table.rows().count() === 0) {
+                    $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
+                }
             });
 
             $('#ShipmentPiecesModal').on('hide.bs.modal', function (e) {

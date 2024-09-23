@@ -94,7 +94,6 @@ class AdminShipmentHandoverController extends Controller
           if($handover_shipment->exists()){
             return ['status' => 1, 'error' => 'Shipment is already in another Handover Note'];
           }
-
           $details = array();
           $details['id'] = $shipment->id;
           $details['tracking_number'] = $shipment->tracking_number;
@@ -251,13 +250,17 @@ class AdminShipmentHandoverController extends Controller
         'bag_number' => 'required|numeric|unique:handovers,bag_number',
       ]);
 
-        $shipment_ids = explode(',', $request->shipment_ids);
-        $current_hub = $request->hub_id;
-        
-        $hub_count_check = self::handoverHubCount($shipment_ids, $current_hub);
-        if ($hub_count_check) {
-          return $hub_count_check;
-        }
+        // $shipment_ids_json = explode(',', $request->shipment_ids);
+        $shipment_ids_json = $request->shipment_ids;
+        $shipment_ids = array_map(function($id) {
+          return intval(substr($id, 6));
+        }, json_decode($shipment_ids_json, true));
+
+        // $current_hub = $request->hub_id;
+        // $hub_count_check = self::handoverHubCount($shipment_ids, $current_hub);
+        // if ($hub_count_check) {
+        //   return $hub_count_check;
+        // }
 
         $normal_status_ids = [
           1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
@@ -1179,7 +1182,6 @@ class AdminShipmentHandoverController extends Controller
         $handover_ids = $handover_shipments->pluck('handover_id');
         $handovers = Handover::whereIn('id', $handover_ids)->get();
         $hub_count = $handovers->where('hub', $current_hub)->count();
-        
         if ($hub_count >= 3) {
             return redirect()->back()->with('error', 'You cannot add more handovers for this hub.');
         }

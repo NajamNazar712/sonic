@@ -3652,7 +3652,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::get('unique_bag_number', 'AdminShipmentHandoverController@unique_bag_number')->name('unique_bag_number');
             Route::get('check_bag_type', 'AdminShipmentHandoverController@check_bag_type')->name('check_bag_type');
-            Route::post('receive_shipment_remove_handover', 'Admins\AdminPickupsController@receive_shipment_remove_handover')->name('receive_shipment_remove_handover');
             Route::get('handover_exists', 'AdminShipmentHandoverController@handover_exists')->name('handover_exists');
             Route::get('same_hub_handover_count', 'AdminShipmentHandoverController@same_hub_handover_count')->name('same_hub_handover_count');
         });
