@@ -1230,7 +1230,7 @@ class AdminShipmentHandoverController extends Controller
                     ELSE 'Unknown'
                 END as shipment_type_text
             ")
-        );
+        )->groupBy('shipments.tracking_number');
       $datatable = Datatables::of($handover_shipments)
       ->editColumn('tracking_number', function ($shipments) {
         $route = route('admin.tracking.index');
@@ -1317,7 +1317,7 @@ class AdminShipmentHandoverController extends Controller
       }
 
       $handover_exists = HandoverShipments::where('shipment_id', $shipment->id)
-      ->latest('created_at')
+      ->latest('updated_at')
       ->where('status', 1)
       ->first();
       

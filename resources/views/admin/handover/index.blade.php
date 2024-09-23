@@ -985,6 +985,11 @@
                                 }
                             }
 
+                            if (table.rows().count() === 0) {
+                                // Disable the confirm button if no rows are left
+                                $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
+                            }
+
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                         }
                         else {
