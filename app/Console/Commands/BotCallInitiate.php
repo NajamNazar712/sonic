@@ -66,7 +66,7 @@ class BotCallInitiate extends Command
             $shipmentSeconds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=',$timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'rv_assign_agent_status_id'=>6])->whereIn('unresponsive_count', [1, 2])->pluck('shipment_id', 'unresponsive_count');
             // dd($shipmentSeconds);
             //  Now, re-initiate process for the retrieved shipment_ids after unresponsive two            
-            $shipmentThirds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
+            // $shipmentThirds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
             $second_count = 1;
             if (count($shipmentSeconds) > 0) {            
                 foreach($shipmentSeconds as $key => $shipmentId){
