@@ -738,6 +738,12 @@
                                             <a class="menu-item" href="{{ route('admin.settings.agents_list.index') }}">RVR Caller Agents List</a>
                                         </li>
                                     @endif
+                                    
+                                    @if (session('role_id') == 1 || in_array(1005, session('permissions')) || in_array(1006, session('permissions')) || in_array(1007, session('permissions')))
+                                        <li>
+                                            <a class="menu-item" href="{{ route('admin.settings.alist_shippers.index') }}">Specified Shipper</a>
+                                        </li>
+                                    @endif
 
 
                                 </ul>
@@ -1919,6 +1925,13 @@
                             <li>
                                 <a class="menu-item" href="{{ route('admin.reports.shipment_reversal_report.index') }}">
                                     Shipment Reversal Report
+                                </a>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(1008, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.rvr_reattempt.index') }}">
+                                    Reattempt Analysis Report
                                 </a>
                             </li>
                         @endif

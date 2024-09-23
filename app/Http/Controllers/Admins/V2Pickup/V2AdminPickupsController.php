@@ -678,7 +678,7 @@ class V2AdminPickupsController extends Controller
             return redirect()->back()->with('error', 'Pickup Request(s) already assigned!');
         } catch (\Throwable $th){
             Log::channel('cronJobLog')->error('v2pickupfailed'.json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
-            return response()->json(['status' => 1, 'message' => 'Pickup(s) are Saved!', 'information' => $e->getMessage()]);
+            return response()->json(['status' => 1, 'message' => 'Pickup(s) are Saved!', 'information' => $th->getMessage()]);
         }
     }
 
@@ -811,7 +811,7 @@ class V2AdminPickupsController extends Controller
             $user = $shipment->user;
             $by_passed_users_setting = GlobalSettings::where('type', 'bypass_weight_setting')->first();
             $bypassed_users = $by_passed_users_setting ? explode(',', $by_passed_users_setting->text) : [];
-            
+
             if ($user->sub_segment_id == 2 || (in_array($user->id, $bypassed_users))) {
                 $settings = GlobalSettings::where('type', 'global_rider_id')->first();
                 
@@ -989,6 +989,7 @@ class V2AdminPickupsController extends Controller
     public function bulk_arrival_submit(Request $request)
     {
         $shipment_ids = explode(',', $request->shipment_ids);
+        $shipment_ids = array_unique($shipment_ids);
 
         $pickup_request_ids = array();
 
@@ -1284,8 +1285,10 @@ class V2AdminPickupsController extends Controller
                 //shipment calculate arrival charges
                 $shipment->refresh();
                 if(in_array($shipment->shipper_status_id,[2,15])){
-                    self::arrival_chagres($request,$shipment);
-                    array_push($arrival_charges_shipment,$shipment_id);;
+                    if(!in_array($shipment_id,$arrival_charges_shipment)) {
+                        array_push($arrival_charges_shipment, $shipment_id);
+                        self::arrival_chagres($request, $shipment);
+                    }
                 }
             } else {
                 unset($shipment_ids[$key]);
@@ -1673,8 +1676,10 @@ class V2AdminPickupsController extends Controller
                 }
                 $shipment->refresh();
                 if(in_array($shipment->shipper_status_id,[2,15])){
-                    self::arrival_chagres($request,$shipment);
-                    array_push($arrival_charges_shipment,$shipment_id);;
+                    if(!in_array($shipment_id,$arrival_charges_shipment)) {
+                        array_push($arrival_charges_shipment, $shipment_id);
+                        self::arrival_chagres($request, $shipment);
+                    }
                 }
             } else {
                 unset($shipments[$key]);
@@ -1798,13 +1803,13 @@ class V2AdminPickupsController extends Controller
                 }
             }
         }
-        
+
         $walkin_shipment_ids = array();
         $print_shipment_ids = array();
         $pickup_request_ids = array();
         $unassigned_pickup_requests = array();
 
-        $this->add_weight_bypass($shipments_to_be_bypassed, $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests,$request);
+        $this->add_weight_bypass(array_unique($shipments_to_be_bypassed), $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests,$request);
         return response()->json(['status' => 0, 'shipments_to_be_bypassed'=> $shipments_to_be_bypassed, 'shipments_to_be_not_bypassed' => $shipments_to_be_not_bypassed]);
     }
     
@@ -2421,6 +2426,7 @@ class V2AdminPickupsController extends Controller
     public function individual_arrival_submit(Request $request)
     {
         $shipment_ids = explode(',', $request->shipment_ids);
+        $shipment_ids = array_unique($shipment_ids);
 
         $pickup_request_ids = array();
 
@@ -2635,8 +2641,10 @@ class V2AdminPickupsController extends Controller
                 //shipment calculate arrival charges
                 $shipment->refresh();
                 if(in_array($shipment->shipper_status_id,[2,15])){
-                    self::arrival_chagres($request,$shipment);
-                    array_push($arrival_charges_shipment,$shipment_id);;
+                    if(!in_array($shipment_id,$arrival_charges_shipment)) {
+                        array_push($arrival_charges_shipment, $shipment_id);
+                        self::arrival_chagres($request, $shipment);
+                    }
                 }
             } else {
                 unset($shipment_ids[$key]);

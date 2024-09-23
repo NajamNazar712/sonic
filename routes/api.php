@@ -572,6 +572,10 @@ use Illuminate\Http\Request;
             });
 
 
+            //APIs for Bot Calling
+        Route::get('bot_get_ticket/{tracking_number?}', 'Agent\BotCallingController@bot_get_ticket_details')->name('bot_get_ticket');
+        Route::post('bot_submit_ticket', 'Agent\BotCallingController@bot_submit_ticket')->name('bot_submit_ticket');
+
         });
 
         Route::middleware('AdminAPIDWSToken')->group(function () {

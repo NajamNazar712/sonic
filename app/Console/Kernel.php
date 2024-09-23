@@ -149,6 +149,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\NotificationReturnedDeliveredToShipper',
         // 'App\Console\Commands\AgentUnassignedTicket ',
         'App\Console\Commands\AgentSarNotification',
+        'App\Console\Commands\BotCallInitiate',
         'App\Console\Commands\SackBagStatusUpdate',
         'App\Console\Commands\AutoAssignCrmAgentNew',
         // 'App\Console\Commands\ShipperLogisticBookingCron',
@@ -156,7 +157,8 @@ class Kernel extends ConsoleKernel
 
         'App\Console\Commands\CalculateFranchiseCommission',
         'App\Console\Commands\DeleteOldDataFromShortUrlTable',
-        'App\Console\Commands\RestartSupervisordProcesses'
+        'App\Console\Commands\RestartSupervisordProcesses',
+        'App\Console\Commands\UpdateArrivalChargesCommand'
         ];
 
     /**
@@ -241,6 +243,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('agent:sarnotification')->dailyAt($agent_sar_notify_time)->runInBackground();
 
         //rv agent cron jobs end
+
+        // rv cron job for the call every two hours execute
+        $checkBot = GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists();
+        if($checkBot)
+        {
+            $schedule->command('agent:botcallunresponsive')->everyFifteenMinutes()->runInBackground();
+        }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -548,6 +557,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('supervisord:restart')
             ->cron('0 9,13,16 * * *')
             ->runInBackground();
+
+        $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
     }
     /**
      * Register the commands for the application.
