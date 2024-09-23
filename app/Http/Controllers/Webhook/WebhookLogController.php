@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Webhook;
 
-use ApiCallZongLog;
 use App\Http\Models\Webhook\ShipperWebhookLog;
 use App\Http\Models\Webhook\WebhookLog;
 use Illuminate\Http\Request;
