@@ -56,12 +56,14 @@ class GenericObserver
             }else if( $model instanceof AdminRole) {
                 $screen = 'Role Management';
             }
-            $record = new UserRoleManagementLog;
-            $record->changed_by_id = Auth::id();
-            $record->data = json_encode($changes);
-            $record->changed_in_record_id = $model->id;
-            $record->screen_name = $screen;
-            $record->save();
+            if(auth()->check()) {
+                $record = new UserRoleManagementLog;
+                $record->changed_by_id = auth()->user()->id;
+                $record->data = json_encode($changes);
+                $record->changed_in_record_id = $model->id;
+                $record->screen_name = $screen;
+                $record->save();
+            }
         }
         
     }
