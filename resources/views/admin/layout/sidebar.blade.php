@@ -5,7 +5,6 @@
     {
         $roles = explode("," , $settings->text);
     }
-    
 @endphp
 <div class="main-menu menu-fixed menu-light menu-accordion menu-bordered menu-shadow" data-scroll-to-active="true">
     <div class="main-menu-content">
@@ -959,7 +958,7 @@
                                                 Notes</a></li>
                                     @endif
 
-                                    @if (session('role_id') == 1 || session('id') == 3364 || in_array(54, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(54, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.finance.outstanding_shipments.index') }}">Shipments</a>
                                         </li>
