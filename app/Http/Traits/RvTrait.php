@@ -317,7 +317,7 @@ trait RvTrait
             
         } else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count < 3) {
             $shipment_assign_agent_table_columns['rv_state_id'] = 2; //unassign shipment
-        } else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 2) {
+        } else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 3) {
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 7; //set status to Shipper Advise Requested 
             $shipment_assign_agent_table_columns['rv_state_id'] = 2; //unassign shipment
         } else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count >= 4) {
