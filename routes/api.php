@@ -48,9 +48,14 @@ use Illuminate\Http\Request;
             });
 
             Route::prefix('track')->name('track.')->group(function () {
-                Route::get('', 'APIController@shipment_track')->name('track');
-                Route::get('order_id', 'APIController@shipment_track_order_id')->name('order_id');
+                Route::get('', 'APIController@shipment_track')
+                    ->name('track')
+                    ->middleware('custom.throttle');
+
+                Route::get('order_id', 'APIController@shipment_track_order_id')
+                    ->name('order_id');
             });
+
 
             Route::get('charges', 'APIController@shipment_charges')->name('charges');
             Route::get('payment_status', 'APIController@shipment_payment_status')->name('payment_status');

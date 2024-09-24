@@ -60,7 +60,7 @@ class Kernel extends HttpKernel
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-
+        'custom.throttle' => \App\Http\Middleware\CustomThrottle::class,
         'APIToken' => \App\Http\Middleware\APIToken::class,
         'Permission' => \App\Http\Middleware\Permission::class,
         'APIThrottle' => \App\Http\Middleware\APIThrottle::class,
