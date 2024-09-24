@@ -153,6 +153,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Account Type</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Shipper</th>
@@ -412,6 +413,7 @@
 
                             head.push('S. No.');
                             head.push('Tracking No.');
+                            head.push('Account Type.');
                             head.push('Account No.');
                             head.push('Business Category');
                             head.push('Shipper');
@@ -458,6 +460,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.account_type);
                                 row.push(values.account_no);
                                 row.push(values.name);
                                 row.push(values.shipper);
@@ -557,6 +560,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
+                    { data:'account_type' ,name: '', class: 'align-middle text-center account_type'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
                     { data:'name' ,name: 'bc.name', class: 'align-middle name'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
@@ -600,6 +604,8 @@
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
                 ],
                 rowCallback: function(row, data, index) {
+                    console.log(data.account_type);
+                    
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },

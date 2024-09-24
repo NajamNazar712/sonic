@@ -5606,6 +5606,7 @@ class AdminReportsController extends Controller
                     $join->on('is.shipment_id', '=', 'shipments.id')
                         ->where('is.type', '!=',2 );
                 })
+            // ->leftJoin('faf_', '', '')
             ->leftJoin('invoices', 'is.invoice_id', '=', 'invoices.id');
         //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
         //            $now = Carbon::now();
@@ -5863,8 +5864,21 @@ class AdminReportsController extends Controller
                 } else {
                     return '';
                 }
+            })
+            ->addColumn('account_type', function ($sales) {
+                if ($sales->account_type_id == 1){
+                    return "Reimbursement";
+                } else {
+                    return "Corporate";
+                }
+            })
+            ->addColumn('faf_charges', function ($sales) {
+                if ($sales->account_type_id == 1){
+                    return "Reimbursement";
+                } else {
+                    return "Corporate";
+                }
             });
-
         if ($tracking = $request->get('search_tracking')) {
             $datatable->where('shipments.tracking_number', '=', $tracking);
         }
