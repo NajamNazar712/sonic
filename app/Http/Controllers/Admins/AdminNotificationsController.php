@@ -1195,7 +1195,8 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 214)
         {
-            $details['receiver'] = ['tanveer.malik@trax.pk','muhammad.jawwad@trax.pk','fawad.ahmed@trax.pk','waqas@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk','ghazanfar.ali@trax.pk','CC-muhammad.waqas@trax.pk','CC-faisal.hasan@trax.pk','CC-asad.ahsan@trax.pk'];
+            // $details['receiver'] = ['tanveer.malik@trax.pk','muhammad.jawwad@trax.pk','fawad.ahmed@trax.pk','waqas@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk','ghazanfar.ali@trax.pk','CC-muhammad.waqas@trax.pk','CC-faisal.hasan@trax.pk','CC-asad.ahsan@trax.pk'];
+            $details['receiver'] = ['syed.furqan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'BCC-(asad.ahsan@trax.pk,sahban.ghani@trax.pk)'];
 
             $details['fields'] = ['link'];
         }
