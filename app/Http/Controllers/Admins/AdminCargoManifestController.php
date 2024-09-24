@@ -1196,7 +1196,7 @@ class AdminCargoManifestController extends Controller
             $city_details = City::find($shipment_details->old_consignee_city_id);
             $origin = $city_details->hub_city;
         } else {
-            if ($shipment->shipper_status_id == 20) {
+            if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 69 || $shipment->shipper_status_id == 72 || $shipment->shipper_status_id == 75) {
                 if ($shipment->return_address_id != null) {
                     $origin = $shipment->return_address->city->hub_city;
                 } else {
@@ -5452,11 +5452,11 @@ class AdminCargoManifestController extends Controller
                 // validate bag n shipment type
                 
                 if ($bag_type == 1) {
-                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,69,70,72,73,75,76,27,33])) {
+                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,69,70,72,73,75,76,27,33,30,37])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
                     }
                 } else {
-                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,69,70,72,73,75,76,27,33])) {
+                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,69,70,72,73,75,76,27,33,30,37])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
                     }
                 }
@@ -5574,7 +5574,7 @@ class AdminCargoManifestController extends Controller
 
                 // validate bag n shipment type
                 if ($bag_type == 1) {
-                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,69,70,72,73,75,76,27,33])) {
+                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,69,70,72,73,75,76,27,33,30,37])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
                     }
 
@@ -5592,7 +5592,7 @@ class AdminCargoManifestController extends Controller
                     // check that is shipment return reattempt or not end
 
                 } else {
-                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,69,70,72,73,75,76,27,33])) {
+                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,69,70,72,73,75,76,27,33,30,37])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
                     }
                 }
@@ -5768,7 +5768,7 @@ class AdminCargoManifestController extends Controller
             if ($shipment_status != 11) // agr status 11 h to masla h q k forwarding and return dono p same 11 lagta h ispe sochna h, lekin koshish ki h niche is resolve krne ki ($return_confirm_journey,$return_reattampt)
             {
                 if ($bag_type == 1) {
-                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,69,70,72,73,75,76,27,33])) {
+                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,69,70,72,73,75,76,27,33,30,37])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
                     }
                 } else {
@@ -5792,7 +5792,7 @@ class AdminCargoManifestController extends Controller
                     }
                     // check that is shipment return reattempt or not end
 
-                    if ((!in_array($shipment_status, [20, 21, 22, 24, 44, 47, 48,49,26,27,29,69,70,72,73,75,76,27,33,32])) && ($return_reattempt_flag == 1)) {
+                    if ((!in_array($shipment_status, [20, 21, 22, 24, 44, 47, 48,49,26,27,29,69,70,72,73,75,76,27,33,32,30,37])) && ($return_reattempt_flag == 1)) {
                         return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
                     }
                 }
@@ -5832,7 +5832,7 @@ class AdminCargoManifestController extends Controller
                     $details['tracking_number'] = $shipment->tracking_number;
                     $details['bag_number'] = 'N/A';
 
-                    if (in_array($shipment->shipper_status_id, [21,69,70,72,73,75,76])) {
+                    if (in_array($shipment->shipper_status_id, [21,69,70,72,73,75,76,30,37])) {
                         $details['origin'] = $shipment->consignee_city->name;
                         if ($shipment->return_address_id != NULL) {
                             $details['destination'] = $shipment->return_address->city->name;
@@ -5892,7 +5892,7 @@ class AdminCargoManifestController extends Controller
                     $details['tracking_number'] = $shipment->tracking_number;
                     $details['bag_number'] = $bag->seal_number;
 
-                    if (in_array($shipment->shipper_status_id, [21,69,70,72,73,75,76])) {
+                    if (in_array($shipment->shipper_status_id, [21,69,70,72,73,75,76,30,37])) {
                         $details['origin'] = $shipment->consignee_city->name;
                         if ($shipment->return_address_id != NULL) {
                             $details['destination'] = $shipment->return_address->city->name;
@@ -5938,7 +5938,7 @@ class AdminCargoManifestController extends Controller
                 $details['tracking_number'] = $shipment->tracking_number;
                 $details['bag_number'] = 'N/A';
 
-                if (in_array($shipment->shipper_status_id, [20,21,69,70,72,73,75,76])) {
+                if (in_array($shipment->shipper_status_id, [20,21,69,70,72,73,75,76,30,37])) {
                     $details['origin'] = $shipment->consignee_city->name;
                     if ($shipment->return_address_id != NULL) {
                         $details['destination'] = $shipment->return_address->city->name;
