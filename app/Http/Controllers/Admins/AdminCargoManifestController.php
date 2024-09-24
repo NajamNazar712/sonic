@@ -328,13 +328,13 @@ class AdminCargoManifestController extends Controller
         $today = Carbon::today();
         $on_hold_shipments = ShipmentOnHold::whereDate('dispatch_date', '>', $today)->where('status', 1)->pluck('shipment_id')->toArray();
         $shipments = DB::connection('reports')->table('shipments')->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
-            ->join('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
-            ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities as ohc', 'oc.hub_id', '=', 'ohc.id')
-            ->join('zones as z', 'ohc.zone_id', '=', 'z.id')
-            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->leftjoin('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftjoin('cities as oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('cities as ohc', 'oc.hub_id', '=', 'ohc.id')
+            ->leftjoin('zones as z', 'ohc.zone_id', '=', 'z.id')
+            ->leftjoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->leftjoin('user_shipping_infos as rsi', function ($join) {
                 $join->on('shipments.return_address_id', '=', 'rsi.id')
                     ->whereNotNull('shipments.return_address_id')
@@ -342,7 +342,7 @@ class AdminCargoManifestController extends Controller
             })
             ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
             ->leftjoin('zones as rcz', 'rc.zone_id', '=', 'rcz.id')
-            ->join('shipments_journey', function ($join) {
+            ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->on('shipments_journey.shipper_status_id', '=', DB::raw(2));
             })
