@@ -963,47 +963,6 @@
                 // }
             });
 
-            // $('#datatable tbody').on('click', 'tr td.remove button', function() {
-            //     var parent = $(this).parents('tr');
-            //     // var id = parseInt(parent.attr('id'));
-            //     var id = parent.find('td:eq(1)').text().trim().substring(6);
-
-            //     $.ajax({
-            //             // url: '{!! route('admin.pickups.receive.shipment_remove') !!}',
-            //             url: '{!! route('admin.handover.create.receive_shipment_remove_handover') !!}',
-            //             method: 'POST',
-            //             data: {
-            //                 'id': id,
-            //                 '_token': '{{ csrf_token() }}'
-            //             }
-            //         }) .done(function(data) {
-            //             if (data.status == 0) {
-            //                 table.row(parent).remove();
-            //                 table.draw(false);
-
-            //                 var index = $.inArray(id, shipment_ids);
-
-            //                 if (index !== -1) {
-            //                     shipment_ids.splice(index, 1);
-
-            //                     if (shipment_ids.length == 0) {
-            //                         $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
-            //                     }
-            //                 }
-
-            //                 if (table.rows().count() === 0) {
-            //                     // Disable the confirm button if no rows are left
-            //                     $('#arrival_of_shipments_form button.confirm').prop('disabled', true);
-            //                 }
-
-            //                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-            //             }
-            //             else {
-            //                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-            //             }
-            //     });
-            // });
-
             var removedShipments = [];
             $('#datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
