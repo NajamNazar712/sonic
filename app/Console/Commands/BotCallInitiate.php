@@ -63,7 +63,7 @@ class BotCallInitiate extends Command
             
             // Now, re-initiate process for the retrieved shipment_ids after unresponsive one
             $shipmentSeconds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=',$timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'rv_assign_agent_status_id'=>6])->whereIn('unresponsive_count', [1, 2])->pluck('shipment_id', 'unresponsive_count');
-            Log::channel('cronJobLog')->info('s ' . 'Log after  count call  record' . count($sshipmentSeconds));
+            Log::channel('cronJobLog')->info('s ' . 'Log after  count call  record' . count($shipmentSeconds));
 
             // dd($shipmentSeconds);
             //  Now, re-initiate process for the retrieved shipment_ids after unresponsive two            
