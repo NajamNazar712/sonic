@@ -389,7 +389,7 @@ class AdminCargoManifestController extends Controller
             ->leftjoin('cities as olddci', 'olddci.id', '=', 'irbrh.old_consignee_city_id')
             ->leftjoin('cities as olddhci', 'olddci.hub_id', '=', 'olddhci.id')
             ->leftjoin('zones as olddhciz', 'olddhci.zone_id', '=', 'olddhciz.id')
-            ->leftjoin('cities as dc', function ($join) {
+            ->join('cities as dc', function ($join) {
                 $join->on('shipments.consignee_city_id', '=', 'dc.id')
                     ->where(function ($query) {
                         $query->where(function ($sub_query) {
@@ -425,8 +425,8 @@ class AdminCargoManifestController extends Controller
                             });
                     });
             })
-            ->leftjoin('cities as dhc', 'dc.hub_id', '=', 'dhc.id')
-            ->leftjoin('zones as dest_zone', 'dhc.zone_id', '=', 'dest_zone.id')
+            ->join('cities as dhc', 'dc.hub_id', '=', 'dhc.id')
+            ->join('zones as dest_zone', 'dhc.zone_id', '=', 'dest_zone.id')
             ->leftjoin('crm_requests as crm', function ($join) {
                 $join->on('crm.shipment_id', '=', 'shipments.id')
                     ->whereIn('crm.status_id', [2, 3, 5])
@@ -436,6 +436,7 @@ class AdminCargoManifestController extends Controller
             ->select('z.name as zone_name', 'shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub', 'shipments.consignee_address', 'dc.id as destination_city_id', 'sts.status as star_status', 'rcz.name as return_zone_name', 'dest_zone.name as dest_zone', 'olddhcz.name as old_destination_hub_zone','olddhciz.name as old_destination_intercept_hub_zone')
             ->whereNotIn('shipments.id', $on_hold_shipments)
             ->whereNotNull('shipments.tracking_number');
+
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
@@ -482,7 +483,12 @@ class AdminCargoManifestController extends Controller
                 $shipments->whereDate('csj.created_at', $from);
             }
         }
-
+        $destination_city_id = $shipments->pluck('destination_city_id')->toArray();
+        $deliveryKeywords = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+            ->whereIn('dlm.city_id', $destination_city_id)
+            ->select('dlm.city_id', 'delivery_location_mapping_keywords.keyword', 'dlm.area_name as area_name')
+            ->get()
+            ->groupBy('city_id'); // Group by city_id for easy access later
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
@@ -495,41 +501,29 @@ class AdminCargoManifestController extends Controller
                     }
                 },
             ])
-            ->addColumn('sub_station', function ($shipments) {
-                $check = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
-                    ->where('dlm.city_id', $shipments->destination_city_id)
-                    ->select('dlm.city_id', 'delivery_location_mapping_keywords.keyword', 'dlm.area_name as area_name');
+            ->addColumn('sub_station', function ($shipments) use($deliveryKeywords) {
+                $delivery_area = null;
 
-                if ($check->exists()) {
-                    $check = $check->get();
-                    $delivery_area = null;
-                    $msg_string = null;
-                    $str_arr = null;
-                    $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);
-                    foreach ($check as $nsa) {
-                        foreach ($str_arr as $arr_value) {
-                            if (strtolower($nsa->keyword) == strtolower($arr_value)) {
-                                $msg_string = $arr_value;
-                                $delivery_area = $nsa->area_name;
-                            }
+                // Check if delivery keywords exist for the shipment's destination city
+                if (isset($deliveryKeywords[$shipments->destination_city_id])) {
+                    $consignee_address = strtolower($shipments->consignee_address);
+
+                    // Split the consignee address into words
+                    $str_arr = preg_split('/[\s.,\-_*?<>,!?@#$%^&()]+/', $consignee_address);
+
+                    // Get the keywords for the specific city
+                    $keywordsForCity = $deliveryKeywords[$shipments->destination_city_id];
+
+                    foreach ($keywordsForCity as $nsa) {
+                        if (in_array(strtolower($nsa->keyword), $str_arr)) {
+                            $delivery_area = $nsa->area_name;
+                            break; // Stop once the first matching keyword is found
                         }
                     }
                 }
 
-                //                 $delivery_area = null;
-                //                 if ($msg_string != null) {
-                //                     $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
-                //                         ->where('delivery_location_mapping_keywords.keyword', $msg_string)
-                //                         ->where('dlm.city_id', $shipments->destination_city_id)
-                // //                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
-                //                         ->select('dlm.area_name as area_name', 'dlm.id', 'delivery_location_mapping_keywords.mapping_id');
-
-                //                     if ($found->exists()) {
-                //                         $found = $found->first();
-                //                         $delivery_area = $found->area_name;
-                //                     }
-                //                 }
-                return isset($delivery_area) ? $delivery_area : '-';
+                // Return the delivery area or a default value if no match is found
+                return $delivery_area ?? '-';
             })
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('admin.tracking.index');
