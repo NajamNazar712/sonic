@@ -490,6 +490,7 @@ class AdminCargoManifestController extends Controller
             ->get()
             ->groupBy('city_id'); // Group by city_id for easy access later
         $datatables = Datatables::of($shipments)
+            ->setTotalRecords(count($destination_city_id))
             ->setRowAttr([
                 'class' => function ($shipments) {
                     if ($shipments->complaint != null) {
