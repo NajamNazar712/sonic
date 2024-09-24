@@ -6686,10 +6686,19 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         }
 
         if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('pending_payment_shipments as pps', 'pps.pending_payment_id', '=', 'pending_payments.id')
-                ->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
-                ->where('ss.tracking_number', '=', $tracking_number);
+            $shipments_data = Shipment::where('tracking_number', $tracking_number)->select('id')->first();
+
+            if (!empty($shipments_data)) {
+                $shipment_id = $shipments_data->id; // Get the shipment ID from the retrieved data
+
+                $datatables
+                    ->join('pending_payment_shipments as pps', function ($join) use ($shipment_id) {
+                        $join->on('pps.pending_payment_id', '=', 'pending_payments.id')
+                            ->where('pps.id', '=', DB::connection('reports')->raw("(SELECT MAX(id) FROM pending_payment_shipments WHERE pending_payment_shipments.shipment_id = $shipment_id)"));
+                    });
+            }
         }
+
 
         if ($positive_negative_filter = $request->get('positive_negative_filter')) {
             if ($positive_negative_filter == 1) {
