@@ -389,7 +389,7 @@ class AdminCargoManifestController extends Controller
             ->leftjoin('cities as olddci', 'olddci.id', '=', 'irbrh.old_consignee_city_id')
             ->leftjoin('cities as olddhci', 'olddci.hub_id', '=', 'olddhci.id')
             ->leftjoin('zones as olddhciz', 'olddhci.zone_id', '=', 'olddhciz.id')
-            ->join('cities as dc', function ($join) {
+            ->leftjoin('cities as dc', function ($join) {
                 $join->on('shipments.consignee_city_id', '=', 'dc.id')
                     ->where(function ($query) {
                         $query->where(function ($sub_query) {
@@ -425,8 +425,8 @@ class AdminCargoManifestController extends Controller
                             });
                     });
             })
-            ->join('cities as dhc', 'dc.hub_id', '=', 'dhc.id')
-            ->join('zones as dest_zone', 'dhc.zone_id', '=', 'dest_zone.id')
+            ->leftjoin('cities as dhc', 'dc.hub_id', '=', 'dhc.id')
+            ->leftjoin('zones as dest_zone', 'dhc.zone_id', '=', 'dest_zone.id')
             ->leftjoin('crm_requests as crm', function ($join) {
                 $join->on('crm.shipment_id', '=', 'shipments.id')
                     ->whereIn('crm.status_id', [2, 3, 5])
