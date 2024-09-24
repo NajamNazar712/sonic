@@ -202,6 +202,11 @@ class AdminShipmentHandoverController extends Controller
             return ['status' => 1, 'error' => 'Shipment not in Handover / not ready to update!'];
           }
 
+          // // if handover is received
+          // if (Handover::where('id', $current_handover_id)->where('status_id', '!=', 1)){
+          //   return ['status' => 2, 'disbaled'];
+          // }
+
           $handover = Handover::where('id', $handover_shipments->first()->handover_id)->first();
           $bag_number = $handover->bag_number;
 
@@ -264,7 +269,7 @@ class AdminShipmentHandoverController extends Controller
 
         $normal_status_ids = [
           1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
-          11, 12, 13, 14, 15, 17, 18, 19, 
+          11, 12, 13, 14, 15, 17, 19, 
           49, 50, 51, 52, 53, 54, 55, 56,
           58, 59, 61, 62, 65, 67, 68
         ];
@@ -510,10 +515,22 @@ class AdminShipmentHandoverController extends Controller
       ->leftJoin('city_areas as car', 'car.id', '=', 'ssj_r.area_id')
 
       ->leftJoin('handover_shipments', 'handover_shipments.handover_id', '=', 'handovers.id')
-      ->leftJoin(DB::raw('(SELECT MAX(id) as id, shipment_id, shipper_status_id 
-                                FROM shipments_journey 
-                                GROUP BY shipment_id) as latest_journey'),
-                        'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
+      // ->leftJoin(DB::raw('(SELECT MAX(id) as id, shipment_id, shipper_status_id 
+      //                         FROM shipments_journey 
+      //                         GROUP BY shipment_id) as latest_journey'),
+      //                   'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
+      ->leftJoin(DB::raw('(
+        SELECT sj.id, sj.shipment_id, sj.shipper_status_id
+        FROM shipments_journey sj
+        JOIN (
+            SELECT shipment_id, MAX(created_at) as max_created_at
+            FROM shipments_journey
+            GROUP BY shipment_id
+        ) latest_journey 
+        ON sj.shipment_id = latest_journey.shipment_id 
+        AND sj.created_at = latest_journey.max_created_at
+      ) as latest_journey'), 
+      'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
 
       ->leftJoin('excess_handover_shipments', function($join) {
         $join->on('excess_handover_shipments.handover_id', '=', 'handovers.id')
@@ -1211,10 +1228,22 @@ class AdminShipmentHandoverController extends Controller
       $handover_shipments = HandoverShipments::where('handover_id', $handover_id)
         ->leftJoin('shipments', 'handover_shipments.shipment_id', '=', 'shipments.id')
         ->leftJoin('shipments_journey', 'handover_shipments.shipment_id', '=', 'shipments_journey.shipment_id')
-        ->leftJoin(DB::raw('(SELECT MAX(id) as id, shipment_id, shipper_status_id 
-                            FROM shipments_journey 
-                            GROUP BY shipment_id) as latest_journey'),
-                  'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
+        // ->leftJoin(DB::raw('(SELECT MAX(id) as id, shipment_id, shipper_status_id 
+        //                     FROM shipments_journey 
+        //                     GROUP BY shipment_id) as latest_journey'),
+        //           'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
+        ->leftJoin(DB::raw('(
+          SELECT sj.id, sj.shipment_id, sj.shipper_status_id
+          FROM shipments_journey sj
+          JOIN (
+              SELECT shipment_id, MAX(created_at) as max_created_at
+              FROM shipments_journey
+              GROUP BY shipment_id
+          ) latest_journey 
+          ON sj.shipment_id = latest_journey.shipment_id 
+          AND sj.created_at = latest_journey.max_created_at
+        ) as latest_journey'), 
+        'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')      
         ->leftJoin('users', 'shipments.user_id', '=', 'users.id')
         ->select(
             'handover_shipments.id',
@@ -1233,6 +1262,7 @@ class AdminShipmentHandoverController extends Controller
                 END as shipment_type_text
             ")
         )->groupBy('shipments.tracking_number');
+
       $datatable = Datatables::of($handover_shipments)
       ->editColumn('tracking_number', function ($shipments) {
         $route = route('admin.tracking.index');
