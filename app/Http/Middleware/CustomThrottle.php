@@ -18,9 +18,16 @@ class CustomThrottle
     public function handle(Request $request, Closure $next)
     {
         $key = 'custom_throttle:' . $request->ip();
-        $trackingNumbers = explode(',', $request->tracking_numbers);
+        $trackingNumbers = (!empty($request->tracking_numbers)) ? $request->tracking_numbers :  $request->input('packets', 1); ;
+
+        if (!is_array($trackingNumbers)) {
+            $trackingNumbers = explode(',', $trackingNumbers);
+        }
+
+        $trackingNumbers = array_filter($trackingNumbers);
 
         $count = count($trackingNumbers);
+
         $timeLimit = 0;
 
         if ($count >= 100 && $count < 150) {
@@ -31,7 +38,7 @@ class CustomThrottle
             $timeLimit = 15; // 15-minute restriction for 200-300 bookings or tracking
         }
 
-        if ($this->limiter->attempts($key) > 5 && $this->limiter->availableIn($key) > 0) {
+        if ($this->limiter->availableIn($key) > 0) {
             return response()->json(['message' => 'Too many requests. Please try again in ' . $this->limiter->availableIn($key) . ' seconds.'], 429);
         }
 
