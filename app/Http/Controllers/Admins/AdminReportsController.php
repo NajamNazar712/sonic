@@ -5606,7 +5606,7 @@ class AdminReportsController extends Controller
                     $join->on('is.shipment_id', '=', 'shipments.id')
                         ->where('is.type', '!=',2 );
                 })
-            // ->leftJoin('faf_', '', '')
+                ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
             ->leftJoin('invoices', 'is.invoice_id', '=', 'invoices.id');
         //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
         //            $now = Carbon::now();
@@ -5872,12 +5872,8 @@ class AdminReportsController extends Controller
                     return "Corporate";
                 }
             })
-            ->addColumn('faf_charges', function ($sales) {
-                if ($sales->account_type_id == 1){
-                    return "Reimbursement";
-                } else {
-                    return "Corporate";
-                }
+            ->editColumn('faf_charges', function ($sale) {
+                return $sale->faf_charges ?? '-';
             });
         if ($tracking = $request->get('search_tracking')) {
             $datatable->where('shipments.tracking_number', '=', $tracking);

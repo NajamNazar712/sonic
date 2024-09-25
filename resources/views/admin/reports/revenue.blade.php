@@ -193,6 +193,7 @@
                         <th class="border-primary border-darken-1">SMS Charges</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Estimated Charges</th>
+                        <th class="border-primary border-darken-1">FAF Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                     </tr>
@@ -453,6 +454,7 @@
                             head.push('SMS Charges');
                             head.push('Total Charges');
                             head.push('Estimated Charges');
+                            head.push('FAF Charges');
                             head.push('Net Payable');
                             head.push('Delivered / Returned Date');
                             $.each(result.data, function(index, values) {
@@ -500,6 +502,7 @@
                                 row.push(values.pps_sms_charges);
                                 row.push(values.p_total_charges);
                                 row.push(values.estimated_charges);
+                                row.push(values.faf_charges);
                                 row.push(values.p_net_payable);
                                 row.push(values.delivered_or_returned);
 
@@ -560,7 +563,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
-                    { data:'account_type' ,name: '', class: 'align-middle text-center account_type'},
+                    { data:'account_type' ,name: 'account_type', class: 'align-middle text-center account_type'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
                     { data:'name' ,name: 'bc.name', class: 'align-middle name'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
@@ -600,6 +603,7 @@
                     { data:'pps_sms_charges' ,name: 'pps.pps_sms_charges', class: 'align-middle pps_sms_charges',sortable:false},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
                     { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
+                    { data: 'faf_charges' ,name: 'faf_charges', class: 'align-middle faf_charges'},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
                 ],
