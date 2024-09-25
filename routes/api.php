@@ -42,7 +42,7 @@ use Illuminate\Http\Request;
         Route::post('pickup_address/add', 'APIController@pickup_address_add')->name('pickup_address.add');
 
         Route::prefix('shipment')->name('shipment.')->group(function () {
-            Route::post('book', 'APIController@shipment_book')->name('book');
+            Route::post('book', 'APIController@shipment_book')->name('book')->middleware('custom.throttle');
             Route::post('book/intl', 'APIController@shipment_book_international')->name('book.intl');
             Route::post('book/gul_ahmed', 'APIController@shipment_book_gul_ahmed')->name('book.gul_ahmed');
             Route::get('air_waybill', 'APIController@shipment_air_waybill')->name('air_waybill');
@@ -55,8 +55,15 @@ use Illuminate\Http\Request;
             });
 
             Route::prefix('track')->name('track.')->group(function () {
-                Route::get('', 'APIController@shipment_track')->name('track');
-                Route::get('order_id', 'APIController@shipment_track_order_id')->name('order_id');
+                Route::get('', 'APIController@shipment_track')
+                    ->name('track');
+
+                Route::get('order_id', 'APIController@shipment_track_order_id')
+                    ->name('order_id');
+
+                Route::get('bulk', 'APIController@bulk_shipment_track')
+                    ->name('bulk_track')
+                    ->middleware('custom.throttle');
             });
 
             Route::get('charges', 'APIController@shipment_charges')->name('charges');
