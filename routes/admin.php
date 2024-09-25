@@ -3654,6 +3654,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('check_bag_type', 'AdminShipmentHandoverController@check_bag_type')->name('check_bag_type');
             Route::get('handover_exists', 'AdminShipmentHandoverController@handover_exists')->name('handover_exists');
             Route::get('same_hub_handover_count', 'AdminShipmentHandoverController@same_hub_handover_count')->name('same_hub_handover_count');
+            Route::get('permission_to_create_handover', 'AdminShipmentHandoverController@permission_to_create_handover')->name('permission_to_create_handover');
         });
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');
