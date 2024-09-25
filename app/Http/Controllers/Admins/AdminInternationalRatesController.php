@@ -818,7 +818,7 @@ class AdminInternationalRatesController extends Controller
                 else{
                     return redirect()->back()->with(['error' => 'Rate settings not set!']);
                 }
-                $margin = array('margin_1' => 0,'margin_2' => 0,'margin_3' => 0,'margin_4' => 0,'margin_5' => 0,'margin_6' => 0,'margin_7' => 0,'margin_8' => 0,'margin_9' => 0,'margin_10' => 0,'margin_11' => 0,'margin_12' => 0,'margin_13' => 0);
+                $margin = array('margin_1' => 0,'margin_2' => 0,'margin_3' => 0,'margin_4' => 0,'margin_5' => 0,'margin_6' => 0,'margin_7' => 0,'margin_8' => 0,'margin_9' => 0,'margin_10' => 0,'margin_11' => 0,'margin_1b' => 0,'margin_8b' => 0);
                 
                 if($user_information){
                     if($user_information->status == 1 || $user_information->status == 4 || $user_information->status == 5){
@@ -836,8 +836,8 @@ class AdminInternationalRatesController extends Controller
                             $margin['margin_9'] = $international_user_rate->margin_9;
                             $margin['margin_10'] = $international_user_rate->margin_10;
                             $margin['margin_11'] = $international_user_rate->margin_11;
-                            $margin['margin_12'] = $international_user_rate->margin_12;
-                            $margin['margin_13'] = $international_user_rate->margin_13;
+                            $margin['margin_1b'] = $international_user_rate->margin_1b;
+                            $margin['margin_8b'] = $international_user_rate->margin_8b;
                         }
                     }
                     else{
@@ -855,8 +855,8 @@ class AdminInternationalRatesController extends Controller
                             $margin['margin_9'] = $international_user_rate->margin_9;
                             $margin['margin_10'] = $international_user_rate->margin_10;
                             $margin['margin_11'] = $international_user_rate->margin_11;
-                            $margin['margin_12'] = $international_user_rate->margin_12;
-                            $margin['margin_13'] = $international_user_rate->margin_13;
+                            $margin['margin_1b'] = $international_user_rate->margin_1b;
+                            $margin['margin_8b'] = $international_user_rate->margin_8b;
                         }
                     }
                 }
@@ -882,8 +882,8 @@ class AdminInternationalRatesController extends Controller
         $margin_9 = 0;
         $margin_10 = 0;
         $margin_11 = 0;
-        $margin_12 = 0;
-        $margin_13 = 0;
+        $margin_1b = 0;
+        $margin_8b = 0;
 
         $intl_user_information = InternationalUsersInformation::where('user_id', $id);
         if($intl_user_information->exists()){
@@ -903,8 +903,8 @@ class AdminInternationalRatesController extends Controller
                     $margin_9 = $international_user_rate->margin_9;
                     $margin_10 = $international_user_rate->margin_10;
                     $margin_11 = $international_user_rate->margin_11;
-                    $margin_12 = $international_user_rate->margin_12;
-                    $margin_13 = $international_user_rate->margin_13;
+                    $margin_1b = $international_user_rate->margin_1b;
+                    $margin_8b = $international_user_rate->margin_8b;
                 }
             }
             else{
@@ -922,13 +922,13 @@ class AdminInternationalRatesController extends Controller
                     $margin_9 = $international_user_rate->margin_9;
                     $margin_10 = $international_user_rate->margin_10;
                     $margin_11 = $international_user_rate->margin_11;
-                    $margin_12 = $international_user_rate->margin_12;
-                    $margin_13 = $international_user_rate->margin_13;
+                    $margin_1b = $international_user_rate->margin_1b;
+                    $margin_8b = $international_user_rate->margin_8b;
                 }
             }
         }
 
-        $rates_list = InternationalStandardDhlRate::select('id','range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11', 'zone_12', 'zone_13');
+        $rates_list = InternationalStandardDhlRate::select('id','range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11', 'zone_1b', 'zone_8b');
 
         return Datatables::of($rates_list)
             ->editColumn('zone_1', function ($rate) use ($margin_1){
@@ -1019,20 +1019,20 @@ class AdminInternationalRatesController extends Controller
                     return $rate->zone_11;
                 }
             })
-            ->editColumn('zone_12', function ($rate) use ($margin_12){
-                if($margin_12 > 0){
-                    return round($zone = ((100 + $margin_12) / 100) * $rate->zone_12, 2);
+            ->editColumn('zone_1b', function ($rate) use ($margin_1b){
+                if($margin_1b > 0){
+                    return round($zone = ((100 + $margin_1b) / 100) * $rate->zone_1b, 2);
                 }
                 else{
-                    return $rate->zone_12;
+                    return $rate->zone_1b;
                 }
             })
-            ->editColumn('zone_13', function ($rate) use ($margin_13){
-                if($margin_13 > 0){
-                    return round($zone = ((100 + $margin_13) / 100) * $rate->zone_13, 2);
+            ->editColumn('zone_8b', function ($rate) use ($margin_8b){
+                if($margin_8b > 0){
+                    return round($zone = ((100 + $margin_8b) / 100) * $rate->zone_8b, 2);
                 }
                 else{
-                    return $rate->zone_13;
+                    return $rate->zone_8b;
                 }
             })
 
@@ -1083,8 +1083,8 @@ class AdminInternationalRatesController extends Controller
                 $history_international_user_rate->margin_9 = $previous_rate_status->margin_9;
                 $history_international_user_rate->margin_10 = $previous_rate_status->margin_10;
                 $history_international_user_rate->margin_11 = $previous_rate_status->margin_11;
-                $history_international_user_rate->margin_12 = $previous_rate_status->margin_12;
-                $history_international_user_rate->margin_13 = $previous_rate_status->margin_13;
+                $history_international_user_rate->margin_1b = $previous_rate_status->margin_1b;
+                $history_international_user_rate->margin_8b = $previous_rate_status->margin_8b;
 
                 $history_international_user_rate->updated_by = $previous_rate_status->updated_by;
                 $history_international_user_rate->rates_updated_at = $previous_rate_status->rates_updated_at;
@@ -1109,8 +1109,8 @@ class AdminInternationalRatesController extends Controller
                     $international_user_rates->margin_9 = $request->margin_9;
                     $international_user_rates->margin_10 = $request->margin_10;
                     $international_user_rates->margin_11 = $request->margin_11;
-                    $international_user_rates->margin_12 = $request->margin_12;
-                    $international_user_rates->margin_13 = $request->margin_13;
+                    $international_user_rates->margin_1b = $request->margin_1b;
+                    $international_user_rates->margin_8b = $request->margin_8b;
                     $international_user_rates->updated_by = $pending_rate_statuses->updated_by;
                     $international_user_rates->rates_updated_at = $pending_rate_statuses->rates_updated_at;
                     $international_user_rates->save();
@@ -1160,8 +1160,8 @@ class AdminInternationalRatesController extends Controller
                 $international_user_rates->margin_9 = $request->margin_9;
                 $international_user_rates->margin_10 = $request->margin_10;
                 $international_user_rates->margin_11 = $request->margin_11;
-                $international_user_rates->margin_12 = $request->margin_12;
-                $international_user_rates->margin_13 = $request->margin_13;
+                $international_user_rates->margin_1b = $request->margin_1b;
+                $international_user_rates->margin_8b = $request->margin_8b;
                 $international_user_rates->updated_by = Auth::id();
                 $international_user_rates->rates_updated_at = Carbon::now();
                 $international_user_rates->save();
@@ -1181,8 +1181,8 @@ class AdminInternationalRatesController extends Controller
                     $international_user_rates->margin_9 = $request->margin_9;
                     $international_user_rates->margin_10 = $request->margin_10;
                     $international_user_rates->margin_11 = $request->margin_11;
-                    $international_user_rates->margin_12 = $request->margin_12;
-                    $international_user_rates->margin_13 = $request->margin_13;
+                    $international_user_rates->margin_1b = $request->margin_1b;
+                    $international_user_rates->margin_8b = $request->margin_8b;
                     $international_user_rates->updated_by = Auth::id();
                     $international_user_rates->rates_updated_at = Carbon::now();
 
@@ -1201,8 +1201,8 @@ class AdminInternationalRatesController extends Controller
                     $international_user_rates->margin_9 = $request->margin_9;
                     $international_user_rates->margin_10 = $request->margin_10;
                     $international_user_rates->margin_11 = $request->margin_11;
-                    $international_user_rates->margin_12 = $request->margin_12;
-                    $international_user_rates->margin_13 = $request->margin_13;
+                    $international_user_rates->margin_1b = $request->margin_1b;
+                    $international_user_rates->margin_8b = $request->margin_8b;
                     $international_user_rates->updated_by = Auth::id();
                     $international_user_rates->rates_updated_at = Carbon::now();
                 }
@@ -1513,7 +1513,7 @@ class AdminInternationalRatesController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),382);
         }
 
-        $rates_list = InternationalStandardRetailRates::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11', 'zone_12', 'zone_13');
+        $rates_list = InternationalStandardRetailRates::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11', 'zone_1b', 'zone_8b');
         if ($request->shipping_mode_id == 1){
             $rates_list = $rates_list->where('shipping_mode_id',1);
         }
@@ -1534,19 +1534,20 @@ class AdminInternationalRatesController extends Controller
             'range_up' => 'Range Up',
             'range_down' => 'Range Down',
             /*   'shipping_mode_id' => 'Shipping Mode',*/
-            'zone_1' => 'Zone 1',
+            'zone_1' => 'Zone 1A',
+            'zone_1b' => 'Zone 1B',
             'zone_2' => 'Zone 2',
             'zone_3' => 'Zone 3',
             'zone_4' => 'Zone 4',
             'zone_5' => 'Zone 5',
             'zone_6' => 'Zone 6',
             'zone_7' => 'Zone 7',
-            'zone_8' => 'Zone 8',
+            'zone_8' => 'Zone 8A',
+            'zone_8b' => 'Zone 8B',
             'zone_9' => 'Zone 9',
             'zone_10' => 'Zone 10',
             'zone_11' => 'Zone 11',
-            'zone_12' => 'Zone 12',
-            'zone_13' => 'Zone 13',
+
         ];
 
         $messages = [
@@ -1559,6 +1560,7 @@ class AdminInternationalRatesController extends Controller
             'range_down' => ['required', 'numeric', 'between:0.01,300'/*, Rule::exists('international_standard_retail_rates', 'range_down')*/],
             /* 'shipping_mode_id' => ['required', 'numeric', 'between:1,3'],*/
             'zone_1' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_1b' => ['required', 'numeric', 'between:0,1000000'],
             'zone_2' => ['required', 'numeric', 'between:0,1000000'],
             'zone_3' => ['required', 'numeric', 'between:0,1000000'],
             'zone_4' => ['required', 'numeric', 'between:0,1000000'],
@@ -1566,21 +1568,53 @@ class AdminInternationalRatesController extends Controller
             'zone_6' => ['required', 'numeric', 'between:0,1000000'],
             'zone_7' => ['required', 'numeric', 'between:0,1000000'],
             'zone_8' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_8b' => ['required', 'numeric', 'between:0,1000000'],
             'zone_9' => ['required', 'numeric', 'between:0,1000000'],
             'zone_10' => ['required', 'numeric', 'between:0,1000000'],
             'zone_11' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_12' => ['required', 'numeric', 'between:0,1000000'],
-            'zone_13' => ['required', 'numeric', 'between:0,1000000'],
+
         ];
 
-        $fields = [0 => 'range_up', 1 => 'range_down', 2 => 'zone_1', 3 => 'zone_2', 4 => 'zone_3', 5 => 'zone_4', 6 => 'zone_5', 7 => 'zone_6', 8 => 'zone_7', 9 => 'zone_8', 10 => 'zone_9', 11 => 'zone_10', 12 => 'zone_11', 13 => 'zone_12', 14 => 'zone_13'];
+        $fields = [
+            0  => 'range_up',
+            1  => 'range_down',
+            2  => 'zone_1',
+            3  => 'zone_1b', // Moved zone_1b next to zone_1
+            4  => 'zone_2',
+            5  => 'zone_3',
+            6  => 'zone_4',
+            7  => 'zone_5',
+            8  => 'zone_6',
+            9  => 'zone_7',
+            10 => 'zone_8',
+            11 => 'zone_8b', // Moved zone_8b next to zone_8
+            12 => 'zone_9',
+            13 => 'zone_10',
+            14 => 'zone_11'
+        ];
 
         if ($file = $request->file('document_rates')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11', 'Zone 12', 'Zone 13'];
+            $header = [
+                'Range Up',
+                'Range Down',
+                'Zone 1A',
+                'Zone 1B', // Moved Zone 1B next to Zone 1
+                'Zone 2',
+                'Zone 3',
+                'Zone 4',
+                'Zone 5',
+                'Zone 6',
+                'Zone 7',
+                'Zone 8A',
+                'Zone 8B', // Moved Zone 8B next to Zone 8
+                'Zone 9',
+                'Zone 10',
+                'Zone 11'
+            ];
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
@@ -1673,8 +1707,8 @@ class AdminInternationalRatesController extends Controller
                         $zone_9 = trim($row['zone_9']);
                         $zone_10 = trim($row['zone_10']);
                         $zone_11 = trim($row['zone_11']);
-                        $zone_12 = trim($row['zone_12']);
-                        $zone_13 = trim($row['zone_13']);
+                        $zone_1b = trim($row['zone_1b']);
+                        $zone_8b = trim($row['zone_8b']);
 
                         $standard_rate = new InternationalStandardRetailRates();
                         $standard_rate->range_up = $range_up;
@@ -1691,8 +1725,8 @@ class AdminInternationalRatesController extends Controller
                         $standard_rate->zone_9 = $zone_9;
                         $standard_rate->zone_10 = $zone_10;
                         $standard_rate->zone_11 = $zone_11;
-                        $standard_rate->zone_12 = $zone_12;
-                        $standard_rate->zone_13 = $zone_13;
+                        $standard_rate->zone_1b = $zone_1b;
+                        $standard_rate->zone_8b = $zone_8b;
                         $standard_rate->save();
                         $created++;
 
@@ -1725,7 +1759,23 @@ class AdminInternationalRatesController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11', 'Zone 12', 'Zone 13'];
+            $header = [
+                'Range Up',
+                'Range Down',
+                'Zone 1A',
+                'Zone 1B', // Moved Zone 1B next to Zone 1
+                'Zone 2',
+                'Zone 3',
+                'Zone 4',
+                'Zone 5',
+                'Zone 6',
+                'Zone 7',
+                'Zone 8A',
+                'Zone 8B', // Moved Zone 8B next to Zone 8
+                'Zone 9',
+                'Zone 10',
+                'Zone 11'
+            ];
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
@@ -1818,8 +1868,8 @@ class AdminInternationalRatesController extends Controller
                         $zone_9 = trim($row['zone_9']);
                         $zone_10 = trim($row['zone_10']);
                         $zone_11 = trim($row['zone_11']);
-                        $zone_12 = trim($row['zone_12']);
-                        $zone_13 = trim($row['zone_13']);
+                        $zone_1b = trim($row['zone_1b']);
+                        $zone_8b = trim($row['zone_8b']);
 
                         $standard_rate = new InternationalStandardRetailRates();
                         $standard_rate->range_up = $range_up;
@@ -1836,8 +1886,8 @@ class AdminInternationalRatesController extends Controller
                         $standard_rate->zone_9 = $zone_9;
                         $standard_rate->zone_10 = $zone_10;
                         $standard_rate->zone_11 = $zone_11;
-                        $standard_rate->zone_12 = $zone_12;
-                        $standard_rate->zone_13 = $zone_13;
+                        $standard_rate->zone_1b = $zone_1b;
+                        $standard_rate->zone_8b = $zone_8b;
                         $standard_rate->save();
                         $created++;
 
@@ -1869,7 +1919,23 @@ class AdminInternationalRatesController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11', 'Zone 12', 'Zone 13'];
+            $header = [
+                'Range Up',
+                'Range Down',
+                'Zone 1A',
+                'Zone 1B', // Moved Zone 1B next to Zone 1
+                'Zone 2',
+                'Zone 3',
+                'Zone 4',
+                'Zone 5',
+                'Zone 6',
+                'Zone 7',
+                'Zone 8A',
+                'Zone 8B', // Moved Zone 8B next to Zone 8
+                'Zone 9',
+                'Zone 10',
+                'Zone 11'
+            ];
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
@@ -1964,8 +2030,8 @@ class AdminInternationalRatesController extends Controller
                         $zone_9 = trim($row['zone_9']);
                         $zone_10 = trim($row['zone_10']);
                         $zone_11 = trim($row['zone_11']);
-                        $zone_12 = trim($row['zone_12']);
-                        $zone_13 = trim($row['zone_13']);
+                        $zone_1b = trim($row['zone_1b']);
+                        $zone_8b = trim($row['zone_8b']);
 
                         $standard_rate = new InternationalStandardRetailRates();
                         $standard_rate->range_up = $range_up;
@@ -1982,8 +2048,8 @@ class AdminInternationalRatesController extends Controller
                         $standard_rate->zone_9 = $zone_9;
                         $standard_rate->zone_10 = $zone_10;
                         $standard_rate->zone_11 = $zone_11;
-                        $standard_rate->zone_12 = $zone_12;
-                        $standard_rate->zone_13 = $zone_13;
+                        $standard_rate->zone_1b = $zone_1b;
+                        $standard_rate->zone_8b = $zone_8b;
                         $standard_rate->save();
                         $created++;
 

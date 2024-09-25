@@ -14,8 +14,8 @@ class UpdateintlEconomyStandardRetailRatesAddZone extends Migration
     public function up()
     {
         Schema::table('intl_economy_standard_retail_rates', function (Blueprint $table) {
-            $table->decimal('zone_13', 8,2)->default(0)->after('zone_11');
-            $table->decimal('zone_12', 8,2)->default(0)->after('zone_11');
+            $table->decimal('zone_1b', 8,2)->default(0)->after('zone_11');
+            $table->decimal('zone_8b', 8,2)->default(0)->after('zone_11');
         });
     }
 

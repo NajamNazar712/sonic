@@ -14,16 +14,16 @@ class UpdateinternationalUserRatesaddcolumn extends Migration
     public function up()
     {
         Schema::table('international_user_rates', function (Blueprint $table) {
-            $table->decimal('margin_12', 20,2);
-            $table->decimal('margin_13', 20,2);
+            $table->decimal('margin_1b', 20,2);
+            $table->decimal('margin_8b', 20,2);
         });
         Schema::table('pending_international_user_rates', function (Blueprint $table) {
-            $table->decimal('margin_12', 20,2);
-            $table->decimal('margin_13', 20,2);
+            $table->decimal('margin_1b', 20,2);
+            $table->decimal('margin_8b', 20,2);
         });
         Schema::table('history_international_user_rates', function (Blueprint $table) {
-            $table->decimal('margin_12', 20,2);
-            $table->decimal('margin_13', 20,2);
+            $table->decimal('margin_1b', 20,2);
+            $table->decimal('margin_8b', 20,2);
         });
     }
 

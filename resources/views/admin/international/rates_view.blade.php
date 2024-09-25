@@ -65,19 +65,20 @@
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">Range Up</th>
                                     <th class="border-primary border-darken-1">Range Down</th>
-                                    <th class="border-primary border-darken-1">Zone 1 </th>
+                                    <th class="border-primary border-darken-1">Zone 1A </th>
+                                    <th class="border-primary border-darken-1">Zone 1B </th>
                                     <th class="border-primary border-darken-1">Zone 2 </th>
                                     <th class="border-primary border-darken-1">Zone 3 </th>
                                     <th class="border-primary border-darken-1">Zone 4 </th>
                                     <th class="border-primary border-darken-1">Zone 5 </th>
                                     <th class="border-primary border-darken-1">Zone 6 </th>
                                     <th class="border-primary border-darken-1">Zone 7 </th>
-                                    <th class="border-primary border-darken-1">Zone 8 </th>
+                                    <th class="border-primary border-darken-1">Zone 8A </th>
+                                    <th class="border-primary border-darken-1">Zone 8B </th>
                                     <th class="border-primary border-darken-1">Zone 9 </th>
                                     <th class="border-primary border-darken-1">Zone 10 </th>
                                     <th class="border-primary border-darken-1">Zone 11 </th>
-                                    <th class="border-primary border-darken-1">Zone 12 </th>
-                                    <th class="border-primary border-darken-1">Zone 13 </th>
+
 
                                 </tr>
                                 </thead>
@@ -133,19 +134,20 @@
                             head.push('S.No');
                             head.push('Range Up');
                             head.push('Range Down');
-                            head.push('Zone 1');
+                            head.push('Zone 1A');
+                            head.push('Zone 1B');
                             head.push('Zone 2');
                             head.push('Zone 3');
                             head.push('Zone 4');
                             head.push('Zone 5');
                             head.push('Zone 6');
                             head.push('Zone 7');
-                            head.push('Zone 8');
+                            head.push('Zone 8A');
+                            head.push('Zone 8B');
                             head.push('Zone 9');
                             head.push('Zone 10');
                             head.push('Zone 11');
-                            head.push('Zone 12');
-                            head.push('Zone 13');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -154,6 +156,7 @@
                                 row.push(values.range_up);
                                 row.push(values.range_down);
                                 row.push(values.zone_1);
+                                row.push(values.zone_1b);
                                 row.push(values.zone_2);
                                 row.push(values.zone_3);
                                 row.push(values.zone_4);
@@ -161,11 +164,11 @@
                                 row.push(values.zone_6);
                                 row.push(values.zone_7);
                                 row.push(values.zone_8);
+                                row.push(values.zone_8b);
                                 row.push(values.zone_9);
                                 row.push(values.zone_10);
                                 row.push(values.zone_11);
-                                row.push(values.zone_12);
-                                row.push(values.zone_13);
+
 
                                 body.push(row);
                             });
@@ -206,6 +209,7 @@
                     {data: 'range_up', name: 'range_up', class: 'align-middle range_up'},
                     {data: 'range_down', name: 'range_down', class: 'align-middle range_down'},
                     {data: 'zone_1', name: 'zone_1', class: 'align-middle zone_1'},
+                    {data: 'zone_1b', name: 'zone_1b', class: 'align-middle zone_1b'},
                     {data: 'zone_2', name: 'zone_2', class: 'align-middle zone_2'},
                     {data: 'zone_3', name: 'zone_3', class: 'align-middle zone_3'},
                     {data: 'zone_4', name: 'zone_4', class: 'align-middle zone_4'},
@@ -213,11 +217,10 @@
                     {data: 'zone_6', name: 'zone_6', class: 'align-middle zone_6'},
                     {data: 'zone_7', name: 'zone_7', class: 'align-middle zone_7'},
                     {data: 'zone_8', name: 'zone_8', class: 'align-middle zone_8'},
+                    {data: 'zone_8b', name: 'zone_8b', class: 'align-middle zone_8b'},
                     {data: 'zone_9', name: 'zone_9', class: 'align-middle zone_9'},
                     {data: 'zone_10', name: 'zone_10', class: 'align-middle zone_10'},
                     {data: 'zone_11', name: 'zone_11', class: 'align-middle zone_11'},
-                    {data: 'zone_12', name: 'zone_12', class: 'align-middle zone_12'},
-                    {data: 'zone_13', name: 'zone_13', class: 'align-middle zone_13'}
                 ],
                 rowCallback: function(row, data, index) {
 
