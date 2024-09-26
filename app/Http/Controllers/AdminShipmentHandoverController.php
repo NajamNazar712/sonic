@@ -86,6 +86,16 @@ class AdminShipmentHandoverController extends Controller
       $shipment = Shipment::where('tracking_number', $request->tracking_number);
       if ($shipment->exists()) {
         $shipment = $shipment->first();
+        
+        $blocked_shipments = ShipmentsJourney::where('shipment_id', $shipment->id)
+        ->latest('created_at')
+        ->select('shipper_status_id')
+        ->first();
+        if ($blocked_shipments->shipper_status_id == 51 || $blocked_shipments->shipper_status_id == 18){
+          ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+          return ['status' => 1, 'error' => 'Cannot scan this shipment.'];
+        }
+
         $latest_shipper_status = $shipment->shipment_journey()->latest('id')->first()->shipper_status_id ?? null;
         $shipment_pieces1 = $shipment->pieces;
         $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
@@ -196,7 +206,6 @@ class AdminShipmentHandoverController extends Controller
           $handover_shipments = HandoverShipments::where('shipment_id',$shipment->id)->whereIn('status', [1,3]);
 
           // shipments with no handover/bag
-          $excess_shipment = null;
           if (!$handover_shipments->first())
           {
             $details = array();
@@ -1238,16 +1247,6 @@ class AdminShipmentHandoverController extends Controller
     public function handover_shipment_type(Request $request)
     {
       $handover_id = $request->bag_number;
-      $check_full_bag = Handover::where('id', $handover_id)
-      ->select(['id', 'shipments', 'received'])
-      ->first();
-
-      // if ($check_full_bag->shipments == $check_full_bag->received)
-      // {
-      //   return response()->json(['status' => 1, 'error' => 'This handover bag is fully received', 'data' => []]);
-      //   // return ['status' => 1, 'error' => 'This handover bag is fully received'];
-      // }
-
       $normal_status_ids = [
           1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
           11, 12, 13, 14, 15, 17, 19, 49, 
@@ -1410,6 +1409,22 @@ class AdminShipmentHandoverController extends Controller
       $hub_count = $handovers->where('hub', $request->hub_id)->count();
       if ($hub_count >= 3) {
         return ['status' => 1, 'error' => 'You cannot add more handovers for this hub.'];
+      }
+    }
+
+    public function check_full_bag(Request $request)
+    {
+      $check_full_bag = Handover::where('id', (int)$request->bag_number)
+      ->select(['shipments', 'received'])
+      ->first();
+
+      if ($check_full_bag == null){
+        return;
+      }
+
+      if ($check_full_bag->shipments == $check_full_bag->received)
+      {
+        return ['status' => 1, 'error' => 'This handover bag is fully received'];
       }
     }
 }
