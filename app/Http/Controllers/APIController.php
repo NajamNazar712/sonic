@@ -1282,14 +1282,13 @@ class APIController extends Controller
         }
         else {
             if ($user_type['restrict_order_id'] == 1) {
-                $rules['order_id'] = ['nullable', 'between:0,100', 'valid_order_id_with_prefix', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
+                $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
                 })];
             } else {
-                $rules['order_id'] = ['nullable', 'filled', 'between:0,100','valid_order_id_with_prefix'];
+                $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
             }
         }
-
         $errors = [];
 
 
@@ -1377,7 +1376,8 @@ class APIController extends Controller
                 //     }
                 // }
 
-//                if ($shipment_pre_book->isNotEmpty()) {
+
+                if ($shipment_pre_book && $shipment_pre_book->isNotEmpty()) {
 //                    $shipment_pre_book = $shipment_pre_book->pluck('prefix')->toArray();
 //                    $order_id = $request->input('order_id');
 //                    $prefix_matched = false;
@@ -1398,10 +1398,11 @@ class APIController extends Controller
 //                    if (!$prefix_matched) {
 //                        return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
 //                    }
-//                }
-//                else {
-//                    $shipment_pre_book = null;
-//                }
+                }
+                else {
+                    $shipment_pre_book = null;
+                }
+
                 if ($service_type_id != 5) {
                     $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
 //
@@ -1739,7 +1740,7 @@ class APIController extends Controller
                     $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id, $parcel_value);
                 }
 
-                if (!empty($order_id)) {
+                if ($shipment_pre_book) {
                     $tracking_number[] = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
                 } else {
                     $tracking_number[] = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
