@@ -365,11 +365,6 @@
                 }
             });
 
-            // bag_number.on('change', function() {
-            //     bag = $(this).val();
-            //     shipment_type_datatable.draw();
-            // });
-
             bag_number.on('change', function() {
                 bag = $(this).val();
                 if (bag) {
@@ -493,10 +488,6 @@
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                 }
-
-                                // else if(data.status == 2){
-                                    
-                                // }
 
                                 //Open Modal if Shipment Receive Pieces are greater than 1 
                                 else if(data.status == 3){

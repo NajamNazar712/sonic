@@ -12,74 +12,83 @@
             <div class="card-body">
 
                 @include('admin.inc.messages')
-                <div class="row mb-2 justify-content-center">
+                <div class="container">
+                    <div class="row mb-2 justify-content-center">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                        <div class="col-3">
-                            <fieldset class="position-relative has-icon-left">
-                                <input type="text" class="form-control" placeholder="Tracking Number" id="search_tracking">
-                            </fieldset>
-                        </div>
-                        <div class="col-4">
-                            <fieldset class="form-group">
-                                <select name="R" id="search_hub" class="form-control select2">
-                                    @foreach($hubs as $hub)
-                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
-                        <div class="col-4">
-                            <fieldset class="form-group">
-                                <select name="search_from_admin" id="search_from_admin" class="form-control select2">
-                                    @foreach($handover_admins as $admin)
-                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
-                        <div class="col-4">
-                            <fieldset class="form-group">
-                                <select name="search_to_admin" id="search_to_admin" class="form-control select2">
-                                    @foreach($handover_admins as $admin)
-                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
-
-                        <div class="col-4">
-                            <fieldset class="form-group">
-                                <select name="search_area" id="search_area" class="form-control select2">
-                                    @foreach($areas as $area)
-                                        <option value="{{$area->id}}">{{$area->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
-
-                        <div class="col-3 form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
+                            <div class="col-3 my-1">
+                                <fieldset class="position-relative has-icon-left">
+                                    <input type="text" class="form-control" placeholder="Tracking Number" id="search_tracking">
+                                </fieldset>
                             </div>
 
-                            <input type="text" name="search_date_from" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)">
-                        </div>
-                        <div class="col-3 form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
+                            <div class="col-3">
+                                <fieldset class="position-relative has-icon-left">
+                                    <input type="text" class="form-control" placeholder="Bag Number" id="search_bag_number">
+                                </fieldset>
                             </div>
 
-                            <input type="text" name="search_date_to" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)">
-                        </div>
-
-                        <div class="col-2">
-                            <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                        </div>
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <select name="R" id="search_hub" class="form-control select2">
+                                        @foreach($hubs as $hub)
+                                            <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-4 my-1">
+                                <fieldset class="form-group">
+                                    <select name="search_from_admin" id="search_from_admin" class="form-control select2">
+                                        @foreach($handover_admins as $admin)
+                                            <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <select name="search_to_admin" id="search_to_admin" class="form-control select2">
+                                        @foreach($handover_admins as $admin)
+                                            <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+    
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <select name="search_area" id="search_area" class="form-control select2">
+                                        @foreach($areas as $area)
+                                            <option value="{{$area->id}}">{{$area->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+    
+                            <div class="col-3 form-group input-group">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                </div>
+    
+                                <input type="text" name="search_date_from" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)">
+                            </div>
+                            <div class="col-3 form-group input-group">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                </div>
+    
+                                <input type="text" name="search_date_to" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)">
+                            </div>
+    
+                            <div class="col-2">
+                                <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                            </div>
                         </form>
+                    </div>
                 </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="width:100%;z-index: 3;">
@@ -378,7 +387,12 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
-       
+
+            $('#search_bag_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -588,6 +602,7 @@
                     url: '{{ route('admin.handover.list.list') }}',
                     data: function (d) {
                         d.search_tracking = $('#search_tracking').val();
+                        d.search_bag_number = $('#search_bag_number').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_from_admin = $('#search_from_admin').val();
                         d.search_to_admin = $('#search_to_admin').val();

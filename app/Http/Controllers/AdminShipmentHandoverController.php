@@ -53,7 +53,7 @@ class AdminShipmentHandoverController extends Controller
         foreach($data as $row){
           if ($type == 0 && isset($row->name)){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
-          }else if ($type == 1 && !isset($row->name) && isset($row->admin_id)){
+          }else if ($type == 1 && isset($row->name) && isset($row->admin_id)){
             $output .= '<option value ="'.$row->id.'">' . Admin::where('id' ,$row->admin_id)->first()->name   . '</option> ';
           }
         }
@@ -195,56 +195,94 @@ class AdminShipmentHandoverController extends Controller
           $shipment_pieces = $shipment->pieces;
           $handover_shipments = HandoverShipments::where('shipment_id',$shipment->id)->whereIn('status', [1,3]);
 
-          // if received but try to receive again
+          // shipments with no handover/bag
+          $excess_shipment = null;
           if (!$handover_shipments->first())
           {
-            return ['status' => 1, 'error' => 'Shipment not in Handover / not ready to update!'];
-          }
+            // $excess_shipment = 1;
+            // $data = [
+            //   'handover_id' => null,
+            //   'excess_handover_id' => null,
+            //   'bag_number' => null,
+            //   'excess_bag_number' => null,
+            //   'shipment_ids' => $shipment->id,
+            //   'excess_shipment' => $excess_shipment
+            // ];
+            // ExcessHandoverShipment::create($data);
 
-          // // if handover is received
-          // if (Handover::where('id', $current_handover_id)->where('status_id', '!=', 1)){
-          //   return ['status' => 2, 'disbaled'];
-          // }
-
-          $handover = Handover::where('id', $handover_shipments->first()->handover_id)->first();
-          $bag_number = $handover->bag_number;
-
-          $details = array();
-          $details['id'] = $shipment->id;
-          $details['tracking_number'] = $shipment->tracking_number;
-          $details['shipper'] = $shipment->user->name;
-          $details['phone_number'] = $shipment->user->phone;
-          $details['pickup_date'] = $shipment->pickup_date;
-          $details['special_instructions'] = $shipment->special_instructions;
-          $details['bag_number'] = $bag_number;
-
-          if ($bag_number == $current_bag_number) {
-            $details['verification_status'] = 'Verified';
-          } elseif ($bag_number != $current_bag_number) {
+            $details = array();
+            $details['id'] = $shipment->id;
+            $details['tracking_number'] = $shipment->tracking_number;
+            $details['shipper'] = $shipment->user->name;
+            $details['phone_number'] = $shipment->user->phone;
+            $details['pickup_date'] = $shipment->pickup_date;
+            $details['special_instructions'] = $shipment->special_instructions;
+            // $details['bag_number'] = $bag_number;
             $details['verification_status'] = 'Excess';
-          }
 
-          if($handover_shipments->exists() && $shipment_pieces == 1){
-            ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
-            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
-          }
+            if($shipment_pieces == 1){
+              ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+              return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+            }
 
-          else if($shipment_pieces > 1)
+            else if($shipment_pieces > 1)
             {
               $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
               $details['pieces_count'] = $shipment->pieces;
               ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
               return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
             }
+          }
+          
+          
+          else if ($handover_shipments->first()) {
+            $handover = Handover::where('id', $handover_shipments->first()->handover_id)->first();
+            $bag_number = $handover->bag_number;
+            // $excess_shipment = 0;
+            // $data = [
+            //   'handover_id' => $handover->id,
+            //   'excess_handover_id' => null,
+            //   'bag_number' => $current_bag_number,
+            //   'excess_bag_number' => null,
+            //   'shipment_ids' => $shipment->id,
+            //   'excess_shipment' => $excess_shipment
+            // ];
+            // ExcessHandoverShipment::create($data);
+            $details = array();
+            $details['id'] = $shipment->id;
+            $details['tracking_number'] = $shipment->tracking_number;
+            $details['shipper'] = $shipment->user->name;
+            $details['phone_number'] = $shipment->user->phone;
+            $details['pickup_date'] = $shipment->pickup_date;
+            $details['special_instructions'] = $shipment->special_instructions;
+            $details['bag_number'] = $bag_number;
 
+            if ($bag_number == $current_bag_number) {
+              $details['verification_status'] = 'Verified';
+            } elseif ($bag_number != $current_bag_number) {
+              $details['verification_status'] = 'Excess';
+            }
+
+            if($handover_shipments->exists() && $shipment_pieces == 1){
+              ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+              return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+            }
+
+            else if($shipment_pieces > 1)
+            {
+              $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+              $details['pieces_count'] = $shipment->pieces;
+              ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+              return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+            }
+          }
           else 
           {
             return ['status' => 1, 'error' => 'Shipment not in Handover / not ready to update!'];
           }
-
-         }
+      }
       else {
-      return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+        return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
       }
     }
 
@@ -259,12 +297,6 @@ class AdminShipmentHandoverController extends Controller
         $shipment_ids = array_map(function($id) {
           return intval(substr($id, 6));
         }, json_decode($shipment_ids_json, true));
-
-        // $current_hub = $request->hub_id;
-        // $hub_count_check = self::handoverHubCount($shipment_ids, $current_hub);
-        // if ($hub_count_check) {
-        //   return $hub_count_check;
-        // }
 
         $normal_status_ids = [
           1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
@@ -292,9 +324,7 @@ class AdminShipmentHandoverController extends Controller
 
         $shipper_status_ids = $shipment_type->pluck('shipper_status_id');
 
-        // Check if there are normal statuses
         $has_normal = $shipper_status_ids->intersect($normal_status_ids)->isNotEmpty();
-        // Check if there are return statuses
         $has_return = $shipper_status_ids->intersect($return_status_ids)->isNotEmpty();
 
         if ($has_normal && $has_return) {
@@ -325,17 +355,11 @@ class AdminShipmentHandoverController extends Controller
                 $handover_shipments->shipment_id = $shipment_id;
                 $handover_shipments->status = 1;
                 $handover_shipments->save();
-
                 HandoverShipmentJourneyController::add($shipment_id,$handover_id,1);
             }
-
             return redirect()->route('admin.handover.create.index')->with('success','Handover Note created Successfully!');
         }
         return redirect()->back()->with('error', 'No shipments scanned!');
-    }
-
-    private function isShipmentExcess($shipment, $request_bag_number, $existing_bag_number) {
-      return $request_bag_number->bag_number != $existing_bag_number->bag_number;
     }
 
     public function bulk_handover_submit_receive(Request $request){
@@ -364,16 +388,41 @@ class AdminShipmentHandoverController extends Controller
 
                 if ($request_bag_number->bag_number == $existing_bag_number->bag_number) {
                   $excess_shipment = 0;
-                } else {
-                  $excess_shipment = 1;
                   $data = [
-                    'handover_id' => $request->handover_id,
-                    'bag_number' => $request_bag_number->bag_number,
+                    'handover_id' => null,
+                    'excess_handover_id' => $request->handover_id,
+                    'bag_number' => null,
+                    'excess_bag_number' => $request_bag_number->bag_number,
                     'shipment_ids' => $shipment_id,
                     'excess_shipment' => $excess_shipment
                   ];
                   ExcessHandoverShipment::create($data);
-                }
+                } 
+                
+                else {
+                  $excess_shipment = 1;
+                  $data = [
+                    'handover_id' => null,
+                    'excess_handover_id' => $request->handover_id,
+                    'bag_number' => null,
+                    'excess_bag_number' => $request_bag_number->bag_number,
+                    'shipment_ids' => $shipment_id,
+                    'excess_shipment' => $excess_shipment
+                  ];
+                  ExcessHandoverShipment::create($data);
+                } 
+            }
+            else if (!$handover_shipments->exists()){
+              $excess_shipment = 1;
+              $data = [
+                'handover_id' => null,
+                'excess_handover_id' => null,
+                'bag_number' => null,
+                'excess_bag_number' => null,
+                'shipment_ids' => $shipment_id,
+                'excess_shipment' => $excess_shipment
+              ];
+              ExcessHandoverShipment::create($data);
             }
         }
 
@@ -680,7 +729,9 @@ class AdminShipmentHandoverController extends Controller
         if ($to_admin = $request->get('search_to_admin')) {
             $datatable->where('handovers.to', '=', $to_admin);
         }
-        
+        if ($bag_number = $request->get('search_bag_number')) {
+          $datatable->where('handovers.bag_number', '=', $bag_number);
+        }
         // if ($search_area = $request->get('search_area')) {
         //   $datatable->where(function($query) use ($search_area) {
         //       $query->where('ssj_f.area_id', '=', $search_area)
@@ -1207,6 +1258,16 @@ class AdminShipmentHandoverController extends Controller
     public function handover_shipment_type(Request $request)
     {
       $handover_id = $request->bag_number;
+      $check_full_bag = Handover::where('id', $handover_id)
+      ->select(['id', 'shipments', 'received'])
+      ->first();
+
+      // if ($check_full_bag->shipments == $check_full_bag->received)
+      // {
+      //   return response()->json(['status' => 1, 'error' => 'This handover bag is fully received', 'data' => []]);
+      //   // return ['status' => 1, 'error' => 'This handover bag is fully received'];
+      // }
+
       $normal_status_ids = [
           1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
           11, 12, 13, 14, 15, 17, 19, 49, 
@@ -1227,10 +1288,6 @@ class AdminShipmentHandoverController extends Controller
       $handover_shipments = HandoverShipments::where('handover_id', $handover_id)
         ->leftJoin('shipments', 'handover_shipments.shipment_id', '=', 'shipments.id')
         ->leftJoin('shipments_journey', 'handover_shipments.shipment_id', '=', 'shipments_journey.shipment_id')
-        // ->leftJoin(DB::raw('(SELECT MAX(id) as id, shipment_id, shipper_status_id 
-        //                     FROM shipments_journey 
-        //                     GROUP BY shipment_id) as latest_journey'),
-        //           'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
         ->leftJoin(DB::raw('(
           SELECT sj.id, sj.shipment_id, sj.shipper_status_id
           FROM shipments_journey sj
