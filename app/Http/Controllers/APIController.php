@@ -9,6 +9,7 @@ use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\WalletUser;
 use App\Models\FinjaRequestLog;
 use App\ShipmentAdditionalCharges;
+use App\ShipmentBookedApiCount;
 use DB;
 use SnappyPDF;
 use Validator;
@@ -1560,6 +1561,35 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
 
+        $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
+        $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
+        $timeLimit = 0;
+
+        if ($shipmentCountRecord) {
+            $last_created_at = $shipmentCountRecord->created_at;
+            $minutesDiff = $last_created_at->diffInMinutes(now());
+
+            $timeLimits = [
+                ['min' => 100, 'max' => 150, 'limit' => 5,  'seconds' => 300],
+                ['min' => 150, 'max' => 200, 'limit' => 10, 'seconds' => 600],
+                ['min' => 200, 'max' => 300, 'limit' => 15, 'seconds' => 900]
+            ];
+
+            foreach ($timeLimits as $range) {
+                if ($count >= $range['min'] && $count <= $range['max'] && $minutesDiff < $range['limit']) {
+                    $timeLimit = $range['seconds'];
+                    break;
+                }
+            }
+
+            if ($timeLimit > 0) {
+                $remainingTime = $timeLimit - $last_created_at->diffInSeconds(now());
+                return response()->json(['message' => 'Please try again in ' . $remainingTime . ' seconds.'], 429);
+            }
+        }
+
+
+
         // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
         //     if ($value) {
         //         $value = $this->phone_number($value);
@@ -2347,7 +2377,7 @@ class APIController extends Controller
         $errors = [];
 
 
-        foreach ($request->packets as $key2 => $row) {
+        foreach ($request->data as $key2 => $row) {
             $key_inc = $key2 + 1;
             $validate = Validator::make($row, $rules, $this->messages);
             if ($validate->fails()) {
@@ -2365,7 +2395,7 @@ class APIController extends Controller
         }
 
         if(empty($errors))
-            foreach ($request->packets as $key2 => $row) {
+            foreach ($request->data as $key2 => $row) {
 //                if ($request->input('amount') == 0 || $request->input('amount') === null) {
 //                    $amount = $request->input('amount');
 //                    $parcel_value = $request->input('parcel_value');
@@ -2945,7 +2975,7 @@ class APIController extends Controller
                         $item_quantity = $item['item_quantity'];
                         $item_price = $item['product_value'];
 
-                        if (isset($item[$row['replacement_item_image']]) && !empty($item[$row['item_insurance']])) {
+                        if (isset($row['item_insurance']) && !empty($row['item_insurance'])) {
                             $item_insurance = true;
                         } else {
                             $item_insurance = false;
@@ -3085,12 +3115,13 @@ class APIController extends Controller
                         $return_array['messages'][] = $video; // Append video message instead of returning immediately
                     }
                 }
-
-                // Final return if no issues or messages to show
-
             }
 
-        $request->merge(['process_packets' => $request->input('packets', 1)]);
+        //record api booked count
+        $shipment_booked_api_count = New ShipmentBookedApiCount();
+        $shipment_booked_api_count->shipment_count = count($return_array["tracking_number"]);
+        $shipment_booked_api_count->user_id = $request->user_id;
+        $shipment_booked_api_count->save();
 
         return response()->json($return_array);
 
