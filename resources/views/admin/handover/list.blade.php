@@ -453,7 +453,8 @@
                                 row.push(values.hub);
                                 row.push(values.status);
                                 row.push(values.total_shipments);
-                                row.push(values.excess_shipments);
+                                // row.push(values.excess_shipments);
+                                row.push($(values.excess_shipments).text() || values.excess_shipments);
                                 row.push(values.received_shipments);
                                 row.push(values.remaining);
                                 row.push(values.received_by);

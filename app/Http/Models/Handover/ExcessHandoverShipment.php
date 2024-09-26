@@ -10,6 +10,8 @@ class ExcessHandoverShipment extends Model
         'handover_id',
         'bag_number',
         'shipment_ids',
-        'excess_shipment'
+        'excess_shipment',
+        'excess_handover_id',
+        'excess_bag_number',
     ];
 }

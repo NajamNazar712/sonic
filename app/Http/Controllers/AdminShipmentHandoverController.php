@@ -199,17 +199,6 @@ class AdminShipmentHandoverController extends Controller
           $excess_shipment = null;
           if (!$handover_shipments->first())
           {
-            // $excess_shipment = 1;
-            // $data = [
-            //   'handover_id' => null,
-            //   'excess_handover_id' => null,
-            //   'bag_number' => null,
-            //   'excess_bag_number' => null,
-            //   'shipment_ids' => $shipment->id,
-            //   'excess_shipment' => $excess_shipment
-            // ];
-            // ExcessHandoverShipment::create($data);
-
             $details = array();
             $details['id'] = $shipment->id;
             $details['tracking_number'] = $shipment->tracking_number;
@@ -238,16 +227,7 @@ class AdminShipmentHandoverController extends Controller
           else if ($handover_shipments->first()) {
             $handover = Handover::where('id', $handover_shipments->first()->handover_id)->first();
             $bag_number = $handover->bag_number;
-            // $excess_shipment = 0;
-            // $data = [
-            //   'handover_id' => $handover->id,
-            //   'excess_handover_id' => null,
-            //   'bag_number' => $current_bag_number,
-            //   'excess_bag_number' => null,
-            //   'shipment_ids' => $shipment->id,
-            //   'excess_shipment' => $excess_shipment
-            // ];
-            // ExcessHandoverShipment::create($data);
+
             $details = array();
             $details['id'] = $shipment->id;
             $details['tracking_number'] = $shipment->tracking_number;
@@ -389,23 +369,23 @@ class AdminShipmentHandoverController extends Controller
                 if ($request_bag_number->bag_number == $existing_bag_number->bag_number) {
                   $excess_shipment = 0;
                   $data = [
-                    'handover_id' => null,
-                    'excess_handover_id' => $request->handover_id,
-                    'bag_number' => null,
-                    'excess_bag_number' => $request_bag_number->bag_number,
+                    'handover_id' => (int)$request->handover_id,
+                    'excess_handover_id' => null,
+                    'bag_number' => $request_bag_number->bag_number,
+                    'excess_bag_number' => null,
                     'shipment_ids' => $shipment_id,
                     'excess_shipment' => $excess_shipment
                   ];
                   ExcessHandoverShipment::create($data);
-                } 
-                
+                }
                 else {
+                  $excess_handover_id = Handover::where('bag_number', $existing_bag_number->bag_number)->first()->id;
                   $excess_shipment = 1;
                   $data = [
-                    'handover_id' => null,
-                    'excess_handover_id' => $request->handover_id,
+                    'handover_id' => (int)$request->handover_id,
+                    'excess_handover_id' => $excess_handover_id,
                     'bag_number' => null,
-                    'excess_bag_number' => $request_bag_number->bag_number,
+                    'excess_bag_number' => $existing_bag_number->bag_number,
                     'shipment_ids' => $shipment_id,
                     'excess_shipment' => $excess_shipment
                   ];
@@ -415,7 +395,7 @@ class AdminShipmentHandoverController extends Controller
             else if (!$handover_shipments->exists()){
               $excess_shipment = 1;
               $data = [
-                'handover_id' => null,
+                'handover_id' => (int)$request->handover_id,
                 'excess_handover_id' => null,
                 'bag_number' => null,
                 'excess_bag_number' => null,
@@ -761,14 +741,14 @@ class AdminShipmentHandoverController extends Controller
     public function excess_handover_shipments_count(Request $request)
     {
       $handover_id = $request->input('id');
-      $handover_shipments = ExcessHandoverShipment::where('handover_id', $handover_id)
+      $excess_handover_shipments = ExcessHandoverShipment::where('handover_id', $handover_id)
       ->where('excess_shipment', 1)
       ->select('shipment_ids')
       ->get();
       $shipments = array();
-      if($handover_shipments->count() != 0){
-        foreach ($handover_shipments as $handover_shipment){
-          $shipment = Shipment::find($handover_shipment->shipment_ids);
+      if($excess_handover_shipments->count() != 0){
+        foreach ($excess_handover_shipments as $excess_handover_shipment){
+          $shipment = Shipment::find($excess_handover_shipment->shipment_ids);
           $shipments[] = $shipment->tracking_number;
         }
         return ['status' => 0, 'success' => 'Handover Note Shipments', 'shipments' => $shipments];
