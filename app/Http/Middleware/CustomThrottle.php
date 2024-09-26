@@ -18,7 +18,7 @@ class CustomThrottle
     public function handle(Request $request, Closure $next)
     {
         $key = 'custom_throttle:' . $request->ip();
-        $trackingNumbers = (!empty($request->tracking_numbers)) ? $request->tracking_numbers :  $request->input('packets', 1); ;
+        $trackingNumbers = (!empty($request->tracking_numbers)) ? $request->tracking_numbers :  $request->input('packets', 1);
 
         if (!is_array($trackingNumbers)) {
             $trackingNumbers = explode(',', $trackingNumbers);
