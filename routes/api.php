@@ -36,7 +36,7 @@ use Illuminate\Http\Request;
 
         Route::prefix('shipment')->name('shipment.')->group(function () {
             Route::post('book', 'APIController@shipment_book')->name('book');
-            Route::post('book/bulk', 'APIController@shipment_bulk_book')->name('bulk_book')->middleware('bulk.booking.api.throttle');
+            Route::post('book/bulk', 'APIController@shipment_bulk_book')->name('bulk_book');
             Route::post('book/intl', 'APIController@shipment_book_international')->name('book.intl');
             Route::post('book/gul_ahmed', 'APIController@shipment_book_gul_ahmed')->name('book.gul_ahmed');
             Route::get('air_waybill', 'APIController@shipment_air_waybill')->name('air_waybill');
@@ -57,7 +57,7 @@ use Illuminate\Http\Request;
 
                 Route::get('bulk', 'APIController@bulk_shipment_track')
                     ->name('bulk_track')
-                    ->middleware('bulk.tracking.api.throttle');
+                    ->middleware('BulkTrackingApiThrottle');
             });
 
 

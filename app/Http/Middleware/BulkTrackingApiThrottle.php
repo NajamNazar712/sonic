@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Models\Shipment;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Cache\RateLimiter;
@@ -19,7 +20,8 @@ class bulkTrackingApiThrottle
     {
         $key = 'tracking:' . $request->ip();
         $trackingNumbers = explode(',', $request->tracking_numbers);
-        $count = count($trackingNumbers);
+        $validTrackingNumber = Shipment::whereIn('tracking_number', $trackingNumbers)->count();
+        $count = $validTrackingNumber;
         $timeLimit = 0;
 
         if ($count >= 100 && $count < 150) {
@@ -27,7 +29,7 @@ class bulkTrackingApiThrottle
         } elseif ($count >= 150 && $count < 200) {
             $timeLimit = 10; // 10-minute restriction for 150-200 bookings or tracking
         } elseif ($count >= 200 && $count <= 300) {
-            $timeLimit = 15; // 15-minute restriction for 200-300 bookings or tracking
+            $timeLimit = 15;
         }
 
         if ($this->limiter->availableIn($key) > 0) {
