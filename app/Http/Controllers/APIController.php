@@ -3652,7 +3652,7 @@ class APIController extends Controller
         $all_details = [];
 
         // Process each tracking number
-        foreach ($tracking_numbers as $tracking_number) {
+        foreach (array_filter($tracking_numbers) as $tracking_number) {
 
             $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 

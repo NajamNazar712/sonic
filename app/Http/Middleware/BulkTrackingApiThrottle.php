@@ -20,7 +20,7 @@ class bulkTrackingApiThrottle
     {
         $key = 'tracking:' . $request->ip();
         $trackingNumbers = explode(',', $request->tracking_numbers);
-        $validTrackingNumber = Shipment::whereIn('tracking_number', $trackingNumbers)->count();
+        $validTrackingNumber = Shipment::whereIn('tracking_number', array_filter($trackingNumbers))->count();
         $count = $validTrackingNumber;
         $timeLimit = 0;
 
