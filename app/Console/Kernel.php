@@ -559,7 +559,7 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
-        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
+//        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
     }
     /**
      * Register the commands for the application.
