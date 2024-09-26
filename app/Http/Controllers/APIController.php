@@ -3675,22 +3675,13 @@ class APIController extends Controller
 
         $user_ids[] = $user_id;
 
-        $rules = [
-            'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_ids) {
-                $query->whereIn('user_id', $user_ids);
-            })],
-            'type' => ['required', 'boolean'],
-        ];
+        // Split tracking numbers into an array
+        $tracking_numbers = explode(',', $request->tracking_numbers);
+        $type = $request->type;
+        $all_details = [];
 
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
-            $tracking_number = $request->tracking_number;
-            $type = $request->type;
+        // Process each tracking number
+        foreach (array_filter($tracking_numbers) as $tracking_number) {
 
             $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 
