@@ -142,6 +142,7 @@ class BotCallingController extends Controller
                     'name' => 'zong',
                     'api_request' => json_encode($request->all()), // log the request data
                     'status_code' => 200,
+                    'call_date_time' => $request->start_date,
                     'created_at' => now(),
                 ]);
                 $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->whereIn('rv_state_id', [1, 3])->latest()->first();
@@ -206,6 +207,8 @@ class BotCallingController extends Controller
                     'name' => 'zong',
                     'api_request' => json_encode($request->all()), // log the request data
                     'status_code' => 200,
+                    'error' => 'Shipment is in different status, Cannot mark it as Another Status!',
+                    'call_date_time' => $request->start_date,
                     'created_at' => now(),
                 ]);
                 $data = [
@@ -220,6 +223,7 @@ class BotCallingController extends Controller
                 'api_request' => json_encode($request->all()), // log the request data
                 'error' => json_encode($th->getMessage()), // log the request data
                 'status_code' => 400,
+                'call_date_time' => $request->start_date,
                 'created_at' => now(),
             ]);
             // Log::channel('cronJobLog')->info('s ' . 'OPS LOG' . $th->getMessage());
