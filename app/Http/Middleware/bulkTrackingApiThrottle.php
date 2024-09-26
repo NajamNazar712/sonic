@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Cache\RateLimiter;
 
-class CustomThrottle
+class bulkTrackingApiThrottle
 {
     protected $limiter;
 
@@ -17,17 +17,9 @@ class CustomThrottle
 
     public function handle(Request $request, Closure $next)
     {
-        $key = 'custom_throttle:' . $request->ip();
-        $trackingNumbers = (!empty($request->tracking_numbers)) ? $request->tracking_numbers :  $request->input('packets', 1);
-
-        if (!is_array($trackingNumbers)) {
-            $trackingNumbers = explode(',', $trackingNumbers);
-        }
-
-        $trackingNumbers = array_filter($trackingNumbers);
-
+        $key = 'tracking:' . $request->ip();
+        $trackingNumbers = explode(',', $request->tracking_numbers);
         $count = count($trackingNumbers);
-
         $timeLimit = 0;
 
         if ($count >= 100 && $count < 150) {

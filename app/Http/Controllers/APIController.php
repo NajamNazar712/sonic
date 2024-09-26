@@ -486,7 +486,7 @@ class APIController extends Controller
         }
     }
 
-    public function shipment_book(Request $request)
+    public function shipment_bulk_book(Request $request)
     {
         /********************************NOTE********************************/
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
@@ -1054,7 +1054,7 @@ class APIController extends Controller
                 })],
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check'],
+                }), 'origin_check',  'default_return_address', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'destination_return_check', 'default_return_address', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
