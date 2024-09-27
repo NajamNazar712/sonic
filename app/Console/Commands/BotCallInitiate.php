@@ -122,7 +122,7 @@ class BotCallInitiate extends Command
                 Log::channel('botCallJobLog')->info('s ' . 'Call initiate start third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
 
                 foreach($shipmentThirds as $shipmentId){
-                    // dispatch(new BotCallDispatchThird($shipmentId));
+                    dispatch(new BotCallDispatchThird($shipmentId));
 
             //         if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             //             if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists() && Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $shipmentId)->exists()) {
@@ -156,21 +156,8 @@ class BotCallInitiate extends Command
             //         }
                 }
                 Log::channel('botCallJobLog')->info('s ' . 'Call initiate end third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
-
             }
-            // RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)
-            // ->where('rv_state_id', 2)
-            // ->where('unresponsive_attempt_time', '<', Carbon::today()) // if current day has passed
-            // ->update(['rv_state_id' => 3]);
-
-            //Query for Making Shipments Enable again in Get Tickets After their "Unresponsive" Status is Submitted.
-            // RvShipmentTicket::where('in_progress', 1)->update(['in_progress' => 0]);
-
-
-            //Make record of return/dashboard cards count daily to mantain history
-            
-
-
+        
         } catch (\Throwable $th) {
                         Log::channel('botCallJobLog')->info(' Unresponsive Count ');
 
