@@ -231,8 +231,6 @@ class AdminShipmentHandoverController extends Controller
               return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
             }
           }
-          
-          
           else if ($handover_shipments->first()) {
             $handover = Handover::where('id', $handover_shipments->first()->handover_id)->first();
             $bag_number = $handover->bag_number;
@@ -1296,7 +1294,9 @@ class AdminShipmentHandoverController extends Controller
                     ELSE 'Unknown'
                 END as shipment_type_text
             ")
-        )->groupBy('shipments.tracking_number');
+        )
+        ->where('handover_shipments.status', '!=', 4)
+      ->groupBy('shipments.tracking_number');
 
       $datatable = Datatables::of($handover_shipments)
       ->editColumn('tracking_number', function ($shipments) {
