@@ -10065,6 +10065,60 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'FaF Percent Updated !!!');
 
-
     }
+
+    public function bulk_booking_and_tracking_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 808);
+        $shippers = User::where('status', 3)->get();
+
+        $bulk_tracking_shippers_setting = GlobalSettings::where('setting_value', 1)
+            ->where('type', 'bulk_tracking_shippers')
+            ->first();
+        $bulk_booking_shippers_setting = GlobalSettings::where('setting_value', 1)
+            ->where('type', 'bulk_booking_shippers')
+            ->first();
+
+        $bulk_tracking_shippers = $bulk_tracking_shippers_setting ?
+            array_map('intval', explode(',', $bulk_tracking_shippers_setting->text))
+            : [];
+
+        $bulk_booking_shippers = $bulk_booking_shippers_setting ?
+            array_map('intval', explode(',', $bulk_booking_shippers_setting->text))
+            : [];
+
+        return view('admin.settings.bulk_booking_and_tracking.index', compact('shippers','bulk_tracking_shippers', 'bulk_booking_shippers'));
+    }
+
+    public function bulk_booking_and_tracking_store(Request $request)
+    {
+        $bulk_tracking_select = $request->has('tracking_select')
+            ? implode(',', $request->tracking_select)
+            : '';
+
+        $bulk_booking_select = $request->has('booking_select')
+            ? implode(',', $request->booking_select)
+            : '';
+
+        function updateOrCreateGlobalSettings($type, $users)
+        {
+            $global_setting = GlobalSettings::where('setting_value', 1)->where('type', $type)->first();
+            if ($global_setting) {
+                $global_setting->text = $users;
+                $global_setting->save();
+            } else {
+                $global_setting = new GlobalSettings();
+                $global_setting->type = $type;
+                $global_setting->setting_value = 1;
+                $global_setting->text = $users;
+                $global_setting->save();
+            }
+        }
+
+        updateOrCreateGlobalSettings('bulk_tracking_shippers', $bulk_tracking_select);
+        updateOrCreateGlobalSettings('bulk_booking_shippers', $bulk_booking_select);
+
+        return redirect()->back()->with('success', 'Shippers have been assigned rights!');
+    }
+
 }

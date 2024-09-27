@@ -2139,6 +2139,14 @@
                                             </a>
                                         </li>
                                         @endif
+
+                                        @if (session('role_id') == 1 || in_array(1009, session('permissions')))
+                                            <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.shippers.bulk_booking_and_tracking.index') }}">
+                                                    Bulk Booking & Bulk Tracking API setting
+                                                </a>
+                                            </li>
+                                        @endif
                                 </ul>
 
                             </li>

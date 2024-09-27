@@ -2613,6 +2613,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\GlobalSettingsController@lead_progress_list')->name('list');
                 Route::post('update', 'Admins\GlobalSettingsController@lead_progress_update')->name('update');
             });
+
+            Route::prefix('bulk_booking_and_tracking')->name('bulk_booking_and_tracking.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@bulk_booking_and_tracking_index')->name('index');
+                Route::post('store', 'Admins\GlobalSettingsController@bulk_booking_and_tracking_store')->name('store');
+
+            });
         });
 
         Route::prefix('fleet')->name('fleet.')->group(function () {
