@@ -64,7 +64,7 @@ class BotCallInitiate extends Command
             $timeStart = Carbon::parse($timeEnd)->subMinute(14)->format('Y-m-d H:i') . ':00'; // Get the timestamp of two hours ago
            
             // Now, re-initiate process for the retrieved shipment_ids after unresponsive one
-            $shipmentSeconds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', '2024-09-27 14:16:00'], ['unresponsive_attempt_time', '<=', '2024-09-27 14:59:59'], 'unresponsive_count' => 1, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
+            $shipmentSeconds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', '2024-09-27 15:16:00'], ['unresponsive_attempt_time', '<=', '2024-09-27 15:15:59'], 'unresponsive_count' => 1, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
             Log::channel('botCallJobLog')->info('s ' . 'Log after  shipmentSeconds call  record' . count($shipmentSeconds) .'Start time'. $timeStart .'End Time'. $timeEnd);
             
             // dd($shipmentSeconds);
@@ -114,15 +114,15 @@ class BotCallInitiate extends Command
 
             }
             
-            $shipmentThirds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
+            $shipmentThirds = RvShipmentAssignAgent::where(['agent_id' => 4620,['unresponsive_attempt_time', '>=', '2024-09-27 10:00:00'], ['unresponsive_attempt_time', '<=', '2024-09-27 15:15:59'], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
             Log::channel('botCallJobLog')->info('s ' . 'Log after  shipmentThirds call  record' . count($shipmentThirds));
 
-            // $third_count =1;
-            // if(count($shipmentThirds) > 0){
-            //     Log::channel('botCallJobLog')->info('s ' . 'Call initiate start third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
+            $third_count =1;
+            if(count($shipmentThirds) > 0){
+                Log::channel('botCallJobLog')->info('s ' . 'Call initiate start third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
 
-            //     foreach($shipmentThirds as $shipmentId){
-                    // dispatch(new BotCallDispatchThird($shipmentId));
+                foreach($shipmentThirds as $shipmentId){
+                    dispatch(new BotCallDispatchThird($shipmentId));
 
             //         if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             //             if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists() && Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $shipmentId)->exists()) {
@@ -154,10 +154,10 @@ class BotCallInitiate extends Command
             //                 return json_encode(['status' => 0, 'message' => 'Shipment isn`t at the bot call prefernce']);
             //             }
             //         }
-            //     }
-            //     Log::channel('botCallJobLog')->info('s ' . 'Call initiate end third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
+                }
+                Log::channel('botCallJobLog')->info('s ' . 'Call initiate end third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
 
-            // }
+            }
             // RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)
             // ->where('rv_state_id', 2)
             // ->where('unresponsive_attempt_time', '<', Carbon::today()) // if current day has passed
