@@ -63,7 +63,7 @@ class BotCallInitiate extends Command
             $timeStart = Carbon::parse($timeEnd)->subMinute(14)->format('Y-m-d H:i') . ':00'; // Get the timestamp of two hours ago
            
             // Now, re-initiate process for the retrieved shipment_ids after unresponsive one
-            $shipmentSeconds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 1, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
+            $shipmentSeconds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', '2024-09-27 14:01:00'], ['unresponsive_attempt_time', '<=', '2024-09-27 14:15:59'], 'unresponsive_count' => 1, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
             Log::channel('botCallJobLog')->info('s ' . 'Log after  shipmentSeconds call  record' . count($shipmentSeconds) .'Start time'. $timeStart .'End Time'. $timeEnd);
             
             // dd($shipmentSeconds);
@@ -117,44 +117,44 @@ class BotCallInitiate extends Command
             Log::channel('botCallJobLog')->info('s ' . 'Log after  shipmentThirds call  record' . count($shipmentThirds));
 
             // $third_count =1;
-            if(count($shipmentThirds) > 0){
-                Log::channel('botCallJobLog')->info('s ' . 'Call initiate start third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
+            // if(count($shipmentThirds) > 0){
+            //     Log::channel('botCallJobLog')->info('s ' . 'Call initiate start third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
 
-                foreach($shipmentThirds as $shipmentId){
-                    if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
-                        if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists() && Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $shipmentId)->exists()) {
-                            $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
-                            RvShipmentTicket::where('shipment_id', $shipmentId)->update(['in_progress' => 1]);
-                            $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
-                            $post = [
-                                'vpbx_id' => '66bdfd18cb67f',
-                                'caller_id' => preg_replace("/[^a-zA-Z0-9]+/", "", $shipment->consignee_phone_number_1),
-                                'tracking_number' => $shipment->tracking_number,
-                                'cod_amount' => $shipment->amount,
-                                'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,
-                                'customer_name' => $shipment->consignee_name,
-                            ];
-                            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
-                            $response = $client->post('', [
-                                    'json' => $post
-                                ]);
-                            $status_code = $response->getStatusCode();
-                            $response = $response->getBody()->getContents();
-                            $response = json_decode($response);
-                            Log::channel('botCallJobLog')->info('s ' . 'Log third call record' . $shipmentId);
-                            // $third_count++;    
-                            // Log::channel('cronJobLog')->info('s ' . 'Log after call dispatched with response third-call' . json_encode($response));
-                            WebhookLogController::zong_call_log($shipment->user_id,  $status_code, $shipmentId, 3, json_encode($response));
-                        } else {
-                            Log::channel('botCallJobLog')->info('s ' . 'Log  third call not record' . $shipmentId);
+            //     foreach($shipmentThirds as $shipmentId){
+            //         if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
+            //             if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists() && Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $shipmentId)->exists()) {
+            //                 $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
+            //                 RvShipmentTicket::where('shipment_id', $shipmentId)->update(['in_progress' => 1]);
+            //                 $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
+            //                 $post = [
+            //                     'vpbx_id' => '66bdfd18cb67f',
+            //                     'caller_id' => preg_replace("/[^a-zA-Z0-9]+/", "", $shipment->consignee_phone_number_1),
+            //                     'tracking_number' => $shipment->tracking_number,
+            //                     'cod_amount' => $shipment->amount,
+            //                     'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,
+            //                     'customer_name' => $shipment->consignee_name,
+            //                 ];
+            //                 $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
+            //                 $response = $client->post('', [
+            //                         'json' => $post
+            //                     ]);
+            //                 $status_code = $response->getStatusCode();
+            //                 $response = $response->getBody()->getContents();
+            //                 $response = json_decode($response);
+            //                 Log::channel('botCallJobLog')->info('s ' . 'Log third call record' . $shipmentId);
+            //                 // $third_count++;    
+            //                 // Log::channel('cronJobLog')->info('s ' . 'Log after call dispatched with response third-call' . json_encode($response));
+            //                 WebhookLogController::zong_call_log($shipment->user_id,  $status_code, $shipmentId, 3, json_encode($response));
+            //             } else {
+            //                 Log::channel('botCallJobLog')->info('s ' . 'Log  third call not record' . $shipmentId);
 
-                            return json_encode(['status' => 0, 'message' => 'Shipment isn`t at the bot call prefernce']);
-                        }
-                    }
-                }
-                Log::channel('botCallJobLog')->info('s ' . 'Call initiate end third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
+            //                 return json_encode(['status' => 0, 'message' => 'Shipment isn`t at the bot call prefernce']);
+            //             }
+            //         }
+            //     }
+            //     Log::channel('botCallJobLog')->info('s ' . 'Call initiate end third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
 
-            }
+            // }
             // RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)
             // ->where('rv_state_id', 2)
             // ->where('unresponsive_attempt_time', '<', Carbon::today()) // if current day has passed
