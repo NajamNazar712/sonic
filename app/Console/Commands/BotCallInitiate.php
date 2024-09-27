@@ -70,7 +70,9 @@ class BotCallInitiate extends Command
             //  Now, re-initiate process for the retrieved shipment_ids after unresponsive two            
             // $shipmentThirds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
             // $second_count = 1;
-            if (count($shipmentSeconds) > 0) {            
+            if (count($shipmentSeconds) > 0) {
+                Log::channel('botCallJobLog')->info('s ' . 'Call initiate start second-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
+            
                 foreach($shipmentSeconds as $shipmentId){
 
                     dispatch(new BotCallDispatchSecod($shipmentId));
@@ -107,6 +109,8 @@ class BotCallInitiate extends Command
                     //     }
                     // }
                 }
+                Log::channel('botCallJobLog')->info('s ' . 'Call initiate end second-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
+
             }
             
             $shipmentThirds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
@@ -114,6 +118,8 @@ class BotCallInitiate extends Command
 
             // $third_count =1;
             if(count($shipmentThirds) > 0){
+                Log::channel('botCallJobLog')->info('s ' . 'Call initiate start third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
+
                 foreach($shipmentThirds as $shipmentId){
                     if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
                         if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists() && Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $shipmentId)->exists()) {
@@ -146,6 +152,8 @@ class BotCallInitiate extends Command
                         }
                     }
                 }
+                Log::channel('botCallJobLog')->info('s ' . 'Call initiate end third-call' . Carbon::parse(now())->format('Y-m-d H:i:s'));
+
             }
             // RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)
             // ->where('rv_state_id', 2)
