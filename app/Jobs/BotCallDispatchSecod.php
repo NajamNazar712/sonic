@@ -45,7 +45,7 @@ class BotCallDispatchSecod implements ShouldQueue
 
         //
         $environment = config('app.env');
-        // Log::channel('cronJobLog')->info('s ' . 'bot-call Second Unresponsive');
+        Log::channel('cronJobLog')->info('s ' . 'bot-call Second Unresponsive');
 
         if (GlobalSettings::where(['type'=> 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             if(RvShipmentTicket::where('shipment_id', $this->shipmentId)->whereNull('deleted_at')->where('is_bot',1)->exists()){
