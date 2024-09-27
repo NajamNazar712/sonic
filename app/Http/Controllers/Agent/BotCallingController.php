@@ -207,7 +207,7 @@ class BotCallingController extends Controller
                     'name' => 'zong',
                     'api_request' => json_encode($request->all()), // log the request data
                     'status_code' => 200,
-                    'error' => 'Shipment is in different status, Cannot mark it as Another Status!',
+                    'error' => json_encode('Shipment is in different status, Cannot mark it as Another Status!'),
                     'call_date_time' => $request->start_date,
                     'created_at' => now(),
                 ]);
