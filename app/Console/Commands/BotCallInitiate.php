@@ -93,12 +93,14 @@ class BotCallInitiate extends Command
                             $status_code = $response->getStatusCode();
                             $response = $response->getBody()->getContents();
                             $response = json_decode($response);
-                            // Log::channel('cronJobLog')->info('s ' . 'Log after second call  record' . $second_count);
+                            Log::channel('botCallJobLog')->info('s ' . 'Log after second call  record' . $shipmentId);
                             // $second_count++;    
                             // WebhookLogController::shipment_status_log($shipment->user_id, $status_code, json_encode($response));
                             // Log::channel('cronJobLog')->info('s ' . 'Log after second call  with response' . $shipment->tracking_number);
                             WebhookLogController::zong_call_log($shipment->user_id,  $status_code, $shipmentId, 2, json_encode($response));
                         } else {
+                            Log::channel('botCallJobLog')->info('s ' . 'Log after second call not recorded' . $shipmentId);
+
                             return json_encode(['status' => 0, 'message' => 'Shipment isn`t at the bot call prefernce']);
                         }
                     }
@@ -106,7 +108,7 @@ class BotCallInitiate extends Command
             }
             
             $shipmentThirds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
-            Log::channel('cronJobLog')->info('s ' . 'Log after  shipmentThirds call  record' . count($shipmentThirds));
+            Log::channel('botCallJobLog')->info('s ' . 'Log after  shipmentThirds call  record' . count($shipmentThirds));
 
             // $third_count =1;
             if(count($shipmentThirds) > 0){
@@ -131,11 +133,13 @@ class BotCallInitiate extends Command
                             $status_code = $response->getStatusCode();
                             $response = $response->getBody()->getContents();
                             $response = json_decode($response);
-                            // Log::channel('cronJobLog')->info('s ' . 'Log after third call  record' . $third_count);
+                            Log::channel('botCallJobLog')->info('s ' . 'Log third call record' . $shipmentId);
                             // $third_count++;    
                             // Log::channel('cronJobLog')->info('s ' . 'Log after call dispatched with response third-call' . json_encode($response));
                             WebhookLogController::zong_call_log($shipment->user_id,  $status_code, $shipmentId, 3, json_encode($response));
                         } else {
+                            Log::channel('botCallJobLog')->info('s ' . 'Log  third call not record' . $shipmentId);
+
                             return json_encode(['status' => 0, 'message' => 'Shipment isn`t at the bot call prefernce']);
                         }
                     }
