@@ -1557,9 +1557,23 @@ class APIController extends Controller
         $user_id = $request->user_id;
         $flag = null;
         $user_type = User::where('id', $user_id)->first();
+
+        //check if user allow for bulk booking
+        $bulk_booking_shippers_setting = GlobalSettings::where('setting_value', 1)
+            ->where('type', 'bulk_booking_shippers')
+            ->first();
+        $bulk_booking_shippers = $bulk_booking_shippers_setting ?
+            array_map('intval', explode(',', $bulk_booking_shippers_setting->text))
+            : [];
+
         if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$user_type['account_type_id'])){
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
+
+        if(!in_array($user_id, $bulk_booking_shippers)){
+            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
+        }
+
 
         $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
         $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
@@ -1587,8 +1601,6 @@ class APIController extends Controller
                 return response()->json(['message' => 'Please try again in ' . $remainingTime . ' seconds.'], 429);
             }
         }
-
-
 
         // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
         //     if ($value) {
@@ -1767,7 +1779,7 @@ class APIController extends Controller
         Validator::extend('user_shipping_info_status_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
 
-            if (!$user_shipping_info->status) {
+            if (isset($user_shipping_info->status) && !$user_shipping_info->status) {
                 $validator->addReplacer('user_shipping_info_status_check', function ($message, $attribute, $rule, $parameters) {
                     return 'Pickup Address is disabled';
                 });
@@ -1781,7 +1793,7 @@ class APIController extends Controller
         Validator::extend('user_shipping_info_status_city_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
 
-            if (!$user_shipping_info->city->status) {
+            if (isset($user_shipping_info->city->status) && !$user_shipping_info->city->status) {
                 $validator->addReplacer('user_shipping_info_status_city_check', function ($message, $attribute, $rule, $parameters) {
                     return 'Pickup Address City is disabled';
                 });
@@ -1795,7 +1807,7 @@ class APIController extends Controller
         Validator::extend('user_shipping_info_status_zone_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
 
-            if (!$user_shipping_info->city->zone_id) {
+            if (isset($user_shipping_info->city->zone_id) && !$user_shipping_info->city->zone_id) {
                 $validator->addReplacer('user_shipping_info_status_zone_check', function ($message, $attribute, $rule, $parameters) {
                     return 'Pickup Address City zone is disabled';
                 });
@@ -1809,7 +1821,7 @@ class APIController extends Controller
         Validator::extend('user_shipping_info_city_pickup_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
 
-            if (!$user_shipping_info->city->pickup) {
+            if (isset($user_shipping_info->city->pickup) && !$user_shipping_info->city->pickup) {
                 $validator->addReplacer('user_shipping_info_city_pickup_check', function ($message, $attribute, $rule, $parameters) {
                     return 'Pickup is not allowed for City';
                 });
@@ -1857,7 +1869,7 @@ class APIController extends Controller
         Validator::extend('return_user_shipping_info_status_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
 
-            if (!$user_shipping_info->status) {
+            if (isset($user_shipping_info->status) && !$user_shipping_info->status) {
                 $validator->addReplacer('return_user_shipping_info_status_check', function ($message, $attribute, $rule, $parameters) {
                     return 'Return Address is disabled';
                 });
@@ -1871,7 +1883,7 @@ class APIController extends Controller
         Validator::extend('return_user_shipping_info_status_city_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
 
-            if (!$user_shipping_info->city->status) {
+            if (isset($user_shipping_info->city->status) && !$user_shipping_info->city->status) {
                 $validator->addReplacer('return_user_shipping_info_status_city_check', function ($message, $attribute, $rule, $parameters) {
                     return 'Return Address City is disabled';
                 });
@@ -1885,7 +1897,7 @@ class APIController extends Controller
         Validator::extend('return_user_shipping_info_status_zone_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
 
-            if (!$user_shipping_info->city->zone_id) {
+            if (isset($user_shipping_info->city->zone_id) && !$user_shipping_info->city->zone_id) {
                 $validator->addReplacer('return_user_shipping_info_status_zone_check', function ($message, $attribute, $rule, $parameters) {
                     return 'Return Address City zone is disabled';
                 });
@@ -1912,7 +1924,7 @@ class APIController extends Controller
         Validator::extend('consignee_city_status_check', function ($attribute, $value, $parameters, $validator){
             // Check if consignee_city status is deactivated
             $consignee_city = City::find($value);
-            if (!$consignee_city->status) {
+            if (isset($consignee_city->status) && !$consignee_city->status) {
                 // Add a custom error message
                 $validator->addReplacer('consignee_city_status_check', function ($message, $attribute, $rule, $parameters) use ($value) {
                     return 'Consignee City ID #' . $value . ' is deactivated';
@@ -1925,7 +1937,7 @@ class APIController extends Controller
         // Consignee City Zone Check
         Validator::extend('consignee_city_zone_check', function ($attribute, $value, $parameters, $validator) {
             $consignee_city = City::find($value);
-            if (!$consignee_city->zone_id) {
+            if (isset($consignee_city->zone_id) && !$consignee_city->zone_id) {
                 $validator->addReplacer('consignee_city_zone_check', function ($message, $attribute, $rule, $parameters) use ($value) {
                     return 'Consignee City ID #' . $value . ' is deactivated';
                 });
@@ -1937,7 +1949,7 @@ class APIController extends Controller
         // Consignee City Booking Enable Check
         Validator::extend('consignee_city_booking_enable_check', function ($attribute, $value, $parameters, $validator) {
             $consignee_city = City::find($value);
-            if (!$consignee_city->booking_enable_status) {
+            if (isset($consignee_city->booking_enable_status) && !$consignee_city->booking_enable_status) {
                 $validator->addReplacer('consignee_city_booking_enable_check', function ($message, $attribute, $rule, $parameters) {
                     return 'Delivery is not available for this City.';
                 });
@@ -1949,9 +1961,21 @@ class APIController extends Controller
         // Same Day Delivery Check
         Validator::extend('same_day_delivery_check', function ($attribute, $value, $parameters, $validator) {
             $data = $validator->getData();
-            $pickup_address_id = $data['pickup_address_id'];
-            $shipping_mode_id = $data['shipping_mode_id'];
+
+            $pickup_address_id = $data['pickup_address_id'] ?? null;
+            $shipping_mode_id = $data['shipping_mode_id'] ?? null;
+
+            if (!$pickup_address_id) {
+                $validator->errors()->add('pickup_address_id', 'Pickup address ID is missing.');
+                return false;
+            }
+
             $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+
+            if (!$user_shipping_info) {
+                $validator->errors()->add('pickup_address_id', 'Pickup address not found.');
+                return false;
+            }
 
             if ($value != $user_shipping_info->city_id && $shipping_mode_id == 4) {
                 $validator->addReplacer('same_day_delivery_check', function ($message, $attribute, $rule, $parameters) {
@@ -1959,24 +1983,29 @@ class APIController extends Controller
                 });
                 return false;
             }
+
             return true;
         });
+
 
         // COD Cap Check based on Zone Class
         Validator::extend('cod_cap_zone_check', function ($attribute, $value, $parameters, $validator) {
             $data = $validator->getData();
             $pickup_address_id = $data['pickup_address_id'];
             $user_shipping_info = UserShippingInfo::find($pickup_address_id);
-            if ($user_shipping_info->city->id != $data['consignee_city_id']) {
+            if (isset($user_shipping_info->city) && $user_shipping_info->city->id != $data['consignee_city_id']) {
                 $city_zone = City::find($data['consignee_city_id']);
-                $zone = ZoneClassCity::where(['city_id' => $data['consignee_city_id'], 'zone_id' => $city_zone->zone_id]);
+
+                if(isset($city_zone->zone_id)){
+                    $zone = ZoneClassCity::where(['city_id' => $data['consignee_city_id'], 'zone_id' => $city_zone->zone_id]);
+                }
 
                 $class_a = GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->first();
                 $class_b = GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->first();
                 $class_c = GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->first();
                 $class_d = GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->first();
 
-                if ($zone->exists()) {
+                if (isset($zone) && $zone->exists()) {
                     $zone = $zone->first();
                     if ($zone['class'] == 0) {
                         $check_zone = $class_a['setting_value'];
@@ -2030,7 +2059,7 @@ class APIController extends Controller
         // Pickup City Status Check
         Validator::extend('pickup_city_status_check', function ($attribute, $value, $parameters, $validator) {
             $pickup_consignee_city = City::find($value);
-            if (!$pickup_consignee_city->status) {
+            if (isset($pickup_consignee_city->status) && !$pickup_consignee_city->status) {
                 $validator->addReplacer('pickup_city_status_check', function ($message, $attribute, $rule, $parameters) use ($pickup_consignee_city) {
                     return 'Pickup Address\'s City ID #' . $pickup_consignee_city->id . ' is deactivated';
                 });
@@ -2042,7 +2071,7 @@ class APIController extends Controller
         // Pickup City Zone ID Check
         Validator::extend('pickup_city_zone_check', function ($attribute, $value, $parameters, $validator){
             $pickup_consignee_city = City::find($value);
-            if (!$pickup_consignee_city->zone_id) {
+            if (isset($pickup_consignee_city->zone_id) && !$pickup_consignee_city->zone_id) {
                 $validator->addReplacer('pickup_city_zone_check', function ($message, $attribute, $rule, $parameters) use ($pickup_consignee_city) {
                     return 'Pickup Address\'s City ID #' . $pickup_consignee_city->id . ' is deactivated';
                 });
@@ -2054,7 +2083,7 @@ class APIController extends Controller
         // Pickup Availability Check
         Validator::extend('pickup_city_availability_check', function ($attribute, $value, $parameters, $validator) use($user_id) {
             $pickup_consignee_city = City::find($value);
-            if (!in_array($user_id, [7762, 4758]) && !$pickup_consignee_city->pickup) {
+            if (!in_array($user_id, [7762, 4758]) && isset($pickup_consignee_city->pickup) && !$pickup_consignee_city->pickup) {
                 $validator->addReplacer('pickup_city_availability_check', function ($message, $attribute, $rule, $parameters) use ($pickup_consignee_city) {
                     return 'Pickup is not allowed for City ID #' . $pickup_consignee_city->id;
                 });
@@ -2066,46 +2095,54 @@ class APIController extends Controller
         //Delivery Status Zone Check
         Validator::extend('delivery_status_zone_check', function ($attribute, $value, $parameters, $validator) {
             $data = $validator->getData();
-            $pickup_address_id_for_delivery = $data['pickup_address_id'];
-            $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
-            $delivery_city = City::find($pickup_address_for_delivery->city_id);
-            if (!$delivery_city->zone || !$delivery_city->status) {
-                $validator->errors()->add('delivery_city', 'Consignee City ID #' . $data['consignee_city_id'] . ' is deactivated.');
+            $pickup_address_id_for_delivery = $data['pickup_address_id'] ?? null;
+
+            if (!$pickup_address_id_for_delivery) {
+                $validator->errors()->add('pickup_address_id', 'Pickup address ID is missing.');
                 return false;
             }
+
+            $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
+            if (!$pickup_address_for_delivery) {
+                $validator->errors()->add('pickup_address_id', 'Pickup address not found.');
+                return false;
+            }
+
+            $delivery_city = City::find($pickup_address_for_delivery->city_id);
+            if (!$delivery_city || !$delivery_city->zone || !$delivery_city->status) {
+                $validator->errors()->add('delivery_city', 'Consignee City ID #' . ($data['consignee_city_id'] ?? 'unknown') . ' is deactivated.');
+                return false;
+            }
+
             return true;
         });
 
         // Normal Consignee ID Check
         Validator::extend('normal_consignee_id_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            // Get the form data from the validator
             $data = $validator->getData();
 
-            // Find the pickup address for delivery
             $pickup_address_id_for_delivery = $data['pickup_address_id'] ?? null;
             $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
 
             if (!$pickup_address_for_delivery) {
-                return false; // Fail validation if pickup address is not found
+                return false;
             }
 
-            // Find the city based on the pickup address
             $delivery_city = City::find($pickup_address_for_delivery->city_id);
 
             if (!$delivery_city) {
-                return false; // Fail validation if city is not found
+                return false;
             }
 
-            // Check if the user is allowed to book from the city and validate based on the service and shipping mode
             if (!in_array($user_id, [7762, 4758]) && !CityDelivery::where('city_id', $delivery_city->id)
                     ->where('booking_type_id', $data['service_type_id'] ?? null)
                     ->where('shipping_mode_id', $data['shipping_mode_id'] ?? null)
                     ->exists()) {
 
-                return false; // Fail validation if conditions are not met
+                return false;
             }
 
-            return true; // Pass validation
+            return true;
         });
 
 
@@ -2547,13 +2584,13 @@ class APIController extends Controller
 //                            }
 //                        }
 
-                        if (!empty($row['return_address_id'])) {
-                            $return_address_id = $row['return_address_id'];
-                        }
+//                        if (!empty($row['return_address_id'])) {
+//                            $return_address_id = $row['return_address_id'];
+//                        }
                     }
                     //check
 
-                    $consignee_city = City::find($row['consignee_city_id']);
+//                    $consignee_city = City::find($row['consignee_city_id']);
 //
 //                    if (($request->input('consignee_city_id') == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110 && $user_id != 16292)) {
 //                        return response()->json(['status' => 1, 'message' => 'User is not allowed to book from ' . $request->input('consignee_city_id')]);
@@ -2608,7 +2645,7 @@ class APIController extends Controller
 //                    }
                 } else {
                     //                dd('s1');
-                    $pickup_consignee_city = City::find($row['consignee_city_id']);
+//                    $pickup_consignee_city = City::find($row['consignee_city_id']);
 //                    if (!$pickup_consignee_city->status) {
 //                        return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id . ' is deactivated']);
 //                    }
@@ -2623,9 +2660,9 @@ class APIController extends Controller
 //                        }
 //                    }
 
-                    $pickup_address_id_for_delivery = $row['pickup_address_id'];
-                    $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
-                    $delivery_city = City::find($pickup_address_for_delivery->city_id);
+//                    $pickup_address_id_for_delivery = $row['pickup_address_id'];
+//                    $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
+//                    $delivery_city = City::find($pickup_address_for_delivery->city_id);
 //
 //                    if (!$delivery_city->status) {
 //                        return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
@@ -2635,7 +2672,7 @@ class APIController extends Controller
 //                        return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
 //                    }
 
-                    $pickup_city_id = $pickup_consignee_city->id;
+//                    $pickup_city_id = $pickup_consignee_city->id;
 
 //                    if ($request->input('consignee_city_id') != $pickup_city_id && $request->input('shipping_mode_id') == 4) {
 //                        return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
@@ -2648,19 +2685,19 @@ class APIController extends Controller
 //                    }
                 }
 
-                if ($user_type['account_type_id'] == 2) {
-                    if ($row['delivery_type_id'] == 2) {
-                        $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
+//                if ($user_type['account_type_id'] == 2) {
+//                    if ($row['delivery_type_id'] == 2) {
+//                        $allowed_delivery_type = CorporateDeliveryTypeStatus::where('user_id', $user_id);
 //                        if ($allowed_delivery_type->exists()) {
-                            $allowed_delivery_type = $allowed_delivery_type->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
+//                            $allowed_delivery_type = $allowed_delivery_type->where('shipping_mode_id', $row['shipping_mode_id'])->where('delivery_type_id', $row['delivery_type_id']);
 //                            if (!$allowed_delivery_type->exists()) {
 //                                return response()->json(['status' => 1, 'message' => 'Selected Delivery Type is disabled']);
 //                            }
 //                        } else {
 //                            return response()->json(['status' => 1, 'message' => 'Selected Delivery Type is disabled']);
 //                        }
-                    }
-                }
+//                    }
+//                }
                 if ($service_type_id == 5) {
 
                     if (!empty($row['consignee_email_address'])) {
@@ -3120,7 +3157,7 @@ class APIController extends Controller
         //record api booked count
         $shipment_booked_api_count = New ShipmentBookedApiCount();
         $shipment_booked_api_count->shipment_count = count($return_array["tracking_number"]);
-        $shipment_booked_api_count->user_id = $request->user_id;
+        $shipment_booked_api_count->user_id = $user_id;
         $shipment_booked_api_count->save();
 
         return response()->json($return_array);
@@ -3669,11 +3706,25 @@ class APIController extends Controller
 
     public function bulk_shipment_track(Request $request)
     {
+
+
         $user_id = $request->user_id;
 
         $user_ids = MergedSisterAccountMapping::where('head_user_id', $user_id)->pluck('sister_user_id')->toArray();
 
         $user_ids[] = $user_id;
+
+        //check if user allow for bulk tracking
+        $bulk_tracking_shippers_setting = GlobalSettings::where('setting_value', 1)
+            ->where('type', 'bulk_tracking_shippers')
+            ->first();
+        $bulk_tracking_shippers = $bulk_tracking_shippers_setting ?
+            array_map('intval', explode(',', $bulk_tracking_shippers_setting->text))
+            : [];
+
+        if(!in_array($user_id, $bulk_tracking_shippers)){
+            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Tracking']);
+        }
 
         // Split tracking numbers into an array
         $tracking_numbers = explode(',', $request->tracking_numbers);
