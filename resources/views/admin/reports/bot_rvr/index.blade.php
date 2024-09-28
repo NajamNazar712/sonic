@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Reattempt Analysis Report')
+@section('title', 'BOT CALL REPORT')
 
 @section('content')
 <div class="app-content content">
@@ -8,36 +8,14 @@
         <div class="content-header row">
         </div>
         <div class="content-body">
-            <div class="row">
+            <div class="row w-100">
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            <h1>Bot RVR Call Stataus Report</h1>
+                            <h1 class="text-center align-middle">BOT CALL REPORT</h1>
                             @include('admin.inc.messages')
-                            <div class="col mt-2">
+                            <div class="col mt-3">
                                 <form id="search_form" class="row mb-2 justify-content-center" novalidate="novalidate">
-                                    {{-- Search by tracking number --}}     
-                                {{-- Search by shipper name --}}
-                                    {{-- <div class="col-4">
-                                        <div class="form-group">
-                                            <select name="search_shipper_name" id="search_shipper_name" class="form-control select2">
-                                                @foreach($shippers as $shipper)
-                                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div> --}}
-                                {{-- Search by agent name --}}
-                                    {{-- <div class="col-4">
-                                        <div class="form-group">
-                                            <select name="search_agent_name" id="search_agent_name" class="form-control select2">
-                                                @foreach($agents as $agent)
-                                                    <option value="{{$agent->id}}">{{$agent->name}} - {{$agent->trax_id}} - {{$agent->city_name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div> --}}
-
                                     {{-- Search date from filter --}}
                                     <div class="col-4">
                                         <div class="form-group input-group">
@@ -74,21 +52,26 @@
 
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
+                               <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1 text-center align-middle " rowspan="2">Serial No</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle " rowspan="2">Date</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Description</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="5">Connected Calls</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="3">Not Connected Calls</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Grand Total</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">No. of Shipments</th>
+                                </tr>
                                 <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1">Date</th>
-                                    <th class="border-primary border-darken-1">Description</th>
-                                    <th class="border-primary border-darken-1">Option 1</th>
-                                    <th class="border-primary border-darken-1">Option 2</th>
-                                    <th class="border-primary border-darken-1">Option 3</th>
-                                    <th class="border-primary border-darken-1">No option</th>
-                                    <th class="border-primary border-darken-1">Total</th>
-                                    <th class="border-primary border-darken-1">Not Answered</th>
-                                    <th class="border-primary border-darken-1">Busy</th>
-                                    <th class="border-primary border-darken-1">Disconnected</th>
-                                    <th class="border-primary border-darken-1">Invalid Number</th>
-                                    <th class="border-primary border-darken-1">Total</th>
-                                    <th class="border-primary border-darken-1">Grand Total</th>
-                                    <th class="border-primary border-darken-1">No. of Shipments</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Option 1</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Option 2</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Option 3</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">No option</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Total</th>
+                                    {{-- <th class="border-primary border-darken-1">Not Answered</th> --}}
+                                    <th class="border-primary border-darken-1 text-center align-middle">Busy</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle">Disconnected</th>
+                                    {{-- <th class="border-primary border-darken-1">Invalid Number</th> --}}
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Total</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -369,7 +352,7 @@
                         }
                     }
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.rvr_reattempt.list') }}',
+                        url: '{{ route('admin.reports.bot_rvr.list') }}',
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -379,43 +362,38 @@
                             head = [];
 
                             head.push('S.No');  
-                            head.push('Tracking No.');
-                            head.push('RVR Count');
-                            head.push('Shipper');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Hub');
-                            head.push('Zone');
-                            head.push('Consignee Mobile#');
-                            head.push('Arrival Date');
-                            head.push('Destination Arrival Date');
-                            head.push('RVR Time & Date');
-                            head.push('RVR Action Time & Date');
-                            head.push('OFD Time & Date');
-                            head.push('Last Status');
-                            head.push('Last Status Time & Date');
-                           
+                            head.push('Date');
+                            head.push('Description');
+                            head.push('Option 1');
+                            head.push('Option 2');
+                            head.push('Option 3');
+                            head.push('Option 3');
+                            head.push('Total');
+                            head.push('Busy');
+                            head.push('Disconnected');
+                            head.push('Total');
+                            head.push('Grand Total');
+                            head.push('No of Shipment');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number.split(">")[2].slice(0,-3));
-                                row.push(values.rvr_count);
-                                row.push(values.shipper_name);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.zone_name);
-                                row.push(values.consignee_phon_no);
-                                row.push(values.arrival_date);
-                                row.push(values.arrival_destination_date);
-                                row.push(values.rvr_date_time);
-                                row.push(values.action_date);
-                                row.push(values.ofd_date_time);
-                                row.push(values.current_status);
-                                row.push(values.current_status_date);
+                                row.push(values.date);
+                                row.push(values.description);
+                                row.push(values.option1);
+                                row.push(values.option2);
+                                row.push(values.option3);
+                                row.push(values.option4);
+                                row.push(values.total1);
+                                row.push(values.busy);
+                                row.push(values.disconnected);
+                                row.push(values.total2);
+                                row.push(values.grandtotal);
+                                row.push(values.no_of_shipment);
                                 body.push(row);
                             });
+                        
                         },
                         async: false
                     });
@@ -429,8 +407,8 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     extend: 'excelHtml5',
-                    title: 'Reattempt Analysis Report',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
+                    title: 'BOT CALL REPORT',
+                    text: '<i class="la la-file-excel-o underline"></i> Excel',
                     className: 'btn btn-primary datatable_excel_btn',
                     
                 },'reset'],
@@ -446,37 +424,31 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.reports.rvr_reattempt.list')}}',
+                    url: '{{ route('admin.reports.bot_rvr.list')}}',
                     method: 'POST',
                     headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
                     data: function (d) {
-                        d.search_tracking_no = $('#search_tracking_no').val();
-                        d.search_shipper_name = $('#search_shipper_name').val();
-                        d.search_agent_name = $('#search_agent_name').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                order: [[13, 'desc']],
+                  order: [[1, 'desc'], [2, 'asc']], // Order by 'created_at' DESC and 'description' ASC
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
-                    {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle tracking_number',searchable: false},
-                    {data: 'rvr_count', name: 'rvr_count', class: 'align-middle shipper_name',searchable: false},
-                    {data: 'shipper_name', name: 'shipper_name', class: 'align-middle shipper_name',searchable: false},
-                    {data: 'origin', name: 'origin', class: 'text-center align-middle origin',searchable: false},
-                    {data: 'destination', name: 'destination', class: 'align-middle destination',searchable: false},
-                    {data: 'hub', name: 'hub', class: 'align-middle hub',searchable: false},
-                    {data: 'zone_name', name: 'zone_name', class: 'align-middle hub',searchable: false},
-                    {data: 'consignee_phon_no', name: 'consignee_phon_no', class: 'align-middle cod_amount',searchable: false},
-                    {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date',searchable: false},
-                    {data: 'arrival_destination_date', name: 'arrival_destination_date', class: 'align-middle action',searchable: false},
-                    {data: 'rvr_date_time', name: 'rvr_date_time', class: 'align-middle reason',searchable: false},
-                    {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false},
-                    {data: 'ofd_date_time', name: 'ofd_date_time', class: 'align-middle action_updated_by',searchable: false},
-                    {data: 'current_status', name: 's_status.name', class: 'align-middle current_status',searchable: false},
-                    {data: 'current_status_date', name: 'current_status_date', class: 'align-middle current_status_date',searchable: false},
+                    {data: 'date', name: 'date', class: 'text-center align-middle date', searchable: false},
+                    {data: 'description', name: 'description', class: 'align-middle description', searchable: false},
+                    {data: 'option1', name: 'option1', orderable: false, class: 'text-center align-middle option1', searchable: false},
+                    {data: 'option2', name: 'option2', orderable: false, class: 'text-center align-middle option2', searchable: false},
+                    {data: 'option3', name: 'option3', orderable: false, class: 'text-center align-middle option3', searchable: false},
+                    {data: 'option4', name: 'option4', orderable: false, class: 'text-center align-middle option4', searchable: false},
+                    {data: 'total1', name: 'total1', orderable: false, class: 'text-center align-middle total1', searchable: false},
+                    {data: 'busy', name: 'busy', orderable: false, class: 'text-center align-middle busy', searchable: false},
+                    {data: 'disconnected', name: 'disconnected', orderable: false, class: 'text-center align-middle disconnected', searchable: false}, // Center text
+                    {data: 'total2', name: 'total2', orderable: false, class: 'text-center align-middle total2', searchable: false},
+                    {data: 'grandtotal', name: 'grandtotal', orderable: false, class: 'text-center align-middle grandtotal', searchable: false},
+                    {data: 'no_of_shipment', name: 'no_of_shipment', orderable: false, class: 'text-center align-middle no_of_shipment', searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -486,13 +458,10 @@
 
         $('#search_form').bind('submit', function (e) {
             e.preventDefault();
-            var tracking_number = $('#search_form #search_tracking_no').val();
-            var shipper_name = $('#search_form #search_shipper_name').val();
-            var agent_name = $('#search_form #search_agent_name').val();
             var search_date_from = $('#search_form #search_date_from').val();
             var search_date_to = $('#search_form #search_date_to').val();
 
-            if (shipper_name !== '' || agent_name !== '' || tracking_number != ''  || (search_date_from != '' && search_date_to != '' )) {
+            if ((search_date_from != '' && search_date_to != '' )) {
                 table.draw();
             }
 
