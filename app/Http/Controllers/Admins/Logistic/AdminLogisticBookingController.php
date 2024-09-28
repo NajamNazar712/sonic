@@ -499,13 +499,12 @@ class AdminLogisticBookingController extends Controller
                 $services=TraxService::whereIn('shipping_mode_id',$shipping_modes_ids)->get();
                 $trax_stations=TraxStation::select('id','name')->where('status',1)->get();
                 $pickup_addresses=UserShippingInfo::select('id','pickup_address','poc','phone','email')->where('user_id',$logistic_booking->shipper_id)->get();
-                $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id);
+                $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id)->first();
 
                 $booking_img_url=null;
-                if ($booking_img->exists())
+                if ($booking_img)
                 {
-                    $booking_img = $booking_img->first();
-                    $booking_img_url =  Storage::url('logistic_bookings/'. $booking_img->image_name);
+                    $booking_img_url =  Storage::disk('s4')->url('logistic_bookings/'. $booking_img->image_name);
                 }
 
 
