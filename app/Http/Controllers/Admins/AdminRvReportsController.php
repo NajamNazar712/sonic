@@ -14,6 +14,7 @@ class AdminRvReportsController extends Controller
     use RvTrait;
     public function __construct()
     {
+        dd('data');
         $this->middleware('auth:admin');
 
         $this->middleware('Permission');
