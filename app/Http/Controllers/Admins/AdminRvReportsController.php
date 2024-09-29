@@ -15,7 +15,7 @@ class AdminRvReportsController extends Controller
     {
         $this->middleware('auth:admin');
 
-        // $this->middleware('Permission');
+        $this->middleware('Permission');
     }
 
     public function botRvCallRecord(){
@@ -32,7 +32,7 @@ class AdminRvReportsController extends Controller
                 DB::raw('(case  WHEN call_count = 1 THEN "1st Calls" 
                 WHEN call_count = 2 THEN "2nd Calls" 
                 WHEN call_count = 3 THEN "3rd Calls"
-                -- WHEN call_count IS NULL THEN "Total"
+                WHEN call_count IS NULL THEN "Total"
                  end
                 )
                 as description'),
