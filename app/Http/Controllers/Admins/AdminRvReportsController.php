@@ -29,38 +29,38 @@ class AdminRvReportsController extends Controller
 
         $rv_report = RvShipmentAssignAgentDetails::where('agent_id',4620)
         ->where('rv_assign_agent_status_id','!=','')
-        ->where('call_count','!=','')
-        ->select(
-                DB::raw('Date(created_at) as date'),
-                // DB::raw('(case  WHEN call_count = 1 THEN "1st Calls" 
-                // WHEN call_count = 2 THEN "2nd Calls" 
-                // WHEN call_count = 3 THEN "3rd Calls"
-                // WHEN call_count IS NULL THEN "Total"
-                //  end
-                // )
-                // as description'),
-                DB::raw('sum(case when rv_assign_agent_sub_status_id = 35 then 1 else 0 end) AS option1'),
-                DB::raw('sum(case when rv_assign_agent_sub_status_id = 36 then 1 else 0 end) AS option2'),
-                DB::raw('sum(case when rv_assign_agent_sub_status_id = 37 then 1 else 0 end) AS option3'),
-                DB::raw('sum(case when rv_assign_agent_sub_status_id = 34 then 1 else 0 end) AS option4'),
-                // DB::raw('sum(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END 
-                //         + CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END
-                //         + CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END
-                //         + CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END) AS total1'
-                //     ),
-                //     DB::raw('sum(case when rv_assign_agent_sub_status_id = 32 then 1 else 0 end) AS busy'),
-                //     DB::raw('sum(case when rv_assign_agent_sub_status_id = 33 then 1 else 0 end) AS disconnected'),
-                //     DB::raw('sum(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END 
-                //     + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS total2'
-                // ),    
-                // DB::raw('sum(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END
-                //         + CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END
-                //         + CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END
-                //         + CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END  
-                //         + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS grandtotal' ),
-                DB::raw('count(shipment_id) as no_of_shipment'),
+        ->where('call_count','!=','');
+        // ->select(
+        //         DB::raw('Date(created_at) as date'),
+        //         DB::raw('(case  WHEN call_count = 1 THEN "1st Calls" 
+        //         WHEN call_count = 2 THEN "2nd Calls" 
+        //         WHEN call_count = 3 THEN "3rd Calls"
+        //         WHEN call_count IS NULL THEN "Total"
+        //          end
+        //         )
+        //         as description'),
+        //         DB::raw('sum(case when rv_assign_agent_sub_status_id = 35 then 1 else 0 end) AS option1'),
+        //         DB::raw('sum(case when rv_assign_agent_sub_status_id = 36 then 1 else 0 end) AS option2'),
+        //         DB::raw('sum(case when rv_assign_agent_sub_status_id = 37 then 1 else 0 end) AS option3'),
+        //         DB::raw('sum(case when rv_assign_agent_sub_status_id = 34 then 1 else 0 end) AS option4'),
+        //         DB::raw('sum(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END 
+        //                 + CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END
+        //                 + CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END
+        //                 + CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END) AS total1'
+        //             ),
+        //             DB::raw('sum(case when rv_assign_agent_sub_status_id = 32 then 1 else 0 end) AS busy'),
+        //             DB::raw('sum(case when rv_assign_agent_sub_status_id = 33 then 1 else 0 end) AS disconnected'),
+        //             DB::raw('sum(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END 
+        //             + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS total2'
+        //         ),    
+        //         DB::raw('sum(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END
+        //                 + CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END
+        //                 + CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END
+        //                 + CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END  
+        //                 + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS grandtotal' ),
+        //         DB::raw('count(shipment_id) as no_of_shipment'),
 
-            );
+        //     );
             // $rv_report->groupBy(DB::raw("DATE(created_at), call_count WITH ROLLUP"));
             $datatable = Datatables::of($rv_report);
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
