@@ -20,7 +20,7 @@ class botCallReport extends Seeder
         ));
         
         DB::table('activity_trail_actions')->insert(array(
-            array('id' => 806, 'screen_name' => 'Reattempt Analysis Report', 'action' => 'View'),
+            array('id' => 809, 'screen_name' => 'Bot Report', 'action' => 'View'),
         ));
 
         DB::table('admins_screen_list')->insert(array(
