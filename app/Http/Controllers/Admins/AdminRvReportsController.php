@@ -63,11 +63,11 @@ class AdminRvReportsController extends Controller
             );
             $rv_report->groupBy(DB::raw("DATE(created_at) ,call_count WITH ROLLUP"));
             $datatable = Datatables::of($rv_report);
-            if ($request->get('search_date_from') && $request->get('search_date_to')) {
-                $from = $request->get('search_date_from');
-                $to = $request->get('search_date_to');
-                $rv_report->where([['rv_shipment_assign_agent_details.created_at','>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
-            }
+            // if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            //     $from = $request->get('search_date_from');
+            //     $to = $request->get('search_date_to');
+            //     $rv_report->where([['rv_shipment_assign_agent_details.created_at','>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
+            // }
 
             return $datatable->make(true);
     }
