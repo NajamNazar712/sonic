@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\RvTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 
 class AdminRvReportsController extends Controller
@@ -23,7 +24,9 @@ class AdminRvReportsController extends Controller
     }
 
     public function botRvCallRecordList(Request $request){
-       
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 809);
+
         $rv_report = RvShipmentAssignAgentDetails::where('agent_id',4620)
         ->where('rv_assign_agent_status_id','!=','')
         ->where('call_count','!=','')
