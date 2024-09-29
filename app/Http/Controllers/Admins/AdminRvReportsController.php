@@ -32,13 +32,11 @@ class AdminRvReportsController extends Controller
         ->where('call_count','!=','')
         ->select(
             DB::raw('Date(created_at) as date'),
-            DB::raw("(case  WHEN call_count = 1 THEN '1st Calls' 
-                WHEN call_count = 2 THEN '2nd Calls' 
-                WHEN call_count = 3 THEN '3rd Calls'
-                WHEN call_count IS NULL THEN 'Total'
-                 end
-                )
-                as description"),
+            DB::raw("(case  WHEN call_count = 1 THEN '1st Calls' WHEN call_count = 2 THEN '2nd Calls' WHEN call_count = 3 THEN '3rd Calls' WHEN call_count IS NULL THEN 'Total' end ) as description"),
+            DB::raw('sum(case when rv_assign_agent_sub_status_id = 35 then 1 else 0 end) AS option1'),
+                DB::raw('sum(case when rv_assign_agent_sub_status_id = 36 then 1 else 0 end) AS option2'),
+                DB::raw('sum(case when rv_assign_agent_sub_status_id = 37 then 1 else 0 end) AS option3'),
+                DB::raw('sum(case when rv_assign_agent_sub_status_id = 34 then 1 else 0 end) AS option4'),
         );
         // ->select(
         //         DB::raw('Date(created_at) as date'),
