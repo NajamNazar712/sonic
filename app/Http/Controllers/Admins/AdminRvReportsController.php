@@ -29,7 +29,17 @@ class AdminRvReportsController extends Controller
 
         $rv_report = RvShipmentAssignAgentDetails::where('agent_id',4620)
         ->where('rv_assign_agent_status_id','!=','')
-        ->where('call_count','!=','');
+        ->where('call_count','!=','')
+        ->select(
+            DB::raw('Date(created_at) as date'),
+            DB::raw("(case  WHEN call_count = 1 THEN '1st Calls' 
+                WHEN call_count = 2 THEN '2nd Calls' 
+                WHEN call_count = 3 THEN '3rd Calls'
+                WHEN call_count IS NULL THEN 'Total'
+                 end
+                )
+                as description"),
+        );
         // ->select(
         //         DB::raw('Date(created_at) as date'),
         //         DB::raw('(case  WHEN call_count = 1 THEN "1st Calls" 
