@@ -14,19 +14,19 @@ class AdminRvReportsController extends Controller
     use RvTrait;
     public function __construct()
     {
-        dd('data');
         $this->middleware('auth:admin');
 
-        // $this->middleware('Permission');
+        $this->middleware('Permission');
     }
 
     public function botRvCallRecord(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 809);
+
         return view('admin.reports.bot_rvr.index');
     }
 
     public function botRvCallRecordList(Request $request){
 
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 809);
 
         $rv_report = RvShipmentAssignAgentDetails::where('agent_id',4620)
         ->where('rv_assign_agent_status_id','!=','')
