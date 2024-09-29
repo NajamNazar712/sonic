@@ -27,11 +27,10 @@ class AdminRvReportsController extends Controller
 
     public function botRvCallRecordList(Request $request){
 
-        dd('data');
         $rv_report = RvShipmentAssignAgentDetails::where('agent_id',4620)
         ->where('rv_assign_agent_status_id','!=','')
         ->where('call_count','!=','')
-            ->select(
+        ->select(
                 DB::raw('Date(created_at) as date'),
                 DB::raw('(case  WHEN call_count = 1 THEN "1st Calls" 
                 WHEN call_count = 2 THEN "2nd Calls" 
@@ -62,10 +61,7 @@ class AdminRvReportsController extends Controller
                         + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS grandtotal' ),
                 DB::raw('count(shipment_id) as no_of_shipment'),
 
-                        )
-                    
-                ->groupBy(DB::raw('DATE(created_at) ,call_count WITH ROLLUP')
-            );
+            )->groupBy(DB::raw('DATE(created_at) ,call_count WITH ROLLUP'));
             $datatable = Datatables::of($rv_report);
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
