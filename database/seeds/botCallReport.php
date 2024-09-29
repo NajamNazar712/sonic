@@ -16,7 +16,7 @@ class botCallReport extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('module_permissions')->insert(array(
-            array('id' => 1010, 'name' => 'Reattempt Analysis Report', 'module_id' => 9),
+            array('id' => 1010, 'name' => 'Bot Report', 'module_id' => 9),
         ));
         
         DB::table('activity_trail_actions')->insert(array(
