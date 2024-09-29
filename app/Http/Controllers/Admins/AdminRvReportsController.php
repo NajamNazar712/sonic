@@ -36,7 +36,7 @@ class AdminRvReportsController extends Controller
             DB::raw("sum(case when rv_assign_agent_sub_status_id = 35 then 1 else 0 end) AS option1"),
             DB::raw("sum(case when rv_assign_agent_sub_status_id = 36 then 1 else 0 end) AS option2"),
             DB::raw("sum(case when rv_assign_agent_sub_status_id = 37 then 1 else 0 end) AS option3"),
-            DB::raw("sum(case when rv_assign_agent_sub_status_id = 34 then 1 else 0 end) AS option4"),
+            DB::raw("sum(case when rv_assign_agent_sub_status_id = 34 then 1 else 0 end) AS option4")
         );
         // ->select(
         //         DB::raw('Date(created_at) as date'),
