@@ -36,7 +36,12 @@ class AdminRvReportsController extends Controller
             DB::raw("sum(case when rv_assign_agent_sub_status_id = 35 then 1 else 0 end) AS option1"),
             DB::raw("sum(case when rv_assign_agent_sub_status_id = 36 then 1 else 0 end) AS option2"),
             DB::raw("sum(case when rv_assign_agent_sub_status_id = 37 then 1 else 0 end) AS option3"),
-            DB::raw("sum(case when rv_assign_agent_sub_status_id = 34 then 1 else 0 end) AS option4")
+            DB::raw("sum(case when rv_assign_agent_sub_status_id = 34 then 1 else 0 end) AS option4"),
+            DB::raw("sum(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END) AS total1"),
+            DB::raw("sum(case when rv_assign_agent_sub_status_id = 32 then 1 else 0 end) AS busy"),
+            DB::raw("sum(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END  + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS total2"),
+            DB::raw("sum(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END+ CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS grandtotal"),
+            DB::raw('count(shipment_id) as no_of_shipment')
         );
         // ->select(
         //         DB::raw('Date(created_at) as date'),
@@ -51,21 +56,11 @@ class AdminRvReportsController extends Controller
         //         DB::raw('sum(case when rv_assign_agent_sub_status_id = 36 then 1 else 0 end) AS option2'),
         //         DB::raw('sum(case when rv_assign_agent_sub_status_id = 37 then 1 else 0 end) AS option3'),
         //         DB::raw('sum(case when rv_assign_agent_sub_status_id = 34 then 1 else 0 end) AS option4'),
-        //         DB::raw('sum(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END 
-        //                 + CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END
-        //                 + CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END
-        //                 + CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END) AS total1'
-        //             ),
+        //         DB::raw('sum(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END) AS total1"),
         //             DB::raw('sum(case when rv_assign_agent_sub_status_id = 32 then 1 else 0 end) AS busy'),
-        //             DB::raw('sum(case when rv_assign_agent_sub_status_id = 33 then 1 else 0 end) AS disconnected'),
-        //             DB::raw('sum(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END 
-        //             + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS total2'
-        //         ),    
-        //         DB::raw('sum(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END
-        //                 + CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END
-        //                 + CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END
-        //                 + CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END  
-        //                 + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS grandtotal' ),
+        //             DB::raw("sum(case when rv_assign_agent_sub_status_id = 33 then 1 else 0 end) AS disconnected"),
+        //             DB::raw("sum(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END  + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS total2"),    
+        //         DB::raw('sum(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END+ CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS grandtotal"),
         //         DB::raw('count(shipment_id) as no_of_shipment'),
 
         //     );
