@@ -16,7 +16,7 @@ class AdminRvReportsController extends Controller
     {
         $this->middleware('auth:admin');
 
-        $this->middleware('Permission');
+        // $this->middleware('Permission');
     }
 
     public function botRvCallRecord(){
