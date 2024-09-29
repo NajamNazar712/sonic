@@ -16,10 +16,10 @@ class ForceFullyThirdCallInti extends Seeder
     public function run()
     {
         //
-        $timeStart = '2024-09-26 00:00:00'; // Get the timestamp of two hours ago
+        $timeStart = '2024-09-23 00:00:00'; // Get the timestamp of two hours ago
         // Carbon::parse(now())->subHour(2)->format('Y-m-d H:i') 
-        $timeEnd = '2024-09-29 18:30:59';
-        
+        $timeEnd = '2024-09-25 23:56:59';
+
         $shipmentThirds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
         Log::channel('cronJobLog')->info('s ' . 'Log after  shipmentThirds call  record' . count($shipmentThirds));
 
