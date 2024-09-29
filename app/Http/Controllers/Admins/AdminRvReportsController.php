@@ -60,8 +60,8 @@ class AdminRvReportsController extends Controller
                 //         + CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS grandtotal' ),
                 // DB::raw('count(shipment_id) as no_of_shipment'),
 
-            )
-            ->groupBy(DB::raw('DATE(created_at) ,call_count WITH ROLLUP'));
+            );
+            $rv_report->groupBy(DB::raw("DATE(created_at) ,call_count WITH ROLLUP"));
             $datatable = Datatables::of($rv_report);
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
