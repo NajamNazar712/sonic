@@ -1628,7 +1628,7 @@ class Permission
 
             'crm.bulk_claim.index' => 19,
 
-            'admin.reports.rvr_reattempt.index' => 1010
+            'admin.reports.bot_rvr.index' => 1010
 
         ]
     ];
