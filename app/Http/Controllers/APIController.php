@@ -2437,7 +2437,8 @@ class APIController extends Controller
         }
 
         if(empty($errors))
-            foreach ($request->data as $key2 => $row) {
+        $array_piece_quantity_count = 0;
+        foreach ($request->data as $key2 => $row) {
 //                if ($request->input('amount') == 0 || $request->input('amount') === null) {
 //                    $amount = $request->input('amount');
 //                    $parcel_value = $request->input('parcel_value');
@@ -3147,9 +3148,10 @@ class APIController extends Controller
                     NotificationsController::send(153, $shipment_id);
                 }
 
+                $array_piece_quantity_count = ($row['pieces_quantity'] > 1) ? $array_piece_quantity_count + 1 : $array_piece_quantity_count;
                 // Handle pieces quantity message
                 if (!empty($row['pieces_quantity'])) {
-                    if ($row['pieces_quantity'] > 1) {
+                    if ($array_piece_quantity_count > 0) {
                         $video = array(
                             "url" => "https://www.youtube.com/watch?v=Uy0KAIx3xHQ",
                             "message" => "Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment! ملٹیپل پیسز شپمینٹ بک یا پیک کرنے کا طریقہ اس وڈیو میں ضرور دیکھیں اگر شپمینٹ بتاۓ ہؤۓ طریقہ  کے تہت  ہینڈاؤرنہیں ہوئ تو ہم اس شپمینٹ کو پروسیس نہیں کریں گے"
@@ -3158,7 +3160,6 @@ class APIController extends Controller
                     }
                 }
             }
-
         //record api booked count
         $shipment_booked_api_count = New ShipmentBookedApiCount();
         $shipment_booked_api_count->shipment_count = !empty($return_array["tracking_number"]) ? count($return_array["tracking_number"]) : 0;
