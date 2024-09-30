@@ -452,7 +452,9 @@
                 },
                 submitHandler: function(form) {
                     $('#add_shipment_form button.add').prop('disabled', true);
-
+                    $('#scan_tracking_number').on('keydown', function(){
+                        $('#add_shipment_form button.add').prop('disabled', false);
+                    });
                     var tracking_number = $(form).find('input.tracking_number').val();
                     var handover = $('#bag_number').val();
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
