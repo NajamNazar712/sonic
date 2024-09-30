@@ -1825,20 +1825,25 @@ class APIController extends Controller
 
         // Default Return Address Check
         Validator::extend('default_return_address', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $return_address = UserShippingInfo::where('user_id', $user_id)
-                ->where('status', 1)
-                ->where('default_return_address', 1)
-                ->first();
+            $data = $validator->getData();
 
-            if (!$return_address) {
-                $validator->addReplacer('default_return_address', function ($message, $attribute, $rule, $parameters) {
-                    return 'Default return address is not set';
-                });
-                return false;
+            if (!empty($data['return_address_id'])) {
+                return true;
             }
 
-            return true;
+            $return_address = UserShippingInfo::where('user_id', $user_id)
+                ->where('status', 1)
+                ->where('default_return_address', 1);
+
+            if ($return_address->exists()) {
+                return true;
+            }
+
+            $validator->errors()->add($attribute, 'Default return address is not set!');
+            return false;
         });
+
+
 
         // Omni Account Check
         Validator::extend('omni_account', function ($attribute, $value, $parameters, $validator) use ($user_id) {
@@ -2176,7 +2181,7 @@ class APIController extends Controller
                 })],
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check',  'default_return_address', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
+                }), 'origin_check', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'destination_return_check', 'default_return_address', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
