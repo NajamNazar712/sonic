@@ -207,8 +207,26 @@ class AdminShipmentHandoverController extends Controller
 
           // trying to scan after partial recive
           $handover_shipment_id = HandoverShipments::where('shipment_id', $shipment->id)->select(['handover_id', 'shipment_id', 'status'])->first();
-          if (($handover_shipment_id->handover_id == (int)$current_handover_id) && $handover_shipment_id->status == 2) {
+          if (($handover_shipment_id && $handover_shipment_id->handover_id == (int)$current_handover_id) && $handover_shipment_id->status == 2) {
             return ['status' => 1, 'error' => 'This shipment is already verified'];
+          }
+
+          // stop receving after 1 time
+          $excess_handovers = ExcessHandoverShipment::where('shipment_ids', $shipment->id)
+            ->select(['handover_id', 'shipment_ids', 'excess_shipment'])
+            ->get();
+
+          if ($excess_handovers->isNotEmpty()){
+            foreach ($excess_handovers as $excess_handover) {
+              if ($excess_handover->excess_shipment == 1) {
+                if ($excess_handover->handover_id == $current_handover_id || $excess_handover->excess_handover_id == $current_handover_id) {
+                  return ['status' => 1, 'error' => 'This shipment is already added in this bag as an excess shipment.'];
+                }
+              }
+              else if ($excess_handover->handover_id == $current_handover_id) {
+                return ['status' => 1, 'error' => 'This shipment is already verified.'];
+              }
+            }
           }
 
           // shipments with no handover/bag
