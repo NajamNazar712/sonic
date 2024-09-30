@@ -205,6 +205,12 @@ class AdminShipmentHandoverController extends Controller
           $shipment_pieces = $shipment->pieces;
           $handover_shipments = HandoverShipments::where('shipment_id',$shipment->id)->whereIn('status', [1,3]);
 
+          // trying to scan after partial recive
+          $handover_shipment_id = HandoverShipments::where('shipment_id', $shipment->id)->select(['handover_id', 'shipment_id', 'status'])->first();
+          if (($handover_shipment_id->handover_id == (int)$current_handover_id) && $handover_shipment_id->status == 2) {
+            return ['status' => 1, 'error' => 'This shipment is already verified'];
+          }
+
           // shipments with no handover/bag
           if (!$handover_shipments->first())
           {
@@ -1295,7 +1301,7 @@ class AdminShipmentHandoverController extends Controller
                 END as shipment_type_text
             ")
         )
-        ->where('handover_shipments.status', '!=', 4)
+        ->where('handover_shipments.status', '!=', 2)
       ->groupBy('shipments.tracking_number');
 
       $datatable = Datatables::of($handover_shipments)
