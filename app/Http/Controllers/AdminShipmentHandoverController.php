@@ -53,7 +53,7 @@ class AdminShipmentHandoverController extends Controller
         foreach($data as $row){
           if ($type == 0 && isset($row->name)){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
-          }else if ($type == 1 && !isset($row->name) && isset($row->admin_id)){
+          }else if ($type == 1 && isset($row->name) && isset($row->admin_id)){
             $output .= '<option value ="'.$row->id.'">' . Admin::where('id' ,$row->admin_id)->first()->name   . '</option> ';
           }
         }
@@ -1410,22 +1410,49 @@ class AdminShipmentHandoverController extends Controller
       }
     }
 
+    // public function same_hub_handover_count(Request $request)
+    // {
+    //   $shipment = Shipment::where('tracking_number', $request->tracking_number)
+    //   ->select('id')
+    //   ->first();
+    //     if (!$shipment) {
+    //         return ['status' => 0, 'error' => 'Shipment not found.'];
+    //     }
+    //   $handover_shipments = HandoverShipments::where('shipment_id', $shipment->id)
+    //   ->select('handover_id')
+    //   ->get();
+    //   $handover_ids = $handover_shipments->pluck('handover_id');
+    //   $handovers = Handover::whereIn('id', $handover_ids)->get();
+    //   $hub_count = $handovers->where('hub', $request->hub_id)->count();
+    //   if ($hub_count >= 3) {
+    //     return ['status' => 1, 'error' => 'You cannot add more handovers for this hub.'];
+    //   }
+    // }
+
     public function same_hub_handover_count(Request $request)
     {
       $shipment = Shipment::where('tracking_number', $request->tracking_number)
-      ->select('id')
-      ->first();
+        ->select('id')
+        ->first();
       if (!$shipment) {
-          return ['status' => 0, 'error' => 'Shipment not found.'];
+        return ['status' => 0, 'error' => 'Shipment not found.'];
       }
+
       $handover_shipments = HandoverShipments::where('shipment_id', $shipment->id)
-      ->select('handover_id')
-      ->get();
-      $handover_ids = $handover_shipments->pluck('handover_id');
-      $handovers = Handover::whereIn('id', $handover_ids)->get();
-      $hub_count = $handovers->where('hub', $request->hub_id)->count();
-      if ($hub_count >= 3) {
-        return ['status' => 1, 'error' => 'You cannot add more handovers for this hub.'];
+        ->latest()
+        ->take(3)
+        ->get();
+      if ($handover_shipments->count() === 3) {
+          $handover_ids = $handover_shipments->pluck('handover_id');
+          $hubs = Handover::whereIn('id', $handover_ids)
+            ->pluck('hub');
+          if ($hubs->every(function ($hub) use ($hubs) {
+            return $hub == $hubs->first();
+          })) {
+              if ($hubs->first() == $request->hub_id) {
+                return ['status' => 1, 'error' => 'You cannot add more handovers for this hub.'];
+              }
+          }
       }
     }
 
