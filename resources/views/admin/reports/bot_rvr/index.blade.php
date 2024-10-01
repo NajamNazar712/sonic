@@ -56,22 +56,31 @@
                                     <th class="border-primary border-darken-1 text-center align-middle " rowspan="2">Serial No</th>
                                     <th class="border-primary border-darken-1 text-center align-middle " rowspan="2">Date</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Description</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="5">Connected Calls</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="3">Not Connected Calls</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="10">Connected Calls</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="6">Not Connected Calls</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Grand Total</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Grand Total %</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">No. of Shipments</th>
                                 </tr>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1 text-center align-middle ">Option 1</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Option1 %</th>
                                     <th class="border-primary border-darken-1 text-center align-middle ">Option 2</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Option2 %</th>
                                     <th class="border-primary border-darken-1 text-center align-middle ">Option 3</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Option3 %</th>
                                     <th class="border-primary border-darken-1 text-center align-middle ">No option</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">No Option %</th>
                                     <th class="border-primary border-darken-1 text-center align-middle ">Total</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Total %</th>
                                     {{-- <th class="border-primary border-darken-1">Not Answered</th> --}}
                                     <th class="border-primary border-darken-1 text-center align-middle">Busy</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle">Busy %</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Disconnected</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle">Disconnected %</th>
                                     {{-- <th class="border-primary border-darken-1">Invalid Number</th> --}}
                                     <th class="border-primary border-darken-1 text-center align-middle ">Total</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Total %</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -365,14 +374,23 @@
                             head.push('Date');
                             head.push('Description');
                             head.push('Option 1');
+                            head.push('Option %');
                             head.push('Option 2');
+                            head.push('Option %');
                             head.push('Option 3');
-                            head.push('Option 3');
+                            head.push('Option %');
+                            head.push('No Option');
+                            head.push('No Option %');
                             head.push('Total');
+                            head.push('Total %');
                             head.push('Busy');
+                            head.push('Busy %');
                             head.push('Disconnected');
+                            head.push('Disconnected %');
                             head.push('Total');
+                            head.push('Total %');
                             head.push('Grand Total');
+                            head.push('Grand Total %');
                             head.push('No of Shipment');
 
                             $.each(result.data, function(index, values) {
@@ -382,14 +400,23 @@
                                 row.push(values.date);
                                 row.push(values.description);
                                 row.push(values.option1);
+                                row.push(values.option1_per);
                                 row.push(values.option2);
+                                row.push(values.option2_per);
                                 row.push(values.option3);
+                                row.push(values.option3_per);
                                 row.push(values.option4);
+                                row.push(values.option4_per);
                                 row.push(values.total1);
+                                row.push(values.total1_per);
                                 row.push(values.busy);
+                                row.push(values.busy_per);
                                 row.push(values.disconnected);
+                                row.push(values.disconnected_per);
                                 row.push(values.total2);
+                                row.push(values.total2_per);
                                 row.push(values.grandtotal);
+                                row.push(values.grandtotal_per);
                                 row.push(values.no_of_shipment);
                                 body.push(row);
                             });
@@ -440,14 +467,23 @@
                     {data: 'date', name: 'date', class: 'text-center align-middle date', searchable: false},
                     {data: 'description', name: 'description', class: 'align-middle description', searchable: false},
                     {data: 'option1', name: 'option1', orderable: false, class: 'text-center align-middle option1', searchable: false},
+                    {data: 'option1_per', name: 'option1_per', orderable: false, class: 'text-center align-middle option1_per', searchable: false},
                     {data: 'option2', name: 'option2', orderable: false, class: 'text-center align-middle option2', searchable: false},
+                    {data: 'option2_per', name: 'option2_per', orderable: false, class: 'text-center align-middle option2_per', searchable: false},
                     {data: 'option3', name: 'option3', orderable: false, class: 'text-center align-middle option3', searchable: false},
+                    {data: 'option3_per', name: 'option3_per', orderable: false, class: 'text-center align-middle option3_per', searchable: false},
                     {data: 'option4', name: 'option4', orderable: false, class: 'text-center align-middle option4', searchable: false},
+                    {data: 'option4_per', name: 'option4_per', orderable: false, class: 'text-center align-middle option4_per', searchable: false},
                     {data: 'total1', name: 'total1', orderable: false, class: 'text-center align-middle total1', searchable: false},
+                    {data: 'total1_per', name: 'total1_per', orderable: false, class: 'text-center align-middle total1_per', searchable: false},
                     {data: 'busy', name: 'busy', orderable: false, class: 'text-center align-middle busy', searchable: false},
+                    {data: 'busy_per', name: 'busy_per', orderable: false, class: 'text-center align-middle busy_per', searchable: false},
                     {data: 'disconnected', name: 'disconnected', orderable: false, class: 'text-center align-middle disconnected', searchable: false}, // Center text
+                    {data: 'disconnected_per', name: 'disconnected_per', orderable: false, class: 'text-center align-middle disconnected_per', searchable: false}, // Center text
                     {data: 'total2', name: 'total2', orderable: false, class: 'text-center align-middle total2', searchable: false},
+                    {data: 'total2_per', name: 'total2_per', orderable: false, class: 'text-center align-middle total2_per', searchable: false},
                     {data: 'grandtotal', name: 'grandtotal', orderable: false, class: 'text-center align-middle grandtotal', searchable: false},
+                    {data: 'grandtotal_per', name: 'grandtotal_per', orderable: false, class: 'text-center align-middle grandtotal_per', searchable: false},
                     {data: 'no_of_shipment', name: 'no_of_shipment', orderable: false, class: 'text-center align-middle no_of_shipment', searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
