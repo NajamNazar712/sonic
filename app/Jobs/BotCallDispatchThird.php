@@ -52,9 +52,18 @@ class BotCallDispatchThird implements ShouldQueue
                 $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
                 RvShipmentTicket::where('shipment_id', $this->shipmentId)->update(['in_progress' => 1]);
                 $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($this->shipmentId);
+                // Clean the phone number by removing non-alphanumeric characters    
+                $cleaned_phone = preg_replace("/[^a-zA-Z0-9]+/", "", $shipment->consignee_phone_number_1);
+                if (substr($cleaned_phone, 0, 2) === "00") {
+                    // Remove one "0" by replacing "00" at the start with "0"
+                    $final_phone = preg_replace("/^00/", "0", $cleaned_phone);
+                } else {
+                    // No leading "00", so leave the cleaned phone number as is
+                    $final_phone = $cleaned_phone;
+                }
                 $post = [
                     'vpbx_id' => '66bdfd18cb67f',
-                    'caller_id' => preg_replace("/[^a-zA-Z0-9]+/", "", $shipment->consignee_phone_number_1),
+                    'caller_id' => $final_phone,
                     'tracking_number' => $shipment->tracking_number,
                     'cod_amount' => $shipment->amount,
                     'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,

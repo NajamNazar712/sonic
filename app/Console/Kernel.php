@@ -547,7 +547,7 @@ class Kernel extends ConsoleKernel
 		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
 //		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground(); //ye filhal bnd ki hai due to r2 shutdown issue
 		$schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
-		$schedule->command('clean:7DaysQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
+		$schedule->command('clean:7DaysOlderQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
 
         // Commission calculation schedule
         $schedule->command('commission:calculate_commission')->monthlyOn(1, '00:00')->runInBackground();

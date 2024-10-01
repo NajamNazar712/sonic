@@ -17,9 +17,9 @@ class ForceFullySecondCallIntiate extends Seeder
     public function run()
     {
         //
-        $timeStart = '2024-09-24 00:00:00'; // Get the timestamp of two hours ago
+        $timeStart = '2024-09-23 00:00:00'; // Get the timestamp of two hours ago
         // Carbon::parse(now())->subHour(2)->format('Y-m-d H:i') 
-        $timeEnd = '2024-09-26 23:59:59';
+        $timeEnd = '2024-09-25 23:56:59';
 
         // Now, re-initiate process for the retrieved shipment_ids after unresponsive one
         $shipmentSeconds = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => 1, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');

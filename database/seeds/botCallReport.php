@@ -24,7 +24,7 @@ class botCallReport extends Seeder
         ));
 
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Bot Report', 'url' => 'admin.reports.rvr_reattempt.index', 'permission_id' => 1010),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Bot Report', 'url' => 'admin.reports.bot_rvr.index', 'permission_id' => 1010),
         ));
     }
 }
