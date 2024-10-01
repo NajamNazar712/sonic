@@ -59,7 +59,6 @@
                                     <th class="border-primary border-darken-1 text-center align-middle "  colspan="10">Connected Calls</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  colspan="6">Not Connected Calls</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Grand Total</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Grand Total %</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">No. of Shipments</th>
                                 </tr>
                                 <tr role="row" class="bg-primary white">
@@ -390,7 +389,6 @@
                             head.push('Total');
                             head.push('Total %');
                             head.push('Grand Total');
-                            head.push('Grand Total %');
                             head.push('No of Shipment');
 
                             $.each(result.data, function(index, values) {
@@ -416,7 +414,6 @@
                                 row.push(values.total2);
                                 row.push(values.total2_per);
                                 row.push(values.grandtotal);
-                                row.push(values.grandtotal_per);
                                 row.push(values.no_of_shipment);
                                 body.push(row);
                             });
@@ -483,7 +480,6 @@
                     {data: 'total2', name: 'total2', orderable: false, class: 'text-center align-middle total2', searchable: false},
                     {data: 'total2_per', name: 'total2_per', orderable: false, class: 'text-center align-middle total2_per', searchable: false},
                     {data: 'grandtotal', name: 'grandtotal', orderable: false, class: 'text-center align-middle grandtotal', searchable: false},
-                    {data: 'grandtotal_per', name: 'grandtotal_per', orderable: false, class: 'text-center align-middle grandtotal_per', searchable: false},
                     {data: 'no_of_shipment', name: 'no_of_shipment', orderable: false, class: 'text-center align-middle no_of_shipment', searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
