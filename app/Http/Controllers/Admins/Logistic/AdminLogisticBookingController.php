@@ -572,7 +572,7 @@ class AdminLogisticBookingController extends Controller
                 }),
             ],
             'insurance_item_code'=>['max:255'],
-            'shipper_reference'=>['string','max:255']
+            'shipper_reference'=>['nullable','max:255']
         ]);
         if($validate->fails())
         {

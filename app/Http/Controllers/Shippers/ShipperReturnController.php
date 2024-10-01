@@ -32,11 +32,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Traits\RvTrait;
-use App\Jobs\ProcessRvShipmentTicket;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\ShipperInterceptExclude;
+use App\Http\Models\SpecifiedShipper;
+use Illuminate\Support\Facades\Log;
 
 class ShipperReturnController extends Controller
 {
@@ -473,7 +474,13 @@ class ShipperReturnController extends Controller
                 if ($parcel->shipper_status_id == 65) {
                     $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 65)->where('status_reason_id', 12)->latest('id')->first();
                     // Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
-
+                    
+                    
+                    if (SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists()) { // If shipper is lay on AList then will be auto re-attempt
+                        request()->request->add(['shipment_id' => $request->shipment_id]);
+                        $this->reattempt($request, session('user_id'));
+                        return response()->json(['status' => 1, 'success' => "We're reattempting your shipment request directly, without a call request"]);
+                    }
                     //Update shipment status id to 66 (Shipment - Re-Attempt Call Requested)
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 66, 'consignee_status_id' => 66]);
 
@@ -490,21 +497,14 @@ class ShipperReturnController extends Controller
                         $last_reason_id = NULL;
                     }
                     // ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
-
+                    
                     //Update shipment status id to 66 (Shipment - Re-Attempt Call Requested)
                     ShipmentsJourneyController::add($request->shipment_id, 66, 66, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
 
                     //if Shipper Status Id = 66 (Shipment - Re-Attempt Call Requested) Then fetch Those Shipments in Get Ticket
-                    {
-                        $rvData = [
-                            'shipment_id' => $parcel->id,
-                            'shipper_status_id' => 66,
-                            'status_reason_id' => $last_reason_id,
-                            'shipment_user_id' => $parcel->user_id,
-                            'call_count' => 2
-                        ];
-                        dispatch(new ProcessRvShipmentTicket($rvData));
-                    }
+                    $this->rvshipmentticketInsert($parcel->id, 66, $last_reason_id, $parcel->user_id,2);
+
+                    
 
                     //update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to open(3)
                     // $this->shipment_status_update_shipper($request, 7, 2, 3);
@@ -524,7 +524,9 @@ class ShipperReturnController extends Controller
                         NotificationsController::send(33, $request->shipment_id);
                     }
 
-                    return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+                    return response()->json(['status' => 1, 'success' =>
+                    // "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"
+                    "We’re reattempting your shipment with a call request; we'll proceed further once we get a response"]);
                 } else {
                     return ['status' => 0, 'error' => "Shipment is already updated for Re-attempt!"];
                 }

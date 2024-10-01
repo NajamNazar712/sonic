@@ -21,9 +21,9 @@
                                 <div class="col-2">
                                     <fieldset class="form-group">
                                         <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                            @foreach ($shippers as $shipper)
-                                                <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
-                                            @endforeach
+{{--                                            @foreach ($shippers as $shipper)--}}
+{{--                                                <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>--}}
+{{--                                            @endforeach--}}
                                         </select>
                                     </fieldset>
                                 </div>
@@ -342,6 +342,7 @@
                                                     <tr role="row" class="bg-primary white">
                                                         <th class="border-primary border-darken-1"></th>
                                                         <th class="border-primary border-darken-1">S. No.</th>
+                                                        <th class="border-primary border-darken-1">Account Type</th>
                                                         <th class="border-primary border-darken-1">Shipper</th>
                                                         <th class="border-primary border-darken-1">Shipment</th>
                                                         <th class="border-primary border-darken-1">Origin</th>
@@ -357,7 +358,7 @@
                                                         <th class="border-primary border-darken-1">SMS Charges</th>
                                                         <th class="border-primary border-darken-1">Fintech Charges</th>
                                                         <th class="border-primary border-darken-1">Packing Charges</th>
-                                                        <th class="border-primary border-darken-1">Deductable</th>
+                                                        <th class="border-primary border-darken-1">Deductible</th>
                                                         <th class="border-primary border-darken-1">Payable</th>
                                                         <th class="border-primary border-darken-1">Faf Charges</th>
                                                         <th class="border-primary border-darken-1">Arrival Date</th>
@@ -438,7 +439,7 @@
 
                                                 <div class="col-2">
                                                     <div class="form-group">
-                                                        <label class="mx-auto">Total Deductable</label>
+                                                        <label class="mx-auto">Total Deductible</label>
                                                         <input type="text" name="total_deductable"
                                                             class="form-control text-center total_deductable"
                                                             placeholder="Total Deductable" readonly="readonly">
@@ -464,9 +465,12 @@
                                                 </div>
 
                                                 <div class="w-100"></div>
+                                                <hr>
 
                                                 <button type="button" class="mr-auto btn btn-secondary"
                                                     data-dismiss="modal">Close</button>
+                                                <button type="button" name="make_invoice" onclick="verify_make_invoice_payments()"
+                                                        class="mr-1 btn btn-primary make_invoice">Corporate Invoice for Negative Payable</button>
                                                 <button type="submit" name="make"
                                                     class="mr-1 btn btn-primary make">Make & Export Bank Order</button>
                                             </form>
@@ -571,13 +575,31 @@
             var initial_total_hold = 0;
             var initial_ibft_charges = 0;
 
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Shipper',
-                width: '100%',
-                allowClear: true
+            $('#search_shipper').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    delay: 700,
+                }
             }).bind('change', function() {
                 table.draw(false);
             });;
+
+
             $('#positive_negative_filter_form select.positive_negative_filter').prepend(
                 '<option value="" selected></option>').select2({
                 placeholder: 'Select Positive/Negative Filter',
@@ -731,7 +753,9 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(60, session('permissions')))
 
-                    buttons: [{
+                    buttons: [
+                        // Modal
+                        {
                             text: 'Make Payment(s)',
                             className: 'btn btn-primary make_payment',
                             enabled: false,
@@ -745,10 +769,9 @@
                                 $('#make_payments #make_payments_form .wht').val(0);
 
 
-                                $('#make_payments #make_payments_form button.make').prop('disabled',
-                                    true);
-                                $('#make_payments #make_payments_form button.export_bank_order')
-                                    .prop('disabled', true);
+                                $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                                $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
+                                $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
 
                                 $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
 
@@ -770,18 +793,52 @@
                                         selected_shippers_id.push(parseInt(rowData.user_id));
                                     }
                                 });
-
                                 make_payments_table.clear().draw();
 
                                 $('#make_payments').modal('show');
                             }
                         },
+
+                        // New tab
+                        // {
+                        //     text: 'Make Payment(s)',
+                        //     className: 'btn btn-primary make_payment',
+                        //     enabled: false,
+                        //     action: function(e, dt, node, config) {
+                        //         // Reset all form fields and buttons
+                        //         $('#make_payments #make_payments_form .total_amount').val(0);
+                        //         $('#make_payments #make_payments_form .total_charges').val(0);
+                        //         $('#make_payments #make_payments_form .total_gst').val(0);
+                        //         $('#make_payments #make_payments_form .total_deductable').val(0);
+                        //         $('#make_payments #make_payments_form .total_payable').val(0);
+                        //         $('#make_payments #make_payments_form .total_hold').val(0);
+                        //         $('#make_payments #make_payments_form .wht').val(0);
+                        //
+                        //         $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                        //         $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
+                        //         $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                        //
+                        //         $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
+                        //
+                        //         var selected_shippers_id = [];
+                        //         table.rows({ selected: true }).every(function(index, element) {
+                        //             var rowData = this.data();
+                        //             if (selected_shippers_id.indexOf(parseInt(rowData.user_id)) === -1) {
+                        //                 selected_shippers_id.push(parseInt(rowData.user_id));
+                        //             }
+                        //         });
+                        //         openNewTabWithData(selected_rows,selected_shippers_id);
+                        //     }
+                        // },
+
                         {
                             extend: 'excel',
                             title: 'Make Payments',
                             className: 'btn btn-primary',
                             text: '<i class="la la-file-excel-o"></i> Excel',
-                        }, {
+                        }, 
+                        
+                        {
                             extend: 'selectAll',
                             text: 'Select All',
                             className: 'select_all',
@@ -807,7 +864,9 @@
                                     }
                                 });
                             }
-                        }, {
+                        }, 
+                        
+                        {
                             extend: 'selectNone',
                             text: 'Select None',
                             className: 'select_none',
@@ -1175,6 +1234,41 @@
                 }
             });
 
+            $('#datatable').on('click', '.dropdown-item.make_payment_new_tab', function() {
+                var table = $('#datatable').DataTable();
+                var closestRow = $(this).closest('tr');
+                var rowData = table.row(closestRow).data();
+                console.log(rowData.id,rowData.user_id);
+                openNewTabWithData([rowData.id],[rowData.user_id]);
+            });
+
+
+            function openNewTabWithData(row_id = [],selected_shippers_id = []) {
+                $('#make_payments #make_payments_form .total_amount').val(0);
+                $('#make_payments #make_payments_form .total_charges').val(0);
+                $('#make_payments #make_payments_form .total_gst').val(0);
+                $('#make_payments #make_payments_form .total_deductable').val(0);
+                $('#make_payments #make_payments_form .total_payable').val(0);
+                $('#make_payments #make_payments_form .total_hold').val(0);
+                $('#make_payments #make_payments_form .wht').val(0);
+                
+                $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
+                $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                
+                $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
+
+                var newTab = window.open('{{ route('admin.finance.make_payments.payment') }}', '_blank');
+                newTab.onload = function() {
+                    newTab.postMessage({id: row_id, selected_shipper_id: selected_shippers_id}, '*');
+                };
+
+
+
+            }
+
+
+
             $('#make_payments').on('shown.bs.modal', function() {
                 $.ajaxSetup({
                     headers: {
@@ -1226,72 +1320,77 @@
             //Make Payment Modal Datatable
             var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
                 dom: '<"pull-right"B>tr',
-                buttons: [{
-                    text: 'Export Selected',
-                    className: 'export_selected',
-                    action: function(e) {
-                        e.preventDefault();
+                buttons: [
+                    {
+                        text: 'Export Selected',
+                        className: 'export_selected',
+                        action: function(e) {
+                            e.preventDefault();
 
-                        if (selected_rows_shipments.length != 0) {
-                            window.open('{!! route('admin.finance.make_payments.shipment_export_selected') !!}?ids=' +
-                                selected_rows_shipments, '_blank');
+                            if (selected_rows_shipments.length != 0) {
+                                window.open('{!! route('admin.finance.make_payments.shipment_export_selected') !!}?ids=' +
+                                    selected_rows_shipments, '_blank');
+                            }
+                        }
+                    },
+
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action: function(e) {
+                            e.preventDefault();
+                            make_payments_table.rows().nodes().each(function(index) {
+                                var row = make_payments_table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') &&
+                                    !$(row.node()).hasClass('selected')) {
+                                    row.select();
+                                    var parent = $(row.node());
+                                    calculation(parent);
+                                }
+                            
+                            });
+
+                            shipper_limit = parseFloat(shipper_limit).toFixed(2);
+                            shipper_limit = parseFloat(shipper_limit);
+                            total_payable_amt = total_payable_amt.toFixed(2);
+
+                            if(total_payable_amt > shipper_limit)
+                            {
+                                scan_sound(2);
+                                toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                                $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                            }
+                            check_reimbursement();
+                            
+                        }
+                    },
+
+                    {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action: function(e) {
+                            e.preventDefault();
+
+                            make_payments_table.rows().nodes().each(function(index) {
+                                var row = make_payments_table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') &&
+                                    $(row.node()).hasClass('selected')) {
+                                    row.deselect();
+
+                                    var parent = $(row.node());
+
+                                    calculation(parent);
+                                }
+                            });
+                            check_reimbursement();
                         }
                     }
-                }, {
-                    extend: 'selectAll',
-                    text: 'Select All',
-                    className: 'select_all',
-                    action: function(e) {
-                        e.preventDefault();
-                      
-                        make_payments_table.rows().nodes().each(function(index) {
-                            var row = make_payments_table.row(index);
-
-                            if ($(row.node().firstChild).hasClass('select-checkbox') &&
-                                !$(row.node()).hasClass('selected')) {
-                                row.select();
-
-                                var parent = $(row.node());
-
-                                calculation(parent);
-                            }
-                           
-                        });
-
-                      shipper_limit = parseFloat(shipper_limit).toFixed(2);
-                      shipper_limit = parseFloat(shipper_limit);
-                      total_payable_amt = total_payable_amt.toFixed(2);
-
-                        if(total_payable_amt > shipper_limit)
-                        {
-                            scan_sound(2);
-                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            $('#make_payments #make_payments_form button.make').prop('disabled', true);
-                            $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
-                        }
-                        
-                    }
-                }, {
-                    extend: 'selectNone',
-                    text: 'Select None',
-                    className: 'select_none',
-                    action: function(e) {
-                        e.preventDefault();
-
-                        make_payments_table.rows().nodes().each(function(index) {
-                            var row = make_payments_table.row(index);
-
-                            if ($(row.node().firstChild).hasClass('select-checkbox') &&
-                                $(row.node()).hasClass('selected')) {
-                                row.deselect();
-
-                                var parent = $(row.node());
-
-                                calculation(parent);
-                            }
-                        });
-                    }
-                }],
+                ],
                 scrollX: true,
                 paging: false,
                 select: {
@@ -1315,7 +1414,7 @@
                 },
                 rowId: 'id',
                 order: [
-                    [2, 'desc']
+                    [3, 'desc']
                 ],
                 columns: [{
                         data: 'id',
@@ -1337,6 +1436,13 @@
                         render: function(data, type, row) {
                             return '';
                         }
+                    },
+                    {
+                        data: 'account_type_id',
+                        name: 'u.account_type_id',
+                        class: 'align-middle text-center account_type_id',
+                        orderable: false,
+                        searchable: false,
                     },
                     {
                         data: 'shipper',
@@ -1452,10 +1558,11 @@
                         '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var drop_select =
                         '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="3">All</option>' +
+                        '<option value="4">All</option>' +
                         '<option value="0">Delivered</option>' +
                         '<option value="1">Returned</option>' +
                         '<option value="2">Adjusted</option>' +
+                        '<option value="3">Arrival</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -1767,6 +1874,7 @@
                     $('#make_payments #make_payments_form .wht').val(0);
 
                     $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                    $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
                     $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
 
                     $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
@@ -1799,9 +1907,9 @@
             function calculation(parent) {
                 total_payable_amt=0;
                 var id = parseInt(parent.attr('id'));
+
                 var payable = parent.children('td.payable').html();
                 var shipper_id = parent.children('td.shipper_id').html();
-
                 var index = $.inArray(id, selected_rows_shipments);
 
                 var total_amount_selector = $('#make_payments #make_payments_form .total_amount');
@@ -1916,6 +2024,7 @@
                     total_hold_selector.val(parseFloat(total_hold).toFixed(2));
 
                     $('#make_payments #make_payments_form button.make').prop('disabled', false);
+                    $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
                     $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
 
                     //if total payable is grate than 0 it enable make and export bank order button
@@ -1927,6 +2036,7 @@
                             if (isAnyNegative) {
                                 $('#make_payments #make_payments_form button.make').prop('disabled', true);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                                $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
                             } else {
                                 $('#make_payments #make_payments_form button.make').prop('disabled', false);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
@@ -1940,7 +2050,7 @@
                     }
 
                 } else {
-                  
+
                     total_amount_selector.val(0);
                     total_charges_selector.val(0);
                     total_gst_selector.val(0);
@@ -1950,7 +2060,9 @@
                     total_hold_selector.val(parseFloat(initial_total_hold).toFixed(2));
 
                     $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                    $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
                     $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+
                 }
 
                 $('#make_payments #make_payments_form .pending_payment_shipment_ids').val(selected_rows_shipments);
@@ -1993,11 +2105,9 @@
             }
 
             $('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
-                
                 var parent = $(this).parent('tr');
                 var selected_id = $(this).parent('tr').attr('id');
                 var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
-               
                 if (con_id) {
                     var count = 0;
                     make_payments_table.rows().nodes().each(function(index) {
@@ -2026,7 +2136,6 @@
                         }
 
                     });
-                    
                     if(total_payable_amt > shipper_limit)
                      {
                          scan_sound(2);
@@ -2036,7 +2145,6 @@
                     }
 
                 } else {
-                    
                     calculation(parent);
                      if(total_payable_amt > shipper_limit)
                      {
@@ -2046,8 +2154,43 @@
                          $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                     }
                 }
-
+                check_reimbursement();
             });
+
+            function check_reimbursement(){
+                setTimeout(function() {
+                    var reimbursement_check = false;
+                    var make_invoice = true;
+                    var rows_selected = false;
+                    make_payments_table.rows().nodes().each(function(index) {
+                        var row2 = make_payments_table.row(index);
+
+                        if ($(row2.node().firstChild).hasClass('select-checkbox')) {
+                            if($(row2.node()).hasClass('selected')) {
+                                rows_selected = true;
+                                var parent = $(row2.node());
+                                if (parent.children('td.account_type_id').html() == 'Reimbursement') {
+                                    reimbursement_check = true;
+                                }
+                                if (parseFloat(parent.children('td.payable').html()) >= 0) {
+                                    make_invoice = false;
+                                }
+                            }
+                        }
+
+                    });
+                    if(!rows_selected){
+                        make_invoice = false;
+                    }
+                    if(reimbursement_check || !make_invoice){
+                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', true);
+                    }else{
+                        $('#make_payments #make_payments_form button.make_invoice').prop('disabled', false);
+                    }
+
+                }, 200);
+
+            }
 
             var shipments_array = [];
 
@@ -2313,6 +2456,7 @@
                     });
             }
 
+
             $('#star_shippers_filter').on('click', function() {
                 $('#star_shippers_filter').val(1);
                 table.draw(true);
@@ -2354,5 +2498,51 @@
 			});
 
         });
+
+        function verify_make_invoice_payments() {
+
+            swal({
+                title: 'Are You Sure?',
+                content: content,
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function(confirm) {
+                if (confirm) {
+                    $.ajax({
+                        url: '{!! route('admin.finance.make_payments.invoice') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'pending_payment_shipment_ids': $('#make_payments #make_payments_form .pending_payment_shipment_ids').val()
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status == 1){
+                            toastr.success("Invoice Generated", 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }else{
+                            toastr.error("Error!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+            });
+
+
+        }
     </script>
 @endsection

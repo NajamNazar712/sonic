@@ -28,6 +28,7 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\ServiceList;
 use App\Http\Models\StarShipper;
+use App\Http\Models\SpecifiedShipper;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Notification;
 use App\Http\Models\Shipper\User;
@@ -8687,6 +8688,16 @@ class GlobalSettingsController extends Controller
             ->get();
         return view('admin.settings.star_shippers.index')->with(['shippers' => $shippers]);
     }
+    
+    public function aListShippersIndex()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 805);
+        $shippers = User::where('status', '=', 3)
+            ->where('blacklist', 0)
+            //->whereNull('disable_at')
+            ->get();
+        return view('admin.settings.alist_shippers.index')->with(['shippers' => $shippers]);
+    }
 
     public function star_shippers_list()
     {
@@ -8702,6 +8713,44 @@ class GlobalSettingsController extends Controller
                 }
             })
             ->addColumn('action', function ($star_shippers) {
+                if (session('role_id') == 1 || count(array_intersect([1007], session('permissions'))) !== 0) {
+
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    if (session('role_id') == 1 || in_array(1007, session('permissions'))) {
+                        if ($star_shippers->status == 1) {
+
+                            $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        } else {
+                            $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        }
+                    }
+
+                    $dropdown .= '</div></div>';
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            });
+        return $datatables->make(true);
+    }
+    
+    public function aListShipperView()
+    {
+        $alistShipper = SpecifiedShipper::join('users as u', 'specified_shippers.user_id', '=', 'u.id')
+            ->select('u.name as shipper_name', 'specified_shippers.id as id', 'specified_shippers.status as status', 'specified_shippers.created_at as created_at');
+
+        $datatables = Datatables::of($alistShipper)
+            ->editColumn('status', function ($alistShipper) {
+                if ($alistShipper->status == 1) {
+                    return 'Enable';
+                } else {
+                    return 'Disable';
+                }
+            })
+            ->addColumn('action', function ($alistShipper) {
                 if (session('role_id') == 1 || count(array_intersect([848], session('permissions'))) !== 0) {
 
                     $dropdown = '<div class="btn-group">
@@ -8709,7 +8758,7 @@ class GlobalSettingsController extends Controller
                     <div class="dropdown-menu dropdown-menu-sm">
                     ';
                     if (session('role_id') == 1 || in_array(848, session('permissions'))) {
-                        if ($star_shippers->status == 1) {
+                        if ($alistShipper->status == 1) {
 
                             $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                         } else {
@@ -8728,13 +8777,16 @@ class GlobalSettingsController extends Controller
 
     public function star_shippers_add(Request $request)
     {
+        $Model = self::ModelName($request);
+       
         $shipper_id = $request->star_shipper_id;
+       
         if (!empty($shipper_id)) {
-            $shipper_exist = StarShipper::where('user_id', $shipper_id);
+            $shipper_exist = $Model::where('user_id', $shipper_id);
             if ($shipper_exist->exists()) {
                 return redirect()->back()->with('error', 'Already Exist !');
             } else {
-                $new_shipper = new StarShipper();
+                $new_shipper = new $Model();
                 $new_shipper->user_id = $shipper_id;
                 $new_shipper->add_by = $shipper_id;
                 $new_shipper->save();
@@ -8745,14 +8797,18 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'Shipper Required !');
         }
     }
+    
 
     public function star_shippers_enable_disable(Request $request)
     {
-        $star_shipper = StarShipper::find($request->id);
 
+        $Model = self::ModelName($request);
+        
+        $star_shipper = $Model::find($request->id);
+       
         if ($star_shipper->status == 1) {
             $star_shipper->status = 0;
-
+           
             $star_shipper->save();
             return redirect()->back()->with('success', 'Shipper Disabled !');
         } else {
@@ -8761,6 +8817,17 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('success', 'Shipper Enabled !');
         }
     }
+
+    static function ModelName($data){
+        // Check condition on the shipper type is specified Shipper
+        if ($data->shipper_type > 1) {
+            $shipperModel = 'App\Http\Models\SpecifiedShipper';
+        } else {
+            $shipperModel = 'App\Http\Models\StarShipper';
+        }
+        return $shipperModel;
+    }
+    
 
     public function auto_delivery_note_verification_index()
     {

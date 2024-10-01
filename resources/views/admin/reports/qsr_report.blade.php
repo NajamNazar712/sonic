@@ -15,13 +15,10 @@
                 <div class="row mb-2 justify-content-start">
 
                     <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
+                            <fieldset class="form-group">
+                                <select name="search_shipper[]" id="search_shippers" class="form-control select2" multiple required data-rule-required="true" data-msg-required="This field is required">
+                                </select>
+                            </fieldset>
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
@@ -222,6 +219,7 @@
                         <th class="border-primary border-darken-1">Last Location Screen Name</th>
                         <th class="border-primary border-darken-1">Sub Hub</th>
                         <th class="border-primary border-darken-1">Last Location Updated At</th>
+                        <th class="border-primary border-darken-1">Entry Method</th>
 
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
@@ -340,6 +338,8 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
+
+
     <script type="text/javascript">
         $(document).ready(function () {
             $('#search_shipment_status').prepend('<option value="" selected="selected"></option>').select2({
@@ -349,9 +349,26 @@
             });
             $('#search_shippers').select2({
                 width:'100%',
-                placeholder:"Select Shipper(s)",
+                placeholder:"Select Shipper",
                 allowClear:true,
-                minimumInputLength: 3
+                multiple: true,
+                minimumInputLength: 2,
+                ajax: {
+                    dataType: 'json',
+                    url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                            sub_segment_select : $('#sub_segment_select').val()
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    delay: 700,
+                }
             });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
@@ -700,6 +717,7 @@
                     {data: 'last_location_screen_location_name', name: 'shipment_scanning_screen_locations.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name',text:'Last Location Screen Location Name',value:'last_location_screen_location_name',download:true},
                     {data: 'ca_scanning_last_location_name', name: 'ca_scanning_last_location_name.name', as:'ca_scanning_last_location_name', class: 'align-middle ca_scanning_last_location_name',text:'Sub Hub',value:'ca_scanning_last_location_name',download:true},
                     {data: 'last_location_updated_at', name: 'ssjal_last_location.updated_at', as:'last_location_updated_at', class: 'align-middle last_location_updated_at',text:'Last Location Updated At',value:'last_location_updated_at',download:true},
+                    {data: 'entry_method', name: 'ssjal_last_location.entry_method', as:'entry_method', class: 'align-middle entry_method',text:'Entry Method',value:'entry_method',download:true},
 
                     {data: 'reason', name: 'ssr.name', as:'reason', class: 'align-middle reason',text:'Reason',value:'reason',download:true},
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks',text:'Remarks',value:'remarks',download:true},
@@ -799,24 +817,24 @@
 
             var sub_segment_select = $('#sub_segment_select');
             var shippers_select = $('#search_shippers');
-            sub_segment_select.on('change', function(){
-                var sub_segment_value = sub_segment_select.val();
-                $.ajax({
-                    url: "{{ route('admin.reports.qsr.updated_shippers_list') }}",
-                    data: {
-                        sub_segment_value
-                    },
-                    success: function (response) {
-                        var shippers = response.data;
-                        shippers_select.empty();
-                        shippers.forEach(function(shipper) {
-                            var newOption = new Option(shipper.name, shipper.id, false, false);
-                            shippers_select.append(newOption);
-                        });
-                        shippers_select.trigger('change');
-                    }
-                });
-            });
+            {{--sub_segment_select.on('change', function(){--}}
+            {{--    var sub_segment_value = sub_segment_select.val();--}}
+            {{--    $.ajax({--}}
+            {{--        url: "{{ route('admin.reports.qsr.updated_shippers_list') }}",--}}
+            {{--        data: {--}}
+            {{--            sub_segment_value--}}
+            {{--        },--}}
+            {{--        success: function (response) {--}}
+            {{--            var shippers = response.data;--}}
+            {{--            shippers_select.empty();--}}
+            {{--            shippers.forEach(function(shipper) {--}}
+            {{--                var newOption = new Option(shipper.name, shipper.id, false, false);--}}
+            {{--                shippers_select.append(newOption);--}}
+            {{--            });--}}
+            {{--            shippers_select.trigger('change');--}}
+            {{--        }--}}
+            {{--    });--}}
+            {{--});--}}
         });
 
     </script>
