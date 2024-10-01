@@ -203,6 +203,16 @@ class AdminShipmentHandoverController extends Controller
 
           $shipment = $shipment->first();
           $shipment_pieces = $shipment->pieces;
+
+          $lost_shipments = ShipmentsJourney::where('shipment_id', $shipment->id)
+            ->orderBy('created_at', 'desc')
+            ->select('shipper_status_id')
+            ->first();
+
+          if ($lost_shipments->shipper_status_id == 18 || $lost_shipments->shipper_status_id == 51){
+            return ['status' => 1, 'error' => 'This shipment is either lost of closed.'];
+          }
+
           $handover_shipments = HandoverShipments::where('shipment_id',$shipment->id)->whereIn('status', [1,3]);
 
           // trying to scan after partial recive
@@ -475,149 +485,129 @@ class AdminShipmentHandoverController extends Controller
     }
 
     public function handover_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),384);
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from =  date('Y-m-d 00:00:01',strtotime($request->get('search_date_from')));
-            $to = date('Y-m-d 23:59:59',strtotime($request->get('search_date_to')));
-        }else{
-            $date = date('Y-m-d');
-            $from = date('Y-m-d 00:00:01',strtotime($date.'-6 month'));
-            $to = date('Y-m-d 23:59:59',strtotime($date));
-        }
-
-          $normal_status_ids = [
-          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
-          11, 12, 13, 14, 15, 17, 19, 49, 
-          50, 52, 53, 54, 55, 56,
-          58, 59, 61, 62, 65, 67, 68
-        ];
-
-        $return_status_ids = [
-          /* 18, */ 20, 21, 22, 23, 24, 25, 26, 
-          27, 28, 29, 30, 31, 32, 33, 34,
-          35, 36, 37, 38, 44, 45, 46, 47,
-          48, /* 51, */ 56, 57
-        ];
-
-        $normal_status_ids_str = implode(',', $normal_status_ids);
-        $return_status_ids_str = implode(',', $return_status_ids);
-
-        $handover_list = Handover::join('cities as c','c.id','=','handovers.hub')
-        ->leftjoin('admins as a', function ($join) {
-            $join->on('a.id',   '=', 'handovers.created_by')
-            ->where('a.role_id', '!=' , 1);
-          })
-        ->leftjoin('admins as ad', function ($join) {
-          $join->on('ad.id',   '=', 'handovers.received_by')
-          ->where('ad.role_id', '!=' ,1);
+      if ($request->get('excel') && $request->get('excel') == true) {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 384);
+    }
+    
+    if ($request->get('search_date_from') && $request->get('search_date_to')) {
+        $from =  date('Y-m-d 00:00:01', strtotime($request->get('search_date_from')));
+        $to = date('Y-m-d 23:59:59', strtotime($request->get('search_date_to')));
+    } else {
+        $date = date('Y-m-d');
+        $from = date('Y-m-d 00:00:01', strtotime($date . '-6 month'));
+        $to = date('Y-m-d 23:59:59', strtotime($date));
+    }
+    
+    $normal_status_ids = [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+        11, 12, 13, 14, 15, 17, 19, 49,
+        50, 52, 53, 54, 55, 56,
+        58, 59, 61, 62, 65, 67, 68
+    ];
+    
+    $return_status_ids = [
+        20, 21, 22, 23, 24, 25, 26,
+        27, 28, 29, 30, 31, 32, 33, 34,
+        35, 36, 37, 38, 44, 45, 46, 47,
+        48, 56, 57
+    ];
+    
+    $normal_status_ids_str = implode(',', $normal_status_ids);
+    $return_status_ids_str = implode(',', $return_status_ids);
+    
+    $handover_list = Handover::join('cities as c', 'c.id', '=', 'handovers.hub')
+        ->leftJoin('admins as a', function ($join) {
+            $join->on('a.id', '=', 'handovers.created_by')
+                ->where('a.role_id', '!=', 1);
         })
-      
-        ->join('handover_statuses as hs','hs.id','=','handovers.status_id')
-        ->join('handover_responsibilities as hr','hr.id','=','handovers.from')
-        ->join('handover_responsibilities as hor','hor.id','=','handovers.to')
-        ->join('handover_shipments as hss','hss.handover_id','=','handovers.id')
-        ->join('shipments as s','s.id','=','hss.shipment_id')
-        ->leftjoin('city_areas as c_from', function ($join) {
-            $join->on('c_from.id', '=', 'hr.city_area_id');
-                // ->where('c_from.default', 1);
+        ->leftJoin('admins as ad', function ($join) {
+            $join->on('ad.id', '=', 'handovers.received_by')
+                ->where('ad.role_id', '!=', 1);
         })
-        ->leftjoin('city_areas as c_to', function ($join) {
-            $join->on('c_to.id',   '=', 'hor.city_area_id');
-                // ->where('c_to.default', 1);
+        ->join('handover_statuses as hs', 'hs.id', '=', 'handovers.status_id')
+        ->join('handover_responsibilities as hr', 'hr.id', '=', 'handovers.from')
+        ->join('handover_responsibilities as hor', 'hor.id', '=', 'handovers.to')
+        ->join('handover_shipments as hss', 'hss.handover_id', '=', 'handovers.id')
+        ->join('shipments as s', 's.id', '=', 'hss.shipment_id')
+        ->leftJoin('city_areas as c_from', 'c_from.id', '=', 'hr.city_area_id')
+        ->leftJoin('city_areas as c_to', 'c_to.id', '=', 'hor.city_area_id')
+        ->leftJoin('handover_shipments_journeys as hsj_f', function ($join) {
+            $join->on('hsj_f.handover_id', '=', 'handovers.id')
+                ->where('hsj_f.id', '=', DB::connection('reports')->raw('(select max(id) from handover_shipments_journeys where handover_shipments_journeys.handover_id = handovers.id and status = 1)'));
         })
-
-        ->leftjoin('handover_shipments_journeys as hsj_f', function ($join) {
-          $join->on('hsj_f.handover_id', '=', 'handovers.id')
-              ->where(
-                  'hsj_f.id',
-                  '=',
-                  DB::connection('reports')->raw('(select max(id) from handover_shipments_journeys where handover_shipments_journeys.handover_id = handovers.id and status = 1)')
-              );
+        ->leftJoin('handover_shipments_journeys as hsj_r', function ($join) {
+            $join->on('hsj_r.handover_id', '=', 'handovers.id')
+                ->where('hsj_r.id', '=', DB::connection('reports')->raw('(select max(id) from handover_shipments_journeys where handover_shipments_journeys.handover_id = handovers.id and status = 2)'));
         })
-        ->leftjoin('handover_shipments_journeys as hsj_r', function ($join) {
-          $join->on('hsj_r.handover_id', '=', 'handovers.id')
-              ->where(
-                  'hsj_r.id',
-                  '=',
-                  DB::connection('reports')->raw('(select max(id) from handover_shipments_journeys where handover_shipments_journeys.handover_id = handovers.id and status = 2)')
-              );
+        ->leftJoin('shipment_scanning_journeys as ssj_hss_f', function ($join) {
+            $join->on('ssj_hss_f.shipment_id', '=', 'hsj_f.shipment_id')
+                ->where('ssj_hss_f.screen_location_id', '=', 26)
+                ->whereRaw('ssj_hss_f.id = (select max(id) from shipment_scanning_journeys where shipment_scanning_journeys.updated_at <= hsj_f.updated_at AND shipment_scanning_journeys.shipment_id = hsj_f.shipment_id)');
         })
-
-      ->leftJoin('shipment_scanning_journeys as ssj_hss_f', function ($join) {
-          $join->on('ssj_hss_f.shipment_id', '=', 'hsj_f.shipment_id')
-               ->where('ssj_hss_f.screen_location_id', '=', 26)
-               ->whereRaw('ssj_hss_f.id = (
-                select max(id) 
-                from shipment_scanning_journeys 
-                where shipment_scanning_journeys.updated_at <= hsj_f.updated_at 
-                AND shipment_scanning_journeys.shipment_id = hsj_f.shipment_id
-            )');
+        ->leftJoin('shipment_scanning_journeys as ssj_hss_r', function ($join) {
+            $join->on('ssj_hss_r.shipment_id', '=', 'hsj_r.shipment_id')
+                ->where('ssj_hss_r.screen_location_id', '=', 27)
+                ->whereRaw('ssj_hss_r.id = (select max(id) from shipment_scanning_journeys where shipment_scanning_journeys.updated_at <= hsj_r.updated_at AND shipment_scanning_journeys.shipment_id = hsj_r.shipment_id)');
         })
-      ->leftJoin('shipment_scanning_journeys as ssj_hss_r', function ($join) {
-          $join->on('ssj_hss_r.shipment_id', '=', 'hsj_r.shipment_id')
-               ->where('ssj_hss_r.screen_location_id', '=', 27)
-               ->whereRaw('ssj_hss_r.id = (
-                select max(id) 
-                from shipment_scanning_journeys 
-                where shipment_scanning_journeys.updated_at <= hsj_f.updated_at 
-                AND shipment_scanning_journeys.shipment_id = hsj_r.shipment_id
-            )');
-            
-      })
-      ->leftJoin('shipment_scanning_journey_area_logs as ssj_f', 'ssj_f.shipment_scanning_journey_id', '=', 'ssj_hss_f.id')
-      ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
-
-      ->leftJoin('city_areas as caf', 'caf.id', '=', 'ssj_f.area_id')
-      ->leftJoin('city_areas as car', 'car.id', '=', 'ssj_r.area_id')
-
-      ->leftJoin('handover_shipments', 'handover_shipments.handover_id', '=', 'handovers.id')
-      // ->leftJoin(DB::raw('(SELECT MAX(id) as id, shipment_id, shipper_status_id 
-      //                         FROM shipments_journey 
-      //                         GROUP BY shipment_id) as latest_journey'),
-      //                   'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
-      ->leftJoin(DB::raw('(
-        SELECT sj.id, sj.shipment_id, sj.shipper_status_id
-        FROM shipments_journey sj
-        JOIN (
-            SELECT shipment_id, MAX(created_at) as max_created_at
-            FROM shipments_journey
-            GROUP BY shipment_id
-        ) latest_journey 
-        ON sj.shipment_id = latest_journey.shipment_id 
-        AND sj.created_at = latest_journey.max_created_at
-      ) as latest_journey'), 
-      'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
-
-      ->leftJoin('excess_handover_shipments', function($join) {
-        $join->on('excess_handover_shipments.handover_id', '=', 'handovers.id')
-          ->where('excess_handover_shipments.excess_shipment', '=', 1);
-      })    
-
-        ->select(['handovers.id as handover_id','a.name as created_by','a.id as created_by_id','ad.name as received_by','ad.id as received_by_id',
-        'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
-        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
-        'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name',
-        'handovers.from_dept_area_desg as from_dept_area_desg','handovers.to_dept_area_desg as to_dept_area_desg','handovers.received_at','handovers.created_at',
-        DB::raw('(select shipments - received_shipments from handovers where handovers.id= hss.handover_id ) as remaining'),
-        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area', 'ssj_f.location_status as forward_location_status','ssj_r.location_status as received_location_status','caf.name as forwarded_area_name', 'car.name as received_area_name',
-        'handovers.bag_number as bag_number',
-        DB::raw("
+        ->leftJoin('shipment_scanning_journey_area_logs as ssj_f', 'ssj_f.shipment_scanning_journey_id', '=', 'ssj_hss_f.id')
+        ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
+        ->leftJoin('city_areas as caf', 'caf.id', '=', 'ssj_f.area_id')
+        ->leftJoin('city_areas as car', 'car.id', '=', 'ssj_r.area_id')
+        ->leftJoin('handover_shipments', 'handover_shipments.handover_id', '=', 'handovers.id')
+        ->leftJoin(DB::raw('(
+            SELECT sj.id, sj.shipment_id, sj.shipper_status_id
+            FROM shipments_journey sj
+            JOIN (
+                SELECT shipment_id, MAX(created_at) as max_created_at
+                FROM shipments_journey
+                GROUP BY shipment_id
+            ) latest_journey 
+            ON sj.shipment_id = latest_journey.shipment_id 
+            AND sj.created_at = latest_journey.max_created_at
+          ) as latest_journey'), 'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
+        ->leftJoin('excess_handover_shipments', function ($join) {
+            $join->on('excess_handover_shipments.handover_id', '=', 'handovers.id')
+                ->where('excess_handover_shipments.excess_shipment', '=', 1);
+        })
+        ->select([
+            'handovers.id as handover_id', 'a.name as created_by', 'a.id as created_by_id',
+            'ad.name as received_by', 'ad.id as received_by_id',
+            'hr.admin_id as from_admin_id', 'hor.admin_id as to_admin_id', 'c.name as hub',
+            'handovers.shipments as shipment_count', 'handovers.shipments as total_shipments', 'hs.name as status',
+            'handovers.received as received_shipments', 'hr.name as from_name', 'hor.name as to_name',
+            'handovers.from_dept_area_desg as from_dept_area_desg', 'handovers.to_dept_area_desg as to_dept_area_desg',
+            'handovers.received_at', 'handovers.created_at',
+            DB::raw('(select shipments - received_shipments from handovers where handovers.id = hss.handover_id) as remaining'),
+            DB::raw('SUM(s.pieces) as shipment_pieces'), 'c_from.name as from_area', 'c_to.name as to_area',
+            'ssj_f.location_status as forward_location_status', 'ssj_r.location_status as received_location_status',
+            'caf.name as forwarded_area_name', 'car.name as received_area_name',
+            'handovers.bag_number as bag_number',
+            DB::raw("
                 CASE 
                     WHEN latest_journey.shipper_status_id IN ($normal_status_ids_str) THEN 'Normal'
                     WHEN latest_journey.shipper_status_id IN ($return_status_ids_str) THEN 'Return'
                     ELSE 'Unknown'
                 END as bag_type
-            "), 
+            "),
             'excess_handover_shipments.shipment_ids as excess_shipments'
-       
-      ])
-      ->whereBetween('handovers.created_at', [$from,$to])
-      ->orderBy('handovers.id', 'DESC')
-      ->groupBy('handovers.id');
-
+        ]);
+    
+    if ($tracking_number = $request->get('search_tracking')) {
+        // $handover_list->join('shipments_journey as sjl', function ($join) {
+        //     $join->on('sjl.shipment_id', '=', 's.id')
+        //         ->where(
+        //             'sjl.id',
+        //             '=',
+        //             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id ))')
+        //         );
+        // })
+        $handover_list->whereNotIn('latest_journey.shipper_status_id', [18, 51])
+        ->where('s.tracking_number', $tracking_number);  // Replaces HAVING clause with WHERE
+    }
+    $handover_list->whereBetween('handovers.created_at', [$from, $to])
+        ->orderBy('handovers.id', 'DESC')
+        ->groupBy('handovers.id');
+    
         $datatable = Datatables::of($handover_list)
             ->addColumn('handover_id_padded', function ($handover) {
                 return str_pad($handover->handover_id, 6, '0', STR_PAD_LEFT);
@@ -726,9 +716,8 @@ class AdminShipmentHandoverController extends Controller
           return $received_area_name . ' | ' . $received_location_status;
         });
 
-        if ($tracking_number = $request->get('search_tracking')) {
-            $datatable->where('s.tracking_number', '=', $tracking_number);
-        }
+    
+
         
         if ($hub = $request->get('search_hub')) {
             $datatable->where('handovers.hub', '=', $hub);
@@ -1389,6 +1378,10 @@ class AdminShipmentHandoverController extends Controller
       ->latest('created_at')
       ->select('shipper_status_id')
       ->first();
+
+      if ($shipment_journey && ($shipment_journey->shipper_status_id == 18 || $shipment_journey->shipper_status_id == 51)){
+        return ['status' => 1, 'error' => 'This shipment is related to lost or case close'];
+      }
 
       if ($shipment_journey && !in_array($shipment_journey->shipper_status_id, $allowed_status_ids)) {
         return ['status' => 1, 'error' => 'Shipment type is not correct.'];
