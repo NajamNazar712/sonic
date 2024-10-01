@@ -36,9 +36,6 @@
                                 <fieldset class="form-group">
                                     {{-- <input type="text" name="search_shipper[]" id="search_shipper" class="form-control shipper_name" placeholder="Shipper Name" multiple> --}}
                                     <select name="search_shipper[]" id="search_shipper" class="form-control select2"  multiple>
-                                        @foreach($shippers as $shipper)
-                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                        @endforeach
                                     </select>
                                 </fieldset>
                             </div>
@@ -1115,7 +1112,23 @@
             width:'100%',
             placeholder:"Select Shipper",
             allowClear:true,
-            multiple: true
+            multiple: true,
+            minimumInputLength: 2,
+            ajax: {
+                dataType: 'json',
+                url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'pending']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                delay: 700,
+            }
          });
 
         $('#payment_cycles').prepend('<option value="" selected="selected"></option>').select2({
@@ -1752,7 +1765,7 @@
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
-                {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress'},
+                {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress', orderable: false, searchable: false},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
                rowCallback: function(row, data, index) {
@@ -1805,7 +1818,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.select') || $(header).is('.action') || $(header).is('.serial_number') || $(header).is('.rate_status') || $(header).is('.duplicate') || $(header).is('.international_rate_status') || $(header).is('.international_rejected_reason')) {
+                    if ($(header).is('.select') || $(header).is('.action') || $(header).is('.serial_number') || $(header).is('.rate_status') || $(header).is('.duplicate') || $(header).is('.international_rate_status') || $(header).is('.international_rejected_reason') || $(header).is('.lead_progress')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))

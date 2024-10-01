@@ -76,6 +76,11 @@ class AdminLogisticBookingController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 792);
         }
+        if ($request->get('logistic_from_date') && $request->get('logistic_to_date')) {
+            $from = $request->get('logistic_from_date');
+            $to = $request->get('logistic_to_date');
+        }
+
         $hub_ids=session('hubs');
         $city_ids=City::whereIn('hub_id',$hub_ids);
         if($city_ids->exists())
@@ -95,6 +100,9 @@ class AdminLogisticBookingController extends Controller
         if (session('role_id') != 1)
         {
             $logistic_bookings = $logistic_bookings->whereIn('trax_logistic_bookings.origin_id',$city_ids);
+        }
+        if ($request->get('logistic_from_date') && $request->get('logistic_to_date')) {
+            $logistic_bookings = $logistic_bookings->whereBetween('trax_logistic_bookings.created_at', [$from, $to]);
         }
         $datatables = Datatables::of($logistic_bookings)
             ->addColumn('action',function ($logistic_bookings){
@@ -564,7 +572,7 @@ class AdminLogisticBookingController extends Controller
                 }),
             ],
             'insurance_item_code'=>['max:255'],
-            'shipper_reference'=>['string','max:255']
+            'shipper_reference'=>['nullable','max:255']
         ]);
         if($validate->fails())
         {

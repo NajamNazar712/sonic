@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admins\DeliveryController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
@@ -12,6 +13,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipperShipmentsSubscription;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Request;
 
 class outForDeliveryJourney extends Seeder
 {
@@ -20,18 +22,34 @@ class outForDeliveryJourney extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(Request $request)
     {
         //
         $shipmentId = [
-            766375134663, 766375134035, 766375130869, 766375130825, 766375130783, 766375129918, 766375128288, 766375124220, 766375121810, 766375121787, 20220241131127, 20220241128541, 20220241126944, 20220241113934, 20220241105973, 20220241103641, 20220241094304, 20220241093987, 20220241091963, 20220241086816, 20220241076579, 20220241053874, 20220241002578, 152991395085
+            22617440980487,
+            22320241010259,
+            22317441500424,
             ];
-        echo count($shipmentId);
+        
         if ($shipmentId) {
-            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
+            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id', 5)->get();
+            echo count($shipmentId);
+            $serial = 53; 
 
             foreach ($shipmentId as $shipment) {
+
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
+                if(!$deliveryNoteId){
+                    $deliveryNoteId =  new DeliveryNoteShipment();
+                    $deliveryNoteId->delivery_note_id = 2333515;
+                    $deliveryNoteId->status = 1;
+                    $deliveryNoteId->shipment_id = $shipment->id;
+                    $deliveryNoteId->notification = 1;
+                    $deliveryNoteId->rider_information = 1;
+                    $deliveryNoteId->ordering = $serial;
+                    $deliveryNoteId->save();
+                    $serial++;
+                }
                 $delivertNote   = DeliveryNote::find($deliveryNoteId->delivery_note_id);
                 
                 if($delivertNote->request_note_id){

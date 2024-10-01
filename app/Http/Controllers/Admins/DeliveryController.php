@@ -127,6 +127,7 @@ use App\Http\Models\Admin\StationDepositeNoteActionLog;
 use App\Http\Traits\RvTrait;
 use App\Jobs\ProcessRvShipmentTicket;
 use App\RvShipmentTicket;
+use GuzzleHttp\Client;
 
 class DeliveryController extends Controller
 {
@@ -3982,7 +3983,8 @@ class DeliveryController extends Controller
 
                                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $shipper_status_id]);
                                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                                            } else if ($shipper_status_id == 20) {
+                                            }
+                                            else if ($shipper_status_id == 20) {
                                                 $parcel = Shipment::find($shipment);
 
                                                 if (!$parcel->packaging_material_request) {
@@ -4027,14 +4029,16 @@ class DeliveryController extends Controller
                                                         //                                                        }
                                                     }
                                                 }
-                                            } else if ($shipper_status_id == 56) {
+                                            }
+                                            else if ($shipper_status_id == 56) {
                                                 $parcel = Shipment::find($shipment);
                                                 if ($parcel->booking_type_id == 2) {
                                                     ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                     Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 56, 'consignee_status_id' => 56]);
                                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                                 }
-                                            } else if (in_array($shipper_status_id, $delivered_status_array)) {
+                                            }
+                                            else if (in_array($shipper_status_id, $delivered_status_array)) {
                                                 $parcel = Shipment::where('id', $shipment)->first();
                                                 if ($parcel->booking_type_id == 2) {
                                                     //                                                ShipmentsJourneyController::add($shipment, 30, 30, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
@@ -4161,7 +4165,6 @@ class DeliveryController extends Controller
                                     } //main if condition
 
                                 } else {
-
                                     $parcel = Shipment::find($shipment);
                                     if ($verification == 1) {
                                         if ($parcel->booking_type_id == 2) {
@@ -9001,7 +9004,6 @@ class DeliveryController extends Controller
 
     public function add_shipments_in_receive_deliveries(Request $request)
     {
-
         $shipment_id = $request->shipment_id;
 
         $delivery_note_id = $request->delivery_note_id;
@@ -9117,6 +9119,7 @@ class DeliveryController extends Controller
             return response()->json(['status' => 1, 'error' => 'Shipments Not Found']);
         }
     }
+    
 
     public function operation_riders(Request $request)
     {

@@ -38,9 +38,6 @@
                                 <div class="col-4">
                                     <fieldset class="form-group">
                                         <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple>
-                                            @foreach($shippers as $shipper)
-                                                <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                            @endforeach
                                         </select>
                                     </fieldset>
                                 </div>
@@ -1062,7 +1059,23 @@ function checkboxStatus() {
             width:'100%',
             placeholder:"Select Shipper",
             allowClear:true,
-            multiple: true
+            multiple: true,
+            minimumInputLength: 2,
+            ajax: {
+                dataType: 'json',
+                url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                        }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                delay: 700,
+            }
          });
 
          $('#block_disable_reason').prepend('<option value="" selected></option>').select2({
@@ -1846,6 +1859,7 @@ function checkboxStatus() {
                 var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                     '<option value="3">Enable</option>' +
                     '<option value="4">Disable</option>' +
+                    '<option value="6">Booking Paused</option>' +
                     '</select>';
                 var documents_drop_select = '<select name="documents_status_select" id="documents_status_select" class="select2 form-control">' +
                     '<option value="0">Incomplete</option>' +
@@ -2223,6 +2237,54 @@ function checkboxStatus() {
 
         });
 
+         //Pause User
+         $('body').on('click','button.pause_shipper_booking',function () {
+            var status  = "pause";
+            var id = $(this).parents('tr').attr('id');
+            swal({
+                title: 'Are You Sure?',
+                text: 'Select Yes to pause this account!',
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function (confirm) {
+                if(confirm){
+                    if(id){
+                        $.ajax({
+                            url: '{!! route('admin.accounts.status.change') !!}',
+                            method: 'POST',
+                            data: {
+                                'id':id,
+                                'status':status,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status === 1){
+                                table.draw('false');
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                    }
+                }
+            });
+        });
 
         $('#datatable').on('click', 'button.warehousing_enable', function(){
             var id = $(this).parents('tr').attr('id');
