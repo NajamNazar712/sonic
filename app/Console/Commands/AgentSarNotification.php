@@ -146,7 +146,11 @@ class AgentSarNotification extends Command
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status after refusal on call status, 
             // the system will automatically update the shipment status to "Return Confirm."
             
-            $refusal_call_shipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
+            $refusal_call_shipments = RvShipmentAssignAgent::join('shipments', function ($join) {
+                $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
+                    ->where('shipments.shipper_status_id', '=', 65);
+                })
+                ->where('rv_assign_agent_status_id', 8)
                 ->where('rv_state_id', 2)
                 ->where('updated_at', '<=', $nowSub24Hours)
                 ->get();
