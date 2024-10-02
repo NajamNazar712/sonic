@@ -475,9 +475,7 @@
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
-                                'handover': handover,
                                 'action' : window.lastAction,
-
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
