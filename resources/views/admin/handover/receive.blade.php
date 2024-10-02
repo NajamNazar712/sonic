@@ -373,8 +373,7 @@
                 bag = $(this).val();
                 bagChangeCount++;
                 table.clear().draw();
-
-                if (bagChangeCount == 0){
+                if (bagChangeCount < 2){
                     $.ajax({
                         type: "GET",
                         url:  '{!! route('admin.handover.receive.check_full_bag') !!}',

@@ -393,7 +393,18 @@ class AdminShipmentHandoverController extends Controller
                 $handover_shipments = $handover_shipments->latest()->first();
                 $handover_id = $handover_shipments->handover_id;
                 $handover_shipments->status = 2;
-                $handover_shipments->save();
+
+                $current_handover_bag = Handover::where('id', (int)$request->handover_id)
+                ->select(['id', 'bag_number'])
+                ->first();
+
+                $receving_shipment_bag = Handover::where('id', $handover_shipments->handover_id)
+                ->select(['id', 'bag_number'])
+                ->first();
+
+                if ($current_handover_bag->bag_number == $receving_shipment_bag->bag_number){
+                  $handover_shipments->save();
+                }
                 if(!in_array($handover_id, $handover_ids)){
                     $handover_ids[] = $handover_id;
                 }
