@@ -2118,30 +2118,38 @@ class APIController extends Controller
         // Normal Consignee ID Check
         Validator::extend('normal_consignee_id_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
-
+        
+            // Get the pickup address for delivery
             $pickup_address_id_for_delivery = $data['pickup_address_id'] ?? null;
             $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
-
+        
             if (!$pickup_address_for_delivery) {
+                $validator->errors()->add($attribute, 'Pickup address not found.');
                 return false;
             }
-
+        
+            // Get the delivery city
             $delivery_city = City::find($pickup_address_for_delivery->city_id);
-
+        
             if (!$delivery_city) {
+                $validator->errors()->add($attribute, 'Delivery city not found.');
                 return false;
             }
-
+        
             if (!in_array($user_id, [7762, 4758]) && !CityDelivery::where('city_id', $delivery_city->id)
                     ->where('booking_type_id', $data['service_type_id'] ?? null)
                     ->where('shipping_mode_id', $data['shipping_mode_id'] ?? null)
                     ->exists()) {
-
+        
+                $validator->errors()->add($attribute, 'Delivery is not allowed for City ID #' . $delivery_city->id . 
+                    ' with Service Type ID #' . ($data['service_type_id'] ?? 'N/A') . 
+                    ' and Shipping Mode ID #' . ($data['shipping_mode_id'] ?? 'N/A'));
                 return false;
             }
-
+        
             return true;
         });
+        
 
 
 
