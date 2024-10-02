@@ -2020,9 +2020,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('updated_shippers_list', 'Admins\AdminReportsController@updated_shippers_list')->name('updated_shippers_list');
 
         });
-        Route::prefix('rvr_reattempt')->name('rvr_reattempt.')->group(function () {
-            Route::get('', 'Admins\AdminReportsController@qsrold_index')->name('index');
-        });
         Route::prefix('qsr_old')->name('qsr_old.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsrold_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsrold_list')->name('list');
@@ -2565,9 +2562,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Route::post('udpate', 'Admins\GlobalSettingsController@delivery_revert_access_update')->name('update');
         });
 
-        Route::prefix('alist_shippers')->name('alist_shippers.')->group(function () {
-            Route::get('', 'Admins\GlobalSettingsController@show_vendors')->name('index');
-        });
 
         Route::prefix('delivery_revert_access')->name('delivery_revert_access.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@delivery_revert_access_index')->name('index');
