@@ -6,6 +6,8 @@ use App\CorporateShipmentReturnDiscountCharges;
 use App\CorporateZeroCodDiscountCharges;
 use App\HistoryShipmentReturnDiscountCharges;
 use App\HistoryZeroCodDiscountCharges;
+use App\Http\Models\CorporateWeightChargeZoneWise;
+use App\Http\Models\HistoryCorporateWeightChargeZoneWise;
 use App\PendingCorporateShipmentReturnDiscountCharges;
 use App\PendingCorporateZeroCodDiscountCharges;
 use App\PendingShipmentReturnDiscountCharges;
@@ -35,6 +37,7 @@ use App\Http\Models\RouteType;
 use App\Http\Models\PickupType;
 use App\Http\Models\RateRemark;
 use App\Http\Models\RateStatus;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\BookingType;
@@ -13550,6 +13553,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     public function rate_history_date(Request $request)
     {
+
         $user_id = $request->user_id;
         $details = array();
         if ($user_id) {
@@ -13564,13 +13568,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $details[] = $date;
                         }
                     }
+                    $compare_weight = $this->compareWeightCharges($user_id, 'weight_charges', 'history_weight_charges');
                     return response()->json(['status' => 1, 'account_type' => 1, 'details' => $details, 'user_id' => $user_id]);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'No Data Found']);
                 }
             } else {
-                    $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
-
+                $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
                 if ($old_corporate_account->exists()) {
                     $old_corporate_account_dates = $old_corporate_account->select('created_at')->groupBy('created_at')->get();
                     foreach ($old_corporate_account_dates as $date) {
@@ -13579,6 +13583,22 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $details[] = $date;
                         }
                     }
+
+                    $user = User::find($user_id);
+                    if($user->corporate_rate_type_id){
+                        if($user->corporate_rate_type_id == 1){
+                            $table1 = 'corporate_weight_charges';
+                            $table2 = 'history_corporate_weight_charges';
+                        }else if ($user->corporate_rate_type_id == 2){
+                            $table1 = CorporateWeightChargeZoneWise::class;
+                            $table2 = HistoryCorporateWeightChargeZoneWise::class;
+                        }else{
+                            $table1 = 'corporate_default_weight_charges';
+                            $table2 = 'corporate_default_history_weight_charges';
+                        }
+                    }
+
+                    $compare_weight = $this->compareWeightCharges($user_id, $table1, $table2);
                     return response()->json(['status' => 1, 'success', 'account_type' => 2, 'details' => $details, 'user_id' => $user_id]);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'No Data Found']);
@@ -15145,5 +15165,50 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
         return redirect()->back()->with('success', 'FAF Charges Status Updated');
     }
-    
+
+    public static function compareWeightCharges($user_id, $table1, $table2)
+    {
+        $existing_weight_charge = (new $table1)->getFillable();
+        $last_weight_charge_from_history = (new $table2)->getFillable();
+
+        $excludeColumns = [
+            'id',
+            'user_id',
+            'shipping_mode_id',
+            'delivery_type_id',
+            'created_at',
+            'updated_at',
+            'base'
+        ];
+
+        $existing_weight_charge_keys = array_diff($existing_weight_charge, $excludeColumns);
+        $last_weight_charge_from_history_keys = array_diff($last_weight_charge_from_history, $excludeColumns);
+
+        $existing_weight_charges = $table1::where('user_id', $user_id)->select($existing_weight_charge_keys)->get();
+        $last_weight_charges_from_history = $table2::where('user_id', $user_id)->select($last_weight_charge_from_history_keys)->get();
+
+        $is_increment = 0;
+        $is_decrement = 0;
+
+        if (count($existing_weight_charges) == count($last_weight_charges_from_history)) {
+            foreach($existing_weight_charges as $key1 => $existing_weight_charge) {
+                $existing_weight_charge = $existing_weight_charge->getAttributes();
+                $last_weight_charge_from_history = $last_weight_charges_from_history[$key1]->getAttributes();
+                if (array_sum($existing_weight_charge) > array_sum($last_weight_charge_from_history)){
+                    $is_increment++;
+                }else if (array_sum($existing_weight_charge) < array_sum($last_weight_charge_from_history)){
+                    $is_decrement++;
+                }
+            }
+        }else if (count($existing_weight_charges) > count($last_weight_charges_from_history)){
+             $is_increment++;
+        }else if(count($existing_weight_charges) < count($last_weight_charges_from_history)){
+             $is_decrement++;
+        }
+
+        return [
+            'is_increment' => $is_increment,
+            'is_decrement' => $is_decrement
+        ];
+    }
 }
