@@ -344,7 +344,7 @@
                        {{-- @method('post')--}}
                       {{--  {{ csrf_field() }}--}}
                         <input type="text" hidden id="user_id" name="user_id">
-                        <div class="col-12">
+                        <div class="col-12 d-flex">
 
                                 <select name="old_rate_date"  id="old_rate_date" class="form-control select2">
 
@@ -2537,6 +2537,35 @@ function checkboxStatus() {
                             $('#old_rate_date').append(newOption).trigger('change');
                         });
                         $('#RateHistoryModal').modal('show');
+
+                        if (data.compare_weight != '') {
+                            let text = data.compare_weight == 'green' ? '↑' :
+                                data.compare_weight == 'red' ? '↓' :
+                                    data.compare_weight == 'yellow' ? '←→' : 'Rates Added Only';
+
+                            let color = data.compare_weight == 'green' ? 'green' :
+                                data.compare_weight == 'red' ? 'red' :
+                                    data.compare_weight == 'yellow' ? 'yellow' : 'white';
+
+                            let colorSquare = $('<div></div>').addClass('color-square').css({
+                                'width': '10px',
+                                'height': '10px',
+                                'background-color': color,
+                                'border': '1px solid #2c3e50',
+                                'margin': 'auto 4px'
+                            });
+
+                            let sign = $('<div></div>').addClass('sign').css({
+                                'margin': 'auto',
+                                'margin-left': '10px'
+                            }).text(text);
+
+                            $('.col-12.d-flex .color-square').remove();
+                            $('.col-12.d-flex .sign').remove();
+                            $('.col-12.d-flex').append(sign);
+                            $('.col-12.d-flex').append(colorSquare);
+                        }
+
 
                         $('#RateHistoryModal #old_rate_date').bind('change', function () {
                             var date = $(this).val();
