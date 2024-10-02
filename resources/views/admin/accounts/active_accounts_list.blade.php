@@ -2538,34 +2538,8 @@ function checkboxStatus() {
                         });
                         $('#RateHistoryModal').modal('show');
 
-                        if (data.compare_weight != '') {
-                            let text = data.compare_weight == 'green' ? '↑' :
-                                data.compare_weight == 'red' ? '↓' :
-                                    data.compare_weight == 'yellow' ? '←→' : 'Rates Added Only';
-
-                            let color = data.compare_weight == 'green' ? 'green' :
-                                data.compare_weight == 'red' ? 'red' :
-                                    data.compare_weight == 'yellow' ? 'yellow' : 'white';
-
-                            let colorSquare = $('<div></div>').addClass('color-square').css({
-                                'width': '10px',
-                                'height': '10px',
-                                'background-color': color,
-                                'border': '1px solid #2c3e50',
-                                'margin': 'auto 4px'
-                            });
-
-                            let sign = $('<div></div>').addClass('sign').css({
-                                'margin': 'auto',
-                                'margin-left': '10px'
-                            }).text(text);
-
-                            $('.col-12.d-flex .color-square').remove();
-                            $('.col-12.d-flex .sign').remove();
-                            $('.col-12.d-flex').append(sign);
-                            $('.col-12.d-flex').append(colorSquare);
-                        }
-
+                        updateComparison(data.compare_weight, 'w');
+                        updateComparison(data.compare_fuel_surcharge, 'f');
 
                         $('#RateHistoryModal #old_rate_date').bind('change', function () {
                             var date = $(this).val();
@@ -3869,7 +3843,70 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
                 $('#ratesAdditionForm').submit()
             }
         });
-</script>
+
+        function updateComparison(dataValue, type) {
+            if (dataValue !== '') {
+                let text = '';
+                let color = '';
+                let label = type === 'w' ? 'Weight' : 'Fuel';
+
+                switch (dataValue) {
+                    case 'green':
+                        text = '↑';
+                        color = 'green';
+                        break;
+                    case 'red':
+                        text = '↓';
+                        color = 'red';
+                        break;
+                    case 'yellow':
+                        text = '←→';
+                        color = 'yellow';
+                        break;
+                    default:
+                        text = type === 'w' ? 'Rates Added Only' : 'Fuel Surcharge Added Only';
+                        color = 'white';
+                }
+
+                let labelDiv = $('<div></div>').addClass(`${type}-label label`).css({
+                    'text-align': 'center',
+                    'font-weight': 'bold',
+                    'margin-bottom': '2px',
+                    'line-height': '1.2',
+                    'font-size': '12px'
+                }).text(label);
+
+                let colorSquare = $('<div></div>').addClass(`${type}-color-square color-square`).css({
+                    'width': '10px',
+                    'height': '10px',
+                    'background-color': color,
+                    'border': '1px solid #2c3e50',
+                    'margin': '0 5px'
+                });
+
+                let sign = $('<div></div>').addClass(`${type}-sign sign`).css({
+                    'text-align': 'center'
+                }).text(text);
+
+                let rowContainer = $('<div></div>').css({
+                    'display': 'flex',
+                    'align-items': 'center',
+                    'justify-content': 'center'
+                }).append(sign).append(colorSquare);
+
+                let comparisonContainer = $('<div></div>').css({
+                    'display': 'flex',
+                    'flex-direction': 'column',
+                    'align-items': 'center',
+                    'margin': '0 10px'
+                }).append(labelDiv).append(rowContainer);
+
+                $(`.col-12.d-flex .${type}-container`).remove();
+                $('.col-12.d-flex').append(comparisonContainer.addClass(`${type}-container`));
+            }
+        }
+
+    </script>
 
 @endsection
 
