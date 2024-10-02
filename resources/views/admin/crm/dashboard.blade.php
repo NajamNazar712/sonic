@@ -4,699 +4,700 @@
 
 @section('content')
     <section>
-    <div class="app-content content">
-        <div class="content-wrapper">
-            <div class="content-header row">
-            </div>
-            <div class="content-body">
-                <h1 class="mb-1">
-                  CRM  Dashboard 
-                </h1>
-                <div class="card">
-                    <div class="card-content" aria-expanded="true">
-                        <div class="card-body">
-                            {{-- <div class="row mt-2">
-                                <div class="card col-12">
-                                    <div class="card-content collapse show">
-                                        <div class="card-body">
-                                            <form id="search_form" class="card-body card-dashboard" novalidate="novalidate">
-                                                <div class="row justify-content-center">
-                                                    <input type="hidden" name="search_request_div" id="search_request_div"
-                                                           value="">
-                                                    <div class="form-group col">
-                                                        <input type="text" name="from_date"
-                                                               class="form-control graph_date bg-primary border-primary white rounded-right"
-                                                               id="from_date" placeholder="Date From"
-                                                               data-value="{{$dates['old_date']}}" data-rule-required="true"
-                                                               data-msg-required="This field is required">
-                                                    </div>
-                                                    <div class="form-group col">
-                                                        <input type="text" name="to_date"
-                                                               class="form-control graph_date bg-primary border-primary white rounded-right"
-                                                               id="to_date" placeholder="Date To" data-value="{{$dates['current']}}"
-                                                               data-rule-required="true" data-msg-required="This field is required">
-                                                    </div>
-                                                    <div class="form-group col">
-                                                        <select name="search_origin" id="search_origin"
-                                                                class="select2 form-control">
-                                                            @foreach($cities as $city)
-                                                                <option value="{{$city->id}}">{{$city->name}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <fieldset class="form-group">
-                                                            <select name="search_destination" id="search_destination" class="form-control select2">
+        <div class="app-content content">
+            <div class="content-wrapper">
+                <div class="content-header row">
+                </div>
+                <div class="content-body">
+                    <h1 class="mb-1">
+                        CRM  Dashboard
+                    </h1>
+                    <div class="card">
+                        <div class="card-content" aria-expanded="true">
+                            <div class="card-body">
+                                {{-- <div class="row mt-2">
+                                    <div class="card col-12">
+                                        <div class="card-content collapse show">
+                                            <div class="card-body">
+                                                <form id="search_form" class="card-body card-dashboard" novalidate="novalidate">
+                                                    <div class="row justify-content-center">
+                                                        <input type="hidden" name="search_request_div" id="search_request_div"
+                                                               value="">
+                                                        <div class="form-group col">
+                                                            <input type="text" name="from_date"
+                                                                   class="form-control graph_date bg-primary border-primary white rounded-right"
+                                                                   id="from_date" placeholder="Date From"
+                                                                   data-value="{{$dates['old_date']}}" data-rule-required="true"
+                                                                   data-msg-required="This field is required">
+                                                        </div>
+                                                        <div class="form-group col">
+                                                            <input type="text" name="to_date"
+                                                                   class="form-control graph_date bg-primary border-primary white rounded-right"
+                                                                   id="to_date" placeholder="Date To" data-value="{{$dates['current']}}"
+                                                                   data-rule-required="true" data-msg-required="This field is required">
+                                                        </div>
+                                                        <div class="form-group col">
+                                                            <select name="search_origin" id="search_origin"
+                                                                    class="select2 form-control">
                                                                 @foreach($cities as $city)
                                                                     <option value="{{$city->id}}">{{$city->name}}</option>
                                                                 @endforeach
                                                             </select>
-                                                        </fieldset>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <fieldset class="form-group">
+                                                                <select name="search_destination" id="search_destination" class="form-control select2">
+                                                                    @foreach($cities as $city)
+                                                                        <option value="{{$city->id}}">{{$city->name}}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="form-group col">
+                                                            <select name="search_sale_person" id="search_sale_person"
+                                                                    class="select2 form-control">
+                                                                @foreach($sale_name as $sn)
+                                                                    <option value="{{ $sn->id }}"> {{ $sn->name }} </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-1">
+                                                            <button type="submit" class="btn round btn-primary search_button">Search <i
+                                                                        class="ft-bar-chart"></i></button>
+                                                        </div>
                                                     </div>
-                                                    <div class="form-group col">
-                                                        <select name="search_sale_person" id="search_sale_person"
-                                                                class="select2 form-control">
-                                                            @foreach($sale_name as $sn)
-                                                                <option value="{{ $sn->id }}"> {{ $sn->name }} </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-1">
-                                                        <button type="submit" class="btn round btn-primary search_button">Search <i
-                                                                    class="ft-bar-chart"></i></button>
-                                                    </div>
-                                                </div>
-                                            </form>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div> --}}
-{{--                            <form id="search_form" class="card-body card-dashboard" novalidate="novalidate">--}}
-{{--                                <div class="row mb-2 justify-content-center">--}}
-{{--                                    <input type="hidden" name="search_request_div" id="search_request_div"--}}
-{{--                                     value="">--}}
-{{--                                    <div class="col-4">--}}
-{{--                                        <fieldset class="form-group">--}}
-{{--                                            <select name="search_destination" id="search_destination" class="form-control select2">--}}
-{{--                                                @foreach($cities as $destination)--}}
-{{--                                                    <option value="{{$destination->id}}">{{$destination->name}}</option>--}}
-{{--                                                @endforeach--}}
-{{--                                            </select>--}}
-{{--                                        </fieldset>--}}
-{{--                                    </div>--}}
-{{--                --}}
-{{--                                    <div class="col-4">--}}
-{{--                                        <fieldset class="form-group">--}}
-{{--                                            --}}{{-- <select name="search_hub" id="search_hub" class="form-control select2">--}}
-{{--                                                @foreach($hubs as $hub)--}}
-{{--                                                    <option value="{{$hub->id}}">{{$hub->name}}</option>--}}
-{{--                                                @endforeach--}}
-{{--                                            </select> --}}
-{{--                                            <select name="search_origin" id="search_origin" class="select2 form-control">--}}
-{{--                                                @foreach($cities as $origin)--}}
-{{--                                                    <option value="{{$origin->id}}">{{$origin->name}}</option>--}}
-{{--                                                @endforeach--}}
-{{--                                            </select>--}}
-{{--                                        </fieldset>--}}
-{{--                                    </div>--}}
-{{--                --}}
-{{--                                    <div class="col-4">--}}
-{{--                                        <fieldset class="form-group">--}}
-{{--                                            <select name="search_zone" id="search_zone" class="form-control select2">--}}
-{{--                                                @foreach($zones as $zone)--}}
-{{--                                                    <option value="{{$zone->id}}">{{$zone->name}}</option>--}}
-{{--                                                @endforeach--}}
-{{--                                            </select>--}}
-{{--                                        </fieldset>--}}
-{{--                                    </div>--}}
-{{--                --}}
-{{--                                    <div class="col-4">--}}
-{{--                                        <fieldset class="form-group">--}}
-{{--                                            <select name="search_case_nature"  multiple="multiple" id="search_case_nature" class="form-control select2">--}}
-{{--                                                @foreach($case_natures as $case_nature)--}}
-{{--                                                    <option value="{{$case_nature->id}}">{{$case_nature->name}}</option>--}}
-{{--                                                @endforeach--}}
-{{--                                            </select>--}}
-{{--                                        </fieldset>--}}
-{{--                                    </div>--}}
-{{--                --}}
-{{--                                    <div class="col-4">--}}
-{{--                                        <fieldset class="form-group">--}}
-{{--                                            <select name="search_case_nature_type"  multiple="multiple" id="search_case_nature_type" class="form-control select2">--}}
-{{--                                                @foreach($case_nature_types as $case_nature_type)--}}
-{{--                                                    <option value="{{$case_nature_type->id}}">{{$case_nature_type->type}}</option>--}}
-{{--                                                @endforeach--}}
-{{--                                            </select>--}}
-{{--                                        </fieldset>--}}
-{{--                                    </div>--}}
-{{--                                    <div class="col-4">--}}
-{{--                                        <fieldset class="form-group">--}}
-{{--                                            <select name="search_agent" id="search_agent" class="form-control select2">--}}
-{{--                                                @foreach($agents as $agent)--}}
-{{--                                                    <option value="{{$agent->id}}">{{$agent->name}}</option>--}}
-{{--                                                @endforeach--}}
-{{--                                            </select>--}}
-{{--                                        </fieldset>--}}
-{{--                                    </div>--}}
-{{--                                    <div class="col-4">--}}
-{{--                                        <fieldset class="form-group">--}}
-{{--                                            <select name="shipment_status" id="search_shipment_status" class="form-control select2">--}}
-{{--                                                @foreach($shipment_status as $status)--}}
-{{--                                                <option value="{{$status->id}}">{{$status->name}}</option>--}}
-{{--                                                @endforeach--}}
-{{--                                            </select>--}}
-{{--                                        </fieldset>--}}
-{{--                                    </div>--}}
-{{--                                    <div class="col-4">--}}
-{{--                                        <fieldset class="form-group">--}}
-{{--                                            <select name="avg_tat" id="avg_tat" class="form-control select2">--}}
-{{--                                                @foreach($crm_request_statuses as $status)--}}
-{{--                                                <option value="{{$status->id}}">{{$status->name}}</option>--}}
-{{--                                                @endforeach--}}
-{{--                                            </select>--}}
-{{--                                        </fieldset>--}}
-{{--                                    </div>--}}
-{{--                                    <div class="col-4">--}}
-{{--                                        <fieldset class="position-relative has-icon-left">--}}
-{{--                                            <input type="text" class="form-control" placeholder="Search By Tracking Number"--}}
-{{--                                                   name="search_tracking" id="search_tracking">--}}
-{{--                                            <div class="form-control-position">--}}
-{{--                                                <i class="ft-search"></i>--}}
-{{--                                            </div>--}}
-{{--                                        </fieldset>--}}
-{{--                                    </div>--}}
-{{--    --}}{{--             --}}
-{{--                                    <div class="col-4">--}}
-{{--                                       --}}
-{{--                                    </div> --}}
-{{--                --}}
-{{--                                    --}}{{-- <div class="col-4">--}}
-{{--                                        <fieldset class="form-group">--}}
-{{--                                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">--}}
-{{--                                                @foreach($shipping_modes as $shipping_mode)--}}
-{{--                                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>--}}
-{{--                                                @endforeach--}}
-{{--                                            </select>--}}
-{{--                                        </fieldset>--}}
-{{--                                    </div>--}}
-{{--                --}}
-{{--                --}}
-{{--                                    --}}{{-- <div class="col-4">--}}
-{{--                                        <div class="form-group input-group">--}}
-{{--                                            <div class="input-group-prepend">--}}
-{{--                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
-{{--                                                <span class="la la-calendar-o"></span>--}}
-{{--                                            </span>--}}
-{{--                                            </div>--}}
-{{--                                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">--}}
-{{--                                        </div>--}}
-{{--                                    </div> --}}
-{{--                --}}
-{{--                --}}
-{{--                                    <div class="col-4">--}}
-{{--                                        <div class="form-group input-group">--}}
-{{--                                            <div class="input-group-prepend">--}}
-{{--                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
-{{--                                                <span class="la la-calendar-o"></span>--}}
-{{--                                            </span>--}}
-{{--                                            </div>--}}
-{{--                                            <input type="text" name="from_date"  class="form-control bg-primary border-primary white rounded-right"  id="from_date" placeholder="Date From" >--}}
-{{--                                        </div>--}}
-{{--                --}}
-{{--                                    </div>--}}
-{{--                --}}
-{{--                                    <div class="col-4">--}}
-{{--                                        <div class="form-group input-group">--}}
-{{--                                            <div class="input-group-prepend">--}}
-{{--                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
-{{--                                                <span class="la la-calendar-o"></span>--}}
-{{--                                            </span>--}}
-{{--                                            </div>--}}
-{{--                                            <input type="text" name="to_date"  class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" >--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                --}}
-{{--                                    <div class="col-2">--}}
-{{--                                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width search_filter_btn"><i class="la la-search"></i>--}}
-{{--                                            Search--}}
-{{--                                        </button>--}}
-{{--                                    </div>--}}
-{{--                                    --}}
-{{--                                </div>--}}
-{{--                            </form>--}}
+                                </div> --}}
+                                {{--                            <form id="search_form" class="card-body card-dashboard" novalidate="novalidate">--}}
+                                {{--                                <div class="row mb-2 justify-content-center">--}}
+                                {{--                                    <input type="hidden" name="search_request_div" id="search_request_div"--}}
+                                {{--                                     value="">--}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                        <fieldset class="form-group">--}}
+                                {{--                                            <select name="search_destination" id="search_destination" class="form-control select2">--}}
+                                {{--                                                @foreach($cities as $destination)--}}
+                                {{--                                                    <option value="{{$destination->id}}">{{$destination->name}}</option>--}}
+                                {{--                                                @endforeach--}}
+                                {{--                                            </select>--}}
+                                {{--                                        </fieldset>--}}
+                                {{--                                    </div>--}}
+                                {{--                --}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                        <fieldset class="form-group">--}}
+                                {{--                                            --}}{{-- <select name="search_hub" id="search_hub" class="form-control select2">--}}
+                                {{--                                                @foreach($hubs as $hub)--}}
+                                {{--                                                    <option value="{{$hub->id}}">{{$hub->name}}</option>--}}
+                                {{--                                                @endforeach--}}
+                                {{--                                            </select> --}}
+                                {{--                                            <select name="search_origin" id="search_origin" class="select2 form-control">--}}
+                                {{--                                                @foreach($cities as $origin)--}}
+                                {{--                                                    <option value="{{$origin->id}}">{{$origin->name}}</option>--}}
+                                {{--                                                @endforeach--}}
+                                {{--                                            </select>--}}
+                                {{--                                        </fieldset>--}}
+                                {{--                                    </div>--}}
+                                {{--                --}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                        <fieldset class="form-group">--}}
+                                {{--                                            <select name="search_zone" id="search_zone" class="form-control select2">--}}
+                                {{--                                                @foreach($zones as $zone)--}}
+                                {{--                                                    <option value="{{$zone->id}}">{{$zone->name}}</option>--}}
+                                {{--                                                @endforeach--}}
+                                {{--                                            </select>--}}
+                                {{--                                        </fieldset>--}}
+                                {{--                                    </div>--}}
+                                {{--                --}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                        <fieldset class="form-group">--}}
+                                {{--                                            <select name="search_case_nature"  multiple="multiple" id="search_case_nature" class="form-control select2">--}}
+                                {{--                                                @foreach($case_natures as $case_nature)--}}
+                                {{--                                                    <option value="{{$case_nature->id}}">{{$case_nature->name}}</option>--}}
+                                {{--                                                @endforeach--}}
+                                {{--                                            </select>--}}
+                                {{--                                        </fieldset>--}}
+                                {{--                                    </div>--}}
+                                {{--                --}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                        <fieldset class="form-group">--}}
+                                {{--                                            <select name="search_case_nature_type"  multiple="multiple" id="search_case_nature_type" class="form-control select2">--}}
+                                {{--                                                @foreach($case_nature_types as $case_nature_type)--}}
+                                {{--                                                    <option value="{{$case_nature_type->id}}">{{$case_nature_type->type}}</option>--}}
+                                {{--                                                @endforeach--}}
+                                {{--                                            </select>--}}
+                                {{--                                        </fieldset>--}}
+                                {{--                                    </div>--}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                        <fieldset class="form-group">--}}
+                                {{--                                            <select name="search_agent" id="search_agent" class="form-control select2">--}}
+                                {{--                                                @foreach($agents as $agent)--}}
+                                {{--                                                    <option value="{{$agent->id}}">{{$agent->name}}</option>--}}
+                                {{--                                                @endforeach--}}
+                                {{--                                            </select>--}}
+                                {{--                                        </fieldset>--}}
+                                {{--                                    </div>--}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                        <fieldset class="form-group">--}}
+                                {{--                                            <select name="shipment_status" id="search_shipment_status" class="form-control select2">--}}
+                                {{--                                                @foreach($shipment_status as $status)--}}
+                                {{--                                                <option value="{{$status->id}}">{{$status->name}}</option>--}}
+                                {{--                                                @endforeach--}}
+                                {{--                                            </select>--}}
+                                {{--                                        </fieldset>--}}
+                                {{--                                    </div>--}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                        <fieldset class="form-group">--}}
+                                {{--                                            <select name="avg_tat" id="avg_tat" class="form-control select2">--}}
+                                {{--                                                @foreach($crm_request_statuses as $status)--}}
+                                {{--                                                <option value="{{$status->id}}">{{$status->name}}</option>--}}
+                                {{--                                                @endforeach--}}
+                                {{--                                            </select>--}}
+                                {{--                                        </fieldset>--}}
+                                {{--                                    </div>--}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                        <fieldset class="position-relative has-icon-left">--}}
+                                {{--                                            <input type="text" class="form-control" placeholder="Search By Tracking Number"--}}
+                                {{--                                                   name="search_tracking" id="search_tracking">--}}
+                                {{--                                            <div class="form-control-position">--}}
+                                {{--                                                <i class="ft-search"></i>--}}
+                                {{--                                            </div>--}}
+                                {{--                                        </fieldset>--}}
+                                {{--                                    </div>--}}
+                                {{--    --}}{{--             --}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                       --}}
+                                {{--                                    </div> --}}
+                                {{--                --}}
+                                {{--                                    --}}{{-- <div class="col-4">--}}
+                                {{--                                        <fieldset class="form-group">--}}
+                                {{--                                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">--}}
+                                {{--                                                @foreach($shipping_modes as $shipping_mode)--}}
+                                {{--                                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>--}}
+                                {{--                                                @endforeach--}}
+                                {{--                                            </select>--}}
+                                {{--                                        </fieldset>--}}
+                                {{--                                    </div>--}}
+                                {{--                --}}
+                                {{--                --}}
+                                {{--                                    --}}{{-- <div class="col-4">--}}
+                                {{--                                        <div class="form-group input-group">--}}
+                                {{--                                            <div class="input-group-prepend">--}}
+                                {{--                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
+                                {{--                                                <span class="la la-calendar-o"></span>--}}
+                                {{--                                            </span>--}}
+                                {{--                                            </div>--}}
+                                {{--                                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">--}}
+                                {{--                                        </div>--}}
+                                {{--                                    </div> --}}
+                                {{--                --}}
+                                {{--                --}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                        <div class="form-group input-group">--}}
+                                {{--                                            <div class="input-group-prepend">--}}
+                                {{--                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
+                                {{--                                                <span class="la la-calendar-o"></span>--}}
+                                {{--                                            </span>--}}
+                                {{--                                            </div>--}}
+                                {{--                                            <input type="text" name="from_date"  class="form-control bg-primary border-primary white rounded-right"  id="from_date" placeholder="Date From" >--}}
+                                {{--                                        </div>--}}
+                                {{--                --}}
+                                {{--                                    </div>--}}
+                                {{--                --}}
+                                {{--                                    <div class="col-4">--}}
+                                {{--                                        <div class="form-group input-group">--}}
+                                {{--                                            <div class="input-group-prepend">--}}
+                                {{--                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
+                                {{--                                                <span class="la la-calendar-o"></span>--}}
+                                {{--                                            </span>--}}
+                                {{--                                            </div>--}}
+                                {{--                                            <input type="text" name="to_date"  class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" >--}}
+                                {{--                                        </div>--}}
+                                {{--                                    </div>--}}
+                                {{--                --}}
+                                {{--                                    <div class="col-2">--}}
+                                {{--                                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width search_filter_btn"><i class="la la-search"></i>--}}
+                                {{--                                            Search--}}
+                                {{--                                        </button>--}}
+                                {{--                                    </div>--}}
+                                {{--                                    --}}
+                                {{--                                </div>--}}
+                                {{--                            </form>--}}
 
-{{--                            //checkpoint--}}
-                            <div class="row justify-content-center">
-                                <div class="col-3" id="launch_div">
-                                    <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <div class="media d-flex">
-                                                    <div class="align-self-center">
-                                                        <i class="icon-grid text-white font-large-2 float-left"></i>
-                                                    </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="launched" class="d-inline">{{$total_tickets}}</p>
-                                                        </h3>
-                                                        <span>Total Tickets</span>
+                                {{--                            //checkpoint--}}
+                                <div class="row justify-content-center">
+                                    <div class="col-3" id="launch_div">
+                                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <div class="media d-flex">
+                                                        <div class="align-self-center">
+                                                            <i class="icon-grid text-white font-large-2 float-left"></i>
+                                                        </div>
+                                                        <div class="media-body text-white text-right">
+                                                            <h3 class="text-white"><p id="launched" class="d-inline">{{$total_tickets}}</p>
+                                                            </h3>
+                                                            <span>Total Tickets</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+
+
+                                    <div class="col-3" id="in_process_div">
+                                        <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <div class="media d-flex">
+                                                        <div class="align-self-center">
+                                                            <i class="icon-grid text-white font-large-2 float-left"></i>
+                                                        </div>
+                                                        <div class="media-body text-white text-right">
+                                                            <h3 class="text-white">
+                                                                <p id="in_process_percentage" class="d-inline">{{$total_launch}}</p>
+                                                            </h3>
+                                                            <span>Launch</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3" id="resolved_div">
+                                        <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <div class="media d-flex">
+                                                        <div class="align-self-center">
+                                                            <i class="icon-clock text-white font-large-2 float-left"></i>
+                                                        </div>
+                                                        <div class="media-body text-white text-right">
+                                                            <h3 class="text-white">
+                                                                <p id="received_percentage" class="d-inline">{{$total_in_process}}</p>
+                                                            </h3>
+                                                            <span>In Process</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3" id="closed_div">
+                                        <div class="card  bg-gradient-directional-return_delivered pull-up cursor-pointer">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <div class="media d-flex">
+                                                        <div class="align-self-center">
+                                                            <i class="icon-flag text-white font-large-2 float-left"></i>
+                                                        </div>
+                                                        <div class="media-body text-white text-right">
+                                                            <h3 class="text-white">
+                                                                <p id="in_process_for_activation_percentage" class="d-inline">{{$total_resolved}}</p>
+                                                            </h3>
+                                                            <span>Resolved</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row justify-content-center">
+                                    <div class="col-3" id="">
+                                        <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <div class="media d-flex">
+                                                        <div class="align-self-center">
+                                                            <i class="la la-thumbs-o-up text-white font-large-2 float-left"></i>
+                                                        </div>
+                                                        <div class="media-body text-white text-right">
+                                                            <h3 class="text-white"><p id="valid" class="d-inline">{{round($ticket_ratio, 3)}} </p>%</h3>
+                                                            <span>Tickets Ratio</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3" id="">
+                                        <div class="card bg-gradient-directional-pending_return pull-up cursor-pointer">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <div class="media d-flex">
+                                                        <div class="align-self-center">
+                                                            <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                                        </div>
+                                                        <div class="media-body text-white text-right">
+                                                            <h3 class="text-white">
+                                                                <p id="in_valid_percentage"
+                                                                   class="d-inline">{{round($kpi_achieved, 3)}}</p>
+                                                                %</h3>
+                                                            <span>KPI Achieved (48 hrs. closure)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3" id="">
+                                        <div class="card bg-gradient-directional-pending_shipments pull-up cursor-pointer">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <div class="media d-flex">
+                                                        <div class="align-self-center">
+                                                            <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                                        </div>
+                                                        <div class="media-body text-white text-right">
+                                                            <h3 class="text-white">
+                                                                <span id="closed_rate_percentage">{{round($average_aging, 3)}}</span>%
+                                                            </h3>
+                                                            <span>Avg Aging (Launch-Closure)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3" id="">
+                                        <div class="card bg-gradient-directional-launch-closed pull-up cursor-pointer">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <div class="media d-flex">
+                                                        <div class="align-self-center">
+                                                            <i class="la la-close text-white font-large-2 float-left"></i>
+                                                        </div>
+                                                        <div class="media-body text-white text-right">
+                                                            <h3 class="text-white"><span id="in_process_ratio_percentage">{{$tickets_closed_last_1_day}}</span></h3>
+                                                            <span>Today’s closure</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
 
-                                <div class="col-3" id="in_process_div">
-                                    <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <div class="media d-flex">
-                                                    <div class="align-self-center">
-                                                        <i class="icon-clock text-white font-large-2 float-left"></i>
-                                                    </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">
-                                                             <p id="in_process_percentage" class="d-inline">{{$total_launch}}</p>
-                                                        </h3>
-                                                        <span>Launch</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-3" id="resolved_div">
-                                    <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <div class="media d-flex">
-                                                    <div class="align-self-center">
-                                                        <i class="icon-flag text-white font-large-2 float-left"></i>
-                                                    </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">
-                                                             <p id="received_percentage" class="d-inline">{{$total_in_process}}</p>
-                                                        </h3>
-                                                        <span>In Process</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-3" id="closed_div">
-                                    <div class="card  bg-gradient-directional-return_delivered pull-up cursor-pointer">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <div class="media d-flex">
-                                                    <div class="align-self-center">
-                                                        <i class="icon-check text-white font-large-2 float-left"></i>
-                                                    </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">
-                                                             <p id="in_process_for_activation_percentage" class="d-inline">{{$total_resolved}}</p>
-                                                        </h3>
-                                                        <span>Resolved</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                {{--                            //end--}}
+                                {{--                            @include('admin.inc.messages')--}}
 
+                                {{-- <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                    <div class="form-group">
+                                        <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
+                                               placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                                    </div>
+                                    <div class="form-group justify-content-center">
+                                        <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
+                                                    class="la la-search"></i> Search
+                                        </button>
+                                    </div>
+                                </form> --}}
+
+                                {{-- <div class="col justify-content-end">
+                                    <div class="card-header">
+                                        <div class="heading-elements">
+                                            <ul class="list-inline" style="margin-top: -10px">
+                                                <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
+                                                        Star Shippers</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div> --}}
+
+                                {{--                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">--}}
+                                {{--                                <b><label class="ml-1" id="count"></label></b>--}}
+                                {{--                                <thead>--}}
+                                {{--                                <tr role="row" class="bg-primary white">--}}
+                                {{--                                    <th class="border-primary border-darken-1"></th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">S. No.</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Request No.</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Tracking No.</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Shipper Name</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Origin</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Destination</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Hub</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Zone</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Arrival Date</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Shipment Status</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Status</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Last Status Date</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Last status to Today (TAT)</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Last status by</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Case Nature</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Case Nature Type</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Description</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Launched Date</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1"><!-- Launched To Today (TAT) --> Aging</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Responsible Hub</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Sub Hub</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Responsible Zone</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Agent</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Agent Assigned Date</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Agent Assigned By</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Valid Date</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">COD Value</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Shipping Mode</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Segment</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Weight</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Address</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Sales Person</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Key account category</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">KAE</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Launched By</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Launched By Type</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Channel</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Auto Tagged To KAE</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Auto Tagged To Operation</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Last Comment By</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Last Comment</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Last Comment Date</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Last Rider</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Last Reason</th>--}}
+
+                                {{--                                    --}}
+                                {{--                                    --}}
+                                {{--                                    --}}{{-- <th class="border-primary border-darken-1">Manual Tagged To</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Tagged At</th> --}}
+                                {{--                                  --}}{{--  <th class="border-primary border-darken-1">Special Request</th>--}}
+                                {{--                                    --}}
+                                {{--                                   --}}
+                                {{--                                    --}}
+                                {{--                                    --}}
+                                {{--                                    --}}{{-- <th class="border-primary border-darken-1">Address Latitude</th>--}}
+                                {{--                                    <th class="border-primary border-darken-1">Address Longitude</th> --}}
+                                {{--                                    --}}
+                                {{--                                    --}}
+                                {{--                                    --}}
+                                {{--                                    --}}
+                                {{--                                    --}}
+                                {{--                                    --}}{{-- <th class="border-primary border-darken-1"></th> --}}
+                                {{--                                </tr>--}}
+                                {{--                                </thead>--}}
+                                {{--                            </table>--}}
                             </div>
-                            <div class="row justify-content-center">
-                                <div class="col-3" id="">
-                                    <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <div class="media d-flex">
-                                                    <div class="align-self-center">
-                                                        <i class="la la-thumbs-o-up text-white font-large-2 float-left"></i>
-                                                    </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="valid" class="d-inline">{{round($ticket_ratio, 3)}} </p>%</h3>
-                                                        <span>Tickets Ratio</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-3" id="">
-                                    <div class="card bg-gradient-directional-pending_return pull-up cursor-pointer">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <div class="media d-flex">
-                                                    <div class="align-self-center">
-                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
-                                                    </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">
-                                                            <p id="in_valid_percentage"
-                                                            class="d-inline">{{round($kpi_achieved, 3)}}</p>
-                                                        %</h3>
-                                                        <span>KPI Achieved (48 hrs. closure)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-3" id="">
-                                    <div class="card bg-gradient-directional-pending_shipments pull-up cursor-pointer">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <div class="media d-flex">
-                                                    <div class="align-self-center">
-                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
-                                                    </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">
-                                                            <span id="closed_rate_percentage">{{round($average_aging, 3)}}</span>%
-                                                        </h3>
-                                                        <span>Avg Aging (Launch-Closure)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-3" id="">
-                                    <div class="card bg-gradient-directional-launch-closed pull-up cursor-pointer">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <div class="media d-flex">
-                                                    <div class="align-self-center">
-                                                        <i class="la la-close text-white font-large-2 float-left"></i>
-                                                    </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><span id="in_process_ratio_percentage">{{$tickets_closed_last_1_day}}</span></h3>
-                                                        <span>Today’s closure</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-{{--                            //end--}}
-{{--                            @include('admin.inc.messages')--}}
-
-                            {{-- <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                <div class="form-group">
-                                    <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
-                                           placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
-                                </div>
-                                <div class="form-group justify-content-center">
-                                    <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
-                                                class="la la-search"></i> Search
-                                    </button>
-                                </div>
-                            </form> --}}
-
-                            {{-- <div class="col justify-content-end">
-                                <div class="card-header">
-                                    <div class="heading-elements">
-                                        <ul class="list-inline" style="margin-top: -10px">
-                                            <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
-                                                    Star Shippers</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div> --}}
-                            
-{{--                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">--}}
-{{--                                <b><label class="ml-1" id="count"></label></b>--}}
-{{--                                <thead>--}}
-{{--                                <tr role="row" class="bg-primary white">--}}
-{{--                                    <th class="border-primary border-darken-1"></th>--}}
-{{--                                    <th class="border-primary border-darken-1">S. No.</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Request No.</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Tracking No.</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Shipper Name</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Origin</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Destination</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Hub</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Zone</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Arrival Date</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Shipment Status</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Status</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Last Status Date</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Last status to Today (TAT)</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Last status by</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Case Nature</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Case Nature Type</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Description</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Launched Date</th>--}}
-{{--                                    <th class="border-primary border-darken-1"><!-- Launched To Today (TAT) --> Aging</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Responsible Hub</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Sub Hub</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Responsible Zone</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Agent</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Agent Assigned Date</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Agent Assigned By</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Valid Date</th>--}}
-{{--                                    <th class="border-primary border-darken-1">COD Value</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Shipping Mode</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Segment</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Weight</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Address</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Sales Person</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Key account category</th>--}}
-{{--                                    <th class="border-primary border-darken-1">KAE</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Launched By</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Launched By Type</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Channel</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Auto Tagged To KAE</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Auto Tagged To Operation</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Last Comment By</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Last Comment</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Last Comment Date</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Last Rider</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Last Reason</th>--}}
-
-{{--                                    --}}
-{{--                                    --}}
-{{--                                    --}}{{-- <th class="border-primary border-darken-1">Manual Tagged To</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Tagged At</th> --}}
-{{--                                  --}}{{--  <th class="border-primary border-darken-1">Special Request</th>--}}
-{{--                                    --}}
-{{--                                   --}}
-{{--                                    --}}
-{{--                                    --}}
-{{--                                    --}}{{-- <th class="border-primary border-darken-1">Address Latitude</th>--}}
-{{--                                    <th class="border-primary border-darken-1">Address Longitude</th> --}}
-{{--                                    --}}
-{{--                                    --}}
-{{--                                    --}}
-{{--                                    --}}
-{{--                                    --}}
-{{--                                    --}}{{-- <th class="border-primary border-darken-1"></th> --}}
-{{--                                </tr>--}}
-{{--                                </thead>--}}
-{{--                            </table>--}}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </section>
-{{--    <div class="modal fade text-left" id="BulkExternalCommentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BulkExternalCommentModal"--}}
-{{--         aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-lg" role="document">--}}
-{{--            <div class="modal-content">--}}
-{{--                <div class="modal-header bg-primary white">--}}
-{{--                    <h4 class="modal-title white">Add External Comment </h4>--}}
-{{--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-{{--                        <span aria-hidden="true">&times;</span>--}}
-{{--                    </button>--}}
-{{--                </div>--}}
-{{--                <div class="modal-body text-center">--}}
-{{--                    <form id="bulk_comment_form" class="form-horizontal" method="POST" novalidate="novalidate">--}}
-{{--                        <input type="text" value="0" name="bulk_comment_type" id="bulk_comment_type" hidden>--}}
-{{--                        <div class="col">--}}
-{{--                            <div class="form-group">--}}
-{{--                                <textarea class="form-control" rows="5" id="bulk_comment" placeholder="Add External Comment"></textarea>--}}
-{{--                            </div>--}}
-{{--                            <div class="modal-footer justify-content-center">--}}
-{{--                                <button type="button" class="btn btn-success" id="bulkcommentSubmit">Add External Comment</button>--}}
-{{--                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </form>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
-{{--    <div class="modal fade text-left" id="InternalCommentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="InternalCommentModal"--}}
-{{--         aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-lg" role="document">--}}
-{{--            <div class="modal-content">--}}
-{{--                <div class="modal-header bg-primary white">--}}
-{{--                    <h4 class="modal-title white">Add Internal Comment </h4>--}}
-{{--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-{{--                        <span aria-hidden="true">&times;</span>--}}
-{{--                    </button>--}}
-{{--                </div>--}}
-{{--                <div class="modal-body text-center">--}}
-{{--                    <form id="internal_comment_form" class="form-horizontal" method="POST" novalidate="novalidate">--}}
-{{--                        <div class="col">--}}
-{{--                            <div class="form-group">--}}
-{{--                                <input type="text" value="1" name="internal_comment_type" id="internal_comment_type" hidden>--}}
-{{--                                <textarea class="form-control" rows="5" id="internal_comment" placeholder="Add Internal Comment"></textarea>--}}
-{{--                            </div>--}}
-{{--                            <div class="modal-footer justify-content-center">--}}
-{{--                                <button type="button" class="btn btn-success" id="internalcommentSubmit">Add Internal Comment</button>--}}
-{{--                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </form>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
+    {{--    <div class="modal fade text-left" id="BulkExternalCommentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BulkExternalCommentModal"--}}
+    {{--         aria-hidden="true">--}}
+    {{--        <div class="modal-dialog modal-lg" role="document">--}}
+    {{--            <div class="modal-content">--}}
+    {{--                <div class="modal-header bg-primary white">--}}
+    {{--                    <h4 class="modal-title white">Add External Comment </h4>--}}
+    {{--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+    {{--                        <span aria-hidden="true">&times;</span>--}}
+    {{--                    </button>--}}
+    {{--                </div>--}}
+    {{--                <div class="modal-body text-center">--}}
+    {{--                    <form id="bulk_comment_form" class="form-horizontal" method="POST" novalidate="novalidate">--}}
+    {{--                        <input type="text" value="0" name="bulk_comment_type" id="bulk_comment_type" hidden>--}}
+    {{--                        <div class="col">--}}
+    {{--                            <div class="form-group">--}}
+    {{--                                <textarea class="form-control" rows="5" id="bulk_comment" placeholder="Add External Comment"></textarea>--}}
+    {{--                            </div>--}}
+    {{--                            <div class="modal-footer justify-content-center">--}}
+    {{--                                <button type="button" class="btn btn-success" id="bulkcommentSubmit">Add External Comment</button>--}}
+    {{--                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>--}}
+    {{--                            </div>--}}
+    {{--                        </div>--}}
+    {{--                    </form>--}}
+    {{--                </div>--}}
+    {{--            </div>--}}
+    {{--        </div>--}}
+    {{--    </div>--}}
+    {{--    <div class="modal fade text-left" id="InternalCommentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="InternalCommentModal"--}}
+    {{--         aria-hidden="true">--}}
+    {{--        <div class="modal-dialog modal-lg" role="document">--}}
+    {{--            <div class="modal-content">--}}
+    {{--                <div class="modal-header bg-primary white">--}}
+    {{--                    <h4 class="modal-title white">Add Internal Comment </h4>--}}
+    {{--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+    {{--                        <span aria-hidden="true">&times;</span>--}}
+    {{--                    </button>--}}
+    {{--                </div>--}}
+    {{--                <div class="modal-body text-center">--}}
+    {{--                    <form id="internal_comment_form" class="form-horizontal" method="POST" novalidate="novalidate">--}}
+    {{--                        <div class="col">--}}
+    {{--                            <div class="form-group">--}}
+    {{--                                <input type="text" value="1" name="internal_comment_type" id="internal_comment_type" hidden>--}}
+    {{--                                <textarea class="form-control" rows="5" id="internal_comment" placeholder="Add Internal Comment"></textarea>--}}
+    {{--                            </div>--}}
+    {{--                            <div class="modal-footer justify-content-center">--}}
+    {{--                                <button type="button" class="btn btn-success" id="internalcommentSubmit">Add Internal Comment</button>--}}
+    {{--                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>--}}
+    {{--                            </div>--}}
+    {{--                        </div>--}}
+    {{--                    </form>--}}
+    {{--                </div>--}}
+    {{--            </div>--}}
+    {{--        </div>--}}
+    {{--    </div>--}}
 
 
-{{--    <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"--}}
-{{--         aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-md" role="document">--}}
-{{--            <div class="modal-content">--}}
-{{--                <div class="modal-header">--}}
-{{--                    <h4 class="modal-title" id="">Assign Agent</h4>--}}
-{{--                </div>--}}
-{{--                <div class="modal-body">--}}
-{{--                    <select name="Sale_person" id="assign_agent" class="form-control select2">--}}
-{{--                        @foreach($agents as $agent)--}}
-{{--                            <option value="{{ $agent->id }}" > {{ $agent->name }} </option>--}}
-{{--                        @endforeach--}}
-{{--                    </select>--}}
-{{--                </div>--}}
-{{--                <div class="modal-footer">--}}
-{{--                    <button type="button" class="btn btn-success" id="assign_agentSubmit">Assign</button>--}}
-{{--                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
-{{--    <div class="modal fade text-left" id="tagModal" data-backdrop="static" tabindex="-1" role="dialog"--}}
-{{--             aria-labelledby="tagModal"--}}
-{{--             aria-hidden="true">--}}
-{{--            <div class="modal-dialog modal-md" role="document">--}}
-{{--                <div class="modal-content ">--}}
-{{--                    <div class="modal-header">--}}
-{{--                        <h4 class="modal-title">Tag</h4>--}}
-{{--                    </div>--}}
-{{--                    <div class="modal-body text-center">--}}
-{{--                        <form id="tag_submit_form" method="post">--}}
-{{--                            @method('POST')--}}
-{{--                            @csrf--}}
-{{--                            <div class="row justify-content-center">--}}
-{{--                                <div class="col-11">--}}
-{{--                                    <fieldset class="form-group">--}}
-{{--                                        <input type="hidden" id="crm_request_ids" value="">--}}
-{{--                                        <input type="hidden" id="prev_status" name="prev_status"--}}
-{{--                                               value="">--}}
-{{--                                        <select name="tag_type" id="tag_type" class="form-control select2">--}}
-{{--                                            @foreach($types as $type)--}}
-{{--                                                <option value="{{$type->id}}"> {{$type->name}} </option>--}}
-{{--                                            @endforeach--}}
-{{--                                        </select>--}}
-{{--                                    </fieldset>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                            <div class="row justify-content-center">--}}
-{{--                                <div class="col-8">--}}
-{{--                                    <fieldset class="form-group">--}}
-{{--                                        <div class="d-none" id="admin_tag_div">--}}
-{{--                                            <div class="">--}}
-{{--                                                <select id="admin_tag_department"--}}
-{{--                                                        class="form-control  select2">--}}
-{{--                                                    @foreach($departments as $department)--}}
-{{--                                                        <option value="{{$department->id}}"> {{$department->name}} </option>--}}
-{{--                                                    @endforeach--}}
-{{--                                                </select>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="mt-1">--}}
-{{--                                                <select id="admin_tag_hub"--}}
-{{--                                                        class="form-control select2">--}}
-{{--                                                    @foreach($hubs as $hub)--}}
-{{--                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>--}}
-{{--                                                    @endforeach--}}
-{{--                                                </select>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="mt-1">--}}
-{{--                                                <select name="tag_admin" id="tag_admin" class="form-control select2">--}}
+    {{--    <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"--}}
+    {{--         aria-hidden="true">--}}
+    {{--        <div class="modal-dialog modal-md" role="document">--}}
+    {{--            <div class="modal-content">--}}
+    {{--                <div class="modal-header">--}}
+    {{--                    <h4 class="modal-title" id="">Assign Agent</h4>--}}
+    {{--                </div>--}}
+    {{--                <div class="modal-body">--}}
+    {{--                    <select name="Sale_person" id="assign_agent" class="form-control select2">--}}
+    {{--                        @foreach($agents as $agent)--}}
+    {{--                            <option value="{{ $agent->id }}" > {{ $agent->name }} </option>--}}
+    {{--                        @endforeach--}}
+    {{--                    </select>--}}
+    {{--                </div>--}}
+    {{--                <div class="modal-footer">--}}
+    {{--                    <button type="button" class="btn btn-success" id="assign_agentSubmit">Assign</button>--}}
+    {{--                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>--}}
+    {{--                </div>--}}
+    {{--            </div>--}}
+    {{--        </div>--}}
+    {{--    </div>--}}
+    {{--    <div class="modal fade text-left" id="tagModal" data-backdrop="static" tabindex="-1" role="dialog"--}}
+    {{--             aria-labelledby="tagModal"--}}
+    {{--             aria-hidden="true">--}}
+    {{--            <div class="modal-dialog modal-md" role="document">--}}
+    {{--                <div class="modal-content ">--}}
+    {{--                    <div class="modal-header">--}}
+    {{--                        <h4 class="modal-title">Tag</h4>--}}
+    {{--                    </div>--}}
+    {{--                    <div class="modal-body text-center">--}}
+    {{--                        <form id="tag_submit_form" method="post">--}}
+    {{--                            @method('POST')--}}
+    {{--                            @csrf--}}
+    {{--                            <div class="row justify-content-center">--}}
+    {{--                                <div class="col-11">--}}
+    {{--                                    <fieldset class="form-group">--}}
+    {{--                                        <input type="hidden" id="crm_request_ids" value="">--}}
+    {{--                                        <input type="hidden" id="prev_status" name="prev_status"--}}
+    {{--                                               value="">--}}
+    {{--                                        <select name="tag_type" id="tag_type" class="form-control select2">--}}
+    {{--                                            @foreach($types as $type)--}}
+    {{--                                                <option value="{{$type->id}}"> {{$type->name}} </option>--}}
+    {{--                                            @endforeach--}}
+    {{--                                        </select>--}}
+    {{--                                    </fieldset>--}}
+    {{--                                </div>--}}
+    {{--                            </div>--}}
+    {{--                            <div class="row justify-content-center">--}}
+    {{--                                <div class="col-8">--}}
+    {{--                                    <fieldset class="form-group">--}}
+    {{--                                        <div class="d-none" id="admin_tag_div">--}}
+    {{--                                            <div class="">--}}
+    {{--                                                <select id="admin_tag_department"--}}
+    {{--                                                        class="form-control  select2">--}}
+    {{--                                                    @foreach($departments as $department)--}}
+    {{--                                                        <option value="{{$department->id}}"> {{$department->name}} </option>--}}
+    {{--                                                    @endforeach--}}
+    {{--                                                </select>--}}
+    {{--                                            </div>--}}
+    {{--                                            <div class="mt-1">--}}
+    {{--                                                <select id="admin_tag_hub"--}}
+    {{--                                                        class="form-control select2">--}}
+    {{--                                                    @foreach($hubs as $hub)--}}
+    {{--                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>--}}
+    {{--                                                    @endforeach--}}
+    {{--                                                </select>--}}
+    {{--                                            </div>--}}
+    {{--                                            <div class="mt-1">--}}
+    {{--                                                <select name="tag_admin" id="tag_admin" class="form-control select2">--}}
 
-{{--                                                </select>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
+    {{--                                                </select>--}}
+    {{--                                            </div>--}}
+    {{--                                        </div>--}}
 
-{{--                                        <div class="d-none" id="department_tag_div">--}}
-{{--                                            <div class="">--}}
-{{--                                                <select name="tag_department" id="tag_department"--}}
-{{--                                                        class="form-control  select2">--}}
-{{--                                                    @foreach($departments as $department)--}}
-{{--                                                        <option value="{{$department->id}}"> {{$department->name}} </option>--}}
-{{--                                                    @endforeach--}}
-{{--                                                </select>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="mt-1">--}}
-{{--                                                <select name="tag_hub" id="tag_hub"--}}
-{{--                                                        class="form-control select2">--}}
-{{--                                                    @foreach($hubs as $hub)--}}
-{{--                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>--}}
-{{--                                                    @endforeach--}}
-{{--                                                </select>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </fieldset>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </form>--}}
-{{--                    </div>--}}
-{{--                    <div class="modal-footer">--}}
-{{--                        <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>--}}
-{{--                        <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
+    {{--                                        <div class="d-none" id="department_tag_div">--}}
+    {{--                                            <div class="">--}}
+    {{--                                                <select name="tag_department" id="tag_department"--}}
+    {{--                                                        class="form-control  select2">--}}
+    {{--                                                    @foreach($departments as $department)--}}
+    {{--                                                        <option value="{{$department->id}}"> {{$department->name}} </option>--}}
+    {{--                                                    @endforeach--}}
+    {{--                                                </select>--}}
+    {{--                                            </div>--}}
+    {{--                                            <div class="mt-1">--}}
+    {{--                                                <select name="tag_hub" id="tag_hub"--}}
+    {{--                                                        class="form-control select2">--}}
+    {{--                                                    @foreach($hubs as $hub)--}}
+    {{--                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>--}}
+    {{--                                                    @endforeach--}}
+    {{--                                                </select>--}}
+    {{--                                            </div>--}}
+    {{--                                        </div>--}}
+    {{--                                    </fieldset>--}}
+    {{--                                </div>--}}
+    {{--                            </div>--}}
+    {{--                        </form>--}}
+    {{--                    </div>--}}
+    {{--                    <div class="modal-footer">--}}
+    {{--                        <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>--}}
+    {{--                        <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>--}}
+    {{--                    </div>--}}
+    {{--                </div>--}}
+    {{--            </div>--}}
+    {{--        </div>--}}
 
-{{--    <div class="modal fade" id="ViewRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewRequestModal"--}}
-{{--         aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-lg" role="document">--}}
-{{--            <div class="modal-content">--}}
-{{--                <div class="modal-header text-center">--}}
-{{--                    <h4 class="modal-title w-100 font-weight-bold">Special Request</h4>--}}
-{{--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-{{--                        <span aria-hidden="true">&times;</span>--}}
-{{--                    </button>--}}
-{{--                </div>--}}
-{{--                <div class="modal-body mx-3">--}}
+    {{--    <div class="modal fade" id="ViewRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewRequestModal"--}}
+    {{--         aria-hidden="true">--}}
+    {{--        <div class="modal-dialog modal-lg" role="document">--}}
+    {{--            <div class="modal-content">--}}
+    {{--                <div class="modal-header text-center">--}}
+    {{--                    <h4 class="modal-title w-100 font-weight-bold">Special Request</h4>--}}
+    {{--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+    {{--                        <span aria-hidden="true">&times;</span>--}}
+    {{--                    </button>--}}
+    {{--                </div>--}}
+    {{--                <div class="modal-body mx-3">--}}
 
-{{--                </div>--}}
-{{--                <div class="modal-footer d-flex justify-content-end">--}}
-{{--                    <button class="btn btn-grey" data-dismiss="modal">Close</button>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>   --}}
-{{--        <div class="modal fade text-left" id="CloseReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CloseReasonModal"--}}
-{{--         aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-md" role="document">--}}
-{{--            <div class="modal-content">--}}
-{{--                <div class="modal-header">--}}
-{{--                    <h4 class="modal-title" id="">Who’s at Fault</h4>--}}
-{{--                </div>--}}
-{{--                <input type="hidden" name="close_reason_crm_ids" id="close_reason_crm_ids" value="0">--}}
-{{--                <div class="modal-body">--}}
-{{--                    <select name="closed_reason_status" id="closed_reason_status" class="form-control select2">--}}
-{{--                        @foreach($closed_reason_statuses as $closed_reason_status)--}}
-{{--                            <option value="{{ $closed_reason_status->id }}" > {{ $closed_reason_status->name }} </option>--}}
-{{--                        @endforeach--}}
-{{--                    </select>--}}
-{{--                </div>--}}
-{{--                <div class="modal-footer">--}}
-{{--                    <button type="button" class="btn btn-success" id="closed_reason_submit">Submit</button>--}}
-{{--                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
+    {{--                </div>--}}
+    {{--                <div class="modal-footer d-flex justify-content-end">--}}
+    {{--                    <button class="btn btn-grey" data-dismiss="modal">Close</button>--}}
+    {{--                </div>--}}
+    {{--            </div>--}}
+    {{--        </div>--}}
+    {{--    </div>   --}}
+    {{--        <div class="modal fade text-left" id="CloseReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CloseReasonModal"--}}
+    {{--         aria-hidden="true">--}}
+    {{--        <div class="modal-dialog modal-md" role="document">--}}
+    {{--            <div class="modal-content">--}}
+    {{--                <div class="modal-header">--}}
+    {{--                    <h4 class="modal-title" id="">Who’s at Fault</h4>--}}
+    {{--                </div>--}}
+    {{--                <input type="hidden" name="close_reason_crm_ids" id="close_reason_crm_ids" value="0">--}}
+    {{--                <div class="modal-body">--}}
+    {{--                    <select name="closed_reason_status" id="closed_reason_status" class="form-control select2">--}}
+    {{--                        @foreach($closed_reason_statuses as $closed_reason_status)--}}
+    {{--                            <option value="{{ $closed_reason_status->id }}" > {{ $closed_reason_status->name }} </option>--}}
+    {{--                        @endforeach--}}
+    {{--                    </select>--}}
+    {{--                </div>--}}
+    {{--                <div class="modal-footer">--}}
+    {{--                    <button type="button" class="btn btn-success" id="closed_reason_submit">Submit</button>--}}
+    {{--                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>--}}
+    {{--                </div>--}}
+    {{--            </div>--}}
+    {{--        </div>--}}
+    {{--    </div>--}}
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
-    
+
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css"
           href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
