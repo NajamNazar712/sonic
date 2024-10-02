@@ -366,41 +366,6 @@
                 }
             });
 
-            bag_number.on('change', function() {
-                bag = $(this).val();
-                $.ajax({
-                    type: "GET",
-                    url:  '{!! route('admin.handover.receive.check_full_bag') !!}',
-                    data: {
-                        bag_number: bag
-                    },
-                    success: function (response) {
-                        if (response.status == 1 && response.error) {
-                            toastr.error(response.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                        else {
-                            if (bag) {
-                                shipment_type_datatable.draw();
-                                shipment_type_datatable_container.removeClass('d-none');
-                                scan_tracking_numebr_table.removeClass('d-none');
-                                scan_tracking_number_div.removeClass('d-none');
-                                scan_button.removeClass('d-none');
-                                confirm_button.removeClass('d-none');
-                            } else {
-                                shipment_type_datatable_container.addClass('d-none');
-                                scan_tracking_numebr_table.addClass('d-none');
-                                scan_tracking_number_div.addClass('d-none');
-                                scan_button.addClass('d-none');
-                                confirm_button.addClass('d-none');
-                            }
-                        }
-                    }
-                });
-            });
-
             var shipment_ids = [];
         
             $('#add_shipment_form input.tracking_number').focus();
@@ -560,6 +525,44 @@
                     return false;
                 }
             });
+
+            bag_number.on('change', function() {
+                bag = $(this).val();
+                table.clear();
+                $.ajax({
+                    type: "GET",
+                    url:  '{!! route('admin.handover.receive.check_full_bag') !!}',
+                    data: {
+                        bag_number: bag
+                    },
+                    success: function (response) {
+                        if (response.status == 1 && response.error) {
+                            toastr.error(response.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        else {
+                            if (bag) {
+                                shipment_type_datatable.draw();
+                                shipment_type_datatable_container.removeClass('d-none');
+                                scan_tracking_numebr_table.removeClass('d-none');
+                                scan_tracking_number_div.removeClass('d-none');
+                                scan_button.removeClass('d-none');
+                                confirm_button.removeClass('d-none');
+                            } else {
+                                shipment_type_datatable_container.addClass('d-none');
+                                scan_tracking_numebr_table.addClass('d-none');
+                                scan_tracking_number_div.addClass('d-none');
+                                scan_button.addClass('d-none');
+                                confirm_button.addClass('d-none');
+                            }
+                        }
+                    }
+                });
+            });
+
+            table.draw();
 
             var shipment_piece_ids = [];
             var all_shipment_piece_ids = [];
