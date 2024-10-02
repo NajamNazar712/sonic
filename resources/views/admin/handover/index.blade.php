@@ -217,6 +217,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
 
     <script>
@@ -449,7 +450,9 @@
                                                 url: "{{ route('admin.handover.create.check_bag_type') }}",
                                                 data: {
                                                     'selected_bag_type': selected_bag_type,
-                                                    'tracking_number': tracking_number_value
+                                                    'tracking_number': tracking_number_value,
+                                                    'action': window.lastAction
+
                                                 },
                                                 success: function(response) {
                                                     if (response.status === 1 && response.error) {
@@ -949,6 +952,7 @@
                             data: {
                                 'shipment_id': shipment_id,
                                 'piece_id': item,
+                                'action': window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             },
                             timeout: 5000,

@@ -110,7 +110,7 @@ class AdminShipmentHandoverController extends Controller
           $details['phone_number'] = $shipment->user->phone;
           $details['pickup_date'] = $shipment->pickup_date;
           $details['special_instructions'] = $shipment->special_instructions;
-          ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+          ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
 
           $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
 
@@ -170,7 +170,7 @@ class AdminShipmentHandoverController extends Controller
           {
             $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
             $details['pieces_count'] = $shipment->pieces;
-            ShipmentScanningJourneyController::add($shipment->id,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+            ShipmentScanningJourneyController::add($shipment->id,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
             return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
           }
           else {
@@ -253,7 +253,7 @@ class AdminShipmentHandoverController extends Controller
             $details['verification_status'] = 'Excess';
 
             if($shipment_pieces == 1){
-              ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+              ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
               return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
             }
 
@@ -261,7 +261,7 @@ class AdminShipmentHandoverController extends Controller
             {
               $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
               $details['pieces_count'] = $shipment->pieces;
-              ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+              ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
               return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
             }
           }

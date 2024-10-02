@@ -28,6 +28,7 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\ServiceList;
 use App\Http\Models\StarShipper;
+use App\Http\Models\SpecifiedShipper;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Notification;
 use App\Http\Models\Shipper\User;
@@ -4667,7 +4668,7 @@ class GlobalSettingsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 382);
         }
-        $rates_list = InternationalStandardDhlRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
+        $rates_list = InternationalStandardDhlRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11', 'zone_1b', 'zone_8b');
 
         return Datatables::of($rates_list)->make(true);
     }
@@ -4678,14 +4679,16 @@ class GlobalSettingsController extends Controller
         $names = [
             'range_up' => 'Range Up',
             'range_down' => 'Range Down',
-            'zone_1' => 'Zone 1',
+            'zone_1' => 'Zone 1A',
+            'zone_1b' => 'Zone 1B',
             'zone_2' => 'Zone 2',
             'zone_3' => 'Zone 3',
             'zone_4' => 'Zone 4',
             'zone_5' => 'Zone 5',
             'zone_6' => 'Zone 6',
             'zone_7' => 'Zone 7',
-            'zone_8' => 'Zone 8',
+            'zone_8' => 'Zone 8A',
+            'zone_8b' => 'Zone 8B',
             'zone_9' => 'Zone 9',
             'zone_10' => 'Zone 10',
             'zone_11' => 'Zone 11',
@@ -4700,6 +4703,7 @@ class GlobalSettingsController extends Controller
             'range_up' => ['required', 'numeric', 'between:0.01,300', Rule::exists('international_standard_dhl_rates', 'range_up')],
             'range_down' => ['required', 'numeric', 'between:0.01,300', Rule::exists('international_standard_dhl_rates', 'range_down')],
             'zone_1' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_1b' => ['required', 'numeric', 'between:0,1000000'],
             'zone_2' => ['required', 'numeric', 'between:0,1000000'],
             'zone_3' => ['required', 'numeric', 'between:0,1000000'],
             'zone_4' => ['required', 'numeric', 'between:0,1000000'],
@@ -4707,19 +4711,54 @@ class GlobalSettingsController extends Controller
             'zone_6' => ['required', 'numeric', 'between:0,1000000'],
             'zone_7' => ['required', 'numeric', 'between:0,1000000'],
             'zone_8' => ['required', 'numeric', 'between:0,1000000'],
+            'zone_8b' => ['required', 'numeric', 'between:0,1000000'],
             'zone_9' => ['required', 'numeric', 'between:0,1000000'],
             'zone_10' => ['required', 'numeric', 'between:0,1000000'],
             'zone_11' => ['required', 'numeric', 'between:0,1000000'],
+
         ];
 
-        $fields = [0 => 'range_up', 1 => 'range_down', 2 => 'zone_1', 3 => 'zone_2', 4 => 'zone_3', 5 => 'zone_4', 6 => 'zone_5', 7 => 'zone_6', 8 => 'zone_7', 9 => 'zone_8', 10 => 'zone_9', 11 => 'zone_10', 12 => 'zone_11'];
+        $fields = [
+            0  => 'range_up',
+            1  => 'range_down',
+            2  => 'zone_1',
+            3  => 'zone_1b', // Moved zone_1b next to zone_1
+            4  => 'zone_2',
+            5  => 'zone_3',
+            6  => 'zone_4',
+            7  => 'zone_5',
+            8  => 'zone_6',
+            9  => 'zone_7',
+            10 => 'zone_8',
+            11 => 'zone_8b', // Moved zone_8b next to zone_8
+            12 => 'zone_9',
+            13 => 'zone_10',
+            14 => 'zone_11'
+        ];
+
 
         if ($file = $request->file('rates')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
+            $header = [
+                'Range Up',
+                'Range Down',
+                'Zone 1A',
+                'Zone 1B', // Moved Zone 1B next to Zone 1
+                'Zone 2',
+                'Zone 3',
+                'Zone 4',
+                'Zone 5',
+                'Zone 6',
+                'Zone 7',
+                'Zone 8A',
+                'Zone 8B', // Moved Zone 8B next to Zone 8
+                'Zone 9',
+                'Zone 10',
+                'Zone 11'
+            ];
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
@@ -4803,6 +4842,8 @@ class GlobalSettingsController extends Controller
                         $zone_9 = trim($row['zone_9']);
                         $zone_10 = trim($row['zone_10']);
                         $zone_11 = trim($row['zone_11']);
+                        $zone_1b = trim($row['zone_1b']);
+                        $zone_8b = trim($row['zone_8b']);
 
                         $standard_rate = InternationalStandardDhlRate::where('range_up', $range_up)->where('range_down', $range_down);
                         if ($standard_rate->exists()) {
@@ -4818,6 +4859,8 @@ class GlobalSettingsController extends Controller
                             $standard_rate->zone_9 = ($zone_9 != null) ? $zone_9 : 0;
                             $standard_rate->zone_10 = ($zone_10 != null) ? $zone_10 : 0;
                             $standard_rate->zone_11 = ($zone_11 != null) ? $zone_11 : 0;
+                            $standard_rate->zone_1b = ($zone_1b != null) ? $zone_1b : 0;
+                            $standard_rate->zone_8b = ($zone_8b != null) ? $zone_8b : 0;
                             $standard_rate->save();
                             $updated++;
                         } else {
@@ -8687,6 +8730,16 @@ class GlobalSettingsController extends Controller
             ->get();
         return view('admin.settings.star_shippers.index')->with(['shippers' => $shippers]);
     }
+    
+    public function aListShippersIndex()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 805);
+        $shippers = User::where('status', '=', 3)
+            ->where('blacklist', 0)
+            //->whereNull('disable_at')
+            ->get();
+        return view('admin.settings.alist_shippers.index')->with(['shippers' => $shippers]);
+    }
 
     public function star_shippers_list()
     {
@@ -8702,6 +8755,44 @@ class GlobalSettingsController extends Controller
                 }
             })
             ->addColumn('action', function ($star_shippers) {
+                if (session('role_id') == 1 || count(array_intersect([1007], session('permissions'))) !== 0) {
+
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    if (session('role_id') == 1 || in_array(1007, session('permissions'))) {
+                        if ($star_shippers->status == 1) {
+
+                            $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        } else {
+                            $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        }
+                    }
+
+                    $dropdown .= '</div></div>';
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            });
+        return $datatables->make(true);
+    }
+    
+    public function aListShipperView()
+    {
+        $alistShipper = SpecifiedShipper::join('users as u', 'specified_shippers.user_id', '=', 'u.id')
+            ->select('u.name as shipper_name', 'specified_shippers.id as id', 'specified_shippers.status as status', 'specified_shippers.created_at as created_at');
+
+        $datatables = Datatables::of($alistShipper)
+            ->editColumn('status', function ($alistShipper) {
+                if ($alistShipper->status == 1) {
+                    return 'Enable';
+                } else {
+                    return 'Disable';
+                }
+            })
+            ->addColumn('action', function ($alistShipper) {
                 if (session('role_id') == 1 || count(array_intersect([848], session('permissions'))) !== 0) {
 
                     $dropdown = '<div class="btn-group">
@@ -8709,7 +8800,7 @@ class GlobalSettingsController extends Controller
                     <div class="dropdown-menu dropdown-menu-sm">
                     ';
                     if (session('role_id') == 1 || in_array(848, session('permissions'))) {
-                        if ($star_shippers->status == 1) {
+                        if ($alistShipper->status == 1) {
 
                             $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                         } else {
@@ -8728,13 +8819,16 @@ class GlobalSettingsController extends Controller
 
     public function star_shippers_add(Request $request)
     {
+        $Model = self::ModelName($request);
+       
         $shipper_id = $request->star_shipper_id;
+       
         if (!empty($shipper_id)) {
-            $shipper_exist = StarShipper::where('user_id', $shipper_id);
+            $shipper_exist = $Model::where('user_id', $shipper_id);
             if ($shipper_exist->exists()) {
                 return redirect()->back()->with('error', 'Already Exist !');
             } else {
-                $new_shipper = new StarShipper();
+                $new_shipper = new $Model();
                 $new_shipper->user_id = $shipper_id;
                 $new_shipper->add_by = $shipper_id;
                 $new_shipper->save();
@@ -8745,14 +8839,18 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'Shipper Required !');
         }
     }
+    
 
     public function star_shippers_enable_disable(Request $request)
     {
-        $star_shipper = StarShipper::find($request->id);
 
+        $Model = self::ModelName($request);
+        
+        $star_shipper = $Model::find($request->id);
+       
         if ($star_shipper->status == 1) {
             $star_shipper->status = 0;
-
+           
             $star_shipper->save();
             return redirect()->back()->with('success', 'Shipper Disabled !');
         } else {
@@ -8761,6 +8859,17 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('success', 'Shipper Enabled !');
         }
     }
+
+    static function ModelName($data){
+        // Check condition on the shipper type is specified Shipper
+        if ($data->shipper_type > 1) {
+            $shipperModel = 'App\Http\Models\SpecifiedShipper';
+        } else {
+            $shipperModel = 'App\Http\Models\StarShipper';
+        }
+        return $shipperModel;
+    }
+    
 
     public function auto_delivery_note_verification_index()
     {

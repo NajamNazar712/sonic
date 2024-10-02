@@ -31,6 +31,8 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\AdminRoleModulePermission;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminHumanResourseController;
+use App\Http\Models\Admin\UserRoleManagementLog;
+
 use Illuminate\Support\Facades\Log;
 use PhpParser\Parser\Multiple;
 
@@ -632,10 +634,24 @@ class UserManagementController extends Controller
 
                 $admin_hub->save();
             }
+            $deleted_name_hubs = City::whereIn('id', $delete_hub_ids)->pluck('name')
+            ->implode(', ');
 
 
         } else {
+            $current_hub_ids = AdminHub::where('admin_id', $id)->pluck('hub_id')->toArray();
+            $deleted_name_hubs = City::whereIn('id', $delete_hub_ids)->pluck('name')
+            ->implode(', ');
             AdminHub::where('admin_id', $id)->delete();
+        }
+        if(!empty($deleted_name_hubs)) {
+            $array['Deleted Hubs'] = $deleted_name_hubs;
+            $record = new UserRoleManagementLog;
+            $record->changed_by_id = Auth::id();
+            $record->data = json_encode($array);
+            $record->changed_in_record_id = $id;
+            $record->screen_name = 'User Management';
+            $record->save();
         }
 
         if ($admin->duplicate_user == 0) {
@@ -1012,9 +1028,26 @@ class UserManagementController extends Controller
 
                 $admin_role_module_permission->save();
             }
+
+            $deleted_name_permissions = ModulePermission::whereIn('id', $delete_permission_ids)->pluck('name')
+            ->implode(', ');
+            
         } else {
+            $current_permission_ids = AdminRoleModulePermission::where('role_id', $id)->pluck('permission_id')->toArray();
+            $deleted_name_permissions = ModulePermission::whereIn('id', $current_permission_ids)->pluck('name')
+            ->implode(', ');
             AdminRoleModulePermission::where('role_id', $id)->delete();
         }
+            if(!empty($deleted_name_permissions)) {
+                $array['Deleted Permissions'] = $deleted_name_permissions;
+                $record = new UserRoleManagementLog;
+                $record->changed_by_id = Auth::id();
+                $record->data = json_encode($array);
+                $record->changed_in_record_id = $id;
+                $record->screen_name = 'Role Management';
+                $record->save();
+            }
+            
 
         return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Role: ' . $request->input('name') . ' has been updated!']);
     }

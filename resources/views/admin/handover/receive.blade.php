@@ -225,6 +225,8 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
+
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
 
     <script>
@@ -366,6 +368,51 @@
                 }
             });
 
+            let bagChangeCount = 0;
+            bag_number.on('change', function() {
+                bag = $(this).val();
+                bagChangeCount++;
+                table.clear().draw();
+
+                if (bagChangeCount == 0){
+                    $.ajax({
+                        type: "GET",
+                        url:  '{!! route('admin.handover.receive.check_full_bag') !!}',
+                        data: {
+                            bag_number: bag
+                        },
+                        success: function (response) {
+                            if (response.status == 1 && response.error) {
+                                toastr.error(response.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            else {
+                                if (bag) {
+                                    shipment_type_datatable.draw();
+                                    shipment_type_datatable_container.removeClass('d-none');
+                                    scan_tracking_numebr_table.removeClass('d-none');
+                                    scan_tracking_number_div.removeClass('d-none');
+                                    scan_button.removeClass('d-none');
+                                    confirm_button.removeClass('d-none');
+                                } else {
+                                    shipment_type_datatable_container.addClass('d-none');
+                                    scan_tracking_numebr_table.addClass('d-none');
+                                    scan_tracking_number_div.addClass('d-none');
+                                    scan_button.addClass('d-none');
+                                    confirm_button.addClass('d-none');
+                                }
+                            }
+                        }
+                    });
+                } else if (bagChangeCount === 2) {
+                    // Second bag change, reload the page
+                    location.reload();
+                }
+
+            });
+
             var shipment_ids = [];
         
             $('#add_shipment_form input.tracking_number').focus();
@@ -429,6 +476,8 @@
                             data: {
                                 'tracking_number': tracking_number,
                                 'handover': handover,
+                                'action' : window.lastAction,
+
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
@@ -526,44 +575,6 @@
                 }
             });
 
-            bag_number.on('change', function() {
-                bag = $(this).val();
-                table.clear();
-                $.ajax({
-                    type: "GET",
-                    url:  '{!! route('admin.handover.receive.check_full_bag') !!}',
-                    data: {
-                        bag_number: bag
-                    },
-                    success: function (response) {
-                        if (response.status == 1 && response.error) {
-                            toastr.error(response.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                        else {
-                            if (bag) {
-                                shipment_type_datatable.draw();
-                                shipment_type_datatable_container.removeClass('d-none');
-                                scan_tracking_numebr_table.removeClass('d-none');
-                                scan_tracking_number_div.removeClass('d-none');
-                                scan_button.removeClass('d-none');
-                                confirm_button.removeClass('d-none');
-                            } else {
-                                shipment_type_datatable_container.addClass('d-none');
-                                scan_tracking_numebr_table.addClass('d-none');
-                                scan_tracking_number_div.addClass('d-none');
-                                scan_button.addClass('d-none');
-                                confirm_button.addClass('d-none');
-                            }
-                        }
-                    }
-                });
-            });
-
-            table.draw();
-
             var shipment_piece_ids = [];
             var all_shipment_piece_ids = [];
             
@@ -590,6 +601,7 @@
                             data: {
                                 'shipment_id': shipment_id,
                                 'piece_id': item,
+                                'action' : window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             },
                             timeout: 5000,
