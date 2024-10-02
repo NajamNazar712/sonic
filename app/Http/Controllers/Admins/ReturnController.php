@@ -2627,7 +2627,20 @@ class ReturnController extends Controller
                 return isset($delivery_area) ? $delivery_area : '-';
             })
             ->addColumn('action', function ($shipment) {
-                if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
+                $cargo_bag = CargoManifestBagShipments::where('shipment_id' , $shipment->shipment_id);
+                if($cargo_bag->exists()) {
+                    $cargo_bag = $cargo_bag->latest()->first();
+                    $bag_number = $cargo_bag->cargo_manifest_bag_id;
+                    $return_bag = CargoManifestBag::where('id', $bag_number)->where('type', 2);
+                    if($return_bag->exists()) {
+                       $return_flag_check = true;
+                    } else {
+                        $return_flag_check = false;
+                    }
+                } else {
+                    $return_flag_check = false;
+                }
+                if (($shipment->shipper_status_id == 20 &&  $return_flag_check == false) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
                     $flag = true;
                     $consolidation = ConsolidationShipments::where('shipment_id', $shipment->shipment_id)->first();
                     if ($consolidation) {
