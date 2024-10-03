@@ -378,7 +378,7 @@
             function make_vehicle_select(index)
             {
                 vehicles = `<div class="form-group">
-                                <select multiple="multiple" name="vehicles[${index}][]" id="vehicles_${index}" class="vehicles_select" data-msg-required="Vehicle is Required" data-rule-required="true">
+                                <select multiple="multiple" name="vehicles[${index}][]" id="vehicles_${index}" class="vehicles_select">
                                     @foreach($vehicles as $vehicle)
                                         <option value="{{$vehicle->id}}">{{$vehicle->reg_number}}</option>
                                     @endforeach
@@ -433,7 +433,7 @@
 
                 $("#add_mapping form .vehicles_select").select2({
                     width: '100%',
-                    placeholder: 'Vehicle Numbers*'
+                    placeholder: 'Vehicle Numbers'
                 }).bind('select2:select', function(e){
                     var current_val = e.params.data.id;
                     var select = $(this);

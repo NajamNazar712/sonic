@@ -2627,7 +2627,20 @@ class ReturnController extends Controller
                 return isset($delivery_area) ? $delivery_area : '-';
             })
             ->addColumn('action', function ($shipment) {
-                if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
+                $cargo_bag = CargoManifestBagShipments::where('shipment_id' , $shipment->shipment_id);
+                if($cargo_bag->exists()) {
+                    $cargo_bag = $cargo_bag->latest()->first();
+                    $bag_number = $cargo_bag->cargo_manifest_bag_id;
+                    $return_bag = CargoManifestBag::where('id', $bag_number)->where('type', 2);
+                    if($return_bag->exists()) {
+                       $return_flag_check = true;
+                    } else {
+                        $return_flag_check = false;
+                    }
+                } else {
+                    $return_flag_check = false;
+                }
+                if (($shipment->shipper_status_id == 20 &&  $return_flag_check == false) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
                     $flag = true;
                     $consolidation = ConsolidationShipments::where('shipment_id', $shipment->shipment_id)->first();
                     if ($consolidation) {
@@ -2721,7 +2734,7 @@ class ReturnController extends Controller
                 if (!$dispute_check) {
                     return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                 }
-                ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), NULL, NULL, NULL, NULL, session('latitude'), session('longitude'), NULL);
+                ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), NULL, NULL, NULL, NULL, session('latitude'), session('longitude'), NULL, $request->action);
                 if ($request->shipper_id != null) {
                     $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
                     if ($request->shipper_id != $shipment->user_id) {
@@ -3170,6 +3183,9 @@ class ReturnController extends Controller
                                     $shipper_status_id = 23;
                                     $consignee_status_id = 23;
                                 }
+
+                                self::update_replacement_weight_and_charges($shipment);
+
                                 $shipment->shipper_status_id = $shipper_status_id;
                                 $shipment->consignee_status_id = $consignee_status_id;
                                 $shipment->save();
@@ -3210,6 +3226,15 @@ class ReturnController extends Controller
         } else {
 
             return ['error' => "No shipments scanned"];
+        }
+    }
+
+    private static function update_replacement_weight_and_charges($shipment)
+    {
+        if($shipment->replacement_weight == null)
+        {
+            $shipment->replacement_weight = $shipment->actual_weight;
+            $shipment->replacement_charges = $shipment->weight_charges;
         }
     }
 
@@ -7351,6 +7376,8 @@ class ReturnController extends Controller
                             if ($shipment_data->booking_type_id == 2) {
                                 $shipper_status_id = 28;
                                 $consignee_status_id = 28;
+
+                                self::update_replacement_weight_and_charges($shipment_data);
                             }
 
                             if ($shipment_data->booking_type_id == 3) {

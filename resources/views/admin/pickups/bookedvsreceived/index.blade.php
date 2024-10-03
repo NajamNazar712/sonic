@@ -21,7 +21,7 @@
                             <div class="row mb-2 justify-content-center">
                                 <div class="col-4">
                                     <div class="form-group">
-                                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                                            <select name="search_shipper" id="search_shipper" class="form-control select2" required>
                                                 @foreach($shippers as $shipper)
                                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                                 @endforeach

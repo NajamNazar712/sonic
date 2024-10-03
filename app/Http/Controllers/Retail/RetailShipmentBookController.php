@@ -61,6 +61,7 @@ use App\Http\Models\RetailUserProductPercentage;
 use App\Http\Models\TotalSumFranchiseCommission;
 use App\Http\Models\TotalSumRetailTraxCenter;
 use App\Http\Models\RetailFranchiseCharge;
+use App\RetailDiscountCode;
 
 class RetailShipmentBookController extends Controller
 {
@@ -241,6 +242,14 @@ class RetailShipmentBookController extends Controller
         $information_display = TRUE;
 
         $discount =  Auth::user()->store->discount;
+
+        if($request->has('discount_code'))
+        {
+            if ($request->filled('retail_discount_percentage') && $request->retail_discount_percentage > 0) {
+                $discount = $request->retail_discount_percentage;
+            }
+        }
+
         $insurance = Auth::user()->store->insurance;
         $consignee_name = $request->input('consignee_name');
         $consignee_address = $request->input('consignee_address');
@@ -548,6 +557,19 @@ class RetailShipmentBookController extends Controller
                 $retail_shipment->admin_discount_type = 1;
             }
         }
+
+        if($request->has('discount_code') && $request->discount_code != null)
+        {
+            $isCodeValid = $this->is_discount_available_to_apply($request->discount_code);
+            $isCodeValid = $isCodeValid->getData();
+            if($request->has('retail_discount_amount') && $isCodeValid->status == 1)
+            {
+                $retail_shipment->retail_discount_amount = $request->retail_discount_amount;
+                $retail_shipment->discount = $request->retail_discount_amount;
+                $retail_shipment->total_charges = $retail_shipment->total_charges - $request->retail_discount_amount;
+                RetailDiscountCode::where('code', '=', $request->discount_code)->update(['shipment_id' => $shipment_id]);
+            }
+        }
         $retail_shipment->save();
 
         // retail user history
@@ -628,6 +650,15 @@ class RetailShipmentBookController extends Controller
 
         $pickup_city_id = Auth::user()->store->pickup_address->city_id;
         $discount =  Auth::user()->store->discount;
+
+        if($request->has('retail_discount_applied') && $request->retail_discount_applied == 1)
+        {
+            if ($request->filled('retail_discount_percentage') && $request->retail_discount_percentage > 0) {
+                $discount = $request->retail_discount_percentage;
+            }
+        }
+
+
         $insurance =  Auth::user()->store->insurance;
 
         if($request->weight != null){
@@ -660,6 +691,7 @@ class RetailShipmentBookController extends Controller
                 }
             }
         }
+
 
         if ($details['total_charges'] <= 0)
         {
@@ -2272,7 +2304,35 @@ class RetailShipmentBookController extends Controller
       }
       return response()->json(['status'=>'true']);
 
-  }
+    }
+
+    public function is_discount_available_to_apply($discountCode = null)
+    {
+
+        $data = RetailDiscountCode::where('code', $discountCode)->first();
+
+        if (!$data) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Discount code is not valid',
+                'data' => null,
+            ]);
+        }
+
+        if ($data->shipment_id) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Discount code is already used',
+                'data' => $data,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Discount code is valid',
+            'data' => $data,
+        ]);
+    }
 
     static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address, $id)
     {

@@ -6,6 +6,10 @@ use App\Http\Models\City;
 use App\Http\Models\Zone;
 use Illuminate\Http\Request;
 use App\Http\Models\RateStatus;
+use App\CorporateDefaultShipmentReturnDiscountCharges;
+use App\CorporateDefaultZeroCodDiscountCharges;
+use App\CorporateShipmentReturnDiscountCharges;
+use App\CorporateZeroCodDiscountCharges;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\BookingType;
 use App\Http\Models\ReturnCharge;
@@ -56,6 +60,9 @@ use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
+use App\ShipmentReturnDiscountCharges;
+use App\ZeroCodDiscountCharges;
+
 
 class ShipperAgreementController extends Controller
 {
@@ -905,6 +912,7 @@ otherwise it will be rejected</li>
                           </table></div></div>';
                     }
 
+
                     $return_charges_details = '';
                     if($shipper->account_type_id == 1){
                         $return_charges = ReturnCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
@@ -957,6 +965,45 @@ otherwise it will be rejected</li>
                         }
                     }
 
+                    $zero_cod_chagres_details = '';
+                    if($shipper->account_type_id == 1){
+                        $zero_cod_charges = ZeroCodDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                    }else{
+                        if($corporate_rate_type == 3){
+                            $zero_cod_charges = CorporateDefaultZeroCodDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                        }
+                        else{
+                            $zero_cod_charges = CorporateZeroCodDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                        }
+                    }
+
+                    if($zero_cod_charges){
+                        $zero_cod_chagres_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Zero Cod Discount </strong></thead></table></div></div>';
+                        $zero_cod_chagres_details .= '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
+                            <tbody><tr><td class="color primary" ><strong>Zero Cod Discount</strong></td><td>' . $zero_cod_charges->cod_discount_per . '%</td></tr></tr></tbody>
+                          </table></div></div>';
+                    }
+
+
+                    $return_discount_chagres_details = '';
+                    if($shipper->account_type_id == 1){
+                        $return_discount_chagres = ShipmentReturnDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                    }else{
+                        if($corporate_rate_type == 3){
+                            $return_discount_chagres = CorporateDefaultShipmentReturnDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                        }
+                        else{
+                            $return_discount_chagres = CorporateShipmentReturnDiscountCharges::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->first();
+                        }
+                    }
+
+                    if($return_discount_chagres){
+                        $return_discount_chagres_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Return Discount Charges </strong></thead></table></div></div>';
+                        $return_discount_chagres_details .= '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0">
+                            <tbody><tr><td class="color primary" ><strong>Return Discount Charges</strong></td><td>' . $return_discount_chagres->return_discount_per . '%</td></tr></tr></tbody>
+                          </table></div></div>';
+                    }
+
                     $discount_weight_charges_details = '';
                     if($shipper->account_type_id == 1){
                         $discount_weight_charges = DiscountWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get()->groupBy('destination_id');
@@ -987,7 +1034,9 @@ otherwise it will be rejected</li>
                     $rate_details .= $cash_handling_details;
                     $rate_details .= $insurance_charges_details;
                     $rate_details .= $fuel_surcharge_charges_details;
+                    $rate_details .= $zero_cod_chagres_details;
                     $rate_details .= $return_charges_details;
+                    $rate_details .= $return_discount_chagres_details;
                     $rate_details .= $discount_weight_charges_details;
                     $rate_details .= '<div class="new-page"></div>';
                 }
@@ -1056,7 +1105,7 @@ otherwise it will be rejected</li>
                     $margin_9 = (float)$international_rate_status->margin_9;
                     $margin_10 = (float)$international_rate_status->margin_10;
                     $margin_11 = (float)$international_rate_status->margin_11;*/
-                  $margin = array('margin_1' => 0,'margin_2' => 0,'margin_3' => 0,'margin_4' => 0,'margin_5' => 0,'margin_6' => 0,'margin_7' => 0,'margin_8' => 0,'margin_9' => 0,'margin_10' => 0,'margin_11' => 0,);
+                  $margin = array('margin_1' => 0,'margin_2' => 0,'margin_3' => 0,'margin_4' => 0,'margin_5' => 0,'margin_6' => 0,'margin_7' => 0,'margin_8' => 0,'margin_9' => 0,'margin_10' => 0,'margin_11' => 0,'margin_1b' => 0,'margin_8b' => 0,);
                     $margin['margin_1']= (float)$international_rate_status->margin_1;
                     $margin['margin_2']= (float)$international_rate_status->margin_2;
                     $margin['margin_3']= (float)$international_rate_status->margin_3;
@@ -1068,6 +1117,8 @@ otherwise it will be rejected</li>
                     $margin['margin_9']= (float)$international_rate_status->margin_9;
                     $margin['margin_10'] = (float)$international_rate_status->margin_10;
                     $margin['margin_11'] = (float)$international_rate_status->margin_11;
+                    $margin['margin_1b'] = (float)$international_rate_status->margin_1b;
+                    $margin['margin_8b'] = (float)$international_rate_status->margin_8b;
 
                     $fuel_charges = 0;
                     $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
@@ -1105,7 +1156,7 @@ otherwise it will be rejected</li>
                     $intl_weight_charges_details = '';
                     if(count($intl_weight_charges) > 0){
                         $intl_weight_charges_details .= '<div class="row"><div class="col-12"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Weight Charges </strong></thead></table></div></div>';
-                        $intl_weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Zone 1</th><th>Zone 2</th><th>Zone 3</th><th>Zone 4</th><th>Zone 5</th><th>Zone 6</th><th>Zone 7</th><th>Zone 8</th><th>Zone 9</th><th>Zone 10</th><th>Zone 11</th></tr></thead><tbody>';
+                        $intl_weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Zone 1</th><th>Zone 2</th><th>Zone 3</th><th>Zone 4</th><th>Zone 5</th><th>Zone 6</th><th>Zone 7</th><th>Zone 8</th><th>Zone 9</th><th>Zone 10</th><th>Zone 11</th><th>Zone 1B</th><th>Zone 8B</th></tr></thead><tbody>';
 
                         foreach ($intl_weight_charges as $weight_charge) {
                            
@@ -1120,8 +1171,10 @@ otherwise it will be rejected</li>
                             $zone_9_charges = self::international_charges_calculate($weight_charge->zone_9, $fuel_surcharge_flat, $exchange_rate_charges,  $margin['margin_9'], $gst_flat);
                             $zone_10_charges = self::international_charges_calculate($weight_charge->zone_10, $fuel_surcharge_flat, $exchange_rate_charges,  $margin['margin_10'], $gst_flat);
                             $zone_11_charges = self::international_charges_calculate($weight_charge->zone_11, $fuel_surcharge_flat, $exchange_rate_charges,  $margin['margin_11'], $gst_flat);
+                            $zone_1b_charges = self::international_charges_calculate($weight_charge->zone_1b, $fuel_surcharge_flat, $exchange_rate_charges,  $margin['margin_1b'], $gst_flat);
+                            $zone_8b_charges = self::international_charges_calculate($weight_charge->zone_8b, $fuel_surcharge_flat, $exchange_rate_charges,  $margin['margin_8b'], $gst_flat);
 
-                            $intl_weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $zone_1_charges . '</td><td>' . $zone_2_charges . '</td><td>' . $zone_3_charges . '</td><td>' . $zone_4_charges . '</td><td>' . $zone_5_charges . '</td><td>' . $zone_6_charges . '</td><td>' . $zone_7_charges . '</td><td>' . $zone_8_charges . '</td><td>' . $zone_9_charges . '</td><td>' . $zone_10_charges . '</td><td>' . $zone_11_charges . '</td></tr>';
+                            $intl_weight_charges_details .= '<tr><td>' . $weight_charge->range_up . '</td><td>' . $weight_charge->range_down . '</td><td>' . $zone_1_charges . '</td><td>' . $zone_2_charges . '</td><td>' . $zone_3_charges . '</td><td>' . $zone_4_charges . '</td><td>' . $zone_5_charges . '</td><td>' . $zone_6_charges . '</td><td>' . $zone_7_charges . '</td><td>' . $zone_8_charges . '</td><td>' . $zone_9_charges . '</td><td>' . $zone_10_charges . '</td><td>' . $zone_11_charges . '</td><td>' . $zone_1b_charges . '</td><td>' . $zone_8b_charges . '</td></tr>';
                         }
                         $intl_weight_charges_details .= '</tbody></table>';
                         $intl_box .= $intl_weight_charges_details;

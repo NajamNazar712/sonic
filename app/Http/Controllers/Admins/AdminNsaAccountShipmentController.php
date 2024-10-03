@@ -236,6 +236,7 @@ class AdminNsaAccountShipmentController extends Controller
                             $settings = $settings->first();
                             $nsa_accounts = array_map('intval', explode(',', $settings->text));
                         }
+
                         if (count($nsa_accounts) > 0) {
                             if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->where('shipper_status_id', 1)->exists()) {
                                 $errors['Row #' . $row_id][] = 'Shipment not found with Tracking Number #' . $row['tracking_number'];
@@ -273,7 +274,7 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     $status_id = 2;
 
-                                    if (in_array($nsa_shipment->user_id, [7762, 10354])) {
+                                    if (in_array($nsa_shipment->user_id, [7762, 10354,37791,38106])) {
                                         $admin_id = Auth::id();
                                     }
                                     else {
@@ -293,7 +294,7 @@ class AdminNsaAccountShipmentController extends Controller
                                     $nsa_shipment->shipper_status_id = $status_id;
                                     $nsa_shipment->consignee_status_id = $status_id;
 
-                                    if (in_array($nsa_shipment->user_id, [7762, 10354])) {
+                                    if (in_array($nsa_shipment->user_id, [7762, 10354,37791,38106])) {
                                         $nsa_shipment->actual_weight = $nsa_shipment->estimated_weight;
                                     }
                                     else {

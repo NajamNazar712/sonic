@@ -144,6 +144,7 @@ class MMSReportController extends Controller
             ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','riders.trax_id as rider_id', 'riders.name as rider_name','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'dr.received_or_refused_by', 'dr.cnic', 'dr.relation','ssr.name as reason', 'shipments.consignee_address', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2','si.description as item_description',  'sjl.shipment_id as journey_latest_id',
             'sjl.updated_at as journey_latest_updated_at',
             'sjl.shipper_status_id as latest_shipper_status_id','shipments.shipper_status_id as shipper_status_id')
+            ->whereNotNull('shipments.tracking_number')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereIn('u.id', $special_shippers)
             ->whereBetween('sj.created_at', [$from,$to])

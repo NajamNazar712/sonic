@@ -149,14 +149,16 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\NotificationReturnedDeliveredToShipper',
         // 'App\Console\Commands\AgentUnassignedTicket ',
         'App\Console\Commands\AgentSarNotification',
+        'App\Console\Commands\BotCallInitiate',
         'App\Console\Commands\SackBagStatusUpdate',
         'App\Console\Commands\AutoAssignCrmAgentNew',
-//        'App\Console\Commands\ShipperLogisticBookingCron',
-//        'App\Console\Commands\HourlyShipperLogisticBookingEmailCron'
+        // 'App\Console\Commands\ShipperLogisticBookingCron',
+        // 'App\Console\Commands\HourlyShipperLogisticBookingEmailCron'
 
         'App\Console\Commands\CalculateFranchiseCommission',
         'App\Console\Commands\DeleteOldDataFromShortUrlTable',
-        'App\Console\Commands\RestartSupervisordProcesses'
+        'App\Console\Commands\RestartSupervisordProcesses',
+        'App\Console\Commands\UpdateArrivalChargesCommand'
         ];
 
     /**
@@ -167,6 +169,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('create:service_ledger')->dailyAt('00:00')->runInBackground();
         $schedule->command('corporate_reimbursement_setting:update')->monthlyOn(1, '00:15')->runInBackground();
 
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
@@ -240,6 +243,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('agent:sarnotification')->dailyAt($agent_sar_notify_time)->runInBackground();
 
         //rv agent cron jobs end
+
+        // rv cron job for the call every two hours execute
+        $checkBot = GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists();
+        if($checkBot)
+        {
+            $schedule->command('agent:botcallunresponsive')->everyFifteenMinutes()->runInBackground();
+        }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -537,15 +547,19 @@ class Kernel extends ConsoleKernel
 		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
 //		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground(); //ye filhal bnd ki hai due to r2 shutdown issue
 		$schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
-		$schedule->command('clean:7DaysQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
+		$schedule->command('clean:7DaysOlderQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
 
         // Commission calculation schedule
         $schedule->command('commission:calculate_commission')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('logistic:shipper-bookings')->dailyAt('06:00')->runInBackground();
 //        $schedule->command('hourly-logistic:shipper-bookings')->hourly()->runInBackground();
         $schedule->command('delete:short-url-data')->dailyAt('01:00')->runInBackground();
-        $schedule->command('supervisord:restart')->twiceDaily('09','17')->runInBackground();
+        $schedule->command('supervisord:restart')
+            ->cron('0 9,13,16 * * *')
+            ->runInBackground();
 
+        $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
+//        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
     }
     /**
      * Register the commands for the application.
