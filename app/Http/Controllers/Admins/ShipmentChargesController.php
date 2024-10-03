@@ -890,6 +890,12 @@ class ShipmentChargesController extends Controller
                             case 11:
                                 $margin = $international_rate->margin_11;
                                 break;
+                            case "1b":
+                                $margin = $international_rate->margin_1b;
+                                break;
+                            case "8b":
+                                $margin = $international_rate->margin_8b;
+                                break;
                             default:
                                 $margin = 0;
                                 break;

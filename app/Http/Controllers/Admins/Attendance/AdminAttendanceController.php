@@ -77,6 +77,9 @@ class AdminAttendanceController extends Controller
     }
 
     public function admin_attendance_index(Request $request){
+
+        // return redirect()->route('admin.dashboard.index');
+
         ActivityTrailController::createActivityTrailLog(Auth::id(),56);
 
         if(in_array(session('role_id'), [1, 63, 70,104])){
@@ -116,6 +119,9 @@ class AdminAttendanceController extends Controller
     }
 
     public function admin_attendance_horizontal_index(Request $request){
+
+        // return redirect()->route('admin.dashboard.index');
+
         ActivityTrailController::createActivityTrailLog(Auth::id(),453);
 
         if(in_array(session('role_id'), [1, 63, 70,104])){
@@ -183,14 +189,14 @@ class AdminAttendanceController extends Controller
             $attendances->where('a.id', $search_disabled_rider)->where('employee_type',2);
         }
 
-//        if(session('role_id') != 1)
-//        {
-////            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
-//            $attendances->where(function($query){
-//                $query->whereIn('c.hub_id', session('hubs'))
-//                    ->orWhereIn('rc.hub_id', session('hubs'));
-//            });
-//        }
+        //        if(session('role_id') != 1)
+        //        {
+        ////            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
+        //            $attendances->where(function($query){
+        //                $query->whereIn('c.hub_id', session('hubs'))
+        //                    ->orWhereIn('rc.hub_id', session('hubs'));
+        //            });
+        //        }
        
         $datatable = Datatables::of($attendances)
         ->setRowAttr([
@@ -510,6 +516,7 @@ class AdminAttendanceController extends Controller
 
     public function mark_attendance_index()
     {
+        // return redirect()->route('admin.dashboard.index');
         ActivityTrailController::createActivityTrailLog(Auth::id(), 432);
         $admin_id = Auth::user()->employee_id;
         $date = Carbon::now()->format("Y-m-d");
@@ -571,6 +578,7 @@ class AdminAttendanceController extends Controller
 
     public function mark_attendance_submit(Request $request)
     {
+        // return redirect()->route('admin.dashboard.index');
         $attendance_mark = Carbon::now()->format('Y-m-d H:i:s');
         $admin_id = Auth::user()->employee_id;
         $admin = Employee::find($admin_id);
