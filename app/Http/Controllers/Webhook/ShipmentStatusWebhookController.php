@@ -90,12 +90,14 @@ class ShipmentStatusWebhookController extends Controller
                 if($otp){
                     $payload['otp'] = $otp;
                 }
+                if ($user_id == 32032) {
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log url' . json_encode($url));
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log $payload' . json_encode($payload));
+                }
                 $response = $client->post('', [
                     'form_params' => $payload
                 ]);
-                if ($user_id == 32032) {
-                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log form_params' . json_encode($client));
-                }
+                
                 $status_code = $response->getStatusCode();
                 if ($user_id == 32032) {
                     Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-payload' . json_encode($response));
