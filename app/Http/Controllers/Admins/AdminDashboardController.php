@@ -13599,19 +13599,15 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     }
 
                     $user = User::find($user_id);
-                    if($user->corporate_rate_type_id){
-                        if($user->corporate_rate_type_id == 1){
-                            $table1 = CorporateWeightCharge::class;
-                            $table2 = HistoryCorporateWeightCharge::class;
-                        }else if ($user->corporate_rate_type_id == 2){
-                            $table1 = CorporateWeightChargeZoneWise::class;
-                            $table2 = HistoryCorporateWeightChargeZoneWise::class;
-                        }else{
-                            $table1 = CorporateDefaultWeightCharge::class;
-                            $table2 = CorporateDefaultHistoryWeightCharge::class;
-                        }
-                        $compare_weight = $this->compareWeightCharges($user_id, $table1, $table2);
+                    if (!$user || !$user->corporate_rate_type_id) {
+                        return;
                     }
+
+                    //FlatKg and default
+                    $table1 = CorporateDefaultWeightCharge::class;
+                    $table2 = CorporateDefaultHistoryWeightCharge::class;
+
+                    $compare_weight = $this->compareWeightCharges($user_id, $table1, $table2);
 
                     return response()->json(['status' => 1, 'success', 'account_type' => 2, 'details' => $details, 'user_id' => $user_id, 'compare_weight' => $compare_weight]);
                 } else {
@@ -15235,8 +15231,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             return 'green';
         } elseif ($existing_fuel_surcharge_value < $history_fuel_surcharge_value) {
             return 'red';
-        } else {
-            return 'yellow';
         }
+
+        return 'yellow';
+
     }
 }
