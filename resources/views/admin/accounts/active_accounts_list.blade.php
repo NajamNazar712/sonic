@@ -3873,12 +3873,12 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
                     'font-weight': 'bold',
                     'margin-bottom': '2px',
                     'line-height': '1.2',
-                    'font-size': '12px'
+                    'font-size': '20px'
                 }).text(label);
 
                 let colorSquare = $('<div></div>').addClass(`${type}-color-square color-square`).css({
-                    'width': '10px',
-                    'height': '10px',
+                    'width': '15px',
+                    'height': '15px',
                     'background-color': color,
                     'border': '1px solid #2c3e50',
                     'margin': '0 5px'
