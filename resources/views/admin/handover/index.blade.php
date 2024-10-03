@@ -37,7 +37,7 @@
 
                     
                     <div class="row mb-2 justify-content-center">
-                        <div class="col-3">
+                        <div class="col-2 mr-1">
                             <fieldset class="form-group">
                                 <select name="hub" id="hub" class="form-control select2 dynamic" data-dependent="from"
                                         required>
@@ -49,7 +49,7 @@
                             </fieldset>
 
                         </div>
-                        <div class="col-3">
+                        <div class="col-2 mr-1">
                             <fieldset class="form-group">
                                 <select name="from" id="from" class="form-control select2" required>
                                 </select>
@@ -57,7 +57,7 @@
                             </fieldset>
                         </div>
 
-                        <div class="col-3">
+                        <div class="col-2">
                             <fieldset class="form-group">
                                 <input type="text" readonly id="from_sub_area" class="form-control from_sub_area width-215" placeholder="From Sub Area">
                             </fieldset>
@@ -70,7 +70,7 @@
                             </fieldset>
                         </div> --}}
 
-                        <div class="col-3">
+                        <div class="col-2 mr-1">
                             <fieldset class="form-group">
                                 <select name="to" id="to" class="form-control select2" required>
                                 </select>
@@ -78,7 +78,7 @@
                             </fieldset>
                         </div>
 
-                        <div class="col-3">
+                        <div class="col-2 mr-1">
                             <fieldset class="form-group">
                                 <input type="text" readonly  id="to_sub_area" class="form-control to_sub_area width-215" placeholder="To Sub Area">
                             </fieldset>
