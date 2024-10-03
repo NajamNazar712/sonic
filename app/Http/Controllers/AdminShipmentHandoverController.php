@@ -238,7 +238,6 @@ class AdminShipmentHandoverController extends Controller
               }
             }
           }
-
           // shipments with no handover/bag
           if (!$handover_shipments->first())
           {
@@ -252,7 +251,7 @@ class AdminShipmentHandoverController extends Controller
             // $details['bag_number'] = $bag_number;
             $details['verification_status'] = 'Excess';
 
-            if($handover_shipments->exists() && $shipment_pieces == 1){
+            if($shipment_pieces == 1){
               ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
               return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
             }
