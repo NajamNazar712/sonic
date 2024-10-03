@@ -72,7 +72,9 @@ class ShipmentStatusWebhookController extends Controller
     static public function webhook_dispatch($url, $user_id, $tracking_number, $status, $date, $reason = NULL, $otp = NULL,$orderId = NULL){
         $attempts = 5;
         $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 30, 'timeout' => 30]);
-
+        if($user_id == 32032){
+            Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-in' . date('Y-m-d H:i:s'));
+        }
         $notification_data = ['user_id' => $user_id, 'url' => $url];
         for($i = 0; $i < $attempts; $i++){
             try{
@@ -93,7 +95,9 @@ class ShipmentStatusWebhookController extends Controller
                 ]);
                 
                 $status_code = $response->getStatusCode();
-                
+                if ($user_id == 32032) {
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-payload' . json_encode($response));
+                }
                 if (in_array($status_code, [200, 201, 202, 204])) {
                     break;
                 }
@@ -101,7 +105,9 @@ class ShipmentStatusWebhookController extends Controller
             }
             catch (\GuzzleHttp\Exception\ConnectException $e) {
                 // log the error here
-
+                if ($user_id == 32032) {
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-error' . json_encode($e->getMessage()));
+                }
                 $res = $e->getMessage();
                 $status_code = 404;
                 $notification_data['status_code'] = $status_code;
@@ -119,7 +125,9 @@ class ShipmentStatusWebhookController extends Controller
             catch(RequestException $e){
                 $status_code = 400;
                 $res = $e->getMessage();
-
+                if ($user_id == 32032) {
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-error' . json_encode($res));
+                }
                 $notification_data['status_code'] = $status_code;
                 $notification_data['message'] = $res;
                 WebhookLogController::shipment_status_log($user_id, $status_code, $res);
