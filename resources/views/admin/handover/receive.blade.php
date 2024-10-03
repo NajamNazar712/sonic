@@ -475,6 +475,7 @@
                             data: {
                                 'tracking_number': tracking_number,
                                 'action' : window.lastAction,
+                                'handover': handover,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
