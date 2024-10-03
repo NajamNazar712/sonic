@@ -3797,6 +3797,20 @@ class AdminReportsController extends Controller
                 } else {
                     return '';
                 }
+            })->addColumn('total_attempt', function ($sale) {
+                $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $sale->shipment_id);
+                if ($delivery_note_shipment->exists()) {
+                    $delivery_note_ids = $delivery_note_shipment->pluck('delivery_note_id')->toArray();
+                    $delivery_notes = DeliveryNote::whereIn('id', $delivery_note_ids)
+                        ->whereHas('rider', function ($query) {
+                            $query->where('operation_rider_id', 1);
+                        })
+                        ->count();
+
+                    return $delivery_notes;
+                }
+
+                return '-';
             });
 
         if ($tracking = $request->get('search_tracking')) {
@@ -14757,8 +14771,7 @@ class AdminReportsController extends Controller
             'u.id as account_no',
             'sm.mode as shipping_mode',
             'shipments.order_id as order_id',
-            'rc.name as return_city', 
-             DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),
+            'rc.name as return_city',
             'cmbh.name as current_hub_name',
             'cmbh.id as current_hub_id',
             'shipments.shipper_status_id as shipper_status_id',
@@ -14809,7 +14822,7 @@ class AdminReportsController extends Controller
                     DB::raw('(select max(id) from sale_tier_tags where sale_tier_tags.user_id = u.id)')
                 );
             })
-            
+
             ->leftJoin('admins as kam', 'kam.id','stt.kam')
             ->leftjoin('sales_commissions as sc', 'sc.shipper_id', '=', 'u.id')
             ->leftjoin('sales_commission_users as scu', function($join){
@@ -14957,7 +14970,7 @@ class AdminReportsController extends Controller
                                     where shipment_scanning_journeys.shipment_id = journey.shipment_id
                                     and shipment_scanning_journeys.screen_location_id not in (9, 18)
                                 )');
-            })            
+            })
             ->when(\DB::raw('ssj_last_location.user_type = 1'), function ($join) {
                 $join->leftJoin('admins as adm', function ($join) {
                     $join->on('adm.id', '=', 'ssj_last_location.admin_id')
@@ -14968,7 +14981,7 @@ class AdminReportsController extends Controller
                 $join->on('ssjal_last_location.shipment_scanning_journey_id', '=', 'ssj_last_location.id')
                      ->where('ssjal_last_location.hub_id', '=', DB::raw('journey.city_id'))
                      ->where('ssjal_last_location.shipment_id', '=', DB::raw('journey.shipment_id'));
-            })                 
+            })
             ->leftJoin('city_areas as ca_scanning_last_location_name', 'ssjal_last_location.area_id', '=', 'ca_scanning_last_location_name.id')
             ->leftJoin('shipment_scanning_screen_locations as last_screen_location', 'last_screen_location.id', '=', 'ssj_last_location.screen_location_id')
 
@@ -15078,7 +15091,7 @@ class AdminReportsController extends Controller
         if($search_sale_person =  $request->get('search_sale_person')) {
             $shipments->where('spt.admin_id', $search_sale_person);
         }
- 
+
         if ($search_kam = $request->get('search_kam')) {
             $shipments->where(function($query) use ($search_kam) {
                 $query->where('stt.kam', $search_kam)
@@ -15203,7 +15216,8 @@ class AdminReportsController extends Controller
                     return $shipments->stt_kam_name;
                 }
 
-            })->editColumn('ca_scanning_last_location_name', function ($shipment) {
+            })
+            ->editColumn('ca_scanning_last_location_name', function ($shipment) {
                 if($shipment->scanned_by_user_type == 5){
                     $rider = Rider::find($shipment->scanned_by_id);
                     if(isset($rider->area)){
@@ -15216,11 +15230,28 @@ class AdminReportsController extends Controller
                 }else{
                     return '-';
                 }
-            })->editColumn('entry_method', function ($shipment) {
+            })
+            ->editColumn('entry_method', function ($shipment) {
                 return $shipment->entry_method === null
                     ? 'Not Scanned'
                     : ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
+            })
+            ->addColumn('total_attempt', function ($shipment) {
+                $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->shId);
+                if ($delivery_note_shipment->exists()) {
+                    $delivery_note_ids = $delivery_note_shipment->pluck('delivery_note_id')->toArray();
+                    $delivery_notes = DeliveryNote::whereIn('id', $delivery_note_ids)
+                        ->whereHas('rider', function ($query) {
+                            $query->where('operation_rider_id', 1);
+                        })
+                        ->count();
+
+                    return $delivery_notes;
+                }
+
+                return '-';
             });
+
       
 
         //return $datatable->make(true);
