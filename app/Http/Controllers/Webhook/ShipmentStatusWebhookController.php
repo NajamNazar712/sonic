@@ -73,7 +73,7 @@ class ShipmentStatusWebhookController extends Controller
         $attempts = 5;
         $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 30, 'timeout' => 30]);
         if($user_id == 32032){
-            Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-in' . date('Y-m-d H:i:s'));
+            Log::channel('botCallJobLog')->info('s ' . 'Webhook log $url' . $url);
         }
         $notification_data = ['user_id' => $user_id, 'url' => $url];
         for($i = 0; $i < $attempts; $i++){
