@@ -97,7 +97,7 @@ class ShipmentStatusWebhookController extends Controller
                 if ($user_id == 32032) {
                     $response = $response->getBody()->getContents();
                     $response = json_decode($response);
-                    WebhookLogController::shipment_status_log($user_id,  200, json_encode($response));
+                    WebhookLogController::shipper_webhook_log($user_id, json_encode($response));
                 }
                 $status_code = $response->getStatusCode();
                 
