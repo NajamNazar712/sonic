@@ -40,9 +40,6 @@ class ProcessShipmentStatusWebhook implements ShouldQueue
         $date = $this->shipment['date_time'];
         $reason = $this->shipment['reason'];
         $otp = $this->shipment['otp'];
-        if($this->shipment['user_id'] == 32032){
-            Log::channel('botCallJobLog')->info('s ' . 'Webhook log check' . date('Y-m-d H:i:s'));
-        }
         ShipmentStatusWebhookController::webhook_dispatch($url, $user_id, $tracking_number, $status, $date, $reason, $otp,$orderId);
     }
 }

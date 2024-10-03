@@ -93,10 +93,13 @@ class ShipmentStatusWebhookController extends Controller
                 $response = $client->post('', [
                     'form_params' => $payload
                 ]);
-                
+                if ($user_id == 32032) {
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log form_params' . json_encode($client));
+                }
                 $status_code = $response->getStatusCode();
                 if ($user_id == 32032) {
                     Log::channel('botCallJobLog')->info('s ' . 'Webhook log check-payload' . json_encode($response));
+                    Log::channel('botCallJobLog')->info('s ' . 'Webhook log status_code' . $status_code);
                 }
                 if (in_array($status_code, [200, 201, 202, 204])) {
                     break;
