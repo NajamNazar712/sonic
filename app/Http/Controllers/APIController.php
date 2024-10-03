@@ -2149,7 +2149,7 @@ class APIController extends Controller
                     ->where('shipping_mode_id', $data['shipping_mode_id'] ?? null)
                     ->exists()) {
         
-                $validator->errors()->add($attribute, 'Delivery is not allowed for City ID #' . $delivery_city->id . 
+                $validator->errors()->add($attribute, 'Delivery is not allowed for City ID #' . $value .
                     ' with Service Type ID #' . ($data['service_type_id'] ?? 'N/A') . 
                     ' and Shipping Mode ID #' . ($data['shipping_mode_id'] ?? 'N/A'));
                 return false;
