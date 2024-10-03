@@ -473,6 +473,7 @@ class RiderLogisticApiController extends Controller
 
         public function store_image(Request $request) {
 
+            Log::channel('code_test_log')->error('logistic CN Number: '. $request->cn_number);
             $rules = [ 
                 'booking_image' => ['required', 'mimes:png,jpeg,jpg'],
                 'cn_number' => ['required']
