@@ -111,7 +111,6 @@ class AdminShipmentHandoverController extends Controller
           $details['pickup_date'] = $shipment->pickup_date;
           $details['special_instructions'] = $shipment->special_instructions;
           ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
-          ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
 
           $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
 
@@ -253,10 +252,10 @@ class AdminShipmentHandoverController extends Controller
             // $details['bag_number'] = $bag_number;
             $details['verification_status'] = 'Excess';
 
-            if($shipment_pieces == 1){
-              ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
-              return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
-            }
+          if($handover_shipments->exists() && $shipment_pieces == 1){
+            ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->actionL);
+            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+          }
 
             else if($shipment_pieces > 1)
             {

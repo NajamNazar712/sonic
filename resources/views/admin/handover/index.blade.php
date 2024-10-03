@@ -471,7 +471,7 @@
                                                                     'tracking_number': tracking_number,
                                                                     'delivery_location_mapping': $('#delivery_location_mapping').val(),
                                                                     'action': window.lastAction,
-                                                                    '_token': '{{ csrf_token() }}'
+                                '_token': '{{ csrf_token() }}'
                                                                 }
                                                             }).done(function(data) {
                                                                 if (data.status === 0) {
