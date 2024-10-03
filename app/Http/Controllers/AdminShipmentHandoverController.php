@@ -92,7 +92,7 @@ class AdminShipmentHandoverController extends Controller
         ->select('shipper_status_id')
         ->first();
         if ($blocked_shipments->shipper_status_id == 51 || $blocked_shipments->shipper_status_id == 18){
-          ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+          ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
           return ['status' => 1, 'error' => 'Cannot scan this shipment.'];
         }
 
