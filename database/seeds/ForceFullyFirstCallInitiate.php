@@ -33,7 +33,7 @@ class ForceFullyFirstCallInitiate extends Seeder
 
             foreach ($shipmentId as $shipmentId) {
                 if(RvShipmentAssignAgent::where('shipment_id', $shipmentId->id)->exists()){
-                    dispatch(new BotCallDispatch($shipmentId));
+                    dispatch(new BotCallDispatch($shipmentId->id));
                 }else{
                     $this->rvshipmentticketInsert($shipmentId->id, $shipmentId->shipper_status_id, 8, $shipmentId->user_id);
                 }
