@@ -5339,16 +5339,15 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 return $message;
             })
             ->addColumn('shipment_status_dncc', function ($shipment) {
-                $shipments_journey_id = ShipmentsJourney::where('shipment_id', $shipment->shId)
+                // Eager load the status relationship while fetching the ShipmentsJourney
+                $shipmentsJourney = ShipmentsJourney::with('shipment_status_shipper')
+                    ->where('shipment_id', $shipment->shId)
                     ->whereNotNull('reference_1_id')
                     ->where('reference_1_id', $shipment->dncc_no)
-                    ->pluck('id')
-                    ->max();
-                $shipment_journey_status = ShipmentsJourney::where('id', $shipments_journey_id)->first();
-                $shipment_status = ShipmentStatus::where('id', $shipment_journey_status->shipper_status_id)
-                    ->select('name')
                     ->first();
-                return $shipment_status->name;
+
+                // Return the name of the status if it exists
+                return optional($shipmentsJourney->shipment_status_shipper)->name;
             });
 
         return $datatables->make(true);
