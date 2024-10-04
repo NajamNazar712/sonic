@@ -72,9 +72,7 @@ class ShipmentStatusWebhookController extends Controller
     static public function webhook_dispatch($url, $user_id, $tracking_number, $status, $date, $reason = NULL, $otp = NULL,$orderId = NULL){
         $attempts = 5;
         $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 30, 'timeout' => 30]);
-        if($user_id == 32032){
-            Log::channel('botCallJobLog')->info('s ' . 'Webhook log $url' . $url);
-        }
+        
         $notification_data = ['user_id' => $user_id, 'url' => $url];
         for($i = 0; $i < $attempts; $i++){
             try{
@@ -94,18 +92,9 @@ class ShipmentStatusWebhookController extends Controller
                 $response = $client->post('', [
                     'form_params' => $payload
                 ]);
-                if ($user_id == 32032) {
-                    $response = $response->getBody()->getContents();
-                    $response = json_decode($response);
-                    WebhookLogController::shipper_webhook_log($user_id, json_encode($response));
-                }
+               
                 $status_code = $response->getStatusCode();
-                
-                if ($user_id == 32032) {
-                    $response1 = $response->getBody()->getContents();
-                    $response1 = json_decode($response);
-                    WebhookLogController::shipment_status_log($user_id,  $status_code, $response1);
-                }
+               
                 if (in_array($status_code, [200, 201, 202, 204])) {
                     break;
                 }
