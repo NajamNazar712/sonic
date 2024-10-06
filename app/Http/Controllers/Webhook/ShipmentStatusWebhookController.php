@@ -92,8 +92,13 @@ class ShipmentStatusWebhookController extends Controller
                 $response = $client->post('', [
                     'form_params' => $payload
                 ]);
-               
-                $status_code = $response->getStatusCode();
+
+                if ($response instanceof \Psr\Http\Message\ResponseInterface) {
+                    $status_code = $response->getStatusCode();
+                } else {
+                    $status_code = 500;
+                }
+
                
                 if (in_array($status_code, [200, 201, 202, 204])) {
                     break;
