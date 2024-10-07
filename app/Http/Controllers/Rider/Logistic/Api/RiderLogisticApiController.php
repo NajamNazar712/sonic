@@ -473,7 +473,7 @@ class RiderLogisticApiController extends Controller
 
         public function store_image(Request $request) {
 
-            Log::channel('code_test_log')->error('logistic CN Number: '. $request->cn_number);
+           // Log::channel('code_test_log')->error('logistic CN Number: '. $request->cn_number);
             $rules = [ 
                 'booking_image' => ['required', 'mimes:png,jpeg,jpg'],
                 'cn_number' => ['required']
@@ -498,6 +498,7 @@ class RiderLogisticApiController extends Controller
                         $time = Carbon::now()->timestamp;
                         $image_name =$booking_id . '_' . $time . '.png';
                         $image_path = 'logistic_bookings/' . $image_name;
+                        Log::channel('code_test_log')->error('logistic image_path: '. $image_path.' booking_image - > '.$request->booking_image);
 //                    Storage::disk('public')->put($image_path, file_get_contents($request->booking_image));
                         Storage::disk('s4')->put($image_path, file_get_contents($request->booking_image));
                         $image->booking_id = $booking_id;
