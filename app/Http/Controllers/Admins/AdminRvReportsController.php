@@ -50,9 +50,20 @@ class AdminRvReportsController extends Controller
             DB::raw("sum(CASE WHEN rv_assign_agent_sub_status_id IN (32,33) THEN 1 ELSE 0 END) AS total2"),
             DB::raw("concat(round(sum(case when rv_assign_agent_sub_status_id IN (32,33) then 1 else 0 end) / count(DISTINCT Shipment_id) * 100,2), '%') AS total2_per"),
             DB::raw("sum(CASE WHEN rv_assign_agent_sub_status_id IN (32,33,35,36,37,34) THEN 1 ELSE 0 END) AS grandtotal"),
-            DB::raw('count(DISTINCT shipment_id) as no_of_shipment')
+            DB::raw('COUNT(DISTINCT CASE WHEN call_count IN (2, 3) THEN Shipment_id ELSE NULL END) + COUNT(CASE WHEN call_count = 1 THEN Shipment_id ELSE NULL END) as no_of_shipment')
         )->groupBy(DB::raw("DATE(created_at), call_count WITH ROLLUP"));
             $datatable = Datatables::of($rv_report);
+            // ->editColumn('option1_per', function ($rv_report) {
+            //     if($rv_report['description'] == '1st Calls'){
+            //         if($rv_report['option1_per']){
+            //             return round($rv_report['option1'] / $rv_report['no_of_shipments'] * 100 ,2).'%'; 
+            //         }
+            //         // if($rv_report['total1_per']){
+            //         //     return round($rv_report['total1_per'] / $rv_report['no_of_shipments'] * 100 ,2).'%'; 
+            //         // }
+
+            //     }
+            // });
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');

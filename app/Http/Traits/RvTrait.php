@@ -810,8 +810,8 @@ trait RvTrait
                 // if($request->rv_assign_agent_sub_status_id == 34){ //If the consignee is unresponsive during a bot call, the unresponsive count is set to 3, and the SAR is marked 
                 //      $rv_shipment_assign_agent->unresponsive_count = 3; 
                 // }else{
-                //     $rv_shipment_assign_agent->increment('unresponsive_count');
-                // }
+                    // }
+                $rv_shipment_assign_agent->increment('unresponsive_count');
                 $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
                 $rv_shipment_assign_agent->save();
 
