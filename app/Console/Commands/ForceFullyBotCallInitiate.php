@@ -50,7 +50,8 @@ class ForceFullyBotCallInitiate extends Command
         //Unresponsive count
         $unresponsive = $this->argument('unresponsive');
         // Now, re-initiate process for the retrieved shipment_ids after unresponsive one
-        $shipment = RvShipmentAssignAgent::where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => $unresponsive, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
+        $shipment = RvShipmentAssignAgent::join('shipments as s','s.id', 'rv_shipment_assign_agents.shipment_id')->where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'unresponsive_count' => $unresponsive, 'rv_assign_agent_status_id' => 6])->whereIn('s.shipper_status_id',[12,52,66])->pluck('shipment_id');
+        
         Log::channel('cronJobLog')->info('s ' . 'Log after  shipmentSeconds call  record' . count($shipment));
 
         if (count($shipment) > 0) {
