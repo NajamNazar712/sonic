@@ -1563,16 +1563,20 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
 
-//        if(!in_array($user_id, $bulk_booking_shippers)){
-//            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
-//        }
+        if(!in_array($user_id, $bulk_booking_shippers)){
+            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
+        }
 
+        if(count($request->data) > 150){
+            return response()->json(['message' => 'Bulk Booking Limit Is Max 150']);
+        }
 
         $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
         $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
         $timeLimit = 0;
 
-        if ($shipmentCountRecord && (count($request->data) >= 1 && count($request->data) < 151)) {
+        if ($shipmentCountRecord) {
+
             $last_created_at = $shipmentCountRecord->created_at;
             $minutesDiff = $last_created_at->diffInMinutes(now());
 
