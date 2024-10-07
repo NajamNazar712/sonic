@@ -15271,10 +15271,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->whereDate('created_at', $latestDate)
             ->sum('fuel_surcharge');
 
-        $existing_fuel_surcharge = $table1::where('user_id', $user_id)
-            ->whereDate('created_at', $latestDate)
-            ->sum('fuel_surcharge');
-        
+        $existing_fuel_surcharge = $table1::where('user_id', $user_id)->sum('fuel_surcharge');
+
         if($existing_fuel_surcharge && $history_fuel_surcharge) {
             if ($existing_fuel_surcharge > $history_fuel_surcharge) {
                 return 'green';
