@@ -1892,6 +1892,7 @@ class ShipperFinanceController extends Controller
                 $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges;
                 $final_array[$origin][$shipment->id]['gst'] = $invoice_shipment->gst;
                 $final_array[$origin][$shipment->id]['total_invoice_amount'] = $invoice_shipment->invoice_amount;
+                $serial_number[$origin]++;
 
             }
             else {
@@ -1954,7 +1955,7 @@ class ShipperFinanceController extends Controller
                         <td>' . number_format($final_array[$origin][$shipment->id]['total_invoice_amount'], 2) . '</td>
                     </tr>';
 
-            $serial_number[$origin]++;
+
 
             if (!isset($total_weight_charges[$origin])) {
                 $total_weight_charges[$origin] = 0;
@@ -4037,6 +4038,7 @@ class ShipperFinanceController extends Controller
                 $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges;
                 $final_array[$origin][$shipment->id]['gst'] = $invoice_shipment->gst;
                 $final_array[$origin][$shipment->id]['total_invoice_amount'] = $invoice_shipment->invoice_amount;
+                $serial_number[$origin]++;
 
             }
             else {
@@ -4098,7 +4100,7 @@ class ShipperFinanceController extends Controller
                         <td>' . number_format($final_array[$origin][$shipment->id]['total_invoice_amount'], 2) . '</td>
                     </tr>';
 
-            $serial_number[$origin]++;
+
 
             if (!isset($total_weight_charges[$origin])) {
                 $total_weight_charges[$origin] = 0;
