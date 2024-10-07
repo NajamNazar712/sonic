@@ -1563,27 +1563,27 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
 
-        if(!in_array($user_id, $bulk_booking_shippers)){
-            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
-        }
+//        if(!in_array($user_id, $bulk_booking_shippers)){
+//            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
+//        }
 
 
         $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
         $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
         $timeLimit = 0;
 
-        if ($shipmentCountRecord) {
+        if ($shipmentCountRecord && (count($request->data) >= 1 && count($request->data) < 151)) {
             $last_created_at = $shipmentCountRecord->created_at;
             $minutesDiff = $last_created_at->diffInMinutes(now());
 
             $timeLimits = [
-                ['min' => 100, 'max' => 150, 'limit' => 5,  'seconds' => 300],
-                ['min' => 150, 'max' => 200, 'limit' => 10, 'seconds' => 600],
-                ['min' => 200, 'max' => 300, 'limit' => 15, 'seconds' => 900]
+                ['min' => 1, 'max' => 50, 'limit' => 5,  'seconds' => 300],
+                ['min' => 51, 'max' => 100, 'limit' => 10, 'seconds' => 600],
+                ['min' => 101, 'max' => 150, 'limit' => 15, 'seconds' => 900]
             ];
 
             foreach ($timeLimits as $range) {
-                if ($count >= $range['min'] && $count <= $range['max'] && $minutesDiff < $range['limit']) {
+                if ($count >= $range['min'] && $count < $range['max'] && $minutesDiff < $range['limit']) {
                     $timeLimit = $range['seconds'];
                     break;
                 }
