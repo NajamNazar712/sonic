@@ -10141,7 +10141,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges;
                     $final_array[$origin][$shipment->id]['gst'] = $invoice_shipment->gst;
                     $final_array[$origin][$shipment->id]['total_invoice_amount'] = $invoice_shipment->invoice_amount;
-                    $serial_number[$origin]++;
 
                 }
                 else {
@@ -10205,7 +10204,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         <td>' . number_format($final_array[$origin][$shipment->id]['total_invoice_amount'], 2) . '</td>
                     </tr>';
 
-
+                $serial_number[$origin]++;
 
                 if (!isset($total_weight_charges[$origin])) {
                     $total_weight_charges[$origin] = 0;
@@ -10846,7 +10845,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges;
                 $final_array[$origin][$shipment->id]['gst'] = $invoice_shipment->gst;
                 $final_array[$origin][$shipment->id]['total_invoice_amount'] = $invoice_shipment->invoice_amount;
-                $serial_number[$origin]++;
 
             }
             else {
@@ -10908,7 +10906,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         <td>' . number_format($final_array[$origin][$shipment->id]['total_invoice_amount'], 2) . '</td>
                     </tr>';
 
-
+            $serial_number[$origin]++;
 
             if (!isset($total_weight_charges[$origin])) {
                 $total_weight_charges[$origin] = 0;
@@ -12399,7 +12397,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges;
                 $final_array[$origin][$shipment->id]['gst'] = $invoice_shipment->gst;
                 $final_array[$origin][$shipment->id]['total_invoice_amount'] = $invoice_shipment->invoice_amount;
-                $serial_number[$origin]++;
+
             }
             else {
                 // Perform the addition directly without number_format()
@@ -12463,7 +12461,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     </tr>';
 
 
-
+            $serial_number[$origin]++;
 
             if (!isset($total_weight_charges[$origin])) {
                 $total_weight_charges[$origin] = 0;
@@ -13214,7 +13212,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges;
                 $final_array[$origin][$shipment->id]['gst'] = $invoice_shipment->gst;
                 $final_array[$origin][$shipment->id]['total_invoice_amount'] = $invoice_shipment->invoice_amount;
-                $serial_number[$origin]++;
 
             }
             else {
@@ -13276,7 +13273,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         <td>' . number_format($final_array[$origin][$shipment->id]['total_invoice_amount'], 2) . '</td>
                     </tr>';
 
-
+            $serial_number[$origin]++;
 
             if (!isset($total_weight_charges[$origin])) {
                 $total_weight_charges[$origin] = 0;
