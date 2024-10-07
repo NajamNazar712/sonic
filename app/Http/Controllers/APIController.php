@@ -2118,38 +2118,38 @@ class APIController extends Controller
         // Normal Consignee ID Check
         Validator::extend('normal_consignee_id_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
-        
+
             // Get the pickup address for delivery
             $pickup_address_id_for_delivery = $data['pickup_address_id'] ?? null;
             $pickup_address_for_delivery = UserShippingInfo::find($pickup_address_id_for_delivery);
-        
+
             if (!$pickup_address_for_delivery) {
                 $validator->errors()->add($attribute, 'Pickup address not found.');
                 return false;
             }
-        
+
             // Get the delivery city
             $delivery_city = City::find($pickup_address_for_delivery->city_id);
-        
+
             if (!$delivery_city) {
                 $validator->errors()->add($attribute, 'Delivery city not found.');
                 return false;
             }
-        
+
             if (!in_array($user_id, [7762, 4758]) && !CityDelivery::where('city_id', $delivery_city->id)
                     ->where('booking_type_id', $data['service_type_id'] ?? null)
                     ->where('shipping_mode_id', $data['shipping_mode_id'] ?? null)
                     ->exists()) {
-        
+
                 $validator->errors()->add($attribute, 'Delivery is not allowed for City ID #' . $value .
-                    ' with Service Type ID #' . ($data['service_type_id'] ?? 'N/A') . 
+                    ' with Service Type ID #' . ($data['service_type_id'] ?? 'N/A') .
                     ' and Shipping Mode ID #' . ($data['shipping_mode_id'] ?? 'N/A'));
                 return false;
             }
-        
+
             return true;
         });
-        
+
 
 
 
@@ -2998,7 +2998,15 @@ class APIController extends Controller
             }
 
         }
+
+        $shipment_booked_api_count = new ShipmentBookedApiCount();
+        $shipment_booked_api_count->shipment_count = !empty($return_array["tracking_number"]) ? count($return_array["tracking_number"]) : 0;
+        $shipment_booked_api_count->user_id = $user_id;
+        $shipment_booked_api_count->save();
+
+        //send to job
         dispatch(new ProcessShipmentApiBulkBooking($data, $user_id));
+
         return response()->json($return_array);
     }
     public function shipment_book_international(Request $request)
@@ -4719,13 +4727,13 @@ class APIController extends Controller
             //         }
             //     }
             // }
-            
+
             $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id)->get();
             if (!$shipment_pre_book->isEmpty()) {
                 $prefixes = $shipment_pre_book->pluck('prefix')->toArray();
                 $order_id = $request->input('order_id');
                 $is_valid_order_id = false;
-        
+
                 foreach ($prefixes as $prefix) {
                     $length = strlen($prefix);
                     $check_order_id_prefix = substr($order_id, 0, $length);
@@ -4734,7 +4742,7 @@ class APIController extends Controller
                         break;
                     }
                 }
-        
+
                 if (!$is_valid_order_id) {
                     return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
                 }
@@ -6530,11 +6538,11 @@ class APIController extends Controller
                         if ($rcp_assigned_shipment->exists()) {
                             $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                             $rcp_assigned_shipment->shipment_status = 4; //return confirm status
-                            $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
+                            $rcp_assigned_shipment->assigned_status = 2; //unassign agent
                             $rcp_assigned_shipment->user_id = $user_id;
                             $rcp_assigned_shipment->save();
 
-                            //updating already_updated & pending of agent if shipment is updated by shipper 
+                            //updating already_updated & pending of agent if shipment is updated by shipper
                             $rcp_assigned_agent = RcpAssignedAgent::where('id', $rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                             $already_updated = $rcp_assigned_agent->increment('already_updated');
                             $rcp_assigned_agent->decrement('pending_shipments');
@@ -6588,12 +6596,12 @@ class APIController extends Controller
                             //Reattempt Request
                             $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id)->where('assigned_status', 1)->where('shipment_status', 0)->latest()->first();
                             if ($rcp_assigned_shipment) {
-                                $rcp_assigned_shipment->shipment_status = 10; //reattempt request 
-                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
+                                $rcp_assigned_shipment->shipment_status = 10; //reattempt request
+                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent
                                 $rcp_assigned_shipment->user_id = $user_id;
                                 $rcp_assigned_shipment->save();
 
-                                //updating already_updated & pending of agent if shipment is updated by shipper 
+                                //updating already_updated & pending of agent if shipment is updated by shipper
                                 $rcp_assigned_agent = RcpAssignedAgent::where('id', $rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                                 $already_updated = $rcp_assigned_agent->increment('already_updated');
                                 $rcp_assigned_agent->decrement('pending_shipments');
@@ -6617,7 +6625,7 @@ class APIController extends Controller
                                 'state_id' => 3,//Open rv state id 3 is Open
                                 'type_id'=> 3, // set the user_type_id 3 against to the shipper default function set is 1.
                             ];
-                           
+
                             $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
                             //if Shipper Status Id = 66 (Shipment - Re-Attempt Call Requested) Then fetch Those Shipments in Get Ticket
@@ -6627,7 +6635,7 @@ class APIController extends Controller
                                 'status_reason_id' => $last_reason_id,
                                 'shipment_user_id' => $shipment->user_id,
                                 'call_count' => 2
-                            ];  
+                            ];
                             dispatch(new ProcessRvShipmentTicket($rvData));
 
                             if ($journey) {
@@ -6717,11 +6725,11 @@ class APIController extends Controller
 
                                                 $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                                                 $rcp_assigned_shipment->shipment_status = 8; //intercept approved
-                                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
+                                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent
                                                 $rcp_assigned_shipment->user_id = $user_id;
                                                 $rcp_assigned_shipment->save();
 
-                                                //updating already_updated & pending of agent if shipment is updated by shipper 
+                                                //updating already_updated & pending of agent if shipment is updated by shipper
                                                 $rcp_assigned_agent = RcpAssignedAgent::where('id', $rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                                                 $already_updated = $rcp_assigned_agent->increment('already_updated');
                                                 $rcp_assigned_agent->decrement('pending_shipments');
@@ -6766,8 +6774,8 @@ class APIController extends Controller
                                     return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment->status_shipper->name . ' against Tracking Number: ' . $shipment->tracking_number]);
                                 }
                             }
-                        } 
-                        
+                        }
+
                         else {
                             //different consignee
                             $rules = [
@@ -6840,17 +6848,17 @@ class APIController extends Controller
                                             if ($rcp_assigned_shipment->exists()) {
                                                 $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                                                 $rcp_assigned_shipment->shipment_status = 7; //intercept request
-                                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
+                                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent
                                                 $rcp_assigned_shipment->user_id = $user_id;
                                                 $rcp_assigned_shipment->save();
 
-                                                //updating already_updated & pending of agent if shipment is updated by shipper 
+                                                //updating already_updated & pending of agent if shipment is updated by shipper
                                                 $rcp_assigned_agent = RcpAssignedAgent::where('id', $rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                                                 $already_updated = $rcp_assigned_agent->increment('already_updated');
                                                 $rcp_assigned_agent->decrement('pending_shipments');
                                                 $rcp_assigned_agent->save();
 
-                                                //creating log 
+                                                //creating log
                                                 $return_assign_log = new RcpAssignedShipmentLog();
                                                 $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
                                                 $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
@@ -7631,7 +7639,7 @@ class APIController extends Controller
                                     $return_data['due_date'] = Carbon::parse($shipment_data->created_at)->format('Ymd');
 
                                     // creating amount -- will always set + prefix if amount is not negative otherwise - if negative
-                                    // total length is 14 
+                                    // total length is 14
                                     // 1 for + or - prefix
                                     // 11 digit for amount
                                     // 2 last digit for decimal values
@@ -7642,9 +7650,9 @@ class APIController extends Controller
 
                                     $standard_fintech_charges = standard_fintech_charges::where('id', '1')->first();
                                     $charges =  $standard_fintech_charges->standard_fintech_charges;   //stdadard charges
-                                    $fed     =  $standard_fintech_charges->standard_fed_charges;      // Fed Tax            
+                                    $fed     =  $standard_fintech_charges->standard_fed_charges;      // Fed Tax
 
-                                    //Calculate 
+                                    //Calculate
                                     $calculate_standard_charges = round(($shipment_data->amount / 100) * $charges);
                                     $calculate_fed_charges      = round(($calculate_standard_charges / 100) * $fed);
                                     $total_cod  = $calculate_standard_charges + $shipment_data->amount + $calculate_fed_charges;
@@ -7684,7 +7692,7 @@ class APIController extends Controller
                             }
                         } else {
 
-                            // if shipment is not exist in DB 
+                            // if shipment is not exist in DB
                             $return_data['response_Code'] = "01";
                             $return_data['reserved'] = "consumer number does not exist";
                         }
@@ -7835,7 +7843,7 @@ class APIController extends Controller
                                 }
                             }
                         } else {
-                            // if shipment is not exist in DB 
+                            // if shipment is not exist in DB
                             $return_data['response_Code'] = "01";
                             $return_data['reserved'] = "consumer number does not exist";
                         }
@@ -9293,7 +9301,7 @@ class APIController extends Controller
         $userFintechCharges       = UserFintectCharges::where('user_id', $user_id)->where('status', '1'); // user fintech charges
         $standard_fintech_charges = new standard_fintech_charges();
         $standard                 = $standard_fintech_charges->first();
-        $fed_percentage           = $standard->standard_fed_charges;  //Standard FED Pecentage 
+        $fed_percentage           = $standard->standard_fed_charges;  //Standard FED Pecentage
         // (Applicable on both users charges or standard charges)
         if ($userFintechCharges->exists()) {
             $fintect_charges_percentage = $userFintechCharges->first()->fintech_charges; //fintech charges from user
@@ -9325,7 +9333,7 @@ class APIController extends Controller
             $total_company_charges = $select_range->charges; // company charges
         }
 
-        // Calculate FED 
+        // Calculate FED
         if ($select_range->fed_tax_is_percentage == 1) {
             $company_fed        = ($select_range->fed_tax) / 100; // company Fed
             $total_company_fed  = number_format($company_fed * $total_company_charges, 2);
@@ -9343,7 +9351,7 @@ class APIController extends Controller
         } else {
             $additional_charges = 0;
         }
-        // total company charges Fintech Charges   
+        // total company charges Fintech Charges
         $total_company_fintech_charges = $total_company_charges + $total_company_fed + $additional_charges;
 
         function calculatepercentage($total_amount, $charges, $fed)
@@ -9360,16 +9368,16 @@ class APIController extends Controller
         $revenue = $total_fintech_calculated[0] - $total_company_fintech_charges;
         // return response()->json([
         // 'cod'             => $cod_amount,
-        // 'conpany charges' => $total_company_charges, 
-        // 'company fed'     => $total_company_fed,        
+        // 'conpany charges' => $total_company_charges,
+        // 'company fed'     => $total_company_fed,
         // 'company addi'    => $additional_charges,
         // 'total company'   => $total_company_fintech_charges,
         // 'fintech %'       => $fintect_charges_percentage,
         // 'Fed %'           => $fed_percentage,
         // 'total fintech'   => $total_fintech_calculated[0],
-        // 'revenue'         => $revenue   
+        // 'revenue'         => $revenue
         //  ]);
-        //total amount received   
+        //total amount received
         $total_amount_received = $cod_amount + $total_fintech_calculated[0];
         $fintech_details = new FintechPaymentDetails();
         $fintech_details->trax_pay_id            = $trax_pay_id;
@@ -9445,12 +9453,12 @@ class APIController extends Controller
                 return response()->json(['status' => $status_code, 'message' => 'Error(s) in Input', 'errors' => $errors]);
             } else {
                 $retail_note_cash_collection_id = $request->retail_note_cash_collection_id;
-                $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);              
+                $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);
                 if ($retail_note->exists()) {
-                    $retail_note = $retail_note->first();          
-                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();              
+                    $retail_note = $retail_note->first();
+                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();
                     if ($retail_note->created_at >= $min_date) {
-                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note->id);                    
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note->id);
                         $transactions_amount = 0;
                         if ($hbl_konnect_transaction_delivery_note->exists()) {
                             $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
@@ -11405,29 +11413,29 @@ class APIController extends Controller
 
 
     public function trax_pk_validation($company_name = null, $email_address = null, $phone_number = null) {
-    
+
         if ($company_name != 'none') {
             $exists = User::where('name', $company_name)->exists();
             if(!$exists){
-                $exists = Lead::where('company', $company_name)->exists();   
+                $exists = Lead::where('company', $company_name)->exists();
             }
         }
-    
+
         if ($email_address != 'none') {
             $exists = User::where('email', $email_address)->exists();
             if(!$exists){
                 $exists = Lead::where('email_address', $email_address)->exists();
             }
         }
-    
+
         if ($phone_number != 'none') {
             $exists = User::where('phone', $phone_number)->exists();
             if(!$exists){
                 $exists = Lead::where('phone_number', $phone_number)->exists();
             }
         }
-    
+
         return response()->json(['exists' => $exists]);
     }
-    
+
 }
