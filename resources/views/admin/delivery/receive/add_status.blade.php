@@ -114,7 +114,6 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-
                         <input type="hidden" name="shipment_id" id="pod_shipment" >
                         <div class="form-group">
                             <label for="pod_file">
@@ -759,7 +758,6 @@
 
                                 }
                             });
-
                             $('#submit_selected_status').attr('disabled', true);
                         }
                     },
@@ -954,7 +952,6 @@
                     table.button('.delivered').disable();
                     $('#submit_selected_status').attr('disabled', true);
                 }
-
             });
 
 
@@ -1355,8 +1352,6 @@
                             this_form.submit();
                         }
                     });
-
-
                 }
             });
 

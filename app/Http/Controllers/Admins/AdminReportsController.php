@@ -14040,13 +14040,13 @@ class AdminReportsController extends Controller
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
             $re_attempt_and_intercept_status = array(52,55);
 
-            $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subMonths(4)->setTime(21, 00, 00);  //last 6 month
+            $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subMonths(4)->setTime(21, 00, 00);  //last 4 month
             $re_attempt_and_intercept_endDate = Carbon::parse($search_date)->subDay(1)->setTime(20, 59, 59);
 
-            $other_pending_status_startDate = Carbon::parse($search_date)->subMonths(4)->setTime(9, 00, 00); // last 6 month
+            $other_pending_status_startDate = Carbon::parse($search_date)->subMonths(4)->setTime(9, 00, 00); // last 4 month
             $other_pending_status_endDate = Carbon::parse($search_date)->setTime(8, 59, 59);
 
-            $other_statuses_startDate = Carbon::parse($search_date)->subMonths(4)->startOfDay()->toDateTimeString(); // last 6 month
+            $other_statuses_startDate = Carbon::parse($search_date)->subMonths(4)->startOfDay()->toDateTimeString(); // last 4 month
             $other_statuses_endDate = Carbon::parse($search_date)->subDay(1)->endOfDay()->toDateTimeString();
 
             $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
