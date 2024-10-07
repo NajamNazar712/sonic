@@ -510,9 +510,9 @@ class AdminLogisticBookingController extends Controller
                 Log::channel('code_test_log')->error('batch_id = > '.$batch_id.' booking_img_url '.$booking_img_url);
                 $imageUrl = Storage::disk('s3')->url('sonic_staging/logistic_booking1/168_1728304014.png');
 
-                return view('admin.logistic.edit_logistic_book', compact('imageUrl'));
-                // return view('admin.logistic.edit_logistic_book')
-                //     ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shipper'=>$shipper,'products'=>$products,'services'=>$services,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'riders'=>$riders]);
+                //return view('admin.logistic.edit_logistic_book', compact('imageUrl'));
+                return view('admin.logistic.edit_logistic_book')
+                    ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shipper'=>$shipper,'products'=>$products,'services'=>$services,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'riders'=>$riders]);
             } catch (\Exception $th){
                 Log::channel('code_test_log')->error('logistic-booking'.json_encode($th->getMessage()));
             }
