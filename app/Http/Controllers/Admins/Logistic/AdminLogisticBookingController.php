@@ -507,7 +507,7 @@ class AdminLogisticBookingController extends Controller
                     $booking_img_url =  Storage::disk('s4')->url('logistic_bookings/'. $booking_img->image_name);
                 }
 
-
+                Log::channel('code_test_log')->error('batch_id'.$batch_id.' booking_img_url '.$booking_img_url.' logistic_booking '.$logistic_booking);
                 return view('admin.logistic.edit_logistic_book')
                     ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shipper'=>$shipper,'products'=>$products,'services'=>$services,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'riders'=>$riders]);
             } catch (\Exception $th){
