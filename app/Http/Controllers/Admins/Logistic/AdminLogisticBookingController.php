@@ -508,7 +508,7 @@ class AdminLogisticBookingController extends Controller
                 }
 
                 Log::channel('code_test_log')->error('batch_id = > '.$batch_id.' booking_img_url '.$booking_img_url);
-                $imageUrl = Storage::disk('s3')->url('sonic_staging/logistic_booking1/168_1728304014.png');
+                $imageUrl = Storage::disk('s3')->url('logistic_booking1/168_1728304014.png');
 
                 //return view('admin.logistic.edit_logistic_book', compact('imageUrl'));
                 return view('admin.logistic.edit_logistic_book')
