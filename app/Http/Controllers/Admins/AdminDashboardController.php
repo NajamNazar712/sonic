@@ -15269,7 +15269,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $history_fuel_surcharge = $table2::where('user_id', $user_id);
 
         if ($latestDate) {
-            $history_fuel_surcharge->whereDate('created_at', $latestDate->toDateString());
+            $history_fuel_surcharge->where('created_at', $latestDate);
         }
 
         $history_fuel_surcharge_sum = $history_fuel_surcharge->sum('fuel_surcharge');
