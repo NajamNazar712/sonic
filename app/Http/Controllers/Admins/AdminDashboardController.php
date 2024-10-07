@@ -15262,27 +15262,26 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     public static function compareFuelCharges($user_id, $table1, $table2)
     {
-
         $latestDate = $table2::where('user_id', $user_id)
             ->latest('created_at')
             ->value('created_at');
 
-        $history_fuel_surcharge = $table2::where('user_id', $user_id)
-            ->whereDate('created_at', $latestDate)
-            ->sum('fuel_surcharge');
+        $history_fuel_surcharge = $table2::where('user_id', $user_id);
 
-        $existing_fuel_surcharge = $table1::where('user_id', $user_id)->sum('fuel_surcharge');
-
-        if($existing_fuel_surcharge && $history_fuel_surcharge) {
-            if ($existing_fuel_surcharge > $history_fuel_surcharge) {
-                return 'green';
-            } elseif ($existing_fuel_surcharge < $history_fuel_surcharge) {
-                return 'red';
-            }
-            return 'yellow';
-
-        }else{
-            return "Fuel Added Only";
+        if ($latestDate) {
+            $history_fuel_surcharge->whereDate('created_at', $latestDate->toDateString());
         }
+
+        $history_fuel_surcharge_sum = $history_fuel_surcharge->sum('fuel_surcharge');
+
+        $existing_fuel_surcharge_sum = $table1::where('user_id', $user_id)->sum('fuel_surcharge');
+
+        if ($existing_fuel_surcharge_sum && $history_fuel_surcharge_sum) {
+            return $existing_fuel_surcharge_sum > $history_fuel_surcharge_sum ? 'green'
+                : ($existing_fuel_surcharge_sum < $history_fuel_surcharge_sum ? 'red' : 'yellow');
+        }
+
+        return 'Fuel Added Only';
     }
+
 }
