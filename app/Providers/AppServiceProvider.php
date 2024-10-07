@@ -17,6 +17,9 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\AdminsScreenList;
 use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\Admin\NotificationReturnedDeliveredToShipper;
+use App\Observers\GenericObserver;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminRole;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +31,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+        Admin::observe(GenericObserver::class);
+        AdminRole::observe(GenericObserver::class);
+
 
         view()->composer('*', function ($view) {
             $search_sonic = NULL;

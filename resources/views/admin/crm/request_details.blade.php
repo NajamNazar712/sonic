@@ -104,7 +104,7 @@
                                             <tr>
                                                 <th scope="row">Case Nature Type</th>
                                                 <td class="name">
-                                                        <h5 class="mb-0">{{$crm_details->nature_type->type}}</h5>
+                                                        <h5 class="mb-0">{{$crm_details->nature_type ? $crm_details->nature_type->type : '-' }}</h5>
                                                 </td>
                                             </tr>
                                             @endif
@@ -945,7 +945,7 @@
                                 @if(!empty($crm_details->case_nature_type_id))
                                     <tr class="border-bottom-success border-custom-color">
                                         <td><b>{{$crm_details->nature->name}}</b></td>
-                                        <td><b>{{$crm_details->nature_type->type}}</b></td>
+                                        <td><b>{{$crm_details->nature_type ? $crm_details->nature_type->type : '-' }}</b></td>
                                     </tr>
                                 @endif
                                 </tbody>

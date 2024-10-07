@@ -603,7 +603,7 @@
                                                                 <input type="checkbox" name="on_dws" id="on_dws" class="switchery on_dws" {{ (($on_dws_charges != null) ? 'checked' : '') }} data-size="xs" data-switchery="true">
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
@@ -623,13 +623,13 @@
                                                                         <option value="1">High</option>
                                                                         <option value="2">Low</option>
                                                                     @endif
-                                                                    
+
                                                                 </select>
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                 </div>
-                                                
+
                                             </div>
 
                                         </div>
@@ -1004,6 +1004,7 @@
                                             $e_on_discount_weight_sw = '';
                                         }
                                         @endphp
+
                                         <div class="row">
                                             <div class="col text-center">
                                                 <fieldset>
@@ -1124,6 +1125,84 @@
                                                 </fieldset>
                                             </div>
 
+
+                                        </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+                                            @php
+                                                $zero_cod_check = '';
+                                                $zero_cod_input = '';
+
+                                                if((isset($switches[1][0]) && $switches[1][0]->zero_cod_discount == 1)){
+
+                                                   $zero_cod_check = 'checked';
+                                                   $zero_cod_input = '';
+                                                 }else{
+                                                   $zero_cod_check = '';
+                                                   $zero_cod_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="on_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" {{$zero_cod_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="on_zero_cod_record" value="{{ (isset($zero_cod_discount[1][0]) && $zero_cod_discount[1][0]->id != '')? $zero_cod_discount[1][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" class="form-control @if(isset($e_zero_cod_discount[1][0]) && isset($zero_cod_discount[1][0]) && $e_zero_cod_discount[1][0]->cod_discount_per != $zero_cod_discount[1][0]->cod_discount_per) changed @elseif(!isset($e_zero_cod_discount[1][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_zero_cod_discount[1][0]) && isset($zero_cod_discount[1][0]) && $e_zero_cod_discount[1][0]->cod_discount_per != $zero_cod_discount[1][0]->cod_discount_per) {{$e_zero_cod_discount[1][0]->cod_discount_per}} @endif" name="on_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($zero_cod_discount[1][0]) && $zero_cod_discount[1][0]->cod_discount_per != '')? $zero_cod_discount[1][0]->cod_discount_per : ''}}" {{$zero_cod_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+                                            @php
+                                                $return_discount_check = '';
+                                                $return_discount_input = '';
+
+                                                if((isset($switches[1][0]) && $switches[1][0]->return_discount == 1)){
+                                                   $return_discount_check = 'checked';
+                                                   $return_discount_input = '';
+                                                 }else{
+                                                   $return_discount_check = '';
+                                                   $return_discount_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="on_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" {{$return_discount_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="on_return_discount_record" value="{{ (isset($return_discount_charges[1][0]) && $return_discount_charges[1][0]->id != '')? $return_discount_charges[1][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" type="number" data-rule-min="0" data-rule-max="100" class="form-control @if(isset($e_return_discount_charges[1][0]) && isset($return_discount_charges[1][0]) && $e_return_discount_charges[1][0]->return_discount_per != $return_discount_charges[1][0]->return_discount_per) changed @elseif(!isset($e_return_discount_charges[1][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_return_discount_charges[1][0]) && isset($return_discount_charges[1][0]) && $e_return_discount_charges[1][0]->return_discount_per != $return_discount_charges[1][0]->return_discount_per) {{$e_return_discount_charges[1][0]->return_discount_per}} @endif" name="on_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($return_discount_charges[1][0]) && $return_discount_charges[1][0]->return_discount_per != '')? $return_discount_charges[1][0]->return_discount_per : ''}}" {{$return_discount_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
 
                                         </div>
 
@@ -1573,13 +1652,13 @@
                                                                 <input type="checkbox" name="ol_dws" id="ol_dws" class="switchery ol_dws" {{ (($ol_dws_charges != null) ? 'checked' : '') }} data-size="xs" data-switchery="true">
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <select name="ol_dws_weight" id="ol_dws_weight" class="form-control"  {{ (($ol_dws_charges != null) ? '' : 'disabled') }}>
                                                                     @if ($ol_dws_charges != null)
-                                                                   
+
                                                                         @if ($ol_dws_charges == 1)
                                                                         <option value="1" selected>High</option>
                                                                         <option value="2">Low</option>
@@ -1597,9 +1676,9 @@
                                                                 </select>
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                 </div>
-                                                
+
                                             </div>
                                         </div>
                                         <hr>
@@ -2103,6 +2182,85 @@
 
                                         </div>
 
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+                                            @php
+                                                $zero_cod_check = '';
+                                                $zero_cod_input = '';
+
+                                                if((isset($switches[2][0]) && $switches[2][0]->zero_cod_discount == 1)){
+
+                                                   $zero_cod_check = 'checked';
+                                                   $zero_cod_input = '';
+                                                 }else{
+                                                   $zero_cod_check = '';
+                                                   $zero_cod_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="ol_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" {{$zero_cod_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="ol_zero_cod_record" value="{{ (isset($zero_cod_discount[2][0]) && $zero_cod_discount[2][0]->id != '')? $zero_cod_discount[2][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_zero_cod_discount[2][0]) && isset($zero_cod_discount[2][0]) && $e_zero_cod_discount[2][0]->cod_discount_per != $zero_cod_discount[2][0]->cod_discount_per) changed @elseif(!isset($e_zero_cod_discount[2][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_zero_cod_discount[2][0]) && isset($zero_cod_discount[2][0]) && $e_zero_cod_discount[2][0]->cod_discount_per != $zero_cod_discount[2][0]->cod_discount_per) {{$e_zero_cod_discount[2][0]->cod_discount_per}} @endif" name="ol_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($zero_cod_discount[2][0]) && $zero_cod_discount[2][0]->cod_discount_per != '')? $zero_cod_discount[2][0]->cod_discount_per : ''}}" {{$zero_cod_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+                                            @php
+                                                $return_discount_check = '';
+                                                $return_discount_input = '';
+
+                                                if((isset($switches[2][0]) && $switches[2][0]->return_discount == 1)){
+                                                   $return_discount_check = 'checked';
+                                                   $return_discount_input = '';
+                                                 }else{
+                                                   $return_discount_check = '';
+                                                   $return_discount_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="ol_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" {{$return_discount_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="ol_return_discount_record" value="{{ (isset($return_discount_charges[2][0]) && $return_discount_charges[2][0]->id != '')? $return_discount_charges[2][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_return_discount_charges[2][0]) && isset($return_discount_charges[2][0]) && $e_return_discount_charges[2][0]->return_discount_per != $return_discount_charges[2][0]->return_discount_per) changed @elseif(!isset($e_return_discount_charges[2][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_return_discount_charges[2][0]) && isset($return_discount_charges[2][0]) && $e_return_discount_charges[2][0]->return_discount_per != $return_discount_charges[2][0]->return_discount_per) {{$e_return_discount_charges[2][0]->return_discount_per}} @endif" name="ol_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($return_discount_charges[2][0]) && $return_discount_charges[2][0]->return_discount_per != '')? $return_discount_charges[2][0]->return_discount_per : ''}}" {{$return_discount_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -2562,13 +2720,13 @@
                                                                 <input type="checkbox" name="detain_dws" id="detain_dws" class="switchery detain_dws"  {{ (($detain_dws_charges != null) ? 'checked' : '') }} data-size="xs" data-switchery="true">
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <select name="detain_dws_weight" id="detain_dws_weight" class="form-control"   {{ (($detain_dws_charges != null) ? '' : 'disabled') }}>
                                                                     @if ($detain_dws_charges != null)
-                                                                    
+
                                                                         @if ($detain_dws_charges == 1)
                                                                         <option value="1" selected>High</option>
                                                                         <option value="2">Low</option>
@@ -2586,9 +2744,9 @@
                                                                 </select>
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                 </div>
-                                                
+
                                             </div>
                                         </div>
                                         <hr>
@@ -3092,6 +3250,85 @@
                                             </div>
                                         </div>
 
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+                                            @php
+                                                $zero_cod_check = '';
+                                                $zero_cod_input = '';
+
+                                                if((isset($switches[3][0]) && $switches[3][0]->zero_cod_discount == 1)){
+
+                                                   $zero_cod_check = 'checked';
+                                                   $zero_cod_input = '';
+                                                 }else{
+                                                   $zero_cod_check = '';
+                                                   $zero_cod_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="detain_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" {{$zero_cod_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="detain_zero_cod_record" value="{{ (isset($zero_cod_discount[3][0]) && $zero_cod_discount[3][0]->id != '')? $zero_cod_discount[3][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_zero_cod_discount[3][0]) && isset($zero_cod_discount[3][0]) && $e_zero_cod_discount[3][0]->cod_discount_per != $zero_cod_discount[3][0]->cod_discount_per) changed @elseif(!isset($e_zero_cod_discount[3][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_zero_cod_discount[3][0]) && isset($zero_cod_discount[3][0]) && $e_zero_cod_discount[3][0]->cod_discount_per != $zero_cod_discount[3][0]->cod_discount_per) {{$e_zero_cod_discount[3][0]->cod_discount_per}} @endif" name="detain_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($zero_cod_discount[3][0]) && $zero_cod_discount[3][0]->cod_discount_per != '')? $zero_cod_discount[3][0]->cod_discount_per : ''}}" {{$zero_cod_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+                                            @php
+                                                $return_discount_check = '';
+                                                $return_discount_input = '';
+
+                                                if((isset($switches[3][0]) && $switches[3][0]->return_discount == 1)){
+                                                   $return_discount_check = 'checked';
+                                                   $return_discount_input = '';
+                                                 }else{
+                                                   $return_discount_check = '';
+                                                   $return_discount_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="detain_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" {{$return_discount_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="detain_return_discount_record" value="{{ (isset($return_discount_charges[3][0]) && $return_discount_charges[3][0]->id != '')? $return_discount_charges[3][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_return_discount_charges[3][0]) && isset($return_discount_charges[3][0]) && $e_return_discount_charges[3][0]->return_discount_per != $return_discount_charges[3][0]->return_discount_per) changed @elseif(!isset($e_return_discount_charges[3][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_return_discount_charges[3][0]) && isset($return_discount_charges[3][0]) && $e_return_discount_charges[3][0]->return_discount_per != $return_discount_charges[3][0]->return_discount_per) {{$e_return_discount_charges[3][0]->return_discount_per}} @endif" name="detain_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($return_discount_charges[3][0]) && $return_discount_charges[3][0]->return_discount_per != '')? $return_discount_charges[3][0]->return_discount_per : ''}}" {{$return_discount_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -3472,13 +3709,13 @@
                                                                 <input type="checkbox" name="sameday_dws" id="sameday_dws" class="switchery sameday_dws" {{ (($sameday_dws_charges != null) ? 'checked' : '') }} data-size="xs" data-switchery="true">
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <select name="sameday_dws_weight" id="sameday_dws_weight" class="form-control"  {{ (($sameday_dws_charges != null) ? '' : 'disabled') }}>
                                                                     @if ($sameday_dws_charges != null)
-                                                                    
+
                                                                         @if ($sameday_dws_charges == 1)
                                                                         <option value="1" selected>High</option>
                                                                         <option value="2">Low</option>
@@ -3496,7 +3733,7 @@
                                                                 </select>
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -3980,6 +4217,85 @@
 
                                         </div>
 
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Zero Cod Discount</h3>
+                                            </div>
+                                            @php
+                                                $zero_cod_check = '';
+                                                $zero_cod_input = '';
+
+                                                if((isset($switches[4][0]) && $switches[4][0]->zero_cod_discount == 1)){
+
+                                                   $zero_cod_check = 'checked';
+                                                   $zero_cod_input = '';
+                                                 }else{
+                                                   $zero_cod_check = '';
+                                                   $zero_cod_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="sameday_zero_cod_switch" class="switchery ZeroCodDiscountCharges" data-color="success" data-size="sm" {{$zero_cod_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row zero-cod-input-div">
+                                            <input type="hidden" name="sameday_zero_cod_record" value="{{ (isset($zero_cod_discount[4][0]) && $zero_cod_discount[4][0]->id != '')? $zero_cod_discount[4][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_zero_cod_discount[4][0]) && isset($zero_cod_discount[4][0]) && $e_zero_cod_discount[4][0]->cod_discount_per != $zero_cod_discount[4][0]->cod_discount_per) changed @elseif(!isset($e_zero_cod_discount[4][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_zero_cod_discount[4][0]) && isset($zero_cod_discount[4][0]) && $e_zero_cod_discount[4][0]->cod_discount_per != $zero_cod_discount[4][0]->cod_discount_per) {{$e_zero_cod_discount[4][0]->cod_discount_per}} @endif" name="sameday_cod_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($zero_cod_discount[4][0]) && $zero_cod_discount[4][0]->cod_discount_per != '')? $zero_cod_discount[4][0]->cod_discount_per : ''}}" {{$zero_cod_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <h3 class="card-title">Return Discount Charges</h3>
+                                            </div>
+                                            @php
+                                                $return_discount_check = '';
+                                                $return_discount_input = '';
+
+                                                if((isset($switches[4][0]) && $switches[4][0]->return_discount == 1)){
+                                                   $return_discount_check = 'checked';
+                                                   $return_discount_input = '';
+                                                 }else{
+                                                   $return_discount_check = '';
+                                                   $return_discount_input = 'disabled';
+                                                }
+                                            @endphp
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="sameday_return_discount_switch" class="switchery ReturnDiscountCharges" data-color="success" data-size="sm" {{$return_discount_check}}/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row return-discount-charges-input-div">
+                                            <input type="hidden" name="sameday_return_discount_record" value="{{ (isset($return_discount_charges[4][0]) && $return_discount_charges[4][0]->id != '')? $return_discount_charges[4][0]->id : ''}}">
+                                            <div class="col-md-2 text-center">
+                                                <label class="card-title">Charges</label>
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <input type="number" data-rule-min="0" data-rule-max="100" type="number"  class="form-control @if(isset($e_return_discount_charges[4][0]) && isset($return_discount_charges[4][0]) && $e_return_discount_charges[4][0]->return_discount_per != $return_discount_charges[4][0]->return_discount_per) changed @elseif(!isset($e_return_discount_charges[4][0]) && $existing == 1) new @endif" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_return_discount_charges[4][0]) && isset($return_discount_charges[4][0]) && $e_return_discount_charges[4][0]->return_discount_per != $return_discount_charges[4][0]->return_discount_per) {{$e_return_discount_charges[4][0]->return_discount_per}} @endif" name="sameday_return_discount_per" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($return_discount_charges[4][0]) && $return_discount_charges[4][0]->return_discount_per != '')? $return_discount_charges[4][0]->return_discount_per : ''}}" {{$return_discount_input}}>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -3988,7 +4304,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead primary">Warehousing</h3>
-                                        
+
                                     </div>
                                     <div class="col-md-6">
                                         <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info" {{ ($wms_user_info->warehousing)? 'checked':'' }}/></a>
@@ -4008,7 +4324,7 @@
                                                         @else
                                                             <option value="{{ $cycle->id }}">{{ $cycle->name }}</option>
                                                         @endif
-                                                        
+
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -4026,7 +4342,7 @@
 
                                         <div class="card border-primary p-2">
                                             <div class="row">
-                        
+
                                                 <div class="col-12">
                                                     <div class="row">
                                                         <div class="col-4 text-center">
@@ -4125,15 +4441,15 @@
                                                                 </div>
                                                             @endif
                                                         </div>
-                                                        
+
                                                     </div>
 
                                                 </div>
-                                               
+
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="card-body">
                                                 <div>
                                                     <h3 class="card-title">Fulfillment Charges</h3>
@@ -4141,9 +4457,9 @@
 
                                             <div class="card border-primary p-2">
                                             <div class="row">
-                                                
+
                                                 <div class="col-12">
-                                                    
+
 
                                                     <div class="row">
                                                         <div class="col-3">
@@ -4196,13 +4512,13 @@
                                                                         @if($pkey > 0)
                                                                         <span row="{{$pkey}}" class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span>
                                                                         @endif
-                                                                   
+
                                                                 </div>
                                                             </div>
                                                             @php  $packing_row_count++ @endphp
                                                             @endforeach
                                                             @else
-                                                                 
+
                                                                 <div class="row packing_type_row" id="packing_type_row0">
                                                                     <input type="hidden" id="packing_type_input0" name="packing_type[0]">
                                                                     <div class="col-md-2">
@@ -4226,14 +4542,14 @@
                                                                     <div class="col-md-2">
                                                                        <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
                                                                         <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
-                                                                        
+
                                                                     </div>
                                                                 </div>
-                                                                    
-                                                                
+
+
                                                             @endif
                                                         </div>
-                                                        
+
                                                     </div>
 
                                                     <div class="row">
@@ -4246,7 +4562,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                        
+
                                                     <div class="row">
                                                         <div class="col-md-2">
                                                             <fieldset class="form-group">
@@ -4254,24 +4570,24 @@
                                                             </fieldset>
                                                         </div>
                                                     </div>
-                                                            
-                                                        
+
+
                                                     </div>
 
 
                                                 </div>
-                                               
+
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                     </div>
                             @else
                             <div id="" class="card-header mt-1 border-primary">
                                     <div class="row">
                                         <div class="col-md-6">
                                             <h3 class="display-inline card-title lead primary">Warehousing</h3>
-                                            
+
                                         </div>
                                         <div class="col-md-6">
                                             <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info"/></a>
@@ -4298,7 +4614,7 @@
 
                                         <div class="card border-primary p-2">
                                             <div class="row">
-                        
+
                                                 <div class="col-12">
                                                     <div class="row">
                                                         <div class="col-4 text-center">
@@ -4351,7 +4667,7 @@
                                                                         </select>
                                                                     </fieldset>
                                                                 </div>
-                                                                
+
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
                                                                         <input name="storage_type_charges[0]" data-rule-required="true" data-msg-required="Charges are required" type="text" class="form-control numeric" placeholder="Charges">
@@ -4362,18 +4678,18 @@
                                                                         <span class="storage_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
                                                                 </div>
                                                             </div>
-                                                            
-                                                            
+
+
                                                         </div>
-                                                        
+
                                                     </div>
 
                                                 </div>
-                                               
+
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="card-body">
                                                 <div>
                                                     <h3 class="card-title">Fulfillment Charges</h3>
@@ -4381,9 +4697,9 @@
 
                                             <div class="card border-primary p-2">
                                             <div class="row">
-                                                
+
                                                 <div class="col-12">
-                                                    
+
 
                                                     <div class="row">
                                                         <div class="col-3">
@@ -4418,15 +4734,15 @@
                                                                     </fieldset>
                                                                 </div>
                                                                 <div class="col-md-2">
-                                                                    
+
                                                                         <span id="packing_type_add" class="btn btn-sm btn-outline-primary d-none" title="Add" ><i class="la la-check"></i></span>
                                                                         <span class="packing_type_row_delete btn btn-sm btn-outline-danger d-none"><i class="la la-trash"></i></span>
-                                                                    
+
                                                                 </div>
                                                             </div>
-                                                            
+
                                                         </div>
-                                                        
+
                                                     </div>
 
                                                     <div class="row">
@@ -4439,7 +4755,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                        
+
                                                     <div class="row">
                                                         <div class="col-md-2">
                                                             <fieldset class="form-group">
@@ -4447,19 +4763,19 @@
                                                             </fieldset>
                                                         </div>
                                                     </div>
-                                                            
-                                                        
+
+
                                                     </div>
 
 
                                                 </div>
-                                               
+
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                     </div>
-                                 @endisset 
+                                 @endisset
                                  @if(count($rate_remarks) > 0)
                                 <div class="row justify-content-center">
                                     <div class="col-6">
@@ -4488,18 +4804,18 @@
                                             </table>
                                             </div>
                                         </div>
-                                    </div>  
-                                    
+                                    </div>
+
                                 </div>
                             @endif
 
-                            
+
                             <div class="row mt-2 justify-content-center">
                                 <div class="col-5 form-group">
                                     <textarea name="rate_remarks" id="rate_remarks" class="form-control" placeholder="Rate Remarks..." rows="3"></textarea>
                                 </div>
-                                
-                            </div> 
+
+                            </div>
 
                             <div class="text-center mt-2">
                                 <div class="form-group">
@@ -4520,13 +4836,13 @@
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h4 class="modal-title" id="bookings_modal_title">Duplicate Data</h4>
-                                    
+
                                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                             <span aria-hidden="true">×</span>
                                                         </button>
                                                     </div>
                                                     <div class="modal-body text-center">
-                                    
+
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button id="accountApproveActiveSubmit" type="submit" class="btn btn-success">Yes</button>
@@ -4548,7 +4864,7 @@
                                 </div>
                             </div>
 
-                            
+
 
                         </form>
 
@@ -4572,7 +4888,7 @@
                                                 </div>
                                             </div>
                                         </div>
-             
+
                                         <div class="col-12">
                                             <div id="add_user_commission_form" class="form mb-1 justify-content-center">
                                                 <div class="row justify-content-center">
@@ -4591,7 +4907,7 @@
                                                     </div>
                                                     <div class="col-2 form-group">
                                                         <select name="user" class="select2" id="user_select"
-                                                                
+
                                                                 disabled>
                                                         </select>
                                                     </div>
@@ -4640,7 +4956,7 @@
                                 <button type="submit" class="btn btn-success" style="margin-right:680px;">Submit</button>
                             </div>
                         </form> --}}
-                
+
             </div>
         </div>
 
@@ -4840,8 +5156,8 @@
                     $('#sameday_dws_weight').attr('disabled', true);
                 }
             });
-            
-            
+
+
 
             $("#on_default").on('change', function(){
                 if($("#ol_default").is(":checked")){
@@ -5044,7 +5360,7 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             }
-            
+
             if (group != 'Admins' && group != 'Sales' && $('#user_select').val() != ""){
                 $('#user_commission').val(1.8)
                 $('#user_commission').attr('disabled', true)
@@ -5355,7 +5671,7 @@
                                 '<td>' + (data.info.ntn && data.info.shared_ntn_no.length ? data.info.ntn : '') + '</td>' +
                                 '<td>' + (data.info.shared_ntn_no ?
                                     generateLinks(data.info.shared_ntn_no.split(','), baseURL, 'ntn') : '') + '</td>' +
-                                '</tr>';  
+                                '</tr>';
                             html += '<tr>' +
                                 '<td><strong>Email</strong></td>' +
                                 '<td>' + (data.info.shared_email && data.info.shared_email.includes(data.info.email) ?
@@ -5437,7 +5753,6 @@
         var returnChargesSwitch = document.querySelector('.switchery.returnChargesOvernight');
         var fuelChargesSwitch = document.querySelector('.switchery.fuelSurchargeOvernight');
         var packagingChargesSwitch = document.querySelector('.switchery.packagingChargesSwitch');
-
 
 
 
@@ -5649,6 +5964,25 @@
 
             }
         };
+
+        $(document).on('change', '.switchery.ZeroCodDiscountCharges', function() {
+            var zeroCodInputDiv = $(this).closest('.row').next('.zero-cod-input-div');
+            var inputField = zeroCodInputDiv.find('input[type="number"]');
+            if ($(this).is(':checked')) {
+                inputField.removeAttr('disabled');
+            } else {
+                inputField.attr('disabled', 'disabled');
+            }
+        });
+        $(document).on('change', '.switchery.ReturnDiscountCharges', function() {
+            var ReturnDiscountInput = $(this).closest('.row').next('.return-discount-charges-input-div');
+            var inputField = ReturnDiscountInput.find('input[type="number"]');
+            if ($(this).is(':checked')) {
+                inputField.removeAttr('disabled');
+            } else {
+                inputField.attr('disabled', 'disabled');
+            }
+        });
         // packagingChargesSwitch.onchange = function () {
         //     if(packagingChargesSwitch.checked === true){
         //         $('#packaging_material_charges_div').slideDown('slow');
@@ -6388,7 +6722,7 @@
         var weekly = [1, 2, 3, 4, 5, 6, 7];
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
 
-        
+
         $('#invoicing_cycle_select').prepend('<option value="" selected></option>').select2({
             placeholder: "Select Invoicing Cycle",
             width:'100%'
@@ -6441,11 +6775,11 @@
                 width:'100%',
                 placeholder:'Select Storage Type'
             }).bind('select2:select', function(){
-                
+
                 $(this).parents('div.storage_type_row').find('span#storage_type_add').removeClass('d-none');
                 $('input[name="storage_type[0]"]').val($(this).val());
 
-                
+
             });
 
             $('select[name="packing_type[0]"]').prepend('<option value="" selected="selected"></option>').select2({
@@ -6471,8 +6805,8 @@
                 $('input[name="packing_size[0]"]').val($(this).val());
 
             });
-            
-           
+
+
 
         @endif
         var current_selection = null;
@@ -6482,8 +6816,8 @@
                 obj.text = obj.name;
                 return obj;
             });
-        
-        
+
+
 
         var PPCSwitch = document.querySelector('.switchery.PPCSwitch');
         PPCSwitch.onchange = function () {
@@ -6517,19 +6851,19 @@
                 $('input[name="labelling_charges"]').prop('disabled', true);
             }
         };
-        
+
         @if(count($wms_storage_charges) > 0)
         var storage_type_rows = {{ count($wms_storage_charges) }};
         @else
         var storage_type_rows = 1;
         @endempty
-        
-        
+
+
 
         $('body').on('click','#storage_type_add', function(){
-            
+
             var previous_row = storage_type_rows - 1;
-              
+
             $(this).addClass('d-none');
             var previous_select = $('select[name="storage_type['+ previous_row +']"]');
             var index = $.inArray(previous_select.val(), storage_type_selected);
@@ -6540,13 +6874,13 @@
             var storage_data_new = $.map(storage_type_data, function (obj) {
                 var current_id = obj.id.toString();
                 var index = $.inArray(current_id, storage_type_selected);
-                
+
                 if(index === -1){
                     obj.id = obj.id;
                     obj.text = obj.name;
                     return obj;
                 }
-                
+
             });
 
             if(storage_data_new.length !== 0){
@@ -6566,7 +6900,7 @@
 
             $('#wms_storage_types_div').append(htmldiv);
 
-            
+
             var last_id = storage_type_rows;
             $('select[name="storage_type['+ storage_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
                 data:storage_data_new,
@@ -6588,7 +6922,7 @@
 
             storage_type_rows++;
             }
-            
+
 
         });
 
@@ -6611,8 +6945,8 @@
         @else
         var packing_type_rows = 1;
         @endif
-       
-        
+
+
         @isset($wms_user_info->warehousing)
         @if(!$wms_user_info->packing_charges)
 
@@ -6658,8 +6992,8 @@
             }
         };
 
-        
-        
+
+
         $('body').on('click','#packing_type_add', function(){
             var previous_row = packing_type_rows - 1;
             $(this).addClass('d-none');
@@ -6668,11 +7002,11 @@
             var previous_size = $('select[name="packing_size['+ previous_row +']"]');
             var index = $.inArray(previous_type.val(), packing_type_selected);
             packing_size_selected.push(previous_size.val());
-            
+
             previous_type.prop('disabled', true);
             previous_size.prop('disabled', true);
 
-            
+
             // if(packing_data.length !== 0){
                 var htmldiv = '<div class="row packing_type_row" id="packing_type_row'+packing_type_rows+'">\n' +
                 '                                                <input id="packing_type_input'+ packing_type_rows +'" type="hidden" name="packing_type['+ packing_type_rows +']" value=""><div class="col-md-2">\n' +
@@ -6693,8 +7027,8 @@
                 '<span row="'+ packing_type_rows +'" class="packing_type_row_delete btn btn-sm btn-outline-danger"><i class="la la-trash"></i></span></div></div>';
 
             $('#wms_packing_charges_div').append(htmldiv);
-            
-            
+
+
             var last_id = packing_type_rows;
             $('select[name="packing_type['+ packing_type_rows +']"]').prepend('<option value="" selected="selected"></option>').select2({
                 data:packing_data,
@@ -6710,7 +7044,7 @@
                         obj.id = obj.id;
                         obj.text = obj.size;
                         return obj;
-                    }  
+                    }
                 });
                 $('select[name="packing_size['+ last_id +']"]').empty().select2({data:packing_sizes_data, placeholder: 'Select Packing Size'}).val(null).trigger('change');
             });
@@ -6735,12 +7069,12 @@
 
             packing_type_rows++;
             // }
-            
+
 
         });
 
         $('body').on('click','span.packing_type_row_delete', function(){
-            var row_id = $(this).parent().parent().attr('row'); 
+            var row_id = $(this).parent().parent().attr('row');
             var size_selected = $('select[name="packing_size['+ row_id +']"]').val();
             if(size_selected !== ''){
                 var index = $.inArray(size_selected, packing_size_selected);

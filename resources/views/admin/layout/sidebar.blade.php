@@ -738,6 +738,12 @@
                                             <a class="menu-item" href="{{ route('admin.settings.agents_list.index') }}">RVR Caller Agents List</a>
                                         </li>
                                     @endif
+                                    
+                                    @if (session('role_id') == 1 || in_array(1005, session('permissions')) || in_array(1006, session('permissions')) || in_array(1007, session('permissions')))
+                                        <li>
+                                            <a class="menu-item" href="{{ route('admin.settings.alist_shippers.index') }}">Specified Shipper</a>
+                                        </li>
+                                    @endif
 
 
                                 </ul>
@@ -1016,6 +1022,11 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(984, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.finance.tracking_number_wise_dncc_info.index') }}">Tracking number wise DNCC info</a></li>
+                        @endif
+
+                        {{-- Ledger --}}
+                        @if (session('role_id') == 1 /* || in_array(984, session('permissions')) */)
+                            <li><a class="menu-item" href="{{ route('admin.finance.shipment_ledger.index') }}">Service Ledger</a></li>
                         @endif
                     </ul>
 
@@ -1917,6 +1928,13 @@
                                 </a>
                             </li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(1008, session('permissions')))
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.rvr_reattempt.index') }}">
+                                    Reattempt Analysis Report
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -2748,6 +2766,10 @@
                                                         <li><a class="menu-item"
                                                                 href="{{ route('admin.user_management.fuel_management.index') }}">Fuel
                                                                 Management</a></li>
+                                                    @endif
+                                                    @if (session('role_id') == 1)
+                                                        <li><a class="menu-item"
+                                                                href="{{ route('admin.user_management.index') }}">User/Role Management Logs</a></li>
                                                     @endif
                                                 </ul>
                                             </li>

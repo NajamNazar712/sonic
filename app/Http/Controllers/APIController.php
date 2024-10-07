@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\ShipmentAdditionalCharges;
 use DB;
 use SnappyPDF;
 use Validator;
@@ -57,6 +58,7 @@ use App\Http\Models\GulAhmedPickupAddress;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Controllers\CRM\CRMController;
+use App\Http\Models\Admin\Lead\LeadTagging;
 use App\Http\Models\Admin\RcpAssignedAgent;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\DonePaymentCalculation;
@@ -126,6 +128,7 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
+
 
 class APIController extends Controller
 {
@@ -3850,7 +3853,10 @@ class APIController extends Controller
                             $details['payment_type'] = 'Delivered';
                         } else if ($done_payment_shipment->type == 1) {
                             $details['payment_type'] = 'Returned';
-                        } else {
+                        }else if ($done_payment_shipment->type == 3) {
+                            $details['payment_type'] = 'Arrival';
+                        }
+                        else {
                             $details['payment_type'] = 'Adjusted';
                         }
                         $details['payment_id'] = $done_payment_shipment->done_payment->id;
@@ -3904,19 +3910,23 @@ class APIController extends Controller
                     if (!$invoice_shipments->isEmpty()) {
                         foreach ($invoice_shipments as $invoice_shipment) {
                             $shipment = $invoice_shipment->shipment;
+                            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
                             $details = array();
                             if ($invoice_shipment->type == 0) {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Delivered';
                             } else if ($invoice_shipment->type == 1) {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Returned';
-                            } else {
+                            } else if ($invoice_shipment->type == 3) {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Arrival';
+                            }
+                            else {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Adjusted';
                             }
-                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->weight_charges : 0);
+                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
                             $details[$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 2 && $invoice_shipment->type == 0 && $invoice_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
                             $details[$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->insurance_charges : 0);
                             $details[$shipment->tracking_number]['return_charges'] = (($account_type_id == 2 && $invoice_shipment->type == 1 && $invoice_shipment->charges != 0) ? $shipment->return_charges : 0);
-                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
+                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
                             $details[$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->replacement_charges : 0);
                             $details[$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
                             $details[$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->intercept_charges : 0);
@@ -3952,19 +3962,23 @@ class APIController extends Controller
                     if (!$done_payment_shipments->isEmpty()) {
                         foreach ($done_payment_shipments as $done_payment_shipment) {
                             $shipment = $done_payment_shipment->shipment;
+                            $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
                             $details = array();
                             if ($done_payment_shipment->type == 0) {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Delivered';
                             } else if ($done_payment_shipment->type == 1) {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Returned';
-                            } else {
+                            } else if ($done_payment_shipment->type == 3) {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Arrival';
+                            }
+                            else {
                                 $details[$shipment->tracking_number]['payment_type'] = 'Adjusted';
                             }
-                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->weight_charges : 0);
+                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0 && ($done_payment_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
                             $details[$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
                             $details[$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->insurance_charges : 0);
                             $details[$shipment->tracking_number]['return_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 1 && $done_payment_shipment->charges != 0) ? $shipment->return_charges : 0);
-                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
+                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0 && ($done_payment_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
                             $details[$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->replacement_charges : 0);
                             $details[$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
                             $details[$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->intercept_charges : 0);
@@ -5038,14 +5052,8 @@ class APIController extends Controller
                             $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
                             //if Shipper Status Id = 66 (Shipment - Re-Attempt Call Requested) Then fetch Those Shipments in Get Ticket
-                            $rvData = [
-                                'shipment_id' => $shipment->id,
-                                'shipper_status_id' => 66,
-                                'status_reason_id' => $last_reason_id,
-                                'shipment_user_id' => $shipment->user_id,
-                                'call_count' => 2
-                            ];  
-                            dispatch(new ProcessRvShipmentTicket($rvData));
+                            $this->rvshipmentticketInsert($shipment->id, 66, $last_reason_id, $shipment->user_id);
+
 
                             if ($journey) {
                                 NotificationsController::send(33, $shipment->id);
@@ -9847,4 +9855,46 @@ class APIController extends Controller
         return response()->json(['exists' => $exists]);
     }
     
+    
+    public function wp_custom_select_dropdown_data() {
+        $concerned_wp_cities = [
+            "Abbottabad",
+            "Attock",
+            "Bahawalpur",
+            "Faisalabad",
+            "Gujranwala",
+            "Gujrat",
+            "Hyderabad",
+            "Islamabad",
+            "Jhelum",
+            "Jhang",
+            "Kamaliya",
+            "Karachi",
+            "Lahore",
+            "Larkana",
+            "Multan",
+            "Peshawar",
+            "Quetta",
+            "Rahim Yar Khan",
+            "Rawalpindi",
+            "Sahiwal",
+            "Sargodha",
+            "Sialkot",
+            "Sukkur"
+        ];
+
+        $city_ids = City::whereIn('name', $concerned_wp_cities)->pluck('id')->toArray();
+
+        $filtered_leads_tagging = LeadTagging::where('status', '!=', 0)
+            ->whereIn('city_id', $city_ids)
+            ->pluck('city_id')
+            ->unique()
+            ->toArray();
+
+        $filtered_concerned_wp_cities = City::whereIn('id', $filtered_leads_tagging)->get();
+
+        return response()->json(['response' => $filtered_concerned_wp_cities]);
+
+    }
+
 }

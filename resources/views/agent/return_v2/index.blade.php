@@ -935,7 +935,7 @@
                                 // shipment += '<td>' + (index + 1) + '</td>'; // S.no
                                 shipment += '<td>' + date[0] + '</td>'; //Calling Date
                                 shipment += '<td>' + date[1] + '</td>'; //Calling Time
-                                shipment += '<td>' + 'Unresponsive' + '</td>'; //Call Finding
+                                shipment += '<td>' + item.data.call_status ?? 'Not Connected' + '</td>'; //Call Finding
                                 shipment += '<td>' + item.data.rv_call_finding.name + '</td>'; //Call finding reason or Un-responsive Findings
                                 shipment += '<td>' + ((item.data.remarks != null) ? item.data.remarks : '-') + '</td>'; //Remarks
                                 shipment += '<td>' + 'Consigneee' + '</td>'; //call to
