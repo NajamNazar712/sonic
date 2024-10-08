@@ -208,7 +208,7 @@ class BotCallingController extends Controller
                     'name' => 'zong',
                     'api_request' => json_encode($request->all()), // log the request data
                     'status_code' => 200,
-                    'shipment_id' => $findShipmentId->id,
+                    'shipment_id' => Shipment::where('tracking_number',$request->input('tracking_number'))->first()->id,
                     'error' => json_encode('Shipment is in different status, Cannot mark it as Another Status!'),
                     'call_date_time' => $request->start_date,
                     'created_at' => now(),
@@ -225,7 +225,7 @@ class BotCallingController extends Controller
                 'api_request' => json_encode($request->all()), // log the request data
                 'error' => json_encode($th->getMessage()), // log the request data
                 'status_code' => 400,
-                // 'shipment_id' => $findShipmentId->id,
+                'shipment_id' => Shipment::where('tracking_number', $request->input('tracking_number'))->first()->id,
                 'call_date_time' => $request->start_date,
                 'created_at' => now(),
             ]);
