@@ -11,7 +11,7 @@ $(window).on('storage', function(event) {
         if (data.pageUrl === window.location.pathname) {
             setTimeout(function() {
                 location.reload();
-            }, 1000);
+            }, 3000);
         }
     }
 });
