@@ -14015,7 +14015,7 @@ class AdminReportsController extends Controller
             $shipmentJourneyMaxId = DB::table('shipments_journey')->whereDate('created_at', DB::raw('DATE("' . $to . '")'))->max('id');
 
 
-            $shipments = DB::connection('reports_2')->table('shipments')
+            $shipments = DB::connection('reports')->table('shipments')
                 ->leftJoin('shipments_journey as sj', function ($join) use ($shipment_journey_min_id,$shipmentJourneyMaxId) {
                     if($shipment_journey_min_id &&  $shipmentJourneyMaxId)
                     {
@@ -14036,7 +14036,9 @@ class AdminReportsController extends Controller
                     }
 
                 })
-                ->whereBetween('sj.id', [$shipment_journey_min_id, $shipmentJourneyMaxId])->get();
+                ->whereBetween('sj.id', [$shipment_journey_min_id, $shipmentJourneyMaxId])
+                ->whereBetween('shipments.created_at', [$from, $to])
+                ->get();
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
             $re_attempt_and_intercept_status = array(52,55);
 
