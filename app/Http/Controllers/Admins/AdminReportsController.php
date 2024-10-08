@@ -14005,7 +14005,7 @@ class AdminReportsController extends Controller
             $from = '';
             $to = '';
 
-            $from = Carbon::parse($search_date)->subMonths(4)->setTime(21, 00, 00)->toDateTimeString();
+            $from = Carbon::parse($search_date)->subMonths(3)->setTime(21, 00, 00)->toDateTimeString();
             $to = Carbon::parse($search_date)->setTime(8, 59, 59)->toDateTimeString();
 
             $regions = DB::connection('reports_2')->table('regions')->select('id','name')->pluck('name','id')->toArray();
