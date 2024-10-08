@@ -225,7 +225,7 @@ class BotCallingController extends Controller
                 'api_request' => json_encode($request->all()), // log the request data
                 'error' => json_encode($th->getMessage()), // log the request data
                 'status_code' => 400,
-                'shipment_id' => $findShipmentId->id,
+                // 'shipment_id' => $findShipmentId->id,
                 'call_date_time' => $request->start_date,
                 'created_at' => now(),
             ]);
