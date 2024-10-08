@@ -504,11 +504,10 @@ class AdminLogisticBookingController extends Controller
                 $booking_img_url=null;
                 if ($booking_img)
                 {
+                    $booking_img_url =Storage::disk('public')->url('logistic_bookings/'. $booking_img->image_name);
                     if (Storage::disk('s4')->exists('logistic_bookings/'. $booking_img->image_name)) {
                         $booking_img_url =  Storage::disk('s4')->url('logistic_bookings/'. $booking_img->image_name);
-                    } else {
-                        $booking_img_url =  Storage::disk('public')->url('logistic_bookings/'. $booking_img->image_name);
-                    }
+                    } 
                     
                 }
 
