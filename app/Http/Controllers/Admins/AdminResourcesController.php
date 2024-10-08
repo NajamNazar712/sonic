@@ -7,6 +7,7 @@ use App\Http\Models\ZoneClassCity;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\City;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -30,8 +31,23 @@ class AdminResourcesController extends Controller
             $city_list_array = array();
             $city_list_array['header'] = ['S. No.','ID', 'Name', 'Class', 'Zone'];
             $serial = 1;
+
+            $city_data = DB::table('shipments')
+                ->join('user_shipping_infos', 'shipments.pickup_address_id', '=', 'user_shipping_infos.id')
+                ->join('cities AS origin_city', 'user_shipping_infos.city_id', '=', 'origin_city.id')
+                ->join('cities AS destination_city', 'shipments.consignee_city_id', '=', 'destination_city.id')
+                ->select([
+                    'origin_city.name as origin_city',
+                    'destination_city.name as destination_city'
+                ])
+            ->get();
+
+            $origin_city = $city_data->pluck(['origin_city'])->toArray();
+            $destination_city = $city_data->pluck(['destination_city'])->toArray();
+
             foreach ($zones as $index => $zone){
-                foreach ($zone->zone_cities as $city) {
+                // foreach ($zone->zone_cities as $city) {
+                foreach ($zone->zone_cities as $city_index => $city) {
                     $city_check = City::where('id', $city->id)->first();
                     if ($city_check->status == 1) {
                     $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
@@ -46,7 +62,19 @@ class AdminResourcesController extends Controller
                             } else {
                                 $class_name = "D";
                             }
-                            $city_list_array[] = ['serial' => $serial, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name, 'Zone' => $zone->name];
+
+                            $city_origin = $origin_city[$city_index] ?? '-';
+                            $city_destination = isset($destination_city[$city_index]) ? $destination_city[$city_index] : '-';
+
+                            $city_list_array[] = [
+                                'serial' => $serial, 
+                                'id' => $city->id, 
+                                'name' => $city->name, 
+                                'Origin' => $city_origin,
+                                'Destination' => $city_destination,
+                                'class' => $class_name, 
+                                'Zone' => $zone->name
+                            ];
                             $serial++;
                         }
                     }
