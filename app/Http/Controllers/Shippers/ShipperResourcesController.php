@@ -28,10 +28,10 @@ class ShipperResourcesController extends Controller
             $city_list_array = array();
             $city_list_array['header'] = [
                 'S. No.',
-                'ID', 
-                'Name',
+                // 'Name',
                 'Origin',
                 'Destination', 
+                'ID', 
                 'Class', 
                 'Zone'
             ];
@@ -44,11 +44,13 @@ class ShipperResourcesController extends Controller
                 ->where('shipments.user_id', Auth::user()->id)
                 ->select([
                     'origin_city.name as origin_city',
+                    'destination_city.id as destination_city_id',
                     'destination_city.name as destination_city'
                 ])
             ->get();
 
             $origin_city = $city_data->pluck(['origin_city'])->toArray();
+            $destination_city_id = $city_data->pluck(['destination_city_id'])->toArray();
             $destination_city = $city_data->pluck(['destination_city'])->toArray();
 
             foreach ($zones as $index => $zone){
@@ -70,14 +72,15 @@ class ShipperResourcesController extends Controller
                             }
 
                             $city_origin = $origin_city[$city_index] ?? '-';
+                            $destination_id = isset($destination_city_id[$city_index]) ? $destination_city_id[$city_index] : '-';
                             $city_destination = isset($destination_city[$city_index]) ? $destination_city[$city_index] : '-';
 
                             $city_list_array[] = [
                                 'S. No.' => $serial,
-                                'ID' => $city->id,
-                                'Name' => $city_check->name,
+                                // 'Name' => $city_check->name,
                                 'Origin' => $city_origin,
                                 'Destination' => $city_destination,
+                                'ID' => $destination_id,
                                 'Class' => $class_name,
                                 'Zone' => $zone->name
                             ];
@@ -95,7 +98,7 @@ class ShipperResourcesController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getDefaultColumnDimension()->setWidth(20);
             $sheet->fromArray($city_list_array,NULL,'A2',true);
-            $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
+            $sheet->getStyle("A2:F2")->applyFromArray($cell_st);
             $sheet->setTitle('Network List');
             $spreadsheet->createSheet();
             $spreadsheet->setActiveSheetIndex(0);

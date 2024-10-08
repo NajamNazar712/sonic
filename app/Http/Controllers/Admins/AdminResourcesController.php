@@ -31,10 +31,10 @@ class AdminResourcesController extends Controller
             $city_list_array = array();
             $city_list_array['header'] = [
                 'S. No.',
-                'ID',
-                'Name',
+                // 'Name',
                 'Origin',
                 'Destination',
+                'ID',
                 'Class',
                 'Zone'
             ];
@@ -46,11 +46,13 @@ class AdminResourcesController extends Controller
                 ->join('cities AS destination_city', 'shipments.consignee_city_id', '=', 'destination_city.id')
                 ->select([
                     'origin_city.name as origin_city',
+                    'destination_city.id as destination_city_id',
                     'destination_city.name as destination_city'
                 ])
             ->get();
 
             $origin_city = $city_data->pluck(['origin_city'])->toArray();
+            $destination_city_id = $city_data->pluck(['destination_city_id'])->toArray();
             $destination_city = $city_data->pluck(['destination_city'])->toArray();
 
             foreach ($zones as $index => $zone){
@@ -72,14 +74,15 @@ class AdminResourcesController extends Controller
                             }
 
                             $city_origin = $origin_city[$city_index] ?? '-';
+                            $destination_id = isset($destination_city_id[$city_index]) ? $destination_city_id[$city_index] : '-';
                             $city_destination = isset($destination_city[$city_index]) ? $destination_city[$city_index] : '-';
 
                             $city_list_array[] = [
-                                'serial' => $serial, 
-                                'id' => $city->id, 
-                                'name' => $city->name, 
+                                'S. No.' => $serial,
+                                // 'name' => $city->name, 
                                 'Origin' => $city_origin,
                                 'Destination' => $city_destination,
+                                'id' => $destination_id, 
                                 'class' => $class_name, 
                                 'Zone' => $zone->name
                             ];
@@ -97,7 +100,7 @@ class AdminResourcesController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getDefaultColumnDimension()->setWidth(20);
             $sheet->fromArray($city_list_array,NULL,'A2',true);
-            $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
+            $sheet->getStyle("A2:F2")->applyFromArray($cell_st);
             $sheet->setTitle('Network List');
             $spreadsheet->createSheet();
             $spreadsheet->setActiveSheetIndex(0);
