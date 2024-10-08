@@ -601,6 +601,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/refreshTabs.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -998,7 +999,6 @@
                 //do something
                 $(this).attr('data-rule-required', 'true');
                 $(this).attr('data-msg-required', 'CNIC is required');
-                console.log('got yea');
             }
 
             $('body').on('click', 'input.open_box', function(){
@@ -1352,6 +1352,7 @@
                             
                             
                             blockPagePermanently();
+                            triggerRefreshInAllTabs();
                             this_form.submit();
                         }
                     });
@@ -1996,8 +1997,10 @@
                                                         dangerMode: true
                                                     }).then(function (confirm) {
                                                         if (confirm) {
+                                                            triggerRefreshInAllTabs()
                                                             location.reload();
                                                         } else {
+                                                            triggerRefreshInAllTabs()
                                                             location.reload();
                                                         }
                                                     });
@@ -2008,6 +2011,7 @@
                                                      positionClass: 'toast-bottom-center',
                                                      containerId: 'toast-bottom-center'
                                                  });
+                                                triggerRefreshInAllTabs()
                                                  location.reload();
                                             }
 
@@ -2080,8 +2084,10 @@
                                                     dangerMode: true
                                                 }).then(function (confirm) {
                                                     if (confirm) {
+                                                        triggerRefreshInAllTabs()
                                                         location.reload();
                                                     } else {
+                                                        triggerRefreshInAllTabs()
                                                         location.reload();
                                                     }
                                                 });
@@ -2093,6 +2099,7 @@
                                                 positionClass: 'toast-top-center',
                                                 containerId: 'toast-top-center'
                                             });
+                                            triggerRefreshInAllTabs()
                                             location.reload();
                                         }
                                     });
