@@ -97,7 +97,7 @@
                                                             <label for="Destination">Destination</label>
                                                             <input type="hidden" class="destination_hub_id" name="destination_hub_id">
                                                             <input type="text" name="destination_hub_name" class="destination_hub_name form-control" readonly>
-                                                            
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -216,6 +216,7 @@
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/refreshTabs.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
@@ -515,6 +516,7 @@
                                     });
                                     $('#cargo_consignment form .transport_mode').prop("disabled", false);
                                     $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
+                                    triggerRefreshInAllTabs();
                                     form.submit();
 
                                 }
@@ -554,16 +556,17 @@
                                 });
                                 $('#cargo_consignment form .transport_mode').prop("disabled", false);
                                 $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
+
+                                triggerRefreshInAllTabs();
                                 form.submit();
                             }
                             else {
                                 $(form).find('button[type=submit]').prop('disabled', false);
-
                                 UnblockPagePermanently();
                             }
                         });
                     }
-                    
+
                 }
             });
 
@@ -789,8 +792,8 @@
                 }else{
                       $("#sackbag_row").css('display','block');
                      $("#sack_bag_no").attr('data-rule-required', true).attr('data-msg-required', 'Sack Bag No is Required');
-                  
-                
+
+
 
                 }
             });
