@@ -12898,7 +12898,7 @@ class AdminReportsController extends Controller
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
         ->join('shipments_journey as sj', function($join) {
             $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
-                 ->where('sj.shipper_status_id', '=', 13);
+                 ->where('sj.shipper_status_id', '=', 66);
         })
         ->leftjoin('users', 'shipments.user_id', 'users.id')
         ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
@@ -12967,7 +12967,7 @@ class AdminReportsController extends Controller
                 
             })
             ->addColumn('rvr_count', function($rv_report) use ($request) {
-                        $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->whereBetween('created_at',[$request->get('search_date_from'),$request->get('search_date_to')])->whereIn('shipper_status_id', [52,12,66])->count();
+                        $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('verification',1)->whereIn('shipper_status_id', [52,12,66])->count();
                         return $rvr_count;
             });
                     
@@ -13998,17 +13998,17 @@ class AdminReportsController extends Controller
         return response()->json(['status' => 200 , 'data' => $ops_data],200);
     }
 
-    public function ops_report_data($search_date)
+        public function ops_report_data($search_date)
     {
 
-        try {
+
             $from = '';
             $to = '';
 
-            $from = Carbon::parse($search_date)->subMonths(6)->setTime(21, 00, 00)->toDateTimeString();
+            $from = Carbon::parse($search_date)->subMonths(4)->setTime(21, 00, 00)->toDateTimeString();
             $to = Carbon::parse($search_date)->setTime(8, 59, 59)->toDateTimeString();
 
-            $regions = DB::connection('reports_2')->table('regions')->select('id','name')->get();
+            $regions = DB::connection('reports_2')->table('regions')->select('id','name')->pluck('name','id')->toArray();
             $ops_data = [];
 
             $shipment_journey_min_id = DB::table('shipments_journey')->whereDate('created_at', DB::raw('DATE("' . $from . '")'))->min('id');
@@ -14040,13 +14040,13 @@ class AdminReportsController extends Controller
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
             $re_attempt_and_intercept_status = array(52,55);
 
-            $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subMonths(6)->setTime(21, 00, 00);  //last 6 month
+            $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subMonths(4)->setTime(21, 00, 00);  //last 4 month
             $re_attempt_and_intercept_endDate = Carbon::parse($search_date)->subDay(1)->setTime(20, 59, 59);
 
-            $other_pending_status_startDate = Carbon::parse($search_date)->subMonths(6)->setTime(9, 00, 00); // last 6 month
+            $other_pending_status_startDate = Carbon::parse($search_date)->subMonths(4)->setTime(9, 00, 00); // last 4 month
             $other_pending_status_endDate = Carbon::parse($search_date)->setTime(8, 59, 59);
 
-            $other_statuses_startDate = Carbon::parse($search_date)->subMonths(6)->startOfDay()->toDateTimeString(); // last 6 month
+            $other_statuses_startDate = Carbon::parse($search_date)->subMonths(4)->startOfDay()->toDateTimeString(); // last 4 month
             $other_statuses_endDate = Carbon::parse($search_date)->subDay(1)->endOfDay()->toDateTimeString();
 
             $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
@@ -14082,14 +14082,34 @@ class AdminReportsController extends Controller
                     'delivery_notes.id as delivery_note','c.zone_id')
                 ->groupBy('c.zone_id')->whereBetween('delivery_notes.created_at', [$other_statuses_startDate, $other_statuses_endDate])->get();
 
-            foreach ($regions as $region_key => $region) {
+            $zones = DB::connection('reports_2')
+                ->table('zone_regions')
+                ->join('zones as z', 'z.id', 'zone_regions.zone_id')
+                ->whereIn('zone_regions.region_id', array_keys($regions))
+                ->where('z.status', 1)
+                ->where('z.business_category_id', 1)
+                ->select('zone_regions.region_id', 'z.id', 'z.name')
+                ->get();
 
-                $zones = DB::connection('reports_2')->table('zone_regions')->join('zones as z', 'z.id', 'zone_regions.zone_id')->where('zone_regions.region_id',$region->id)->where('z.status',1)->where('z.business_category_id',1)->select('z.id','z.name')->get();
 
-                foreach ($zones as $key => $zone) {
+            $groupedZones = $zones->reduce(function ($carry, $item) {
+                $carry[$item->region_id][] = [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                ];
+                return $carry;
+            }, []);
 
+            $zoneIds = array_merge(...array_map(function($zones) {
+                return array_column($zones, 'id');
+            }, $groupedZones));
+
+           $zone_cities = DB::connection('reports_2')->table('cities')->whereIn('zone_id',$zoneIds)->pluck('zone_id','id')->toArray();
+
+            foreach ($regions as $region_id => $region) {
+                foreach ($groupedZones[$region_id] as $key => $zone) {
                     $data = [];
-                    $data['zone'] = $zone->name;
+                    $data['zone'] = $zone['name'];
                     $data['ready_for_delivery'] = 0;
                     $data['out_for_delivery'] = 0;
                     $data['out_for_delivery_percentage'] = 0;
@@ -14111,11 +14131,13 @@ class AdminReportsController extends Controller
                     $data['rcp'] = 0;
                     $data['rcp_percentage'] = 0;
 
-                    $zone_cities = DB::connection('reports_2')->table('cities')->where('zone_id',$zone->id)->pluck('id')->toArray();
+                    $filteredCities = array_filter($zone_cities, function($zoneId) use ($zone)  {
+                        return $zoneId == $zone['id'];
+                    });
 
                     foreach ($shipments as $shipment_key => $shipment_data) {
 
-                        if(in_array($shipment_data->consignee_city_id,$zone_cities))
+                        if(in_array($shipment_data->consignee_city_id,$filteredCities))
                         {
                             $created_date = Carbon::parse($shipment_data->created_at);
 
@@ -14132,7 +14154,7 @@ class AdminReportsController extends Controller
                     }
 
                     foreach ($route_distribution_summary as $rds_key => $rds_value) {
-                        if($rds_value->zone_id == $zone->id)
+                        if($rds_value->zone_id == $zone['id'])
                         {
                             $dn_ids = explode(',', $rds_value->dn_ids);
 
@@ -14170,17 +14192,17 @@ class AdminReportsController extends Controller
                         }
                     }
 
-                    $ops_data[$region->name][] = $data;
+                    $ops_data[$region][] = $data;
                 }
             }
 
 
             return $ops_data;
-        } catch (\Throwable $th) {
-            Log::channel('cronJobLog')->info('s ' .'OPS LOG'. $th->getMessage());
-        }
+
 
     }
+
+    
 
 
 
