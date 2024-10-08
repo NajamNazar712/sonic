@@ -77,7 +77,9 @@ class BotCallDispatch implements ShouldQueue
                 $response = $response->getBody()->getContents();
                 $response = json_decode($response);
                 // Log::channel('cronJobLog')->info('s ' . 'Log after call dispatched with response' . json_encode($response));
-                WebhookLogController::shipment_status_log($shipment->user_id, $status_code, json_encode($response));
+                WebhookLogController::zong_call_log($shipment->user_id,  $status_code, $this->shipmentId, 1, json_encode($response));
+
+                // WebhookLogController::shipment_status_log($shipment->user_id, $status_code, json_encode($response));
             }else{
             return json_encode(['status'=>0,'message'=>'Shipment isn`t at the bot call prefernce']);
             }

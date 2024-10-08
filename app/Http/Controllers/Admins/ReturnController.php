@@ -2627,7 +2627,20 @@ class ReturnController extends Controller
                 return isset($delivery_area) ? $delivery_area : '-';
             })
             ->addColumn('action', function ($shipment) {
-                if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
+                $cargo_bag = CargoManifestBagShipments::where('shipment_id' , $shipment->shipment_id);
+                if($cargo_bag->exists()) {
+                    $cargo_bag = $cargo_bag->latest()->first();
+                    $bag_number = $cargo_bag->cargo_manifest_bag_id;
+                    $return_bag = CargoManifestBag::where('id', $bag_number)->where('type', 2);
+                    if($return_bag->exists()) {
+                       $return_flag_check = true;
+                    } else {
+                        $return_flag_check = false;
+                    }
+                } else {
+                    $return_flag_check = false;
+                }
+                if (($shipment->shipper_status_id == 20 &&  $return_flag_check == false) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
                     $flag = true;
                     $consolidation = ConsolidationShipments::where('shipment_id', $shipment->shipment_id)->first();
                     if ($consolidation) {
@@ -7773,7 +7786,6 @@ class ReturnController extends Controller
             $completed_shipment_first_unresponsive = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 4)->where('unresponsive_count', 0)->latest()->first();
             $old_completed_shipments = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_assign_agent_status_id', '!=', 6)->whereIn('rv_state_id', [2, 4])->latest()->first();
 
-
             if ($exist_shipment) {
                 if ($unresponsive_shipments) {
                     $unresponsive_invalid_shipments[] = $shipment_id;
@@ -7945,6 +7957,25 @@ class ReturnController extends Controller
                     if ($new_call_history) {
                         $old_completed_shipments->update(['rv_state_id' => 2]);
                         $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $old_completed_shipments, $shipments_journey);
+                        $successfull_updated_shipments[] = $shipment_id;
+                    } else {
+                        $unresponsive_invalid_shipments[] = $shipment_id;
+                    }
+                }else{ 
+                    
+                    $exist_shipment->increment('call_count');
+                    $exist_shipment->increment('unresponsive_count');
+                    $exist_shipment->updated_by_id = Auth::id();
+                    $exist_shipment->updated_type_id = 1;
+                    $exist_shipment->rv_state_id = 1; // Force fully update call history then rv_state_id set is 1
+                    $exist_shipment->save();
+                    //adding new row in rv_agent_call_histories and updating unresposive count
+                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
+
+                    $new_call_history = $this->unresponsive($request);
+                    if ($new_call_history) {
+                        $exist_shipment->update(['rv_state_id' => 2]);
+                        $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $exist_shipment, $shipments_journey);
                         $successfull_updated_shipments[] = $shipment_id;
                     } else {
                         $unresponsive_invalid_shipments[] = $shipment_id;
