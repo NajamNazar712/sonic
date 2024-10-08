@@ -14082,6 +14082,25 @@ class AdminReportsController extends Controller
                     'delivery_notes.id as delivery_note','c.zone_id')
                 ->groupBy('c.zone_id')->whereBetween('delivery_notes.created_at', [$other_statuses_startDate, $other_statuses_endDate])->get();
 
+            $delivery_note_ids = $route_distribution_summary->pluck('dn_ids','zone_id')->toArray();
+
+            $exploded_delivery_note_ids = array_merge(...array_map(function($idString) {
+                return explode(',', $idString);
+            }, $delivery_note_ids));
+        
+//            $zone_delivery_note_ids = array_reduce(array_keys($delivery_note_ids), function ($carry, $zone_id) use ($delivery_note_ids) {
+//                $carry[$zone_id] = array_map('intval', explode(',', $delivery_note_ids[$zone_id]));
+//                return $carry;
+//            }, []);
+
+            $delivery_note_shipment = DeliveryNoteShipment::whereIn('delivery_note_id', $exploded_delivery_note_ids)
+                ->get()
+                ->groupBy('delivery_note_id')
+                ->map(function ($group) {
+                    return $group->pluck('shipment_id')->toArray();
+                })
+                ->toArray();
+
             $zones = DB::connection('reports_2')
                 ->table('zone_regions')
                 ->join('zones as z', 'z.id', 'zone_regions.zone_id')
@@ -14159,9 +14178,15 @@ class AdminReportsController extends Controller
                             $dn_ids = explode(',', $rds_value->dn_ids);
 
                             // $total_cod_received_amount = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->sum('received_cod_amount');
-                            $delivery_note_shipment = DeliveryNoteShipment::whereIn('delivery_note_id', $dn_ids)->pluck('shipment_id')->toArray();
-                            $total_cod_received_amount = Shipment::whereIn('id', $delivery_note_shipment)->whereIn('shipper_status_id',[14,30,36,37])->sum('amount');
-                            $fintech_amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
+
+                            $filtered_delivery_note_shipment = array_filter($delivery_note_shipment, function ($key) use($dn_ids) {
+                                return in_array($key, $dn_ids);
+                            }, ARRAY_FILTER_USE_KEY);
+
+                            $combined_shipments = array_merge(...array_values($filtered_delivery_note_shipment));
+
+                            $total_cod_received_amount = Shipment::whereIn('id', $combined_shipments)->whereIn('shipper_status_id',[14,30,36,37])->sum('amount');
+                            $fintech_amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $combined_shipments)->sum('fpd.cod_amount');
                             $hbl_connect_amount = DB::connection('reports')->table('hbl_konnect_transaction_delivery_notes')->whereIn('delivery_note_id', $dn_ids)->sum('transactions_amount');
                             $total_cash_submitted = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->whereIn('cash_collection_status',[1,2,3])->sum('received_cod_amount');
                             // $remaining_cash_after_lost = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->whereIn('cash_collection_status',[2,3])->sum('received_cod_amount');
