@@ -1595,7 +1595,7 @@ class APIController extends Controller
             ];
 
             foreach ($timeLimits as $range) {
-                if ($count >= $range['min'] && $count < $range['max'] && $minutesDiff < $range['limit']) {
+                if ($count >= $range['min'] && $count <= $range['max'] && $minutesDiff < $range['limit']) {
                     $timeLimit = $range['seconds'];
                     break;
                 }
