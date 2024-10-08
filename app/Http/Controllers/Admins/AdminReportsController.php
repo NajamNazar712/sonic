@@ -14005,8 +14005,10 @@ class AdminReportsController extends Controller
             $from = '';
             $to = '';
 
-            $from = Carbon::parse($search_date)->subMonths(3)->setTime(21, 00, 00)->toDateTimeString();
+            $from = Carbon::parse($search_date)->subMonths(1)->setTime(21, 00, 00)->toDateTimeString();
+            $from_2 = Carbon::parse($search_date)->subMonths(4)->setTime(00, 00, 00)->toDateTimeString();
             $to = Carbon::parse($search_date)->setTime(8, 59, 59)->toDateTimeString();
+            $to_2 = Carbon::parse($search_date)->setTime(23, 59, 59)->toDateTimeString();
 
             $regions = DB::connection('reports_2')->table('regions')->select('id','name')->pluck('name','id')->toArray();
             $ops_data = [];
@@ -14016,7 +14018,7 @@ class AdminReportsController extends Controller
 
 
             $shipments = DB::connection('reports')->table('shipments')
-                ->leftJoin('shipments_journey as sj', function ($join) use ($shipment_journey_min_id,$shipmentJourneyMaxId) {
+                ->join('shipments_journey as sj', function ($join) use ($shipment_journey_min_id,$shipmentJourneyMaxId) {
                     if($shipment_journey_min_id &&  $shipmentJourneyMaxId)
                     {
                         $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -14036,8 +14038,7 @@ class AdminReportsController extends Controller
                     }
 
                 })
-                ->whereBetween('sj.id', [$shipment_journey_min_id, $shipmentJourneyMaxId])
-                ->whereBetween('shipments.created_at', [$from, $to])
+                ->whereBetween('shipments.created_at', [$from_2, $to_2])
                 ->get();
             $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
             $re_attempt_and_intercept_status = array(52,55);
