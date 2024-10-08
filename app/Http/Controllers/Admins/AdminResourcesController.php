@@ -29,7 +29,15 @@ class AdminResourcesController extends Controller
         $zones = Zone::where('status', 1)->get();
         if($zones){
             $city_list_array = array();
-            $city_list_array['header'] = ['S. No.','ID', 'Name', 'Class', 'Zone'];
+            $city_list_array['header'] = [
+                'S. No.',
+                'ID',
+                'Name',
+                'Origin',
+                'Destination',
+                'Class',
+                'Zone'
+            ];
             $serial = 1;
 
             $city_data = DB::table('shipments')
@@ -89,7 +97,7 @@ class AdminResourcesController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getDefaultColumnDimension()->setWidth(20);
             $sheet->fromArray($city_list_array,NULL,'A2',true);
-            $sheet->getStyle("A2:E2")->applyFromArray($cell_st);
+            $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
             $sheet->setTitle('Network List');
             $spreadsheet->createSheet();
             $spreadsheet->setActiveSheetIndex(0);

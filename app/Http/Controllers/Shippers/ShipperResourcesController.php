@@ -95,7 +95,7 @@ class ShipperResourcesController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getDefaultColumnDimension()->setWidth(20);
             $sheet->fromArray($city_list_array,NULL,'A2',true);
-            $sheet->getStyle("A2:E2")->applyFromArray($cell_st);
+            $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
             $sheet->setTitle('Network List');
             $spreadsheet->createSheet();
             $spreadsheet->setActiveSheetIndex(0);
