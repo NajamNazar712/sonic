@@ -2576,6 +2576,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Route::post('udpate', 'Admins\GlobalSettingsController@delivery_revert_access_update')->name('update');
         });
 
+
         Route::prefix('delivery_revert_access')->name('delivery_revert_access.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@delivery_revert_access_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@delivery_revert_access_store')->name('store');
@@ -3587,7 +3588,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('launched_re_open')->name('launched_re_open.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@launched_re_open_index')->name('index');
-            Route::get('list', 'Admins\AdminCRMController@launched_re_open_list')->name('list');
+            Route::post('list', 'Admins\AdminCRMController@launched_re_open_list')->name('list');
         });
         Route::prefix('in_process')->name('in_process.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@in_process_index')->name('index');

@@ -497,6 +497,11 @@ class VigilanceController extends Controller
         $rider_id = $request->rider_id;
         if($rider_id){
             $tracking_number = $request->tracking_number;
+
+            if ($tracking_number == '' || $tracking_number == null){
+                return response()->json(['status' => 0, 'error' => 'Tracking number is required']);
+            }
+
             $shipment = Shipment::where('tracking_number', $tracking_number);
             if($shipment->exists()){
                 $shipment = $shipment->first();
