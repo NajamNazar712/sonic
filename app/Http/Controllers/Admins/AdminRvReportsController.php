@@ -1,9 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
+
+use ApiCallZongLog;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Webhook\ApiCallLog;
+use App\Http\Models\Webhook\ApiZongLog;
 use App\Http\Traits\RvTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -85,7 +88,7 @@ class AdminRvReportsController extends Controller
 
         $rv_call_logs = ApiCallLog::join('shipments as s','s.id', 'api_call_logs.shipment_id')
             ->leftJoin('api_zong_logs as azl', function ($join) use ($request) {
-                $join->on('api_call_logs.shipment_id', '=', 'azl.shipment_id');
+                $join->on('azl.call_date_time', '=', 'api_call_logs.created_at');
                 $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
                 $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
             })    
@@ -98,10 +101,9 @@ class AdminRvReportsController extends Controller
             'azl.call_date_time as call_start_date',
             'azl.api_request as api_request',
             'azl.error as message',
-            'azl.created_at as date_time')
-            ->groupBy('api_call_logs.id', 'azl.call_date_time');
-        
-            $datatable = Datatables::of($rv_call_logs)
+            'azl.created_at as date_time');
+
+              $datatable = Datatables::of($rv_call_logs)
             ->editColumn('tracking_number', function ($rv_call_logs) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$rv_call_logs->tracking_number' class='tracking' target='_blank'>$rv_call_logs->tracking_number</a></u>";
@@ -167,15 +169,15 @@ class AdminRvReportsController extends Controller
                     return 'Data Saved SuccessFully!';
                 }
             });
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+            }
             
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $rv_call_logs->where([['api_call_logs.created_at', '>=', $from], ['api_call_logs.created_at', '<=', $to]]);
-        }
+        $rv_call_logs->where([['api_call_logs.created_at', '>=', $from], ['api_call_logs.created_at', '<=', $to]]);
         if($request->get('search_tracking_no')){
             $rv_call_logs->where('s.tracking_number', $request->get('search_tracking_no'));
-        }
+        }   
 
         return $datatable->make(true);
     }

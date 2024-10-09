@@ -457,7 +457,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                  order: [[1, 'desc']], // Order by 'created_at' DESC and 'description' ASC
+                  order: [[4, 'asc']], // Order by 'created_at' DESC and 'description' ASC
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle tracking_number', searchable: true},
