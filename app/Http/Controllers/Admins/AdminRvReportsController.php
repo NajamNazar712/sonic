@@ -101,7 +101,8 @@ class AdminRvReportsController extends Controller
             'azl.call_date_time as call_start_date',
             'azl.api_request as api_request',
             'azl.error as message',
-            'azl.created_at as date_time');
+            'azl.created_at as date_time')
+            ->groupby('api_call_logs.call_count_initiate');
 
               $datatable = Datatables::of($rv_call_logs)
             ->editColumn('tracking_number', function ($rv_call_logs) {
