@@ -84,12 +84,12 @@ class AdminRvReportsController extends Controller
     {
 
         $rv_call_logs = ApiCallLog::join('shipments as s','s.id', 'api_call_logs.shipment_id')
-            // ->leftJoin('api_zong_logs as azl', function ($join) use ($request) {
-            //     $join->on('api_call_logs.shipment_id', '=', 'azl.shipment_id');
-            //     $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
-            //     $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
-            // })    
-            ->leftJoin(DB::raw('(SELECT DISTINCT shipment_id FROM api_zong_logs) AS azl'), 'azl.shipment_id', '=', 'acl.shipment_id')
+            ->leftJoin(DB::raw('(SELECT DISTINCT shipment_id,call_date_time,api_request,error,created_at FROM api_zong_logs) AS azl'), function ($join) use ($request) {
+                $join->on('api_call_logs.shipment_id', '=', 'azl.shipment_id');
+                $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
+                $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
+            })    
+            // ->leftJoin(DB::raw('(SELECT DISTINCT shipment_id,call_date_time,api_request,error,created_at FROM api_zong_logs) AS azl'), 'azl.shipment_id', '=', 'api_call_logs.shipment_id')
 
             ->select('s.tracking_number as tracking_number',
             'api_call_logs.shipment_id as shipmentNo',
