@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Webhook\ApiCallLog;
 use App\Http\Traits\RvTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -71,5 +72,38 @@ class AdminRvReportsController extends Controller
             }
 
             return $datatable->make(true);
+    }
+
+    public function botRvCallLogs()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 810);
+
+        return view('admin.reports.bot_rvr_log.index');
+    }
+    public function botRvCallLogsList(Request $request)
+    {
+
+        $rv_report = ApiCallLog::join('shipments as s','s.id', 'api_call_logs.shipment_id')
+            ->leftjoin('api_zong_logs as azl', 'api_call_logs.shipment_id','azl.shipment_id')
+            ->select('s.tracking_number,api_call_logs.shipment_id,api_call_logs.payload,api_call_logs.created_at');
+        $datatable = Datatables::of($rv_report);
+        // ->editColumn('option1_per', function ($rv_report) {
+        //     if($rv_report['description'] == '1st Calls'){
+        //         if($rv_report['option1_per']){
+        //             return round($rv_report['option1'] / $rv_report['no_of_shipments'] * 100 ,2).'%'; 
+        //         }
+        //         // if($rv_report['total1_per']){
+        //         //     return round($rv_report['total1_per'] / $rv_report['no_of_shipments'] * 100 ,2).'%'; 
+        //         // }
+
+        //     }
+        // });
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rv_report->where([['rv_shipment_assign_agent_details.created_at', '>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
+        }
+
+        return $datatable->make(true);
     }
 }
