@@ -84,11 +84,13 @@ class AdminRvReportsController extends Controller
     {
 
         $rv_call_logs = ApiCallLog::join('shipments as s','s.id', 'api_call_logs.shipment_id')
-            ->leftJoin('api_zong_logs as azl', function ($join) use ($request) {
-                $join->on('api_call_logs.shipment_id', '=', 'azl.shipment_id');
-                $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
-                $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
-            })    
+            // ->leftJoin('api_zong_logs as azl', function ($join) use ($request) {
+            //     $join->on('api_call_logs.shipment_id', '=', 'azl.shipment_id');
+            //     $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
+            //     $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
+            // })    
+            ->leftJoin(DB::raw('(SELECT DISTINCT shipment_id FROM api_zong_logs) AS azl'), 'azl.shipment_id', '=', 'acl.shipment_id')
+
             ->select('s.tracking_number as tracking_number',
             'api_call_logs.shipment_id as shipmentNo',
             'api_call_logs.call_count_initiate  as call_count',
@@ -99,7 +101,7 @@ class AdminRvReportsController extends Controller
             'azl.api_request as api_request',
             'azl.error as message',
             'azl.created_at as date_time')
-            ->groupBy('api_call_logs.id');
+            ->groupBy('api_call_logs.call_count_initiate');
         
             $datatable = Datatables::of($rv_call_logs)
             ->editColumn('tracking_number', function ($rv_call_logs) {
