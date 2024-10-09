@@ -172,6 +172,9 @@ class AdminRvReportsController extends Controller
             $to = $request->get('search_date_to');
             $rv_call_logs->where([['api_call_logs.created_at', '>=', $from], ['api_call_logs.created_at', '<=', $to]]);
         }
+        if($request->get('search_tracking_no')){
+            $rv_call_logs->where('s.tracking_number', $request->get('search_tracking_no'));
+        }
 
         return $datatable->make(true);
     }
