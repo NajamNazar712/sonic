@@ -1323,7 +1323,6 @@ trait RvTrait
         $agent = Admin::find($agent_id);
 
         $shipments = $this->getShipmentsFromRvShipmentTicket($agent);
-
         // check if shipments exist or if admin is assign shipment to agent
         //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
         if ($shipments->count()) {
@@ -1528,7 +1527,6 @@ trait RvTrait
                 ->where('is_bot',0)
                 ->orderBy('updated_at','asc')
                 ->get(['id','shipment_id']);
-
         return $shipments;                
     }
 

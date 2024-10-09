@@ -744,7 +744,12 @@
                                             <a class="menu-item" href="{{ route('admin.settings.alist_shippers.index') }}">Specified Shipper</a>
                                         </li>
                                     @endif
-
+                                    
+                                    @if (session('role_id') == 1 || in_array(1011, session('permissions')))
+                                        <li>
+                                            <a class="menu-item" href="{{ route('admin.reports.bot_rvr_log.index') }}">Bot RVR Log Call</a>
+                                        </li>
+                                    @endif
 
                                 </ul>
                             </li>
@@ -1859,9 +1864,6 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(950, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.rvr_call_history.index') }}">Overall RVR Call History</a></li>
-                        @endif
-                        @if (session('role_id') == 1 || in_array(1011, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.reports.bot_rvr_log.index') }}">Bot RVR Log Call</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(930, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.rv_action_count_report.index') }}">RV Action Count Report</a></li>
