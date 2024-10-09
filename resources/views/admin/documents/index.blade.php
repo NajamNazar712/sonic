@@ -57,7 +57,12 @@
                                         <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
                                         <div class="heading-elements">
                                             <ul class="list-inline mb-0">
-                                                <li><a href="javascript:void(0);" class="btn btn-secondary round btn-min-width mr-1 mb-1 city_list_download"> <i class=" ft-download"></i> Download</a></li>
+                                                <li>
+                                                    <a href="javascript:void(0);" class="btn btn-secondary round btn-min-width mr-1 mb-1 admin_city_list_download" id="admin_city_list_download"> 
+                                                        {{-- <i class=" ft-download"></i> --}}
+                                                        Click here to select shippers
+                                                    </a>
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>
@@ -132,28 +137,139 @@
                     </div>
                 </div>
 
+                <div class="modal fade" id="user_data_modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalLabel">User Information</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="select2Form">
+                                    <div class="form-group">
+                                        <label for="user_dropdown">Select Shippers</label>
+                                        <select name="search_shipper[]" id="user_dropdown" class="form-control select2" multiple>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <a href="javascript:void(0);" class="btn btn-secondary round btn-min-width mr-1 user_city_list_download" id="user_city_list_download"> 
+                                    <i class=" ft-download"></i>
+                                    Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
 @endsection
 @section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
 
+<style>
+    #toast-container > .toast-error {
+        font-size: 2rem;
+        width: 46%;
+    }
+
+    #toast-container{
+        width: 65%;
+    }
+
+    #user_data_modal{
+        margin: 100px 0px 0px 0px;
+    }
+</style>
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-
-
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
             $('li a.city_list_download').on('click', function () {
                 $(this).attr('disabled', true);
                 window.open('{!! route('admin.resources.city_list') !!}', '_blank');
+            });
+            
+            var admin_list = $('#admin_city_list_download');
+            admin_list.on('click', function () {
+                // Show modal
+                $('#user_data_modal').modal('show');
 
-            })
+                // show all active users
+                $('#user_dropdown').select2({
+                    width:'100%',
+                    placeholder:"Select Shipper",
+                    allowClear:true,
+                    multiple: true,
+                    minimumInputLength: 2,
+                    ajax: {
+                        dataType: 'json',
+                        url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                            data: function (params) {
+                                return {
+                                    search: params.term,
+                                }
+                            },
+                            processResults: function (data) {
+                                return {
+                                    results: data
+                                };
+                            },
+                        delay: 700,
+                    }
+                });
+
+                // download excel file
+                var user_list = $('#user_city_list_download');
+                user_list.off('click');
+                user_list.on('click', function () {
+                    var selectedUsers = $('#user_dropdown').val();
+                    if (selectedUsers.length == 0) {
+                        toastr.error('Please select at least 1 shipper', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    } else {
+                        $(this).attr('disabled', true);
+                        $.ajax({
+                            url: '{!! route('admin.resources.city_list') !!}',
+                            method: 'GET',
+                            data: {
+                                users: selectedUsers
+                            },
+                            success: function (response) {
+                                window.open(response.url, '_blank');
+                            },
+                            error: function (error) {
+                                console.error('Error:', error);
+                                alert('An error occurred while downloading the file.');
+                            },
+                            complete: function () {
+                                user_list.attr('disabled', false);
+                            }
+                        });
+                    }
+                });
+            });
         });
 
 
