@@ -158,7 +158,9 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\CalculateFranchiseCommission',
         'App\Console\Commands\DeleteOldDataFromShortUrlTable',
         'App\Console\Commands\RestartSupervisordProcesses',
-        'App\Console\Commands\UpdateArrivalChargesCommand'
+        'App\Console\Commands\UpdateArrivalChargesCommand',
+        '\App\Console\Commands\RetryJobsInRange',
+        '\App\Console\Commands\ForceFullyBotCallInitiate'
         ];
 
     /**

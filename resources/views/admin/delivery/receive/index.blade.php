@@ -400,7 +400,7 @@
                     {data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
                     {data: 'shipments_count_link', name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    {data: 'total_weight', name: 'total_weight', class: 'align-middle total_weight text-center'},
+                    {data: 'total_weight', name: 'total_weight', class: 'align-middle total_weight text-center',orderable:false},
                     {data: 'shipments_unverified_link', name: 'shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center', orderable: false, searchable: false},
                     {data: 'delivered_shipments', name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments text-center', orderable: false, searchable: false},
                     {data: 'assignee', name: 'admins.name', class: 'align-middle assignee'},
