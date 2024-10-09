@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'BOT CALL REPORT')
+@section('title', 'BOT CALL LOG REPORT')
 
 @section('content')
 <div class="app-content content">
@@ -12,7 +12,7 @@
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            <h1 class="text-center align-middle">BOT CALL REPORT</h1>
+                            <h1 class="text-center align-middle">BOT CALL LOG REPORT</h1>
                             @include('admin.inc.messages')
                             <div class="col mt-3">
                                 <form id="search_form" class="row mb-2 justify-content-center" novalidate="novalidate">
@@ -60,18 +60,21 @@
                                <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1 text-center align-middle " rowspan="2">Serial No</th>
                                     <th class="border-primary border-darken-1 text-center align-middle " rowspan="2">Tracking No</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="3">Call Initiate Record</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="6">Zong Call Response Record</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="5">Call Initiate Record</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="7">Zong Call Response Record</th>
                                 </tr>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1 text-center align-middle ">Shipment Id</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Call No</th>
                                     <th class="border-primary border-darken-1 text-center align-middle ">Response</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Message</th>
                                     <th class="border-primary border-darken-1 text-center align-middle ">Date</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Shipment Id</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle ">Response</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle">Message</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Call Start Date</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Call End Date</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Input</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle">Message</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Date</th>
                                 </tr>
                                 </thead>
@@ -269,6 +272,23 @@
         .statusOnhold {
             background-color: #154360;
         }
+        .tooltip-inner {
+            color: red; /* Change to any color you want */
+            white-space: pre-wrap; /* Ensure the JSON content wraps properly */
+            max-width: 500px;      /* Set maximum width to prevent overflow */
+            word-break: break-all; /* Break long words */
+            background-color: #fff; /* Optional: Change background color of the tooltip */
+            border: 1px solid #ccc; /* Optional: Add a border to the tooltip */
+        }
+
+        /* Optional: Style the arrow of the tooltip */
+        .tooltip.bs-tooltip-top .arrow::before {
+            border-top-color: #fff; /* Match the background color */
+        }
+        .json-tooltip + .tooltip > .tooltip-inner {
+            color: blue; /* Change the color to blue for this tooltip */
+            background-color: yellow; /* Optional: Custom background color */
+        }
     </style>
 @endsection
 @section('js')
@@ -353,7 +373,7 @@
                         }
                     }
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.bot_rvr.list') }}',
+                        url: '{{ route('admin.reports.bot_rvr_log.list') }}',
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -363,51 +383,36 @@
                             head = [];
 
                             head.push('S.No');  
-                            head.push('Date');
-                            head.push('Description');
-                            head.push('Option 1');
-                            head.push('Option %');
-                            head.push('Option 2');
-                            head.push('Option %');
-                            head.push('Option 3');
-                            head.push('Option %');
-                            head.push('No Option');
-                            head.push('No Option %');
-                            head.push('Total');
-                            head.push('Total %');
-                            head.push('Busy');
-                            head.push('Busy %');
-                            head.push('Disconnected');
-                            head.push('Disconnected %');
-                            head.push('Total');
-                            head.push('Total %');
-                            head.push('Grand Total');
-                            head.push('No of Shipment');
-
+                            head.push('Tracking No');
+                            head.push('ShipmentId');
+                            head.push('Call Count');
+                            head.push('Response');
+                            head.push('Message');
+                            head.push('Date Time');
+                            head.push('ShipmentId');
+                            head.push('Response');
+                            head.push('Message');
+                            head.push('Call Start Date');
+                            head.push('Call End Date');
+                            head.push('Input');
+                            head.push('Date Time');
+                           
                             $.each(result.data, function(index, values) {
                                 row = [];
-
                                 row.push(index + 1);
-                                row.push(values.date);
-                                row.push(values.description);
-                                row.push(values.option1);
-                                row.push(values.option1_per);
-                                row.push(values.option2);
-                                row.push(values.option2_per);
-                                row.push(values.option3);
-                                row.push(values.option3_per);
-                                row.push(values.option4);
-                                row.push(values.option4_per);
-                                row.push(values.total1);
-                                row.push(values.total1_per);
-                                row.push(values.busy);
-                                row.push(values.busy_per);
-                                row.push(values.disconnected);
-                                row.push(values.disconnected_per);
-                                row.push(values.total2);
-                                row.push(values.total2_per);
-                                row.push(values.grandtotal);
-                                row.push(values.no_of_shipment);
+                                row.push(values.tracking_number.split(">")[2].slice(0,-3));
+                                row.push(values.shipmentNo);
+                                row.push(values.call_count);
+                                row.push(values.response);
+                                row.push(values.call_message);
+                                row.push(values.created_at);
+                                row.push(values.shipmentNo1);
+                                row.push(values.api_request);
+                                row.push(values.message);
+                                row.push(values.call_start_date);
+                                row.push(values.call_end_date);
+                                row.push(values.input);
+                                row.push(values.date_time);
                                 body.push(row);
                             });
                         
@@ -424,7 +429,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     extend: 'excelHtml5',
-                    title: 'BOT CALL REPORT',
+                    title: 'BOT CALL Log REPORT',
                     text: '<i class="la la-file-excel-o underline"></i> Excel',
                     className: 'btn btn-primary datatable_excel_btn',
                     
@@ -441,7 +446,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.reports.bot_rvr.list')}}',
+                    url: '{{ route('admin.reports.bot_rvr_log.list')}}',
                     method: 'POST',
                     headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -451,29 +456,23 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                  order: [[1, 'desc'], [2, 'asc']], // Order by 'created_at' DESC and 'description' ASC
+                  order: [[1, 'desc']], // Order by 'created_at' DESC and 'description' ASC
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
-                    {data: 'date', name: 'date', class: 'text-center align-middle date', searchable: false},
-                    {data: 'description', name: 'description', class: 'align-middle description', searchable: false},
-                    {data: 'option1', name: 'option1', orderable: false, class: 'text-center align-middle option1', searchable: false},
-                    {data: 'option1_per', name: 'option1_per', orderable: false, class: 'text-center align-middle option1_per', searchable: false},
-                    {data: 'option2', name: 'option2', orderable: false, class: 'text-center align-middle option2', searchable: false},
-                    {data: 'option2_per', name: 'option2_per', orderable: false, class: 'text-center align-middle option2_per', searchable: false},
-                    {data: 'option3', name: 'option3', orderable: false, class: 'text-center align-middle option3', searchable: false},
-                    {data: 'option3_per', name: 'option3_per', orderable: false, class: 'text-center align-middle option3_per', searchable: false},
-                    {data: 'option4', name: 'option4', orderable: false, class: 'text-center align-middle option4', searchable: false},
-                    {data: 'option4_per', name: 'option4_per', orderable: false, class: 'text-center align-middle option4_per', searchable: false},
-                    {data: 'total1', name: 'total1', orderable: false, class: 'text-center align-middle total1', searchable: false},
-                    {data: 'total1_per', name: 'total1_per', orderable: false, class: 'text-center align-middle total1_per', searchable: false},
-                    {data: 'busy', name: 'busy', orderable: false, class: 'text-center align-middle busy', searchable: false},
-                    {data: 'busy_per', name: 'busy_per', orderable: false, class: 'text-center align-middle busy_per', searchable: false},
-                    {data: 'disconnected', name: 'disconnected', orderable: false, class: 'text-center align-middle disconnected', searchable: false}, // Center text
-                    {data: 'disconnected_per', name: 'disconnected_per', orderable: false, class: 'text-center align-middle disconnected_per', searchable: false}, // Center text
-                    {data: 'total2', name: 'total2', orderable: false, class: 'text-center align-middle total2', searchable: false},
-                    {data: 'total2_per', name: 'total2_per', orderable: false, class: 'text-center align-middle total2_per', searchable: false},
-                    {data: 'grandtotal', name: 'grandtotal', orderable: false, class: 'text-center align-middle grandtotal', searchable: false},
-                    {data: 'no_of_shipment', name: 'no_of_shipment', orderable: false, class: 'text-center align-middle no_of_shipment', searchable: false},
+                    {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle tracking_number', searchable: true},
+                    {data: 'shipmentNo', name: 'shipmentNo', class: 'align-middle shipmentNo', searchable: false},
+                    {data: 'call_count', name: 'call_count', orderable: false, class: 'text-center align-middle call_count', searchable: false},
+                    {data: 'response', name: 'response', orderable: false, class: 'text-center align-middle response', searchable: false},
+                    {data: 'call_message', name: 'call_message', orderable: false, class: 'text-center align-middle call_message', searchable: false},
+                    {data: 'created_at', name: 'created_at', orderable: false, class: 'text-center align-middle created_at', searchable: false},
+                    {data: 'shipmentNo1', name: 'shipmentNo1', class: 'align-middle shipmentNo1', searchable: false},
+                    {data: 'api_request', name: 'api_request', class: 'align-middle api_request', searchable: false},
+                    {data: 'message', name: 'message', class: 'align-middle message', searchable: false},
+                    {data: 'call_start_date', name: 'call_start_date', class: 'align-middle call_start_date', searchable: false},
+                    {data: 'call_end_date', name: 'call_end_date', class: 'align-middle call_end_date', searchable: false},
+                    {data: 'input', name: 'input', class: 'align-middle input', searchable: false},
+                    {data: 'date_time', name: 'date_time', class: 'align-middle date_time', searchable: false},
+                    
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

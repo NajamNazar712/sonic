@@ -83,25 +83,94 @@ class AdminRvReportsController extends Controller
     public function botRvCallLogsList(Request $request)
     {
 
-        $rv_report = ApiCallLog::join('shipments as s','s.id', 'api_call_logs.shipment_id')
-            ->leftjoin('api_zong_logs as azl', 'api_call_logs.shipment_id','azl.shipment_id')
-            ->select('s.tracking_number,api_call_logs.shipment_id,api_call_logs.payload,api_call_logs.created_at');
-        $datatable = Datatables::of($rv_report);
-        // ->editColumn('option1_per', function ($rv_report) {
-        //     if($rv_report['description'] == '1st Calls'){
-        //         if($rv_report['option1_per']){
-        //             return round($rv_report['option1'] / $rv_report['no_of_shipments'] * 100 ,2).'%'; 
-        //         }
-        //         // if($rv_report['total1_per']){
-        //         //     return round($rv_report['total1_per'] / $rv_report['no_of_shipments'] * 100 ,2).'%'; 
-        //         // }
+        $rv_call_logs = ApiCallLog::join('shipments as s','s.id', 'api_call_logs.shipment_id')
+            ->leftJoin('api_zong_logs as azl', function ($join) use ($request) {
+                $join->on('api_call_logs.shipment_id', '=', 'azl.shipment_id');
+                $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
+                $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
+            })    
+            ->select('s.tracking_number as tracking_number',
+            'api_call_logs.shipment_id as shipmentNo',
+            'api_call_logs.call_count_initiate  as call_count',
+            'api_call_logs.payload  as response',
+            'api_call_logs.created_at as created_at',
+            'azl.shipment_id as shipmentNo1',
+            'azl.call_date_time as call_start_date',
+            'azl.api_request as api_request',
+            'azl.error as message',
+            'azl.created_at as date_time');
+        
+            $datatable = Datatables::of($rv_call_logs)
+            ->editColumn('tracking_number', function ($rv_call_logs) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$rv_call_logs->tracking_number' class='tracking' target='_blank'>$rv_call_logs->tracking_number</a></u>";
+            })
+            ->editColumn('response', function ($rv_call_logs) {
+                if ($rv_call_logs['response'] && !request()->get('excel')) {
+                    // Decode the JSON response
+                    $responseData = json_decode($rv_call_logs['response'], true);
 
-        //     }
-        // });
+                    // Encode and escape the JSON for safe HTML output
+                    $tooltipData = htmlspecialchars(json_encode($responseData, JSON_PRETTY_PRINT));
+
+                    // Use a brief text for display (optional)
+                    $displayText = 'Hover to view details';
+
+                    return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
+                }else{
+                    return $rv_call_logs['response'];
+                }
+                return '';
+            })
+            ->addColumn('call_message', function ($rv_call_logs) {
+                if ($rv_call_logs['response']) {
+                    return json_decode($rv_call_logs['response'])->message;
+                }
+            })
+            ->editColumn('api_request', function ($rv_call_logs) {
+                if ($rv_call_logs['api_request']&& !request()->get('excel')) {
+                    // Decode the JSON response
+                    $responseData = json_decode($rv_call_logs['api_request'], true);
+
+                    // Encode and escape the JSON for safe HTML output
+                    $tooltipData = htmlspecialchars(json_encode($responseData, JSON_PRETTY_PRINT));
+
+                    // Use a brief text for display (optional)
+                    $displayText = 'Hover to view details';
+
+                    return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
+                }elseif(request()->get('excel')){
+                    return $rv_call_logs['api_request'];
+                }
+                return '';
+            })
+            ->addColumn('call_end_date', function ($rv_call_logs) {
+                if ($rv_call_logs['api_request']) {
+                    return json_decode($rv_call_logs['api_request'])->end_date;
+                }
+            })
+            ->addColumn('input', function ($rv_call_logs) {
+                if ($rv_call_logs['api_request']) {
+                    return json_decode($rv_call_logs['api_request'])->input;
+                }
+            })
+            ->editColumn('message', function ($rv_call_logs) {
+                if ($rv_call_logs['message'] && !request()->get('excel')) {
+                    $tooltipData = htmlspecialchars($rv_call_logs['message'],JSON_PRETTY_PRINT);
+                    $displayText = 'Hover to view details';
+
+                    return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
+                }elseif($rv_call_logs['message'] && request()->get('excel')){
+                    return $rv_call_logs['message'];
+                }else{
+                    return 'Data Saved SuccessFully!';
+                }
+            });
+            
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $rv_report->where([['rv_shipment_assign_agent_details.created_at', '>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
+            $rv_call_logs->where([['api_call_logs.created_at', '>=', $from], ['api_call_logs.created_at', '<=', $to]]);
         }
 
         return $datatable->make(true);

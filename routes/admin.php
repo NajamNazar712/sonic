@@ -2472,7 +2472,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         Route::prefix('bot_rvr_log')->name('bot_rvr_log.')->group(function () {
             Route::get('', 'Admins\AdminRvReportsController@botRvCallLogs')->name('index');
-            // Route::post('list', 'Admins\AdminRvReportsController@botRvCallRecordList')->name('list');
+            Route::post('list', 'Admins\AdminRvReportsController@botRvCallLogsList')->name('list');
         });
 
         Route::prefix('ordinary_discrepancy_report')->name('ordinary_discrepancy_report.')->group(function () {
