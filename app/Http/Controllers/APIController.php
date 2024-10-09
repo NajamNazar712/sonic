@@ -58,6 +58,7 @@ use App\Http\Models\GulAhmedPickupAddress;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Controllers\CRM\CRMController;
+use App\Http\Models\Admin\Lead\LeadTagging;
 use App\Http\Models\Admin\RcpAssignedAgent;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\DonePaymentCalculation;
@@ -2556,9 +2557,9 @@ class APIController extends Controller
                 $business_category_id = $request->business_category;
             }
             if ($business_category_id) {
-                $cities = City::where('status', 1)->where('business_category_id', $business_category_id);
+                $cities = City::where('status', 1)->where('business_category_id', $business_category_id)->where('booking_enable_status',1);
             } else {
-                $cities = City::where('status', 1);
+                $cities = City::where('status', 1)->where('booking_enable_status',1);
             }
 
             if ($cities->exists()) {
@@ -9854,4 +9855,46 @@ class APIController extends Controller
         return response()->json(['exists' => $exists]);
     }
     
+    
+    public function wp_custom_select_dropdown_data() {
+        $concerned_wp_cities = [
+            "Abbottabad",
+            "Attock",
+            "Bahawalpur",
+            "Faisalabad",
+            "Gujranwala",
+            "Gujrat",
+            "Hyderabad",
+            "Islamabad",
+            "Jhelum",
+            "Jhang",
+            "Kamaliya",
+            "Karachi",
+            "Lahore",
+            "Larkana",
+            "Multan",
+            "Peshawar",
+            "Quetta",
+            "Rahim Yar Khan",
+            "Rawalpindi",
+            "Sahiwal",
+            "Sargodha",
+            "Sialkot",
+            "Sukkur"
+        ];
+
+        $city_ids = City::whereIn('name', $concerned_wp_cities)->pluck('id')->toArray();
+
+        $filtered_leads_tagging = LeadTagging::where('status', '!=', 0)
+            ->whereIn('city_id', $city_ids)
+            ->pluck('city_id')
+            ->unique()
+            ->toArray();
+
+        $filtered_concerned_wp_cities = City::whereIn('id', $filtered_leads_tagging)->get();
+
+        return response()->json(['response' => $filtered_concerned_wp_cities]);
+
+    }
+
 }
