@@ -5905,6 +5905,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 $arrival_shipments = $payment->arrival_shipment - 1;
 
                                 $payment->arrival_shipment = (($arrival_shipments > 0) ? $arrival_shipments : 0);
+                                ShipmentAdditionalCharges::additional_charges_undo([$shipment_id],true);
                             }
 
                             $payment->save();
