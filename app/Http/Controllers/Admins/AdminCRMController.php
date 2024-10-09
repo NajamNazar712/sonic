@@ -1376,7 +1376,16 @@ class AdminCRMController extends Controller
             ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
             ->leftjoin('users as us','us.id','=','s.user_id')
             ->leftjoin('segments as seg','us.segment_id','seg.id')
-            ->leftjoin('admins as ad1', 'ad1.id', '=', 'crm_requests.agent_id')
+            ->leftJoin('sale_person_tags as spta', function($join){
+                $join->on('spta.user_id','u.id')
+                    ->where(
+                        'spta.id',
+                        '=',
+                        DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0 )')
+                    );
+            })
+            ->leftjoin('admins as ad1', 'ad1.id', '=', 'spta.admin_id')
+
             ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
             ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
             ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crt.tagged_id')
@@ -2043,7 +2052,15 @@ class AdminCRMController extends Controller
             ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
             ->leftjoin('users as us','us.id','=','s.user_id')
             ->leftjoin('segments as seg','us.segment_id','seg.id')
-            ->leftjoin('admins as ad1', 'ad1.id', '=', 'crm_requests.agent_id')
+            ->leftJoin('sale_person_tags as spta', function($join){
+                $join->on('spta.user_id','u.id')
+                    ->where(
+                        'spta.id',
+                        '=',
+                        DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0 )')
+                    );
+            })
+            ->leftjoin('admins as ad1', 'ad1.id', '=', 'spta.admin_id')
             ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
             ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
             ->leftjoin('shipments_journey as sj', function ($join){
@@ -2835,7 +2852,15 @@ class AdminCRMController extends Controller
             ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
             ->leftjoin('users as us','us.id','=','s.user_id')
             ->leftjoin('segments as seg','us.segment_id','seg.id')
-            ->leftjoin('admins as ad1', 'ad1.id', '=', 'crm_requests.agent_id')
+            ->leftJoin('sale_person_tags as spta', function($join){
+                $join->on('spta.user_id','u.id')
+                    ->where(
+                        'spta.id',
+                        '=',
+                        DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0 )')
+                    );
+            })
+            ->leftjoin('admins as ad1', 'ad1.id', '=', 'spta.admin_id')
             ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
             ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
             ->leftjoin('shipments_journey as sj', function ($join){

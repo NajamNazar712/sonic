@@ -760,7 +760,7 @@
                     {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub'}, // Responsible Hub
                     {data: 'sub_hub', name: 'ca.name', class: 'align-middle sub_hub'}, // Sub Hub
                     {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone'}, // Responsible Zone
-                    {data: 'agent', name: 'agent', class: 'align-middle agent'}, // Agent
+                    {data: 'agent', name: 'ad.name', class: 'align-middle agent'}, // Agent
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},              // Agent Assigned By
                     {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value'}, // Parcel Value
                     {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'}, // COD Value
