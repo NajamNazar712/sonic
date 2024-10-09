@@ -354,7 +354,7 @@
                                                         </div>
                                                         <div class="media-body text-white text-right">
                                                             <h3 class="text-white">
-                                                                <span id="closed_rate_percentage">{{round($average_aging, 3)}}</span>%
+                                                                <span id="closed_rate_percentage">{{round($average_aging, 3)}}</span> Days
                                                             </h3>
                                                             <span>Avg Aging (Launch-Closure)</span>
                                                         </div>
