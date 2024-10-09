@@ -89,8 +89,8 @@ class AdminRvReportsController extends Controller
         $rv_call_logs = ApiCallLog::join('shipments as s','s.id', 'api_call_logs.shipment_id')
             ->leftJoin('api_zong_logs as azl', function ($join) use ($request) {
                 $join->on('azl.call_date_time', '=', 'api_call_logs.created_at');
-                $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
-                $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
+                // $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
+                // $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
             })    
             ->select('s.tracking_number as tracking_number',
             'api_call_logs.shipment_id as shipmentNo',
@@ -102,7 +102,7 @@ class AdminRvReportsController extends Controller
             'azl.api_request as api_request',
             'azl.error as message',
             'azl.created_at as date_time')
-            ->groupby('api_call_logs.call_count_initiate');
+            ->groupby('api_call_logs.call_count_initiate','api_call_logs.id');
 
               $datatable = Datatables::of($rv_call_logs)
             ->editColumn('tracking_number', function ($rv_call_logs) {
@@ -170,12 +170,12 @@ class AdminRvReportsController extends Controller
                     return 'Data Saved SuccessFully!';
                 }
             });
-            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            if ($request->get('search_date_from') && $request->get('search_date_to') && !$request->get('search_tracking_no')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
+                $rv_call_logs->where([['api_call_logs.created_at', '>=', $from], ['api_call_logs.created_at', '<=', $to]]);
             }
             
-        $rv_call_logs->where([['api_call_logs.created_at', '>=', $from], ['api_call_logs.created_at', '<=', $to]]);
         if($request->get('search_tracking_no')){
             $rv_call_logs->where('s.tracking_number', $request->get('search_tracking_no'));
         }   
