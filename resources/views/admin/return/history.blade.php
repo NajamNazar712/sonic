@@ -258,12 +258,21 @@
                             head.push('Rider Id');
                             head.push('Area');
                             head.push('Rider');
+
                             head.push('No. Of Shipments');
+                            head.push('E-Comm (COD)');
+                            head.push('General Logistics (Retail)');
+                            head.push('General Logistics - E-Comm (Express)');
+
                             head.push('Created By');
                             head.push('Created Date');
                             head.push('Submitted By');
                             head.push('Submitted Date');
+
                             head.push('Delivered to shipper');
+                            head.push('E-Comm (COD)');
+                            head.push('General Logistics (Retail)');
+                            head.push('General Logistics - E-Comm (Express)');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -276,13 +285,21 @@
                                 row.push(values.rider_id);
                                  row.push(values.area);
                                 row.push(values.rider);
+
                                 row.push(values.shipments_count);
+                                row.push(values.excel_ecom_cod);
+                                row.push(values.excel_general_retail);
+                                row.push(values.excel_general_ecom_express);
+
                                 row.push(values.assigned_by);
                                 row.push(values.created_at);
                                 row.push(values.submitted_by);
                                 row.push(values.submitted_at);
-                                row.push(values.delivered_to_shipper_count_link);
 
+                                row.push(values.excel_delivered_to_shipper_count);
+                                row.push(values.delivered_excel_ecom_cod);
+                                row.push(values.delivered_excel_general_retail);
+                                row.push(values.delivered_excel_general_ecom_express);
                                 body.push(row);
                             });
                         },
