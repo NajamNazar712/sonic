@@ -27,12 +27,11 @@ class AdminResourcesController extends Controller
     public function get_network_list(Request $request){
         // $zones = Zone::where('status', 1)->pluck('id','id')->toArray();
         $ZoneClassCity = ZoneClassCity::with('city','zone_classification')->get()->pluck(null, 'id')->toArray();
-
         if(true){
             $city_list_array = array();
             $city_list_array['header'] = ['S. No.','Origin','ID', 'Destination', 'Class', 'Zone','Zone Classification'];
             $serial = 1;
-            $hubs = City::whereIn('id',session('hubs'))->get();
+            $hubs = City::where('id',auth()->user()->default_hub_id)->get();
             foreach ($hubs as $key=>$hub_city) {
                 $zone = $hub_city->zone;
                 $zoneId = $zone->id;
@@ -49,7 +48,6 @@ class AdminResourcesController extends Controller
                             $class = (object)collect(array_filter($ZoneClassCity, function ($item) use ($zoneId, $cityId) {
                                 return $item['zone_id'] == $zoneId && $item['city_id'] == $cityId;
                             }))->first();
-
                             if ($class) {
                                 $class = $class->class;
                                 if ($class == 0) {
