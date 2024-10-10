@@ -1779,7 +1779,7 @@ class APIController extends Controller
 
         // User Shipping Info Status Check
         Validator::extend('user_shipping_info_status_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
+            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->latest()->first();
 
             if (isset($user_shipping_info->status) && !$user_shipping_info->status) {
                 $validator->addReplacer('user_shipping_info_status_check', function ($message, $attribute, $rule, $parameters) {
@@ -1793,7 +1793,7 @@ class APIController extends Controller
 
         // User Shipping Info Status City Check
         Validator::extend('user_shipping_info_status_city_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
+            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->latest()->first();
 
             if (isset($user_shipping_info->city->status) && !$user_shipping_info->city->status) {
                 $validator->addReplacer('user_shipping_info_status_city_check', function ($message, $attribute, $rule, $parameters) {
@@ -1807,7 +1807,7 @@ class APIController extends Controller
 
         // User Shipping Info Status Zone Check
         Validator::extend('user_shipping_info_status_zone_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
+            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->latest()->first();
 
             if (isset($user_shipping_info->city->zone_id) && !$user_shipping_info->city->zone_id) {
                 $validator->addReplacer('user_shipping_info_status_zone_check', function ($message, $attribute, $rule, $parameters) {
@@ -1821,7 +1821,7 @@ class APIController extends Controller
 
         // User Shipping Info City Pickup Check
         Validator::extend('user_shipping_info_city_pickup_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
+            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->latest()->first();
 
             if (isset($user_shipping_info->city->pickup) && !$user_shipping_info->city->pickup) {
                 $validator->addReplacer('user_shipping_info_city_pickup_check', function ($message, $attribute, $rule, $parameters) {
@@ -1874,7 +1874,7 @@ class APIController extends Controller
 
         // Return User Shipping Info Status Check
         Validator::extend('return_user_shipping_info_status_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
+            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->latest()->first();
 
             if (isset($user_shipping_info->status) && !$user_shipping_info->status) {
                 $validator->addReplacer('return_user_shipping_info_status_check', function ($message, $attribute, $rule, $parameters) {
@@ -1888,7 +1888,7 @@ class APIController extends Controller
 
         // Return User Shipping Info Status City Check
         Validator::extend('return_user_shipping_info_status_city_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
+            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->latest()->first();
 
             if (isset($user_shipping_info->city->status) && !$user_shipping_info->city->status) {
                 $validator->addReplacer('return_user_shipping_info_status_city_check', function ($message, $attribute, $rule, $parameters) {
@@ -1902,7 +1902,7 @@ class APIController extends Controller
 
         // Return User Shipping Info Status Zone Check
         Validator::extend('return_user_shipping_info_status_zone_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->first();
+            $user_shipping_info = UserShippingInfo::where('user_id', $user_id)->latest()->first();
 
             if (isset($user_shipping_info->city->zone_id) && !$user_shipping_info->city->zone_id) {
                 $validator->addReplacer('return_user_shipping_info_status_zone_check', function ($message, $attribute, $rule, $parameters) {
@@ -2199,7 +2199,7 @@ class APIController extends Controller
                 })],
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
-                }), 'origin_check', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
+                }), 'origin_check', 'user_shipping_info_status_check', 'user_shipping_info_status_city_check', 'user_shipping_info_status_zone_check', 'user_shipping_info_city_pickup_check'],
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'destination_return_check', 'default_return_address', 'omni_account', 'return_user_shipping_info_status_check', 'return_user_shipping_info_status_city_check', 'return_user_shipping_info_status_zone_check'],
