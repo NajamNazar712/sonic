@@ -160,7 +160,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RestartSupervisordProcesses',
         'App\Console\Commands\UpdateArrivalChargesCommand',
         '\App\Console\Commands\RetryJobsInRange',
-        '\App\Console\Commands\ForceFullyBotCallInitiate'
+        '\App\Console\Commands\ForceFullyBotCallInitiate',
+        '\App\Console\Commands\lastMileAppReportCountUpdate'
         ];
 
     /**
