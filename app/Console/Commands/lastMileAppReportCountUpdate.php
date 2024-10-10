@@ -156,7 +156,7 @@ class lastMileAppReportCountUpdate extends Command
                     ChangeLogs::create([
                         'table_name' => $rwds->getTable(),
                         'record_id' => $rwds->getKey(),
-                        // 'old_data' => json_encode($originalValue),
+                        'old_data' => json_encode($originalValue),
                         'new_data' => json_encode($rwds->getChanges()),
                         'updated_by' => 346,
                     ]);
