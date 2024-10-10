@@ -248,9 +248,8 @@ class ShipperTrackingController extends Controller
                         } else {
                             $details['consignee']['address'] = $shipment->consignee_address;
                         }
-
-
                         // $details['consignee']['address'] = $shipment->consignee_address;
+
                         $details['consignee']['email'] = $shipment->consignee_email;
                         $details['consignee']['crm_status'] = 0;
 
