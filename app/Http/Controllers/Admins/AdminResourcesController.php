@@ -32,7 +32,7 @@ class AdminResourcesController extends Controller
             $city_list_array = array();
             $city_list_array['header'] = ['S. No.','Origin','ID', 'Destination', 'Class', 'Zone','Zone Classification'];
             $serial = 1;
-            $hubs = City::whereIn('id',session('hubs'))->get();
+            $hubs = City::where('id',auth()->user()->default_hub_id)->get();
             foreach ($hubs as $key=>$hub_city) {
                 $zone = $hub_city->zone;
                 $zoneId = $zone->id;
