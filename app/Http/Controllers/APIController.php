@@ -1582,33 +1582,33 @@ class APIController extends Controller
             return response()->json(['message' => 'Bulk Booking Limit Is Max 150']);
         }
 
-        $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
-        $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
-        $timeLimit = 0;
-
-        if ($shipmentCountRecord) {
-
-            $last_created_at = $shipmentCountRecord->created_at;
-            $minutesDiff = $last_created_at->diffInMinutes(now());
-
-            $timeLimits = [
-                ['min' => 1, 'max' => 50, 'limit' => 5,  'seconds' => 300],
-                ['min' => 51, 'max' => 100, 'limit' => 10, 'seconds' => 600],
-                ['min' => 101, 'max' => 150, 'limit' => 15, 'seconds' => 900]
-            ];
-
-            foreach ($timeLimits as $range) {
-                if ($count >= $range['min'] && $count <= $range['max'] && $minutesDiff < $range['limit']) {
-                    $timeLimit = $range['seconds'];
-                    break;
-                }
-            }
-
-            if ($timeLimit > 0) {
-                $remainingTime = $timeLimit - $last_created_at->diffInSeconds(now());
-                return response()->json(['message' => 'Please try again in ' . $remainingTime . ' seconds.'], 429);
-            }
-        }
+//        $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
+//        $count = $shipmentCountRecord ? $shipmentCountRecord->shipment_count : 0;
+//        $timeLimit = 0;
+//
+//        if ($shipmentCountRecord) {
+//
+//            $last_created_at = $shipmentCountRecord->created_at;
+//            $minutesDiff = $last_created_at->diffInMinutes(now());
+//
+//            $timeLimits = [
+//                ['min' => 1, 'max' => 50, 'limit' => 5,  'seconds' => 300],
+//                ['min' => 51, 'max' => 100, 'limit' => 10, 'seconds' => 600],
+//                ['min' => 101, 'max' => 150, 'limit' => 15, 'seconds' => 900]
+//            ];
+//
+//            foreach ($timeLimits as $range) {
+//                if ($count >= $range['min'] && $count <= $range['max'] && $minutesDiff < $range['limit']) {
+//                    $timeLimit = $range['seconds'];
+//                    break;
+//                }
+//            }
+//
+//            if ($timeLimit > 0) {
+//                $remainingTime = $timeLimit - $last_created_at->diffInSeconds(now());
+//                return response()->json(['message' => 'Please try again in ' . $remainingTime . ' seconds.'], 429);
+//            }
+//        }
 
         // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
         //     if ($value) {
