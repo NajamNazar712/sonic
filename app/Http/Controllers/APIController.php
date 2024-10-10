@@ -1610,17 +1610,17 @@ class APIController extends Controller
 //            }
 //        }
 
-        // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
-        //     if ($value) {
-        //         $value = $this->phone_number($value);
+         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
+             if ($value) {
+                 $value = $this->phone_number($value);
 
-        //         if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
-        //             return true;
-        //         } else {
-        //             return false;
-        //         }
-        //     }
-        // });
+                 if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
+                     return true;
+                 } else {
+                     return false;
+                 }
+             }
+         });
 
         if (preg_match('/^(92|03)\d+/', $request->consignee_phone_number_1)) {
             Validator::extend('phone_number', function ($attribute, $value, $parameters) {
