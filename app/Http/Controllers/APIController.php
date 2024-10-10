@@ -1567,7 +1567,10 @@ class APIController extends Controller
             array_map('intval', explode(',', $bulk_booking_shippers_setting->text))
             : [];
 
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$user_type['account_type_id'])){
+
+        $amounts = array_column($request->input('data'), 'amount');
+        
+        if(in_array(0, $amounts) && !PendingPayment::check_negative_payable($user_id,$user_type['account_type_id'])){
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
 
