@@ -156,6 +156,7 @@
 										<th class="border-primary border-darken-1">Payment ID</th>
 										<th class="border-primary border-darken-1">Account ID</th>
 										<th class="border-primary border-darken-1">Shipper</th>
+										<th class="border-primary border-darken-1">Sale Person</th>
 										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Phone No(s).</th>
 										<th class="border-primary border-darken-1">Address</th>
@@ -163,6 +164,7 @@
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
 										<th class="border-primary border-darken-1">Returned Shipments</th>
 										<th class="border-primary border-darken-1">Adjusted Shipments</th>
+										<th class="border-primary border-darken-1">Arrival Shipments</th>
 										<th class="border-primary border-darken-1">Fintech Charges</th>
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
@@ -268,6 +270,24 @@
 									<div class="modal-content">
 										<div class="modal-header">
 											<h4 class="modal-title" id="adjusted_shipments_title">Adjusted Shipment(s)</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body text-center">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="modal fade" id="arrival_shipment" role="dialog" aria-labelledby="arrival_shipment_title" aria-hidden="true">
+								<div class="modal-dialog modal-sm" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="arrival_shipment_title">Arrival Shipment(s)</h4>
 
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 												<span aria-hidden="true">×</span>
@@ -535,6 +555,7 @@
                             head.push('Payment ID');
                             head.push('Account ID');
                             head.push('Shipper');
+							head.push('Sale Person');
                             head.push('City');
                             head.push('Phone No(s).');
                             head.push('Address');
@@ -542,6 +563,8 @@
                             head.push('Delivered Shipments');
                             head.push('Returned Shipments');
                             head.push('Adjusted Shipments');
+							head.push('Fintech Charges');
+                            head.push('Arrival Shipments');
                             head.push('Total Amount');
                             head.push('Total Charges');
                             head.push('Total GST');
@@ -570,6 +593,7 @@
                                 row.push(values.id_padded);
                                 row.push(values.user_id_padded);
                                 row.push(values.shipper);
+								row.push(values.sale_person_name);
                                 row.push(values.city);
                                 row.push(values.phone_numbers);
                                 row.push(values.address);
@@ -577,6 +601,8 @@
                                 row.push(values.delivered_shipments_count);
                                 row.push(values.returned_shipments_count);
                                 row.push(values.adjusted_shipments_count);
+								row.push(values.done_fintech_charges);
+                                row.push(values.arrival_shipment_shipments_count);
                                 row.push(values.total_amount);
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
@@ -819,6 +845,7 @@
 					{data:'payment_id', name: 'done_payments.id', class: 'align-middle text-center payment_id'},
 					{data:'user_id_padded', name: 'done_payments.user_id', class: 'align-middle text-center user_id_padded'},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
+					{data:'sale_person_name', name: 'sale_admin.name', class: 'align-middle text-center sale_person_name'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
 					{data:'address', name: 'u.address', class: 'align-middle text-center address'},
@@ -826,15 +853,14 @@
 					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'done_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
-					
+					{data:'arrival_shipment', name: 'done_payments.arrival_shipment', class: 'align-middle text-center arrival_shipment'},
 					{data:'done_fintech_charges', name: 'done_fintech_charges', class: 'align-middle text-center done_fintech_charges', orderable: false},
 					
 					{data:'total_amount', name: 'dpc.amount', class: 'align-middle text-center total_amount', orderable: false},
 					{data:'total_charges', name: 'dpc.charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'dpc.gst', class: 'align-middle text-center total_gst', orderable: false},
 					{data:'total_wht', name: 'dpc.wht', class: 'align-middle text-center total_wht', orderable: false},
-					{data:'total_sms_charges', name:'dpc.sms_charges', class: 'align-middle text-center total_sms_charges', orderable: false
-                    },
+					{data:'total_sms_charges', name:'dpc.sms_charges', class: 'align-middle text-center total_sms_charges', orderable: false},
 					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'ibft_charges', name: 'done_payments.ibft_charges', class: 'align-middle text-center ibft_charges', orderable: false},
@@ -1124,6 +1150,33 @@
 						$('#adjusted_shipments .modal-body').html(tracking_numbers);
 
 						$('#adjusted_shipments').modal('show');
+					}
+				});
+			});
+			$('#datatable tbody').on('click', 'tr td.arrival_shipment button', function() {
+				var id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#arrival_shipment .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('admin.finance.done_payments.arrival_shipment') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'id': id
+					}
+				})
+				.done(function(data) {
+					if (data) {
+						var tracking_numbers = '';
+
+						$.each(data, function(index, tracking_number) {
+                            tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+						});
+
+						$('#arrival_shipment .modal-body').html(tracking_numbers);
+
+						$('#arrival_shipment').modal('show');
 					}
 				});
 			});

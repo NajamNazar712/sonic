@@ -61,6 +61,7 @@ use App\Http\Models\GulAhmedPickupAddress;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Controllers\CRM\CRMController;
+use App\Http\Models\Admin\Lead\LeadTagging;
 use App\Http\Models\Admin\RcpAssignedAgent;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\DonePaymentCalculation;
@@ -130,6 +131,7 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
+
 
 class APIController extends Controller
 {
@@ -4141,9 +4143,9 @@ class APIController extends Controller
                 $business_category_id = $request->business_category;
             }
             if ($business_category_id) {
-                $cities = City::where('status', 1)->where('business_category_id', $business_category_id);
+                $cities = City::where('status', 1)->where('business_category_id', $business_category_id)->where('booking_enable_status',1);
             } else {
-                $cities = City::where('status', 1);
+                $cities = City::where('status', 1)->where('booking_enable_status',1);
             }
 
             if ($cities->exists()) {
@@ -6636,14 +6638,8 @@ class APIController extends Controller
                             $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
                             //if Shipper Status Id = 66 (Shipment - Re-Attempt Call Requested) Then fetch Those Shipments in Get Ticket
-                            $rvData = [
-                                'shipment_id' => $shipment->id,
-                                'shipper_status_id' => 66,
-                                'status_reason_id' => $last_reason_id,
-                                'shipment_user_id' => $shipment->user_id,
-                                'call_count' => 2
-                            ];
-                            dispatch(new ProcessRvShipmentTicket($rvData));
+                            $this->rvshipmentticketInsert($shipment->id, 66, $last_reason_id, $shipment->user_id);
+
 
                             if ($journey) {
                                 NotificationsController::send(33, $shipment->id);
@@ -11443,6 +11439,48 @@ class APIController extends Controller
         }
 
         return response()->json(['exists' => $exists]);
+    }
+    
+    
+    public function wp_custom_select_dropdown_data() {
+        $concerned_wp_cities = [
+            "Abbottabad",
+            "Attock",
+            "Bahawalpur",
+            "Faisalabad",
+            "Gujranwala",
+            "Gujrat",
+            "Hyderabad",
+            "Islamabad",
+            "Jhelum",
+            "Jhang",
+            "Kamaliya",
+            "Karachi",
+            "Lahore",
+            "Larkana",
+            "Multan",
+            "Peshawar",
+            "Quetta",
+            "Rahim Yar Khan",
+            "Rawalpindi",
+            "Sahiwal",
+            "Sargodha",
+            "Sialkot",
+            "Sukkur"
+        ];
+
+        $city_ids = City::whereIn('name', $concerned_wp_cities)->pluck('id')->toArray();
+
+        $filtered_leads_tagging = LeadTagging::where('status', '!=', 0)
+            ->whereIn('city_id', $city_ids)
+            ->pluck('city_id')
+            ->unique()
+            ->toArray();
+
+        $filtered_concerned_wp_cities = City::whereIn('id', $filtered_leads_tagging)->get();
+
+        return response()->json(['response' => $filtered_concerned_wp_cities]);
+
     }
 
 }

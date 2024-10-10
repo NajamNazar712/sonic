@@ -1616,6 +1616,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
             Route::post('forward', 'Admins\AdminUserRequestController@forward')->name('forward');
         });
+        Route::get('/logs/index', 'UserRoleManagementLogController@index')->name('index');
+        Route::get('/logs/list', 'UserRoleManagementLogController@list')->name('logs.list');
+
     });
 
     Route::prefix('finance')->name('finance.')->group(function () {
@@ -1720,6 +1723,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('delivered_shipments', 'Admins\AdminFinanceController@done_payments_delivered_shipments')->name('delivered_shipments');
             Route::post('returned_shipments', 'Admins\AdminFinanceController@done_payments_returned_shipments')->name('returned_shipments');
             Route::post('adjusted_shipments', 'Admins\AdminFinanceController@done_payments_adjusted_shipments')->name('adjusted_shipments');
+            Route::post('arrival_shipment', 'Admins\AdminFinanceController@done_payments_arrival_shipment')->name('arrival_shipment');
             Route::post('details_print', 'Admins\AdminFinanceController@done_payments_details_print')->name('details_print');
             Route::post('details', 'Admins\AdminFinanceController@done_payments_details')->name('details');
             Route::put('update_details', 'Admins\AdminFinanceController@done_payments_update_details')->name('update_details');
@@ -2454,7 +2458,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('rvr_call_history')->name('rvr_call_history.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@rvr_call_history_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@rvr_call_history_list')->name('list');
-            });
+        });
+        
+        Route::prefix('rvr_reattempt')->name('rvr_reattempt.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@reattemptRvReport')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@rvReattemptList')->name('list');
+        });
+
+        Route::prefix('bot_rvr')->name('bot_rvr.')->group(function () {
+            Route::get('', 'Admins\AdminRvReportsController@botRvCallRecord')->name('index');
+            Route::post('list', 'Admins\AdminRvReportsController@botRvCallRecordList')->name('list');
+        });
+        
+        Route::prefix('bot_rvr_log')->name('bot_rvr_log.')->group(function () {
+            Route::get('', 'Admins\AdminRvReportsController@botRvCallLogs')->name('index');
+            Route::post('list', 'Admins\AdminRvReportsController@botRvCallLogsList')->name('list');
+        });
 
         Route::prefix('ordinary_discrepancy_report')->name('ordinary_discrepancy_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ordinary_discrepancy_report_index')->name('index');
@@ -2561,6 +2580,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@store_vendors')->name('store');
             // Route::post('udpate', 'Admins\GlobalSettingsController@delivery_revert_access_update')->name('update');
         });
+
 
         Route::prefix('delivery_revert_access')->name('delivery_revert_access.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@delivery_revert_access_index')->name('index');
@@ -3411,6 +3431,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\GlobalSettingsController@star_shippers_add')->name('add');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
         });
+        Route::prefix('alist_shippers')->name('alist_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@aListShippersIndex')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@aListShipperView')->name('list');
+        });
 
         Route::prefix('airway_bill_address_visibility')->name('airway_bill_address_visibility.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
@@ -3567,13 +3591,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('case_nature_remarks', 'Admins\AdminTrackingController@case_nature_remarks')->name('case_nature_remarks');
             Route::post('case_nature_service_remarks', 'Admins\AdminTrackingController@case_nature_service_remarks')->name('case_nature_service_remarks');
             Route::post('case_nature_claim_remarks', 'Admins\AdminTrackingController@case_nature_claim_remarks')->name('case_nature_claim_remarks');
+            Route::post('updated_crm_request_nature_types', 'Admins\AdminTrackingController@updated_crm_request_nature_types')->name('updated_crm_request_nature_types');
+
         });
         Route::prefix('feedback')->name('feedback.')->group(function () {
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
         });
         Route::prefix('launched_re_open')->name('launched_re_open.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@launched_re_open_index')->name('index');
-            Route::get('list', 'Admins\AdminCRMController@launched_re_open_list')->name('list');
+            Route::post('list', 'Admins\AdminCRMController@launched_re_open_list')->name('list');
         });
         Route::prefix('in_process')->name('in_process.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@in_process_index')->name('index');

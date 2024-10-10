@@ -133,6 +133,7 @@ use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
+use App\Http\Models\Admin\Retail\RetailShipment;
 
 
 class NotificationsController extends Controller
@@ -7087,17 +7088,22 @@ class NotificationsController extends Controller
                     self::sms($body, $to, NULL, NULL, $id);
                 } else if ($id == 115) {
                     $tracking_number = $reference_1_id;
-                    $shipment = Shipment::where('tracking_number', $tracking_number)->first('id');
+                    // $shipment = Shipment::where('tracking_number', $tracking_number)->first('id');
+                    $shipment = Shipment::where('tracking_number', $tracking_number)->pluck('id')->first();
                     $shipper_info_id = $reference_2_id;
+                    $total_charges = RetailShipment::where('shipment_id', $shipment)->first()->total_charges;
+
                     $body = $notification->body;
                     if ($tracking_number) {
                         $shipper_info = RetailShipperInfo::find($shipper_info_id);
-
                         if (strpos($body, '[tracking_number]') !== FALSE) {
                             $body = str_replace('[tracking_number]', $tracking_number, $body);
                         }
                         if (strpos($body, '[shipper]') !== FALSE) {
                             $body = str_replace('[shipper]', $shipper_info->name, $body);
+                        }
+                        if (strpos($body, '[total_charges]') !== FALSE) {
+                            $body = str_replace('[total_charges]', $total_charges, $body);
                         }
                         $to = $shipper_info->shipper_phone_no;
                         self::sms($body, $to, NULL,NULL, $id);
