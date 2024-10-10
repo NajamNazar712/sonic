@@ -101,48 +101,47 @@ class ShipperResourcesController extends Controller
             ])
             ->first();
 
-            $user_destination_city = City::where('hub', '!=', 1)
-            ->where('hub_id', $user_origin_city->origin_id)
-            ->select([
+            $user_destination = DB::table('cities')
+            ->where('hub', '!=', 1)
+            ->where('status', 1)
+            ->select(['id', 'name'])
+            ->get();
+
+            $user_destination_cities = $user_destination->pluck(
                 'id',
                 'name'
-            ])
-            ->get();
+            )->toArray();
 
             foreach ($zones as $zone) {
                 foreach ($zone->zone_cities as $city) {
-                    $city_check = City::where('id', $city->id)->first();
+                    $city_check = $city_list[$city->id] ?? City::find($city->id); 
                     if ($city_check && $city_check->status == 1) {
-                        $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
+                        $city_list[$city->id] = $city_check;
+
+                        $class = $zone_classes[$zone->id][$city->id] ?? ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
                         if ($class) {
-                            if ($user_origin_city->origin_id != $city->id) {
-                                $class_name = "Local";
+                            $zone_classes[$zone->id][$city->id] = $class;
+
+                            if ($class->class == 0) {
+                                $class_name = "A";
+                            } elseif ($class->class == 1) {
+                                $class_name = "B";
+                            } elseif ($class->class == 2) {
+                                $class_name = "C";
                             } else {
-                                $class = $class->class;
-                                if ($class == 0) {
-                                    $class_name = "A";
-                                } elseif ($class == 1) {
-                                    $class_name = "B";
-                                } elseif ($class == 2) {
-                                    $class_name = "C";
-                                } else {
-                                    $class_name = "D";
-                                }
+                                $class_name = "D";
                             }
 
-                            // Only loop through the destination cities once for each zone city
-                            foreach ($user_destination_city as $destination) {
-                                // Avoid duplicating the same origin-destination pair
-                                $existing_entry = collect($city_list_array ?? [])->firstWhere('destination', $destination->name);
-
+                            foreach (array_keys($user_destination_cities) as $destination_name) {
+                                $existing_entry = collect($city_list_array ?? [])->firstWhere('destination', $destination_name);
                                 if (!$existing_entry) {
                                     $city_list_array[] = [
                                         'serial' => $serial,
                                         'origin' => $user_origin_city->origin_name,
-                                        'destination' => $destination->name,
-                                        'id' => $destination->id,
+                                        'destination' => $destination_name,
+                                        'id' => $user_destination_cities[$destination_name],
                                         'class' => $class_name,
-                                        'Zone' => $zone->name
+                                        'Zone' => $zone->name,
                                     ];
                                     $serial++;
                                 }
@@ -151,41 +150,6 @@ class ShipperResourcesController extends Controller
                     }
                 }
             }
-
-            // foreach ($zones as $index => $zone){
-            //     foreach ($zone->zone_cities as $city) {
-            //         $city_check = City::where('id', $city->id)->first();
-            //         if ($city_check->status == 1) {
-            //             $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
-            //             if ($class) {
-            //                 $class = $class->class;
-            //                 if ($class == 0) {
-            //                     $class_name = "A";
-            //                 } elseif ($class == 1) {
-            //                     $class_name = "B";
-            //                 } elseif ($class == 2) {
-            //                     $class_name = "C";
-            //                 } else {
-            //                     $class_name = "D";
-            //                 }
-            //                 // $city_list_array[] = ['serial' => $serial, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name, 'Zone' => $zone->name];
-            //                 // $serial++;
-            //                 foreach($user_destination_city as $destination){
-            //                     $city_list_array[] = [
-            //                         'serial' => $serial,
-            //                         // 'name' => $city->name,
-            //                         'origin' => $user_origin_city->origin_name,
-            //                         'destination' => $destination->name,
-            //                         'id' => $destination->id,
-            //                         'class' => $class_name,
-            //                         'Zone' => $zone->name
-            //                     ];
-            //                     $serial++;
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
 
             $cell_st =[
                 'font' =>['bold' => true],

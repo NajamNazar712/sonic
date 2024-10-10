@@ -58,9 +58,9 @@
                                         <div class="heading-elements">
                                             <ul class="list-inline mb-0">
                                                 <li>
-                                                    <a href="javascript:void(0);" class="btn btn-secondary round btn-min-width mr-1 mb-1 admin_city_list_download" id="admin_city_list_download"> 
-                                                        {{-- <i class=" ft-download"></i> --}}
-                                                        Click here to select shippers
+                                                    <a href="javascript:void(0);" class="btn btn-secondary round btn-min-width mr-1 mb-1 city_list_download" id="city_list_download"> 
+                                                        <i class=" ft-download"></i>
+                                                        Download
                                                     </a>
                                                 </li>
                                             </ul>
@@ -137,7 +137,7 @@
                     </div>
                 </div>
 
-                <div class="modal fade" id="user_data_modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+                {{-- <div class="modal fade" id="user_data_modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -164,7 +164,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
 
             </div>
         </div>
@@ -207,68 +207,6 @@
             $('li a.city_list_download').on('click', function () {
                 $(this).attr('disabled', true);
                 window.open('{!! route('admin.resources.city_list') !!}', '_blank');
-            });
-            
-            var admin_list = $('#admin_city_list_download');
-            admin_list.on('click', function () {
-                // Show modal
-                $('#user_data_modal').modal('show');
-
-                // show all active users
-                $('#user_dropdown').select2({
-                    width:'100%',
-                    placeholder:"Select Shipper",
-                    allowClear:true,
-                    multiple: true,
-                    minimumInputLength: 2,
-                    ajax: {
-                        dataType: 'json',
-                        url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
-                            data: function (params) {
-                                return {
-                                    search: params.term,
-                                }
-                            },
-                            processResults: function (data) {
-                                return {
-                                    results: data
-                                };
-                            },
-                        delay: 700,
-                    }
-                });
-
-                // download excel file
-                var user_list = $('#user_city_list_download');
-                user_list.off('click');
-                user_list.on('click', function () {
-                    var selectedUsers = $('#user_dropdown').val();
-                    if (selectedUsers.length == 0) {
-                        toastr.error('Please select at least 1 shipper', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    } else {
-                        $(this).attr('disabled', true);
-                        $.ajax({
-                            url: '{!! route('admin.resources.city_list') !!}',
-                            method: 'GET',
-                            data: {
-                                users: selectedUsers
-                            },
-                            success: function (response) {
-                                window.open(response.url, '_blank');
-                            },
-                            error: function (error) {
-                                console.error('Error:', error);
-                                alert('An error occurred while downloading the file.');
-                            },
-                            complete: function () {
-                                user_list.attr('disabled', false);
-                            }
-                        });
-                    }
-                });
             });
         });
 
