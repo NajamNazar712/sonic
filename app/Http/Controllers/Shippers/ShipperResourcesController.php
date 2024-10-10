@@ -23,57 +23,75 @@ class ShipperResourcesController extends Controller
         return view('client.documents.index');
     }
 
-    public function get_network_list(Request $request){
+    public function get_network_list(Request $request)
+    {
         $ZoneClassCity = ZoneClassCity::with('city','zone_classification')->get()->pluck(null, 'id')->toArray();
-        if(true){
+        if (true) {
             $city_list_array = array();
-            $city_list_array['header'] = ['S. No.','Origin','ID', 'Destination', 'Class', 'Zone','Zone Classification'];
+            $city_list_array['header'] = ['S. No.', 'Origin', 'ID', 'Destination', 'Class', 'Zone', 'Zone Classification'];
             $serial = 1;
-            $hubs = City::where('id',Auth::user()->city_id)->get();
-            foreach ($hubs as $key=> $hub_city){
-                $zone = $hub_city->zone;
-                $zoneId = $zone->id;
-                $zone_cities = array_filter($ZoneClassCity, function ($item) use ($zoneId) {
-                    return $item['zone_id'] == $zoneId;
-                });
-                foreach ($zone_cities as $city2) {
-                    $city = (object) $city2['city'];
-                    $classification = (object) $city2['zone_classification'];
-                    if (isset($city->id)) {
-                        if ($city->status == 1) {
-                            // $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
-                            $cityId = $city->id;
-                            $class = (object)collect(array_filter($ZoneClassCity, function ($item) use ($zoneId, $cityId) {
-                                return $item['zone_id'] == $zoneId && $item['city_id'] == $cityId;
-                            }))->first();
+            $hubs = City::where('id', Auth::user()->city_id)->first();
+            $zone = $hubs->zone;
+            $zoneId = $zone->id;
 
-                            if ($class) {
-                                $class = $class->class;
-                                if ($class == 0) {
-                                    $class_name = "A";
-                                } elseif ($class == 1) {
-                                    $class_name = "B";
-                                } elseif ($class == 2) {
-                                    $class_name = "C";
-                                } else {
-                                    $class_name = "D";
-                                }
-                                $city_list_array[] = ['serial' => $serial, 'origin' => $hub_city->name, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name, 'Zone' => $zone->name,'zone_classification'=>$classification->name];
-                                $serial++;
+            // Track processed city ids to avoid duplicates
+            $processedCities = [];
+
+            $zone_cities = array_filter($ZoneClassCity, function ($item) use ($zoneId) {
+                return $item['zone_id'] == $zoneId;
+            });
+
+            foreach ($zone_cities as $city2) {
+                $city = (object) $city2['city'];
+                $classification = (object) $city2['zone_classification'];
+
+                if (isset($city->id) && !in_array($city->id, $processedCities)) { // Check if city is already processed
+                    if ($city->status == 1) {
+                        $cityId = $city->id;
+                        $class = (object)collect(array_filter($ZoneClassCity, function ($item) use ($zoneId, $cityId) {
+                            return $item['zone_id'] == $zoneId && $item['city_id'] == $cityId;
+                        }))->first();
+
+                        if ($class) {
+                            $class = $class->class;
+                            if ($class == 0) {
+                                $class_name = "A";
+                            } elseif ($class == 1) {
+                                $class_name = "B";
+                            } elseif ($class == 2) {
+                                $class_name = "C";
+                            } else {
+                                $class_name = "D";
                             }
+
+                            // Add city details to array and mark city as processed
+                            $city_list_array[] = [
+                                'serial' => $serial,
+                                'origin' => $hubs->name,
+                                'id' => $city->id,
+                                'name' => $city->name,
+                                'class' => $class_name,
+                                'Zone' => $zone->name,
+                                'zone_classification' => $classification->name
+                            ];
+
+                            $processedCities[] = $city->id; // Track city ID
+                            $serial++;
                         }
                     }
                 }
             }
-            $cell_st =[
-                'font' =>['bold' => true],
-                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+
+            $cell_st = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
             ];
+
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getDefaultColumnDimension()->setWidth(20);
-            $sheet->fromArray($city_list_array,NULL,'A2',true);
+            $sheet->fromArray($city_list_array, NULL, 'A2', true);
             $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
             $sheet->setTitle('Network List');
             $spreadsheet->createSheet();
@@ -83,11 +101,10 @@ class ShipperResourcesController extends Controller
             header('Content-Disposition: attachment;filename="Network List.xlsx"');
             header('Cache-Control: max-age=0');
             $file_name_without_path = "file/documents/Network List.xlsx";
-            $file_name = public_path() .'/'.$file_name_without_path ;
+            $file_name = public_path() . '/' . $file_name_without_path;
             $writer->save('php://output');
         }
     }
-
 
     static public function get_city_list(){
         $city_list_array = array();
