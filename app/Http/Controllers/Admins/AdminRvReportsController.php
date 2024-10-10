@@ -87,12 +87,16 @@ class AdminRvReportsController extends Controller
     {
 
         $rv_call_logs = ApiCallLog::join('shipments as s','s.id', 'api_call_logs.shipment_id')
-            ->leftJoin('api_zong_logs as azl', function ($join) use ($request) {
-                $join->on('azl.call_date_time', '=', 'api_call_logs.created_at');
-                $join->on('azl.shipment_id', '=', 'api_call_logs.shipment_id');
-                // $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
-                // $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
-            })    
+            // ->leftJoin('api_zong_logs as azl', function ($join) use ($request) {
+            //     $join->on('azl.call_date_time', '=', 'api_call_logs.created_at');
+            //     $join->on('azl.shipment_id', '=', 'api_call_logs.shipment_id');
+            //     // $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
+            //     // $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
+            // })    
+            ->leftJoin('api_zong_logs as azl', function ($join) {
+                $join->on('azl.shipment_id', '=', 's.id')
+                    ->whereRaw('DATE_FORMAT(azl.call_date_time, "%Y-%m-%d %H:%i") = DATE_FORMAT(api_call_logs.created_at, "%Y-%m-%d %H:%i")');
+            })
             ->select('s.tracking_number as tracking_number',
             'api_call_logs.shipment_id as shipmentNo',
             'api_call_logs.call_count_initiate  as call_count',
