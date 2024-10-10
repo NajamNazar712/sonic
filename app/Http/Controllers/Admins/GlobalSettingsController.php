@@ -8755,7 +8755,7 @@ class GlobalSettingsController extends Controller
                 }
             })
             ->addColumn('action', function ($star_shippers) {
-                if (session('role_id') == 1 || count(array_intersect([1007], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([1007, 848], session('permissions'))) !== 0) {
 
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
