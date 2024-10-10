@@ -22,135 +22,49 @@ class ShipperResourcesController extends Controller
     public function index(){
         return view('client.documents.index');
     }
-    // public function get_network_list(Request $request){
-    //     $zones = Zone::where('status', 1)->get();
-    //     if($zones){
-    //         $city_list_array = array();
-    //         $city_list_array['header'] = ['S. No.','ID', 'Name', 'Class', 'Zone'];
-    //         $serial = 1;
-    //         foreach ($zones as $index => $zone){
-    //             foreach ($zone->zone_cities as $city) {
-    //                 $city_check = City::where('id', $city->id)->first();
-    //                 if ($city_check->status == 1) {
-    //                     $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
-    //                     if ($class) {
-    //                         $class = $class->class;
-    //                         if ($class == 0) {
-    //                             $class_name = "A";
-    //                         } elseif ($class == 1) {
-    //                             $class_name = "B";
-    //                         } elseif ($class == 2) {
-    //                             $class_name = "C";
-    //                         } else {
-    //                             $class_name = "D";
-    //                         }
-    //                         $city_list_array[] = ['serial' => $serial, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name, 'Zone' => $zone->name];
-    //                         $serial++;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         $cell_st =[
-    //             'font' =>['bold' => true],
-    //             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-    //             'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
-    //         ];
-    //         $spreadsheet = new Spreadsheet();
-    //         $sheet = $spreadsheet->getActiveSheet();
-    //         $sheet->getDefaultColumnDimension()->setWidth(20);
-    //         $sheet->fromArray($city_list_array,NULL,'A2',true);
-    //         $sheet->getStyle("A2:E2")->applyFromArray($cell_st);
-    //         $sheet->setTitle('Network List');
-    //         $spreadsheet->createSheet();
-    //         $spreadsheet->setActiveSheetIndex(0);
-    //         $writer = new Xlsx($spreadsheet);
-    //         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    //         header('Content-Disposition: attachment;filename="Network List.xlsx"');
-    //         header('Cache-Control: max-age=0');
-    //         $file_name_without_path = "file/documents/Network List.xlsx";
-    //         $file_name = public_path() .'/'.$file_name_without_path ;
-    //         $writer->save('php://output');
-    //     }
-    // }
 
     public function get_network_list(Request $request){
-        $zones = Zone::where('status', 1)->get();
-        if($zones){
+        $ZoneClassCity = ZoneClassCity::with('city','zone_classification')->get()->pluck(null, 'id')->toArray();
+        if(true){
             $city_list_array = array();
-            // $city_list_array['header'] = ['S. No.','ID', 'Name', 'Class', 'Zone'];
-            // $serial = 1;
-
-            $city_list_array['header'] = [
-                'S. No.',
-                // 'Name',
-                'Origin',
-                'Destination',
-                'ID',
-                'Class',
-                'Zone'
-            ];
+            $city_list_array['header'] = ['S. No.','Origin','ID', 'Destination', 'Class', 'Zone','Zone Classification'];
             $serial = 1;
+            $hubs = City::where('id',Auth::user()->city_id)->get();
+            foreach ($hubs as $key=> $hub_city){
+                $zone = $hub_city->zone;
+                $zoneId = $zone->id;
+                $zone_cities = array_filter($ZoneClassCity, function ($item) use ($zoneId) {
+                    return $item['zone_id'] == $zoneId;
+                });
+                foreach ($zone_cities as $city2) {
+                    $city = (object) $city2['city'];
+                    $classification = (object) $city2['zone_classification'];
+                    if (isset($city->id)) {
+                        if ($city->status == 1) {
+                            // $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
+                            $cityId = $city->id;
+                            $class = (object)collect(array_filter($ZoneClassCity, function ($item) use ($zoneId, $cityId) {
+                                return $item['zone_id'] == $zoneId && $item['city_id'] == $cityId;
+                            }))->first();
 
-            $user_origin_city = DB::table('users')
-            ->leftJoin('cities as origin_city', 'users.city_id', 'origin_city.id')
-            ->where('origin_city.status', 1)
-            ->where('users.id', Auth::user()->id)
-            ->select([
-                'origin_city.id as origin_id',
-                'origin_city.name as origin_name',
-            ])
-            ->first();
-
-            $user_destination = DB::table('cities')
-            ->where('hub', '!=', 1)
-            ->where('status', 1)
-            ->select(['id', 'name'])
-            ->get();
-
-            $user_destination_cities = $user_destination->pluck(
-                'id',
-                'name'
-            )->toArray();
-
-            foreach ($zones as $zone) {
-                foreach ($zone->zone_cities as $city) {
-                    $city_check = $city_list[$city->id] ?? City::find($city->id); 
-                    if ($city_check && $city_check->status == 1) {
-                        $city_list[$city->id] = $city_check;
-
-                        $class = $zone_classes[$zone->id][$city->id] ?? ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
-                        if ($class) {
-                            $zone_classes[$zone->id][$city->id] = $class;
-
-                            if ($class->class == 0) {
-                                $class_name = "A";
-                            } elseif ($class->class == 1) {
-                                $class_name = "B";
-                            } elseif ($class->class == 2) {
-                                $class_name = "C";
-                            } else {
-                                $class_name = "D";
-                            }
-
-                            foreach (array_keys($user_destination_cities) as $destination_name) {
-                                $existing_entry = collect($city_list_array ?? [])->firstWhere('destination', $destination_name);
-                                if (!$existing_entry) {
-                                    $city_list_array[] = [
-                                        'serial' => $serial,
-                                        'origin' => $user_origin_city->origin_name,
-                                        'destination' => $destination_name,
-                                        'id' => $user_destination_cities[$destination_name],
-                                        'class' => $class_name,
-                                        'Zone' => $zone->name,
-                                    ];
-                                    $serial++;
+                            if ($class) {
+                                $class = $class->class;
+                                if ($class == 0) {
+                                    $class_name = "A";
+                                } elseif ($class == 1) {
+                                    $class_name = "B";
+                                } elseif ($class == 2) {
+                                    $class_name = "C";
+                                } else {
+                                    $class_name = "D";
                                 }
+                                $city_list_array[] = ['serial' => $serial, 'origin' => $hub_city->name, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name, 'Zone' => $zone->name,'zone_classification'=>$classification->name];
+                                $serial++;
                             }
                         }
                     }
                 }
             }
-
             $cell_st =[
                 'font' =>['bold' => true],
                 'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -160,7 +74,7 @@ class ShipperResourcesController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getDefaultColumnDimension()->setWidth(20);
             $sheet->fromArray($city_list_array,NULL,'A2',true);
-            $sheet->getStyle("A2:F2")->applyFromArray($cell_st);
+            $sheet->getStyle("A2:E2")->applyFromArray($cell_st);
             $sheet->setTitle('Network List');
             $spreadsheet->createSheet();
             $spreadsheet->setActiveSheetIndex(0);
@@ -173,6 +87,7 @@ class ShipperResourcesController extends Controller
             $writer->save('php://output');
         }
     }
+
 
     static public function get_city_list(){
         $city_list_array = array();

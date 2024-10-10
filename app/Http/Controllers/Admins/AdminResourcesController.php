@@ -25,88 +25,49 @@ class AdminResourcesController extends Controller
     }
 
     public function get_network_list(Request $request){
-        $zones = Zone::where('status', 1)->get();
-        if($zones){
+        // $zones = Zone::where('status', 1)->pluck('id','id')->toArray();
+        $ZoneClassCity = ZoneClassCity::with('city','zone_classification')->get()->pluck(null, 'id')->toArray();
+
+        if(true){
             $city_list_array = array();
-            $city_list_array['header'] = [
-                'S. No.',
-                // 'Name',
-                'Origin', 
-                'Destination', 
-                'ID', 
-                'Class', 
-                'Zone'
-            ];
+            $city_list_array['header'] = ['S. No.','Origin','ID', 'Destination', 'Class', 'Zone','Zone Classification'];
             $serial = 1;
+            $hubs = City::whereIn('id',session('hubs'))->get();
+            foreach ($hubs as $key=>$hub_city) {
+                $zone = $hub_city->zone;
+                $zoneId = $zone->id;
+                $zone_cities = array_filter($ZoneClassCity, function ($item) use ($zoneId) {
+                    return $item['zone_id'] == $zoneId;
+                });
+                foreach ($zone_cities as $city2) {
+                    $city = (object) $city2['city'];
+                    $classification = (object) $city2['zone_classification'];
+                    if (isset($city->id)) {
+                        if ($city->status == 1) {
+                            // $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
+                            $cityId = $city->id;
+                            $class = (object)collect(array_filter($ZoneClassCity, function ($item) use ($zoneId, $cityId) {
+                                return $item['zone_id'] == $zoneId && $item['city_id'] == $cityId;
+                            }))->first();
 
-
-
-
-
-            $origin_cities = [];
-            foreach (DB::table('cities as origin_city')
-                ->where('origin_city.hub', '=', 1)
-                ->where('origin_city.status', 1)
-                ->select([
-                    'origin_city.id as origin_id',
-                    'origin_city.name as origin_name',
-                ])
-                ->orderBy('origin_city.id')
-                ->cursor() as $city) { // Use cursor for memory-efficient iteration
-                $origin_cities[] = $city; // Store or process each origin city
-            }
-
-            $destination_cities = [];
-            foreach (DB::table('cities as destination_city')
-                ->where('destination_city.hub', '!=', 1)
-                ->where('destination_city.status', 1)
-                ->select([
-                    'destination_city.id as destination_id',
-                    'destination_city.name as destination_name',
-                ])
-                ->orderBy('destination_city.id')
-                ->cursor() as $city) { // Use cursor for memory-efficient iteration
-                $destination_cities[] = $city; // Store or process each destination city
-            }
-
-
-
-
-
-            foreach ($zones as $index => $zone){
-                foreach ($zone->zone_cities as $city) {
-                    $city_check = City::where('id', $city->id)->first();
-                    if ($city_check->status == 1) {
-                    $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
-                        if ($class) {
-                            $class = $class->class;
-                            if ($class == 0) {
-                                $class_name = "A";
-                            } elseif ($class == 1) {
-                                $class_name = "B";
-                            } elseif ($class == 2) {
-                                $class_name = "C";
-                            } else {
-                                $class_name = "D";
-                            }
-                            foreach ($origin_cities as $origin) {
-                                foreach ($destination_cities as $destination) {
-                                    $city_list_array[] = [
-                                        'serial' => $serial,
-                                        'origin' => $origin->origin_name,
-                                        'destination' => $destination->destination_name,
-                                        'id' => $destination->destination_id,
-                                        'class' => $class_name,
-                                        'Zone' => $zone->name,
-                                    ];
-                                    $serial++;
+                            if ($class) {
+                                $class = $class->class;
+                                if ($class == 0) {
+                                    $class_name = "A";
+                                } elseif ($class == 1) {
+                                    $class_name = "B";
+                                } elseif ($class == 2) {
+                                    $class_name = "C";
+                                } else {
+                                    $class_name = "D";
                                 }
+                                $city_list_array[] = ['serial' => $serial, 'origin' => $hub_city->name, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name, 'Zone' => $zone->name,'zone_classification'=>$classification->name];
+                                $serial++;
                             }
                         }
                     }
                 }
             }
-
             $cell_st =[
                 'font' =>['bold' => true],
                 'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -116,7 +77,7 @@ class AdminResourcesController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getDefaultColumnDimension()->setWidth(20);
             $sheet->fromArray($city_list_array,NULL,'A2',true);
-            $sheet->getStyle("A2:E2")->applyFromArray($cell_st);
+            $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
             $sheet->setTitle('Network List');
             $spreadsheet->createSheet();
             $spreadsheet->setActiveSheetIndex(0);
