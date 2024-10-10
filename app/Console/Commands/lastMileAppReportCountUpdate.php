@@ -153,7 +153,7 @@ class lastMileAppReportCountUpdate extends Command
                 $rwds->via_rider_count = $shipment_count;
                 if($rwds->isDirty()){
                     $rwds->save();
-                    ChangeLogs::where('record_id', $rwds->id)->update([
+                    ChangeLogs::create([
                         'table_name' => $rwds->getTable(),
                         'record_id' => $rwds->getKey(),
                         // 'old_data' => json_encode($originalValue),
