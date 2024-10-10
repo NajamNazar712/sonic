@@ -232,19 +232,14 @@ class ShipperTrackingController extends Controller
                         $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
 
-                        $consignee_address = InterceptReBookRequestHistory::where('id', $shipment->id)
+                        $consignee_address = InterceptReBookRequestHistory::where('shipment_id', $shipment->id)
                         ->select([
-                            'old_consignee_address',
                             'new_consignee_address',
                         ])
                         ->first();
-                        
+
                         if ($consignee_address){
-                            if ($shipment->consignee_address == $consignee_address->old_consignee_address){
-                                $details['consignee']['address'] = $consignee_address->old_consignee_address;
-                            } else {
-                                $details['consignee']['address'] = $consignee_address->new_consignee_address;
-                            }
+                            $details['consignee']['address'] = $consignee_address->new_consignee_address;
                         } else {
                             $details['consignee']['address'] = $shipment->consignee_address;
                         }
