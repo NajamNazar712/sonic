@@ -43,22 +43,48 @@ class lastMileAppReportCountUpdate extends Command
     {
         //
         $lastMileReport = RiderWiseDeliveryNoteSummary::where([['delivery_date','>=',$this->argument('Startdate').' 00:00:00'],['delivery_date','<=', $this->argument('Startdate').' 23:59:59']])->get();
-        $before_11 = 0;
-        $shipment_count = 0;
-        $at_11_count = 0;
-        $at_12_count = 0;
-        $at_13_count = 0;
-        $at_14_count = 0;
-        $at_15_count = 0;
-        $at_16_count = 0;
-        $at_17_count = 0;
-        $at_18_count = 0;
-        $at_19_count = 0;
-        $at_20_count = 0;
-        $at_21_count = 0;
-        $at_22_count = 0;
-        $at_23_count = 0;
+        $changesLogs = ChangeLogs::where('updated_by','346')->get();
+        // foreach($changesLogs as $changes){
+        //     $lastMileReport = RiderWiseDeliveryNoteSummary::where([['delivery_date', '>=', $this->argument('Startdate') . ' 00:00:00'], ['delivery_date', '<=', $this->argument('Startdate') . ' 23:59:59'],['id',$changes->record_id]])->get();
+        //     $changesjson = json_decode($changes->old_data);
+        //     RiderWiseDeliveryNoteSummary::where('id',$changes->record_id)->update([
+        //         'shipment_update_count' => $changesjson->shipment_update_count,
+        //         'before_11_count' => $changesjson->before_11_count,
+        //         'at_11_count' => $changesjson->at_11_count,
+        //         'at_12_count' => $changesjson->at_12_count,
+        //         'at_13_count' => $changesjson->at_13_count,
+        //         'at_14_count' => $changesjson->at_14_count,
+        //         'at_15_count' => $changesjson->at_15_count,
+        //         'at_16_count' => $changesjson->at_16_count,
+        //         'at_17_count' => $changesjson->at_17_count,
+        //         'at_18_count' => $changesjson->at_18_count,
+        //         'at_19_count' => $changesjson->at_19_count,
+        //         'at_20_count' => $changesjson->at_20_count,
+        //         'at_21_count' => $changesjson->at_21_count,
+        //         'at_21_count' => $changesjson->at_21_count,
+        //         'at_22_count' => $changesjson->at_22_count,
+        //         'at_23_count' => $changesjson->at_23_count,
+        //         'via_rider_count' => $changesjson->via_rider_count
+        //     ]);
+        //     var_dump($changes->record_id);
+           
+        // }
         foreach($lastMileReport as $rwds){
+            $before_11 = 0;
+            $shipment_count = 0;
+            $at_11_count = 0;
+            $at_12_count = 0;
+            $at_13_count = 0;
+            $at_14_count = 0;
+            $at_15_count = 0;
+            $at_16_count = 0;
+            $at_17_count = 0;
+            $at_18_count = 0;
+            $at_19_count = 0;
+            $at_20_count = 0;
+            $at_21_count = 0;
+            $at_22_count = 0;
+            $at_23_count = 0;
             $rider = RiderWiseDeliveryNoteShipment::select(
                 'rwdnsum_id',
                 DB::raw('COUNT(*) AS count'),
@@ -127,13 +153,14 @@ class lastMileAppReportCountUpdate extends Command
                 $rwds->via_rider_count = $shipment_count;
                 if($rwds->isDirty()){
                     $rwds->save();
-                    ChangeLogs::create([
+                    ChangeLogs::where('record_id', $rwds->id)->update([
                         'table_name' => $rwds->getTable(),
                         'record_id' => $rwds->getKey(),
-                        'old_data' => json_encode($originalValue),
+                        // 'old_data' => json_encode($originalValue),
                         'new_data' => json_encode($rwds->getChanges()),
                         'updated_by' => 346,
                     ]);
+                    var_dump($rwds->rider_name);
                 }
         }
     }
