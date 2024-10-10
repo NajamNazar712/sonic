@@ -723,11 +723,15 @@ class LostShipmentsController extends Controller
                         }
                     }
 
+                    $lost_shipments_time = [];
+
                     $shipment_details->shipper_status_id = 18;
                     $shipment_status_reason_for_shipment_lost_id = DB::table('shipment_status_reason')->where('name', '=','Shipment Lost - Requested')->first()->id;
 
                     $shipment_details->save();
                     ShipmentsJourneyController::add($shipment_details->id, 18, NULL, $shipment_status_reason_for_shipment_lost_id, $remarks[$shipment_details->id],NULL,Auth::id(), NULL, NULL, 0);
+
+                    $lost_shipments_time[$shipment] = ShipmentsJourney::where(['shipment_id' => $shipment, 'shipper_status_id' => 18])->latest()->first()->created_at;
                     $lost_shipments_array[] = $shipment;
 
                     //Pending Count For Lost Pending
@@ -735,6 +739,8 @@ class LostShipmentsController extends Controller
                     
                 }
             }
+            dd($lost_shipments_time);
+
             if(count($lost_shipments_array) > 0){
                 NotificationsController::send(150, $lost_shipments_array);
             }
