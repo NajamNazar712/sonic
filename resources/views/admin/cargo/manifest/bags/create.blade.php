@@ -97,7 +97,7 @@
                                                             <label for="Destination">Destination</label>
                                                             <input type="hidden" class="destination_hub_id" name="destination_hub_id">
                                                             <input type="text" name="destination_hub_name" class="destination_hub_name form-control" readonly>
-                                                            
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -563,7 +563,7 @@
                             }
                         });
                     }
-                    
+
                 }
             });
 
@@ -789,8 +789,8 @@
                 }else{
                       $("#sackbag_row").css('display','block');
                      $("#sack_bag_no").attr('data-rule-required', true).attr('data-msg-required', 'Sack Bag No is Required');
-                  
-                
+
+
 
                 }
             });
