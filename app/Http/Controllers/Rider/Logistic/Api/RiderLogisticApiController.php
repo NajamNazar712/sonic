@@ -462,7 +462,7 @@ class RiderLogisticApiController extends Controller
                                 'pickup_address_list' => $pickup_address_list
                             ];
     
-    
+
                            return response()->json(['status'=>0,'shipper_detail'=> $shipper_detail]);
     
                         }
@@ -473,6 +473,7 @@ class RiderLogisticApiController extends Controller
 
         public function store_image(Request $request) {
 
+           // Log::channel('code_test_log')->error('logistic CN Number: '. $request->cn_number);
             $rules = [ 
                 'booking_image' => ['required', 'mimes:png,jpeg,jpg'],
                 'cn_number' => ['required']
@@ -488,26 +489,30 @@ class RiderLogisticApiController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }else {
 
-                $booking_id = TraxLogisticBooking::where('cn_number', $request->cn_number);
-                if($booking_id->exists())
-                {
-                    $booking_id = $booking_id->pluck('id')->first();
-                    $image = new TraxLogisticBookingImages();
-                    $time = Carbon::now()->timestamp;
-                    $image_name =$booking_id . '_' . $time . '.png';
-                    $image_path = 'logistic_bookings/' . $image_name;
-                    Storage::disk('public')->put($image_path, file_get_contents($request->booking_image));
-                    $image->booking_id = $booking_id;
-                    $image->image_name = $image_name;
-                    $image->image_path = $image_path;
-                    $image->save();
-                    return response()->json(['status' => 0, 'message' => 'Image has been stored!']);
-                } else {
-                    return response()->json(['status' => 1, 'error' => 'Image not save','cn_number' => $request->cn_number]);
-
+                try {
+                    $booking_id = TraxLogisticBooking::where('cn_number', $request->cn_number);
+                    if($booking_id->exists())
+                    {
+                        $booking_id = $booking_id->pluck('id')->first();
+                        $image = new TraxLogisticBookingImages();
+                        $time = Carbon::now()->timestamp;
+                        $image_name =$booking_id . '_' . $time . '.png';
+                        $image_path = 'logistic_bookings/' . $image_name;
+                        Log::channel('code_test_log')->error('logistic image_path: '. $image_path.' booking_image - > '.$request->booking_image);
+                        // Storage::disk('public')->put($image_path, file_get_contents($request->booking_image));
+                       Storage::disk('s4')->put($image_path, file_get_contents($request->booking_image));
+                        $image->booking_id = $booking_id;
+                        $image->image_name = $image_name;
+                        $image->image_path = $image_path;
+                        $image->save();
+                        return response()->json(['status' => 0, 'message' => 'Image has been stored!']);
+                    } else {
+                        return response()->json(['status' => 1, 'error' => 'Image not save','cn_number' => $request->cn_number]);
+                    }
+                } catch (\Exception $ex) {
+                    Log::channel('code_test_log')->error('logistic-booking-image: ' . json_encode($ex->getMessage()));
+                    return response()->json(['status' => 1, 'message' => 'An error occurred while storing the image:'.$ex->getMessage()]);
                 }
-
-
             }
 
         }
