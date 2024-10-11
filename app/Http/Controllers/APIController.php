@@ -2558,9 +2558,9 @@ class APIController extends Controller
                 $business_category_id = $request->business_category;
             }
             if ($business_category_id) {
-                $cities = City::where('status', 1)->where('business_category_id', $business_category_id);
+                $cities = City::where('status', 1)->where('business_category_id', $business_category_id)->where('booking_enable_status',1);
             } else {
-                $cities = City::where('status', 1);
+                $cities = City::where('status', 1)->where('booking_enable_status',1);
             }
 
             if ($cities->exists()) {

@@ -1825,7 +1825,7 @@ class ShipperFinanceController extends Controller
 
 
     $shipment_details = array();
-
+        $final_array = array();
     $serial_number = array();
 
     $origins = array();
@@ -1833,7 +1833,7 @@ class ShipperFinanceController extends Controller
     $total_charges = 0;
     $total_gst = 0;
     $total_invoice_amount = 0;
-    $total_reverse_pickup_charges= 0;
+
 
     if($invoice->invoice_type == 1) {
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
@@ -1863,38 +1863,99 @@ class ShipperFinanceController extends Controller
                 $origins[] = $origin;
             }
 
-            if (!isset($shipment_details[$origin])) {
-                $shipment_details[$origin] = '';
-            }
 
             if (!isset($serial_number[$origin])) {
                 $serial_number[$origin] = 1;
             }
 
-            $shipment_details[$origin] .= '
-                        <tr>
-                          <td>' . $serial_number[$origin] . '</td>
-                          <td>' . $shipment->tracking_number . '</td>
-                          <td>' . $shipment->order_id . '</td>
-                          <td>' . $shipment->consignee_city->name . '</td>
-                          <td>' . $shipment->shipping_mode->mode . '</td>
-                          <td>' . $date . '</td>
-                          <td>' . $shipment->actual_weight . '</td>
-                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($faf_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->esc_charges, 2) : '0') . '</td>
-                          <td>' . number_format($invoice_shipment->sms_charges, 2) . '</td>
-                          <td>' . number_format($invoice_shipment->charges + $invoice_shipment->sms_charges , 2) . '</td>
-                          <td>' . number_format($invoice_shipment->gst, 2) . '</td>
-                          <td>' . number_format($invoice_shipment->invoice_amount, 2) . '</td>
-                        </tr>
-            ';
 
-            $serial_number[$origin]++;
+            if (!isset($final_array[$origin][$shipment->id])) {
+                // Assign new shipment details to the final array
+                $final_array[$origin][$shipment->id]['serial_number'] = $serial_number[$origin];
+                $final_array[$origin][$shipment->id]['tracking_number'] = $shipment->tracking_number;
+                $final_array[$origin][$shipment->id]['order_id'] = $shipment->order_id;
+                $final_array[$origin][$shipment->id]['consignee_city'] = $shipment->consignee_city->name;
+                $final_array[$origin][$shipment->id]['shipping_mode'] = $shipment->shipping_mode->mode;
+                $final_array[$origin][$shipment->id]['date'] = $date;
+                $final_array[$origin][$shipment->id]['actual_weight'] = $shipment->actual_weight;
+
+                // Add the values directly without number_format()
+                $final_array[$origin][$shipment->id]['weight_charges'] = ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $shipment->weight_charges : 0;
+                $final_array[$origin][$shipment->id]['service_charges'] = ($invoice_shipment->type != 2) ? $service_charges : 0;
+                $final_array[$origin][$shipment->id]['fuel_surcharge'] = ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $shipment->fuel_surcharge : 0;
+                $final_array[$origin][$shipment->id]['faf_charges'] = ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $faf_charges : 0;
+                $final_array[$origin][$shipment->id]['nsa_osa_charges'] = ($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0;
+                $final_array[$origin][$shipment->id]['invoice_amount'] = ($invoice_shipment->type == 2) ? $invoice_shipment->invoice_amount : 0;
+                $final_array[$origin][$shipment->id]['packaging_material_charges'] = ($invoice_shipment->type == 2) ? $shipment->packaging_material_charges : 0;
+                $final_array[$origin][$shipment->id]['esc_charges'] = ($invoice_shipment->type != 2) ? $shipment->esc_charges : 0;
+                $final_array[$origin][$shipment->id]['sms_charges'] = $invoice_shipment->sms_charges;
+                $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges;
+                $final_array[$origin][$shipment->id]['gst'] = $invoice_shipment->gst;
+                $final_array[$origin][$shipment->id]['total_invoice_amount'] = $invoice_shipment->invoice_amount;
+                $serial_number[$origin]++;
+
+            }
+            else {
+                // Perform the addition directly without number_format()
+
+                if ($final_array[$origin][$shipment->id]['weight_charges'] == 0) {
+                    $final_array[$origin][$shipment->id]['weight_charges'] += ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $shipment->weight_charges : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['fuel_surcharge'] == 0) {
+                    $final_array[$origin][$shipment->id]['fuel_surcharge'] += ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $shipment->fuel_surcharge : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['faf_charges'] == 0) {
+                    $final_array[$origin][$shipment->id]['faf_charges'] += ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $faf_charges : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['nsa_osa_charges'] == 0) {
+                    $final_array[$origin][$shipment->id]['nsa_osa_charges'] += ($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['invoice_amount'] == 0) {
+                    $final_array[$origin][$shipment->id]['invoice_amount'] += ($invoice_shipment->type == 2) ? $invoice_shipment->invoice_amount : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['packaging_material_charges'] == 0) {
+                    $final_array[$origin][$shipment->id]['packaging_material_charges'] += ($invoice_shipment->type == 2) ? $shipment->packaging_material_charges : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['esc_charges'] == 0) {
+                    $final_array[$origin][$shipment->id]['esc_charges'] += ($invoice_shipment->type != 2) ? $shipment->esc_charges : 0;
+                }
+
+                $final_array[$origin][$shipment->id]['sms_charges'] += $invoice_shipment->sms_charges;
+                $final_array[$origin][$shipment->id]['total_charges'] += $invoice_shipment->charges + $invoice_shipment->sms_charges;
+                $final_array[$origin][$shipment->id]['gst'] += $invoice_shipment->gst;
+                $final_array[$origin][$shipment->id]['total_invoice_amount'] += $invoice_shipment->invoice_amount;
+            }
+
+            $shipment_details[$origin][$shipment->id] = '
+                    <tr>
+                        <td>' . $final_array[$origin][$shipment->id]['serial_number'] . '</td>
+                        <td>' . $final_array[$origin][$shipment->id]['tracking_number'] . '</td>
+                        <td>' . $final_array[$origin][$shipment->id]['order_id'] . '</td>
+                        <td>' . $final_array[$origin][$shipment->id]['consignee_city'] . '</td>
+                        <td>' . $final_array[$origin][$shipment->id]['shipping_mode'] . '</td>
+                        <td>' . $final_array[$origin][$shipment->id]['date'] . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['actual_weight'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['weight_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['service_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['fuel_surcharge'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['faf_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['nsa_osa_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['invoice_amount'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['packaging_material_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['esc_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['sms_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['total_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['gst'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['total_invoice_amount'], 2) . '</td>
+                    </tr>';
+
+
 
             if (!isset($total_weight_charges[$origin])) {
                 $total_weight_charges[$origin] = 0;
@@ -2122,7 +2183,7 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="18">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="19">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -2133,6 +2194,7 @@ class ShipperFinanceController extends Controller
                           <th class="color secondary">Arrival Date</th>
                           <th class="color secondary">Weight (kg)</th>
                           <th class="color secondary">Weight Charges (PKR)</th>
+                          <th class="color secondary">Reverse Pickup Charges (PKR)</th>
                           <th class="color secondary">Fuel Surcharge (PKR)</th>
                           <th class="color secondary">Faf Charges (PKR)</th>
                           <th class="color secondary">OSA Charges (PKR)</th>
@@ -2148,7 +2210,9 @@ class ShipperFinanceController extends Controller
                     <tbody>
             ';
 
-            $html .= $shipment_details[$origin];
+            foreach($shipment_details[$origin] as $tr) {
+                $html .= $tr;
+            }
 
             $html .= '
                       </tbody>
@@ -2358,7 +2422,7 @@ class ShipperFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)','Faf Charges (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'FAF CHARGES (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'SMS Charges' , 'Invoice Amount (PKR)', 'Intercept Charges  (PKR)'];
 
         $serial_number = 1;
 
@@ -2385,22 +2449,63 @@ class ShipperFinanceController extends Controller
             $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
             $row = array();
 
-            $row[] = $serial_number;
-            $row[] = $shipment->tracking_number;
-            $row[] = $shipment->pickup_address->city->name;
-            $row[] = $shipment->consignee_city->name;
-            $row[] = $shipment->created_at;
-            $row[] = $shipment->actual_weight;
-            $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
-            $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
-            $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $faf_charges : 0);
-            $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
-            $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
-            $row[] = $invoice_shipment->charges;
-            $row[] = $invoice_shipment->gst;
-            $row[] = $invoice_shipment->invoice_amount;
+            if (!isset($details[$shipment->id])) {
+                // New shipment, assign the details
+                $row[] = $serial_number;
+                $row[] = $shipment->tracking_number;
+                $row[] = $shipment->pickup_address->city->name;
+                $row[] = $shipment->consignee_city->name;
+                $row[] = $shipment->created_at;
+                $row[] = $shipment->actual_weight;
+                $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
+                $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
+                $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $faf_charges : 0);
+                $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
+                $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
+                $row[] = $invoice_shipment->charges;
+                $row[] = $invoice_shipment->gst;
+                $row[] = $invoice_shipment->sms_charges;
+                $row[] = $invoice_shipment->invoice_amount;
+                $row[] = $shipment->intercept_charges;
 
-            $details[] = $row;
+                // Assign the row to the details array
+                $details[$shipment->id] = $row;
+            } else {
+                // Existing shipment, update the values where applicable
+
+                // Check and update weight charges if the current value is 0
+                if ($details[$shipment->id][6] == 0) {
+                    $details[$shipment->id][6] += (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
+                }
+
+                // Check and update fuel surcharge if the current value is 0
+                if ($details[$shipment->id][7] == 0) {
+                    $details[$shipment->id][7] += (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
+                }
+
+                // Check and update FAF charges if the current value is 0
+                if ($details[$shipment->id][8] == 0) {
+                    $details[$shipment->id][8] += (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $faf_charges : 0);
+                }
+
+                // Check and update NSA/OSA charges if the current value is 0
+                if ($details[$shipment->id][9] == 0) {
+                    $details[$shipment->id][9] += (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
+                }
+
+                // Check and update adjustment charges if the current value is 0
+                if ($details[$shipment->id][10] == 0) {
+                    $details[$shipment->id][10] += (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
+                }
+
+                $details[$shipment->id][11] += $invoice_shipment->charges;
+                $details[$shipment->id][12] += $invoice_shipment->gst;
+                $details[$shipment->id][13] += $invoice_shipment->sms_charges;
+                $details[$shipment->id][14] += $invoice_shipment->invoice_amount;
+                if ($details[$shipment->id][15] == 0) {
+                    $details[$shipment->id][15] += $invoice_shipment->intercept_charges;
+                }
+            }
 
             $serial_number++;
         }
@@ -2434,19 +2539,19 @@ class ShipperFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'Faf Charges (PKR)',  'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)','Intercept Charges (PKR)'];
 
         $serial_number = 1;
 
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
+            $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment->id);
             $arrival_charges_applied = ShipmentAdditionalCharges::check_additional_charges($shipment->id,true,false,false);;
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
             if ($shipment_journey->exists()) {
                 $date = $shipment_journey->first()->created_at;
-            }
-            else {
+            } else {
                 $date = $shipment->created_at;
             }
 
@@ -2454,21 +2559,61 @@ class ShipperFinanceController extends Controller
 
             $row = array();
 
-            $row[] = $serial_number;
-            $row[] = $shipment->tracking_number;
-            $row[] = $shipment->pickup_address->city->name;
-            $row[] = $shipment->consignee_city->name;
-            $row[] = $shipment->created_at;
-            $row[] = $shipment->actual_weight;
-            $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
-            $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
-            $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
-            $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
-            $row[] = $invoice_shipment->charges;
-            $row[] = $invoice_shipment->gst;
-            $row[] = $invoice_shipment->invoice_amount;
+            if (!isset($details[$shipment->id])) {
+                // New shipment, assign the details
+                $row[] = $serial_number;
+                $row[] = $shipment->tracking_number;
+                $row[] = $shipment->pickup_address->city->name;
+                $row[] = $shipment->consignee_city->name;
+                $row[] = $shipment->created_at;
+                $row[] = $shipment->actual_weight;
+                $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
+                $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
+                $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $faf_charges : 0);
+                $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
+                $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
+                $row[] = $invoice_shipment->charges;
+                $row[] = $invoice_shipment->gst;
+                $row[] = $invoice_shipment->invoice_amount;
+                $row[] = $shipment->intercept_charges;
 
-            $details[] = $row;
+                // Assign the row to the details array
+                $details[$shipment->id] = $row;
+            } else {
+                // Existing shipment, update the values where applicable
+
+                // Check and update weight charges if the current value is 0
+                if ($details[$shipment->id][6] == 0) {
+                    $details[$shipment->id][6] += (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
+                }
+
+                // Check and update fuel surcharge if the current value is 0
+                if ($details[$shipment->id][7] == 0) {
+                    $details[$shipment->id][7] += (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
+                }
+
+                // Check and update FAF charges if the current value is 0
+                if ($details[$shipment->id][8] == 0) {
+                    $details[$shipment->id][8] += (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $faf_charges : 0);
+                }
+
+                // Check and update NSA/OSA charges if the current value is 0
+                if ($details[$shipment->id][9] == 0) {
+                    $details[$shipment->id][9] += (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
+                }
+
+                // Check and update adjustment charges if the current value is 0
+                if ($details[$shipment->id][10] == 0) {
+                    $details[$shipment->id][10] += (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
+                }
+
+                $details[$shipment->id][11] += $invoice_shipment->charges;
+                $details[$shipment->id][12] += $invoice_shipment->gst;
+                $details[$shipment->id][13] += $invoice_shipment->invoice_amount;
+                if ($details[$shipment->id][14] == 0) {
+                    $details[$shipment->id][14] += $invoice_shipment->intercept_charges;
+                }
+            }
 
             $serial_number++;
         }
@@ -3835,6 +3980,7 @@ class ShipperFinanceController extends Controller
     ';
 
         $shipment_details = array();
+        $final_array = array();
 
         $serial_number = array();
 
@@ -3865,36 +4011,96 @@ class ShipperFinanceController extends Controller
                 $origins[] = $origin;
             }
 
-            if (!isset($shipment_details[$origin])) {
-                $shipment_details[$origin] = '';
-            }
 
             if (!isset($serial_number[$origin])) {
                 $serial_number[$origin] = 1;
             }
 
-            $shipment_details[$origin] .= '
-                    <tr>
-                      <td>' . $serial_number[$origin] . '</td>
-                      <td>' . $shipment->tracking_number . '</td>
-                      <td>' . $shipment->order_id . '</td>
-                      <td>' . $shipment->consignee_city->name . '</td>
-                      <td>' . $shipment->shipping_mode->mode . '</td>
-                      <td>' . $date . '</td>
-                      <td>' . $shipment->actual_weight . '</td>
-                      <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
-                      <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
-                      <td>' . (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? number_format($faf_charges, 2) : '0') . '</td>
-                      <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
-                      <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
-                      <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
-                      <td>' . number_format($invoice_shipment->charges, 2) . '</td>
-                      <td>' . number_format($invoice_shipment->gst, 2) . '</td>
-                      <td>' . number_format($invoice_shipment->invoice_amount, 2) . '</td>
-                    </tr>
-        ';
+            if (!isset($final_array[$origin][$shipment->id])) {
+                // Assign new shipment details to the final array
+                $final_array[$origin][$shipment->id]['serial_number'] = $serial_number[$origin];
+                $final_array[$origin][$shipment->id]['tracking_number'] = $shipment->tracking_number;
+                $final_array[$origin][$shipment->id]['order_id'] = $shipment->order_id;
+                $final_array[$origin][$shipment->id]['consignee_city'] = $shipment->consignee_city->name;
+                $final_array[$origin][$shipment->id]['shipping_mode'] = $shipment->shipping_mode->mode;
+                $final_array[$origin][$shipment->id]['date'] = $date;
+                $final_array[$origin][$shipment->id]['actual_weight'] = $shipment->actual_weight;
 
-            $serial_number[$origin]++;
+                // Add the values directly without number_format()
+                $final_array[$origin][$shipment->id]['weight_charges'] = ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $shipment->weight_charges : 0;
+                $final_array[$origin][$shipment->id]['fuel_surcharge'] = ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $shipment->fuel_surcharge : 0;
+                $final_array[$origin][$shipment->id]['faf_charges'] = ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $faf_charges : 0;
+                $final_array[$origin][$shipment->id]['nsa_osa_charges'] = ($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0;
+                $final_array[$origin][$shipment->id]['invoice_amount'] = ($invoice_shipment->type == 2) ? $invoice_shipment->invoice_amount : 0;
+                $final_array[$origin][$shipment->id]['packaging_material_charges'] = ($invoice_shipment->type == 2) ? $shipment->packaging_material_charges : 0;
+                $final_array[$origin][$shipment->id]['esc_charges'] = ($invoice_shipment->type != 2) ? $shipment->esc_charges : 0;
+                $final_array[$origin][$shipment->id]['sms_charges'] = $invoice_shipment->sms_charges;
+                $final_array[$origin][$shipment->id]['total_charges'] = $invoice_shipment->charges + $invoice_shipment->sms_charges;
+                $final_array[$origin][$shipment->id]['gst'] = $invoice_shipment->gst;
+                $final_array[$origin][$shipment->id]['total_invoice_amount'] = $invoice_shipment->invoice_amount;
+                $serial_number[$origin]++;
+
+            }
+            else {
+                // Perform the addition directly without number_format()
+
+                if ($final_array[$origin][$shipment->id]['weight_charges'] == 0) {
+                    $final_array[$origin][$shipment->id]['weight_charges'] += ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $shipment->weight_charges : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['fuel_surcharge'] == 0) {
+                    $final_array[$origin][$shipment->id]['fuel_surcharge'] += ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $shipment->fuel_surcharge : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['faf_charges'] == 0) {
+                    $final_array[$origin][$shipment->id]['faf_charges'] += ($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || !$arrival_charges_applied)) ? $faf_charges : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['nsa_osa_charges'] == 0) {
+                    $final_array[$origin][$shipment->id]['nsa_osa_charges'] += ($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['invoice_amount'] == 0) {
+                    $final_array[$origin][$shipment->id]['invoice_amount'] += ($invoice_shipment->type == 2) ? $invoice_shipment->invoice_amount : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['packaging_material_charges'] == 0) {
+                    $final_array[$origin][$shipment->id]['packaging_material_charges'] += ($invoice_shipment->type == 2) ? $shipment->packaging_material_charges : 0;
+                }
+
+                if ($final_array[$origin][$shipment->id]['esc_charges'] == 0) {
+                    $final_array[$origin][$shipment->id]['esc_charges'] += ($invoice_shipment->type != 2) ? $shipment->esc_charges : 0;
+                }
+
+                $final_array[$origin][$shipment->id]['sms_charges'] += $invoice_shipment->sms_charges;
+                $final_array[$origin][$shipment->id]['total_charges'] += $invoice_shipment->charges + $invoice_shipment->sms_charges;
+                $final_array[$origin][$shipment->id]['gst'] += $invoice_shipment->gst;
+                $final_array[$origin][$shipment->id]['total_invoice_amount'] += $invoice_shipment->invoice_amount;
+            }
+
+
+            $shipment_details[$origin][$shipment->id] = '
+                    <tr>
+                        <td>' . $final_array[$origin][$shipment->id]['serial_number'] . '</td>
+                        <td>' . $final_array[$origin][$shipment->id]['tracking_number'] . '</td>
+                        <td>' . $final_array[$origin][$shipment->id]['order_id'] . '</td>
+                        <td>' . $final_array[$origin][$shipment->id]['consignee_city'] . '</td>
+                        <td>' . $final_array[$origin][$shipment->id]['shipping_mode'] . '</td>
+                        <td>' . $final_array[$origin][$shipment->id]['date'] . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['actual_weight'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['weight_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['fuel_surcharge'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['faf_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['nsa_osa_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['invoice_amount'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['packaging_material_charges'], 2) . '</td>
+                     
+                        <td>' . number_format($final_array[$origin][$shipment->id]['total_charges'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['gst'], 2) . '</td>
+                        <td>' . number_format($final_array[$origin][$shipment->id]['total_invoice_amount'], 2) . '</td>
+                    </tr>';
+
+
 
             if (!isset($total_weight_charges[$origin])) {
                 $total_weight_charges[$origin] = 0;
@@ -4100,34 +4306,36 @@ class ShipperFinanceController extends Controller
 
         foreach ($origins as $origin) {
             $html .= '
-                <table class="table table-sm table-bordered border shipments_summary">
-                  <thead>
-                    <tr>
-                        <th class="color primary text-center" colspan="16">Shipment(s) Summary - ' . $origin . '</th>
-                    </tr>
-                    <tr>
-                      <th class="color secondary">S. No.</th>
-                      <th class="color secondary">Tracking No.</th>
-                      <th class="color secondary">Order ID</th>
-                      <th class="color secondary">Destination</th>
-                      <th class="color secondary">Shipping Mode</th>
-                      <th class="color secondary">Arrival Date</th>
-                      <th class="color secondary">Weight (kg)</th>
-                      <th class="color secondary">Weight Charges (PKR)</th>
-                      <th class="color secondary">Fuel Surcharge (PKR)</th>
-                      <th class="color secondary">Faf Charges (PKR)</th>
-                      <th class="color secondary">OSA Charges (PKR)</th>
-                      <th class="color secondary">Adjustment Charges (PKR)</th>
-                      <th class="color secondary">Packaging Charges (PKR)</th>
-                      <th class="color secondary">Total Charges (PKR)</th>
-                      <th class="color secondary">GST (PKR)</th>
-                      <th class="color secondary">Invoice Amount (PKR)</th>
-                    </tr>
-                </thead>
-                <tbody>
-        ';
+                    <table class="table table-sm table-bordered border shipments_summary">
+                      <thead>
+                        <tr>
+                            <th class="color primary text-center" colspan="16">Shipment(s) Summary - ' . $origin . '</th>
+                        </tr>
+                        <tr>
+                          <th class="color secondary">S. No.</th>
+                          <th class="color secondary">Tracking No.</th>
+                          <th class="color secondary">Order ID</th>
+                          <th class="color secondary">Destination</th>
+                          <th class="color secondary">Shipping Mode</th>
+                          <th class="color secondary">Arrival Date</th>
+                          <th class="color secondary">Weight (kg)</th>
+                          <th class="color secondary">Weight Charges (PKR)</th>
+                          <th class="color secondary">Fuel Surcharge (PKR)</th>
+                          <th class="color secondary">Faf Charges (PKR)</th>
+                          <th class="color secondary">OSA Charges (PKR)</th>
+                          <th class="color secondary">Adjustment Charges (PKR)</th>
+                          <th class="color secondary">Packaging Charges (PKR)</th>
+                          <th class="color secondary">Total Charges (PKR)</th>
+                          <th class="color secondary">GST (PKR)</th>
+                          <th class="color secondary">Invoice Amount (PKR)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            ';
 
-            $html .= $shipment_details[$origin];
+            foreach($shipment_details[$origin] as $tr) {
+                $html .= $tr;
+            }
 
             $html .= '
                   </tbody>
