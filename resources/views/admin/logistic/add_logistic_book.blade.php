@@ -442,7 +442,7 @@
                                             <div class="row">
                                                 <div class="col-md-12" >
                                                     <div class="label_img">
-                                                        <img id="myimage" src="{{asset('img/codlabel.png')}}" >
+{{--                                                        <img id="myimage" src="{{asset('img/codlabel.png')}}" >--}}
                                                         <hr>
                                                     </div>
                                                 </div>

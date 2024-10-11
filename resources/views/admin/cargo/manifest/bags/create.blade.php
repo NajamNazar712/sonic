@@ -97,7 +97,7 @@
                                                             <label for="Destination">Destination</label>
                                                             <input type="hidden" class="destination_hub_id" name="destination_hub_id">
                                                             <input type="text" name="destination_hub_name" class="destination_hub_name form-control" readonly>
-                                                            
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -563,7 +563,6 @@
                             }
                             else {
                                 $(form).find('button[type=submit]').prop('disabled', false);
-
                                 UnblockPagePermanently();
                             }
                         });
