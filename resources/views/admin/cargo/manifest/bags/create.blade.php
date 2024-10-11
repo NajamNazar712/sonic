@@ -216,7 +216,6 @@
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/refreshTabs.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
@@ -516,7 +515,7 @@
                                     });
                                     $('#cargo_consignment form .transport_mode').prop("disabled", false);
                                     $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
-                                    triggerRefreshInAllTabs();
+                                    
                                     form.submit();
 
                                 }
@@ -557,7 +556,7 @@
                                 $('#cargo_consignment form .transport_mode').prop("disabled", false);
                                 $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
 
-                                triggerRefreshInAllTabs();
+
                                 form.submit();
                             }
                             else {
