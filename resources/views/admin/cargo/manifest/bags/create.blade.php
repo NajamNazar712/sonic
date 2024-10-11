@@ -97,7 +97,7 @@
                                                             <label for="Destination">Destination</label>
                                                             <input type="hidden" class="destination_hub_id" name="destination_hub_id">
                                                             <input type="text" name="destination_hub_name" class="destination_hub_name form-control" readonly>
-                                                            
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -214,6 +214,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/detectActions.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
 
     <script>
@@ -296,6 +297,7 @@
                                 'hub_id': hub_id,
                                 'shipping_mode_id': shipping_mode_id,
                                 'bag_type': bag_type,
+                                'action': window.lastAction,
                                 '_token': '{{ csrf_token() }}'
                             },
                             // timeout: 30000,
@@ -561,7 +563,7 @@
                             }
                         });
                     }
-                    
+
                 }
             });
 
@@ -715,6 +717,7 @@
                         data: {
                             'tracking_number': tracking_number,
                             'pieces_confirm': 1,
+                            'action': window.lastAction,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -786,8 +789,8 @@
                 }else{
                       $("#sackbag_row").css('display','block');
                      $("#sack_bag_no").attr('data-rule-required', true).attr('data-msg-required', 'Sack Bag No is Required');
-                  
-                
+
+
 
                 }
             });

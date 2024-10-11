@@ -324,7 +324,7 @@
                                     <div class="form-group col">
                                         <label for="account_name">Account Number:
                                             <span class="danger">*</span></label>
-                                        <input type="text" class="form-control required" value="" name="account_no" id="account_no" placeholder="Account Number*">
+                                        <input type="text" class="form-control required" value="" name="account_no" id="account_no" placeholder="Account Number*" autocomplete="off">
                                     </div>
                                     <div class="form-group col">
                                         <label for="bank">
@@ -1776,6 +1776,8 @@
                 var quantity = $(this).val();
                 $(this).val(quantity.replace(/[^0-9]/g, ''));
             });
+
+            $('#account_no').attr('autocomplete', 'off');
 
         });
     </script>

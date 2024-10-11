@@ -91,6 +91,7 @@ class VigilanceController extends Controller
     }
 
     public function verification_info(Request $request){
+
         $delivery_note_id = $request->delivery_note_id;
         if($delivery_note_id){
             $delivery_note = DeliveryNote::where('status', 0)->where('id', $delivery_note_id);
@@ -124,7 +125,7 @@ class VigilanceController extends Controller
                     $last_status_date = Carbon::parse($last_status->created_at)->toDateTimeString();
                     $data['status_date'] = $last_status_date;
                     
-                    ShipmentScanningJourneyController::add($shipment->id ,30,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+                    ShipmentScanningJourneyController::add($shipment->id ,30,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
 
                     return response()->json(['status' => 1, 'details' => $data]);
 
@@ -496,6 +497,11 @@ class VigilanceController extends Controller
         $rider_id = $request->rider_id;
         if($rider_id){
             $tracking_number = $request->tracking_number;
+
+            if ($tracking_number == '' || $tracking_number == null){
+                return response()->json(['status' => 0, 'error' => 'Tracking number is required']);
+            }
+
             $shipment = Shipment::where('tracking_number', $tracking_number);
             if($shipment->exists()){
                 $shipment = $shipment->first();
@@ -554,7 +560,7 @@ class VigilanceController extends Controller
                 $last_status_date = Carbon::parse($last_status->created_at)->toDateTimeString();
                 $data['status_date'] = $last_status_date;
 
-                ShipmentScanningJourneyController::add($shipment->id ,30,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+                ShipmentScanningJourneyController::add($shipment->id ,30,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
 
                 return response()->json(['status' => 1, 'details' => $data]);
             }
@@ -743,7 +749,7 @@ class VigilanceController extends Controller
         if ($return_note = $request->get('search_return_note')) {
             $datatable->leftjoin('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
                 ->where('vns.note_id', '=', $return_note)
-                ->where('vigilance_notes.vigilance_note_type_id', 2)
+                ->where('vgigilance_notes.vigilance_note_type_id', 2)
                 ->groupBy('vigilance_notes.id');;
         }
 
