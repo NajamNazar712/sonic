@@ -26,7 +26,8 @@ class JourneyMissingEntrySeeder extends Seeder
     {
         //Only use for the marked as delivered....
         $shipmentId = [
-            22322342808344
+            20217441485604,
+            20217441675415
             // 22320237932466, 22320237923449, 22320237912350, 22320237845635, 22320237842962, 22320237841786, 22320237748724, 22320237711689, 22320237600648
         ];
         if ($shipmentId) {

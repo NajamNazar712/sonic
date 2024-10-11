@@ -19,7 +19,7 @@ class ApiCallZongLog extends Migration
             $table->integer('user_id')->index();
             $table->integer('shipment_id')->index();
             $table->integer('status_code');
-            $table->integer('call_count_logs')->nullable();
+            $table->integer('call_count_initiate')->nullable();
             $table->json('payload')->nullable();
             $table->timestamps();
         });
