@@ -30,7 +30,7 @@ class WebhookLogController extends Controller
         $log->user_id = $user_id;
         $log->shipment_id = $shipment_id;
         $log->status_code = $status_code;
-        $log->call_count_log = $call_count_log;
+        $log->call_count_initiate = $call_count_log;
         $log->payload = $payload;
         $log->save();
     }

@@ -2465,6 +2465,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminReportsController@rvReattemptList')->name('list');
         });
 
+        Route::prefix('bot_rvr')->name('bot_rvr.')->group(function () {
+            Route::get('', 'Admins\AdminRvReportsController@botRvCallRecord')->name('index');
+            Route::post('list', 'Admins\AdminRvReportsController@botRvCallRecordList')->name('list');
+        });
+        
+        Route::prefix('bot_rvr_log')->name('bot_rvr_log.')->group(function () {
+            Route::get('', 'Admins\AdminRvReportsController@botRvCallLogs')->name('index');
+            Route::post('list', 'Admins\AdminRvReportsController@botRvCallLogsList')->name('list');
+        });
+
         Route::prefix('ordinary_discrepancy_report')->name('ordinary_discrepancy_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ordinary_discrepancy_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@ordinary_discrepancy_report_list')->name('list');
@@ -2570,6 +2580,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@store_vendors')->name('store');
             // Route::post('udpate', 'Admins\GlobalSettingsController@delivery_revert_access_update')->name('update');
         });
+
 
         Route::prefix('delivery_revert_access')->name('delivery_revert_access.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@delivery_revert_access_index')->name('index');
@@ -3582,7 +3593,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('launched_re_open')->name('launched_re_open.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@launched_re_open_index')->name('index');
-            Route::get('list', 'Admins\AdminCRMController@launched_re_open_list')->name('list');
+            Route::post('list', 'Admins\AdminCRMController@launched_re_open_list')->name('list');
         });
         Route::prefix('in_process')->name('in_process.')->group(function () {
             Route::get('', 'Admins\AdminCRMController@in_process_index')->name('index');

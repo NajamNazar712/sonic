@@ -158,7 +158,10 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\CalculateFranchiseCommission',
         'App\Console\Commands\DeleteOldDataFromShortUrlTable',
         'App\Console\Commands\RestartSupervisordProcesses',
-        'App\Console\Commands\UpdateArrivalChargesCommand'
+        'App\Console\Commands\UpdateArrivalChargesCommand',
+        '\App\Console\Commands\RetryJobsInRange',
+        '\App\Console\Commands\ForceFullyBotCallInitiate',
+        '\App\Console\Commands\lastMileAppReportCountUpdate'
         ];
 
     /**
@@ -547,7 +550,7 @@ class Kernel extends ConsoleKernel
 		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
 //		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground(); //ye filhal bnd ki hai due to r2 shutdown issue
 		$schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
-		$schedule->command('clean:7DaysQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
+		$schedule->command('clean:7DaysOlderQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
 
         // Commission calculation schedule
         $schedule->command('commission:calculate_commission')->monthlyOn(1, '00:00')->runInBackground();
@@ -559,6 +562,7 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
+//        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
     }
     /**
      * Register the commands for the application.
