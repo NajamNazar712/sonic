@@ -531,7 +531,7 @@ class AdminNsaAccountShipmentController extends Controller
                             else {
                                 $rider_id = $settings->setting_value;
                                 
-                                $admin_id = 11887;
+                                $admin_id = 50;
                             }
 
                             $shipment_data->shipper_status_id = 14;
@@ -1201,7 +1201,7 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     $status_id = 2;
 
-                                    $admin_id = 11887;
+                                    $admin_id = 50;
 
                                     ShipmentsJourneyController::add($carrefour_shipment->id, $status_id, $status_id, NULL, NULL, NULL, $admin_id);
 
