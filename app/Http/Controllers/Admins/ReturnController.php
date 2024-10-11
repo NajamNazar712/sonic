@@ -7840,12 +7840,14 @@ class ReturnController extends Controller
         $unresponsive_shipments_error = false;
 
         foreach ($shipment_ids as $shipment_id) {
-            $shipment = Shipment::find($shipment_id);
+            $shipment = Shipment::find($shipment_id);      
             $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52, 66])->latest()->first();
             if (!$shipment) {
                 return response()->json(['status' => 0]);
             }
-
+            if (!in_array($shipment->shipper_status_id, [12, 52, 66])) {
+                return response()->json(['status' => 0, 'message' => 'Shipment is in different status, Cannot mark it as Another Status!', 'custom_check' => 1]);
+            }
             $exist_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->latest()->first();
             $assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_state_id', 1)->where('assigned_to_type_id', 1)->where('agent_id', Auth::id())->latest()->first();
             $unresponsive_shipments = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_assign_agent_status_id', 6)->where('rv_state_id', 2)->where('unresponsive_count', '>=', 1)->latest()->first();
