@@ -34,7 +34,7 @@
 
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
-                                            <a href="{{ asset('file/Retail International Standard Rates Upload Template.xlsx') }}?v=14_04_2021" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                            <a href="{{ asset('file/Retail International Standard Rates Upload Template.xlsx') }}?v=25_09_2024" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                         </div>
                                     </div>
                                 </div>
@@ -48,14 +48,16 @@
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">Range Up</th>
                                     <th class="border-primary border-darken-1">Range Down</th>
-                                    <th class="border-primary border-darken-1">Zone 1 </th>
+                                    <th class="border-primary border-darken-1">Zone 1A </th>
+                                    <th class="border-primary border-darken-1">Zone 1B </th>
                                     <th class="border-primary border-darken-1">Zone 2 </th>
                                     <th class="border-primary border-darken-1">Zone 3 </th>
                                     <th class="border-primary border-darken-1">Zone 4 </th>
                                     <th class="border-primary border-darken-1">Zone 5 </th>
                                     <th class="border-primary border-darken-1">Zone 6 </th>
                                     <th class="border-primary border-darken-1">Zone 7 </th>
-                                    <th class="border-primary border-darken-1">Zone 8 </th>
+                                    <th class="border-primary border-darken-1">Zone 8A </th>
+                                    <th class="border-primary border-darken-1">Zone 8B </th>
                                     <th class="border-primary border-darken-1">Zone 9 </th>
                                     <th class="border-primary border-darken-1">Zone 10 </th>
                                     <th class="border-primary border-darken-1">Zone 11 </th>
@@ -89,17 +91,21 @@
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">Range Up</th>
                                     <th class="border-primary border-darken-1">Range Down</th>
-                                    <th class="border-primary border-darken-1">Zone 1 </th>
+                                    <th class="border-primary border-darken-1">Zone 1A </th>
+                                    <th class="border-primary border-darken-1">Zone 1B </th>
                                     <th class="border-primary border-darken-1">Zone 2 </th>
                                     <th class="border-primary border-darken-1">Zone 3 </th>
                                     <th class="border-primary border-darken-1">Zone 4 </th>
                                     <th class="border-primary border-darken-1">Zone 5 </th>
                                     <th class="border-primary border-darken-1">Zone 6 </th>
                                     <th class="border-primary border-darken-1">Zone 7 </th>
-                                    <th class="border-primary border-darken-1">Zone 8 </th>
+                                    <th class="border-primary border-darken-1">Zone 8A </th>
+                                    <th class="border-primary border-darken-1">Zone 8B </th>
                                     <th class="border-primary border-darken-1">Zone 9 </th>
                                     <th class="border-primary border-darken-1">Zone 10 </th>
                                     <th class="border-primary border-darken-1">Zone 11 </th>
+
+
 
                                 </tr>
                                 </thead>
@@ -130,17 +136,21 @@
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">Range Up</th>
                                     <th class="border-primary border-darken-1">Range Down</th>
-                                    <th class="border-primary border-darken-1">Zone 1 </th>
+                                    <th class="border-primary border-darken-1">Zone 1A </th>
+                                    <th class="border-primary border-darken-1">Zone 1B </th>
                                     <th class="border-primary border-darken-1">Zone 2 </th>
                                     <th class="border-primary border-darken-1">Zone 3 </th>
                                     <th class="border-primary border-darken-1">Zone 4 </th>
                                     <th class="border-primary border-darken-1">Zone 5 </th>
                                     <th class="border-primary border-darken-1">Zone 6 </th>
                                     <th class="border-primary border-darken-1">Zone 7 </th>
-                                    <th class="border-primary border-darken-1">Zone 8 </th>
+                                    <th class="border-primary border-darken-1">Zone 8A </th>
+                                    <th class="border-primary border-darken-1">Zone 8B </th>
                                     <th class="border-primary border-darken-1">Zone 9 </th>
                                     <th class="border-primary border-darken-1">Zone 10 </th>
                                     <th class="border-primary border-darken-1">Zone 11 </th>
+
+
 
                                 </tr>
                                 </thead>
@@ -330,6 +340,7 @@
                 {data: 'range_up', name: 'range_up', class: 'align-middle range_up'},
                 {data: 'range_down', name: 'range_down', class: 'align-middle range_down'},
                 {data: 'zone_1', name: 'zone_1', class: 'align-middle zone_1'},
+                {data: 'zone_1b', name: 'zone_1b', class: 'align-middle zone_1b'},
                 {data: 'zone_2', name: 'zone_2', class: 'align-middle zone_2'},
                 {data: 'zone_3', name: 'zone_3', class: 'align-middle zone_3'},
                 {data: 'zone_4', name: 'zone_4', class: 'align-middle zone_4'},
@@ -337,9 +348,11 @@
                 {data: 'zone_6', name: 'zone_6', class: 'align-middle zone_6'},
                 {data: 'zone_7', name: 'zone_7', class: 'align-middle zone_7'},
                 {data: 'zone_8', name: 'zone_8', class: 'align-middle zone_8'},
+                {data: 'zone_8b', name: 'zone_8b', class: 'align-middle zone_8b'},
                 {data: 'zone_9', name: 'zone_9', class: 'align-middle zone_9'},
                 {data: 'zone_10', name: 'zone_10', class: 'align-middle zone_10'},
-                {data: 'zone_11', name: 'zone_11', class: 'align-middle zone_11'}
+                {data: 'zone_11', name: 'zone_11', class: 'align-middle zone_11'},
+
             ],
             rowCallback: function(row, data, index) {
 
@@ -410,6 +423,7 @@
                 {data: 'range_up', name: 'range_up', class: 'align-middle range_up'},
                 {data: 'range_down', name: 'range_down', class: 'align-middle range_down'},
                 {data: 'zone_1', name: 'zone_1', class: 'align-middle zone_1'},
+                {data: 'zone_1b', name: 'zone_1b', class: 'align-middle zone_1b'},
                 {data: 'zone_2', name: 'zone_2', class: 'align-middle zone_2'},
                 {data: 'zone_3', name: 'zone_3', class: 'align-middle zone_3'},
                 {data: 'zone_4', name: 'zone_4', class: 'align-middle zone_4'},
@@ -417,9 +431,12 @@
                 {data: 'zone_6', name: 'zone_6', class: 'align-middle zone_6'},
                 {data: 'zone_7', name: 'zone_7', class: 'align-middle zone_7'},
                 {data: 'zone_8', name: 'zone_8', class: 'align-middle zone_8'},
+                {data: 'zone_8b', name: 'zone_8b', class: 'align-middle zone_8b'},
                 {data: 'zone_9', name: 'zone_9', class: 'align-middle zone_9'},
                 {data: 'zone_10', name: 'zone_10', class: 'align-middle zone_10'},
-                {data: 'zone_11', name: 'zone_11', class: 'align-middle zone_11'}
+                {data: 'zone_11', name: 'zone_11', class: 'align-middle zone_11'},
+
+
             ],
             rowCallback: function(row, data, index) {
 
@@ -490,6 +507,7 @@
                 {data: 'range_up', name: 'range_up', class: 'align-middle range_up'},
                 {data: 'range_down', name: 'range_down', class: 'align-middle range_down'},
                 {data: 'zone_1', name: 'zone_1', class: 'align-middle zone_1'},
+                {data: 'zone_1b', name: 'zone_1b', class: 'align-middle zone_1b'},
                 {data: 'zone_2', name: 'zone_2', class: 'align-middle zone_2'},
                 {data: 'zone_3', name: 'zone_3', class: 'align-middle zone_3'},
                 {data: 'zone_4', name: 'zone_4', class: 'align-middle zone_4'},
@@ -497,9 +515,12 @@
                 {data: 'zone_6', name: 'zone_6', class: 'align-middle zone_6'},
                 {data: 'zone_7', name: 'zone_7', class: 'align-middle zone_7'},
                 {data: 'zone_8', name: 'zone_8', class: 'align-middle zone_8'},
+                {data: 'zone_8b', name: 'zone_8b', class: 'align-middle zone_8b'},
                 {data: 'zone_9', name: 'zone_9', class: 'align-middle zone_9'},
                 {data: 'zone_10', name: 'zone_10', class: 'align-middle zone_10'},
-                {data: 'zone_11', name: 'zone_11', class: 'align-middle zone_11'}
+                {data: 'zone_11', name: 'zone_11', class: 'align-middle zone_11'},
+
+
             ],
             rowCallback: function(row, data, index) {
 

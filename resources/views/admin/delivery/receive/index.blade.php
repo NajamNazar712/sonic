@@ -288,10 +288,20 @@
                             head.push('Rider Type');
                             head.push('Rider Category');
                             head.push('Route');
+
                             head.push('No. Of Shipments');
+                            head.push('E-Comm (COD)');
+                            head.push('General Logistics (Retail)');
+                            head.push('General Logistics - E-Comm (Express)');
+
                             head.push('Total Weight');
                             head.push('No. Of Pending Shipments');
+
                             head.push('No. Of Delivered Shipments');
+                            head.push('E-Comm (COD)');
+                            head.push('General Logistics (Retail)');
+                            head.push('General Logistics - E-Comm (Express)');
+
                             head.push('Assigned By');
                             head.push('Assigned Date');
                             head.push('Total COD');
@@ -315,9 +325,19 @@
                                 row.push(values.operation_rider_id);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
+
+                                row.push(values.excel_ecom_cod);
+                                row.push(values.excel_general_retail);
+                                row.push(values.excel_general_ecom_express);
+
                                 row.push(values.total_weight);
                                 row.push(values.shipments_unverified_count);
                                 row.push(values.delivered_shipments);
+
+                                row.push(values.delivered_excel_ecom_cod);
+                                row.push(values.delivered_excel_general_retail);
+                                row.push(values.delivered_excel_general_ecom_express);
+
                                 row.push(values.assignee);
                                 row.push(values.created_at);
                                 row.push(values.amount);
@@ -380,7 +400,7 @@
                     {data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
                     {data: 'shipments_count_link', name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    {data: 'total_weight', name: 'total_weight', class: 'align-middle total_weight text-center'},
+                    {data: 'total_weight', name: 'total_weight', class: 'align-middle total_weight text-center',orderable:false},
                     {data: 'shipments_unverified_link', name: 'shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center', orderable: false, searchable: false},
                     {data: 'delivered_shipments', name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments text-center', orderable: false, searchable: false},
                     {data: 'assignee', name: 'admins.name', class: 'align-middle assignee'},
