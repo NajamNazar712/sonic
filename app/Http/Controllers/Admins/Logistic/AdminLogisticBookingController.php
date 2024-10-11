@@ -499,16 +499,22 @@ class AdminLogisticBookingController extends Controller
                 $services=TraxService::whereIn('shipping_mode_id',$shipping_modes_ids)->get();
                 $trax_stations=TraxStation::select('id','name')->where('status',1)->get();
                 $pickup_addresses=UserShippingInfo::select('id','pickup_address','poc','phone','email')->where('user_id',$logistic_booking->shipper_id)->get();
-                $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id);
+                $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id)->first();
 
                 $booking_img_url=null;
-                if ($booking_img->exists())
+                if ($booking_img)
                 {
-                    $booking_img = $booking_img->first();
-                    $booking_img_url =  Storage::url('logistic_bookings/'. $booking_img->image_name);
+                    $booking_img_url =Storage::disk('public')->url('logistic_bookings/'. $booking_img->image_name);
+                    if (Storage::disk('s4')->exists('logistic_bookings/'. $booking_img->image_name)) {
+                        $booking_img_url =  Storage::disk('s4')->url('logistic_bookings/'. $booking_img->image_name);
+                    } 
+                    
                 }
 
-
+                
+                Log::channel('code_test_log')->error('batch_id = > '.$batch_id.' booking_img_url '.$booking_img->image_name);
+               
+                //return view('admin.logistic.edit_logistic_book', compact('imageUrl'));
                 return view('admin.logistic.edit_logistic_book')
                     ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shipper'=>$shipper,'products'=>$products,'services'=>$services,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'riders'=>$riders]);
             } catch (\Exception $th){

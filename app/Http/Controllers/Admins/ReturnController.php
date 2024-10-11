@@ -2627,7 +2627,20 @@ class ReturnController extends Controller
                 return isset($delivery_area) ? $delivery_area : '-';
             })
             ->addColumn('action', function ($shipment) {
-                if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
+                $cargo_bag = CargoManifestBagShipments::where('shipment_id' , $shipment->shipment_id);
+                if($cargo_bag->exists()) {
+                    $cargo_bag = $cargo_bag->latest()->first();
+                    $bag_number = $cargo_bag->cargo_manifest_bag_id;
+                    $return_bag = CargoManifestBag::where('id', $bag_number)->where('type', 2);
+                    if($return_bag->exists()) {
+                       $return_flag_check = true;
+                    } else {
+                        $return_flag_check = false;
+                    }
+                } else {
+                    $return_flag_check = false;
+                }
+                if (($shipment->shipper_status_id == 20 &&  $return_flag_check == false) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
                     $flag = true;
                     $consolidation = ConsolidationShipments::where('shipment_id', $shipment->shipment_id)->first();
                     if ($consolidation) {
@@ -3288,6 +3301,24 @@ class ReturnController extends Controller
                 } else if ($deliveries->status == 3) {
                     return 'Updated';
                 }
+            })
+            ->addColumn('excel_ecom_cod', function($result){
+                $count = 0;
+                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], 2, 5, null,'return_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_retail', function($result){
+                $count = 0;
+                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], 1, 12, null,'return_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $count_general = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], 1, 2, null,'return_note_id');
+                $count_ecomm = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], 2, 7, null,'return_note_id');
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
             })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.return.receive.status', ['id' => $result->return_note]);
@@ -5078,7 +5109,13 @@ class ReturnController extends Controller
                 if ($deliveries->delivered_to_shipper_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_to_shipper_count . '</button>';
                 } else {
-
+                    return '-';
+                }
+            })
+            ->addColumn('excel_delivered_to_shipper_count', function ($deliveries) {
+                if ($deliveries->delivered_to_shipper_count != 0) {
+                    return $deliveries->delivered_to_shipper_count;
+                } else {
                     return '-';
                 }
             })
@@ -5106,6 +5143,52 @@ class ReturnController extends Controller
                 } else if ($keyword == 3) {
                     $query->where('return_notes.status', 3);
                 }
+            })
+            ->addColumn('excel_ecom_cod', function($result){
+                $count = 0;
+                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], 2, 5, null,'return_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_retail', function($result){
+                $count = 0;
+                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], 1, 12, null, 'return_note_id');
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('excel_general_ecom_express', function($result){
+                $count_general = 0;
+                $count_ecomm = 0;
+                $count_general = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], 1, 2, null,'return_note_id');
+                $count_ecomm = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], 2, 7, null,'return_note_id');
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
+            })
+
+            ->addColumn('delivered_excel_ecom_cod', function($result){
+                $delivered_shipments = $this->return_delivered_shipment($result->return_note);
+                $count = 0;
+                if (!empty($delivered_shipments)) {
+                    $count = DeliveryController::get_segment_type('return_note_shipments', $delivered_shipments, 2, 5, 'returned', 'return_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_retail', function($result){
+                $delivered_shipments = $this->return_delivered_shipment($result->return_note);
+                $count = 0;
+                if (!empty($delivered_shipments)) {
+                    $count = DeliveryController::get_segment_type('return_note_shipments', $delivered_shipments, 1, 12, 'returned', 'return_note_id');
+                }
+                return $count > 0 ? $count : '-';
+            })
+            ->addColumn('delivered_excel_general_ecom_express', function($result){
+                $delivered_shipments = $this->return_delivered_shipment($result->return_note);
+                $count_general = 0;
+                $count_ecomm = 0;
+                if (!empty($delivered_shipments)) {
+                    $count_general = DeliveryController::get_segment_type('return_note_shipments', $delivered_shipments, 1, 2, 'returned', 'return_note_id');
+                    $count_ecomm = DeliveryController::get_segment_type('return_note_shipments', $delivered_shipments, 2, 7, 'returned', 'return_note_id');
+                }
+                $total_count = $count_general + $count_ecomm;
+                return $total_count > 0 ? $total_count : '-';
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -7773,7 +7856,6 @@ class ReturnController extends Controller
             $completed_shipment_first_unresponsive = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 4)->where('unresponsive_count', 0)->latest()->first();
             $old_completed_shipments = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_assign_agent_status_id', '!=', 6)->whereIn('rv_state_id', [2, 4])->latest()->first();
 
-
             if ($exist_shipment) {
                 if ($unresponsive_shipments) {
                     $unresponsive_invalid_shipments[] = $shipment_id;
@@ -7945,6 +8027,25 @@ class ReturnController extends Controller
                     if ($new_call_history) {
                         $old_completed_shipments->update(['rv_state_id' => 2]);
                         $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $old_completed_shipments, $shipments_journey);
+                        $successfull_updated_shipments[] = $shipment_id;
+                    } else {
+                        $unresponsive_invalid_shipments[] = $shipment_id;
+                    }
+                }else{ 
+                    
+                    $exist_shipment->increment('call_count');
+                    $exist_shipment->increment('unresponsive_count');
+                    $exist_shipment->updated_by_id = Auth::id();
+                    $exist_shipment->updated_type_id = 1;
+                    $exist_shipment->rv_state_id = 1; // Force fully update call history then rv_state_id set is 1
+                    $exist_shipment->save();
+                    //adding new row in rv_agent_call_histories and updating unresposive count
+                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
+
+                    $new_call_history = $this->unresponsive($request);
+                    if ($new_call_history) {
+                        $exist_shipment->update(['rv_state_id' => 2]);
+                        $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $exist_shipment, $shipments_journey);
                         $successfull_updated_shipments[] = $shipment_id;
                     } else {
                         $unresponsive_invalid_shipments[] = $shipment_id;
@@ -8513,5 +8614,14 @@ class ReturnController extends Controller
         }
 
         return $datatable->make(true);
+    }
+
+    public static function return_delivered_shipment($return_note){
+        return DB::table('shipments_journey')
+            ->whereIn('shipper_status_id', [25, 31, 38])
+            ->where('reference_1_id', $return_note)
+            ->where('verification', 1)
+            ->pluck('shipment_id')
+            ->toArray();
     }
 }
