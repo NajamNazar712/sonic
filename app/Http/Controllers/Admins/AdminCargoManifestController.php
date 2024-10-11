@@ -1181,6 +1181,30 @@ class AdminCargoManifestController extends Controller
 
         $shipment = Shipment::find(current($request->shipment_ids));
 
+        $cargo_manifest_already_shipments_error = CargoManifestBagShipments::whereIn('shipment_id', $request->shipment_ids)
+            ->whereIn('id', function ($query) use ($request) {
+                $query->selectRaw('MAX(id)')
+                    ->from('cargo_manifest_bag_shipments')
+                    ->whereIn('shipment_id', $request->shipment_ids)
+                    ->groupBy('shipment_id');
+            })
+            ->whereHas('bag', function ($query) {
+                $query->whereIn('status_id', [1, 2]);
+            })
+            ->pluck('shipment_id')
+            ->toArray();
+
+        if (!empty($cargo_manifest_already_shipments_error)) {
+            $tracking_numbers = Shipment::whereIn('id', $cargo_manifest_already_shipments_error)
+                ->pluck('tracking_number')
+                ->toArray();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'These Shipments: ' . implode(', ', $tracking_numbers) . ' are already in other bags'
+            ]);
+        }
+
         $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
         if (!$dispute_check) {
             return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
