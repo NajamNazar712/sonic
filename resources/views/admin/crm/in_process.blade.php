@@ -473,6 +473,30 @@
                         }
                     },
                     @endif
+
+                    // bulk resolve button
+                    @if (session('role_id') == 1 || in_array(787, session('permissions')))
+                        {
+                            text: 'Resolve',
+                            className: 'btn btn-primary bulk_resolve',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                $.ajax({
+                                    url: '{!! route('admin.crm.bulk_resolve') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        'crm_request_ids': selected_rows,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                })
+                                .done(function (data) {
+                                    alert('okay');
+                                });
+                            }
+                        },
+                    @endif
+
+
                     @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
                     {
                         text: 'In-Valid',
@@ -653,6 +677,7 @@
                                     table.button('.assign').enable();
                                     table.button('.close_request').enable();
                                     table.button('.in_valid').enable();
+                                    table.button('.bulk_resolve').enable();
                                     table.button('.tag').enable();
                                     table.button('.un_tag').enable();
                                     table.button('.bulk_external_comment').enable();
@@ -686,6 +711,7 @@
                                         table.button('.assign').disable();
                                         table.button('.close_request').disable();
                                         table.button('.in_valid').disable();
+                                        table.button('.bulk_resolve').disable();
                                         table.button('.tag').disable();
                                         table.button('.un_tag').disable();
                                         table.button('.bulk_external_comment').enable();
@@ -1059,6 +1085,7 @@
                             table.button('.assign').disable();
                             table.button('.valid').disable();
                             table.button('.in_valid').disable();
+                            table.button('.bulk_resolve').disable();
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
@@ -1111,6 +1138,7 @@
                             table.button('.assign').disable();
                             table.button('.valid').disable();
                             table.button('.in_valid').disable();
+                            table.button('.bulk_resolve').disable();
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
@@ -1261,6 +1289,7 @@
                     table.button('.assign').enable();
                     table.button('.close_request').enable();
                     table.button('.in_valid').enable();
+                    table.button('.bulk_resolve').enable();
                     table.button('.tag').enable();
                     table.button('.un_tag').enable();
                     table.button('.bulk_external_comment').enable();
@@ -1270,6 +1299,7 @@
                     table.button('.assign').disable();
                     table.button('.close_request').disable();
                     table.button('.in_valid').disable();
+                    table.button('.bulk_resolve').disable();
                     table.button('.tag').disable();
                     table.button('.un_tag').disable();
                     table.button('.bulk_external_comment').disable();
@@ -1668,6 +1698,26 @@
                 table.draw(true);
                 $('#star_shippers_filter').val(0);
             });
+
+
+            $('#datatable').on('click', '.select-checkbox', function () {
+                var $row = $(this).closest('tr');
+                var crmRequestId = $row.attr('id');
+                console.log(crmRequestId);
+                
+                $.ajax({
+                    type: "POST",
+                    url: "route('admin.crm.check_agent')",
+                    data: {
+                        crm_request_id: crmRequestId,
+                        _token: '{{ csrf_token() }}'
+                        },
+                    success: function (response) {
+                        
+                    }
+                });
+            });
+
         });
     </script>
 @endsection

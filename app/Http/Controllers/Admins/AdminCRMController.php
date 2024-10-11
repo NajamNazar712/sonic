@@ -913,8 +913,6 @@ class AdminCRMController extends Controller
     }
 
     public function request_details(Request $request,$id){
-
-
         $crm_request = CrmRequest::find($id);
         if($crm_request){
             $shipment_status = null;
@@ -932,10 +930,6 @@ class AdminCRMController extends Controller
                 }
                 $shipment_status_journey = ShipmentsJourney::where('shipment_id', $crm_request->shipment_id)->latest('id')->first();
                 $shipment_status_date = $shipment_status_journey->created_at;
-
-
-
-
                 $product_insurance = ShipmentItem::where('shipment_id',$crm_request->shipment_id);
                 if($product_insurance->exists()){
                     $product = $product_insurance->first();
@@ -1148,10 +1142,6 @@ class AdminCRMController extends Controller
                 $special_request_percentage_exceed = true;
                 $special_request = [];
             }
-
-
-
-            // dd($special_request);
 
             $ratings = CrmRequestRating::all();
             $crm_sms_history = CrmSmsLog::where('crm_request_id',$crm_request->id)->get();
@@ -3990,6 +3980,9 @@ class AdminCRMController extends Controller
     public function valid(Request $request)
     {
         $crm_request = CrmRequest::where('id', $request->req_id)->first();
+        dd(
+            $crm_request
+        );
         if ($crm_request['agent_id'] != null) {
             if ($request->prev_status == 1 || $request->prev_status == 5) {
                 if ($crm_request['status_id'] != 2) {
@@ -4153,15 +4146,15 @@ class AdminCRMController extends Controller
 
                     if($crm_request->case_nature_id == 4){
                         $comment = 'Dear Customer,
-Please be noted that your claim has been considered and after due investigation it has been forwarded to concerned department for further adjustments. For any further clarification please approach us.
-                                    
-UAN# 021-111-11-8729
-WhatsApp # 0348-111-8729
-info@trax.pk
-Live Chat Messenger
-                                    
-Regards,
-TRAX-Customer Experience';
+                        Please be noted that your claim has been considered and after due investigation it has been forwarded to concerned department for further adjustments. For any further clarification please approach us.
+                                                            
+                        UAN# 021-111-11-8729
+                        WhatsApp # 0348-111-8729
+                        info@trax.pk
+                        Live Chat Messenger
+                                                            
+                        Regards,
+                        TRAX-Customer Experience';
 
                         CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
                     }
@@ -6729,6 +6722,7 @@ TRAX-Customer Experience';
     }
 
     public function bulk_comment_for_shipper(Request $request){
+        dd($request->all());
         $comment_type= $request->comment_type;
         $comment = $request->comment;
         $crm_request_ids = $request->crm_request_ids;
@@ -6914,7 +6908,6 @@ TRAX-Customer Experience';
      }*/
 
     public function close_reason(Request $request){
-
         if($request->has('crm_request_id')) {
             $shippers = array();
             $crm_request_ids = $request->crm_request_ids;
@@ -7022,5 +7015,22 @@ TRAX-Customer Experience';
         }else{
             return redirect()->back()->with('success', 'Request(s) successfully added');
         }
+    }
+
+    // check agent
+    public function check_agent(Request $request)
+    {
+        dd($request->all());
+    }
+
+    // bulk resolving
+    public function bulk_resolve(Request $request)
+    {
+        $crm_requests = CrmRequest::whereIn('id', $request->crm_request_ids)->get();
+        foreach($crm_requests as $crm_request)
+        {
+
+        }
+        dd('out');
     }
 }

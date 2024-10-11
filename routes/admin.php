@@ -3661,6 +3661,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('card_data', 'Admins\CRMDashboardController@card_data')->name('card_data');
         });
 
+        // bulk resolve
+        Route::post('bulk_resolve', 'Admins\AdminCRMController@bulk_resolve')->name('bulk_resolve');
+
+        // check for agent on click
+        Route::post('check_agent', 'Admins\AdminCRMController@check_agent')->name('check_agent');
+
     });
 
     Route::prefix('intercept')->name('intercept.')->group(function () {
