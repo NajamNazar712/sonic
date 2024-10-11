@@ -30,7 +30,6 @@ class AdminResourcesController extends Controller
         if(true){
             $city_list_array = array();
             $city_list_array['header'] = ['S. No.','Origin','ID', 'Destination', 'Class', 'Zone','Zone Classification'];
-            $city_list_array['header'] = ['S. No.','Origin','ID', 'Destination', 'Class', 'Zone','Zone Classification'];
             $serial = 1;
             $hubs = City::where('id',auth()->user()->default_hub_id)->get();
             foreach ($hubs as $key=>$hub_city) {
@@ -76,7 +75,6 @@ class AdminResourcesController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getDefaultColumnDimension()->setWidth(20);
             $sheet->fromArray($city_list_array,NULL,'A2',true);
-            $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
             $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
             $sheet->setTitle('Network List');
             $spreadsheet->createSheet();
