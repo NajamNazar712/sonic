@@ -278,7 +278,8 @@ class AdminNsaAccountShipmentController extends Controller
                                         $admin_id = Auth::id();
                                     }
                                     else {
-                                        $admin_id = 50;
+                                        $admin_id = 75;
+                                        // $admin_id = 50;
                                     }
 
                                     ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, $admin_id);
@@ -473,7 +474,8 @@ class AdminNsaAccountShipmentController extends Controller
                                 // 03250 ----> new rider id for express shippers
                                 // $rider_id = $settings->setting_value;
                                 $rider_id = 3250;
-                                $admin_id = 50;
+                                // $admin_id = 50;
+                                $admin_id = 75;
                             }
 
                             if (!in_array($nsa_shipment->id, $valid_shipments)) {
@@ -528,7 +530,8 @@ class AdminNsaAccountShipmentController extends Controller
                             }
                             else {
                                 $rider_id = $settings->setting_value;
-                                $admin_id = 50;
+                                // $admin_id = 50;
+                                $admin_id = 75;
                             }
 
                             $shipment_data->shipper_status_id = 14;
@@ -1198,7 +1201,8 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     $status_id = 2;
 
-                                    $admin_id = 50;
+                                    // $admin_id = 50;
+                                    $admin_id = 75;
 
                                     ShipmentsJourneyController::add($carrefour_shipment->id, $status_id, $status_id, NULL, NULL, NULL, $admin_id);
 
