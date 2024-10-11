@@ -307,10 +307,20 @@
                             head.push('HBL Konnect Amount %');
                             head.push('Cash Amount');
                             head.push('Hub');
+
                             head.push('Total Out For Delivery');
+                            head.push('E-Comm (COD)');
+                            head.push('General Logistics (Retail)');
+                            head.push('General Logistics - E-Comm (Express)');
+
                             head.push('Pending');
                             head.push('Pending %');
+
                             head.push('Delivered');
+                            head.push('E-Comm (COD)');
+                            head.push('General Logistics (Retail)');
+                            head.push('General Logistics - E-Comm (Express)');
+
                             head.push('Delivered %');
                             head.push('Undelivered');
                             head.push('Undelivered %');
@@ -335,10 +345,20 @@
                                 row.push(values.hbl_konnect_amount_percent);
                                 row.push(cashAmount);
                                 row.push(values.hub);
+
                                 row.push(values.shipments_count);
+                                row.push(values.excel_ecom_cod);
+                                row.push(values.excel_general_retail);
+                                row.push(values.excel_general_ecom_express);
+
                                 row.push(values.pending_shipments);
                                 row.push(values.pending_shipments_per);
+
                                 row.push(values.delivered_shipments);
+                                row.push(values.delivered_excel_ecom_cod);
+                                row.push(values.delivered_excel_general_retail);
+                                row.push(values.delivered_excel_general_ecom_express);
+
                                 row.push(values.delivered_shipments_per);
                                 row.push(values.undelivered_shipments);
                                 row.push(values.undelivered_shipments_per);
@@ -367,6 +387,14 @@
                             footer.push('');
                             footer.push('');
                             footer.push('');
+
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+
                             footer.push('');
                             footer.push('');
                             footer.push('');
@@ -389,7 +417,7 @@
                 }
             } );
 
-            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
+            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td> <td></td><td></td><td></td><td></td><td></td><td></td><td></td> <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',

@@ -744,7 +744,12 @@
                                             <a class="menu-item" href="{{ route('admin.settings.alist_shippers.index') }}">Specified Shipper</a>
                                         </li>
                                     @endif
-
+                                    
+                                    @if (session('role_id') == 1 || in_array(1011, session('permissions')))
+                                        <li>
+                                            <a class="menu-item" href="{{ route('admin.reports.bot_rvr_log.index') }}">Bot RVR Log Call</a>
+                                        </li>
+                                    @endif
 
                                 </ul>
                             </li>
@@ -1932,6 +1937,13 @@
                             <li>
                                 <a class="menu-item" href="{{ route('admin.reports.rvr_reattempt.index') }}">
                                     Reattempt Analysis Report
+                                </a>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1)
+                            <li>
+                                <a class="menu-item" href="{{ route('admin.reports.bot_rvr.index') }}">
+                                    Bot Report
                                 </a>
                             </li>
                         @endif
