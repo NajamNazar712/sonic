@@ -127,7 +127,7 @@ class AdminRvReportsController extends Controller
 
                     return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
                 }else{
-                    return $rv_call_logs['response'];
+                    // return $rv_call_logs['response'];
                 }
                 return '';
             })
@@ -170,7 +170,7 @@ class AdminRvReportsController extends Controller
 
                     return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
                 }elseif($rv_call_logs['message'] && request()->get('excel')){
-                    return $rv_call_logs['message'];
+                    // return $rv_call_logs['message'];
                 }else{
                     if($rv_call_logs['shipmentNo1']){
                         return 'Data Saved SuccessFully!';
