@@ -172,7 +172,9 @@ class AdminRvReportsController extends Controller
                 }elseif($rv_call_logs['message'] && request()->get('excel')){
                     return $rv_call_logs['message'];
                 }else{
-                    return 'Data Saved SuccessFully!';
+                    if($rv_call_logs['shipmentNo1']){
+                        return 'Data Saved SuccessFully!';
+                    }
                 }
             });
             if ($request->get('search_date_from') && $request->get('search_date_to') && !$request->get('search_tracking_no')) {
