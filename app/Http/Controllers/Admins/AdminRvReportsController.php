@@ -95,7 +95,7 @@ class AdminRvReportsController extends Controller
             // })    
             ->leftJoin('api_zong_logs as azl', function ($join) {
                 $join->on('azl.shipment_id', '=', 's.id')
-                    ->whereRaw('DATE_FORMAT(azl.call_date_time, "%Y-%m-%d %H") = DATE_FORMAT(api_call_logs.created_at, "%Y-%m-%d %H")');
+                    ->whereRaw('DATE_FORMAT(azl.call_date_time, "%Y-%m-%d") = DATE_FORMAT(api_call_logs.created_at, "%Y-%m-%d")');
             })
             ->select('s.tracking_number as tracking_number',
             'api_call_logs.shipment_id as shipmentNo',
