@@ -3106,10 +3106,10 @@ class AdminCargoManifestController extends Controller
         foreach ($success_cargo_ids as $cargo_id) {
             $cargo_array = array($cargo_id);
             $cargo_array = implode(',', $cargo_array);
-            $path = self::print($cargo_array, 1);
-            dd($path);
-            $manifest = CargoManifest::find($cargo_id);
-            NotificationsController::send(148, $manifest->destination_hub_id, url('/') . '/' . 'reports/cargo_manifest_' . str_pad($manifest->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+            //$path = self::print($cargo_array, 1);
+            //dd($path);
+            //$manifest = CargoManifest::find($cargo_id);
+            //NotificationsController::send(148, $manifest->destination_hub_id, url('/') . '/' . 'reports/cargo_manifest_' . str_pad($manifest->id, 6, '0', STR_PAD_LEFT) . '.pdf');
         }
 
         if ($request->filled('submit_and_print_form')) {
