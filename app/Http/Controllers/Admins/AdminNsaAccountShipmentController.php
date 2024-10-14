@@ -963,7 +963,7 @@ class AdminNsaAccountShipmentController extends Controller
                         $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
 
 
-                        $rider_id = $settings->setting_value;
+                        // $rider_id = $settings->setting_value;
                         $rider_id = 3031;
 
 
