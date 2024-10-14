@@ -3129,12 +3129,14 @@ class AdminCargoManifestController extends Controller
     {
         $minimalHtml = '<h1>Hello World</h1>';
         $pdfPath = public_path('reports/anas' . rand(1, 100) . '.pdf');
+        $minimalHtml = '<h1>Hello World</h1>';
+        $pdfContent = FacadesSnappyPdf::loadHTML($minimalHtml)->output();
         FacadesSnappyPdf::loadHTML($minimalHtml)->save($pdfPath);
 
-        return response()->file($pdfPath, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . basename($pdfPath) . '"',
-        ]);
+        return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="report.pdf"',
+            ]);
         // Return a response to open the PDF in a new tab
        
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
