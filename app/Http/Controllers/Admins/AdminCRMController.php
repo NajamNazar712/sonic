@@ -3980,9 +3980,6 @@ class AdminCRMController extends Controller
     public function valid(Request $request)
     {
         $crm_request = CrmRequest::where('id', $request->req_id)->first();
-        dd(
-            $crm_request
-        );
         if ($crm_request['agent_id'] != null) {
             if ($request->prev_status == 1 || $request->prev_status == 5) {
                 if ($crm_request['status_id'] != 2) {
@@ -7020,7 +7017,11 @@ class AdminCRMController extends Controller
     // check agent
     public function check_agent(Request $request)
     {
-        dd($request->all());
+        $crm_request_id = $request->crm_request_id;
+        $crm_request = CrmRequest::where('id', $crm_request_id)->first();
+        if($crm_request->agent_id == null || $crm_request->agent_id == ''){
+            return ['status' => 1, 'error' => 'Agent is not assigned yet'];
+        }
     }
 
     // bulk resolving
@@ -7029,7 +7030,7 @@ class AdminCRMController extends Controller
         $crm_requests = CrmRequest::whereIn('id', $request->crm_request_ids)->get();
         foreach($crm_requests as $crm_request)
         {
-
+            dd('in');
         }
         dd('out');
     }

@@ -310,7 +310,6 @@
         .selectize-control {
             width: 300px !important;
         }
-
         .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
             background-color: #64a0d2 !important;
             border-color: #5587b4 !important;
@@ -756,7 +755,22 @@
                 rowId: 'id',
                 order: [[32, 'desc']],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+
+
+                    { 
+                        data: 'id', 
+                        orderable: false, 
+                        searchable: false, 
+                        class: '', 
+                        targets: 0, 
+                        render: function (data, type, row) {
+                            return '<input type="checkbox" class="text-center align-middle select p-1 select-checkbox" data-id="' + row.id + '">';
+                        }
+                    },
+
+
+
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle id_padded_link'},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'}, // Tracking No.
@@ -802,7 +816,8 @@
 
                 ],
                 rowCallback: function(row, data, index) {
-                    $('td:eq(0)', row).addClass('select-checkbox');
+                    // $('td:eq(0)', row).addClass('select-checkbox');  
+                    $('td:eq(0)', row).addClass('text-center align-middle select p-1 column_checkbox');
 
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
@@ -1699,24 +1714,69 @@
                 $('#star_shippers_filter').val(0);
             });
 
+            // Check agent assigned or not
+            $('#datatable').on('click', '.column_checkbox', function(e) {
+                e.preventDefault();
+                var $td = $(this);
+                var $checkbox = $td.find('.select-checkbox');
+                var crmRequestId = $td.closest('tr').attr('id');
+                var isChecked = !$checkbox.prop('checked'); // Determine the new desired state
 
-            $('#datatable').on('click', '.select-checkbox', function () {
-                var $row = $(this).closest('tr');
-                var crmRequestId = $row.attr('id');
-                console.log(crmRequestId);
-                
                 $.ajax({
                     type: "POST",
-                    url: "route('admin.crm.check_agent')",
+                    url: "{{ route('admin.crm.check_agent') }}",
                     data: {
                         crm_request_id: crmRequestId,
                         _token: '{{ csrf_token() }}'
-                        },
-                    success: function (response) {
-                        
+                    },
+                    success: function(response) {
+                        if (response.status === 1 && response.error) {
+                            toastr.error(response.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            // If there's an error, do not change the checkbox state
+                        } else {
+                            $checkbox.prop('checked', isChecked); // Update checkbox state if AJAX is successful
+                        }
+                    },
+                    error: function() {
+                        // Do not change checkbox state on error
                     }
                 });
             });
+
+            // $('#datatable').on('click', '.select-checkbox', function(e) {
+            //     e.stopPropagation();
+            //     var $checkbox = $(this);
+            //     var crmRequestId = $checkbox.closest('tr').attr('id');
+            //     var isChecked = !$checkbox.prop('checked'); // Determine the new desired state
+
+            //     $.ajax({
+            //         type: "POST",
+            //         url: "{{ route('admin.crm.check_agent') }}",
+            //         data: {
+            //             crm_request_id: crmRequestId,
+            //             _token: '{{ csrf_token() }}'
+            //         },
+            //         success: function(response) {
+            //             if (response.status === 1 && response.error) {
+            //                 toastr.error(response.error, 'Error!', {
+            //                     positionClass: 'toast-top-center',
+            //                     containerId: 'toast-top-center'
+            //                 });
+            //                 // If there's an error, do not change the checkbox state
+            //             } else {
+            //                 $checkbox.prop('checked', isChecked); // Update checkbox state if AJAX is successful
+            //             }
+            //         },
+            //         error: function() {
+            //             // Do not change checkbox state on error
+            //         }
+            //     });
+            // });
+
+
 
         });
     </script>
