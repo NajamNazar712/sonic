@@ -602,6 +602,7 @@ label.error {
                         });
                     }
 
+                    console.log(trax_index)
                     if (trax_index == -1 || trax_index === undefined || change.length === 0 ) {
                         $('.remove_row.' + rows_count).attr('data-trax_id', inputValue);
                         $.ajax({

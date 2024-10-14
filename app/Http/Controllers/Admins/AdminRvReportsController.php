@@ -1,8 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
+
+use ApiCallZongLog;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Webhook\ApiCallLog;
+use App\Http\Models\Webhook\ApiZongLog;
 use App\Http\Traits\RvTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -71,5 +75,116 @@ class AdminRvReportsController extends Controller
             }
 
             return $datatable->make(true);
+    }
+
+    public function botRvCallLogs()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 810);
+
+        return view('admin.reports.bot_rvr_log.index');
+    }
+    public function botRvCallLogsList(Request $request)
+    {
+
+        $rv_call_logs = ApiCallLog::join('shipments as s','s.id', 'api_call_logs.shipment_id')
+            // ->leftJoin('api_zong_logs as azl', function ($join) use ($request) {
+            //     $join->on('azl.call_date_time', '=', 'api_call_logs.created_at');
+            //     $join->on('azl.shipment_id', '=', 'api_call_logs.shipment_id');
+            //     // $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
+            //     // $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
+            // })    
+            ->leftJoin('api_zong_logs as azl', function ($join) {
+                $join->on('azl.shipment_id', '=', 's.id')
+                    ->whereRaw('DATE_FORMAT(azl.call_date_time, "%Y-%m-%d %H") = DATE_FORMAT(api_call_logs.created_at, "%Y-%m-%d %H")');
+            })
+            ->select('s.tracking_number as tracking_number',
+            'api_call_logs.shipment_id as shipmentNo',
+            'api_call_logs.call_count_initiate  as call_count',
+            'api_call_logs.payload  as response',
+            'api_call_logs.created_at as created_at',
+            'azl.shipment_id as shipmentNo1',
+            'azl.call_date_time as call_start_date',
+            'azl.api_request as api_request',
+            'azl.error as message',
+            'azl.created_at as date_time')
+            ->groupby('api_call_logs.call_count_initiate','api_call_logs.id');
+
+              $datatable = Datatables::of($rv_call_logs)
+            ->editColumn('tracking_number', function ($rv_call_logs) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$rv_call_logs->tracking_number' class='tracking' target='_blank'>$rv_call_logs->tracking_number</a></u>";
+            })
+            ->editColumn('response', function ($rv_call_logs) {
+                if ($rv_call_logs['response'] && !request()->get('excel')) {
+                    // Decode the JSON response
+                    $responseData = json_decode($rv_call_logs['response'], true);
+
+                    // Encode and escape the JSON for safe HTML output
+                    $tooltipData = htmlspecialchars(json_encode($responseData, JSON_PRETTY_PRINT));
+
+                    // Use a brief text for display (optional)
+                    $displayText = 'Hover to view details';
+
+                    return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
+                }else{
+                    return $rv_call_logs['response'];
+                }
+                return '';
+            })
+            ->addColumn('call_message', function ($rv_call_logs) {
+                if ($rv_call_logs['response']) {
+                    return json_decode($rv_call_logs['response'])->message;
+                }
+            })
+            ->editColumn('api_request', function ($rv_call_logs) {
+                if ($rv_call_logs['api_request']&& !request()->get('excel')) {
+                    // Decode the JSON response
+                    $responseData = json_decode($rv_call_logs['api_request'], true);
+
+                    // Encode and escape the JSON for safe HTML output
+                    $tooltipData = htmlspecialchars(json_encode($responseData, JSON_PRETTY_PRINT));
+
+                    // Use a brief text for display (optional)
+                    $displayText = 'Hover to view details';
+
+                    return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
+                }elseif(request()->get('excel')){
+                    return $rv_call_logs['api_request'];
+                }
+                return '';
+            })
+            ->addColumn('call_end_date', function ($rv_call_logs) {
+                if ($rv_call_logs['api_request']) {
+                    return json_decode($rv_call_logs['api_request'])->end_date;
+                }
+            })
+            ->addColumn('input', function ($rv_call_logs) {
+                if ($rv_call_logs['api_request']) {
+                    return json_decode($rv_call_logs['api_request'])->input;
+                }
+            })
+            ->editColumn('message', function ($rv_call_logs) {
+                if ($rv_call_logs['message'] && !request()->get('excel')) {
+                    $tooltipData = htmlspecialchars($rv_call_logs['message'],JSON_PRETTY_PRINT);
+                    $displayText = 'Hover to view details';
+
+                    return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
+                }elseif($rv_call_logs['message'] && request()->get('excel')){
+                    return $rv_call_logs['message'];
+                }else{
+                    return 'Data Saved SuccessFully!';
+                }
+            });
+            if ($request->get('search_date_from') && $request->get('search_date_to') && !$request->get('search_tracking_no')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $rv_call_logs->where([['api_call_logs.created_at', '>=', $from], ['api_call_logs.created_at', '<=', $to]]);
+            }
+            
+        if($request->get('search_tracking_no')){
+            $rv_call_logs->where('s.tracking_number', $request->get('search_tracking_no'));
+        }   
+
+        return $datatable->make(true);
     }
 }
