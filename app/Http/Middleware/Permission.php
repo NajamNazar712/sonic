@@ -1628,7 +1628,8 @@ class Permission
 
             'crm.bulk_claim.index' => 19,
 
-            'admin.reports.bot_rvr.index' => 1010
+            'admin.reports.bot_rvr.index' => 1010,
+            'admin.reports.bot_rvr_log.index' => 1011
 
         ]
     ];
@@ -1642,6 +1643,7 @@ class Permission
      */
     public function handle($request, Closure $next)
     {
+       
         if (Auth::guard('admin')->check()) {
             $action = str_replace('admin.', '', $request->route()->getName());
             if (session('department_id') == 7) {
@@ -1660,7 +1662,7 @@ class Permission
             } else {
                 session(['sale_users_bypass' => []]);
             }
-
+            
             if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions')) || (substr($action, 0, 4) == 'crm.' && session('role_id') == 6)) {
                 return $next($request);
             } else {
