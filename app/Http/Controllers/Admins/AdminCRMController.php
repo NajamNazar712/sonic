@@ -7014,19 +7014,53 @@ class AdminCRMController extends Controller
         }
     }
 
-    // check agent
-    public function check_agent(Request $request)
-    {
-        $crm_request_id = $request->crm_request_id;
-        $crm_request = CrmRequest::where('id', $crm_request_id)->first();
-        if($crm_request->agent_id == null || $crm_request->agent_id == ''){
-            return ['status' => 1, 'error' => 'Agent is not assigned yet'];
-        }
-    }
-
     // bulk resolving
     public function bulk_resolve(Request $request)
     {
         $crm_requests = CrmRequest::whereIn('id', $request->crm_request_ids)->get();
+        foreach($crm_requests as $crm_request){
+            if ($crm_request->agent_id == null || $crm_request->agent_id == '' ){
+                return ['status' => 1, 'error' => 'Agent is not assigned yet to CRM request number ' . $crm_request->id];
+            } else {
+                $prev_status = $crm_request->status_id;
+                if ($prev_status == 1 || $prev_status == 5){
+                    if ($prev_status != 2){
+                        CrmRequest::where('id', $crm_request->id)->update([
+                            'status_id' => 2,
+                        ]);
+
+                        CrmRequestStatusHistory::create([
+                            'crm_request_id' => $crm_request->id,
+                            'status_id' => 6,
+                            'agent_id' => Auth::id()
+                        ]);
+
+                        NotificationsController::send(41, $crm_request->id);
+                        CrmRequestStatusHistory::create([
+                            'crm_request_id' => $crm_request->id,
+                            'status_id' => 2,
+                            'agent_id' => Auth::id()
+                        ]);
+
+                        if($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null){
+                            self::delay_in_delivery_shipment_add($crm_request->id, $crm_request->shipment_id);
+                        }
+
+                        if($request->prev_status == 1){
+                            if($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null){
+                                self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
+                            }
+                        }
+                        if($crm_request->case_nature_id == 4){
+                            NotificationsController::send(117, $crm_request->id, 6);
+                        }
+                    }
+                }
+                dump(
+                    $crm_request->shipment_id
+                );
+            }
+        }
+        die;
     }
 }
