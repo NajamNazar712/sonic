@@ -219,8 +219,16 @@
                                });
                            }
                        }
-
                     },{
+                    text: '<i class="la la-file-excel-o"></i> Bulk Booking City',
+                    className: 'btn btn-primary',
+                    enabled: true,
+                    action: function (e, dt, node, config) {
+                        $('#addBulkCity').modal('show');
+
+                    }
+
+                },{
                        text: '<i class="la la-map-marker"></i> Add International City',
                        className: 'btn btn-primary',
                        enabled: true,

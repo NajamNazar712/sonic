@@ -15145,5 +15145,208 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
         return redirect()->back()->with('success', 'FAF Charges Status Updated');
     }
-    
+
+    public function addExcelCityHub (Request $request)
+    {
+        // Check if a file is uploaded.
+        if ($file = $request->file('add_city')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+        } else {
+            return redirect()->back()->with('error', 'No file uploaded');
+        }
+
+        if (isset($spreadsheet)) {
+            $column_count = 40;
+            $fields = [
+                0 => 'city_name',
+                1 => 'city_code',
+                2 => 'is_city',
+                3 => 'is_hub',
+                4 => 'select_hub',
+                5 => 'select_zone',
+                6 => 'office_address',
+                7 => 'add_attempt_tat',
+
+                // Location Information
+                8 => 'latitude',
+                9 => 'longitude',
+                10 => 'hub_latitude',
+                11 => 'hub_longitude',
+
+                // Services
+                12 => 'pickup',
+                13 => 'pick_up_cut_off',
+                14 => 'gc_area',
+
+                // Delivery Options
+                15 => 'regular_rush',
+                16 => 'regular_saver_plus',
+                17 => 'regular_swift',
+                18 => 'regular_same_day',
+
+                19 => 'replacement_rush',
+                20 => 'replacement_saver_plus',
+                21 => 'replacement_swift',
+                22 => 'replacement_same_day',
+
+                23 => 'try_and_buy_rush',
+                24 => 'try_and_buy_saver_plus',
+                25 => 'try_and_buy_swift',
+                26 => 'try_and_buy_same_day',
+
+                27 => 'reverse_pickup_rush',
+                28 => 'reverse_pickup_saver_plus',
+                29 => 'reverse_pickup_swift',
+                30 => 'reverse_pickup_same_day',
+
+                31 => 'ptl_rush',
+                32 => 'ptl_saver_plus',
+                33 => 'ptl_swift',
+                34 => 'ptl_same_day',
+
+                35 => 'walkin_rush',
+                36 => 'walkin_saver_plus',
+                37 => 'walkin_swift',
+                38 => 'walkin_same_day',
+
+                // OSA List
+                39 => 'osa_list',
+            ];
+
+            // Validate the number of columns.
+            if (count($spreadsheet[0]) != $column_count) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+
+            // Remove the header row from the spreadsheet.
+            unset($spreadsheet[0]);
+        }
+
+        if (!isset($spreadsheet) || !empty($spreadsheet)) {
+            $rows = array();
+
+            if (isset($spreadsheet)) {
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                            $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+            } else {
+                $forms = $request->all();
+
+                $forms = $forms['form'];
+                foreach ($forms as $form) {
+                    $row = array();
+                    foreach ($form as $key => $value) {
+                        $row[$key] = $value;
+                    }
+                    $rows[] = $row;
+                }
+
+            }
+
+
+            $errors = [];
+
+            foreach ($rows as $row_id => $row) {
+                // Define validation rules
+                $rules = [
+                    'city_name' => 'required|string',
+                    'select_hub' => 'required_without:select_zone|required_if:is_city,1|exists:cities,name|hub_name_check',
+                    'select_zone' => 'required_without:select_hub|required_if:is_hub,1|exists:zones,name',
+                    'add_attempt_tat' => 'required|int',
+                    'latitude' => 'required|numeric',
+                    'longitude' => 'required|numeric',
+                    'hub_latitude' => 'required|numeric',
+                    'hub_longitude' => 'required|numeric',
+                    'pickup' => 'sometimes|required',
+                    'pick_up_cut_off' => 'required_if:pickup,1',
+                    'gc_area' => 'required_if:select_hub,null|int',
+                    'delivery_types' => 'required_without_all:regular_rush,regular_saver_plus,regular_swift,regular_same_day,replacement_rush,replacement_saver_plus,replacement_swift,replacement_same_day,try_and_buy_rush,try_and_buy_saver_plus,try_and_buy_swift,try_and_buy_same_day,reverse_pickup_rush,reverse_pickup_saver_plus,reverse_pickup_swift,reverse_pickup_same_day,ftl_rush,ftl_saver_plus,ftl_swift,Ftl_same_day,walkin_rush,walkin_saver_plus,walkin_swift,walkin_same_day|boolean',
+                ];
+
+                // Define custom messages if needed
+                $messages = [
+                    'city_name.required' => 'City Name is required.',
+                    'select_hub.required_if' => 'Select Hub is required when you set is_city bit to 1.',
+                    'select_zone.required_if' => 'Select Zone is required when you set is_hub bit to 1',
+                    'add_attempt_tat.required' => 'Add Attempt TAT is required.',
+                    'latitude.required' => 'Latitude is required.',
+                    'longitude.required' => 'Longitude is required.',
+                    'hub_latitude.required_if' => 'Hub Latitude is required when Hub is selected.',
+                    'hub_longitude.required_if' => 'Hub Longitude is required when Hub is selected.',
+                    'pick_up_cut_off.required_if' => 'Pickup Cut Off is required if Pickup is selected.',
+                    'delivery_types.required_without_all' => 'At least one delivery type must be selected.',
+                ];
+
+                // Attribute names for better error display
+                $names = [
+                    'city_name' => 'City Name',
+                    'select_hub' => 'Select Hub',
+                    'add_attempt_tat' => 'Add Attempt TAT',
+                    'latitude' => 'Latitude',
+                    'longitude' => 'Longitude',
+                    'hub_latitude' => 'Hub Latitude',
+                    'hub_longitude' => 'Hub Longitude',
+                ];
+
+
+                Validator::extend('hub_name_check', function ($attribute, $value, $parameters, $validator) {
+                    $exists = City::where('name', $value)->exists();
+
+                    if (!$exists) {
+                        $validator->replacer($attribute, 'The selected hub "' . $value . '" does not exist.');
+                    }
+
+                    return $exists;
+                });
+
+
+
+
+                // Validate each row
+                $validate = Validator::make($row, $rules, $messages);
+                $validate->setAttributeNames($names);
+
+                // Collect errors if validation fails
+                if ($validate->fails()) {
+                    foreach ($validate->errors()->toArray() as $key => $error_array) {
+                        foreach ($error_array as $error) {
+                            $errors[$row_id][$key] = $error;
+                        }
+                    }
+                }
+            }
+
+            // If there are no errors, process the rows
+            if (empty($errors)) {
+                // Your logic for successful processing
+            } else {
+
+                $hubs = City::where('hub', 1)
+                    ->where('business_category_id', 1)
+                    ->where('status', 1)
+                    ->pluck('name', 'name');
+
+                $zones = Zone::where('business_category_id', 1)
+                    ->pluck('name', 'name');
+
+                return view('admin.errors.bulk-excel-city-errors')->with([
+                    'data' => $rows,
+                    'errors' => $errors,
+                    'hubs' => $hubs,
+                    'zones' => $zones,
+                ]);
+            }
+
+        }
+    }
 }
