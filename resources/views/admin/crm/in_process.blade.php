@@ -310,6 +310,11 @@
         .selectize-control {
             width: 300px !important;
         }
+
+        .select-checkbox{
+            border-color: #64a0d2;
+        }
+
         .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
             background-color: #64a0d2 !important;
             border-color: #5587b4 !important;
@@ -1720,7 +1725,7 @@
                 var $td = $(this);
                 var $checkbox = $td.find('.select-checkbox');
                 var crmRequestId = $td.closest('tr').attr('id');
-                var isChecked = !$checkbox.prop('checked'); // Determine the new desired state
+                var isChecked = !$checkbox.prop('checked');
 
                 $.ajax({
                     type: "POST",
@@ -1735,49 +1740,38 @@
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
                             });
-                            // If there's an error, do not change the checkbox state
                         } else {
-                            $checkbox.prop('checked', isChecked); // Update checkbox state if AJAX is successful
+                            $checkbox.prop('checked', isChecked);
                         }
-                    },
-                    error: function() {
-                        // Do not change checkbox state on error
                     }
                 });
             });
 
-            // $('#datatable').on('click', '.select-checkbox', function(e) {
-            //     e.stopPropagation();
-            //     var $checkbox = $(this);
-            //     var crmRequestId = $checkbox.closest('tr').attr('id');
-            //     var isChecked = !$checkbox.prop('checked'); // Determine the new desired state
-
-            //     $.ajax({
-            //         type: "POST",
-            //         url: "{{ route('admin.crm.check_agent') }}",
-            //         data: {
-            //             crm_request_id: crmRequestId,
-            //             _token: '{{ csrf_token() }}'
-            //         },
-            //         success: function(response) {
-            //             if (response.status === 1 && response.error) {
-            //                 toastr.error(response.error, 'Error!', {
-            //                     positionClass: 'toast-top-center',
-            //                     containerId: 'toast-top-center'
-            //                 });
-            //                 // If there's an error, do not change the checkbox state
-            //             } else {
-            //                 $checkbox.prop('checked', isChecked); // Update checkbox state if AJAX is successful
-            //             }
-            //         },
-            //         error: function() {
-            //             // Do not change checkbox state on error
-            //         }
-            //     });
-            // });
-
-
-
+            $('#datatable').on('click', '.select-checkbox', function(e) {
+                e.stopPropagation();
+                var $checkbox = $(this);
+                var crmRequestId = $checkbox.closest('tr').attr('id');
+                var isChecked = !$checkbox.prop('checked');
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('admin.crm.check_agent') }}",
+                    data: {
+                        crm_request_id: crmRequestId,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.status === 1 && response.error) {
+                            toastr.error(response.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $checkbox.prop('checked', false);
+                        } else {
+                            $checkbox.prop('checked', isChecked);
+                        }
+                    }
+                });
+            });
         });
     </script>
 @endsection
