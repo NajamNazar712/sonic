@@ -474,7 +474,6 @@ class AdminNsaAccountShipmentController extends Controller
                                 // 03250 ----> new rider id for express shippers
                                 // $rider_id = $settings->setting_value;
                                 $rider_id = 3031;
-                                
                                 $admin_id = 50;
                             }
 
@@ -544,8 +543,8 @@ class AdminNsaAccountShipmentController extends Controller
                             }
 
                             ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, $admin_id, $note->id, $rider_id);
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, $admin_id, $note->id, NULL, 0,$received_refused_by);
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, $admin_id, $note->id, NULL, 1,$received_refused_by);
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, $admin_id, $note->id, $rider_id, NULL, 0,$received_refused_by);
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, $admin_id, $note->id, $rider_id, NULL, 1,$received_refused_by);
                             DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
                         }
                         // foreach ($valid_shipments as $index => $shipment) {
@@ -1029,8 +1028,8 @@ class AdminNsaAccountShipmentController extends Controller
                                     }
 
                                     ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                                    ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0,$received_by);
-                                    ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1,$received_by);
+                                    ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, 50, $note->id, $rider_id, NULL, 0,$received_by);
+                                    ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, $rider_id, NULL, 1,$received_by);
                                     DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
                                 }
 
