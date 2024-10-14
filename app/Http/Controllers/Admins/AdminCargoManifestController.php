@@ -3217,10 +3217,14 @@ class AdminCargoManifestController extends Controller
         $manifest_ids = explode(',', $cargo_manifest_ids);
 
         foreach ($manifest_ids as $id) {
+            var_dump('1'.$id);
             $cargo = CargoManifest::find($id);
+            var_dump('cargo'. $cargo);
             if ($cargo) {
                 $sender = $cargo->sender;
+                var_dump('sender'. $sender);
                 $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
+                var_dump('receiver'. $receiver);
                 $html .= '</head>
                   <body>
                     <div>
@@ -3412,24 +3416,26 @@ class AdminCargoManifestController extends Controller
                 </html>
       ';
                     $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
-                    // return $pdf;
+                    var_dump('receiver' . $pdf);
+
+                    return $pdf;
                 }
             }
         }
 
-        $html .= '
+    //     $html .= '
                    
-                      </div>
-                    </div>
-                    <script>
-                      window.onload = function() {
-                        window.print();
-                      }
-                    </script>
-                  </body>
-                </html>
-      ';
-        return $html;
+    //                   </div>
+    //                 </div>
+    //                 <script>
+    //                   window.onload = function() {
+    //                     window.print();
+    //                   }
+    //                 </script>
+    //               </body>
+    //             </html>
+    //   ';
+    //     return $html;
     }
 
     public function manifest_index()
