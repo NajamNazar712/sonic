@@ -3127,7 +3127,7 @@ class AdminCargoManifestController extends Controller
     public static function print($cargo_manifest_ids, $type = NULL)
     {
         $minimalHtml = '<h1>Hello World</h1>';
-        $pdf = FacadesSnappyPdf::loadHTML($minimalHtml)->save(public_path('reports/anas'. str_pad($cargo->id, 6, '0', STR_PAD_LEFT) .'.pdf'));
+        $pdf = FacadesSnappyPdf::loadHTML($minimalHtml)->save(public_path('reports/anas'. str_pad(6, '0', STR_PAD_LEFT) .'.pdf'));
         return $pdf;
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
         $html = '
