@@ -61,8 +61,6 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
-use Barryvdh\Snappy\Facades\SnappyPdf as FacadesSnappyPdf;
-use Illuminate\Support\Facades\Response;
 
 class AdminCargoManifestController extends Controller
 {
@@ -3127,9 +3125,7 @@ class AdminCargoManifestController extends Controller
 
     public static function print($cargo_manifest_ids, $type = NULL)
     {
-       
-        // Return a response to open the PDF in a new tab
-       
+
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
         $html = '
                 <!doctype html>
@@ -3414,14 +3410,7 @@ class AdminCargoManifestController extends Controller
                   </body>
                 </html>
       ';
-                    // $pdf = FacadesSnappyPdf::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
-                    // return $pdf;
-                    // $pdf = FacadesSnappyPdf::loadHTML($html)->save(public_path('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf'));
-                    $pdfPath = public_path('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
-                    FacadesSnappyPdf::loadHTML($html)->save($pdfPath);
-
-                    // Return a response to open the PDF in the browser
-                    return response()->redirectTo(asset('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf'));
+                    $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
                     return $pdf;
                 }
             }
