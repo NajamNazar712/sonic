@@ -667,7 +667,7 @@
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
 
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                if ($(row.node().firstChild).hasClass('column_checkbox')) {
                                     row.select();
 
                                     id = parseInt(row.id());
@@ -700,7 +700,7 @@
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
 
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                if ($(row.node().firstChild).hasClass('column_checkbox')) {
                                     row.deselect();
 
                                     id = parseInt(row.id());
@@ -761,8 +761,6 @@
                 order: [[32, 'desc']],
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
-
-
                     { 
                         data: 'id', 
                         orderable: false, 
@@ -773,9 +771,6 @@
                             return '<input type="checkbox" class="text-center align-middle select p-1 select-checkbox" data-id="' + row.id + '">';
                         }
                     },
-
-
-
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle id_padded_link'},
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle tracking_number'}, // Tracking No.
@@ -821,7 +816,7 @@
 
                 ],
                 rowCallback: function(row, data, index) {
-                    // $('td:eq(0)', row).addClass('select-checkbox');  
+                    // $('td:eq(0)', row).addClass('select-checkbox');
                     $('td:eq(0)', row).addClass('text-center align-middle select p-1 column_checkbox');
 
                     if ($.inArray(data.id, selected_rows) !== -1) {
@@ -1293,7 +1288,7 @@
             });
             
 
-            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+            $('#datatable tbody').on('click', 'tr td.column_checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
 
                 var index = $.inArray(id, selected_rows);
@@ -1721,11 +1716,11 @@
 
             // Check agent assigned or not
             $('#datatable').on('click', '.column_checkbox', function(e) {
-                e.preventDefault();
-                var $td = $(this);
-                var $checkbox = $td.find('.select-checkbox');
-                var crmRequestId = $td.closest('tr').attr('id');
+                e.stopPropagation();
+                var $checkbox = $(this).find('.select-checkbox');
+                var crmRequestId = $checkbox.data('id') || $(this).closest('tr').attr('id');
                 var isChecked = !$checkbox.prop('checked');
+                $checkbox.prop('checked', isChecked);
 
                 $.ajax({
                     type: "POST",
@@ -1736,13 +1731,20 @@
                     },
                     success: function(response) {
                         if (response.status === 1 && response.error) {
+                            scan_sound(2);
                             toastr.error(response.error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
                             });
-                        } else {
-                            $checkbox.prop('checked', isChecked);
+                            $checkbox.prop('checked', !isChecked);
                         }
+                    },
+                    error: function() {
+                        toastr.error('An error occurred while processing your request.', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        $checkbox.prop('checked', !isChecked);
                     }
                 });
             });
@@ -1750,8 +1752,10 @@
             $('#datatable').on('click', '.select-checkbox', function(e) {
                 e.stopPropagation();
                 var $checkbox = $(this);
-                var crmRequestId = $checkbox.closest('tr').attr('id');
+                var crmRequestId = $checkbox.data('id') || $checkbox.closest('tr').attr('id');
                 var isChecked = !$checkbox.prop('checked');
+                $checkbox.prop('checked', isChecked);
+
                 $.ajax({
                     type: "POST",
                     url: "{{ route('admin.crm.check_agent') }}",
@@ -1761,14 +1765,20 @@
                     },
                     success: function(response) {
                         if (response.status === 1 && response.error) {
+                            scan_sound(2);
                             toastr.error(response.error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
                             });
-                            $checkbox.prop('checked', false);
-                        } else {
-                            $checkbox.prop('checked', isChecked);
+                            $checkbox.prop('checked', !isChecked);
                         }
+                    },
+                    error: function() {
+                        toastr.error('An error occurred while processing your request.', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        $checkbox.prop('checked', !isChecked);
                     }
                 });
             });

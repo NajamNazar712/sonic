@@ -7028,10 +7028,5 @@ class AdminCRMController extends Controller
     public function bulk_resolve(Request $request)
     {
         $crm_requests = CrmRequest::whereIn('id', $request->crm_request_ids)->get();
-        foreach($crm_requests as $crm_request)
-        {
-            dd('in');
-        }
-        dd('out');
     }
 }
