@@ -3133,7 +3133,7 @@ class AdminCargoManifestController extends Controller
 
         return response()->file($pdfPath, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . basename($pdfPath) . '"',
+            'Content-Disposition' => 'attachment; filename="' . basename($pdfPath) . '"',
         ]);
         // Return a response to open the PDF in a new tab
        
