@@ -26,7 +26,7 @@ class AddAppVersionColumnToTraxLogisticBookingTable extends Migration
     public function down()
     {
         Schema::table('trax_logistic_bookings', function (Blueprint $table) {
-            //
+            $table->dropColumn('app_version');
         });
     }
 }
