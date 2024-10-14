@@ -466,14 +466,14 @@ class AdminNsaAccountShipmentController extends Controller
                         $total_cod_amount = 0;
                         foreach ($nsa_shipments as $nsa_shipment) {
                             if (in_array($nsa_shipment->user_id, [7762, 10354])) {
-                                // $rider_id = 1837;
-                                $rider_id = 1;
+                                $rider_id = 1837;
+                                // $rider_id = 11887;
                                 $admin_id = Auth::id();
                             }
                             else {
                                 // 03250 ----> new rider id for express shippers
                                 // $rider_id = $settings->setting_value;
-                                $rider_id = 1;
+                                $rider_id = 11887;
                                 $admin_id = 50;
                             }
 
@@ -529,7 +529,7 @@ class AdminNsaAccountShipmentController extends Controller
                             }
                             else {
                                 // $rider_id = $settings->setting_value;
-                                $rider_id = 1;
+                                $rider_id = 11887;
                                 $admin_id = 50;
                             }
 
@@ -967,7 +967,7 @@ class AdminNsaAccountShipmentController extends Controller
 
 
                         // $rider_id = $settings->setting_value;
-                        $rider_id = 1;
+                        $rider_id = 11887;
 
 
                         $valid_shipments = array();
