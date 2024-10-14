@@ -3127,16 +3127,7 @@ class AdminCargoManifestController extends Controller
 
     public static function print($cargo_manifest_ids, $type = NULL)
     {
-        $minimalHtml = '<h1>Hello World</h1>';
-        $pdfPath = public_path('reports/anas' . rand(1, 100) . '.pdf');
-        $minimalHtml = '<h1>Hello World</h1>';
-        $pdfContent = FacadesSnappyPdf::loadHTML($minimalHtml)->output();
-        FacadesSnappyPdf::loadHTML($minimalHtml)->save($pdfPath);
-
-        return response($pdfContent, 200, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="report.pdf"',
-            ]);
+       
         // Return a response to open the PDF in a new tab
        
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
@@ -3425,8 +3416,12 @@ class AdminCargoManifestController extends Controller
       ';
                     // $pdf = FacadesSnappyPdf::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
                     // return $pdf;
-                    $pdf = FacadesSnappyPdf::loadHTML($html)->save(public_path('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf'));
+                    // $pdf = FacadesSnappyPdf::loadHTML($html)->save(public_path('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf'));
+                    $pdfPath = public_path('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+                    FacadesSnappyPdf::loadHTML($html)->save($pdfPath);
 
+                    // Return a response to open the PDF in the browser
+                    return response()->redirectTo(asset('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf'));
                     return $pdf;
                 }
             }
