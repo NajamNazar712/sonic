@@ -61,6 +61,7 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
+use Barryvdh\Snappy\Facades\SnappyPdf as FacadesSnappyPdf;
 
 class AdminCargoManifestController extends Controller
 {
@@ -3410,7 +3411,7 @@ class AdminCargoManifestController extends Controller
                   </body>
                 </html>
       ';
-                    $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+                    $pdf = FacadesSnappyPdf::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
                     return $pdf;
                 }
             }
