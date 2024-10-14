@@ -50,6 +50,19 @@ class ShipmentAdditionalCharges extends Model
             );
         }
     }
+    static function additional_charges_undo($shipment_ids,$arrival = false ,$zero_cod = false,$return_discount =false){
+        foreach ($shipment_ids as $shipment_id) {
+            // Use updateOrCreate to simplify the process
+            ShipmentAdditionalCharges::updateOrCreate(
+                ['shipment_id' => $shipment_id], // The condition to check if the record exists
+                array_merge(
+                    $arrival ? ['arrival_charges_applied' => 0] : [],
+                    $zero_cod ? ['zero_cod_discount_applied' => 0] : [],
+                    $return_discount ? ['return_cod_discount_applied' => 0] : []
+                )
+            );
+        }
+    }
 
     static function check_additional_charges($shipment_id,$arrival = false ,$zero_cod = false,$return_discount =false){
         $shipment_additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment_id);

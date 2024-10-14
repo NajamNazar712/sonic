@@ -152,7 +152,7 @@ class AgentSarNotification extends Command
                 })
                 ->where('rv_assign_agent_status_id', 8)
                 ->where('rv_state_id', 2)
-                ->where('updated_at', '<=', $nowSub24Hours)
+                ->where('rv_shipment_assign_agents.updated_at', '<=', $nowSub24Hours)
                 ->get();
                 
             if ($refusal_call_shipments->isNotEmpty()) {
