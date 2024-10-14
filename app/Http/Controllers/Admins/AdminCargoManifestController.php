@@ -3412,7 +3412,7 @@ class AdminCargoManifestController extends Controller
                   </body>
                 </html>
       ';
-                    $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+                    // $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
                    
                     // return $pdf;
                 }
