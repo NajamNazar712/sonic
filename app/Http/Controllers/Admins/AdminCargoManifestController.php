@@ -3128,10 +3128,12 @@ class AdminCargoManifestController extends Controller
     public static function print($cargo_manifest_ids, $type = NULL)
     {
         $minimalHtml = '<h1>Hello World</h1>';
-        $pdf = FacadesSnappyPdf::loadHTML($minimalHtml)->save(public_path('reports/anas'. rand(1, 100) .'.pdf'));
-        return Response::make(file_get_contents($pdf), 200, [
+        $pdfPath = public_path('reports/anas' . rand(1, 100) . '.pdf');
+        FacadesSnappyPdf::loadHTML($minimalHtml)->save($pdfPath);
+
+        return response()->file($pdfPath, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . basename($pdf) . '"',
+            'Content-Disposition' => 'inline; filename="' . basename($pdfPath) . '"',
         ]);
         // Return a response to open the PDF in a new tab
        
