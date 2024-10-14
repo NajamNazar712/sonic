@@ -1036,10 +1036,9 @@ class AdminNsaAccountShipmentController extends Controller
                                     // ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0,$received_by);
                                     // ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1,$received_by);
 
-                                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, NULL, $note->id, $rider_id);
-                                    ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, NULL, $note->id, $rider_id, 0, $received_by);
-                                    ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, NULL, $note->id, $rider_id, 1, $received_by);
-                                    
+                                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id);
+                                    ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id);
+                                    ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, NULL, $note->id, NULL, 1, $received_by, $rider_id);                                    
 
                                     DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
                                 }
@@ -1057,8 +1056,11 @@ class AdminNsaAccountShipmentController extends Controller
                                     $shipment->shipper_status_id = 25;
                                     $shipment->consignee_status_id = 25;
                                     $shipment->save();
-                                    ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                                    ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                                    // ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                                    // ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, 50, $note->id, $rider_id);
+
+                                    ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, NULL, $rider_id, $note->id);
+                                    ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $rider_id, $note->id);
                                 }
                             }
                         }
