@@ -1039,8 +1039,8 @@ class AdminNsaAccountShipmentController extends Controller
                                     ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id);
                                     ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id);
                                     ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, NULL, $note->id, NULL, 1, $received_by, $rider_id);  
-                                    ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, NULL, $note->id, $rider_id);
-                                    ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $note->id, $rider_id); 
+                                    ShipmentsJourneyController::add($shipment, 23, 23, NULL, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id);
+                                    ShipmentsJourneyController::add($shipment, 25, 25, NULL, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id); 
 
                                     DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
                                 }
