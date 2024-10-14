@@ -382,6 +382,7 @@
                         },
                         success: function (response) {
                             if (response.status == 1 && response.error) {
+                                scan_sound(2);
                                 toastr.error(response.error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
@@ -565,7 +566,7 @@
                     }
                     else {
                         $('#add_shipment_form button.add').prop('disabled', false);
-
+                        scan_sound(2);
                         toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
@@ -604,6 +605,7 @@
                             },
                             timeout: 5000,
                             error: function (data) {
+                                scan_sound(2);
                                 toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             },
                             success: function (data) {
@@ -624,12 +626,14 @@
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }
                                 else{
+                                    scan_sound(2);
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             }
                         });
                     }
                     else{
+                        scan_sound(2);
                         toastr.error('Shipment Item has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 }
@@ -753,6 +757,7 @@
                         
 
                         else {
+                            scan_sound(2);
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                     });
