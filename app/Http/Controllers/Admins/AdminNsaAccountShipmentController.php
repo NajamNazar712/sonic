@@ -1056,12 +1056,9 @@ class AdminNsaAccountShipmentController extends Controller
                                     $shipment->shipper_status_id = 25;
                                     $shipment->consignee_status_id = 25;
                                     $shipment->save();
-                                    ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                                    ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                                    // ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                                    // ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, 50, $note->id, $rider_id);
 
-                                    // ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, NULL, $note->id, $rider_id);
-                                    // ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $note->id, $rider_id);     
-                                    
                                     ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id);
                                     ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id); 
                                 }
