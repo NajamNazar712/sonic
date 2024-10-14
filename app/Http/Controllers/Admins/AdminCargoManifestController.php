@@ -3411,7 +3411,10 @@ class AdminCargoManifestController extends Controller
                   </body>
                 </html>
       ';
-                    $pdf = FacadesSnappyPdf::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+                    // $pdf = FacadesSnappyPdf::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+                    // return $pdf;
+                    $pdf = FacadesSnappyPdf::loadHTML($html)->save(public_path('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf'));
+
                     return $pdf;
                 }
             }
