@@ -11507,6 +11507,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ]);
 
             if (!empty($request->walk_in_delivery)) {
+//                dd($request->walk_in_delivery);
                 foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
                     WalkInCities::create([
                         'city_id' => $city->id,
@@ -11515,6 +11516,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     ]);
                 }
             }
+            dd($request->delivery);
 
             foreach ($request->delivery as $booking_type_id => $shipping_modes) {
                 foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
@@ -15146,207 +15148,312 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         return redirect()->back()->with('success', 'FAF Charges Status Updated');
     }
 
-    public function addExcelCityHub (Request $request)
+
+    public function addExcelCityHub(Request $request)
     {
-        // Check if a file is uploaded.
+        $errors = [];
+        $rows = [];
+
+        // Check if a file is uploaded
         if ($file = $request->file('add_city')) {
-            $spreadsheet = IOFactory::createReaderForFile($file);
-            $spreadsheet->setReadDataOnly(true);
-            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
-        } else {
-            return redirect()->back()->with('error', 'No file uploaded');
+            $spreadsheet = IOFactory::createReaderForFile($file)
+                ->setReadDataOnly(true)
+                ->load($file)
+                ->getActiveSheet()
+                ->toArray();
         }
 
-        if (isset($spreadsheet)) {
+        if (!empty($spreadsheet)) {
             $column_count = 40;
             $fields = [
-                0 => 'city_name',
-                1 => 'city_code',
-                2 => 'is_city',
-                3 => 'is_hub',
-                4 => 'select_hub',
-                5 => 'select_zone',
-                6 => 'office_address',
-                7 => 'add_attempt_tat',
-
-                // Location Information
-                8 => 'latitude',
-                9 => 'longitude',
-                10 => 'hub_latitude',
-                11 => 'hub_longitude',
-
-                // Services
-                12 => 'pickup',
-                13 => 'pick_up_cut_off',
-                14 => 'gc_area',
-
-                // Delivery Options
-                15 => 'regular_rush',
-                16 => 'regular_saver_plus',
-                17 => 'regular_swift',
-                18 => 'regular_same_day',
-
-                19 => 'replacement_rush',
-                20 => 'replacement_saver_plus',
-                21 => 'replacement_swift',
-                22 => 'replacement_same_day',
-
-                23 => 'try_and_buy_rush',
-                24 => 'try_and_buy_saver_plus',
-                25 => 'try_and_buy_swift',
-                26 => 'try_and_buy_same_day',
-
-                27 => 'reverse_pickup_rush',
-                28 => 'reverse_pickup_saver_plus',
-                29 => 'reverse_pickup_swift',
-                30 => 'reverse_pickup_same_day',
-
-                31 => 'ptl_rush',
-                32 => 'ptl_saver_plus',
-                33 => 'ptl_swift',
-                34 => 'ptl_same_day',
-
-                35 => 'walkin_rush',
-                36 => 'walkin_saver_plus',
-                37 => 'walkin_swift',
-                38 => 'walkin_same_day',
-
-                // OSA List
-                39 => 'osa_list',
+                'name', 'city_code', 'is_city', 'is_hub', 'hub_id', 'zone_id', 'office_address', 'attempt_tat',
+                'location_latitude', 'location_longitude', 'hub_location_latitude', 'hub_location_longitude', 'pickup', 'cut_off_time', 'gc_area',
+                'regular_rush', 'regular_saver_plus', 'regular_swift', 'regular_same_day',
+                'replacement_rush', 'replacement_saver_plus', 'replacement_swift', 'replacement_same_day',
+                'try_and_buy_rush', 'try_and_buy_saver_plus', 'try_and_buy_swift', 'try_and_buy_same_day',
+                'reverse_pickup_rush', 'reverse_pickup_saver_plus', 'reverse_pickup_swift', 'reverse_pickup_same_day',
+                'ftl_rush', 'ftl_saver_plus', 'ftl_swift', 'ftl_same_day',
+                'walkin_rush', 'walkin_saver_plus', 'walkin_swift', 'walkin_same_day',
+                'osa_list',
             ];
 
-            // Validate the number of columns.
-            if (count($spreadsheet[0]) != $column_count) {
+            if (count($spreadsheet[0]) !== $column_count) {
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
 
-            // Remove the header row from the spreadsheet.
             unset($spreadsheet[0]);
+
+            $rows = array_map(function ($row) use ($fields) {
+                return array_combine($fields, $row);
+            }, $spreadsheet);
+        } else {
+            $forms = $request->except(['_token', '_method']);
+            $rows = array_map(function ($form) {
+                return $form;
+            }, $forms);
         }
 
-        if (!isset($spreadsheet) || !empty($spreadsheet)) {
-            $rows = array();
+        // Validation rules, messages, and attribute names
+        $rules = [
+            'name' => 'required|string',
+            'hub_id' => 'required_without:zone_id|required_if:is_city,1|exists:cities,name|hub_name_check',
+            'zone_id' => 'required_without:hub_id|required_if:is_hub,1|exists:zones,name|zone_name_check',
+            'attempt_tat' => 'required|integer',
+            'location_latitude' => 'required|numeric',
+            'location_longitude' => 'required|numeric',
+            'hub_location_latitude' => 'required|numeric',
+            'hub_location_longitude' => 'required|numeric',
+            'pickup' => 'sometimes|required',
+            'cut_off_time' => 'required_if:pickup,1|nullable|integer|min:0|max:23',
+            'delivery_types' => 'required_without_all:regular_rush,regular_saver_plus,regular_swift,regular_same_day,replacement_rush,replacement_saver_plus,replacement_swift,replacement_same_day,try_and_buy_rush,try_and_buy_saver_plus,try_and_buy_swift,try_and_buy_same_day,reverse_pickup_rush,reverse_pickup_saver_plus,reverse_pickup_swift,reverse_pickup_same_day,ftl_rush,ftl_saver_plus,ftl_swift,ftl_same_day,walkin_rush,walkin_saver_plus,walkin_swift|boolean',
+        ];
 
-            if (isset($spreadsheet)) {
-                foreach ($spreadsheet as $spreadsheet_row) {
-                    $row = array();
+        $messages = [
+            'name.required' => 'City Name is required.',
+            'hub_id.required_if' => 'Select Hub is required when you set is_city bit to 1.',
+            'zone_id.required_if' => 'Select Zone is required when you set is_hub bit to 1.',
+            'attempt_tat.required' => 'Add Attempt TAT is required.',
+            'latitude.required' => 'Latitude is required.',
+            'longitude.required' => 'Longitude is required.',
+            'hub_latitude.required_if' => 'Hub Latitude is required when Hub is selected.',
+            'hub_longitude.required_if' => 'Hub Longitude is required when Hub is selected.',
+            'cut_off_time.required_if' => 'Pickup Cut Off is required if Pickup is selected.',
+            'delivery_types.required_without_all' => 'At least one delivery type must be selected.',
+        ];
 
-                    foreach ($spreadsheet_row as $key => $value) {
-                            $row[$fields[$key]] = $value;
-                    }
+        $names = [
+            'name' => 'City Name',
+            'hub_id' => 'Select Hub',
+            'zone_id' => 'Select Zone',
+            'attempt_tat' => 'Attempt TAT',
+            'latitude' => 'Latitude',
+            'longitude' => 'Longitude',
+            'hub_latitude' => 'Hub Latitude',
+            'hub_longitude' => 'Hub Longitude',
+        ];
 
-                    $rows[] = $row;
-                }
-
-                unset($spreadsheet);
-            } else {
-                $forms = $request->all();
-
-                $forms = $forms['form'];
-                foreach ($forms as $form) {
-                    $row = array();
-                    foreach ($form as $key => $value) {
-                        $row[$key] = $value;
-                    }
-                    $rows[] = $row;
-                }
-
-            }
-
-
-            $errors = [];
-
-            foreach ($rows as $row_id => $row) {
-                // Define validation rules
-                $rules = [
-                    'city_name' => 'required|string',
-                    'select_hub' => 'required_without:select_zone|required_if:is_city,1|exists:cities,name|hub_name_check',
-                    'select_zone' => 'required_without:select_hub|required_if:is_hub,1|exists:zones,name',
-                    'add_attempt_tat' => 'required|int',
-                    'latitude' => 'required|numeric',
-                    'longitude' => 'required|numeric',
-                    'hub_latitude' => 'required|numeric',
-                    'hub_longitude' => 'required|numeric',
-                    'pickup' => 'sometimes|required',
-                    'pick_up_cut_off' => 'required_if:pickup,1',
-                    'gc_area' => 'required_if:select_hub,null|int',
-                    'delivery_types' => 'required_without_all:regular_rush,regular_saver_plus,regular_swift,regular_same_day,replacement_rush,replacement_saver_plus,replacement_swift,replacement_same_day,try_and_buy_rush,try_and_buy_saver_plus,try_and_buy_swift,try_and_buy_same_day,reverse_pickup_rush,reverse_pickup_saver_plus,reverse_pickup_swift,reverse_pickup_same_day,ftl_rush,ftl_saver_plus,ftl_swift,Ftl_same_day,walkin_rush,walkin_saver_plus,walkin_swift,walkin_same_day|boolean',
-                ];
-
-                // Define custom messages if needed
-                $messages = [
-                    'city_name.required' => 'City Name is required.',
-                    'select_hub.required_if' => 'Select Hub is required when you set is_city bit to 1.',
-                    'select_zone.required_if' => 'Select Zone is required when you set is_hub bit to 1',
-                    'add_attempt_tat.required' => 'Add Attempt TAT is required.',
-                    'latitude.required' => 'Latitude is required.',
-                    'longitude.required' => 'Longitude is required.',
-                    'hub_latitude.required_if' => 'Hub Latitude is required when Hub is selected.',
-                    'hub_longitude.required_if' => 'Hub Longitude is required when Hub is selected.',
-                    'pick_up_cut_off.required_if' => 'Pickup Cut Off is required if Pickup is selected.',
-                    'delivery_types.required_without_all' => 'At least one delivery type must be selected.',
-                ];
-
-                // Attribute names for better error display
-                $names = [
-                    'city_name' => 'City Name',
-                    'select_hub' => 'Select Hub',
-                    'add_attempt_tat' => 'Add Attempt TAT',
-                    'latitude' => 'Latitude',
-                    'longitude' => 'Longitude',
-                    'hub_latitude' => 'Hub Latitude',
-                    'hub_longitude' => 'Hub Longitude',
-                ];
-
-
-                Validator::extend('hub_name_check', function ($attribute, $value, $parameters, $validator) {
-                    $exists = City::where('name', $value)->exists();
-
-                    if (!$exists) {
-                        $validator->replacer($attribute, 'The selected hub "' . $value . '" does not exist.');
-                    }
-
-                    return $exists;
+        Validator::extend('hub_name_check', function ($attribute, $value, $parameters, $validator)  {
+            $exists = City::where('name', $value)->exists();
+            if (!$exists) {
+                $validator->addReplacer('hub_name_check', function ($message, $attribute, $rule, $parameters) use($value) {
+                    return "$value does not exist.";
                 });
+                return false;
+            }
+            return true;
+        });
+
+        Validator::extend('zone_name_check', function ($attribute, $value, $parameters, $validator)  {
+            $exists = Zone::where('name', $value)->exists();
+            if (!$exists) {
+                $validator->addReplacer('zone_name_check', function ($message, $attribute, $rule, $parameters) use($value) {
+                    return "$value does not exist.";
+                });
+                return false;
+            }
+            return true;
+        });
 
 
+        foreach ($rows as $row_id => $row) {
+            $validate = Validator::make($row, $rules, $messages);
+            $validate->setAttributeNames($names);
+
+            if ($validate->fails()) {
+                foreach ($validate->errors()->toArray() as $key => $error_array) {
+                    foreach ($error_array as $error) {
+                        $errors[$row_id][$key] = $error;
+                    }
+                }
+            }
+        }
 
 
-                // Validate each row
-                $validate = Validator::make($row, $rules, $messages);
-                $validate->setAttributeNames($names);
+        if (empty($errors)) {
+            $isHubArray = [];
+            $isCityArray = [];
+            $deliveryTypes = [];
+            $walkInTypes = [];
 
-                // Collect errors if validation fails
-                if ($validate->fails()) {
-                    foreach ($validate->errors()->toArray() as $key => $error_array) {
-                        foreach ($error_array as $error) {
-                            $errors[$row_id][$key] = $error;
-                        }
+            $keysToUnsetDeliveryTypes = [
+                'regular_rush',
+                'regular_saver_plus',
+                'regular_swift',
+                'regular_same_day',
+                'replacement_rush',
+                'replacement_saver_plus',
+                'replacement_swift',
+                'replacement_same_day',
+                'try_and_buy_rush',
+                'try_and_buy_saver_plus',
+                'try_and_buy_swift',
+                'try_and_buy_same_day',
+                'reverse_pickup_rush',
+                'reverse_pickup_saver_plus',
+                'reverse_pickup_swift',
+                'reverse_pickup_same_day',
+                'ftl_rush',
+                'ftl_saver_plus',
+                'ftl_swift',
+                'ftl_same_day',
+                'walkin_rush',
+                'walkin_saver_plus',
+                'walkin_swift',
+            ];
+
+            $city_hub_exclude = ['is_city',
+                'is_hub'];
+
+            $walk_in_types = [ 'walkin_rush',
+                'walkin_saver_plus',
+                'walkin_swift',
+                ];
+
+            foreach ($forms as $key1 => $item) {
+
+
+                if (isset($item['is_hub']) && $item['is_hub'] == "1") {
+                    $isHubArray[] = $item;
+                }
+
+                if (isset($item['is_city']) && $item['is_city'] == "1") {
+                    $zone = City::where('name', $item['hub_id'])->latest()->first();
+                    $item['zone_id'] = $zone ? $zone->zone_id : null;
+                    $isCityArray[] = $item;
+                }
+
+            }
+
+            //Unset delivery type value for delivery type section insertion and stored in new array
+            foreach($isCityArray as $key2 => $values){
+                foreach($values as $key3 => $value){
+                    if(in_array($key3, $keysToUnsetDeliveryTypes)){
+                        unset($isCityArray[$key2][$key3]);
+                        $deliveryTypes[] = $key2 . $key3;
+                    }
+
+                    if(in_array($key3, $city_hub_exclude)){
+                        unset($isCityArray[$key2][$key3]);
+                    }
+
+
+                    if(in_array($key3, $walk_in_types)){
+                        unset($isCityArray[$key2][$key3]);
+                        $walkInTypes[] = $key2 . $key3;
+
                     }
                 }
             }
 
-            // If there are no errors, process the rows
-            if (empty($errors)) {
-                // Your logic for successful processing
-            } else {
+            City::insert($isCityArray);
+//            CityHistory::insert($isCityArray);
 
-                $hubs = City::where('hub', 1)
-                    ->where('business_category_id', 1)
-                    ->where('status', 1)
-                    ->pluck('name', 'name');
+            $insertedIds = DB::table('cities')
+                ->orderBy('id', 'desc')
+                ->limit(count($isCityArray))
+                ->pluck('id')
+                ->toArray();
 
-                $zones = Zone::where('business_category_id', 1)
-                    ->pluck('name', 'name');
+            $walkInTypesFiltered = [];
+            $deliveryTypesFiltered = [];
 
-                return view('admin.errors.bulk-excel-city-errors')->with([
-                    'data' => $rows,
-                    'errors' => $errors,
-                    'hubs' => $hubs,
-                    'zones' => $zones,
-                ]);
+            foreach ($walkInTypes as $key => $item) {
+                $prefix = $item[0];
+                $walkInTypesFiltered[$prefix][$key+1] = $item;
             }
 
+            foreach ($deliveryTypes as $key => $item) {
+                $prefix = $item[0];
+                $deliveryTypesFiltered[$prefix][$key+1] = $item;
+            }
+
+            dd($deliveryTypesFiltered);
+
+
+            $walkInTypeToBeInserted = [];
+            foreach ($walkInTypesFiltered as $key => $values) {
+                if (isset($insertedIds[$key])) {
+                    foreach ($values as $key2 => $value) {
+                        if (str_contains($value, 'swift')) {
+                            $count = 3;
+                        } elseif (str_contains($value, 'rush')) {
+                            $count = 1;
+                        } elseif (str_contains($value, 'saver_plus')) {
+                            $count = 2;
+                        }
+                        $walkInTypeToBeInserted[] = [
+                            'city_id' => $insertedIds[$key],
+                            'pickup' => City::find($insertedIds[$key])->pickup,
+                            'delivery' => $count
+                        ];
+                    }
+                }
+            }
+
+            dd($deliveryTypes);
+
+            WalkInCities::insert($walkInTypeToBeInserted);
+
+
+//
+//            foreach ($request->delivery as $booking_type_id => $shipping_modes) {
+//                foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
+//                    CityDelivery::create([
+//                        'city_id' => $city->id,
+//                        'booking_type_id' => $booking_type_id,
+//                        'shipping_mode_id' => $shipping_mode_id,
+//                    ]);
+//                }
+//            }
+//
+//            $zones = Zone::where('business_category_id', 1)->get();
+//            foreach ($zones as $zone) {
+//                $zone_class_city = new ZoneClassCity();
+//
+//                $zone_class_city->zone_id = $zone->id;
+//                $zone_class_city->city_id = $city->id;
+//                $zone_class_city->class = 3;
+//                $zone_class_city->zone_classification_id = 1;
+//
+//                $zone_class_city->save();
+//
+//                $zone_class_city = new ZoneClassCity();
+//
+//                $zone_class_city->zone_id = $zone->id;
+//                $zone_class_city->city_id = $city->id;
+//                $zone_class_city->class = 3;
+//                $zone_class_city->zone_classification_id = 2;
+//
+//                $zone_class_city->save();
+//            }
+//            if ($request->osa_name != null) {
+//
+//                foreach ($request->osa_name as $key => $value) {
+//
+//                    $osa_charges = new CityOsaRate();
+//                    $osa_charges->city_id = $city->id;
+//                    $osa_charges->osa_name = $value;
+//                    $osa_charges->osa_rate = $request->osa_rate[$key];
+//                    $osa_charges->admin_id = Auth::id();
+//                    $osa_charges->save();
+//                }
+//            }
+        } else {
+            $hubs = City::where('hub', 1)
+                ->where('business_category_id', 1)
+                ->where('status', 1)
+                ->pluck('name', 'name');
+
+            $zones = Zone::where('business_category_id', 1)
+                ->pluck('name', 'name');
+
+            return view('admin.errors.bulk-excel-city-errors')->with([
+                'data' => $rows,
+                'errors' => $errors,
+                'hubs' => $hubs,
+                'zones' => $zones,
+            ]);
         }
     }
+
 }
