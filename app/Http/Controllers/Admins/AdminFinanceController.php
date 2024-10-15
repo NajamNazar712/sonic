@@ -7333,11 +7333,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $requestPendingShipmentIds)->pluck('pending_payment_shipment_id')->toArray();        
         
         $idsToInsert = array_diff($requestPendingShipmentIds, $existingShipmentIds);
-        if($request->admin_id == 2471){
-            RvCronLog::create([
-                'message' => 'existingShipmentIds '. json_encode($existingShipmentIds) . 'idsToInsert '. json_encode($idsToInsert)
-            ]);
-        }
         $final_Array = [];
         if (!empty($idsToInsert)) {
             foreach ($idsToInsert as $pending_payment_shipment_id) {
