@@ -7330,9 +7330,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
     {
 
         $requestPendingShipmentIds = explode(',', $request->pending_payment_shipment_ids);
-        $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $requestPendingShipmentIds)->pluck('pending_payment_shipment_id')->toArray();
-        
-        Log::channel('cronJobLog')->info('s ' . 'ShipmentID pending payment' . Carbon::parse(now())->format('Y-m-d H:i:s') . ' shipment_id ' . $requestPendingShipmentIds);
+        $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $requestPendingShipmentIds)->pluck('pending_payment_shipment_id')->toArray();        
         $idsToInsert = array_diff($requestPendingShipmentIds, $existingShipmentIds);
         $final_Array = [];
         if (!empty($idsToInsert)) {
