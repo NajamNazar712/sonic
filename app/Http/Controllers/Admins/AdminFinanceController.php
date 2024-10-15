@@ -7379,11 +7379,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $selected_shipments = count($pending_payment_shipment_ids);
 
                 $pending_payment = PendingPayment::find($pending_payment_id);
-                if(Auth::id() == 3755){
-                    RvCronLog::create([
-                        'message' => '$pending_payment '. json_encode($pending_payment)
-                    ]);
-                }
+               
                 if ($pending_payment) {
                     $user_bank_id = NULL;
 
