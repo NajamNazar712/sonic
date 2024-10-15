@@ -7330,8 +7330,10 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
     {
 
         $requestPendingShipmentIds = explode(',', $request->pending_payment_shipment_ids);
-        $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $requestPendingShipmentIds)->pluck('pending_payment_shipment_id')->toArray();
+        $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $requestPendingShipmentIds)->pluck('pending_payment_shipment_id')->toArray();        
+        
         $idsToInsert = array_diff($requestPendingShipmentIds, $existingShipmentIds);
+        
         $final_Array = [];
         if (!empty($idsToInsert)) {
             foreach ($idsToInsert as $pending_payment_shipment_id) {
@@ -7377,7 +7379,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $selected_shipments = count($pending_payment_shipment_ids);
 
                 $pending_payment = PendingPayment::find($pending_payment_id);
-
+               
                 if ($pending_payment) {
                     $user_bank_id = NULL;
 
