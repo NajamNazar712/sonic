@@ -479,34 +479,58 @@
                     @endif
 
                     // bulk resolve button
-                    @if (session('role_id') == 1 || in_array(787, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(1013, session('permissions')))
                         {
                             text: 'Resolve',
                             className: 'btn btn-primary bulk_resolve',
                             enabled: false,
                             action: function (e, dt, node, config) {
-                                $.ajax({
-                                    url: '{!! route('admin.crm.bulk_resolve') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        'crm_request_ids': selected_rows,
-                                        '_token': '{{ csrf_token() }}'
-                                    }
-                                })
-                                .done(function (data) {
-                                    if (data.status == 1 && data.error){
-                                        toastr.error(data.error, 'Error!', {
-                                            positionClass: 'toast-top-center',
-                                            containerId: 'toast-top-center'
+                                swal({
+                                    title: 'Are you sure?',
+                                    text: 'Are you sure you want to mark them as resolved?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then((result) => {
+                                    if (result) {
+                                        $.ajax({
+                                            url: '{!! route('admin.crm.bulk_resolve') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'crm_request_ids': selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                        .done(function (data) {
+                                            if (data.status == 1 && data.error){
+                                                toastr.error(data.error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            } else {
+                                                window.location.href = '{!! route('admin.crm.resolved.index') !!}';
+                                            }
                                         });
-                                    } else {
-                                        location.reload();
                                     }
                                 });
                             }
                         },
                     @endif
-
 
                     @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
                     {
