@@ -9,7 +9,17 @@
         @include('client.inc.messages')
         <div class="card-content" aria-expanded="true">
             <div class="card-body text-center">
-                <h1 class="mb-5">Welcome to Sonic..</h1>
+                <div class="row mb-5">
+                    <div class="col d-flex justify-content-center">
+                        <h1>Welcome to Sonic..</h1>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{{ route('cod.packaging.requests.categories') }}" class="btn btn-primary" data-toggle="tooltip" title="Click to order your packaging materials now" data-placement="bottom">
+                            <i class="la la-bookmark"></i>
+                            Packaging Material Request
+                        </a>
+                    </div>
+                </div>
         
                 @if(isset($user->lead_id))
                     <div class="progress">
@@ -224,6 +234,12 @@
             width: 100%;
         }
 
+        .tooltip .tooltip-inner {
+            text-align: left;
+        }
+        .tooltip {
+            margin-left: -100px;
+        }
 
     </style>
 @endsection
