@@ -77,6 +77,19 @@
                                         <th>Walk-In Saver Plus</th>
                                         <th>Walk-In Swift</th>
 
+
+                                        <th>Osa Name</th>
+                                        <th>Osa Rate</th>
+
+                                        <th>Osa Name 2</th>
+                                        <th>Osa Rate 2</th>
+
+                                        <th>Osa Name 3</th>
+                                        <th>Osa Rate 3</th>
+
+                                        <th>Osa Name 4</th>
+                                        <th>Osa Rate 4</th>
+
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -191,20 +204,22 @@
                                             </td>
 
                                             <td>
-                                                {!! Form::checkbox($index . "[pickup]", 1, isset($ro['pickup']) && $ro['pickup'] == 1, [
-                                                    'class' => (isset($errors[$index]["pickup"]) ? ' is-invalid' : ''),
-                                                    'style' => !isset($errors[$index]["pickup"]) && isset($ro['pickup']) && ($ro['pickup']) != 1  ? 'pointer-events: none; opacity:0.5;' : ''
-                                                ]) !!}
-                                                @if (isset($errors[$index]["pickup"]))
+                                                {!! Form::hidden($index . "[pickup]", 0) !!}
+                                                {!! Form::checkbox($index . "[pickup]",  $ro['pickup'] ?? "0", isset($ro['pickup']) && $ro['pickup'] == 1, [
+                                                      'class' => isset($errors[$index]["pickup"]) ? 'is-invalid' : '',
+                                                      'style' => !isset($errors[$index]["pickup"]) ? 'pointer-events: none; opacity:0.5;' : ''
+                                                  ]) !!}
+
+                                            @if (isset($errors[$index]["pickup"]))
                                                     <span class="text-danger">{{ $errors[$index]["pickup"] }}</span>
                                                 @endif
                                             </td>
 
 
                                             <td>
-                                                {!! Form::text($index . "[cut_off_time]", $ro['cut_off_time'] ?? '', [
+                                                {!! Form::text($index . "[cut_off_time]", $ro['cut_off_time'] ?? '0', [
                                                     'class' => 'form-control' . (isset($errors[$index]["cut_off_time"]) ? ' is-invalid' : ''),
-                                                    'style' => !isset($errors[$index]["pickup"]) && isset($ro['pickup']) && ($ro['pickup']) != 1  ? 'pointer-events: none; opacity:0.5;' : ''
+                                                    'style' => !isset($errors[$index]["cut_off_time"])  ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
 
                                                 @if (isset($errors[$index]["cut_off_time"]))
@@ -365,6 +380,35 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                             </td>
+
+                                            @for ($i = 1; $i <= 4; $i++)
+                                                {{-- OSA {{$i}} --}}
+                                                <td>
+                                                    {!! Form::text(
+                                                          $index . "[osa_name_$i]",
+                                                          isset($ro["osa_name_$i"]) && $ro["osa_name_$i"] !== "" ? $ro["osa_name_$i"] : '',
+                                                          [
+                                                              'class' => 'form-control' . (isset($errors[$index]["osa_name_$i"]) ? ' is-invalid' : ''),
+                                                              'style' => !isset($errors[$index]["osa_name_$i"]) ? 'pointer-events: none; opacity:0.5;' : ''
+                                                          ]
+                                                      ) !!}
+
+                                                    @if (isset($errors[$index]["osa_name_$i"]))
+                                                        <span class="text-danger">{{ $errors[$index]["osa_name_$i"] }}</span>
+                                                    @endif
+                                                </td>
+
+                                                <td>
+                                                    {!! Form::text($index . "[osa_rate_$i]", $ro["osa_rate_$i"] ?? '', [
+                                                        'class' => 'form-control' . (isset($errors[$index]["osa_rate_$i"]) ? ' is-invalid' : ''),
+                                                        'style' => !isset($errors[$index]["osa_rate_$i"]) ? 'pointer-events: none; opacity:0.5;' : ''
+                                                    ]) !!}
+
+                                                    @if (isset($errors[$index]["osa_rate_$i"]))
+                                                        <span class="text-danger">{{ $errors[$index]["osa_rate_$i"] }}</span>
+                                                    @endif
+                                                </td>
+                                            @endfor
 
                                             <td><button type="button" class="btn btn-icon btn-danger cancel_cities"><i class="la la-close"></i> </button></td>
 
