@@ -9,17 +9,21 @@
         @include('client.inc.messages')
         <div class="card-content" aria-expanded="true">
             <div class="card-body text-center">
-                <div class="row mb-5">
-                    <div class="col d-flex justify-content-center">
-                        <h1>Welcome to Sonic..</h1>
+                @if (auth()->user()->account_type_id == 1)
+                    <div class="row mb-5">
+                        <div class="col d-flex justify-content-center" style="margin: 0px 0px 0px 277px;">
+                            <h1>Welcome to Sonic..</h1>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{{ route('cod.packaging.requests.categories') }}" class="btn btn-primary" data-toggle="tooltip" title="Click to order your packaging materials now" data-placement="bottom">
+                                <i class="la la-bookmark"></i>
+                                Packaging Material Request
+                            </a>
+                        </div>
                     </div>
-                    <div class="col-auto">
-                        <a href="{{ route('cod.packaging.requests.categories') }}" class="btn btn-primary" data-toggle="tooltip" title="Click to order your packaging materials now" data-placement="bottom">
-                            <i class="la la-bookmark"></i>
-                            Packaging Material Request
-                        </a>
-                    </div>
-                </div>
+                @else
+                    <h1 class="mb-5">Welcome to Sonic..</h1>
+                @endif
         
                 @if(isset($user->lead_id))
                     <div class="progress">
