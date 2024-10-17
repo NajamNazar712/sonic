@@ -69,6 +69,7 @@
                             <th class="border-primary border-darken-1">Image</th>
                             <th class="border-primary border-darken-1">Quantity - By Admin</th>
                             <th class="border-primary border-darken-1">Comment or Remarks</th>
+                            <th class="border-primary border-darken-1">ODR Nature</th>
                             <th class="border-primary border-darken-1">Created At</th>
                             <th class="border-primary border-darken-1">Created By</th>
                             <th class="border-primary border-darken-1">Admin Hub</th>
@@ -135,6 +136,18 @@
                                                 <input type="text" name="remarks" id="remarks" class="w-100 p-1 border-primary" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
                                             </div>
                                         </div>
+
+                                        <div class="row p-1">
+
+                                            <div class="col form-group">
+                                                <select name="odr_nature" id="odr_nature" class="select2 form-control" data-rule-required="true" data-msg-required="ODR Nature is required">
+                                                    @foreach($odr_natures as $odr)
+                                                    <option value="{{$odr->id}}">{{ $odr->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
                                         <div class="row p-1">
                                             <div class="col">
                                                 <label>Product Content By Admin (Description)<span class="text-danger">*</span></label>
@@ -248,6 +261,12 @@
                 'allowPlus': false
             });
 
+            $('#odr_nature').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select ODR Nature*",
+                allowClear:true
+            });
+
             // Opening modal and fetching data from shipment tracking number and display values in modal
             $('#add_shipment_form').validate({
                 errorClass: 'danger',
@@ -326,6 +345,7 @@
                     formData.append('shipment_content_shipper', $('#shipment_content_shipper').val());
                     formData.append('quantity', $('#quantity').val());
                     formData.append('remarks', $('#remarks').val());
+                    formData.append('odr_nature', $('#odr_nature').val());
                     formData.append('shipment_content_admin', $('#shipment_content_admin').val());
                     formData.append('picture_attached', $('#picture_attached')[0].files[0]);
                     formData.append('_token', '{{ csrf_token() }}');
@@ -421,6 +441,7 @@
                             head.push('Shipment content by Admin');
                             head.push('Quantity by Admin');
                             head.push('Remarks by Admin');
+                            head.push('ODR Nature');
                             head.push('Created At');
                             head.push('Updated By');
                             head.push('Admin Hub');
@@ -440,6 +461,7 @@
                                 row.push(values.shipment_content_by_admin);
                                 row.push(values.quantity_by_admin);
                                 row.push(values.remarks_by_admin);
+                                row.push(values.odr_nature)
                                 row.push(values.created_at);
                                 row.push(values.updated_by);
                                 row.push(values.admin_hub);
@@ -505,6 +527,7 @@
                     { data:'images' ,name: 'rdinary_discrepancy_reports.picture_path', class: 'align-middle images'},
                     { data:'quantity_by_admin' ,name: 'ordinary_discrepancy_reports.quantity', class: 'align-middle quantity_by_admin text-center'},
                     { data:'remarks_by_admin' ,name: 'ordinary_discrepancy_reports.remarks', class: 'align-middle remarks_by_admin'},
+                    { data:'odr_nature' ,name: 'odr_nature', class: 'align-middle odr_nature'},
                     { data:'created_at' ,name: 'ordinary_discrepancy_reports.created_at', class: 'align-middle created_at'},
                     { data:'updated_by' ,name: 'admins.name', class: 'align-middle updated_by'},
                     { data:'admin_hub' ,name: 'ch.name', class: 'align-middle admin_hub'},
