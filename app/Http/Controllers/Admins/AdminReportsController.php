@@ -15613,4 +15613,42 @@ class AdminReportsController extends Controller
         });
         return $datatable->make(true);
     }
+
+    public function list_for_tracking_screen(Request $request)
+    {
+        $details = OrdinaryDiscrepancyReport::leftjoin('odr_natures', 'odr_natures.id', 'ordinary_discrepancy_reports.odr_nature_id')
+        ->leftjoin('admins', 'admins.id', 'ordinary_discrepancy_reports.admin_id')
+        ->select(['ordinary_discrepancy_reports.*' , 'odr_natures.name as odr_nature', 'admins.name as created_by'])
+        ->where('ordinary_discrepancy_reports.shipment_id', $request->shipment_id)
+        ->latest('created_at')
+        ->get();
+
+
+        $details = $details->map(function ($detail) {
+            $html = "";
+            if ($detail->picture_path != null) {
+                $images = explode('|', $detail->picture_path);
+                foreach ($images as $image) {
+                    $exists = Storage::disk('public')->exists($image);
+                    if ($exists) {
+                        $route = Storage::disk('public')->url($image);
+                    } else {
+                        $route = Storage::disk('s3')->temporaryUrl($image, now()->addMinutes(5));
+                    }
+                    $html .= '<a target="_blank" class="btn btn-sm btn-outline-info align-middle" href="' . $route . '"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View Image</span></a><br>';
+                }
+            } else {
+                $html = "-";
+            }
+        
+            // Add image_html key to the collection item
+            $detail->image_html = $html;
+        
+            return $detail;
+        });
+        
+        //return $details;
+
+        return response()->json(['details' => $details]);
+    }
 }

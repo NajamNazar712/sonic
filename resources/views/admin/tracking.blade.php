@@ -443,6 +443,12 @@
             </div>
         </div>
     </div>
+
+
+    <div class="modal fade" id="ViewODRModal" data-backdrop="static" role="dialog" aria-labelledby="view_odr_modal" aria-hidden="true">
+        
+    </div>
+
     <div class="modal fade text-left" id="ReattemptModal" data-backdrop="static" tabindex="-1" role="dialog"
         aria-labelledby="ReattemptModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -1550,6 +1556,11 @@
                                     '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' +
                                     id + ' data-tracking=' + details.tracking_number +
                                     '>Add Request</button>';
+
+                                shipment +=
+                                        '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 view_odr" id=' +
+                                        id + ' data-tracking=' + details.tracking_number +
+                                        '>View ODR</button>';
 
                                 @if (session('role_id') == 1 || in_array(867, session('permissions')))
                                     shipment +=
@@ -2662,6 +2673,74 @@
                 $('#AddRequestModal').modal('show');
 
             });
+
+            $('#tracking').on('click', '.view_odr', function() {
+                shipment_id = $(this).attr('id');
+
+                $.ajax({
+                url:  '{{ route('admin.reports.ordinary_discrepancy_report.list_for_tracking_screen') }}',
+                type: 'GET', 
+                data: { shipment_id: shipment_id }, 
+                success: function(response) {
+                    var modalContent =  
+                        '<div class="modal-dialog modal-xl" role="document">' +
+                        '<div class="modal-content">' +
+                        '<div class="modal-header bg-primary white">' +
+                        '<h4 class="modal-title white">Operation Discrepancy Report</h4>' +
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                        '</button>' +
+                        '</div>' +
+                        '<div class="modal-body text-center">' +
+                        '<table class="table table-bordered datatable">' +
+                        '<thead>' +
+                        '<tr role="row" class="bg-primary white">' +
+                        '<th class="border-primary border-darken-1">S. No.</th>' +
+                        '<th class="border-primary border-darken-1">ODR Nature</th>' +
+                        '<th class="border-primary border-darken-1">Product Content</th>' +
+                        '<th class="border-primary border-darken-1">Remarks</th>' +
+                        '<th class="border-primary border-darken-1">Added By</th>' +
+                        '<th class="border-primary border-darken-1">Quantity</th>' +
+                        '<th class="border-primary border-darken-1">Image</th>' +
+                        '<th class="border-primary border-darken-1">Created At</th>' +
+
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody>'; 
+
+                        $.each(response.details, function(index, item) {
+                            var data = item;
+                                modalContent += '<tr>';
+                                modalContent += '<td>' + (index + 1) + '</td>'; 
+                                modalContent += '<td>' + data.odr_nature + '</td>'; 
+                                modalContent += '<td>' + data.product_content + '</td>'; 
+                                modalContent += '<td>' + data.remarks + '</td>'; 
+                                modalContent += '<td>' + data.created_by + '</td>';
+                                modalContent += '<td>' + data.quantity + '</td>';
+                                modalContent += '<td>' + data.image_html + '</td>'; 
+                                modalContent += '<td>' + data.created_at + '</td>';
+                                modalContent += '</tr>';                            
+                        });
+
+
+                    modalContent += '</tbody>' + // End of tbody
+                        '</table>' +
+                       
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                    $('#ViewODRModal').html('');
+                    $('#ViewODRModal').append(modalContent);
+                    $('#ViewODRModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors if any
+                }
+            });
+
+
+            });
+
             $('#tracking').on('click', '.returnMarkStatus', function() {
                 id = $(this).attr('id');
                 var tracking = $(this).attr('data-tracking');
