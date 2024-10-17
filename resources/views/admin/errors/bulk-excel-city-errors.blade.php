@@ -243,10 +243,11 @@
 
                                             <td>
                                                 {!! Form::hidden($index . "[pickup]", 0) !!}
-                                                {!! Form::checkbox($index . "[pickup]",  $ro['pickup'] ?? "0", isset($ro['pickup']) && $ro['pickup'] == 1, [
-                                                      'class' => isset($errors[$index]["pickup"]) ? 'is-invalid' : '',
-                                                      'style' => !isset($errors[$index]["pickup"]) ? 'pointer-events: none; opacity:0.5;' : ''
-                                                  ]) !!}
+                                                {!! Form::checkbox($index . "[pickup]", 1, isset($ro['pickup']) && ($ro['pickup'] == 1 || (is_array($ro['pickup']) && Str::contains($ro['pickup'], ['0', '1']))), [
+                                                  'class' => isset($errors[$index]["pickup"]) ? 'is-invalid' : '',
+                                                  'style' => !isset($errors[$index]["pickup"]) ? 'pointer-events: none; opacity:0.5;' : ''
+                                              ]) !!}
+
 
                                             @if (isset($errors[$index]["pickup"]))
                                                     <span class="text-danger">{{ $errors[$index]["pickup"] }}</span>
