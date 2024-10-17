@@ -30,6 +30,7 @@
                                     <thead>
                                     <tr>
                                         <th>City Name</th>
+                                        <th>City Code</th>
                                         <th>Is City</th>
                                         <th>Is Hub</th>
                                         <th>Select Hub</th>
@@ -39,6 +40,9 @@
                                         <th>Location longitude</th>
                                         <th>Hub location latitude</th>
                                         <th>Hub location longitude</th>
+                                        <th>Office Address</th>
+                                        <th>GC Area</th>
+
                                         <th>Pickup</th>
                                         <th>Pickup Cut Off</th>
 
@@ -90,6 +94,9 @@
                                         <th>Osa Name 4</th>
                                         <th>Osa Rate 4</th>
 
+                                        <th>Select Closest Hub (Optional)</th>
+                                        <th>Vehicle Numbers *</th>
+
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -105,6 +112,16 @@
                                                 ]) !!}
                                                 @if (isset($errors[$index]["name"]))
                                                     <span class="text-danger">{{ $errors[$index]["name"] }}</span>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                {!! Form::text($index . "[city_code]", $ro['city_code'] ?? '', [
+                                                    'class' => 'form-control' . (isset($errors[$index]["city_code"]) ? ' is-invalid' : ''),
+                                                    'readonly' => !isset($errors[$index]["city_code"]) ? 'readonly' : null
+                                                ]) !!}
+                                                @if (isset($errors[$index]["city_code"]))
+                                                    <span class="text-danger">{{ $errors[$index]["city_code"] }}</span>
                                                 @endif
                                             </td>
 
@@ -132,11 +149,10 @@
                                                 {!! Form::select($index . "[hub_id]", $hubs, $ro['hub_id'] ?? '', [
                                                     'class' => 'form-control hub_id select2' . (isset($errors[$index]["hub_id"]) ? ' is-invalid' : ''),
                                                     'style' => 'width:80px','placeholder' => '',
-                                                    'disabled' => $ro['is_hub'] == 1 ? 'disabled' : null // Disable if is_hub is 1
+                                                    'disabled' => ($ro['is_hub'] == 1 || isset($errors[$index]["is_hub"]) && isset($errors[$index]["is_city"])) ? 'disabled' : null // Disable if is_hub is 1
                                                 ]) !!}
 
                                                 @if ($ro['is_hub'] == 1 && isset($errors[$index]["hub_id"]))
-                                                    {{-- No error message shown if is_hub is 1 since select is disabled --}}
                                                 @elseif (isset($errors[$index]["hub_id"]))
                                                     <span class="text-danger">{{ $errors[$index]["hub_id"] }}</span>
                                                 @endif
@@ -144,9 +160,9 @@
 
                                             <td>
                                                 {!! Form::select($index . "[zone_id]", $zones, $ro['zone_id'] ?? '', [
-                                                    'class' => 'form-control zone_id' . (isset($errors[$index]["zone_id"]) ? ' is-invalid' : ''),
+                                                    'class' => 'form-control zone_id select2' . (isset($errors[$index]["zone_id"]) ? ' is-invalid' : ''),
                                                     'style' => 'width:80px','placeholder' => '',
-                                                    'disabled' => $ro['is_city'] == 1 ? 'disabled' : null
+                                                    'disabled' => ($ro['is_city'] == 1 || isset($errors[$index]["is_hub"]) && isset($errors[$index]["is_city"]))    ? 'disabled' : null
                                                 ]) !!}
 
                                                 @if ($ro['is_city'] == 1 && isset($errors[$index]["zone_id"]))
@@ -200,6 +216,28 @@
                                                 ]) !!}
                                                 @if (isset($errors[$index]["hub_location_longitude"]))
                                                     <span class="text-danger">{{ $errors[$index]["hub_location_longitude"] }}</span>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                {!! Form::text($index . "[address]", $ro['address'] ?? '', [
+                                                    'class' => 'form-control' . (isset($errors[$index]["address"]) ? ' is-invalid' : ''),
+                                                    'readonly' => !isset($errors[$index]["address"]) ? 'readonly' : null
+                                                ]) !!}
+                                                @if (isset($errors[$index]["address"]))
+                                                    <span class="text-danger">{{ $errors[$index]["address"] }}</span>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                {!! Form::hidden($index . "[gc_area]", 0) !!}
+                                                {!! Form::checkbox($index . "[gc_area]",  $ro['gc_area'] ?? "0", isset($ro['gc_area']) && $ro['gc_area'] == 1, [
+                                                      'class' => isset($errors[$index]["gc_area"]) ? 'is-invalid' : '',
+                                                      'style' => !isset($errors[$index]["gc_area"]) ? 'pointer-events: none; opacity:0.5;' : ''
+                                                  ]) !!}
+
+                                                @if (isset($errors[$index]["gc_area"]))
+                                                    <span class="text-danger">{{ $errors[$index]["gc_area"] }}</span>
                                                 @endif
                                             </td>
 
@@ -408,7 +446,37 @@
                                                         <span class="text-danger">{{ $errors[$index]["osa_rate_$i"] }}</span>
                                                     @endif
                                                 </td>
+
+
                                             @endfor
+
+                                            <td>
+                                                {!! Form::select($index . "[closest_hub]", $hubs, $ro['closest_hub'] ?? '', [
+                                                    'class' => 'form-control closest_hub' . (isset($errors[$index]["closest_hub"]) ? ' is-invalid' : ''),
+                                                    'style' => 'width:80px','placeholder' => '',
+                                                    'disabled' => $ro['is_city'] == 1 ? 'disabled' : null
+                                                ]) !!}
+
+                                                @if ($ro['is_city'] == 1 && isset($errors[$index]["closest_hub"]))
+                                                    {{-- No error message shown if is_city is 1 since select is disabled --}}
+                                                @elseif (isset($errors[$index]["closest_hub"]))
+                                                    <span class="text-danger">{{ $errors[$index]["closest_hub"] }}</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                {!! Form::select($index . "[vehicles_list][]", $vehicles, $ro['vehicles_list'] ?? '', [
+                                                    'class' => 'form-control vehicles_list' . (isset($errors[$index]["vehicles_list"]) ? ' is-invalid' : ''),
+                                                    'style' => 'width:150px',
+                                                    'multiple' => true,
+                                                    'disabled' => $ro['is_city'] == 1 ? 'disabled' : null
+                                                ]) !!}
+
+                                                @if ($ro['is_city'] == 1 && isset($errors[$index]["vehicles_list"]))
+                                                    {{-- No error message shown if is_city is 1 since select is disabled --}}
+                                                @elseif (isset($errors[$index]["vehicles_list"]))
+                                                    <span class="text-danger">{{ $errors[$index]["vehicles_list"] }}</span>
+                                                @endif
+                                            </td>
 
                                             <td><button type="button" class="btn btn-icon btn-danger cancel_cities"><i class="la la-close"></i> </button></td>
 
@@ -420,7 +488,8 @@
                             </div>
                             <div align="center" style="margin-top: 2%">
                                 {!! Form::button('Submit', array('class' => 'btn btn-success submit', 'type' => 'submit', 'style'=>'width:10%'))!!}
-                            </div>                            {!! Form::close() !!}
+                            </div>
+                            {!! Form::close() !!}
                         </div>
                     </div>
                 </div>
@@ -446,6 +515,21 @@
                 $('.zone_id').select2({
                     width: '100%',
                     placeholder: 'Select Zone'
+                });
+                $('.closest_hub').select2({
+                    width: '100%',
+                    allowClear: true,
+                    placeholder: 'Select Hub'
+                });
+
+                $(".vehicles_list").select2({
+                    placeholder: 'Vehicle Numbers*',
+                });
+
+                $('.closest_hub').on('change', function () {
+                    if ($(this).val() === null) {
+                        $(".vehicles_list").val(null).trigger('change');
+                    }
                 });
 
                 $('.form-control').css('width', '100px');
