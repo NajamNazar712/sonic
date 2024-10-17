@@ -7377,7 +7377,6 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $selected_shipments = count($pending_payment_shipment_ids);
 
                 $pending_payment = PendingPayment::find($pending_payment_id);
-
                 if ($pending_payment) {
                     $user_bank_id = NULL;
 
@@ -7647,7 +7646,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
             return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
         }else{
-            return redirect()->with(['success' => 'Given Ids Already Processed']);
+            return redirect()->back()->with(['success' => 'Given Ids Already Processed']);
         }
     }
 
