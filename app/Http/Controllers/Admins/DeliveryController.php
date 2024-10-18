@@ -1504,6 +1504,11 @@ class DeliveryController extends Controller
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
             })
+            ->addColumn('excel_others', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [6,8,9,10,11], null, 'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
 
             ->addColumn('delivered_excel_ecom_cod', function($result){
                 $count = 0;
@@ -1531,6 +1536,14 @@ class DeliveryController extends Controller
                 }
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('delivered_excel_others', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [6,8,9,10,11], 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
             })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.delivery.receive.status', ['id' => $result->delivery_note]);
@@ -5498,6 +5511,11 @@ class DeliveryController extends Controller
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
             })
+            ->addColumn('excel_others', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [6,8,9,10,11], null, 'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
 
             ->addColumn('delivered_excel_ecom_cod', function($result){
                 $count = 0;
@@ -5525,6 +5543,14 @@ class DeliveryController extends Controller
                 }
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('delivered_excel_others', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [6,8,9,10,11], 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
             });
         //        if ($tracking_number = $request->get('search_tracking')) {
         //            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -7768,6 +7794,11 @@ class DeliveryController extends Controller
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
             })
+            ->addColumn('excel_others', function($result){
+                $count = 0;
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [6,8,9,10,11], null, 'delivery_note_id');
+                return $count > 0 ? $count : '-';
+            })
 
             ->addColumn('delivered_excel_ecom_cod', function($result){
                 $count = 0;
@@ -7795,6 +7826,14 @@ class DeliveryController extends Controller
                 }
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('delivered_excel_others', function($result){
+                $count = 0;
+                $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
+                if (!empty($delivered_shipments)) {
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [6,8,9,10,11], 'delivered', 'delivery_note_id');
+                }
+                return $count > 0 ? $count : '-';
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -10619,25 +10658,31 @@ class DeliveryController extends Controller
         }
     }
 
+
+
     public static function get_segment_type($table, $ids, $segment, $sub_segment, $type = null, $column)
     {
-        $shipment_ids = [];
-
-        if ($type == null) {
-            $shipment_ids = DB::table($table)
-                ->whereIn($column, $ids)
-                ->pluck('shipment_id');
-        } else {
-            $shipment_ids = $ids;
-        }
+        $shipment_ids = $type === null
+            ? DB::table($table)->whereIn($column, $ids)->pluck('shipment_id')
+            : $ids;
 
         return Shipment::whereIn('id', $shipment_ids)
             ->whereHas('user', function ($query) use ($segment, $sub_segment) {
-                $query->where('segment_id', $segment)
-                    ->where('sub_segment_id', $sub_segment);
+                if (is_array($segment)) {
+                    $query->whereIn('segment_id', $segment);
+                } else {
+                    $query->where('segment_id', $segment);
+                }
+
+                if (is_array($sub_segment)) {
+                    $query->whereIn('sub_segment_id', $sub_segment);
+                } else {
+                    $query->where('sub_segment_id', $sub_segment);
+                }
             })
             ->count();
     }
+
 
     public static function get_delivered_shipments($dn_ids){
         $dncc_status = array(14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38);

@@ -349,11 +349,13 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Others');
 
                             head.push('No. Of Shipments Delivered');
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Others');
 
                             head.push('Assigned By');
                             head.push('Assigned Date');
@@ -384,11 +386,13 @@
                                 row.push(values.excel_ecom_cod);
                                 row.push(values.excel_general_retail);
                                 row.push(values.excel_general_ecom_express);
+                                row.push(values.excel_others);
 
                                 row.push(values.delivered_shipments);
                                 row.push(values.delivered_excel_ecom_cod);
                                 row.push(values.delivered_excel_general_retail);
                                 row.push(values.delivered_excel_general_ecom_express);
+                                row.push(values.delivered_excel_others);
 
                                 row.push(values.assignee);
                                 row.push(values.created_at);
