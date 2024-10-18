@@ -312,6 +312,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Others');
 
                             head.push('Pending');
                             head.push('Pending %');
@@ -320,6 +321,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Others');
 
                             head.push('Delivered %');
                             head.push('Undelivered');
@@ -350,6 +352,7 @@
                                 row.push(values.excel_ecom_cod);
                                 row.push(values.excel_general_retail);
                                 row.push(values.excel_general_ecom_express);
+                                row.push(values.excel_others);
 
                                 row.push(values.pending_shipments);
                                 row.push(values.pending_shipments_per);
@@ -358,6 +361,7 @@
                                 row.push(values.delivered_excel_ecom_cod);
                                 row.push(values.delivered_excel_general_retail);
                                 row.push(values.delivered_excel_general_ecom_express);
+                                row.push(values.delivered_excel_others);
 
                                 row.push(values.delivered_shipments_per);
                                 row.push(values.undelivered_shipments);
