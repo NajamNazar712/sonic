@@ -7,6 +7,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipment;
 use App\RvShipmentTicket;
 use GuzzleHttp\Client;
+use App\Http\Traits\RvTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 class BotCallDispatchThird implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, RvTrait;
 
     protected $shipmentId;
 
@@ -45,8 +46,9 @@ class BotCallDispatchThird implements ShouldQueue
 
         //
         $environment = config('app.env');
+        $post = $this->BotCallingDataSet($this->shipmentId);
 
-        if (GlobalSettings::where(['type'=> 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
+        if ($post) {
             if(RvShipmentTicket::where('shipment_id', $this->shipmentId)->whereNull('deleted_at')->where('is_bot',1)->exists() && Shipment::whereIn('shipper_status_id', [12, 52, 66])->where('id', $this->shipmentId)->exists()){
                 $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
                 RvShipmentTicket::where('shipment_id', $this->shipmentId)->update(['in_progress' => 1]);
@@ -76,9 +78,9 @@ class BotCallDispatchThird implements ShouldQueue
                 $response = $response->getBody()->getContents();
                 $response = json_decode($response);
                 WebhookLogController::zong_call_log($shipment->user_id,  $status_code, $this->shipmentId, 3, json_encode($response));
-            }else{
-                return json_encode(['status'=>0,'message'=>'Shipment isn`t at the bot call prefernce']);
             }
+        }else {
+            return json_encode(['status' => 0, 'message' => 'Shipment isn`t at the bot call prefernce']);
         }
        
     }
