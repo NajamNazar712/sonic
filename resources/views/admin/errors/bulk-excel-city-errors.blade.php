@@ -126,7 +126,7 @@
                                             </td>
 
                                             <td>
-                                                {!! Form::text($index . "[is_city]", $ro['is_city'] ?? '', [
+                                                {!! Form::text($index . "[is_city]", $ro['is_city'] ?? '0', [
                                                     'class' => 'form-control' . (isset($errors[$index]["is_hub"]) ? ' is-invalid' : ''),
                                                     'readonly' => !isset($errors[$index]["is_city"]) ? 'readonly' : null
                                                 ]) !!}
@@ -136,7 +136,7 @@
                                             </td>
 
                                             <td>
-                                                {!! Form::text($index . "[is_hub]", $ro['is_hub'] ?? '', [
+                                                {!! Form::text($index . "[is_hub]", $ro['is_hub'] ?? '0', [
                                                     'class' => 'form-control' . (isset($errors[$index]["is_hub"]) ? ' is-invalid' : ''),
                                                     'readonly' => !isset($errors[$index]["is_hub"]) ? 'readonly' : null
                                                 ]) !!}
