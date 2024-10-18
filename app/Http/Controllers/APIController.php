@@ -7824,7 +7824,6 @@ class APIController extends Controller
         $valid_ip_addresses[] = '103.111.84.67';
         $valid_ip_addresses[] = '103.111.85.67';
         $valid_ip_addresses[] = '103.111.84.125';
-        $valid_ip_addresses[] = '203.212.31.170';
         $environment = config('app.env');
         if ($environment == 'production') {
             $whip = new Whip();
