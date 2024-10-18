@@ -392,21 +392,25 @@
                             footer.push('');
                             footer.push('');
 
-                            footer.push('');
-                            footer.push('');
-                            footer.push('');
-                            footer.push('');
-                            footer.push('');
-                            footer.push('');
+
+
 
                             footer.push('');
                             footer.push('');
                             footer.push('');
                             footer.push('');
                             footer.push(shipments_count_excel.toFixed(2));
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
                             footer.push(pending_shipments_excel.toFixed(2));
                             footer.push(pending_shipments_per_excel.toFixed(2));
                             footer.push(delivered_shipments_excel.toFixed(2));
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
                             footer.push(delivered_shipments_per_excel.toFixed(2));
                             footer.push(undelivered_shipments_excel.toFixed(2));
                             footer.push(undelivered_shipments_per_excel.toFixed(2));
