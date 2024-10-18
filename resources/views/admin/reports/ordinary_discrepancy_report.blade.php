@@ -1,8 +1,8 @@
 @extends('admin.layout.master')
-@section('title','Ordinary Discrepancy Report')
+@section('title','Ordinary Disorder Report')
 @section('content')
     <h1 class="mb-1">
-        Ordinary Discrepancy Report
+        Ordinary Disorder Report
     </h1> 
 
     <div class="card">
