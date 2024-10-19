@@ -15376,11 +15376,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             foreach ($forms as $item) {
                 if (isset($item['is_hub']) && $item['is_hub'] == "1") {
                     $item['hub'] = 1;
+                    $item['created_at'] = now();
+                    $item['updated_at'] = now();
                     $isHubArray[] = $item;
                 }
+
                 if (isset($item['is_city']) && $item['is_city'] == "1") {
                     $zone = $cities->get($item['hub_id']);
                     $item['zone_id'] = $zone ? $zone->zone_id : null;
+                    $item['created_at'] = now();
+                    $item['updated_at'] = now();
                     $isCityArray[] = $item;
                 }
             }
