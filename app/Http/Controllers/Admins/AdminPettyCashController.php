@@ -2466,7 +2466,10 @@ class AdminPettyCashController extends Controller
 
             $sdn_link = PettyCashStatement::where('id',$petty_detail->petty_cash_statement_id)->first();
             $sdn_amount = StationDepositNote::where('id', $sdn_link->sdn_id)->first(); 
-            $sdn_amount->adjustment_amount = (int)$sdn_link->total_amount;
+
+            $sdn_modified_adjusted_amount = ($sdn_amount->adjustment_amount - $existing_petty_cash->total_amount ) + $amount;
+
+            $sdn_amount->adjustment_amount = (int)$sdn_modified_adjusted_amount;
             $sdn_amount->save();
 
             //            $data = response()->json([
