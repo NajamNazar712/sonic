@@ -7,6 +7,7 @@ use App\CorporateZeroCodDiscountCharges;
 use App\HistoryShipmentReturnDiscountCharges;
 use App\HistoryZeroCodDiscountCharges;
 use App\Http\Models\Admin\VehicleType;
+use App\Jobs\MakeDynamicHubsMapping;
 use App\PendingCorporateShipmentReturnDiscountCharges;
 use App\PendingCorporateZeroCodDiscountCharges;
 use App\PendingShipmentReturnDiscountCharges;
@@ -15224,8 +15225,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'city_code' => 'nullable',
             'hub_id' => 'required_without:zone_id|required_if:is_city,1|exists:cities,id|hub_id_check',
             'zone_id' => 'required_without:hub_id|required_if:is_hub,1|exists:zones,id|zone_id_check',
-            'is_city' => 'required_without_all:is_hub|boolean',
-            'is_hub'  => 'required_without_all:is_city|boolean',
+            'is_city' => 'required_without_all:is_hub|nullable|boolean',
+            'is_hub'  => 'required_without_all:is_city|nullable|boolean',
             'attempt_tat' => 'required|integer|min:1',
             'location_latitude' => 'required|numeric',
             'location_longitude' => 'required|numeric',
@@ -15394,6 +15395,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 }
 
                 $insertedIds = self::getLastInsertedCityIds(count($isCityArray));
+                sort($insertedIds);
+
                 $historyArray = self::historyCityArray($insertedIds);
 
                 if(!empty($historyArray)){
@@ -15433,39 +15436,12 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 //Inserted IDS
                 $insertedIds = self::getLastInsertedCityIds(count($isHubArray));
+                sort($insertedIds);
+
                 $historyArray = self::historyCityArray($insertedIds);
 
                 if(!empty($historyArray)){
                     CityHistory::insert($historyArray);
-                }
-                //insertion for dyanmic mapping hubs
-                if (!empty($closestHubTypes) && !empty($insertedIds)) {
-                    $cities = City::findMany($insertedIds);
-
-                    $cityMap = [];
-                    foreach ($cities as $city) {
-                        $cityMap[$city->id] = $city;
-                    }
-
-                    $hubMappings = [];
-
-                    foreach ($closestHubTypes as $key => $closestHubType) {
-                        foreach (array_values($closestHubTypes) as $key2 => $value) {
-                            if (count($value) > 0) {
-                                if (isset($cityMap[$insertedIds[$key2]])) {
-                                    $hubMappings[] = [
-                                        'value' => $value,
-                                        'key' => $key,
-                                        'city' => $cityMap[$insertedIds[$key2]],
-                                    ];
-                                }
-                            }
-                        }
-                    }
-
-                    foreach ($hubMappings as $mapping) {
-                        $this->makeDynamicHubsMapping($mapping['value'], $mapping['key'], $mapping['city']);
-                    }
                 }
 
 
@@ -15493,6 +15469,46 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 //Add Management Hub Users In Admin Hubs
                 $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
                 self::addManagementHubUser($admin_ids, $insertedIds);
+
+                // Insertion for dynamic mapping hubs
+                if (!empty($closestHubTypes) && !empty($insertedIds)) {
+                    $cities = City::findMany($insertedIds);
+
+                    $cityMap = [];
+                    foreach ($cities as $city) {
+                        $cityMap[$city->id] = $city;
+                    }
+
+                    $hubMappings = [];
+
+                    foreach ($closestHubTypes as $key => $value) {
+                        if (count($value) > 0) {
+                            $keys = array_keys($closestHubTypes);
+                            $index = array_search($key, $keys, true);
+
+                            if ($index !== false && isset($insertedIds[$index])) {
+                                $cityId = $insertedIds[$index];
+
+                                if (isset($cityMap[$cityId])) {
+                                    $hubMappings[] = [
+                                        'vehicles' => $value,
+                                        'closest_hub' => $key,
+                                        'city' => $cityMap[$cityId],
+                                    ];
+                                } else {
+                                    Log::warning("City ID {$cityId} not found in city map.");
+                                }
+                            } else {
+                                Log::warning("Index not found for key {$key} in inserted IDs.");
+                            }
+                        }
+                    }
+
+                    // Dispatch jobs for each mapping
+                    foreach ($hubMappings as $mapping) {
+                        dispatch(new MakeDynamicHubsMapping($mapping['vehicles'], $mapping['closest_hub'], $mapping['city']));
+                    }
+                }
 
             }
             return redirect()->route('admin.management.city.index')->with('success', 'Hub city added successfully');
