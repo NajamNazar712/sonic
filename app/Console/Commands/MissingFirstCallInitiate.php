@@ -70,9 +70,10 @@ class MissingFirstCallInitiate extends Command
         ->whereIn('shipments.shipper_status_id', [12, 52, 66])
         // ->whereNotIn('shipments.user_id', [$globalSettings['rv_disable_shippers_only_shippers']])
         ->select('shipments.id', 'shipments.shipper_status_id', 'shipments.user_id', 'sj.status_reason_id')
+        ->groupBy('sj.shipment_id')
         ->get()
         ->toArray();
-
+        
         $shipmentIds = array_column($shipments, 'id');
         // Convert pluck() result to an array
         $rvShipmentTickets = RvShipmentTicket::whereIn('shipment_id', $shipmentIds)
@@ -84,12 +85,11 @@ class MissingFirstCallInitiate extends Command
         // ->toArray();         
         $rvShipmentInsert = array_diff($shipmentIds, $rvShipmentTickets);
         if(!empty(array_unique($rvShipmentInsert))){
-            Log::channel('botCallJobLog')->info('s ' . 'call missing initiated' . json_encode(array_unique($rvShipmentInsert)));
-            foreach(array_unique($shipments) as $value){
+            foreach($shipments as $value){
                 if(in_array($value['id'], array_unique($rvShipmentInsert))){
                     Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' . $value['id']);
 
-                    // $this->rvshipmentticketInsert($value['id'], $value['shipper_status_id'], $value['status_reason_id'], $value['user_id']);
+                    $this->rvshipmentticketInsert($value['id'], $value['shipper_status_id'], $value['status_reason_id'], $value['user_id']);
                 }
             }
         }
