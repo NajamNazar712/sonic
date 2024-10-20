@@ -8,6 +8,9 @@ use App\Http\Models\Webhook\ApiCallLog;
 use App\RvShipmentTicket;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+
+use function GuzzleHttp\json_encode;
 
 class MissingFirstCallInitiate extends Command
 {
@@ -76,12 +79,10 @@ class MissingFirstCallInitiate extends Command
         ->toArray();  // Ensure this returns an array
         // $apicallLogs = ApiCallLog::whereIn('shipment_id', $rvShipmentTickets)
         // ->pluck('shipment_id')
-        // ->toArray(); 
-        
-
-        // Use array_diff() to find IDs not in $rvShipmentTickets
+        // ->toArray();         
         $rvShipmentInsert = array_diff($shipmentIds, $rvShipmentTickets);
         if(!empty(array_unique($rvShipmentInsert))){
+            Log::channel('botCallJobLog')->info('s ' . 'call missing initiated' . json_encode(array_unique($rvShipmentInsert)));
             foreach($shipments as $value){
                 if(in_array($value['id'], array_unique($rvShipmentInsert))){
                     $this->rvshipmentticketInsert($value['id'], $value['shipper_status_id'], $value['status_reason_id'], $value['user_id']);
