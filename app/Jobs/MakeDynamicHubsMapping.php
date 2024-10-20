@@ -13,6 +13,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
 
 class MakeDynamicHubsMapping implements ShouldQueue
 {
@@ -21,22 +22,26 @@ class MakeDynamicHubsMapping implements ShouldQueue
     protected $requestVehicles;
     protected $closestHubId;
     protected $city;
+    protected $authId;
 
-    public function __construct(array $requestVehicles, int $closestHubId, $city)
+
+    public function __construct(array $requestVehicles, int $closestHubId, $city, $authId)
     {
         $this->queue = 'make_dynamic_hubs_mapping';
         $this->requestVehicles = $requestVehicles;
         $this->closestHubId = $closestHubId;
         $this->city = $city;
+        $this->authId = $authId;
+
     }
 
     public function handle()
     {
         //take this hub as reference hub
-        $authId = Auth::id();
         $closestHubId = $this->closestHubId;
         $city = $this->city;
         $requestVehicles = $this->requestVehicles;
+        $authId = $this->authId;
 
         DB::beginTransaction();
 
@@ -135,7 +140,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
 
             $mapping1->origin_id = $city->id;
             $mapping1->destination_id = $closestHubId;
-            $mapping1->updated_by = Auth::id();
+            $mapping1->updated_by = $authId;
             $mapping1->save();
 
             $route_junction1 = new V2JunctionRoutes();
@@ -249,7 +254,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
 
             $mapping2->origin_id = $closestHubId;
             $mapping2->destination_id = $city->id;
-            $mapping2->updated_by = Auth::id();
+            $mapping2->updated_by = $authId;
             $mapping2->save();
 
             $route_junction2 = new V2JunctionRoutes();
@@ -277,6 +282,10 @@ class MakeDynamicHubsMapping implements ShouldQueue
             DB::commit();
 
         } catch (\Exception $e) {
+            Log::error('Error occurred: ' . $e->getMessage(), [
+                'exception' => $e,
+                'stack' => $e->getTraceAsString()
+            ]);
             // Rollback the transaction if any error occurs
             DB::rollBack();
             throw $e;

@@ -15511,7 +15511,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                     // Dispatch jobs for each mapping
                     foreach ($hubMappings as $mapping) {
-                        dispatch(new MakeDynamicHubsMapping($mapping['vehicles'], $mapping['closest_hub'], $mapping['city']));
+                        dispatch(new MakeDynamicHubsMapping($mapping['vehicles'], $mapping['closest_hub'], $mapping['city'], auth()->id()));
                     }
                 }
 
