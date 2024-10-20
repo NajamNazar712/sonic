@@ -84,12 +84,12 @@ class MissingFirstCallInitiate extends Command
         // ->pluck('shipment_id')
         // ->toArray();         
         $rvShipmentInsert = array_diff($shipmentIds, $rvShipmentTickets);
-        // Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' .json_encode((array_unique($rvShipmentInsert))));
+        Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' .json_encode((array_unique($rvShipmentInsert))));
 
         if(!empty(array_unique($rvShipmentInsert))){
             foreach($shipments as $value){
                 if(in_array($value['id'], array_unique($rvShipmentInsert))){
-                    Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' . $value['id']);
+                    // Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' . $value['id']);
 
                     $this->rvshipmentticketInsert($value['id'], $value['shipper_status_id'], $value['status_reason_id'], $value['user_id']);
                 }
