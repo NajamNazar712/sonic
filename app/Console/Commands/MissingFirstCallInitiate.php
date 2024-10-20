@@ -52,8 +52,8 @@ class MissingFirstCallInitiate extends Command
             $timeEnd = $this->argument('endDate');
             $timeStart = $this->argument('startDate');
         }else{
-            $timeEnd = Carbon::now()->subHour(1)->format('Y-m-d H') . ':59';
-            $timeStart = Carbon::now()->subHour(1)->format('Y-m-d H') . ':00';
+            $timeEnd = Carbon::now()->subHour(1)->format('Y-m-d H') . '59:59';
+            $timeStart = Carbon::now()->subHour(1)->format('Y-m-d H') . '00:00';
         }
         Log::channel('botCallJobLog')->info('s ' . 'bot call misisng entry ' . $timeStart . ' bot call time End '. $timeEnd);
         $globalSettings = GlobalSettings::where('setting_value', 1)
