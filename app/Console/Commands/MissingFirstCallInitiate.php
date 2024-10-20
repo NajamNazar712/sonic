@@ -48,6 +48,9 @@ class MissingFirstCallInitiate extends Command
     public function handle()
     {
         //
+        try{
+            
+        
         if($this->argument('startDate') != 0 && $this->argument('endDate') != 0 ){
             $timeEnd = $this->argument('endDate');
             $timeStart = $this->argument('startDate');
@@ -98,6 +101,11 @@ class MissingFirstCallInitiate extends Command
             // Debugging step: check the result
         // $apiCallogsInsert = array_diff($apicallLogs, $rvShipmentTickets);
         // error_log('apiCallogsInsert'.print_r($apiCallogsInsert,true));
+        } catch (\Throwable $th) {
+            // Log::channel('botCallJobLog')->info(' Unresponsive Count ');
+
+            $this->createRvCronLog($th->getMessage() . ' Unresponsive Count ');
+        }
 
     }
 }
