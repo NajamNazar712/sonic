@@ -488,7 +488,7 @@ trait RvTrait
         //Remove Shipment from RV Shipment Ticket
         // dispatch(new ProcessRemoveShipmentFromRvShipmentTicket($request->shipment_id));
         RvShipmentTicket::where('shipment_id', $request->shipment_id)->delete();
-        if ($userId) { // Alist Shipper is lay this shipper add on shipper advise requested
+        if ($request->agent_id == 4620) { // Alist Shipper is lay this shipper add on shipper advise requested
             $shipperStatus = [12, 52,  65, 66];
         } else {
             $shipperStatus = [12, 52, 66];
