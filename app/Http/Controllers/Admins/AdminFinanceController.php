@@ -7330,10 +7330,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
     {
 
         $requestPendingShipmentIds = explode(',', $request->pending_payment_shipment_ids);
-        $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $requestPendingShipmentIds)->pluck('pending_payment_shipment_id')->toArray();
+        $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $requestPendingShipmentIds)->whereDate('created_at',date('Y-m-d'))->pluck('pending_payment_shipment_id')->toArray();
         $idsToInsert = array_diff($requestPendingShipmentIds, $existingShipmentIds);
         $final_Array = [];
+
         if (!empty($idsToInsert)) {
+
             foreach ($idsToInsert as $pending_payment_shipment_id) {
                 $insertData = [
                     'pending_payment_shipment_id' => $pending_payment_shipment_id,

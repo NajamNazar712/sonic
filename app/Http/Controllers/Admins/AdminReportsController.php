@@ -13033,7 +13033,8 @@ class AdminReportsController extends Controller
                 
             })
             ->addColumn('rvr_count', function($rv_report) use ($request) {
-                        $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('verification',1)->whereIn('shipper_status_id', [52,12,66])->count();
+                        // $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('verification',1)->whereIn('shipper_status_id', [52,12,66])->count();
+                        $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('verification',0)->whereIn('shipper_status_id', [12])->count();
                         return $rvr_count;
             });
                     
