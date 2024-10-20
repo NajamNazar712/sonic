@@ -517,11 +517,9 @@ trait RvTrait
                 $parcel->consignee_status_id = 13;
                 $parcel->save();
 
-                if($userId){
-                    ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, $userId, null);
-                }else{
-                    ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, Auth::id() ?? $request->agent_id);
-                }
+                
+                ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, Auth::id() ?? $request->agent_id);
+                
 
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
