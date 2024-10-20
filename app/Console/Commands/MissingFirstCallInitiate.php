@@ -53,7 +53,7 @@ class MissingFirstCallInitiate extends Command
             $timeEnd = Carbon::now()->subHour(1)->format('Y-m-d H') . ':59';
             $timeStart = Carbon::now()->subHour(1)->format('Y-m-d H') . ':00';
         }
-
+        Log::channel('botCallJobLog')->info('s ' . 'bot call misisng entry ' . $timeStart . ' bot call time End '. $timeEnd);
         $globalSettings = GlobalSettings::where('setting_value', 1)
         ->whereIn('type',[ 'rv_disable_shippers_only_shippers', 'bot_call_enable_disable'])
         ->pluck('text','type');
