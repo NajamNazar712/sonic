@@ -9,11 +9,13 @@ use App\RvShipmentTicket;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use App\Http\Traits\RvTrait;
 
 use function GuzzleHttp\json_encode;
 
 class MissingFirstCallInitiate extends Command
 {
+    use RvTrait;
     /**
      * The name and signature of the console command.
      *
