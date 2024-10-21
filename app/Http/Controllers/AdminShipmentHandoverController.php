@@ -88,7 +88,8 @@ class AdminShipmentHandoverController extends Controller
         $shipment = $shipment->first();
         
         $blocked_shipments = ShipmentsJourney::where('shipment_id', $shipment->id)
-        ->latest('created_at')
+        ->orderBy('created_at', 'desc')
+        ->orderBy('id', 'desc')
         ->select('shipper_status_id')
         ->first();
         if ($blocked_shipments->shipper_status_id == 51 || $blocked_shipments->shipper_status_id == 18){
@@ -206,6 +207,7 @@ class AdminShipmentHandoverController extends Controller
 
           $lost_shipments = ShipmentsJourney::where('shipment_id', $shipment->id)
             ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->select('shipper_status_id')
             ->first();
 
