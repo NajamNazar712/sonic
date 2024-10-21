@@ -608,7 +608,6 @@
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
                 ],
                 rowCallback: function(row, data, index) {
-                    console.log(data.account_type);
                     
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
