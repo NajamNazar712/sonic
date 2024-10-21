@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\FafCharges;
 use App\ShipmentAdditionalCharges;
 use DB;
 use SnappyPDF;
@@ -3904,6 +3905,7 @@ class APIController extends Controller
                     $data['total_charges'] = $invoice->total_charges;
                     $data['total_gst'] = $invoice->total_gst;
                     $data['total_invoice_amount'] = $invoice->total_invoice_amount;
+
                     $data['shipments'] = array();
                     $invoice_shipments = $invoice->invoice_shipments;
 
@@ -3937,6 +3939,10 @@ class APIController extends Controller
                             $details[$shipment->tracking_number]['invoice_amount'] = $invoice_shipment->invoice_amount;
                             $details[$shipment->tracking_number]['amount'] = $shipment->amount;
                             $details[$shipment->tracking_number]['actual_weight'] = $shipment->actual_weight;
+                            $details[$shipment->tracking_number]['faf_charges'] = optional(
+                                ShipmentAdditionalCharges::where('shipment_id', $shipment->id)->latest()->first()
+                            )->faf_charges ?? 'No FaF charge applied';
+
                             $data['shipments'][] = $details;
                         }
                         return response()->json(['status' => 0, 'payments' => $data]);
@@ -3945,7 +3951,6 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => ['Invoice not found!']]);
                 }
             } else {
-
                 $done_payment = DonePayment::where('id', $request->id)->where('user_id', $user_id);
                 if ($done_payment->exists()) {
                     $done_payment = $done_payment->first();
@@ -3989,6 +3994,10 @@ class APIController extends Controller
                             $details[$shipment->tracking_number]['invoice_amount'] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
                             $details[$shipment->tracking_number]['amount'] = $shipment->amount;
                             $details[$shipment->tracking_number]['actual_weight'] = $shipment->actual_weight;
+                            $details[$shipment->tracking_number]['faf_charges'] = optional(
+                                ShipmentAdditionalCharges::where('shipment_id', $shipment->id)->latest()->first()
+                            )->faf_charges ?? 'No FaF charge applied';
+
                             $data['shipments'][] = $details;
                         }
                         return response()->json(['status' => 0, 'payments' => $data]);

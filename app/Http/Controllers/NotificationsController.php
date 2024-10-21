@@ -10455,11 +10455,11 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['tanveer.malik@trax.pk', 'muhammad.jawwad@trax.pk', 'fawad.ahmed@trax.pk', 'waqas@trax.pk',  'huzaifa.aamir@trax.pk', 'hammad.majid@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['syed.furqan@trax.pk','fawad.ahmed@trax.pk','hammad.majid@trax.pk'];
+                    $bcc = ["asad.ahsan@trax.pk", "sahban.ghani@trax.pk"];
+                    // $cc = ["faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
 
-                    $cc = ["faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
-
-                    self::email($subject, $body, $to, $cc);
+                    self::email($subject, $body, $to, $bcc);
                 } else if ($id == 215) {
 
                     $details = $reference_1_id;
