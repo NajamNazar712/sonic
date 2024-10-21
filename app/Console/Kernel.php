@@ -161,6 +161,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\UpdateArrivalChargesCommand',
         '\App\Console\Commands\RetryJobsInRange',
         '\App\Console\Commands\ForceFullyBotCallInitiate',
+        '\App\Console\Commands\MissingFirstCallInitiate',
         '\App\Console\Commands\lastMileAppReportCountUpdate'
         ];
 
@@ -252,6 +253,8 @@ class Kernel extends ConsoleKernel
         if($checkBot)
         {
             $schedule->command('agent:botcallunresponsive')->everyFifteenMinutes()->runInBackground();
+            $schedule->command('missingfirst:call')->hourly()->runInBackground();
+
         }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
@@ -558,7 +561,8 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('hourly-logistic:shipper-bookings')->hourly()->runInBackground();
         $schedule->command('delete:short-url-data')->dailyAt('01:00')->runInBackground();
         $schedule->command('supervisord:restart')
-            ->cron('0 9,13,16 * * *')
+        // ->cron('0 9,13,16 * * *')
+            ->everyThirtyMinutes()
             ->runInBackground();
 
         $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
