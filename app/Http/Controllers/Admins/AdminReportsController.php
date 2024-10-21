@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
+use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Models\Segment;
@@ -6686,54 +6687,32 @@ class AdminReportsController extends Controller
             ->leftjoin('month_closings as mc', 'mc.shipment_id', '=', 's.id')
 
 
-            ->select('ccse.created_at as last_comment_date_external', 'ccse.comment as last_comment_external', 'crm_requests.id as request_number', 's.tracking_number as tracking_number', 'crsh.created_at as reopen_date', 'crcn.id as case_nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'och.name as origin_hub', 'ocz.name as origin_zone', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at',  's.amount as cod_amount', 'adjustment.adjustment_amount as adjusted_amount', 'change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'ad.name as admin_department', 'sjcc.remarks as case_closed_remark', 'crr.name as rating', 'crr.code as rating_code', 'mc.id as month_closing_id', 'crt.tagged_id', 'crt.hub_id', 'crm_requests.shipment_id',  'z.name as zone', 'ss.id as shipment_status_id', 'ss.created_at as last_status_date','bt.booking_type as service_type')
+            //(feature/TO-6880-additional-columns-and-modificat)
+            ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 's.id')
+            ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
+            ->leftjoin('segments as seg','u.segment_id','seg.id')
+            ->leftjoin('shipment_items as si','si.shipment_id','seg.id')
+            ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
+            ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
+            ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
+            ->leftjoin('crm_request_taggings as crt1', 'crt1.crm_request_id', '=', 'crm_requests.id')
+            ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crt1.tagged_id')
+            //END
+
+            ->select( 'crm_requests.id as request_number', 's.tracking_number as tracking_number', 'crsh.created_at as reopen_date', 'crcn.id as case_nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'och.name as origin_hub', 'ocz.name as origin_zone', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.updated_at as arrival_date', 'ss.name as status', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at',  's.amount as cod_amount', 'adjustment.adjustment_amount as adjusted_amount', 'change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'ad.name as admin_department', 'sjcc.remarks as case_closed_remark', 'crr.name as rating', 'crr.code as rating_code', 'mc.id as month_closing_id', 'crt.tagged_id', 'crt.hub_id', 'crm_requests.shipment_id',  'z.name as zone', 'ss.id as shipment_status_id', 'ss.created_at as last_status_date', 'ca.name as sub_hub', 's.parcel_value as parcel_value','seg.name as segment', 'si.description as shipment_description', 'prod.product_name as product_name', 'si.quantity as shipment_quantity', 's.pieces as pieces', 's.actual_weight as actual_weight', 'ad2.name as kae')
             ->groupBy('crm_requests.id');
 
         if (session('department_id') == 8) {
             $crm = $crm->where('s.shipment_type', 2);
         }
 
+        $current_date = Carbon::now();
         $datatable = Datatables::of($crm)
             ->addColumn('tagged_to', function ($crm_request) {
                 if (in_array($crm_request->tagging_type, [2, 4, 5])) {
-                    return Admin::find($crm_request->tagged_id)->name;
+                    return Admin::find($crm_request->tagged_id)->name ?? '-';
                 } else if ($crm_request->tagging_type == 1) {
                     return AdminDepartment::find($crm_request->tagged_id)->name;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('tagged_at', function ($crm_request) {
-                if ($crm_request->tagging_type != null) {
-                    return $crm_request->tagged_at;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('tagged_hub', function ($crm_request) {
-                if ($crm_request->tagging_type == 1) {
-                    return City::find(114)->hub_city->name;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('tagged_aging', function ($crm_request) {
-                Carbon::setWeekendDays([
-                    Carbon::SUNDAY,
-                ]);
-                if ($crm_request->tagged_at) {
-                    if ($crm_request->resolved_date) {
-                        $tagged_at = Carbon::parse($crm_request->tagged_at);
-                        $resolved_date = Carbon::parse($crm_request->resolved_date);
-                        $days = $resolved_date->diffInWeekdays($tagged_at);
-                        if ($days <= 0) {
-                            return '-';
-                        } else {
-                            return $days;
-                        }
-                    } else {
-                        return '-';
-                    }
                 } else {
                     return '-';
                 }
@@ -6786,27 +6765,6 @@ class AdminReportsController extends Controller
                 }
                 return $name;
             })
-            ->filterColumn('launched_by_name', function ($query, $keyword) {
-                $keyword = strtolower($keyword);
-
-                if ($keyword != '') {
-                    $query->where(function ($sub_query) use ($keyword) {
-                        $sub_query->where('crm_requests.launched_by', '=', 0)
-                            ->where('a.name', 'like', '%' . $keyword . '%');
-                    })
-                        ->orWhere(function ($sub_query) use ($keyword) {
-                            $sub_query->where('crm_requests.launched_by', '=', 1)
-                                ->where('us.name', 'like', '%' . $keyword . '%');
-                        })
-                        ->orWhere(function ($sub_query) use ($keyword) {
-                            $sub_query->where('crm_requests.launched_by', '=', 2)
-                                ->where('su.name', 'like', '%' . $keyword . '%');
-                        });
-                } else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->orderColumn('launched_by_name', DB::connection('reports')->raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, us.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1')
             ->editColumn('launched_by_type', function ($requests) {
                 if ($requests->launched_by_type == 0) {
                     return 'Admin';
@@ -6843,7 +6801,6 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('case_closed_remark', function ($requests) {
-
                 if ($requests->case_closed_remark)
                     return $requests->case_closed_remark;
                 else
@@ -6852,138 +6809,6 @@ class AdminReportsController extends Controller
             ->editColumn('resolved_date', function ($requests) {
                 if ($requests->current_status_id == 3 || $requests->current_status_id == 4) {
                     return $requests->resolved_date;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('last_comment_name', function ($requests) {
-                if ($requests->last_comment_by == 0) {
-                    return $requests->last_comment_admin;
-                } else if ($requests->last_comment_by == 1) {
-                    return $requests->last_comment_shipper;
-                } else {
-                    return '-';
-                }
-            })
-            ->editColumn('last_comment_date', function ($requests) {
-                if ($requests->last_comment_date != null) {
-                    return $requests->last_comment_date;
-                } else {
-                    return '-';
-                }
-            })
-            ->filterColumn('last_comment_name', function ($query, $keyword) {
-                $keyword = strtolower($keyword);
-
-                if ($keyword != '') {
-                    $query->where(function ($sub_query) use ($keyword) {
-                        $sub_query->where('ccs.comment_by', '=', 0)
-                            ->where('accs.name', 'like', '%' . $keyword . '%');
-                    });
-                } else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->orderColumn('last_comment_name', DB::raw('accs.name') . ' $1')
-            ->editColumn('last_comment', function ($requests) {
-                if ($requests->last_comment != null) {
-                    return $requests->last_comment;
-                } else {
-                    return '-';
-                }
-            })->addColumn('adjusted_percentage', function ($requests) {
-                if ($requests->adjusted_amount != null) {
-
-                    if ($requests->cod_amount > 0) {
-
-                        return number_format(($requests->adjusted_amount / $requests->cod_amount) * 100, 2);
-                    } else {
-                        return '-';
-                    }
-                } else {
-                    return '-';
-                }
-            })->addColumn('remaining_percentage', function ($requests) {
-                if ($requests->adjusted_amount != null) {
-
-                    if ($requests->cod_amount > 0) {
-                        if (($requests->adjusted_amount / $requests->cod_amount) * 100 == 0) {
-                            return '100';
-                        } else {
-                            return number_format(100 - (($requests->adjusted_amount / $requests->cod_amount) * 100), 2);
-                        }
-                    } else {
-                        return '-';
-                    }
-                } else {
-                    return '-';
-                }
-            })
-            ->addColumn('responsibe_person_name', function ($requests) {
-                $month_closing_responsible = MonthClosingResponsible::where('month_closing_id', $requests->month_closing_id);
-                if ($month_closing_responsible->exists()) {
-                    $month_closing_responsible = $month_closing_responsible->get();
-                    $responsible = '';
-                    $counter = 0;
-                    foreach ($month_closing_responsible as $value) {
-                        if ($value->admin == 1) {
-                            $admin = Admin::find($value->responsible_person_id);
-                            if ($counter > 0) {
-                                $responsible .= ',' . $admin->name . '( ' . ($admin->designation_id != null ? $admin->Edesignation->name : '') . ' ) ';
-                            } else {
-                                $responsible .= $admin->name . '( ' . ($admin->designation_id != null ? $admin->Edesignation->name : '') . ' ) ';
-                            }
-                            $counter++;
-                        } else {
-                            if ($counter > 0) {
-                                $responsible .= ',' . Rider::find($value->responsible_person_id)->name . '( Rider )';
-                            } else {
-                                $responsible .= Rider::find($value->responsible_person_id)->name . '( Rider )';
-                            }
-                            $counter++;
-                        }
-                    }
-                    return $responsible;
-                } else {
-                    return '-';
-                }
-            })
-            ->addColumn('responsibe_person_hub', function ($requests) {
-                $month_closing_responsible = MonthClosingResponsible::where('month_closing_id', $requests->month_closing_id);
-                if ($month_closing_responsible->exists()) {
-                    $month_closing_responsible = $month_closing_responsible->get();
-                    $hub = '';
-                    $counter = 0;
-                    foreach ($month_closing_responsible as $value) {
-                        if ($value->admin == 1) {
-                            $admin = Admin::find($value->responsible_person_id);
-                            if ($counter > 0) {
-                                $hub .= ', ' . ($admin->default_hub_id != null ? $admin->city->hub_city->name : '');
-                            } else {
-                                $hub .= ($admin->default_hub_id != null ? $admin->city->hub_city->name : '');
-                            }
-                            $counter++;
-                        } else {
-                            if ($counter > 0) {
-                                $hub .= ',' . Rider::find($value->responsible_person_id)->city->hub_city->name;
-                            } else {
-                                $hub .= Rider::find($value->responsible_person_id)->city->hub_city->name;
-                            }
-                            $counter++;
-                        }
-                    }
-                    return $hub;
-                } else {
-                    return '-';
-                }
-            })
-            ->addColumn('claim_adjustment_status', function ($requests) {
-                if ($requests->case_nature_id == 4) {
-                    if ($requests->adjusted_amount != null) {
-                        return 'Valid';
-                    } else {
-                        return 'Invalid';
-                    }
                 } else {
                     return '-';
                 }
@@ -7097,7 +6922,78 @@ class AdminReportsController extends Controller
                     $responsible_zone = '-';
                 }
                 return $responsible_zone;
-            });
+            })
+            ->filterColumn('launched_by_name', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('crm_requests.launched_by', '=', 0)
+                            ->where('a.name', 'like', '%' . $keyword . '%');
+                    })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('crm_requests.launched_by', '=', 1)
+                                ->where('us.name', 'like', '%' . $keyword . '%');
+                        })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('crm_requests.launched_by', '=', 2)
+                                ->where('su.name', 'like', '%' . $keyword . '%');
+                        });
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->editColumn('arrival_today', function ($requests)use($current_date) {
+                return ($requests->arrival_date && $current_date) ? with((new Carbon($requests->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($requests->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+                        $date->isSunday();
+                    }, $current_date)) : '-';
+            })
+            ->addColumn('shipper_category', function($requests){
+                if($requests->kae != null){
+                    return 'Key Account';
+                }else{
+                    return 'Non-Key Account';
+                }
+            })
+            ->filterColumn('shipper_category', function($query, $keyword) {
+                if ($keyword == 1) {
+                    $query->whereNotNull('ad2.name');
+                }
+                else {
+                    $query->whereNull('ad2.name');
+                }
+            })
+            ->addColumn('tagged_manual_auto', function($requests){
+                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->request_number)->whereIn('crm_request_tagging_type_id', [1,2])->get()->first();
+                if($crm_tagging){
+                    if($crm_tagging->crm_request_tagging_type_id == 1){
+
+                        $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name;
+                        return $tagged_name;
+                    }elseif($crm_tagging->crm_request_tagging_type_id == 2){
+                        $tagged_name = Admin::find($crm_tagging->tagged_id)->name;
+                        return $tagged_name;
+
+                    }else{
+                        return '-';
+                    }
+                }else{
+                    return '-';
+                }
+            })
+            ->filterColumn('tagged_to_manual',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where(function($sub_query) use ($keyword) {
+                        $sub_query->where('crt1.crm_request_tagging_type_id', '=', 1)
+                            ->where('adp.name', 'like', '%' . $keyword . '%');
+                    })
+                        ->orWhere(function($sub_query) use ($keyword) {
+                            $sub_query->where('crt1.crm_request_tagging_type_id', '=', 2)
+                                ->where('at.name', 'like', '%' . $keyword . '%');
+                        });
+                }
+            })
+            ->orderColumn('launched_by_name', DB::connection('reports')->raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, us.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1');
         if ($tracking = $request->get('search_tracking_no')) {
             $tracking_numbers = explode(',', $tracking);
             $datatable->whereIn('s.tracking_number', $tracking_numbers);
