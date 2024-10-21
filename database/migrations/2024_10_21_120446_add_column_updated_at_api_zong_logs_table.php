@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Apizonglogaddcolumn extends Migration
+class AddColumnUpdatedAtApiZongLogsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,11 @@ class Apizonglogaddcolumn extends Migration
      */
     public function up()
     {
-        //
-        Schema::table('api_zong_logs', function (Blueprint $table) {
-            $table->timestamp('updated_at')->nullable();
-        });
+        if(!Schema::hasColumn('api_zong_logs', 'updated_at')) {
+            Schema::table('api_zong_logs', function (Blueprint $table) {
+                $table->timestamp('updated_at')->nullable();
+            });
+        }
     }
 
     /**
