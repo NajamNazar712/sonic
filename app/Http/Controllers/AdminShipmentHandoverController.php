@@ -330,7 +330,7 @@ class AdminShipmentHandoverController extends Controller
           27, 28, 29, 30, 31, 32, 33, 34,
           35, 36, 37, 38, 44, 45, 46, 47,
           48, /* 51, */ 56, 57, 
-          69, 70, 71, 72, 73, 74, 75, 76, 77
+          69, 70, 72, 73, 75, 76
         ];
 
         $shipment_type = ShipmentsJourney::select('id', 'shipment_id', 'shipper_status_id')
@@ -520,8 +520,7 @@ class AdminShipmentHandoverController extends Controller
         20, 21, 22, 23, 24, 25, 26,
         27, 28, 29, 30, 31, 32, 33, 34,
         35, 36, 37, 38, 44, 45, 46, 47,
-        48, 56, 57, 69, 70, 71, 72, 73, 
-        74, 75, 76, 77
+        48, 56, 57, 69, 70, 72, 73, 75, 76
     ];
     
     $normal_status_ids_str = implode(',', $normal_status_ids);
@@ -1282,7 +1281,7 @@ class AdminShipmentHandoverController extends Controller
           27, 28, 29, 30, 31, 32, 33, 34,
           35, 36, 37, 38, 44, 45, 46, 47,
           48, /* 51, */ 56, 57, 
-          69, 70, 71, 72, 73, 74, 75, 76, 77
+          69, 70, 72, 73, 75, 76
       ];
 
       $normal_status_ids_str = implode(',', $normal_status_ids);
@@ -1377,7 +1376,7 @@ class AdminShipmentHandoverController extends Controller
         27, 28, 29, 30, 31, 32, 33, 34,
         35, 36, 37, 38, 44, 45, 46, 47,
         48, /* 51, */ 56, 57,
-        69, 70, 71, 72, 73, 74, 75, 76, 77
+        69, 70, 72, 73, 75, 76
       ];
 
       // normal shipments
