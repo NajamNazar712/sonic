@@ -18,9 +18,6 @@ class Apizonglogaddcolumn extends Migration
             $table->integer('shipment_id')->index()->nullable();
         });
 
-        Schema::table('api_zong_logs', function (Blueprint $table) {
-            $table->timestamp('updated_at')->nullable();
-        });
     }
 
     /**
@@ -33,9 +30,6 @@ class Apizonglogaddcolumn extends Migration
         //
         Schema::table('api_zong_logs', function (Blueprint $table) {
             $table->dropColumn('shipment_id');
-        });
-        Schema::table('api_zong_logs', function (Blueprint $table) {
-            $table->dropColumn('updated_at');
         });
     }
 }
