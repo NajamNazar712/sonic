@@ -1388,7 +1388,8 @@ class AdminShipmentHandoverController extends Controller
         $allowed_status_ids = $return_status_ids;
       }
       $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
-      ->latest('created_at')
+      ->orderBy('created_at', 'desc')
+      ->orderBy('id', 'desc')
       ->select('shipper_status_id')
       ->first();
 
