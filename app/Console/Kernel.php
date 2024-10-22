@@ -161,6 +161,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\UpdateArrivalChargesCommand',
         '\App\Console\Commands\RetryJobsInRange',
         '\App\Console\Commands\ForceFullyBotCallInitiate',
+        '\App\Console\Commands\MissingFirstCallInitiate',
         '\App\Console\Commands\lastMileAppReportCountUpdate'
         ];
 
@@ -252,6 +253,8 @@ class Kernel extends ConsoleKernel
         if($checkBot)
         {
             $schedule->command('agent:botcallunresponsive')->everyFifteenMinutes()->runInBackground();
+            $schedule->command('missingfirst:call')->hourly()->runInBackground();
+
         }
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');

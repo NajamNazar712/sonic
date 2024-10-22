@@ -87,7 +87,7 @@
                                 <button id="printUndeliveredDNCC" type="button" class="btn btn-warning btn-block">Print Undelivered Performa</button>
                             </div>
                         @endif
-                        
+
                     </div>
                 </form>
             </div>
@@ -170,6 +170,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/refreshTabs.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
 
@@ -219,11 +220,11 @@
             var note_id = $('#return_note').val();
             var statusSelection = $('#status_update_form').find('status_drop');
             var status = statusSelection.val();
-            
+
             var remarks = $('#status_update_form').closest('tr').find('input.return_remarks');
             var errorMsg = $('#status_update_form').closest('tr').find('.error-msg');
             var errorLabel = $('#status_update_form').closest('tr').find('label[for="' + remarks.attr('id') + '"]');
-            
+
             var table = $('#datatable').DataTable({
                 @if (session('role_id') == 1 || in_array(50, session('permissions')))
                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -246,7 +247,7 @@
                                         //     errorMsg.hide();
                                         //     errorLabel.remove();
                                         //     flag = false;
-                                            
+
                                         // } else if (remarks.val() == '') {
                                         //     remarks.addClass('error');
                                         //     remarks.attr('data-rule-required', 'data-rule-required');
@@ -263,7 +264,7 @@
                                         //     errorLabel.remove();
                                         //     flag = false;
                                         // }
-                                
+
                                     }
                                 });
                                 // if(!flag)
@@ -315,7 +316,7 @@
 
                                             }
                                         });
-                                        
+
                                         if (submit_all_status_flag == false) {
                                             swal({
                                                 title: 'Enter Receiver Name for remaining Returned Shipment(s)',
@@ -389,6 +390,7 @@
                                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                                                 }
+                                                triggerRefreshInAllTabs();
                                                 location.reload();
                                             });
                                         }
@@ -405,13 +407,13 @@
                                 //         var status = $(row.node()).find('select.statusDrop').val();
                                 //         var remarks = $(row.node()).find('input.return_remarks');
                                 //         // console.log(remarks.val());
-                                //         if (status == 60 && remarks.val() == '') 
+                                //         if (status == 60 && remarks.val() == '')
                                 //         {
                                 //             remarks.attr('data-rule-required', 'true');
                                 //             remarks.attr('data-msg-required', 'Remarks is required');
                                 //             flag = true;
-                                //         } 
-                                //         else 
+                                //         }
+                                //         else
                                 //         {
                                 //             remarks.attr('data-rule-required', 'false');
                                 //             remarks.removeAttr('data-msg-required');
@@ -614,14 +616,14 @@
                     remarks.removeAttr('data-msg-required');
                     errorMsg.hide();
                     errorLabel.remove();
-                    
+
                 } else if (remarks.val() == '') {
                     remarks.addClass('error');
                     remarks.attr('required', 'required');
                     remarks.attr('data-msg-required', 'Remarks is required');
                     errorMsg.show();
                     errorLabel.show();
-                    
+
                 } else {
                     remarks.removeClass('error');
                     remarks.removeAttr('required');
@@ -650,7 +652,7 @@
                     }
                 });
             });
-           
+
             $('body').on('click','.clear',function () {
                 var status = $(this).parents().closest('tr').find('.statusDrop');
                 var reason = $(this).parents().closest('tr').find('.reasonDrop');
@@ -665,7 +667,7 @@
                     errorMsg.remove();
                 }
                 $('.remarks input').val('');
-                
+
             });
 
             $('body').on('click', 'input.open_box', function(){
@@ -777,7 +779,7 @@
                                 id = table.row( i ).id();
                                 shipments.push(id);
                             }
-                            
+
                             // if (remarks.length && remarks[0].checkValidity()) {
                             //     remarks.removeClass('error');
                             //     remarks.next('.error-msg').html('');
@@ -788,6 +790,7 @@
                             var open_box_input = $('#open_box_ids');
                             open_box_input.val(open_box_ids);
                             shipment.val(shipments);
+                            triggerRefreshInAllTabs();
                             form.submit();
                         }
                     });
@@ -800,7 +803,7 @@
                     remarks.attr('data-msg-required', 'Remarks is required');
                     flag = true;
                 }
-            
+
             }
             });
 
@@ -917,6 +920,7 @@
                                                         toastr.error(errros, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                                                     }
+                                                    triggerRefreshInAllTabs();
                                                     location.reload();
                                                 });
                                             }
@@ -946,6 +950,7 @@
                                                 toastr.error(errros, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                                             }
+                                            triggerRefreshInAllTabs();
                                             location.reload();
                                         });
                                     }
@@ -1031,8 +1036,10 @@
                                                             dangerMode: true
                                                         }).then(function (confirm) {
                                                             if (confirm) {
+                                                                triggerRefreshInAllTabs();
                                                                 location.reload();
                                                             }else{
+                                                                triggerRefreshInAllTabs();
                                                                 location.reload();
                                                             }
                                                         });
@@ -1076,12 +1083,14 @@
                                                             positionClass: 'toast-bottom-center',
                                                             containerId: 'toast-bottom-center'
                                                         });
+                                                        triggerRefreshInAllTabs();
                                                         location.reload();
                                                     }
 
                                                 }
                                                 else{
                                                     toastr.error(errros, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                    triggerRefreshInAllTabs();
                                                     location.reload();
                                                 }
                                             });
@@ -1103,7 +1112,7 @@
                 }
 
             });
-            
+
 
 
 

@@ -239,7 +239,7 @@
                                     <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="case_nature_tclaim" id="case_nature_claim"
-                                                class="form-control select2">
+                                                class="form-control select2" data-rule-required="true" data-msg-required="Select claim type">
                                                 @foreach ($case_nature_type_claims as $claim)
                                                     <option value="{{ $claim->id }}">{{ $claim->type }}</option>
                                                 @endforeach
@@ -381,7 +381,7 @@
                                         @if ($claim->remarks_visibility == 1)
                                             <div class="col-10 d-none" id="case_nature_claim_remarks_div">
                                                 <fieldset class="form-group">
-                                                    <select name="description[]" id="case_nature_claim_remarks" class="form-control select2" multiple="multiple">
+                                                    <select name="description[]" id="case_nature_claim_remarks" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Claim remarks is required.">
                                                         
                                                     </select>
                                                 </fieldset>
@@ -1848,6 +1848,14 @@
                         if (!case_nature_claim_id) {
                             nature_flag = false;
                             var error = "Please select Claim type!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        if (!claim_description) {
+                            nature_flag = false;
+                            var error = "Either a claim description or remarks are required!";
                             toastr.error(error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
