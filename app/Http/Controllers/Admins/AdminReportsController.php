@@ -13050,7 +13050,7 @@ class AdminReportsController extends Controller
                 
             })
             ->editColumn('ofd_date_time', function($rv_report) {
-                if($rv_report['ofd_date_time'] >= $rv_report['reattempt_time']) {
+                if($rv_report['ofd_date_time'] >= $rv_report['reattempt_time'] && isset($rv_report['reattempt_time'])) {
                     return $rv_report['ofd_date_time'];
                 }else{
                     return '';
