@@ -7296,17 +7296,17 @@ class AdminReportsController extends Controller
 
             // Arrival today calculation
             if ($rowArray['arrival_date']) {
-                $arrival_today = with(
-                    (new Carbon($rowArray['arrival_date'], 'UTC'))->diffInWeekendDays($current_date) -
-                    (new Carbon($rowArray['arrival_date'], 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
-                        return $date->isSunday();
-                    }, $current_date)
-                );
-                $rowArray['arrival_today'] = $arrival_today;
+                Carbon::setWeekendDays([Carbon::SUNDAY]);
+                $arrival_date = Carbon::parse($rowArray['arrival_date'], 'UTC');
+
+                $sundays = $arrival_date->diffInDaysFiltered(function (Carbon $date) {
+                    return $date->isSunday();
+                }, $current_date);
+
+                $rowArray['arrival_today'] = ($sundays);
             } else {
                 $rowArray['arrival_today'] = '-';
             }
-
 
             // Shipper category
             $rowArray['shipper_category'] = $rowArray['kae'] != null ? 'Key Account' : 'Non-Key Account';

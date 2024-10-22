@@ -239,7 +239,7 @@
                         <th class="border-primary border-darken-1">Quantity</th>
 
                         <!-- Quantity column added -->
-                        <th class="border-primary border-darken-1">Quantity</th>
+                        <th class="border-primary border-darken-1">Actual Weight</th>
 
                         <!-- Key Account Category column added -->
                         <th class="border-primary border-darken-1">Key Account Category</th>
