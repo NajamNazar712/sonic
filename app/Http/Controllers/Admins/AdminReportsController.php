@@ -6985,26 +6985,6 @@ class AdminReportsController extends Controller
                 }
                 return $responsible_zone;
             })
-            ->filterColumn('launched_by_name', function ($query, $keyword) {
-                $keyword = strtolower($keyword);
-
-                if ($keyword != '') {
-                    $query->where(function ($sub_query) use ($keyword) {
-                        $sub_query->where('crm_requests.launched_by', '=', 0)
-                            ->where('a.name', 'like', '%' . $keyword . '%');
-                    })
-                        ->orWhere(function ($sub_query) use ($keyword) {
-                            $sub_query->where('crm_requests.launched_by', '=', 1)
-                                ->where('us.name', 'like', '%' . $keyword . '%');
-                        })
-                        ->orWhere(function ($sub_query) use ($keyword) {
-                            $sub_query->where('crm_requests.launched_by', '=', 2)
-                                ->where('su.name', 'like', '%' . $keyword . '%');
-                        });
-                } else {
-                    $query->whereRaw('false');
-                }
-            })
             ->editColumn('arrival_today', function ($requests)use($current_date) {
                 return ($requests->arrival_date && $current_date) ? with((new Carbon($requests->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($requests->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
                         $date->isSunday();
@@ -7017,42 +6997,16 @@ class AdminReportsController extends Controller
                     return 'Non-Key Account';
                 }
             })
-            ->filterColumn('shipper_category', function($query, $keyword) {
-                if ($keyword == 1) {
-                    $query->whereNotNull('ad2.name');
-                }
-                else {
-                    $query->whereNull('ad2.name');
-                }
-            })
-            ->addColumn('tagged_manual_auto', function($requests){
-                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->request_number)->whereIn('crm_request_tagging_type_id', [1,2])->get()->first();
+            ->addColumn('tagged_manual_auto', function($requests) {
+                $crm_tagging = CrmRequestTagging::where('crm_request_id', $requests->request_number)
+                    ->where('crm_request_tagging_type_id', 2)
+                    ->first();
+
                 if($crm_tagging){
-                    if($crm_tagging->crm_request_tagging_type_id == 1){
-
-                        $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name;
-                        return $tagged_name;
-                    }elseif($crm_tagging->crm_request_tagging_type_id == 2){
-                        $tagged_name = Admin::find($crm_tagging->tagged_id)->name;
-                        return $tagged_name;
-
-                    }else{
-                        return '-';
-                    }
+                    return (
+                        $crm_tagging->tagged_id == '346') ? 'Auto' : 'Manual';
                 }else{
                     return '-';
-                }
-            })
-            ->filterColumn('tagged_to_manual',function ($query,$keyword){
-                if ($keyword != '') {
-                    $query->where(function($sub_query) use ($keyword) {
-                        $sub_query->where('crt1.crm_request_tagging_type_id', '=', 1)
-                            ->where('adp.name', 'like', '%' . $keyword . '%');
-                    })
-                        ->orWhere(function($sub_query) use ($keyword) {
-                            $sub_query->where('crt1.crm_request_tagging_type_id', '=', 2)
-                                ->where('at.name', 'like', '%' . $keyword . '%');
-                        });
                 }
             })
             ->orderColumn('launched_by_name', DB::connection('reports')->raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, us.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1');
@@ -7313,13 +7267,14 @@ class AdminReportsController extends Controller
 
             // Tagged manual/auto
             $crm_tagging = CrmRequestTagging::where('crm_request_id', $rowArray['request_number'])
-                ->whereIn('crm_request_tagging_type_id', [1, 2])->first();
+                ->where('crm_request_tagging_type_id', 2)
+                ->first();
 
             if ($crm_tagging) {
-                $rowArray['tagged_manual_auto'] = $crm_tagging->crm_request_tagging_type_id == 1
-                    ? AdminDepartment::find($crm_tagging->tagged_id)->name
-                    : Admin::find($crm_tagging->tagged_id)->name;
-            } else {
+                $rowArray['tagged_manual_auto'] = ($crm_tagging->tagged_id == '346')
+                    ? 'Auto'
+                    : 'Manual';
+            }else {
                 $rowArray['tagged_manual_auto'] = '-';
             }
 
