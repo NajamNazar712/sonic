@@ -543,19 +543,23 @@ trait RvTrait
     {
         // $remarks = (is_array($request) && isset($request['remarks']) && $request['remarks'] !== null)  ? $request['remarks'] : null;
         $remarks = $request->remarks;
-        $parcel = Shipment::find($request->shipment_id);
+        $parcel = Shipment::find($request->shipment_id);      
 
         $rv_sub_status = null;
         $shipment_status_reason = null;
 
         if ($request->rv_assign_agent_sub_status_id) {
-            $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');
-
+            $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');           
             if ($rv_sub_status) {
                 $shipment_status_reason = ShipmentStatusReason::where('name', 'like', '%' . $rv_sub_status . '%')->value('id');
             }
         }
 
+        if (!$request->rv_assign_agent_sub_status_id || !$shipment_status_reason) { // Return confirm RVR reason_id bind in journey inserted
+            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest()->select('status_reason_id', 'remarks')->first();
+            $shipment_status_reason = $journey->status_reason_id;
+            $remarks =  $journey->remarks;
+        }
         //these both could be null 
         $consignee_refused_reasons = $request->consignee_refused_reasons ?? null;
         //
