@@ -543,13 +543,13 @@ trait RvTrait
     {
         // $remarks = (is_array($request) && isset($request['remarks']) && $request['remarks'] !== null)  ? $request['remarks'] : null;
         $remarks = $request->remarks;
-        $parcel = Shipment::find($request->shipment_id);      
+        $parcel = Shipment::find($request->shipment_id);
 
         $rv_sub_status = null;
         $shipment_status_reason = null;
 
         if ($request->rv_assign_agent_sub_status_id) {
-            $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');           
+            $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');  
             if ($rv_sub_status) {
                 $shipment_status_reason = ShipmentStatusReason::where('name', 'like', '%' . $rv_sub_status . '%')->value('id');
             }
