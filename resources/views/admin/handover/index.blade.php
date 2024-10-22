@@ -501,6 +501,7 @@
                                                                         setTimeout(function(){
                                                                             $('#add_shipment_form button.add').prop('disabled', false); // Re-enable button after delay
                                                                         }, 0);
+                                                                        $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
                                                                         
                                                                         toastr.success(data.success, 'Success!', {
                                                                             positionClass: 'toast-bottom-center',

@@ -310,15 +310,17 @@ class AdminShipmentHandoverController extends Controller
 
 //admin.handover.create.store
     public function bulk_handover_submit(Request $request){
+      
       $request->validate([
         'bag_number' => 'required|numeric|unique:handovers,bag_number',
       ]);
 
         // $shipment_ids_json = explode(',', $request->shipment_ids);
-        $shipment_ids_json = $request->shipment_ids;
-        $shipment_ids = array_map(function($id) {
-          return intval(substr($id, 6));
-        }, json_decode($shipment_ids_json, true));
+        
+        $shipment_ids_json = json_decode($request->shipment_ids);
+        // $shipment_ids = array_map(function($id) {
+        //   return intval(substr($id, 6));
+        // }, json_decode($shipment_ids_json, true));
 
         $normal_status_ids = [
           1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
@@ -326,7 +328,6 @@ class AdminShipmentHandoverController extends Controller
           49, 50, 52, 53, 54, 55, 56,
           58, 59, 61, 62, 65, 67, 68
         ];
-
         $return_status_ids = [
           /* 18, */ 20, 21, 22, 23, 24, 25, 26, 
           27, 28, 29, 30, 31, 32, 33, 34,
@@ -334,18 +335,19 @@ class AdminShipmentHandoverController extends Controller
           48, /* 51, */ 56, 57, 
           69, 70, 72, 73, 75, 76
         ];
-
-        $shipment_type = ShipmentsJourney::select('id', 'shipment_id', 'shipper_status_id')
-        ->whereIn('shipment_id', $shipment_ids)
-        ->whereIn('id', function ($query) use ($shipment_ids) {
-          $query->select(DB::raw('MAX(id)'))
-          ->from('shipments_journey')
-          ->whereIn('shipment_id', $shipment_ids)
-          ->groupBy('shipment_id');
-        })
-        ->get();
-
-        $shipper_status_ids = $shipment_type->pluck('shipper_status_id');
+        
+        // $shipment_type = ShipmentsJourney::select('id', 'shipment_id', 'shipper_status_id')
+        // ->whereIn('shipment_id', $shipment_ids)
+        // ->whereIn('id', function ($query) use ($shipment_ids) {
+          //   $query->select(DB::raw('MAX(id)'))
+          //   ->from('shipments_journey')
+          //   ->whereIn('shipment_id', $shipment_ids)
+          //   ->groupBy('shipment_id');
+          // })
+          // ->get();
+          
+        $shipmentIds = Shipment::whereIn('tracking_number', $shipment_ids_json)->select('id', 'shipper_status_id')->get();
+        $shipper_status_ids = $shipmentIds->pluck('shipper_status_id');
 
         $has_normal = $shipper_status_ids->intersect($normal_status_ids)->isNotEmpty();
         $has_return = $shipper_status_ids->intersect($return_status_ids)->isNotEmpty();
@@ -355,7 +357,7 @@ class AdminShipmentHandoverController extends Controller
         }
 
         // $hub_id = explode(',', $request->hub);
-        $total= count($shipment_ids);
+        $total= count($shipmentIds);
         if($total > 0){
             $from_admin_dept = Admin::find($request->from);
             $to_admin_dept = Admin::find($request->to);
@@ -372,13 +374,13 @@ class AdminShipmentHandoverController extends Controller
 
             $handover->save();
             $handover_id = $handover->id;
-            foreach ($shipment_ids as $shipment_id) {
+            foreach ($shipmentIds as $shipment_id) {
                 $handover_shipments = new HandoverShipments();
                 $handover_shipments->handover_id = $handover_id;
-                $handover_shipments->shipment_id = $shipment_id;
+                $handover_shipments->shipment_id = $shipment_id->id;
                 $handover_shipments->status = 1;
                 $handover_shipments->save();
-                HandoverShipmentJourneyController::add($shipment_id,$handover_id,1);
+                HandoverShipmentJourneyController::add($shipment_id->id,$handover_id,1);
             }
             return redirect()->route('admin.handover.create.index')->with('success','Handover Note created Successfully!');
         }
@@ -1291,19 +1293,19 @@ class AdminShipmentHandoverController extends Controller
 
       $handover_shipments = HandoverShipments::where('handover_id', $handover_id)
         ->leftJoin('shipments', 'handover_shipments.shipment_id', '=', 'shipments.id')
-        ->leftJoin('shipments_journey', 'handover_shipments.shipment_id', '=', 'shipments_journey.shipment_id')
-        ->leftJoin(DB::raw('(
-          SELECT sj.id, sj.shipment_id, sj.shipper_status_id
-          FROM shipments_journey sj
-          JOIN (
-              SELECT shipment_id, MAX(created_at) as max_created_at
-              FROM shipments_journey
-              GROUP BY shipment_id
-          ) latest_journey 
-          ON sj.shipment_id = latest_journey.shipment_id 
-          AND sj.created_at = latest_journey.max_created_at
-        ) as latest_journey'), 
-        'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')      
+        // ->leftJoin('shipments_journey', 'handover_shipments.shipment_id', '=', 'shipments_journey.shipment_id')
+        // ->leftJoin(DB::raw('(
+        //   SELECT sj.id, sj.shipment_id, sj.shipper_status_id
+        //   FROM shipments_journey sj
+        //   JOIN (
+        //       SELECT shipment_id, MAX(created_at) as max_created_at
+        //       FROM shipments_journey
+        //       GROUP BY shipment_id
+        //   ) latest_journey 
+        //   ON sj.shipment_id = latest_journey.shipment_id 
+        //   AND sj.created_at = latest_journey.max_created_at
+        // ) as latest_journey'), 
+        // 'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')      
         ->leftJoin('users', 'shipments.user_id', '=', 'users.id')
         ->select(
             'handover_shipments.id',
@@ -1316,8 +1318,8 @@ class AdminShipmentHandoverController extends Controller
             'users.name as shipper_name',
             DB::raw("
                 CASE 
-                    WHEN latest_journey.shipper_status_id IN ($normal_status_ids_str) THEN 'Shipment Type is Normal'
-                    WHEN latest_journey.shipper_status_id IN ($return_status_ids_str) THEN 'Shipment Type is Return'
+                    WHEN shipments.shipper_status_id IN ($normal_status_ids_str) THEN 'Shipment Type is Normal'
+                    WHEN shipments.shipper_status_id IN ($return_status_ids_str) THEN 'Shipment Type is Return'
                     ELSE 'Unknown'
                 END as shipment_type_text
             ")
@@ -1358,7 +1360,7 @@ class AdminShipmentHandoverController extends Controller
       $tracking_number = $request->tracking_number;
 
       $shipment = Shipment::where('tracking_number', $tracking_number)
-      ->select('id')
+      ->select('id', 'shipper_status_id')
       ->first();
 
       // if shipment doesn't exist
@@ -1389,17 +1391,17 @@ class AdminShipmentHandoverController extends Controller
       else {
         $allowed_status_ids = $return_status_ids;
       }
-      $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
-      ->orderBy('created_at', 'desc')
-      ->orderBy('id', 'desc')
-      ->select('shipper_status_id')
-      ->first();
+      // $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
+      // ->orderBy('created_at', 'desc')
+      // ->orderBy('id', 'desc')
+      // ->select('shipper_status_id')
+      // ->first();
 
-      if ($shipment_journey && ($shipment_journey->shipper_status_id == 18 || $shipment_journey->shipper_status_id == 51)){
+      if (($shipment->shipper_status_id == 18 || $shipment->shipper_status_id == 51)){
         return ['status' => 1, 'error' => 'This shipment is related to lost or case close'];
       }
 
-      if ($shipment_journey && !in_array($shipment_journey->shipper_status_id, $allowed_status_ids)) {
+      if (!in_array($shipment->shipper_status_id, $allowed_status_ids)) {
         return ['status' => 1, 'error' => 'Shipment type is not correct.'];
       }
     }
