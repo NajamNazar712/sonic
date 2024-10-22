@@ -1255,8 +1255,8 @@
                                 $('#claim_description_div_new').addClass('d-none');
                                 $('#claim_description_div').addClass('d-none');
                             } else {
-                                $('#claim_description_div_new').removeClass('d-none');
-                                $('#claim_description_div').addClass('d-none');
+                                $('#claim_description_div_new').addClass('d-none');
+                                $('#claim_description_div').removeClass('d-none');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
@@ -3590,7 +3590,7 @@
                     $('#complaint_id').val(case_nature_claim_id);
                     var formData = new FormData($('#add_request_form')[0]);
                     var claim_description = '';
-                    if (!$('#case_nature_claim_remarks_div').hasClass('d-none')) {
+                    if ($('#case_nature_claim_remarks_div').length && !$('#case_nature_claim_remarks_div').hasClass('d-none')) {
                         var selectedOptions = $('#case_nature_claim_remarks option:selected');
                         var selectedTexts = [];
                         var useTextarea = false;
