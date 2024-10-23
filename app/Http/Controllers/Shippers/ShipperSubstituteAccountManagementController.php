@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\SubstituteUserModulePermission;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\SubstituteUserPermission;
-
+use App\Http\Models\Shipper\UserShippingInfo;
 use Auth;
 
 use Yajra\Datatables\Datatables;
@@ -120,12 +120,23 @@ class ShipperSubstituteAccountManagementController extends Controller
 
     public function add_index() {
       $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->get();
-
-      return view('client.substitute_account_management.add.index')->with(['permissions' => $permissions]);
+      $pickup_addresses = UserShippingInfo::where('user_id', auth()->user()->id)
+      ->select([
+        'id',
+        'pickup_address'
+      ])
+      ->get();
+      return view('client.substitute_account_management.add.index')
+        ->with([
+          'permissions' => $permissions,
+          'pickup_addresses' => $pickup_addresses
+        ]);
     }
 
     public function add_store(Request $request) {
       $substitute_user = new SubstituteUser();
+
+      $selected_ids = $request->input('pickup_address');
 
       $substitute_user->user_id = session('user_id');
       $substitute_user->name = $request->input('name');
@@ -134,6 +145,7 @@ class ShipperSubstituteAccountManagementController extends Controller
       $substitute_user->cnic = $request->input('cnic');
       $substitute_user->password = bcrypt($request->input('password'));
       $substitute_user->restriction = $request->input('restriction');
+      $substitute_user->pickup_address_id = implode(',', $selected_ids);
 
       $substitute_user->save();
 
@@ -156,9 +168,21 @@ class ShipperSubstituteAccountManagementController extends Controller
       $substitute_user = SubstituteUser::find($id);
 
       if ($substitute_user->user_id == session('user_id')) {
+        // dd($substitute_user->pickup_address_id);
         $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
+        $pickup_addresses = UserShippingInfo::where('user_id', auth()->user()->id)
+        ->select([
+          'id',
+          'pickup_address'
+        ])
+        ->get();
 
-        return view('client.substitute_account_management.update.index')->with(['permissions' => $permissions, 'substitute_user' => $substitute_user, 'substitute_user_permissions' => $substitute_user_permissions]);
+        return view('client.substitute_account_management.update.index')->with([
+          'permissions' => $permissions, 
+          'substitute_user' => $substitute_user, 
+          'substitute_user_permissions' => $substitute_user_permissions, 
+          'pickup_addresses' => $pickup_addresses
+        ]);
       }
       else {
             return redirect()->route('cod.access_denied');
@@ -167,6 +191,7 @@ class ShipperSubstituteAccountManagementController extends Controller
 
     public function update_store(Request $request, $id) {
       $substitute_user = SubstituteUser::find($id);
+      $selected_ids = $request->input('pickup_address');
 
       $substitute_user->user_id = session('user_id');
       $substitute_user->name = $request->input('name');
@@ -174,6 +199,7 @@ class ShipperSubstituteAccountManagementController extends Controller
       $substitute_user->phone_number = $request->input('phone_number');
       $substitute_user->cnic = $request->input('cnic');
       $substitute_user->restriction = $request->input('restriction');
+      $substitute_user->pickup_address_id = implode(',', $selected_ids);
 
       if ($request->filled('password')) {
         $substitute_user->password = bcrypt($request->input('password'));
