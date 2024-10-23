@@ -19,8 +19,7 @@ class RunSpecificJob extends Command
     public function handle()
     {
         $jobId = $this->argument('queuename');
-        $limit = $this->argument('queuename');
-
+        $limit = (int) $this->argument('limit');
         // Find the job by ID
         $jobs = DB::table('jobs')
             ->where('queue', 'email') // Filter by the email queue
