@@ -8,16 +8,16 @@
         <div class="content-wrapper">
             <div class="content-header row"></div>
             <div class="content-body">
-                <h1 class="mb-1">Errors In Book Excel City(s)</h1>
+                <h1 class="mb-1">Errors In Bulk Excel City(s)</h1>
 
-                @foreach($errors as $key => $error)
-                    @if(is_array($error) && array_key_exists("delivery_types", $error))
-                        <br><br>
-                        <button class="btn btn-danger">
-                            For row {{ $key }} : {{ $error['delivery_types'] }}
-                        </button>
-                    @endif
-                @endforeach
+{{--                @foreach($errors as $key => $error)--}}
+{{--                    @if(is_array($error) && array_key_exists("delivery_types", $error))--}}
+{{--                        <br><br>--}}
+{{--                        <button class="btn btn-danger">--}}
+{{--                            For row {{ $key }} : {{ $error['delivery_types'] }}--}}
+{{--                        </button>--}}
+{{--                    @endif--}}
+{{--                @endforeach--}}
 
 
                 <div class="card mt-2">
@@ -29,6 +29,7 @@
                                 <table class="table table-bordered" id="tbl">
                                     <thead>
                                     <tr>
+                                        <th>S No</th>
                                         <th>City Name</th>
                                         <th>City Code</th>
                                         <th>Is City</th>
@@ -105,6 +106,7 @@
                                     @foreach($data as $index => $ro)
 
                                         <tr>
+                                            <td> {{$index}} </td>
                                             <td>
                                                 {!! Form::text($index . "[name]", $ro['name'] ?? '', [
                                                     'class' => 'form-control' . (isset($errors[$index]["name"]) ? ' is-invalid' : ''),
@@ -273,27 +275,45 @@
                                                     // Enable the checkbox if there is an error, otherwise disable it using pointer-events
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[regular_saver_plus]", 1, isset($ro['regular_saver_plus']) ? true : false, [
                                                     'class' => (isset($errors[$index]["delivery_types"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
-
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[regular_swift]", 1, isset($ro['regular_swift']) ? true : false, [
                                                     'class' => (isset($errors[$index]["delivery_types"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
-
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[regular_same_day]", 1, isset($ro['regular_same_day']) ? true : false, [
                                                     'class' => (isset($errors[$index]["delivery_types"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
-
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
 
                                             <!-- Replacement -->
@@ -302,24 +322,44 @@
                                                     'class' => (isset($errors[$index]["replacement_rush"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[replacement_saver_plus]", 1, isset($ro['replacement_saver_plus']) ? true : false, [
                                                     'class' => (isset($errors[$index]["replacement_saver_plus"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[replacement_swift]", 1, isset($ro['replacement_swift']) ? true : false, [
                                                     'class' => (isset($errors[$index]["replacement_swift"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[replacement_same_day]", 1, isset($ro['replacement_same_day']) ? true : false, [
                                                     'class' => (isset($errors[$index]["replacement_same_day"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
 
                                             <!-- Try & Buy -->
@@ -328,18 +368,33 @@
                                                     'class' => (isset($errors[$index]["try_and_buy_rush"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[try_and_buy_saver_plus]", 1, isset($ro['try_and_buy_saver_plus']) ? true : false, [
                                                     'class' => (isset($errors[$index]["try_and_buy_saver_plus"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[try_and_buy_swift]", 1, isset($ro['try_and_buy_swift']) ? true : false, [
                                                     'class' => (isset($errors[$index]["try_and_buy_swift"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[try_and_buy_same_day]", 1, isset($ro['try_and_buy_same_day']) ? true : false, [
@@ -354,24 +409,44 @@
                                                     'class' => (isset($errors[$index]["reverse_pickup_rush"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[reverse_pickup_saver_plus]", 1, isset($ro['reverse_pickup_saver_plus']) ? true : false, [
                                                     'class' => (isset($errors[$index]["reverse_pickup_saver_plus"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[reverse_pickup_swift]", 1, isset($ro['reverse_pickup_swift']) ? true : false, [
                                                     'class' => (isset($errors[$index]["reverse_pickup_swift"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[reverse_pickup_same_day]", 1, isset($ro['reverse_pickup_same_day']) ? true : false, [
                                                     'class' => (isset($errors[$index]["reverse_pickup_same_day"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
 
                                             <!-- FTL -->
@@ -380,24 +455,44 @@
                                                     'class' => (isset($errors[$index]["ftl_rush"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[ftl_saver_plus]", 1, isset($ro['ftl_saver_plus']) ? true : false, [
                                                     'class' => (isset($errors[$index]["ftl_saver_plus"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[ftl_swift]", 1, isset($ro['ftl_swift']) ? true : false, [
                                                     'class' => (isset($errors[$index]["ftl_swift"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[ftl_same_day]", 1, isset($ro['ftl_same_day']) ? true : false, [
                                                     'class' => (isset($errors[$index]["ftl_same_day"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="invalid-feedback">
+                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    </div>
+                                                @endif
                                             </td>
 
                                             <!-- Walk-In -->
@@ -406,6 +501,7 @@
                                                     'class' => (isset($errors[$index]["walkin_rush"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+
                                             </td>
                                             <td>
                                                 {!! Form::checkbox($index . "[walkin_saver_plus]", 1, isset($ro['walkin_saver_plus']) ? true : false, [
