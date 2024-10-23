@@ -278,7 +278,7 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
 
-                                                @if(isset($errors[$index]))
+                                                @if(isset($errors[$index]["delivery_types"]))
                                                     <div class="">
                                                         <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
