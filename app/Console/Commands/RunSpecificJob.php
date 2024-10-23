@@ -65,7 +65,6 @@ class RunSpecificJob extends Command
                         continue; // Skip this job
                     }
                     if ($job && $unserialize->mailable->subject != 'Implementation of Fuel Adjustment Factor (FAF)') {
-                        dd('data');
                         $this->info("Processing Job ID: {$jobRecord->id}");
 
                         $job->fire(); // Fire the job manually
