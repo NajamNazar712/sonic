@@ -54,27 +54,14 @@ class RunSpecificJob extends Command
                 $job = Queue::pop($queueName);
                 $payloadSubject = json_decode($jobRecord->payload);
                 $unserialize = unserialize($payloadSubject->data->command);
-                // Check if the mailable object exists and has a subject property
-                if ($unserialize && isset($unserialize->mailable->subject)) {
-                    // Check if the subject is not the one you want
-                    if ($unserialize->mailable->subject !== 'Implementation of Fuel Adjustment Factor (FAF)') {
-                        $this->info("Skipping Job ID: {$jobRecord->id} due to subject mismatch.");
-                        continue; // Skip this job
-                    }
-                    if ($job && $unserialize->mailable->subject != 'Implementation of Fuel Adjustment Factor (FAF)') {
-                        $this->info("Processing Job ID: {$jobRecord->id}");
+                if ($job && $unserialize->mailable->subject != 'Implementation of Fuel Adjustment Factor (FAF)') {
+                    $this->info("Processing Job ID: {$jobRecord->id}");
 
-                        $job->fire(); // Fire the job manually
+                    $job->fire(); // Fire the job manually
 
-                        $this->info("Successfully processed Job ID: {$jobRecord->id}");
-                    } else {
-                        $this->error("No job found in the queue '{$queueName}'");
-                    }
-                    // Process the job if the subject matches
-                    $this->info("Processing Job ID: {$jobRecord->id} with Subject: {$unserialize->mailable->subject}");
-                    // Add your job processing logic here
+                    $this->info("Successfully processed Job ID: {$jobRecord->id}");
                 } else {
-                    $this->error("Mailable or subject not found in Job ID: {$jobRecord->id}");
+                    $this->error("No job found in the queue '{$queueName}'");
                 }
             } catch (\Exception $e) {
                 $this->error("Error processing Job ID: {$jobRecord->id} - " . $e->getMessage());
