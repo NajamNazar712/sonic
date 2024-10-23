@@ -78,6 +78,7 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\CrmCaseNatureRemark;
+use App\Http\Models\InterceptReBookRequestHistory;
 
 class AdminTrackingController extends Controller
 {
@@ -1243,7 +1244,20 @@ class AdminTrackingController extends Controller
                         $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
                         $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
-                        $details['consignee']['address'] = $shipment->consignee_address;
+
+                        $consignee_address = InterceptReBookRequestHistory::where('shipment_id', $shipment->id)
+                        ->select([
+                            'new_consignee_address',
+                        ])
+                        ->first();
+
+                        if ($consignee_address){
+                            $details['consignee']['address'] = $consignee_address->new_consignee_address;
+                        } else {
+                            $details['consignee']['address'] = $shipment->consignee_address;
+                        }
+
+                        // $details['consignee']['address'] = $shipment->consignee_address;
                         $details['consignee']['email'] = $shipment->consignee_email;
 
                         $details['consignee']['crm_status'] = 0;

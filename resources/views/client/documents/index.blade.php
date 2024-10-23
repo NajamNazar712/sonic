@@ -57,7 +57,12 @@
                                             <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
                                             <div class="heading-elements">
                                                 <ul class="list-inline mb-0">
-                                                    <li><a href="javascript:void(0);" class="btn btn-secondary round btn-min-width mr-1 mb-1 city_list_download"> <i class=" ft-download"></i> Download</a></li>
+                                                    <li>
+                                                        <a href="javascript:void(0);" class="btn btn-secondary round btn-min-width mr-1 mb-1 city_list_download_updated" id="updated_network_list"> 
+                                                            <i class=" ft-download"></i>
+                                                            Download
+                                                        </a>
+                                                    </li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -152,8 +157,12 @@
             $('li a.city_list_download').on('click', function () {
                 $(this).attr('disabled', true);
                 window.open('{!! route('cod.resources.city_list') !!}', '_blank');
-
             })
+
+            var updated_network_list = $('#updated_network_list');
+            updated_network_list.on('click', function () {
+                window.open('{!! route('cod.resources.city_list') !!}', '_blank');
+            });
         });
 
 

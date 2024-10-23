@@ -885,6 +885,11 @@
                             var error = "Please select Channel!";
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
+                        if(!$('#claim_description').val()){
+                            nature_flag = false;
+                            var error = "Please enter the claim description!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
                         if(case_nature_claim_id !== "26"){
                             if(!check_product_picture){
                                 nature_flag = false;
