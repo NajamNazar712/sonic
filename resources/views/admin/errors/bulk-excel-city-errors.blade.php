@@ -104,9 +104,12 @@
 
 
                                     @foreach($data as $index => $ro)
-
                                         <tr>
-                                            <td> {{$index}} </td>
+                                            @if(isset($errors[$index]))
+                                                <td><h4 style="color: red">{!! $index!!}</h4><font color="red">{{ 'Error(s) in this row' }}</font></td>
+                                            @else
+                                                <td>{!! $index!!}</td>
+                                            @endif
                                             <td>
                                                 {!! Form::text($index . "[name]", $ro['name'] ?? '', [
                                                     'class' => 'form-control' . (isset($errors[$index]["name"]) ? ' is-invalid' : ''),
@@ -272,13 +275,12 @@
                                             <td>
                                                 {!! Form::checkbox($index . "[regular_rush]", 1, isset($ro['regular_rush']) ? true : false, [
                                                     'class' => isset($errors[$index]["regular_rush"]) ? 'is-invalid' : '',
-                                                    // Enable the checkbox if there is an error, otherwise disable it using pointer-events
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
 
-                                                @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                @if(isset($errors[$index]))
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -288,8 +290,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -299,8 +301,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -310,8 +312,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -323,8 +325,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -334,8 +336,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -345,8 +347,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -356,8 +358,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -369,8 +371,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -380,8 +382,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -391,8 +393,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -401,6 +403,12 @@
                                                     'class' => (isset($errors[$index]["try_and_buy_same_day"]) ? ' is-invalid' : ''),
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
+
+                                                @if(isset($errors[$index]["delivery_types"]))
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
+                                                    </div>
+                                                @endif
                                             </td>
 
                                             <!-- Reverse Pickup -->
@@ -410,8 +418,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -421,8 +429,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -432,8 +440,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -443,8 +451,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -456,8 +464,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -467,8 +475,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -478,8 +486,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
@@ -489,8 +497,8 @@
                                                     'style' => !isset($errors[$index]["delivery_types"]) ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
                                                 @if(isset($errors[$index]["delivery_types"]))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors[$index]["delivery_types"]}}
+                                                    <div class="">
+                                                        <span class="text-danger">{{ $errors[$index]["delivery_types"]}}</span>
                                                     </div>
                                                 @endif
                                             </td>
