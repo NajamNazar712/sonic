@@ -13574,17 +13574,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $old_reimbursement_account_dates = $old_reimbursement_account->select('created_at')->groupBy('created_at')->get();
                     foreach ($old_reimbursement_account_dates as $date) {
                         $date = Carbon::parse($date->created_at)->toDateString();
+
+                        //Weight Check
+                        $compare_weight = $this->compareWeightCharges($user_id, WeightCharge::class, HistoryWeightCharge::class);
+                        //Fuel Check
+                        $compare_fuel_surcharge = $this->compareFuelCharges($user_id, FuelSurcharge::class, HistoryFuelSurcharge::class);
                         if (!in_array($date, $details)) {
-                            $details[] = $date;
+                            $details[$date]['weight'] = $compare_weight;
+                            $details[$date]['fuel'] = $compare_fuel_surcharge;
                         }
                     }
-
-                    //Weight Check
-                    $compare_weight = $this->compareWeightCharges($user_id, WeightCharge::class, HistoryWeightCharge::class);
-
-                    //Fuel Check
-                    $compare_fuel_surcharge = $this->compareFuelCharges($user_id, FuelSurcharge::class, HistoryFuelSurcharge::class);
-
 
                     return response()->json(['status' => 1, 'account_type' => 1, 'details' => $details, 'user_id' => $user_id, 'compare_weight' => $compare_weight ?? '', 'compare_fuel_surcharge' => $compare_fuel_surcharge ?? '']);
                 } else {
