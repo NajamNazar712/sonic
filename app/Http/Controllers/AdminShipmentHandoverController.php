@@ -87,12 +87,12 @@ class AdminShipmentHandoverController extends Controller
       if ($shipment->exists()) {
         $shipment = $shipment->first();
         
-        $blocked_shipments = ShipmentsJourney::where('shipment_id', $shipment->id)
-        ->orderBy('created_at', 'desc')
-        ->orderBy('id', 'desc')
-        ->select('shipper_status_id')
-        ->first();
-        if ($blocked_shipments->shipper_status_id == 51 || $blocked_shipments->shipper_status_id == 18){
+        // $blocked_shipments = ShipmentsJourney::where('shipment_id', $shipment->id)
+        // ->orderBy('created_at', 'desc')
+        // ->orderBy('id', 'desc')
+        // ->select('shipper_status_id')
+        // ->first();
+        if ($shipment->shipper_status_id == 51 || $shipment->shipper_status_id == 18){
           ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
           return ['status' => 1, 'error' => 'Cannot scan this shipment.'];
         }
@@ -205,13 +205,13 @@ class AdminShipmentHandoverController extends Controller
           $shipment = $shipment->first();
           $shipment_pieces = $shipment->pieces;
 
-          $lost_shipments = ShipmentsJourney::where('shipment_id', $shipment->id)
-            ->orderBy('created_at', 'desc')
-            ->orderBy('id', 'desc')
-            ->select('shipper_status_id')
-            ->first();
+          // $lost_shipments = ShipmentsJourney::where('shipment_id', $shipment->id)
+          //   ->orderBy('created_at', 'desc')
+          //   ->orderBy('id', 'desc')
+          //   ->select('shipper_status_id')
+          //   ->first();
 
-          if ($lost_shipments->shipper_status_id == 18 || $lost_shipments->shipper_status_id == 51){
+          if ($shipment->shipper_status_id == 18 || $shipment->shipper_status_id == 51){
             return ['status' => 1, 'error' => 'This shipment is either lost of closed.'];
           }
 
