@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Queue\CallQueuedHandler;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 
 class RunSpecificJob extends Command
 {
@@ -31,23 +32,40 @@ class RunSpecificJob extends Command
             ->get();
 
         // Initialize Laravel's job handler
-        $jobHandler = app(CallQueuedHandler::class);
+        // $jobHandler = app(CallQueuedHandler::class);
 
         // Process the jobs
+        // foreach ($jobs as $jobRecord) {
+        //     // Get the payload and deserialize the job
+        //     $payload = json_decode($jobRecord->payload, true);
+        //     $command = unserialize($payload['data']['command']);
+        //     dd($command);
+        //     // Process the job by calling Laravel's CallQueuedHandler
+        //     try {
+        //         Artisan::call('queue:email', ['id' => $jobRecord->id]);
+        //         $this->info("Successfully processed Job ID: {$jobRecord->id}");
+        //     } catch (\Exception $e) {
+        //         $this->error("Error processing Job ID: {$jobRecord->id} - " . $e->getMessage());
+        //     }
+        // }
         foreach ($jobs as $jobRecord) {
-            // Get the payload and deserialize the job
-            $payload = json_decode($jobRecord->payload, true);
-            $command = unserialize($payload['data']['command']);
-            dd($command);
-            // Process the job by calling Laravel's CallQueuedHandler
             try {
-                Artisan::call('queue:email', ['id' => $jobRecord->id]);
-                $this->info("Successfully processed Job ID: {$jobRecord->id}");
+                // Process the job through the Queue system
+                $job = Queue::pop($queueName);
+
+                if ($job) {
+                    $this->info("Processing Job ID: {$jobRecord->id}");
+
+                    $job->fire(); // Fire the job manually
+
+                    $this->info("Successfully processed Job ID: {$jobRecord->id}");
+                } else {
+                    $this->error("No job found in the queue '{$queueName}'");
+                }
             } catch (\Exception $e) {
                 $this->error("Error processing Job ID: {$jobRecord->id} - " . $e->getMessage());
             }
         }
-
         $this->info("Processed {$jobs->count()} jobs from the '{$queueName}' queue.");
     }
 }
