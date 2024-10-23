@@ -28,7 +28,7 @@ class RunSpecificJob extends Command
         $jobs = DB::table('jobs')
         ->where('queue', $queueName)            // Filter by the specified queue name
             ->limit($limit)                         // Limit to the specified number
-            ->orderBy('id', 'asc')                  // Order by ascending ID
+            ->orderBy('id', 'desc')                  // Order by ascending ID
             ->get();
 
         // Initialize Laravel's job handler
