@@ -1620,11 +1620,11 @@ class AdminCRMController extends Controller
 
                     if($current_tat >= 0 && $current_tat <= 1)
                     {
-                        return $current_tat.' Day';
+                        return $current_tat/* .' Day' */;
                     }
                     else if($current_tat > 1 /* && $current_tat <= 5 */)
                     {
-                        return $current_tat.' Days';
+                        return $current_tat/* .' Days' */;
                     }
                     // else{
                     //     return '5+ Days';
@@ -2306,11 +2306,11 @@ class AdminCRMController extends Controller
 
                     if($current_tat >= 0 && $current_tat <= 1)
                     {
-                        return $current_tat.' Day';
+                        return $current_tat/* .' Day' */;
                     }
                     else if($current_tat > 1 /* && $current_tat <= 5 */)
                     {
-                        return $current_tat.' Days';
+                        return $current_tat/* .' Days' */;
                     }
                     // else{
                     //     return '5+ Days';
@@ -3464,11 +3464,11 @@ class AdminCRMController extends Controller
 
                     if($current_tat >= 0 && $current_tat <= 1)
                     {
-                        return $current_tat.' Day';
+                        return $current_tat/* .' Day' */;
                     }
                     else if($current_tat > 1 /* && $current_tat <= 5 */)
                     {
-                        return $current_tat.' Days';
+                        return $current_tat/* .' Days' */;
                     }
                     // else{
                     //     return '5+ Days';
