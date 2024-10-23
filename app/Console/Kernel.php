@@ -162,7 +162,9 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\RetryJobsInRange',
         '\App\Console\Commands\ForceFullyBotCallInitiate',
         '\App\Console\Commands\MissingFirstCallInitiate',
-        '\App\Console\Commands\lastMileAppReportCountUpdate'
+        '\App\Console\Commands\lastMileAppReportCountUpdate',
+        '\App\Console\Commands\RunSpecificJob',
+
         ];
 
     /**
