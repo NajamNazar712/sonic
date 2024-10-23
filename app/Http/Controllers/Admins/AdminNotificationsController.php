@@ -164,9 +164,10 @@ class AdminNotificationsController extends Controller
             
             $chunkSize = 50;
             $chunks = array_chunk($emails, $chunkSize);
-            dd($chunks);
+           
             foreach ($chunks as $parsed_emails) {
-                NotificationsController::custom(1, $subject, $body, $parsed_emails, $from_email);
+                var_dump($parsed_emails);
+                // NotificationsController::custom(1, $subject, $body, $parsed_emails, $from_email);
             }
             // for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
             //     $parsed_emails = array_slice($emails, $offset, $chunkSize);
