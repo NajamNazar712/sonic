@@ -48,39 +48,25 @@ class RunSpecificJob extends Command
         //         $this->error("Error processing Job ID: {$jobRecord->id} - " . $e->getMessage());
         //     }
         // }
-        // Filter jobs based on payload contents
-        $filteredJobs = $jobs->filter(function ($jobRecord) {
+        foreach ($jobs as $jobRecord) {
             try {
-                // Unserialize the payload to access its contents
-                $payload = unserialize($jobRecord->payload);
+                // Process the job through the Queue system
+                $job = Queue::pop($queueName);
+                $payloadSubject = json_decode($jobRecord->payload);
+                $unserialize = unserialize($payloadSubject->data->command);
+                if ($job && $unserialize->mailable->subject != 'Implementation of Fuel Adjustment Factor (FAF)') {
+                    $this->info("Processing Job ID: {$jobRecord->id}");
 
-                // Check if the subject matches your condition
-                return isset($payload['subject']) && $payload['subject'] === "Implementation of Fuel Adjustment Factor (FAF)";
+                    $job->fire(); // Fire the job manually
+
+                    $this->info("Successfully processed Job ID: {$jobRecord->id}");
+                } else {
+                    $this->error("No job found in the queue '{$queueName}'");
+                }
             } catch (\Exception $e) {
-                // Log or handle any unserialization errors
                 $this->error("Error processing Job ID: {$jobRecord->id} - " . $e->getMessage());
-                return false; // Exclude this job from the results
             }
-        });
-        dd($filteredJobs);
-        // foreach ($jobs as $jobRecord) {
-        //     try {
-        //         // Process the job through the Queue system
-        //         $job = Queue::pop($queueName);
-
-        //         if ($job) {
-        //             $this->info("Processing Job ID: {$jobRecord->id}");
-
-        //             $job->fire(); // Fire the job manually
-
-        //             $this->info("Successfully processed Job ID: {$jobRecord->id}");
-        //         } else {
-        //             $this->error("No job found in the queue '{$queueName}'");
-        //         }
-        //     } catch (\Exception $e) {
-        //         $this->error("Error processing Job ID: {$jobRecord->id} - " . $e->getMessage());
-        //     }
-        // }
+        }
         $this->info("Processed {$jobs->count()} jobs from the '{$queueName}' queue.");
     }
 }
