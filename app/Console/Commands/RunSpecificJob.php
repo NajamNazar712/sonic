@@ -55,6 +55,7 @@ class RunSpecificJob extends Command
                 $payloadSubject = json_decode($jobRecord->payload);
                 $unserialize = unserialize($payloadSubject->data->command);
                 if ($job && $unserialize->mailable->subject != 'Implementation of Fuel Adjustment Factor (FAF)') {
+                    dd('data');
                     $this->info("Processing Job ID: {$jobRecord->id}");
 
                     $job->fire(); // Fire the job manually
