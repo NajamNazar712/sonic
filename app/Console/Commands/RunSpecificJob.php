@@ -26,7 +26,9 @@ class RunSpecificJob extends Command
 
         // Fetch the jobs based on queue name and limit
         $jobs = DB::table('jobs')
-        ->where('queue', $queueName)            // Filter by the specified queue name
+            ->where('queue', $queueName)
+            ->where('payload', 'NOT LIKE', '%Implementation of Fuel Adjustment Factor (FAF)%')
+            // Filter by the specified queue name
             ->limit($limit)                         // Limit to the specified number
             ->orderBy('id', 'desc')                  // Order by ascending ID
             ->get();
@@ -52,9 +54,9 @@ class RunSpecificJob extends Command
             try {
                 // Process the job through the Queue system
                 $job = Queue::pop($queueName);
-                $payloadSubject = json_decode($jobRecord->payload);
-                $unserialize = unserialize($payloadSubject->data->command);
-                if ($job && $unserialize->mailable->subject != 'Implementation of Fuel Adjustment Factor (FAF)') {
+                // $payloadSubject = json_decode($jobRecord->payload);
+                // $unserialize = unserialize($payloadSubject->data->command);
+                if ($job) {
                     $this->info("Processing Job ID: {$jobRecord->id}");
 
                     $job->fire(); // Fire the job manually
