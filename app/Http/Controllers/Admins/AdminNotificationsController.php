@@ -161,7 +161,7 @@ class AdminNotificationsController extends Controller
 
 
             $totalItems = count($emails);
-            $chunkSize = 50;
+            $chunkSize = 40;
             for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
                 $parsed_emails = array_slice($emails, $offset, $chunkSize);
                 
