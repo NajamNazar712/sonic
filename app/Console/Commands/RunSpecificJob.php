@@ -54,9 +54,6 @@ class RunSpecificJob extends Command
                 $job = Queue::pop($queueName);
                 $payloadSubject = json_decode($jobRecord->payload);
                 $unserialize = unserialize($payloadSubject->data->command);
-                error_log('data'.print_r(($unserialize->mailable->subject !== 'Implementation of Fuel Adjustment Factor (FAF)'),true));
-                
-
                 // Check if the mailable object exists and has a subject property
                 if ($unserialize && isset($unserialize->mailable->subject)) {
                     // Check if the subject is not the one you want
