@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Queue\CallQueuedHandler;
 use Illuminate\Support\Facades\DB;
 
 class RunSpecificJob extends Command
@@ -18,34 +19,34 @@ class RunSpecificJob extends Command
 
     public function handle()
     {
-        $jobId = $this->argument('queuename');
-        $limit = (int) $this->argument('limit');
-        // Find the job by ID
+        $queueName = $this->argument('queuename');  // Get queue name argument
+        $limit = (int) $this->argument('limit');    // Get the limit argument (default: 100)
+
+        // Fetch the jobs based on queue name and limit
         $jobs = DB::table('jobs')
-            ->where('queue', 'email') // Filter by the email queue
-            ->limit($limit)
-            ->orderBy('id','acs')
+        ->where('queue', $queueName)            // Filter by the specified queue name
+            ->limit($limit)                         // Limit to the specified number
+            ->orderBy('id', 'asc')                  // Order by ascending ID
             ->get();
 
-        if (!$jobs) {
-            $this->error("Job with queue name $jobId not found.");
-            return;
+        // Initialize Laravel's job handler
+        $jobHandler = app(CallQueuedHandler::class);
+
+        // Process the jobs
+        foreach ($jobs as $jobRecord) {
+            // Get the payload and deserialize the job
+            $payload = json_decode($jobRecord->payload, true);
+            $command = unserialize($payload['data']['command']);
+
+            // Process the job by calling Laravel's CallQueuedHandler
+            try {
+                $jobHandler->call($command, ['id' => $jobRecord->id]);
+                $this->info("Successfully processed Job ID: {$jobRecord->id}");
+            } catch (\Exception $e) {
+                $this->error("Error processing Job ID: {$jobRecord->id} - " . $e->getMessage());
+            }
         }
 
-        foreach ($jobs as $job) {
-            // Decode the payload
-            $payload = json_decode($job->payload);
-
-            // Unserialize the command (in this case, an email)
-            $command = unserialize($payload->data->command);
-
-            // Manually handle the job (send the email)
-            $command->handle();
-
-            // Optionally delete the job after it's processed
-            DB::table('jobs')->where('id', $job->id)->delete();
-        }
-
-        $this->info("Processed {$jobs->count()} email jobs.");
+        $this->info("Processed {$jobs->count()} jobs from the '{$queueName}' queue.");
     }
 }
