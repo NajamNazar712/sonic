@@ -289,6 +289,8 @@ class NotificationsController extends Controller
             $to = $filterBlockedEmails($to);
             if (is_array($to)) {
                 $to = array_values(array_filter($to));
+                Log::channel('botCallJobLog')->info('s ' . 'email count' . count($to).'email subject'. $subject);
+
                 if (empty($to)) {
                     return false;
                 }
