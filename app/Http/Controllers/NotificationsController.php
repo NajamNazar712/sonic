@@ -11321,6 +11321,8 @@ class NotificationsController extends Controller
     static public function custom($type, $subject, $body, $to, $from = null)
     {
         if ($type == 1) {
+            Log::channel('botCallJobLog')->info('s ' . 'email count' . count($to));
+
             self::email($subject, $body, $from, null, $to, $from);
         }
     }
