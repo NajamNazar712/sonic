@@ -27,7 +27,7 @@ class RunSpecificJob extends Command
         // Fetch the jobs based on queue name and limit
         $jobs = DB::table('jobs')
             ->where('queue', $queueName)
-            // ->where('payload', 'NOT LIKE', '%Implementation of Fuel Adjustment Factor (FAF)%')
+            ->where('payload', 'NOT LIKE', '%Implementation of Fuel Adjustment Factor (FAF)%')
             // Filter by the specified queue name
             ->limit($limit)                         // Limit to the specified number
             ->orderBy('id', 'asc')                  // Order by ascending ID
