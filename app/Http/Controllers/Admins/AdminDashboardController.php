@@ -15311,6 +15311,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $validator->errors()->add('is_city', 'Both is_city and is_hub cannot be present at the same time.');
                     $validator->errors()->add('is_hub', 'Both is_city and is_hub cannot be present at the same time.');
                 }
+
+                if ($row['is_city'] == 0 && $row['is_hub'] == 0) {
+                    $validator->errors()->add('is_city', 'Both is_city and is_hub cannot be 0 at the same time.');
+                    $validator->errors()->add('is_hub', 'Both is_city and is_hub cannot be 0 at the same time.');
+                }
             });
 
             // Check if validation fails
