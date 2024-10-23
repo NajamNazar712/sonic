@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Queue\CallQueuedHandler;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 class RunSpecificJob extends Command
@@ -37,10 +38,10 @@ class RunSpecificJob extends Command
             // Get the payload and deserialize the job
             $payload = json_decode($jobRecord->payload, true);
             $command = unserialize($payload['data']['command']);
-
+            dd($command);
             // Process the job by calling Laravel's CallQueuedHandler
             try {
-                $jobHandler->call($command, ['id' => $jobRecord->id]);
+                Artisan::call('queue:email', ['id' => $jobRecord->id]);
                 $this->info("Successfully processed Job ID: {$jobRecord->id}");
             } catch (\Exception $e) {
                 $this->error("Error processing Job ID: {$jobRecord->id} - " . $e->getMessage());
