@@ -12,74 +12,83 @@
             <div class="card-body">
 
                 @include('admin.inc.messages')
-                <div class="row mb-2 justify-content-center">
+                <div class="container">
+                    <div class="row mb-2 justify-content-center">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                        <div class="col-3">
-                            <fieldset class="position-relative has-icon-left">
-                                <input type="text" class="form-control" placeholder="Tracking Number" id="search_tracking">
-                            </fieldset>
-                        </div>
-                        <div class="col-4">
-                            <fieldset class="form-group">
-                                <select name="R" id="search_hub" class="form-control select2">
-                                    @foreach($hubs as $hub)
-                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
-                        <div class="col-4">
-                            <fieldset class="form-group">
-                                <select name="search_from_admin" id="search_from_admin" class="form-control select2">
-                                    @foreach($handover_admins as $admin)
-                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
-                        <div class="col-4">
-                            <fieldset class="form-group">
-                                <select name="search_to_admin" id="search_to_admin" class="form-control select2">
-                                    @foreach($handover_admins as $admin)
-                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
-
-                        <div class="col-4">
-                            <fieldset class="form-group">
-                                <select name="search_area" id="search_area" class="form-control select2">
-                                    @foreach($areas as $area)
-                                        <option value="{{$area->id}}">{{$area->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
-
-                        <div class="col-3 form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
+                            <div class="col-3 my-1">
+                                <fieldset class="position-relative has-icon-left">
+                                    <input type="text" class="form-control" placeholder="Tracking Number" id="search_tracking">
+                                </fieldset>
                             </div>
 
-                            <input type="text" name="search_date_from" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)">
-                        </div>
-                        <div class="col-3 form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
+                            <div class="col-3">
+                                <fieldset class="position-relative has-icon-left">
+                                    <input type="text" class="form-control" placeholder="Bag Number" id="search_bag_number">
+                                </fieldset>
                             </div>
 
-                            <input type="text" name="search_date_to" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)">
-                        </div>
-
-                        <div class="col-2">
-                            <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                        </div>
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <select name="R" id="search_hub" class="form-control select2">
+                                        @foreach($hubs as $hub)
+                                            <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-4 my-1">
+                                <fieldset class="form-group">
+                                    <select name="search_from_admin" id="search_from_admin" class="form-control select2">
+                                        @foreach($handover_admins as $admin)
+                                            <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <select name="search_to_admin" id="search_to_admin" class="form-control select2">
+                                        @foreach($handover_admins as $admin)
+                                            <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+    
+                            <div class="col-4">
+                                <fieldset class="form-group">
+                                    <select name="search_area" id="search_area" class="form-control select2">
+                                        @foreach($areas as $area)
+                                            <option value="{{$area->id}}">{{$area->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+    
+                            <div class="col-3 form-group input-group">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                </div>
+    
+                                <input type="text" name="search_date_from" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)">
+                            </div>
+                            <div class="col-3 form-group input-group">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                </div>
+    
+                                <input type="text" name="search_date_to" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)">
+                            </div>
+    
+                            <div class="col-2">
+                                <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                            </div>
                         </form>
+                    </div>
                 </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="width:100%;z-index: 3;">
@@ -88,6 +97,8 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Handover ID</th>
+                        <th class="border-primary border-darken-1">Bag Number</th>
+                        <th class="border-primary border-darken-1">Bag Type</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At Area</th>
@@ -102,6 +113,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Shipment(s)</th>
+                        <th class="border-primary border-darken-1">Excess Shipment(s)</th>
                         <th class="border-primary border-darken-1">Received Shipment(s)</th>
                         <th class="border-primary border-darken-1">Remaining Shipment(s)</th>
                         <th class="border-primary border-darken-1">Shipment Pieces</th>
@@ -134,6 +146,29 @@
             </div>
         </div>
     </div>
+
+    {{-- Excess shipments modal --}}
+    <div class="modal fade" id="excess_shipments" role="dialog" aria-labelledby="shipments_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="excess_shipments_title">Excess Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
 
     {{-- Shipment Pieces Modal --}}
     <div class="modal fade" id="shipment_pieces" role="dialog" aria-labelledby="shipments_title" aria-hidden="true">
@@ -352,7 +387,12 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
-       
+
+            $('#search_bag_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -369,6 +409,8 @@
 
                             head.push('S. No');
                             head.push('Handover ID');
+                            head.push('Bag Number');
+                            head.push('Bag Type');
                             head.push('Created At');
                             head.push('Created By');
                             head.push('Created At Area');
@@ -383,6 +425,7 @@
                             head.push('Hub');
                             head.push('Status');
                             head.push('Total Shipment(s)');
+                            head.push('Excess Shipment(s)');
                             head.push('Received Shipment(s)');
                             head.push('Remaining Shipment(s)');
                             head.push('Received By');
@@ -394,6 +437,8 @@
 
                                 row.push(index + 1);
                                 row.push(values.handover_id);
+                                row.push(values.bag_number);
+                                row.push(values.bag_type);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.created_at_area);
@@ -408,6 +453,8 @@
                                 row.push(values.hub);
                                 row.push(values.status);
                                 row.push(values.total_shipments);
+                                // row.push(values.excess_shipments);
+                                row.push($(values.excess_shipments).text() || values.excess_shipments);
                                 row.push(values.received_shipments);
                                 row.push(values.remaining);
                                 row.push(values.received_by);
@@ -556,6 +603,7 @@
                     url: '{{ route('admin.handover.list.list') }}',
                     data: function (d) {
                         d.search_tracking = $('#search_tracking').val();
+                        d.search_bag_number = $('#search_bag_number').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_from_admin = $('#search_from_admin').val();
                         d.search_to_admin = $('#search_to_admin').val();
@@ -571,6 +619,8 @@
                     {data: 'handover_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'handover_id_padded', name: 'handovers.id', class: 'align-middle handover_id_padded'},
+                    {data: 'bag_number', name: 'bag_number', class: 'align-middle bag_number'},
+                    {data: 'bag_type', name: 'bag_type', class: 'align-middle bag_type'},
                     {data: 'created_at', name: 'handovers.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
                     {data: 'created_at_area', name: 'created_at_area', class: 'align-middle created_at_area'},
@@ -584,6 +634,7 @@
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},
                     {data: 'shipment_count', name: 'handovers.shipments', class: 'align-middle text-center shipment_count'},
+                    {data: 'excess_shipments', name: 'excess_shipments', class: 'align-middle text-center excess_shipments'},
                     {data: 'received_shipments', name: 'handovers.received', class: 'align-middle received_shipments'},
                     {data: 'remaining_shipment_count', name: 'remaining_shipment_count', class: 'align-middle text-center remaining_shipment_count', orderable: false, searchable: false},
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle text-center shipment_pieces', orderable: false, searchable: false},
@@ -680,6 +731,33 @@
 
                         }
                     });
+
+            });
+
+            $('#datatable tbody').on('click','tr td.excess_shipments button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#excess_shipments .modal-body').html('');
+                $('#excess_shipments').modal('show');
+
+                $.ajax({
+                        url: '{!! route('admin.handover.list.excess_handover_shipments') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id
+                        }
+                    })
+                    .done(function(data) {
+                        if (data) {
+                            var shipments = '';
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_numbers) {
+                                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                                });
+                            }
+                            $('#excess_shipments .modal-body').html(shipments);
+                        }
+                });
 
             });
 
