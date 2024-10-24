@@ -95,12 +95,12 @@ class AdminRvReportsController extends Controller
             // })    
             ->leftJoin('api_zong_logs as azl', function ($join) {
                 $join->on('azl.shipment_id', '=', 's.id')
-                    ->whereRaw('DATE_FORMAT(azl.call_date_time, "%Y-%m-%d %H") = DATE_FORMAT(api_call_logs.created_at, "%Y-%m-%d %H")');
+                    ->whereRaw('DATE_FORMAT(azl.call_date_time, "%Y-%m-%d") = DATE_FORMAT(api_call_logs.created_at, "%Y-%m-%d")');
             })
             ->select('s.tracking_number as tracking_number',
             'api_call_logs.shipment_id as shipmentNo',
             'api_call_logs.call_count_initiate  as call_count',
-            'api_call_logs.payload  as response',
+            'api_call_logs.payload  as message1',
             'api_call_logs.created_at as created_at',
             'azl.shipment_id as shipmentNo1',
             'azl.call_date_time as call_start_date',
@@ -114,45 +114,45 @@ class AdminRvReportsController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$rv_call_logs->tracking_number' class='tracking' target='_blank'>$rv_call_logs->tracking_number</a></u>";
             })
-            ->editColumn('response', function ($rv_call_logs) {
-                if ($rv_call_logs['response'] && !request()->get('excel')) {
+            ->editColumn('message1', function ($rv_call_logs) {
+                if ($rv_call_logs['message1']) {
                     // Decode the JSON response
-                    $responseData = json_decode($rv_call_logs['response'], true);
-
+                    $responseData = json_decode($rv_call_logs['message1'], true);
+                    return $responseData['message'];
                     // Encode and escape the JSON for safe HTML output
-                    $tooltipData = htmlspecialchars(json_encode($responseData, JSON_PRETTY_PRINT));
+                    // $tooltipData = htmlspecialchars(json_encode($responseData, JSON_PRETTY_PRINT));
 
                     // Use a brief text for display (optional)
-                    $displayText = 'Hover to view details';
+                    // $displayText = 'Hover to view details';
 
-                    return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
+                    // return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
                 }else{
-                    return $rv_call_logs['response'];
+                    // return $rv_call_logs['response'];
                 }
                 return '';
             })
-            ->addColumn('call_message', function ($rv_call_logs) {
-                if ($rv_call_logs['response']) {
-                    return json_decode($rv_call_logs['response'])->message;
-                }
-            })
-            ->editColumn('api_request', function ($rv_call_logs) {
-                if ($rv_call_logs['api_request']&& !request()->get('excel')) {
-                    // Decode the JSON response
-                    $responseData = json_decode($rv_call_logs['api_request'], true);
+            // ->addColumn('call_message', function ($rv_call_logs) {
+            //     if ($rv_call_logs['response']) {
+            //         return json_decode($rv_call_logs['response'])->message;
+            //     }
+            // })
+            // ->editColumn('api_request', function ($rv_call_logs) {
+            //     if ($rv_call_logs['api_request']&& !request()->get('excel')) {
+            //         // Decode the JSON response
+            //         $responseData = json_decode($rv_call_logs['api_request'], true);
 
-                    // Encode and escape the JSON for safe HTML output
-                    $tooltipData = htmlspecialchars(json_encode($responseData, JSON_PRETTY_PRINT));
+            //         // Encode and escape the JSON for safe HTML output
+            //         $tooltipData = htmlspecialchars(json_encode($responseData, JSON_PRETTY_PRINT));
 
-                    // Use a brief text for display (optional)
-                    $displayText = 'Hover to view details';
+            //         // Use a brief text for display (optional)
+            //         $displayText = 'Hover to view details';
 
-                    return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
-                }elseif(request()->get('excel')){
-                    return $rv_call_logs['api_request'];
-                }
-                return '';
-            })
+            //         return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
+            //     }elseif(request()->get('excel')){
+            //         return $rv_call_logs['api_request'];
+            //     }
+            //     return '';
+            // })
             ->addColumn('call_end_date', function ($rv_call_logs) {
                 if ($rv_call_logs['api_request']) {
                     return json_decode($rv_call_logs['api_request'])->end_date;
@@ -164,15 +164,16 @@ class AdminRvReportsController extends Controller
                 }
             })
             ->editColumn('message', function ($rv_call_logs) {
-                if ($rv_call_logs['message'] && !request()->get('excel')) {
+                if ($rv_call_logs['message']) {
                     $tooltipData = htmlspecialchars($rv_call_logs['message'],JSON_PRETTY_PRINT);
-                    $displayText = 'Hover to view details';
+                    return $tooltipData;
+                    // $displayText = 'Hover to view details';
 
-                    return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
-                }elseif($rv_call_logs['message'] && request()->get('excel')){
-                    return $rv_call_logs['message'];
+                    // return "<u><span data-toggle='tooltip' class='tracking json-tooltip' title='{$tooltipData}'>  {$displayText}  </span></u>";
                 }else{
-                    return 'Data Saved SuccessFully!';
+                    if($rv_call_logs['shipmentNo1']){
+                        return 'Data Saved SuccessFully!';
+                    }
                 }
             });
             if ($request->get('search_date_from') && $request->get('search_date_to') && !$request->get('search_tracking_no')) {

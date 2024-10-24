@@ -250,7 +250,7 @@
                                 <div class="row justify-content-center">
                                     <div class="col-10">
                                         <fieldset class="form-group">
-                                            <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2">
+                                            <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2" data-rule-required="true" data-msg-required="Select claim type">
                                                 @foreach($case_nature_type_claims as $claim)
                                                     <option value="{{$claim->id}}">{{$claim->type}}</option>
                                                 @endforeach
@@ -293,7 +293,7 @@
                                     </div>
                                     <div class="col-10">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                            <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Claim description is required."></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
