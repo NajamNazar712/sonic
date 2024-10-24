@@ -7066,7 +7066,7 @@ class AdminReportsController extends Controller
             $headers = $request->input('selectedTexts',[]);
 
             $this->fetchCsvCrm($headers,$fieldsToRetrieve,$crm,$select);
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 138);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 174);
         }else{
             return $datatable->make(true);
         }
