@@ -2022,21 +2022,13 @@ trait RvTrait
     }
 
     static function botCallingDataSet($shipmentId){
-        if (GlobalSettings::where(['type'=> 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
-            if(RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot',1)->exists()){
-                $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
+        if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
+            if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
+                $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCalls';
                 RvShipmentTicket::where('shipment_id', $shipmentId)->update(['in_progress' => 1]);
-                $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($this->shipmentId);
-                // Clean the phone number by removing non-alphanumeric characters    
-                // $cleaned_phone = preg_replace("/[^a-zA-Z0-9]+/", "", $shipment->consignee_phone_number_1);
-                // if (substr($cleaned_phone, 0, 2) === "00") {
-                //     // Remove one "0" by replacing "00" at the start with "0"
-                //     $final_phone = preg_replace("/^00/", "0", $cleaned_phone);
-                // } else {
-                //     // No leading "00", so leave the cleaned phone number as is
-                //     $final_phone = $cleaned_phone;
-                // }
-                $final_phone = self::phoneNumberValidate($shipment->consignee_phone_number_1);
+                $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
+
+                $final_phone = self::phoneNo($shipment->consignee_phone_number_1);
                 $post = [
                     'vpbx_id' => '66bdfd18cb67f',
                     'caller_id' => $final_phone,
@@ -2045,11 +2037,9 @@ trait RvTrait
                     'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,
                     'customer_name' => $shipment->consignee_name,
                 ];
-                return ['post'=>$post,'shipment'=>$shipment];
-
-                // WebhookLogController::shipment_status_log($shipment->user_id, $status_code, json_encode($response));
-            }else{
-               return null;
+                return ['post' => $post, 'base_uri' => $base_uri, 'user_id' => $shipment->user_id];
+            } else {
+                return null;
             }
         }
     }
