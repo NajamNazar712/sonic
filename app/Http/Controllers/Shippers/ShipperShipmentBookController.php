@@ -459,7 +459,44 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users, 'parcel_bypass' => $parcel_bypass]);
+        $viewData = [
+            'booking_types' => $booking_types,
+            'user' => $user,
+            'multi_piece' => $multi_piece,
+            'cities' => $cities,
+            'products' => $products,
+            'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings,
+            'payment_modes' => $payment_modes,
+            'consignee_cities' => $consignee_cities,
+            'check' => $check,
+            'charges_modes' => $charges_modes,
+            'date' => $date,
+            'air_waybill' => $air_waybill,
+            'omni_user' => $omni_user,
+            'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users,
+            'parcel_bypass' => $parcel_bypass
+        ];
+        
+        $substitute_account = null;
+        $substitute_account_pickup_address = null;
+
+        if (session('substitute_user_id')) {
+            $substitute_account = SubstituteUser::find(session('substitute_user_id'));
+            if ($substitute_account && $substitute_account->pickup_address_id) {
+                // Convert the comma-separated string to an array
+                $pickup_address_ids = explode(',', $substitute_account->pickup_address_id);
+                // Retrieve the UserShippingInfo records
+                $substitute_account_pickup_address = UserShippingInfo::whereIn('id', $pickup_address_ids)->get();
+            }
+        }
+
+        // Add the substitute account pickup addresses to view data
+        $viewData['substitute_account'] = $substitute_account;
+        $viewData['substitute_account_pickup_address'] = $substitute_account_pickup_address;
+
+        // return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users, 'parcel_bypass' => $parcel_bypass]);
+        return view('client.shipment.book.index')->with($viewData);
+
     }
 
     public function shipping_modes(Request $request)
