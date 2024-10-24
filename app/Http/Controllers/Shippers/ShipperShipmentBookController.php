@@ -5984,7 +5984,6 @@ class ShipperShipmentBookController extends Controller
             $column_count = null;
 
             if ($excel_type == 0) {
-
             } else if ($excel_type == 1) {
                 $column_count = 36;
 
