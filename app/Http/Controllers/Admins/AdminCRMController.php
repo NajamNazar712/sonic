@@ -6719,7 +6719,6 @@ class AdminCRMController extends Controller
     }
 
     public function bulk_comment_for_shipper(Request $request){
-        dd($request->all());
         $comment_type= $request->comment_type;
         $comment = $request->comment;
         $crm_request_ids = $request->crm_request_ids;
