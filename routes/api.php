@@ -687,6 +687,8 @@ use Illuminate\Http\Request;
 
             Route::post('retail_note_information', 'APIController@hbl_konnect_retail_note_cash_collection_information')->name('retail_note_information');
             Route::post('retail_note_transaction_information', 'APIController@hbl_konnect_retail_note_cash_collection_transactions')->name('retail_note_transaction_information');
+            Route::post('clone_retail_note_transaction_information2', 'APIController@hbl_konnect_retail_note_cash_collection_transactions_2')->name('retail_note_transaction_information2');
+
         });
         Route::prefix('easypaisa')->name('easypaisa.')->group(function () {
             Route::post('delivery_note_information', 'APIController@hbl_konnect_delivery_note_information')->name('delivery_note_information');
