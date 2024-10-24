@@ -15036,7 +15036,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
                     if ($request->has('edit')){
-                        SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
+                        Sales::where('sales_commission_id', $sales_commission_id)->delete();
                     }
 
                     foreach($request->tier_id as $row_id => $tier){
