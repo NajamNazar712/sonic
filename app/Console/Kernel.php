@@ -162,7 +162,9 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\RetryJobsInRange',
         '\App\Console\Commands\ForceFullyBotCallInitiate',
         '\App\Console\Commands\MissingFirstCallInitiate',
-        '\App\Console\Commands\lastMileAppReportCountUpdate'
+        '\App\Console\Commands\lastMileAppReportCountUpdate',
+        '\App\Console\Commands\RunSpecificJob',
+
         ];
 
     /**
@@ -174,6 +176,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('create:service_ledger')->dailyAt('00:00')->runInBackground();
+        $schedule->command('job:run email 25000')->dailyAt('02:02')->runInBackground();
         $schedule->command('corporate_reimbursement_setting:update')->monthlyOn(1, '00:15')->runInBackground();
 
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
