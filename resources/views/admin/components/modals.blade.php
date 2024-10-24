@@ -803,6 +803,10 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Upload</button>
                 </form>
+
+                <div class="form-group text-right">
+                    <a href="{{ asset('file/Trax Bulk City Add.xlsx') }}" class="btn btn-primary btn-md"><i class="la la-download"></i> Trax Bulk City Add Template Download</a>
+                </div>
             </div>
         </div>
     </div>

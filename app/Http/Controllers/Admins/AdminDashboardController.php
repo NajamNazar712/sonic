@@ -15518,6 +15518,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $item['hub'] = 1;
                     $item['created_at'] = now();
                     $item['updated_at'] = now();
+                    $item['is_excel'] = 1;
                     $isHubArray[] = $item;
                 }
 
@@ -15526,6 +15527,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $item['zone_id'] = $zone ? $zone->zone_id : null;
                     $item['created_at'] = now();
                     $item['updated_at'] = now();
+                    $item['is_excel'] = 1;
                     $isCityArray[] = $item;
                 }
             }
@@ -15745,6 +15747,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     // Function to retrieve the last inserted city IDs
     public static function getLastInsertedCityIds($count) {
         return DB::table('cities')
+            ->where('is_excel', 1)
             ->orderBy('id', 'desc')
             ->limit($count)
             ->pluck('id')
