@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admins;
 use Exception;
 use Carbon\Carbon;
 use App\FafCharges;
-use GuzzleHttp\Client;
 use App\RouteLocations;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -15352,6 +15351,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $rows = array_map(function ($form) {
                 return $form;
             }, $forms);
+
+        }
+
+        if(empty($rows)){
+            return redirect()->back()->with('error', 'Excel is empty');
         }
 
         // Validation rules, messages, and attribute names
