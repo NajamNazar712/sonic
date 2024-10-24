@@ -2948,20 +2948,21 @@ class APIController extends Controller
             $request_channel = 2;
             $description = $request->description;
 
-            $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first()->id;
+            $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first();
             $launched_by = 4;
             $name = $request->complaint_name;
             $phoneno = $request->complaint_phone;
 
-            if (!CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $case_nature)->exists()) {
+            if (!CrmRequest::where('shipment_id', $shipment_id->id)->where('case_nature_id', $case_nature)->exists()) {
                 $data = new CrmRequest();
                 $data->case_nature_id = $case_nature;
                 $data->case_nature_type_id = $case_nature_type;
                 $data->description = 'Consignee: (' . $name . ') | Phone Number: (' . $phoneno . ') | Complain: ' . $description;
                 $data->channel_id = $request_channel;
                 $data->status_id = 1;
+                $data->shipper_id = $shipment_id->user_id;
                 $data->launched_by = $launched_by;
-                $data->shipment_id = $shipment_id;
+                $data->shipment_id = $shipment_id->id;
 
                 $data->save();
 
