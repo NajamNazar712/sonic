@@ -301,7 +301,7 @@
                                     <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="case_nature_claim" id="case_nature_claim"
-                                                class="form-control select2">
+                                                class="form-control select2" data-rule-required="true" data-msg-required="Select claim type">
                                                 @foreach ($case_nature_type_claims as $claim)
                                                     <option value="{{ $claim->id }}">{{ $claim->type }}</option>
                                                 @endforeach
@@ -407,7 +407,7 @@
                                     @if ($claim->remarks_visibility == 1)
                                         <div class="col-10 d-none" id="case_nature_claim_remarks_div">
                                             <fieldset class="form-group">
-                                                <select name="description[]" id="case_nature_claim_remarks" class="form-control select2" multiple="multiple">
+                                                <select name="description[]" id="case_nature_claim_remarks" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Claim remarks is required.">
                                                     
                                                 </select>
                                             </fieldset>
@@ -416,7 +416,7 @@
                                         <div class="col-10 d-none" id="claim_description_div_new">
                                             <fieldset class="form-group">
                                                 <textarea class="form-control" name="description[]" id="claim_description_new" rows="5"
-                                                    placeholder="Enter Description Here..."></textarea>
+                                                    placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Claim description is required."></textarea>
                                             </fieldset>
                                         </div>
                                     @endif
@@ -425,7 +425,7 @@
                                 <div class="col-10 d-none" id="claim_description_div">
                                     <fieldset class="form-group">
                                         <textarea class="form-control" name="description[]" id="claim_description" rows="5"
-                                            placeholder="Enter Description Here..."></textarea>
+                                            placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Claim description is required."></textarea>
                                     </fieldset>
                                 </div>
 
@@ -1255,8 +1255,8 @@
                                 $('#claim_description_div_new').addClass('d-none');
                                 $('#claim_description_div').addClass('d-none');
                             } else {
-                                $('#claim_description_div_new').removeClass('d-none');
-                                $('#claim_description_div').addClass('d-none');
+                                $('#claim_description_div_new').addClass('d-none');
+                                $('#claim_description_div').removeClass('d-none');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
@@ -3590,7 +3590,7 @@
                     $('#complaint_id').val(case_nature_claim_id);
                     var formData = new FormData($('#add_request_form')[0]);
                     var claim_description = '';
-                    if (!$('#case_nature_claim_remarks_div').hasClass('d-none')) {
+                    if ($('#case_nature_claim_remarks_div').length && !$('#case_nature_claim_remarks_div').hasClass('d-none')) {
                         var selectedOptions = $('#case_nature_claim_remarks option:selected');
                         var selectedTexts = [];
                         var useTextarea = false;
@@ -3667,6 +3667,14 @@
                                 containerId: 'toast-top-center'
                             });
                         }
+                    }
+                    if (!claim_description) {
+                        nature_flag = false;
+                        var error = "Either a claim description or remarks are required!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
                     }
                     if (nature_flag) {
                         $('#AddNewRequest').attr('disabled', true);

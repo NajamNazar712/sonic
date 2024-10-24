@@ -1181,6 +1181,30 @@ class AdminCargoManifestController extends Controller
 
         $shipment = Shipment::find(current($request->shipment_ids));
 
+        $cargo_manifest_already_shipments_error = CargoManifestBagShipments::whereIn('shipment_id', $request->shipment_ids)
+            ->whereIn('id', function ($query) use ($request) {
+                $query->selectRaw('MAX(id)')
+                    ->from('cargo_manifest_bag_shipments')
+                    ->whereIn('shipment_id', $request->shipment_ids)
+                    ->groupBy('shipment_id');
+            })
+            ->whereHas('bag', function ($query) {
+                $query->whereIn('status_id', [1, 2]);
+            })
+            ->pluck('shipment_id')
+            ->toArray();
+
+        if (!empty($cargo_manifest_already_shipments_error)) {
+            $tracking_numbers = Shipment::whereIn('id', $cargo_manifest_already_shipments_error)
+                ->pluck('tracking_number')
+                ->toArray();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'These Shipments: ' . implode(', ', $tracking_numbers) . ' are already in other bags'
+            ]);
+        }
+
         $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
         if (!$dispute_check) {
             return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
@@ -3107,8 +3131,8 @@ class AdminCargoManifestController extends Controller
             $cargo_array = array($cargo_id);
             $cargo_array = implode(',', $cargo_array);
             $path = self::print($cargo_array, 1);
-            $manifest = CargoManifest::find($cargo_id);
-            NotificationsController::send(148, $manifest->destination_hub_id, url('/') . '/' . 'reports/cargo_manifest_' . str_pad($manifest->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+            //$manifest = CargoManifest::find($cargo_id);
+            //NotificationsController::send(148, $manifest->destination_hub_id, url('/') . '/' . 'reports/cargo_manifest_' . str_pad($manifest->id, 6, '0', STR_PAD_LEFT) . '.pdf');
         }
 
         if ($request->filled('submit_and_print_form')) {
@@ -3410,8 +3434,8 @@ class AdminCargoManifestController extends Controller
                   </body>
                 </html>
       ';
-                    $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
-                    return $pdf;
+                    // $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+                    // return $pdf;
                 }
             }
         }
