@@ -13,11 +13,11 @@
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
 
-{{--                    <div class="col-4">--}}
-{{--                        <fieldset class="form-group">--}}
-{{--                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number(s)">--}}
-{{--                        </fieldset>--}}
-{{--                    </div>--}}
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number(s)">
+                        </fieldset>
+                    </div>
                     <div class="col-4">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_request_number" id="search_request_number" placeholder="Search Ticket Number(s)">
@@ -34,15 +34,6 @@
                         </fieldset>
                     </div>
 
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_destination" id="search_destination" class="form-control select2">
-                                @foreach($cities as $city)
-                                    <option value="{{$city->id}}">{{$city->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
 
                     <div class="col-4">
                         <fieldset class="form-group">
@@ -103,36 +94,6 @@
                             </select>
                         </fieldset>
                     </div>
-
-{{--                    <div class="col-4">--}}
-{{--                        <fieldset class="form-group">--}}
-{{--                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">--}}
-{{--                                @foreach($shipping_modes as $shipping_mode)--}}
-{{--                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>--}}
-{{--                                @endforeach--}}
-{{--                            </select>--}}
-{{--                        </fieldset>--}}
-{{--                    </div>--}}
-{{--                    <div class="col-4">--}}
-{{--                        <select name="service_type_select" id="service_type_select" class="select2">--}}
-{{--                            @foreach($service_types as $service_type)--}}
-{{--                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>--}}
-{{--                            @endforeach--}}
-{{--                        </select>--}}
-{{--                    </div>--}}
-
-
-                    <div class="col-4">
-                        {{-- <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
-                        </div> --}}
-                    </div>
-
 
                     <div class="col-4">
                         <div class="form-group input-group">
@@ -511,27 +472,20 @@
                                     excel: true,
                                     _token: $('meta[name="csrf-token"]').attr('content'),
                                     search_tracking_no : $('#search_tracking_no').val(),
-                                    search_origin : $('#search_origin').val(),
-                                    search_destination : $('#search_destination').val(),
                                     search_hub : $('#search_hub').val(),
                                     search_zone : $('#search_zone').val(),
                                     search_agent : $('#search_agent').val(),
                                     search_case_nature : $('#search_case_nature').val(),
                                     search_case_nature_type : $('#search_case_nature_type').val(),
-                                    search_shipping_mode : $('#search_shipping_mode').val(),
                                     search_shipper : $('#search_shipper').val(),
+                                    search_request_number : $('#search_request_number').val(),
                                     search_status : $('#search_status').val(),
                                     search_from : $('input[name="from_date_formatted"]').val(),
                                     search_to : $('input[name="to_date_formatted"]').val(),
-                                    search_request_number : $('#search_request_number').val(),
-                                    service_type_select : $('#service_type_select').val(),
                                     selectedValue: $('#export').val(),
                                     selectedTexts: $('#export option:selected').map(function() {
                                         return $(this).text()
                                     }).get(),
-                                    service_type_select: $('#service_type_select').val(),
-                                    search_kam: $('#search_kam').val(),
-                                    search_sale_person: $('#search_sale_person').val()
                                 },
                                 beforeSend: function() {
                                     swal({
