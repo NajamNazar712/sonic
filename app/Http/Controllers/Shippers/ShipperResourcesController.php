@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Models\City;
+use App\Http\Models\Shipment;
 use App\Http\Models\Zone;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -14,23 +17,35 @@ class ShipperResourcesController extends Controller
 {
     public function __construct() {
         $this->middleware('auth:web,substitute_users');
-
     }
 
     public function index(){
         return view('client.documents.index');
     }
+
     public function get_network_list(Request $request){
-        $zones = Zone::where('status', 1)->get();
-        if($zones){
+        $ZoneClassCity = ZoneClassCity::with('city','zone_classification')->get()->pluck(null, 'id')->toArray();
+        if(true){
             $city_list_array = array();
-            $city_list_array['header'] = ['S. No.','ID', 'Name', 'Class', 'Zone'];
+            $city_list_array['header'] = ['S. No.','Origin','ID', 'Destination', 'Class', 'Zone','Zone Classification'];
             $serial = 1;
-            foreach ($zones as $index => $zone){
-                foreach ($zone->zone_cities as $city) {
-                    $city_check = City::where('id', $city->id)->first();
-                    if ($city_check->status == 1) {
-                        $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
+            $hubs = City::where('id',Auth::user()->city_id)->first();
+            $zone = $hubs->zone;
+            $zoneId = $zone->id;
+            $zone_cities = array_filter($ZoneClassCity, function ($item) use ($zoneId) {
+                return $item['zone_id'] == $zoneId;
+            });
+            foreach ($zone_cities as $city2) {
+                $city = (object) $city2['city'];
+                $classification = (object) $city2['zone_classification'];
+                if (isset($city->id)) {
+                    if ($city->status == 1) {
+                        // $class = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city->id)->first();
+                        $cityId = $city->id;
+                        $class = (object)collect(array_filter($ZoneClassCity, function ($item) use ($zoneId, $cityId) {
+                            return $item['zone_id'] == $zoneId && $item['city_id'] == $cityId;
+                        }))->first();
+
                         if ($class) {
                             $class = $class->class;
                             if ($class == 0) {
@@ -42,12 +57,13 @@ class ShipperResourcesController extends Controller
                             } else {
                                 $class_name = "D";
                             }
-                            $city_list_array[] = ['serial' => $serial, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name, 'Zone' => $zone->name];
+                            $city_list_array[] = ['serial' => $serial, 'origin' => $hubs->name, 'id' => $city->id, 'name' => $city->name, 'class' => $class_name, 'Zone' => $zone->name,'zone_classification'=>$classification->name];
                             $serial++;
                         }
                     }
                 }
             }
+
             $cell_st =[
                 'font' =>['bold' => true],
                 'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -57,7 +73,7 @@ class ShipperResourcesController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getDefaultColumnDimension()->setWidth(20);
             $sheet->fromArray($city_list_array,NULL,'A2',true);
-            $sheet->getStyle("A2:E2")->applyFromArray($cell_st);
+            $sheet->getStyle("A2:G2")->applyFromArray($cell_st);
             $sheet->setTitle('Network List');
             $spreadsheet->createSheet();
             $spreadsheet->setActiveSheetIndex(0);
@@ -101,7 +117,7 @@ class ShipperResourcesController extends Controller
             $file_name_without_path = "file/documents/Network List.xlsx";
             $file_name = public_path() .'/'.$file_name_without_path ;
             return $writer->save('php://output');
-//            return url('/').'/'.$file_name_without_path;
+            // return url('/').'/'.$file_name_without_path;
         }
 
     }
