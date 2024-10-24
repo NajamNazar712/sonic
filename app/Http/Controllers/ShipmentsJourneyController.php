@@ -60,7 +60,7 @@ class ShipmentsJourneyController extends Controller
           $shipment_journey->city_id = $city_id;
       }
       else if($rider_id != null){
-          $city_id = Rider::find($rider_id)->city_id;
+        $city_id = Rider::find($rider_id)->city_id;
           $shipment_journey->city_id = $city_id;
       }
       else{
