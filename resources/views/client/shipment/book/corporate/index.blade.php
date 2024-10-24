@@ -41,12 +41,37 @@
                                             <p class="border-bottom border-light text-center font-medium-1 text-bold-600">{{ $user->phone }}</p>
                                         </div>
 
+                                        @php
+                                            $default_pickup_address = false;
+                                            $pickup_addresses = $substitute_account ? $substitute_account_pickup_address : $user->shipping;
+                                        @endphp
+
                                         <div class="form-group">
+                                            <select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
+                                                <option value="0">New</option>
+                                                @foreach($pickup_addresses as $shipping_information)
+                                                    @if ($shipping_information->hidden == 0 && $shipping_information->status == 1)
+                                                        @php
+                                                            $is_default = $shipping_information->default_address == 1;
+                                                            $default_pickup_address = $default_pickup_address || $is_default;
+                                                            $selected = $is_default ? 'selected="selected"' : '';
+                                                            $city_name = $shipping_information->city->name ?? ($substitute_account ? '' : $shipping_information['city']['name']);
+                                                        @endphp
+                                                        <option value="{{ $shipping_information->id }}" {{ $selected }}
+                                                                data-city-id="{{ $shipping_information->city_id }}"
+                                                                data-city-name="{{ $city_name }}">
+                                                            {{ $shipping_information->poc }}: {{ $shipping_information->pickup_address }}, {{ $city_name }}
+                                                        </option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        {{-- <div class="form-group">
                                             <select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
                                                 <option value="0">New</option>
 
                                                 @php ($default_pickup_address = FALSE)
-
                                                 @foreach($user->shipping as $shipping_information)
                                                     @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
                                                         @if ($shipping_information['default_address'] == 1)
@@ -59,7 +84,7 @@
                                                     @endif
                                                 @endforeach
                                             </select>
-                                        </div>
+                                        </div> --}}
 
                                         <div class="form-group">
                                             <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="pickup_city_name"></p>
