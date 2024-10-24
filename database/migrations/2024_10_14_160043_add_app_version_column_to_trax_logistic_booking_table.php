@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Apizonglogaddcolumn extends Migration
+class AddAppVersionColumnToTraxLogisticBookingTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,9 @@ class Apizonglogaddcolumn extends Migration
      */
     public function up()
     {
-        //
-        Schema::table('api_zong_logs', function (Blueprint $table) {
-            $table->integer('shipment_id')->index()->nullable();
+        Schema::table('trax_logistic_bookings', function (Blueprint $table) {
+            $table->string('app_version')->nullable()->after('user_type');
         });
-
     }
 
     /**
@@ -27,9 +25,8 @@ class Apizonglogaddcolumn extends Migration
      */
     public function down()
     {
-        //
-        Schema::table('api_zong_logs', function (Blueprint $table) {
-            $table->dropColumn('shipment_id');
+        Schema::table('trax_logistic_bookings', function (Blueprint $table) {
+            $table->dropColumn('app_version');
         });
     }
 }

@@ -60,17 +60,17 @@
                                <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1 text-center align-middle " rowspan="2">Serial No</th>
                                     <th class="border-primary border-darken-1 text-center align-middle " rowspan="2">Tracking No</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="5">Call Initiate Record</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="7">Zong Call Response Record</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="4">Call Initiate Record</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="6">Zong Call Response Record</th>
                                 </tr>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1 text-center align-middle ">Shipment Id</th>
                                     <th class="border-primary border-darken-1 text-center align-middle ">Call No</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle ">Response</th>
+                                    {{-- <th class="border-primary border-darken-1 text-center align-middle ">Response</th> --}}
                                     <th class="border-primary border-darken-1 text-center align-middle ">Message</th>
                                     <th class="border-primary border-darken-1 text-center align-middle ">Date</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Shipment Id</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle ">Response</th>
+                                    {{-- <th class="border-primary border-darken-1 text-center align-middle ">Response</th> --}}
                                     <th class="border-primary border-darken-1 text-center align-middle">Message</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Call Start Date</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Call End Date</th>
@@ -386,11 +386,11 @@
                             head.push('Tracking No');
                             head.push('ShipmentId');
                             head.push('Call Count');
-                            head.push('Response');
+                            // head.push('Response');
                             head.push('Message');
                             head.push('Date Time');
                             head.push('ShipmentId');
-                            head.push('Response');
+                            // head.push('Response');
                             head.push('Message');
                             head.push('Call Start Date');
                             head.push('Call End Date');
@@ -398,16 +398,17 @@
                             head.push('Date Time');
                            
                             $.each(result.data, function(index, values) {
+                                console.log(result.data);
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.tracking_number.split(">")[2].slice(0,-3));
                                 row.push(values.shipmentNo);
                                 row.push(values.call_count);
-                                row.push(values.response);
-                                row.push(values.call_message);
+                                row.push(values.message1);
+                                // row.push(values.call_message);
                                 row.push(values.created_at);
                                 row.push(values.shipmentNo1);
-                                row.push(values.api_request);
+                                // row.push(values.api_request);
                                 row.push(values.message);
                                 row.push(values.call_start_date);
                                 row.push(values.call_end_date);
@@ -463,11 +464,11 @@
                     {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle tracking_number', searchable: true},
                     {data: 'shipmentNo', name: 'shipmentNo', class: 'align-middle shipmentNo', searchable: false},
                     {data: 'call_count', name: 'call_count', orderable: false, class: 'text-center align-middle call_count', searchable: false},
-                    {data: 'response', name: 'response', orderable: false, class: 'text-center align-middle response', searchable: false},
-                    {data: 'call_message', name: 'call_message', orderable: false, class: 'text-center align-middle call_message', searchable: false},
+                    {data: 'message1', name: 'response', orderable: false, class: 'text-center align-middle response', searchable: false},
+                    // {data: 'call_message', name: 'call_message', orderable: false, class: 'text-center align-middle call_message', searchable: false},
                     {data: 'created_at', name: 'created_at', orderable: false, class: 'text-center align-middle created_at', searchable: false},
                     {data: 'shipmentNo1', name: 'shipmentNo1', class: 'align-middle shipmentNo1', searchable: false},
-                    {data: 'api_request', name: 'api_request', class: 'align-middle api_request', searchable: false},
+                    // {data: 'api_request', name: 'api_request', class: 'align-middle api_request', searchable: false},
                     {data: 'message', name: 'message', class: 'align-middle message', searchable: false},
                     {data: 'call_start_date', name: 'call_start_date', class: 'align-middle call_start_date', searchable: false},
                     {data: 'call_end_date', name: 'call_end_date', class: 'align-middle call_end_date', searchable: false},
