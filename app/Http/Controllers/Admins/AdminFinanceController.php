@@ -7330,11 +7330,14 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
     {
 
         $requestPendingShipmentIds = explode(',', $request->pending_payment_shipment_ids);
-        $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $requestPendingShipmentIds)->pluck('pending_payment_shipment_id')->toArray();
+        $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $requestPendingShipmentIds)->whereDate('created_at',date('Y-m-d'))->pluck('pending_payment_shipment_id')->toArray();
         $idsToInsert = array_diff($requestPendingShipmentIds, $existingShipmentIds);
         $final_Array = [];
+
         if (!empty($idsToInsert)) {
+
             foreach ($idsToInsert as $pending_payment_shipment_id) {
+                MakePaymentTempTable::where('pending_payment_shipment_id', $pending_payment_shipment_id)->delete();  // Temp Solution if a date change occurs before data removal, the duplicates need to be manually handled, especially since Moshin isn't available at times to take care of it.
                 $insertData = [
                     'pending_payment_shipment_id' => $pending_payment_shipment_id,
                     'created_at' => now(),
