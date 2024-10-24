@@ -3668,6 +3668,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('card_data', 'Admins\CRMDashboardController@card_data')->name('card_data');
         });
 
+        // bulk resolve
+        Route::post('bulk_resolve', 'Admins\AdminCRMController@bulk_resolve')->name('bulk_resolve');
     });
 
     Route::prefix('intercept')->name('intercept.')->group(function () {
