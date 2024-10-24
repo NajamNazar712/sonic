@@ -6,6 +6,16 @@ use App\CorporateShipmentReturnDiscountCharges;
 use App\CorporateZeroCodDiscountCharges;
 use App\HistoryShipmentReturnDiscountCharges;
 use App\HistoryZeroCodDiscountCharges;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\CorporateDefaultHistoryFuelSurcharge;
+use App\Http\Models\CorporateDefaultHistoryWeightCharge;
+use App\Http\Models\CorporateDefaultWeightCharge;
+use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CorporateWeightChargeZoneWise;
+use App\Http\Models\HistoryCorporateWeightChargeZoneWise;
+use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
+use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\PendingCorporateShipmentReturnDiscountCharges;
 use App\PendingCorporateZeroCodDiscountCharges;
 use App\PendingShipmentReturnDiscountCharges;
@@ -35,6 +45,7 @@ use App\Http\Models\RouteType;
 use App\Http\Models\PickupType;
 use App\Http\Models\RateRemark;
 use App\Http\Models\RateStatus;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\BookingType;
@@ -13550,12 +13561,15 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     public function rate_history_date(Request $request)
     {
+
         $user_id = $request->user_id;
         $details = array();
         if ($user_id) {
             $user = User::find($user_id);
             if ($user->account_type_id == 1) {
                 $old_reimbursement_account = HistoryRateStatus::where('user_id', $user_id);
+
+
                 if ($old_reimbursement_account->exists()) {
                     $old_reimbursement_account_dates = $old_reimbursement_account->select('created_at')->groupBy('created_at')->get();
                     foreach ($old_reimbursement_account_dates as $date) {
@@ -13564,12 +13578,20 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $details[] = $date;
                         }
                     }
-                    return response()->json(['status' => 1, 'account_type' => 1, 'details' => $details, 'user_id' => $user_id]);
+
+                    //Weight Check
+                    $compare_weight = $this->compareWeightCharges($user_id, WeightCharge::class, HistoryWeightCharge::class);
+
+                    //Fuel Check
+                    $compare_fuel_surcharge = $this->compareFuelCharges($user_id, FuelSurcharge::class, HistoryFuelSurcharge::class);
+
+
+                    return response()->json(['status' => 1, 'account_type' => 1, 'details' => $details, 'user_id' => $user_id, 'compare_weight' => $compare_weight ?? '', 'compare_fuel_surcharge' => $compare_fuel_surcharge ?? '']);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'No Data Found']);
                 }
             } else {
-                    $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
+                $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
 
                 if ($old_corporate_account->exists()) {
                     $old_corporate_account_dates = $old_corporate_account->select('created_at')->groupBy('created_at')->get();
@@ -13579,7 +13601,56 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $details[] = $date;
                         }
                     }
-                    return response()->json(['status' => 1, 'success', 'account_type' => 2, 'details' => $details, 'user_id' => $user_id]);
+
+                    $user = User::find($user_id);
+                    if (!$user->corporate_rate_type_id) {
+                        $compare_weight = "Weight History Not Found";
+                    }
+
+                    $corporateRateType = $user->corporate_rate_type_id;
+                    switch ($corporateRateType) {
+                        case 1:
+                            $table1 = CorporateWeightCharge::class;
+                            $table2 = HistoryCorporateWeightCharge::class;
+                            break;
+
+                        case 2:
+                            $table1 = CorporateWeightChargeZoneWise::class;
+                            $table2 = HistoryCorporateWeightChargeZoneWise::class;
+                            break;
+
+                        default:
+                            $table1 = CorporateDefaultWeightCharge::class;
+                            $table2 = CorporateDefaultHistoryWeightCharge::class;
+                            break;
+                    }
+
+                    $compare_weight = $this->compareWeightCharges($user_id, $table1, $table2);
+
+
+                    $fTable1 = null;
+                    $fTable2 = null;
+                    switch ($corporateRateType) {
+                        case 1:
+                            $fTable1 = CorporateFuelSurcharge::class;
+                            $fTable2 = HistoryCorporateFuelSurcharge::class;
+                            break;
+
+                        case 3:
+                            $fTable1 = CorporateDefaultFuelSurcharge::class;
+                            $fTable2 = CorporateDefaultHistoryFuelSurcharge::class;
+                            break;
+                        default:
+                            $compare_fuel_surcharge = '';
+                            break;
+                    }
+
+                    // Compare fuel surcharges
+                    if($fTable1 && $fTable1){
+                        $compare_fuel_surcharge = $this->compareFuelCharges($user_id, $fTable1, $fTable2);
+                    }
+
+                    return response()->json(['status' => 1, 'success', 'account_type' => 2, 'details' => $details, 'user_id' => $user_id, 'compare_weight' => $compare_weight ?? '', 'compare_fuel_surcharge' => $compare_fuel_surcharge ?? '']);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'No Data Found']);
                 }
@@ -15145,5 +15216,72 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
         return redirect()->back()->with('success', 'FAF Charges Status Updated');
     }
-    
+
+    public static function compareWeightCharges($user_id, $table1, $table2)
+    {
+        $excludeColumns = [
+            'id',
+            'user_id',
+            'shipping_mode_id',
+            'delivery_type_id',
+            'created_at',
+            'updated_at',
+            'base'
+        ];
+
+        $currentWeightChargeColumns = array_diff((new $table1)->getFillable(), $excludeColumns);
+        $previousWeightChargeColumns = array_diff((new $table2)->getFillable(), $excludeColumns);
+
+        $latestHistory = $table2::where('user_id', $user_id)->latest('created_at')->first();
+
+        if (!$latestHistory) {
+            if ($table1::where('user_id', $user_id)->exists()) {
+                return 'Rates Added Only';
+            }
+            return '';
+        }
+
+        $currentTotal = $table1::where('user_id', $user_id)
+            ->selectRaw('SUM(' . implode(') + SUM(', $currentWeightChargeColumns) . ') as total')
+            ->value('total');
+
+        $previousTotal = $table2::where('user_id', $user_id)
+            ->where('created_at', $latestHistory->created_at)
+            ->selectRaw('SUM(' . implode(') + SUM(', $previousWeightChargeColumns) . ') as total')
+            ->value('total');
+
+        if ($currentTotal > $previousTotal) {
+            return 'green';
+        } elseif ($currentTotal < $previousTotal) {
+            return 'red';
+        }
+
+        return 'yellow';
+    }
+
+
+    public static function compareFuelCharges($user_id, $table1, $table2)
+    {
+        $latestDate = $table2::where('user_id', $user_id)
+            ->latest('created_at')
+            ->value('created_at');
+
+        $history_fuel_surcharge = $table2::where('user_id', $user_id);
+
+        if ($latestDate) {
+            $history_fuel_surcharge->where('created_at', $latestDate);
+        }
+
+        $history_fuel_surcharge_sum = $history_fuel_surcharge->sum('fuel_surcharge');
+
+        $existing_fuel_surcharge_sum = $table1::where('user_id', $user_id)->sum('fuel_surcharge');
+
+        if ($existing_fuel_surcharge_sum && $history_fuel_surcharge_sum) {
+            return $existing_fuel_surcharge_sum > $history_fuel_surcharge_sum ? 'green'
+                : ($existing_fuel_surcharge_sum < $history_fuel_surcharge_sum ? 'red' : 'yellow');
+        }
+
+        return 'Fuel Added Only';
+    }
+
 }

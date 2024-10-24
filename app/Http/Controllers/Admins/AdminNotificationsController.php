@@ -161,13 +161,19 @@ class AdminNotificationsController extends Controller
 
 
             $totalItems = count($emails);
-            $chunkSize = 50;
-            for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
-                $parsed_emails = array_slice($emails, $offset, $chunkSize);
-                
-                NotificationsController::custom(1, $subject, $body, $parsed_emails,$from_email);
-                
+            
+            $chunkSize = 45;
+            $chunks = array_chunk($emails, $chunkSize);
+           
+            foreach ($chunks as $parsed_emails) {
+                NotificationsController::custom(1, $subject, $body, $parsed_emails, $from_email);
             }
+            // for ($offset = 0; $offset < $totalItems; $offset += $chunkSize) {
+            //     $parsed_emails = array_slice($emails, $offset, $chunkSize);
+                
+            //     NotificationsController::custom(1, $subject, $body, $parsed_emails,$from_email);
+                
+            // }
             return redirect()->back()->with('success', 'Custom Email Sent');
         }
         else {
@@ -1195,7 +1201,8 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 214)
         {
-            $details['receiver'] = ['tanveer.malik@trax.pk','muhammad.jawwad@trax.pk','fawad.ahmed@trax.pk','waqas@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk','ghazanfar.ali@trax.pk','CC-muhammad.waqas@trax.pk','CC-faisal.hasan@trax.pk','CC-asad.ahsan@trax.pk'];
+            // $details['receiver'] = ['tanveer.malik@trax.pk','muhammad.jawwad@trax.pk','fawad.ahmed@trax.pk','waqas@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk','ghazanfar.ali@trax.pk','CC-muhammad.waqas@trax.pk','CC-faisal.hasan@trax.pk','CC-asad.ahsan@trax.pk'];
+            $details['receiver'] = ['syed.furqan@trax.pk','fawad.ahmed@trax.pk','hammad.majid@trax.pk','BCC-(asad.ahsan@trax.pk,sahban.ghani@trax.pk)'];
 
             $details['fields'] = ['link'];
         }

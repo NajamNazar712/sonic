@@ -512,7 +512,7 @@ class AdminLogisticBookingController extends Controller
                 }
 
                 
-                Log::channel('code_test_log')->error('batch_id = > '.$batch_id.' booking_img_url '.$booking_img->image_name);
+              // //Log::channel('code_test_log')->error('batch_id = > '.$batch_id.' booking_img_url '.$booking_img->image_name);
                
                 //return view('admin.logistic.edit_logistic_book', compact('imageUrl'));
                 return view('admin.logistic.edit_logistic_book')
