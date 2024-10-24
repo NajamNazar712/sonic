@@ -4959,8 +4959,8 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $old_shipment_weight = $shipment->actual_weight;
 
 
-                        $shipment->actual_weight = $weight;
-                        $shipment->save();
+                        // $shipment->actual_weight = $weight;
+                        // $shipment->save();
 
 
                         ShipmentChargesController::weight($shipment_id);
@@ -5350,6 +5350,49 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 return optional($shipmentsJourney->shipment_status_shipper)->name;
             });
 
+        return $datatables->make(true);
+    }
+
+    public function dncc_wise_tracking_number_info_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 811);
+        return view('admin.finance.dncc_wise_tracking_number_info');
+    }
+
+    public function dncc_wise_tracking_number_info_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 812);
+        }
+        $dnccNumbers = explode(',', $request->dncc_numbers);
+        $dncc_data = DeliveryNoteShipment::join('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
+            ->join('delivery_notes', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
+            ->join('shipment_status', 'shipment_status.id', '=', 'shipments.shipper_status_id')
+            ->join('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.shipper_status_id', '=', 2);
+            })
+            ->whereIn('delivery_notes.id', $dnccNumbers)
+            ->select([
+                'shipments.id as shId',
+                'delivery_notes.id as dncc_no',
+                'shipments.tracking_number',
+                'shipments_journey.created_at',
+                'delivery_notes.status as status'
+            ])->get();
+        $datatables = Datatables::of($dncc_data)
+        ->editColumn('dncc_no', function ($deliveries) {
+            return str_pad($deliveries->dncc_no, 6, '0', STR_PAD_LEFT);
+        })
+        ->filterColumn('dncc_no', function ($query, $keyword) {
+            return $query->where('delivery_notes.id', '=', $keyword);
+        })
+        ->addColumn('shipment_status', function ($dncc) {
+            $shipmentsJourney = ShipmentsJourney::with('shipment_status_shipper')
+                ->where('shipment_id', $dncc->shId)
+                ->whereNotNull('reference_1_id')
+                ->where('reference_1_id', $dncc->dncc_no)
+                ->first();
+            return optional($shipmentsJourney->shipment_status_shipper)->name;
+        });
         return $datatables->make(true);
     }
 

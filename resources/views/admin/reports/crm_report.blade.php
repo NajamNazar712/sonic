@@ -20,7 +20,7 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_request_number" id="search_request_number" placeholder="Search Request Number">
+                            <input type="text" class="form-control" name="search_request_number" id="search_request_number" placeholder="Search Ticket Number(s)">
                         </fieldset>
                     </div>
 
@@ -34,15 +34,6 @@
                         </fieldset>
                     </div>
 
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_destination" id="search_destination" class="form-control select2">
-                                @foreach($cities as $city)
-                                    <option value="{{$city->id}}">{{$city->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
 
                     <div class="col-4">
                         <fieldset class="form-group">
@@ -105,36 +96,6 @@
                     </div>
 
                     <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                                @foreach($shipping_modes as $shipping_mode)
-                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <select name="service_type_select" id="service_type_select" class="select2">
-                            @foreach($service_types as $service_type)
-                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-
-                    <div class="col-4">
-                        {{-- <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
-                        </div> --}}
-                    </div>
-
-
-                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -169,61 +130,92 @@
                     </div>
                     
                 </div>
+
+                <div class="row justify-content-end">
+                    <div class="col-4">
+                        <h4 for="export" class="font">Excel Column(s):</h4>
+
+                        <fieldset class="form-group">
+                            <select name="export[]" id="export" class="form-control select2" multiple="multiple">
+                                <option value="selectAll">Select All</option>
+                            </select>
+                        </fieldset>
+                    </div>
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
-                        
+
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Request No.</th>
+                        <th class="border-primary border-darken-1">Ticket No.</th>
+                        <th class="border-primary border-darken-1">Ticket Status</th>
+                        <th class="border-primary border-darken-1">Valid/Invalid</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
+                        <th class="border-primary border-darken-1">Arrival Date</th>
+
+                        <!-- Placeholder for Arrival to Today (TAT) -->
+                        <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>
+
                         <th class="border-primary border-darken-1">Shipment Status</th>
                         <th class="border-primary border-darken-1">Last Status Date</th>
                         <th class="border-primary border-darken-1">Case Nature</th>
                         <th class="border-primary border-darken-1">Case Nature Type</th>
                         <th class="border-primary border-darken-1">Description</th>
-                        <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">Service Type</th>
-                        <th class="border-primary border-darken-1">Origin</th>
-                        <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Zone</th>
+                        <th class="border-primary border-darken-1">Launched Date</th>
+                        <th class="border-primary border-darken-1">Aging (From Launch Date To Today)</th>
+
                         <th class="border-primary border-darken-1">Responsible Hub</th>
+
+                        <!-- Sub Hub column added -->
+                        <th class="border-primary border-darken-1">Sub Hub</th>
+
                         <th class="border-primary border-darken-1">Responsible Zone</th>
-                        <th class="border-primary border-darken-1">Arrival Date</th>
-                        <th class="border-primary border-darken-1">Channel</th>
                         <th class="border-primary border-darken-1">Agent</th>
-                        <th class="border-primary border-darken-1">COD Amount</th>
+
+                        <!-- Parcel Value column added -->
+                        <th class="border-primary border-darken-1">Parcel Value</th>
+
+                        <th class="border-primary border-darken-1">COD Value</th>
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
                         <th class="border-primary border-darken-1">Weight Adjusted Amount</th>
-                        <th class="border-primary border-darken-1">Adjusted Percentage</th>
-                        <th class="border-primary border-darken-1">Remaining Percentage</th>
-                        <th class="border-primary border-darken-1">Request Status</th>
-                        <th class="border-primary border-darken-1">Re-Open Status Date</th>
+
+                        <!-- Segment column added -->
+                        <th class="border-primary border-darken-1">Segment</th>
+
+                        <!-- Product Description column added -->
+                        <th class="border-primary border-darken-1">Product Description</th>
+
+                        <!-- Product Type column added -->
+                        <th class="border-primary border-darken-1">Product Type</th>
+
+                        <!-- Pieces column added -->
+                        <th class="border-primary border-darken-1">Pieces</th>
+
+                        <!-- Segment column added -->
+                        <th class="border-primary border-darken-1">Quantity</th>
+
+                        <!-- Quantity column added -->
+                        <th class="border-primary border-darken-1">Actual Weight</th>
+
+                        <!-- Key Account Category column added -->
+                        <th class="border-primary border-darken-1">Key Account Category</th>
+
                         <th class="border-primary border-darken-1">Launched By</th>
-                        <th class="border-primary border-darken-1">Launched By User Type</th>
-                        <th class="border-primary border-darken-1">Admin User's Department</th>
-                        <th class="border-primary border-darken-1">Launched Date</th>
-                        <th class="border-primary border-darken-1">Launched To Date (TAT)</th>
-                        <th class="border-primary border-darken-1">Assigned Date</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Valid/Invalid Date</th>
-                        <th class="border-primary border-darken-1">Resolved Date</th>
-                        <th class="border-primary border-darken-1">Closed Date</th>
-                        <th class="border-primary border-darken-1">Case Closed Remark</th>
-                        <th class="border-primary border-darken-1">Last Internal Comment By</th>
-                        <th class="border-primary border-darken-1">Last Internal Comment</th>
-                        <th class="border-primary border-darken-1">Last Internal Comment Date</th>
-                        <th class="border-primary border-darken-1">Last External Comment</th>
-                        <th class="border-primary border-darken-1">Last External Comment Date</th>
+                        <th class="border-primary border-darken-1">Channel</th>
+                        <th class="border-primary border-darken-1">Launched By Type</th>
                         <th class="border-primary border-darken-1">Tagged To</th>
-                        <th class="border-primary border-darken-1">Tagged Hub</th>
-                        <th class="border-primary border-darken-1">Tagged At</th>
-                        <th class="border-primary border-darken-1">Tagged TAT</th>
-                        <th class="border-primary border-darken-1">Rating</th>
-                        <th class="border-primary border-darken-1">Responsilbe Person</th>
-                        <th class="border-primary border-darken-1">Responsilbe Person's Hub</th>
-                        <th class="border-primary border-darken-1">Claim Adjustment Status</th>
-                        
+
+                        <!--Tagging (Manual or Auto) column added -->
+                        <th class="border-primary border-darken-1">Tagging (Manual or Auto)</th>
+
+                        <th class="border-primary border-darken-1">Closed Date</th>
+                        <th class="border-primary border-darken-1">Resolved Date</th>
+                        <th class="border-primary border-darken-1">Case Closed Remarks</th>
                     </tr>
                     </thead>
                 </table>
@@ -339,7 +331,7 @@
             // });
 
             var select = $('#search_request_number').selectize({
-                placeholder: 'Search Request Number(s)*',
+                placeholder: 'Search Ticket Number(s)*',
                 delimiter: ',',
                 createOnBlur: true,
                 persist: false,
@@ -444,157 +436,94 @@
                     }
                 }
             });
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    body = [];
-                    var params = table.ajax.params();
-                    if(params !== undefined){
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
-                }
-                else{
-                    params = {
-                        'excel':true,
-                    }
-                }
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.crm.list') }}',
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: params,
-                        success: function (result) {
-                            head = [];
-
-                            head.push('S.No');  
-                            head.push('Request No.');
-                            head.push('Tracking No.');
-                            head.push('Shipment Status');
-                            head.push('Last Status Date');
-                            head.push('Case Nature');
-                            head.push('Case Nature Type');
-                            head.push('Description');
-                            head.push('Shipper');
-                            head.push('Service Type');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Hub');
-                            head.push('Zone');
-                            head.push('Reponsible Hub');
-                            head.push('Responsible Zone');
-                            head.push('Arrival Date');
-                            head.push('Channel');
-                            head.push('Agent');
-                            head.push('COD Amount');
-                            head.push('Adjusted Amount');
-                            head.push('Weight Adjusted Amount');
-                            head.push('Adjusted Percentage');
-                            head.push('Remaining Percentage');
-                            head.push('Request Status');
-                            head.push('Re Open Status Date');
-                            head.push('Launched By');
-                            head.push('Launched By User Type');
-                            head.push('Admin User Department');
-                            head.push('Launched Date');
-                            head.push('Launched To Date (TAT)');
-                            head.push('Assigned Date');
-                            head.push('Status');                          
-                            head.push('Valid/Invalid Date');
-                            head.push('Resolved Date');
-                            head.push('Closed Date');
-                            head.push('Case closed Remarks');
-                            head.push('Last Internal Comment By');
-                            head.push('Last Internal Comment');
-                            head.push('Last Internal Comment Date');
-                            head.push('Last External Comment');
-                            head.push('Last External Comment Date');
-                            head.push('Tagged To');
-                            head.push('Tagged Hub');
-                            head.push('Tagged At');
-                            head.push('Tagged TAT');
-                            head.push('Rating');
-                            head.push('Responsilbe Person');
-                            head.push('Responsilbe Person\'s Hub');
-                            head.push('Claim Adjustment Status');
-                            
-                            $.each(result.data, function(index, values) {
-                                row = [];
-
-                                row.push(index + 1);
-                                row.push(values.request_number);
-                                row.push(values.tracking_number);
-                                row.push(values.status);
-                                row.push(values.last_status_date);
-                                row.push(values.case_nature);
-                                row.push(values.case_nature_type);
-                                row.push(values.description);
-                                row.push(values.shipper_name);
-                                row.push(values.service_type);
-
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.zone);
-                                row.push(values.responsible_hub);
-                                row.push(values.responsible_zone);
-                                row.push(values.arrival_date);
-                                row.push(values.channel);
-                                row.push(values.agent);
-                                row.push(values.cod_amount);
-                                row.push(values.adjusted_amount);
-                                row.push(values.weight_charges);
-                                row.push(values.adjusted_percentage);
-                                row.push(values.remaining_percentage);
-                                row.push(values.request_status);
-                                row.push(values.reopen_date);
-                                row.push(values.launched_by_name);
-                                row.push(values.launched_by_type);
-                                row.push(values.admin_department);
-                                row.push(values.launched_date);
-                                row.push(values.launched_to_today);
-                                row.push(values.assigned_date);
-                                row.push(values.valid_invalid_status);
-                                row.push(values.valid_invalid_date);
-                                row.push(values.resolved_date);
-                                row.push(values.closed_date);
-                                row.push(values.case_closed_remark);
-                                row.push(values.last_comment_name);
-                                row.push(values.last_comment.replace(/<br>/gi, '\n'));
-                                row.push(values.last_comment_date);
-                                row.push(values.last_comment_external);
-                                row.push(values.last_comment_date_external);
-                                row.push(values.tagged_to);
-                                row.push(values.tagged_hub);
-                                row.push(values.tagged_at);
-                                row.push(values.tagged_aging);
-                                row.push(values.rating);
-                                row.push(values.responsibe_person_name);
-                                row.push(values.responsibe_person_hub);
-                                row.push(values.claim_adjustment_status);
-                                
-
-
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
-
-                    return {body: body, header: head};
-                }
-            } );            var index_column = 0;
+            var index_column = 0;
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
-                        extend: 'excelHtml5',
+                        extend: 'excel',
                         title: 'CRM Report',
+                        className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },
+                        action: function(e, dt, node, config) {
+                            if ($('#export').val().length === 0) {
+                                swal({
+                                    text: 'At least 1 column should be selected for export!',
+                                    title: 'Please select excel column(s)',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'OK',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        }
+                                    },
+                                    dangerMode: true
+                                });
+                                return;
+                            }
+
+                            $.ajax({
+                                url: "{{ route('admin.reports.crm.list') }}",
+                                method: "POST",
+                                data: {
+                                    excel: true,
+                                    _token: $('meta[name="csrf-token"]').attr('content'),
+                                    search_tracking_no : $('#search_tracking_no').val(),
+                                    search_hub : $('#search_hub').val(),
+                                    search_zone : $('#search_zone').val(),
+                                    search_agent : $('#search_agent').val(),
+                                    search_case_nature : $('#search_case_nature').val(),
+                                    search_case_nature_type : $('#search_case_nature_type').val(),
+                                    search_shipper : $('#search_shipper').val(),
+                                    search_request_number : $('#search_request_number').val(),
+                                    search_status : $('#search_status').val(),
+                                    search_from : $('input[name="from_date_formatted"]').val(),
+                                    search_to : $('input[name="to_date_formatted"]').val(),
+                                    selectedValue: $('#export').val(),
+                                    selectedTexts: $('#export option:selected').map(function() {
+                                        return $(this).text()
+                                    }).get(),
+                                },
+                                beforeSend: function() {
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Downloading is in progress',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                },
+                                complete: function() {
+                                    swal.close();
+                                },
+                                success: function(response, status, xhr) {
+                                    var disposition = xhr.getResponseHeader('Content-Disposition');
+                                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                                        var filename = 'QSR_Report.csv';
+                                        var blob = new Blob([response], { type: 'text/csv' });
+                                        var link = document.createElement('a');
+                                        var url = window.URL.createObjectURL(blob);
+                                        link.href = url;
+                                        link.download = filename;
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        window.URL.revokeObjectURL(url);
+                                        document.body.removeChild(link);
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error('Failed to fetch CSV data:', status, error);
+                                }
+                            });
+                        }
+                    }
                 ],
+
+
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -633,59 +562,85 @@
                 // rowId: 'shipment_id',
                 order: [[27, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle request_number'},
-                    {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
-                    {data: 'status', name: 'ss.name', class: 'align-middle status'},
-                    {data: 'last_status_date', name: 'ss.created_at', class: 'align-middle last_status_date'},
-                    {data: 'case_nature', name: 'crcn.name', class: 'align-middle case_nature'},
-                    {data: 'case_nature_type', name: 'crcnt.type', class: 'align-middle case_nature_type'},
-                    {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
-                    {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
-                    { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
+                    {
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 0,
+                        render: function (data, type, row) { return ''; }
+                    },
+                    {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle request_number', text: 'Request Number', value: 'id_padded_link', download: true},
+                    {data: 'request_status', name: 'crs.name', class: 'align-middle request_status', text: 'Request Status', value: 'request_status', download: true},
 
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},
-                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false, searchable: false,},
-                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
-                    {data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
-                    {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
-                    {data: 'agent', name: 'a.name', class: 'align-middle agent'},
-                    {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
-                    {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount'},
-                    {data: 'weight_charges', name: 'change_shipment_weight_logs.new_charges', class: 'align-middle weight_charges'},
-                    {data: 'adjusted_percentage', name: 'adjusted_percentage', class: 'align-middle adjusted_percentage', orderable: false, searchable: false},
-                    {data: 'remaining_percentage', name: 'remaining_percentage', class: 'align-middle remaining_percentage', orderable: false, searchable: false},
-                    {data: 'request_status', name: 'crs.name', class: 'align-middle request_status'},
-                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
-                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle launched_by_name'},
-                    {data: 'launched_by_type', name: 'crm_requests.launched_by', class: 'align-middle launched_by_type'},
-                    {data: 'admin_department', name: 'admin_department', class: 'align-middle admin_department'},
-                    {data: 'launched_date', name: 'crm_requests.created_at', class: 'align-middle launched_date'},
-                    {data: 'launched_to_today', name: 'launched_to_today', class: 'align-middle launched_to_today', orderable: false, searchable: false},
-                    {data: 'assigned_date', name: 'crah.created_at', class: 'align-middle assigned_date'},
-                    {data: 'valid_invalid_status', name: 'crm_requests.status', class: 'align-middle valid_invalid_status', orderable: false, searchable: false},
-                    {data: 'valid_invalid_date', name: 'crsh.created_at', class: 'align-middle valid_invalid_date', orderable: false, searchable: false},
-                    {data: 'resolved_date', name: 'crshr.created_at', class: 'align-middle resolved_date'},
-                    {data: 'closed_date', name: 'crshc.created_at', class: 'align-middle closed_date'},
-                    {data: 'case_closed_remark', name: 'sjcc.remarks', class: 'align-middle case_closed_remark'},
-                    {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
-                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
-                    {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
-                    {data: 'last_comment_external', name: 'ccse.comment', class: 'align-middle last_comment'},
-                    {data: 'last_comment_date_external', name: 'ccse.created_at', class: 'align-middle last_comment_date'},
-                    {data: 'tagged_to', name: 'crt.tagged_id', class: 'align-middle tagged_to', orderable: false, searchable: false},
-                    {data: 'tagged_hub', name: 'crtadh.name', class: 'align-middle tagged_hub', orderable: false, searchable: false},
-                    {data: 'tagged_at', name: 'crt.created_at', class: 'align-middle tagged_at', orderable: false, searchable: false},
-                    {data: 'tagged_aging', name: 'crt.created_at', class: 'align-middle tagged_aging', orderable: false, searchable: false},
-                    {data: 'rating_code', name: 'crr.name', class: 'align-middle rating_code'},
-                    {data: 'responsibe_person_name', name: 'responsibe_person_name', class: 'align-middle responsibe_person_name'},
-                    {data: 'responsibe_person_hub', name: 'responsibe_person_hub', class: 'align-middle responsibe_person_hub'},
-                    {data: 'claim_adjustment_status', name: 'claim_adjustment_status', class: 'align-middle claim_adjustment_status'},
+                    {data: 'valid_invalid_status', name: 'crm_requests.status', class: 'align-middle valid_invalid_status', orderable: false, searchable: false, text: 'Valid/Invalid Status', value: 'valid_invalid_status', download: true},
+                    {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link', text: 'Tracking Number', value: 'tracking_number_link', download: true},
+                    {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name', text: 'Shipper Name', value: 'shipper_name', download: true},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin', text: 'Origin', value: 'origin', download: true},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination', text: 'Destination', value: 'destination', download: true},
+                    {data: 'hub', name: 'h.name', class: 'align-middle hub', text: 'Hub', value: 'hub', download: true},
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone', text: 'Zone', value: 'zone', download: true},
+                    {data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date', text: 'Arrival Date', value: 'arrival_date', download: true},
 
-                    
+                    // Placeholder for Arrival to Today (TAT)
+                    {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today', text: 'Arrival to Today (TAT)', value: 'arrival_today', download: true},
+
+                    {data: 'status', name: 'ss.name', class: 'align-middle status', text: 'Status', value: 'status', download: true},
+                    {data: 'last_status_date', name: 'ss.created_at', class: 'align-middle last_status_date', text: 'Last Status Date', value: 'last_status_date', download: true},
+                    {data: 'case_nature', name: 'crcn.name', class: 'align-middle case_nature', text: 'Case Nature', value: 'case_nature', download: true},
+                    {data: 'case_nature_type', name: 'crcnt.type', class: 'align-middle case_nature_type', text: 'Case Nature Type', value: 'case_nature_type', download: true},
+                    {data: 'description', name: 'crm_requests.description', class: 'align-middle description', text: 'Description', value: 'description', download: true},
+                    {data: 'launched_date', name: 'crm_requests.created_at', class: 'align-middle launched_date', text: 'Launched Date', value: 'launched_date', download: true},
+                    {data: 'launched_to_today', name: 'launched_to_today', class: 'align-middle launched_date', text: 'Aging (From Launch Date To Today) ', value: 'launched_to_today', download: true},
+
+                    {data: 'responsible_hub', name: 'h.name', class: 'align-middle responsible_hub', text: 'Responsible Hub', value: 'responsible_hub', download: true},
+
+                    // Placeholder for Sub Hub
+                    {data: 'sub_hub', name: 'ca.name', class: 'align-middle sub_hub', text: 'Sub Hub', value: 'sub_hub', download: true},
+
+                    {data: 'responsible_zone', name: 'z.name', class: 'align-middle responsible_zone', text: 'Responsible Zone', value: 'responsible_zone', download: true},
+                    {data: 'agent', name: 'a.name', class: 'align-middle agent', text: 'Agent', value: 'agent', download: true},
+
+                    // Parcel Value column added here
+                    {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value', text: 'Parcel Value', value: 'parcel_value', download: true},
+
+                    {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount', text: 'COD Amount', value: 'cod_amount', download: true},
+                    {data: 'adjusted_amount', name: 'sj.adjusted_amount', class: 'align-middle adjusted_amount', text: 'Adjusted Amount', value: 'adjusted_amount', download: true},
+                    {data: 'weight_charges', name: 'change_shipment_weight_logs.new_charges', class: 'align-middle weight_charges', text: 'Weight Charges', value: 'weight_charges', download: true},
+
+                    // Segment column added here
+                    {data: 'segment', name: 'seg.name', class: 'align-middle segment', text: 'Segment', value: 'segment', download: true},
+
+                    // Placeholder for Product Description
+                    {data: 'shipment_description', name: 'si.description', class: 'align-middle shipment_description', text: 'Product Description', value: 'shipment_description', download: true},
+
+                    // Placeholder for Product Type
+                    {data: 'product_name', name: 'prod.product_name', class: 'align-middle product_name', text: 'Product Name', value: 'product_name', download: true},
+
+                    // Placeholder for pieces
+                    {data: 'pieces', name: 's.pieces', class: 'align-middle pieces', text: 'Pieces', value: 'pieces', download: true},
+
+                    // Placeholder for Quantity
+                    {data: 'shipment_quantity', name: 'si.quantity', class: 'align-middle shipment_quantity', text: 'Quantity', value: 'shipment_quantity', download: true},
+
+                    // Placeholder for Weight
+                    {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight', text: 'Weight', value: 'actual_weight', download: true},
+
+                    // Placeholder for Key Account Category
+                    {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category', text: 'Shipper Category', value: 'shipper_category', download: true},
+
+                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle launched_by_name', text: 'Launched By', value: 'launched_by_name', download: true},
+                    {data: 'channel', name: 'crm_requests.channel', class: 'align-middle channel', text: 'Channel', value: 'channel', download: true},
+                    {data: 'launched_by_type', name: 'crm_requests.launched_by_type', class: 'align-middle launched_by_type', text: 'Launched By Type', value: 'launched_by_type', download: true},
+                    {data: 'tagged_to', name: 'crm_requests.tagged_to', class: 'align-middle tagged_to', text: 'Tagged To', value: 'tagged_to', download: true},
+
+                    // Placeholder for Tagging (Manual or Auto)
+                    {data: 'tagged_manual_auto', name: 'tagged_manual_auto', class: 'align-middle tagged_manual_auto', text: 'Tagging (Manual/Auto)', value: 'tagged_manual_auto', download: true},
+
+                    {data: 'closed_date', name: 'crm_requests.closed_date', class: 'align-middle closed_date', text: 'Closed Date', value: 'closed_date', download: true},
+                    {data: 'resolved_date', name: 'crm_requests.resolved_date', class: 'align-middle resolved_date', text: 'Resolved Date', value: 'resolved_date', download: true},
+                    {data: 'case_closed_remark', name: 'sjcc.remarks', class: 'align-middle case_closed_remark', text: 'Case Closed Remark', value: 'case_closed_remark', download: true}
+
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -698,6 +653,50 @@
 
             $('#search_filter_btn').on('click',function () {
                 table.draw();
+            });
+
+            let option = '';
+            var columnNames2 = table.settings().init().columns.map(function (column) {
+                if(column.download){
+                    let col_name = column.value;
+                    let col_text = column.text;
+
+                    // if(column.as){
+                    //     col_name+= ' as ' +column.as;
+                    // }
+                    if (col_name && col_text) {
+                        option += `<option value="${col_name}">${col_text}</option>`;
+                    }
+                }
+            });
+            $('#export').append(option).select2({
+                columns: 1,
+                placeholder: 'Excel Column(s)',
+                search: true,
+                selectAll: true
+            });
+
+            $('#export').select2({
+                width:'100%',
+                placeholder:"Excel Column(s)",
+                allowClear:true,
+            });
+            $('#export').on('select2:select', function(e) {
+                var selectAll = $('#export').find('option[value="selectAll"]');
+                var firstOption = $('#export option').first();
+                if (e.params.data.id === 'selectAll') {
+                    firstOption.data().data.text = 'Un Select All';
+                    $('#export').find('option').not(selectAll).prop('selected', true).trigger('change');
+
+                }
+            });
+            $('#export').on('select2:unselect', function(e) {
+                var selectAll = $('#export').find('option[value="selectAll"]');
+                var firstOption = $('#export option').first();
+                if (e.params.data.id === 'selectAll') {
+                    firstOption.data().data.text = 'Select All';
+                    $('#export').find('option').not(selectAll).prop('selected', false).trigger('change');
+                }
             });
 
         });
