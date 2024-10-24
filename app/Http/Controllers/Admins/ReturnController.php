@@ -3248,7 +3248,6 @@ class ReturnController extends Controller
     public function return_receive_deliveries_list(Request $request)
     {
 
-
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 309);
         }
@@ -3319,6 +3318,11 @@ class ReturnController extends Controller
                 $count_ecomm = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], 2, 7, null,'return_note_id');
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('excel_others', function($result){
+                $count = 0;
+                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], [1,2], [6,8,9,10,11], null,'return_note_id');
+                return $count > 0 ? $count : '-';
             })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.return.receive.status', ['id' => $result->return_note]);
@@ -5162,7 +5166,11 @@ class ReturnController extends Controller
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
             })
-
+            ->addColumn('excel_others', function($result){
+                $count = 0;
+                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], [1,2], [6,8,9,10,11], null, 'return_note_id');
+                return $count > 0 ? $count : '-';
+            })
             ->addColumn('delivered_excel_ecom_cod', function($result){
                 $delivered_shipments = $this->return_delivered_shipment($result->return_note);
                 $count = 0;
@@ -5189,6 +5197,14 @@ class ReturnController extends Controller
                 }
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('delivered_excel_others', function($result){
+                $delivered_shipments = $this->return_delivered_shipment($result->return_note);
+                $count = 0;
+                if (!empty($delivered_shipments)) {
+                    $count = DeliveryController::get_segment_type('return_note_shipments', $delivered_shipments, 2, 5, 'returned', 'return_note_id');
+                }
+                return $count > 0 ? $count : '-';
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
