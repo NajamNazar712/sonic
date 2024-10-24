@@ -1029,6 +1029,10 @@
                             <li><a class="menu-item" href="{{ route('admin.finance.tracking_number_wise_dncc_info.index') }}">Tracking number wise DNCC info</a></li>
                         @endif
 
+                        @if (session('role_id') == 1 || in_array(1012, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.finance.dncc_wise_tracking_number_info.index') }}">DNCC wise tracking number info</a></li>
+                        @endif
+
                         {{-- Ledger --}}
                         @if (session('role_id') == 1 /* || in_array(984, session('permissions')) */)
                             <li><a class="menu-item" href="{{ route('admin.finance.shipment_ledger.index') }}">Service Ledger</a></li>

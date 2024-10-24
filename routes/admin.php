@@ -1813,6 +1813,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\AdminFinanceController@tracking_number_wise_dncc_info_list')->name('list');
         });
 
+        Route::prefix('dncc_wise_tracking_number_info')->name('dncc_wise_tracking_number_info.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@dncc_wise_tracking_number_info_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@dncc_wise_tracking_number_info_list')->name('list');
+        });
+
         Route::prefix('shipment_ledger')->name('shipment_ledger.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@service_charges_ledger_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@service_charges_ledger_list')->name('list');
