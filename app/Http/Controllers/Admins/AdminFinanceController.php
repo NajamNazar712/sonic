@@ -4959,8 +4959,8 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $old_shipment_weight = $shipment->actual_weight;
 
 
-                        $shipment->actual_weight = $weight;
-                        $shipment->save();
+                        // $shipment->actual_weight = $weight;
+                        // $shipment->save();
 
 
                         ShipmentChargesController::weight($shipment_id);
