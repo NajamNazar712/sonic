@@ -2021,7 +2021,7 @@ trait RvTrait
         dispatch(new ProcessRvShipmentTicket($rvData));
     }
 
-    static function BotCallingDataSet($shipmentId){
+    static function botCallingDataSet($shipmentId){
         if (GlobalSettings::where(['type'=> 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             if(RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot',1)->exists()){
                 $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';

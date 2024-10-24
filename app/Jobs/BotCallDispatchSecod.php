@@ -41,9 +41,7 @@ class BotCallDispatchSecod implements ShouldQueue
     {
 
         //
-        $environment = config('app.env');
-
-        $botRecordData = $this->BotCallingDataSet($this->shipmentId);
+        $botRecordData = $this->botCallingDataSet($this->shipmentId);
         if ($botRecordData) {
             $client = new Client(['base_uri' => $botRecordData['base_uri'], 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
             $response = $client->post('', [
