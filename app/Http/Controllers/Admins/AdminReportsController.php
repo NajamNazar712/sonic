@@ -38,7 +38,7 @@ use App\SpecialApprovalRequestAdmin;
 use function GuzzleHttp\Promise\all;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
-use Illuminate\Validation\Validator;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\MultipleSaleLead;
@@ -103,6 +103,7 @@ use App\Http\Traits\RvTrait;
 use App\RvAgentCallHistory;
 use DateTime;
 use App\Http\Models\Notification;
+use App\Http\Models\Admin\OdrNature;
 
 class AdminReportsController extends Controller
 {
@@ -13959,7 +13960,8 @@ class AdminReportsController extends Controller
     public function ordinary_discrepancy_report_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 698);
-        return view('admin.reports.ordinary_discrepancy_report')->with(['status' => '1']);
+        $odr_natures = OdrNature::get();
+        return view('admin.reports.ordinary_discrepancy_report')->with(['status' => '1', 'odr_natures' => $odr_natures]);
     }
     public function ordinary_discrepancy_report_list(Request $request)
     {
@@ -13975,6 +13977,7 @@ class AdminReportsController extends Controller
             ->leftjoin('cities as citi', 'citi.id', 'usi.city_id')
             ->leftjoin('shipment_items as si', 'si.shipment_id', 'shipments.id')
             ->leftjoin('cities as ch', 'ch.id', 'admins.default_hub_id')
+            ->leftjoin('odr_natures', 'odr_natures.id', 'ordinary_discrepancy_reports.odr_nature_id')
 
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -14000,7 +14003,8 @@ class AdminReportsController extends Controller
                 'ordinary_discrepancy_reports.remarks as remarks_by_admin',
                 'ordinary_discrepancy_reports.created_at as created_at',
                 'admins.name as updated_by',
-                'ch.name as admin_hub'
+                'ch.name as admin_hub',
+                'odr_natures.name  as odr_nature'
             );
 
         $datatables = Datatables::of($tracking_data)
@@ -14090,6 +14094,7 @@ class AdminReportsController extends Controller
 
         $date_time = Carbon::now();
         $date = $date_time->format('Y-m-d');
+        $time = $date_time->format('H-i-s');
         $tracking_number = $request->tracking_numbers;
         $shipment_id = substr($tracking_number, 6);
         $data = Shipment::find($shipment_id);
@@ -14097,7 +14102,7 @@ class AdminReportsController extends Controller
 
         if ($request->hasFile('picture_attached')) {
             $file = $request->file('picture_attached');
-            $filename = 'Shipment_Image_' . $date . '.' . $file->extension();
+            $filename = 'Shipment_Image_' . $date . '-' . $time . '.' . $file->extension();
             $directory = 'ordinary_discrepancy_report\attachment' . $data->id . '';
             Storage::disk('public')->putFileAs($directory, $file, $filename);
             $image = $directory . '/' . $filename;
@@ -14105,26 +14110,20 @@ class AdminReportsController extends Controller
             return redirect()->back()->with('error', 'Incomplete Information!');
         }
 
+        $ordinary_discrepancy_reports = new OrdinaryDiscrepancyReport;
+        $ordinary_discrepancy_reports->shipment_id = $data->id;
+        $ordinary_discrepancy_reports->user_id = $data->user_id;
+        $ordinary_discrepancy_reports->shipment_status_id = $data->shipper_status_id;
+        $ordinary_discrepancy_reports->city_id = $data->consignee_city_id;
+        $ordinary_discrepancy_reports->product_content = $request->shipment_content_admin;
+        $ordinary_discrepancy_reports->picture_path = $image;
+        $ordinary_discrepancy_reports->quantity = $request->quantity;
+        $ordinary_discrepancy_reports->remarks = $request->remarks;
+        $ordinary_discrepancy_reports->admin_id = Auth::id();
+        $ordinary_discrepancy_reports->odr_nature_id = $request->odr_nature;
+        $ordinary_discrepancy_reports->save();
 
-
-        $get_data = OrdinaryDiscrepancyReport::where('shipment_id', $data->id)->get();
-        if (count($get_data) >= 3) {
-            return response()->json(['status' => 0, 'message' => 'Same Shipment cannot add more than 3 times']);
-        } else {
-            $ordinary_discrepancy_reports = new OrdinaryDiscrepancyReport;
-            $ordinary_discrepancy_reports->shipment_id = $data->id;
-            $ordinary_discrepancy_reports->user_id = $data->user_id;
-            $ordinary_discrepancy_reports->shipment_status_id = $data->shipper_status_id;
-            $ordinary_discrepancy_reports->city_id = $data->consignee_city_id;
-            $ordinary_discrepancy_reports->product_content = $request->shipment_content_admin;
-            $ordinary_discrepancy_reports->picture_path = $image;
-            $ordinary_discrepancy_reports->quantity = $request->quantity;
-            $ordinary_discrepancy_reports->remarks = $request->remarks;
-            $ordinary_discrepancy_reports->admin_id = Auth::id();
-            $ordinary_discrepancy_reports->save();
-
-            return response()->json(['status' => 1, 'message' => 'Shipment Updated Successfully']);
-        }
+        return response()->json(['status' => 1, 'message' => 'Shipment Updated Successfully']);
     }
 
     public function csat_report_index()
@@ -15795,5 +15794,43 @@ class AdminReportsController extends Controller
             return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
         });
         return $datatable->make(true);
+    }
+
+    public function list_for_tracking_screen(Request $request)
+    {
+        $details = OrdinaryDiscrepancyReport::leftjoin('odr_natures', 'odr_natures.id', 'ordinary_discrepancy_reports.odr_nature_id')
+        ->leftjoin('admins', 'admins.id', 'ordinary_discrepancy_reports.admin_id')
+        ->select(['ordinary_discrepancy_reports.*' , 'odr_natures.name as odr_nature', 'admins.name as created_by'])
+        ->where('ordinary_discrepancy_reports.shipment_id', $request->shipment_id)
+        ->latest('created_at')
+        ->get();
+
+
+        $details = $details->map(function ($detail) {
+            $html = "";
+            if ($detail->picture_path != null) {
+                $images = explode('|', $detail->picture_path);
+                foreach ($images as $image) {
+                    $exists = Storage::disk('public')->exists($image);
+                    if ($exists) {
+                        $route = Storage::disk('public')->url($image);
+                    } else {
+                        $route = Storage::disk('s3')->temporaryUrl($image, now()->addMinutes(5));
+                    }
+                    $html .= '<a target="_blank" class="btn btn-sm btn-outline-info align-middle" href="' . $route . '"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View Image</span></a><br>';
+                }
+            } else {
+                $html = "-";
+            }
+        
+            // Add image_html key to the collection item
+            $detail->image_html = $html;
+        
+            return $detail;
+        });
+        
+        //return $details;
+
+        return response()->json(['details' => $details]);
     }
 }
