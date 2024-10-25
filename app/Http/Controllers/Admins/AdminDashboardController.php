@@ -15276,7 +15276,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     public static function compareFuelCharges($user_id, $table1, $table2, $date1 = null, $date2 = null, $firstValue )
     {
-        dd($firstValue);
 
         // Helper function to get fuel surcharge sum based on user ID and optional date
         $getFuelSurchargeSum = function($table, $user_id, $date = null) {
