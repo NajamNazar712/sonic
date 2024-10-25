@@ -301,6 +301,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
         Route::get('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditInternationalCityForm')->name('international.city.edit');
         Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
+
+        Route::post('/bulkCity', 'Admins\AdminDashboardController@addExcelCityHub')->name('addExcelCityHub');
+
         Route::put('/city/{id}/edit/form', 'Admins\AdminDashboardController@updateCity')->name('city.edit');
         Route::put('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@updateInternationalCity')->name('international.city.edit');
         Route::post('/international/city', 'Admins\AdminDashboardController@addInternationalCityHub')->name('international.city');
@@ -2485,6 +2488,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminReportsController@ordinary_discrepancy_report_list')->name('list');
             Route::post('tracking_data', 'Admins\AdminReportsController@ordinary_discrepancy_report_tracking_data')->name('tracking_data');
             Route::post('submit_tracking', 'Admins\AdminReportsController@submit_tracking')->name('submit_tracking');
+            Route::get('list_for_tracking_screen', 'Admins\AdminReportsController@list_for_tracking_screen')->name('list_for_tracking_screen');
+
         });
 
         Route::prefix('ibft_report')->name('ibft_report.')->group(function () {
@@ -3666,6 +3671,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('card_data', 'Admins\CRMDashboardController@card_data')->name('card_data');
         });
 
+        // bulk resolve
+        Route::post('bulk_resolve', 'Admins\AdminCRMController@bulk_resolve')->name('bulk_resolve');
     });
 
     Route::prefix('intercept')->name('intercept.')->group(function () {

@@ -219,8 +219,19 @@
                                });
                            }
                        }
+                    },
+                        @if (session('role_id') == 1 || in_array(1016, session('permissions')))
+                            {
+                                text: '<i class="la la-file-excel-o"></i> Bulk Booking City',
+                                className: 'btn btn-primary',
+                                enabled: true,
+                                action: function (e, dt, node, config) {
+                                    $('#addBulkCity').modal('show');
+                                }
+                            },
+                       @endif
 
-                    },{
+               {
                        text: '<i class="la la-map-marker"></i> Add International City',
                        className: 'btn btn-primary',
                        enabled: true,
