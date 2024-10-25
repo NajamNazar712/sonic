@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use App\Http\Models\City;
 use App\Http\Models\Shipper\SubstituteUserModulePermission;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\SubstituteUserPermission;
@@ -120,16 +120,27 @@ class ShipperSubstituteAccountManagementController extends Controller
 
     public function add_index() {
       $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->get();
+
       $pickup_addresses = UserShippingInfo::where('user_id', auth()->user()->id)
       ->select([
         'id',
         'pickup_address'
       ])
       ->get();
+
+      $cities = City::where('pickup', 1)
+        ->where('booking_enable_status', 1)
+        ->where('status', 1)
+        ->where('business_category_id', 1)
+        ->whereNotNull('zone_id')
+        ->orderBy('name')
+      ->get();
+
       return view('client.substitute_account_management.add.index')
         ->with([
           'permissions' => $permissions,
-          'pickup_addresses' => $pickup_addresses
+          'pickup_addresses' => $pickup_addresses,
+          'cities' => $cities
         ]);
     }
 
@@ -145,8 +156,32 @@ class ShipperSubstituteAccountManagementController extends Controller
       $substitute_user->cnic = $request->input('cnic');
       $substitute_user->password = bcrypt($request->input('password'));
       $substitute_user->restriction = $request->input('restriction');
-      $substitute_user->pickup_address_id = implode(',', $selected_ids);
+      
+      $pickup_address_id = implode(',', $selected_ids);
 
+      if ($pickup_address_id == 0) {
+        $user_shipping_info = new UserShippingInfo();
+        $user_shipping_info->user_id = auth()->user()->id;
+        $user_shipping_info->pickup_address = $request->input('new_pickup_address');
+        $user_shipping_info->poc = $request->input('new_pickup_person_of_contact');
+        $user_shipping_info->vendor = $request->input('new_pickup_vendor');
+        $user_shipping_info->phone = $request->input('new_pickup_phone_number');
+        $user_shipping_info->email = $request->input('new_pickup_email_address');
+        $user_shipping_info->city_id = $request->input('new_pickup_city');
+        $user_shipping_info->hidden = 0;
+
+        if ($request->input('make_default_address') == 1) {
+          $default = 1;
+        } else {
+          $default = 0;
+        }
+        $user_shipping_info->default_address = $default;
+
+        $user_shipping_info->save();
+        $substitute_user->pickup_address_id = $user_shipping_info->id; 
+      } else {
+        $substitute_user->pickup_address_id = $pickup_address_id;
+      }
       $substitute_user->save();
 
       if ($request->has('permission_ids')) {

@@ -2887,7 +2887,38 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-        return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes, 'omni_user' => $omni_user]);
+        $viewData = [
+            'booking_types' => $booking_types,
+            'user' => $user,
+            'pickup_addresses' => $pickup_addresses,
+            'cities' => $cities,
+            'products' => $products,
+            'shipping_modes' => $shipping_modes,
+            'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings,
+            'payment_modes' => $payment_modes,
+            'charges_modes' => $charges_modes,
+            'omni_user' => $omni_user,
+        ];
+
+        $substitute_account = null;
+        $substitute_account_pickup_address = null;
+
+        if (session('substitute_user_id')) {
+            $substitute_account = SubstituteUser::find(session('substitute_user_id'));
+            if ($substitute_account && $substitute_account->pickup_address_id) {
+                // Convert the comma-separated string to an array
+                $pickup_address_ids = explode(',', $substitute_account->pickup_address_id);
+                // Retrieve the UserShippingInfo records
+                $substitute_account_pickup_address = UserShippingInfo::whereIn('id', $pickup_address_ids)->get();
+            }
+        }
+
+        // Add the substitute account pickup addresses to view data
+        $viewData['substitute_account'] = $substitute_account;
+        $viewData['substitute_account_pickup_address'] = $substitute_account_pickup_address;
+
+        // return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes, 'omni_user' => $omni_user]);
+        return view('client.shipment.book.excel')->with($viewData);
     }
 
     public function excel_store(Request $request)

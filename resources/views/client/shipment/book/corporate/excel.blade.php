@@ -323,23 +323,26 @@
                                             <th class="border-primary border-lighten-2">Address</th>
                                         </tr>
                                         </thead>
-                                        <tbody>
-                                            @php
-                                                $pickup_addresses = $substitute_account ? $substitute_account_pickup_address : $user->shipping;
-                                            @endphp
 
+                                        <tbody>
+                                            {{-- use sub account's own pickup or main accounts of not available --}}
+                                            @php
+                                                $pickup_addresses = $substitute_account_pickup_address ?? $user->shipping;
+                                            @endphp
                                             @if ($pickup_addresses->count())
                                                 @foreach ($pickup_addresses as $pickup_address)
-                                                    <tr role="row">
-                                                        <td class="text-center">{{ $pickup_address->id }}</td>
-                                                        <td>{{ $pickup_address->pickup_address }}, {{ $pickup_address->city->name }}</td>
-                                                    </tr>
+                                                    @if ($pickup_address->hidden == 0 && $pickup_address->status == 1)
+                                                        <tr role="row">
+                                                            <td class="text-center">{{ $pickup_address->id }}</td>
+                                                            <td>{{ $pickup_address->pickup_address }}, {{ $pickup_address->city->name }}</td>
+                                                        </tr>
+                                                    @endif
                                                 @endforeach
                                             @else
                                                 <tr role="row">
                                                     <td colspan="2" class="text-center">No Active Pickup Addresses</td>
                                                 </tr>
-                                            @endif  
+                                            @endif
                                         </tbody>
 
                                         {{-- <tbody>
