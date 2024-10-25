@@ -14430,7 +14430,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $row[] = $invoice_shipment->gst;
                 $row[] = $invoice_shipment->sms_charges;
                 $row[] = $invoice_shipment->invoice_amount;
-                $row[] = $shipment->intercept_charges;
+                $row[] = (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0);
 
                 // Assign the row to the details array
                 $details[$shipment->id] = $row;
@@ -14467,7 +14467,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $details[$shipment->id][13] += $invoice_shipment->sms_charges;
                 $details[$shipment->id][14] += $invoice_shipment->invoice_amount;
                 if ($details[$shipment->id][15] == 0) {
-                    $details[$shipment->id][15] += $invoice_shipment->intercept_charges;
+                    $details[$shipment->id][15] += (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0);
                 }
             }
 
