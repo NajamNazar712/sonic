@@ -41,7 +41,7 @@
 								</div>
 							@endif
 							
-							@if (session('role_id') == 1 || in_array(1014, session('permissions')))
+							@if (session('role_id') == 1 || in_array(135, session('permissions')))
 								<form id="shipment_weight_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.change_shipment_weight.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 									{{ csrf_field() }}
 
@@ -99,7 +99,7 @@
 								</form>
 							@endif
 
-							@if (session('role_id') == 1 || in_array(1014, session('permissions')))
+							@if (session('role_id') == 1 || in_array(1015, session('permissions')))
 								<form id="search_form" class="row mb-1 justify-content-center mt-2" novalidate="novalidate">
 									<div class="col-2">
 										<h3 class="heading"><strong>Individual Shipment</strong></h3>
@@ -117,7 +117,7 @@
 							<div class="shipment mt-2" id="shipment">
 							</div>
 
-							@if (session('role_id') == 1 || in_array(135, session('permissions')))
+							@if (session('role_id') == 1 || in_array(135, session('permissions')) || in_array(1015, session('permissions')))
 								<div class="row justify-content-center">
 									<div class="col-6">
 										<form id="change_weight_form" class="form mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.finance.change_shipment_weight.store') }}" novalidate="novalidate">
@@ -154,10 +154,11 @@
 												</div>
 
 											</div>
-
-											<div class="form-group text-center">
-												<button type="submit" name="change" class="btn btn-primary change" value="Change">Change</button>
-											</div>
+											@if (session('role_id') == 1 || in_array(135, session('permissions')))
+												<div class="form-group text-center">
+													<button type="submit" name="change" class="btn btn-primary change" value="Change">Change</button>
+												</div>
+											@endif
 										</form>
 									</div>
 								</div>
