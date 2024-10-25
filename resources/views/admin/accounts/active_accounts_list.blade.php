@@ -2534,11 +2534,12 @@ function checkboxStatus() {
                 }).done(function(data){
                     if (data.status == 1) {
                         $.each(data.details, function(key, value) {
-                            let weightSign = value.weight === 'green' ? '↑' : (value.weight === 'red' ? '↓' : '←→');
-                            let weightColor = value.weight === 'green' ? 'green' : (value.weight === 'red' ? 'red' : 'yellow');
+                            let weightSign = value.weight === 'green' ? '↑' : (value.weight === 'red' ? '↓' : (value.weight === 'yellow' ? '←→' : 'Rates Added Only'));
+                            let weightColor = value.weight === 'green' ? 'green' : (value.weight === 'red' ? 'red' : (value.weight === 'yellow' ? 'yellow' : 'Rates Added Only'));
 
-                            let fuelSign = value.fuel === 'green' ? '↑' : (value.fuel === 'red' ? '↓' : '←→');
-                            let fuelColor = value.fuel === 'green' ? 'green' : (value.fuel === 'red' ? 'red' : 'yellow');
+                            let fuelSign = value.fuel === 'green' ? '↑' : (value.fuel === 'red' ? '↓' : (value.fuel === 'yellow' ? '←→' : 'Fuel Added Only'));
+                            let fuelColor = value.fuel === 'green' ? 'green' : (value.fuel === 'red' ? 'red' : (value.fuel === 'yellow' ? 'yellow' : 'Fuel Added Only'));
+
 
                             $('#old_rate_date').append(
                                 $('<option></option>')
@@ -2552,8 +2553,6 @@ function checkboxStatus() {
                         });
                         $('#RateHistoryModal').modal('show');
 
-                        updateComparison(data.compare_weight, 'w');
-                        updateComparison(data.compare_fuel_surcharge, 'f');
 
                         $('#RateHistoryModal #old_rate_date').bind('change', function () {
                             var date = $(this).val();
