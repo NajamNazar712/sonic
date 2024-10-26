@@ -15324,14 +15324,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     private function getFuelTables(int $fuelType): array
     {
-        switch ($fuelType) {
-            case 1:
-                return [CorporateFuelSurcharge::class, HistoryCorporateFuelSurcharge::class];
-            case 3:
-                return [CorporateDefaultFuelSurcharge::class, CorporateDefaultHistoryFuelSurcharge::class];
-            default:
-                return [CorporateFuelSurcharge::class, HistoryCorporateFuelSurcharge::class];
+        if ($fuelType === 1 || $fuelType === 2) {
+            return [CorporateFuelSurcharge::class, HistoryCorporateFuelSurcharge::class];
         }
+
+        return [CorporateDefaultFuelSurcharge::class, CorporateDefaultFuelSurcharge::class];
     }
 
 }
