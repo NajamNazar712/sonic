@@ -15302,7 +15302,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         }
 
         // Comparison of fuel surcharges
-        if ($existingFuelSurchargeSum && $historyFuelSurchargeSum && !$firstValue) {
+        if (!$firstValue) {
             return $existingFuelSurchargeSum > $historyFuelSurchargeSum ? 'green'
                 : ($existingFuelSurchargeSum < $historyFuelSurchargeSum ? 'red' : 'yellow');
         }
@@ -15330,7 +15330,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             case 3:
                 return [CorporateDefaultFuelSurcharge::class, CorporateDefaultHistoryFuelSurcharge::class];
             default:
-                return [null, null];
+                return [CorporateFuelSurcharge::class, HistoryCorporateFuelSurcharge::class];
         }
     }
 
