@@ -587,45 +587,52 @@ class DeliveryController extends Controller
         $routes = $routes->get();
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
         $city_id = Rider::find($request->rider_id)->city_id;
-        if ($city_id == 202) {
-            $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
-                ->where('r.id', $request->rider_id)
-                ->where('delivery_notes.cash_collection_status', 0)
-                ->where('delivery_notes.total_cod_amount', '>', 0)
-                ->where('delivery_notes.status', '!=', 4)
-                ->whereDate('delivery_notes.created_at', '>', $datetime)
-                ->whereDate('delivery_notes.created_at', '<', Carbon::today())
-                ->where('r.operation_rider_id', 1);
-        } else {
-            $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
-                ->where('r.id', $request->rider_id)
-                ->whereNotIn('delivery_notes.cash_collection_status', [2, 3])
-                ->where('delivery_notes.dncc_status', 0)
-                ->where('delivery_notes.total_cod_amount', '>', 0)
-                ->where('delivery_notes.status', '!=', 4)
-                ->whereDate('delivery_notes.created_at', '>', $datetime)
-                ->whereDate('delivery_notes.created_at', '<', Carbon::today())
-                ->where('r.operation_rider_id', 1);
-        }
+        $rider_main_category_id = Rider::find($request->rider_id)->rider_main_category_id;
 
-
-        if ($delivery_note->exists()) {
-            $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
-            if ($delivery_note_request) {
-                $delivery_note_request->completed = 1;
-                $delivery_note_request->save();
-                $rider = Rider::find($request->rider_id);
-                $ccd_rider = $rider->ccd;
-
-                return response()->json(['status' => 1, 'routes' => $routes, 'ccd_rider' => $ccd_rider]);
-            } else {
-                return response()->json(['status' => 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
-            }
-        } else {
+        if($rider_main_category_id == 3) {
             $rider = Rider::find($request->rider_id);
             $ccd_rider = $rider->ccd;
             return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider, 'routes' => $routes]);
+        } else {
+            if ($city_id == 202) {
+                $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+                    ->where('r.id', $request->rider_id)
+                    ->where('delivery_notes.cash_collection_status', 0)
+                    ->where('delivery_notes.total_cod_amount', '>', 0)
+                    ->where('delivery_notes.status', '!=', 4)
+                    ->whereDate('delivery_notes.created_at', '>', $datetime)
+                    ->whereDate('delivery_notes.created_at', '<', Carbon::today())
+                    ->where('r.operation_rider_id', 1);
+            } else {
+                $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+                    ->where('r.id', $request->rider_id)
+                    ->whereNotIn('delivery_notes.cash_collection_status', [2, 3])
+                    ->where('delivery_notes.dncc_status', 0)
+                    ->where('delivery_notes.total_cod_amount', '>', 0)
+                    ->where('delivery_notes.status', '!=', 4)
+                    ->whereDate('delivery_notes.created_at', '>', $datetime)
+                    ->whereDate('delivery_notes.created_at', '<', Carbon::today())
+                    ->where('r.operation_rider_id', 1);
+            }
+            if ($delivery_note->exists()) {
+                $delivery_note_request = DeliveryNoteRequests::where('rider_id', $request->rider_id)->where('status', 2)->where('completed', 0)->latest()->first();
+                if ($delivery_note_request) {
+                    $delivery_note_request->completed = 1;
+                    $delivery_note_request->save();
+                    $rider = Rider::find($request->rider_id);
+                    $ccd_rider = $rider->ccd;
+    
+                    return response()->json(['status' => 1, 'routes' => $routes, 'ccd_rider' => $ccd_rider]);
+                } else {
+                    return response()->json(['status' => 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
+                }
+            } else {
+                $rider = Rider::find($request->rider_id);
+                $ccd_rider = $rider->ccd;
+                return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider, 'routes' => $routes]);
+            }
         }
+        
     }
 
     public function note_consolidation_check(Request $request)
