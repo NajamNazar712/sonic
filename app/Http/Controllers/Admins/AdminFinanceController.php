@@ -6402,7 +6402,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->join('user_bank_infos as ubi', function ($join) {
                 $join->on('pending_payments.user_id', '=', 'ubi.user_id')
-                    ->where('ubi.default_bank', DB::raw(1));
+                    ->where('ubi.id', '=', DB::raw(
+                        '(select max(id) from user_bank_infos where user_id = pending_payments.user_id and default_bank = 1)'
+                    ));
             })
             ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
             ->join('payment_cycles as pc', 'u.payment_cycle_id', '=', 'pc.id')
@@ -7921,7 +7923,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             })
             ->leftJoin('user_bank_infos as ubi_default', function ($join) {
                 $join->on('ubi_default.user_id', '=', 'u.id')
-                    ->where('ubi_default.default_bank', DB::raw(1));
+                    ->where('ubi_default.id', '=', DB::raw(
+                        '(select max(id) from user_bank_infos where user_id = u.id and default_bank = 1)'
+                    ));
             })
             ->leftJoin('banks_lists as ub', function ($join) {
                 $join->where(function ($sub_query) {
