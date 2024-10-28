@@ -1513,7 +1513,7 @@ class DeliveryController extends Controller
             })
             ->addColumn('excel_others', function($result){
                 $count = 0;
-                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [6,8,9,10,11], null, 'delivery_note_id');
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [1,3,4,6,8,9,10,11], null, 'delivery_note_id');
                 return $count > 0 ? $count : '-';
             })
 
@@ -1548,7 +1548,7 @@ class DeliveryController extends Controller
                 $count = 0;
                 $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
                 if (!empty($delivered_shipments)) {
-                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [6,8,9,10,11], 'delivered', 'delivery_note_id');
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
                 }
                 return $count > 0 ? $count : '-';
             })
@@ -5520,7 +5520,7 @@ class DeliveryController extends Controller
             })
             ->addColumn('excel_others', function($result){
                 $count = 0;
-                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [6,8,9,10,11], null, 'delivery_note_id');
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [1,3,4,6,8,9,10,11], null, 'delivery_note_id');
                 return $count > 0 ? $count : '-';
             })
 
@@ -5555,7 +5555,7 @@ class DeliveryController extends Controller
                 $count = 0;
                 $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
                 if (!empty($delivered_shipments)) {
-                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [6,8,9,10,11], 'delivered', 'delivery_note_id');
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
                 }
                 return $count > 0 ? $count : '-';
             });
@@ -7803,7 +7803,7 @@ class DeliveryController extends Controller
             })
             ->addColumn('excel_others', function($result){
                 $count = 0;
-                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [6,8,9,10,11], null, 'delivery_note_id');
+                $count = $this->get_segment_type('delivery_note_shipments',[$result->delivery_note], [1,2], [1,3,4,6,8,9,10,11], null, 'delivery_note_id');
                 return $count > 0 ? $count : '-';
             })
 
@@ -7838,7 +7838,7 @@ class DeliveryController extends Controller
                 $count = 0;
                 $delivered_shipments = $this->get_delivered_shipments([$result->delivery_note]);
                 if (!empty($delivered_shipments)) {
-                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [6,8,9,10,11], 'delivered', 'delivery_note_id');
+                    $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
                 }
                 return $count > 0 ? $count : '-';
             });

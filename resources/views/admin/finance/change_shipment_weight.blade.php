@@ -99,7 +99,7 @@
 								</form>
 							@endif
 
-							@if (session('role_id') == 1 || in_array(1015, session('permissions')))
+							@if (session('role_id') == 1 || array_intersect([135, 1015], session('permissions')))
 								<form id="search_form" class="row mb-1 justify-content-center mt-2" novalidate="novalidate">
 									<div class="col-2">
 										<h3 class="heading"><strong>Individual Shipment</strong></h3>
@@ -117,7 +117,7 @@
 							<div class="shipment mt-2" id="shipment">
 							</div>
 
-							@if (session('role_id') == 1 || in_array(135, session('permissions')) || in_array(1015, session('permissions')))
+							@if (session('role_id') == 1 || array_intersect([135, 1015], session('permissions')))
 								<div class="row justify-content-center">
 									<div class="col-6">
 										<form id="change_weight_form" class="form mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.finance.change_shipment_weight.store') }}" novalidate="novalidate">
@@ -213,7 +213,7 @@
 
 					$('#shipment').html('');
 
-					@if (session('role_id') == 1 || in_array(135, session('permissions')))
+					@if (session('role_id') == 1 || array_intersect([135, 1015], session('permissions')))
 						$('#change_weight_form').addClass('d-none');
 
 						$('#change_weight_form input.tracking_number').val('');
@@ -326,7 +326,7 @@
 							if(details.booking_type_id == 2){
 								$('#replacement_div').removeClass('d-none');
 							}
-							@if (session('role_id') == 1 || in_array(135, session('permissions')))
+							@if (session('role_id') == 1 || array_intersect([135, 1015], session('permissions')))
 								$('#change_weight_form').removeClass('d-none');
 
 								$('#change_weight_form input.shipment_id').val(details.id);
@@ -350,7 +350,7 @@
 				}
 			});
 
-			@if (session('role_id') == 1 || in_array(135, session('permissions')))
+			@if (session('role_id') == 1 || array_intersect([135, 1015], session('permissions')))
 				$('#change_weight_form input.weight').inputmask({
 					'alias': 'decimal',
 					'allowMinus': false,
