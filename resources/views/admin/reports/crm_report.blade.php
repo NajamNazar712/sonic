@@ -583,7 +583,7 @@
                     {data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date', text: 'Arrival Date', value: 'arrival_date', download: true},
 
                     // Placeholder for Arrival to Today (TAT)
-                    {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today', text: 'Arrival to Today (TAT)', value: 'arrival_today', download: true, orderable: false},
+                    {data: 'arrival_today', name: 'sj.updated_at', class: 'align-middle arrival_today', text: 'Arrival to Today (TAT)', value: 'arrival_today', download: true},
 
                     {data: 'status', name: 'ss.name', class: 'align-middle status', text: 'Status', value: 'status', download: true},
                     {data: 'last_status_date', name: 'ss.created_at', class: 'align-middle last_status_date', text: 'Last Status Date', value: 'last_status_date', download: true},
