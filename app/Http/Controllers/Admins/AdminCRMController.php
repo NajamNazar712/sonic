@@ -7017,233 +7017,190 @@ class AdminCRMController extends Controller
     public function bulk_resolve(Request $request)
     {
         $crm_requests = CrmRequest::whereIn('id', $request->crm_request_ids)->get();
-        foreach($crm_requests as $crm_request){
-            if ($crm_request->agent_id == null || $crm_request->agent_id == '' ){
-                return ['status' => 1, 'error' => 'Agent is not assigned yet to CRM request number ' . $crm_request->id];
-            } else {
-                $prev_status = $crm_request->status_id;
-                if ($prev_status == 1 || $prev_status == 5){
-                    if ($prev_status != 2){
-                        CrmRequest::where('id', $crm_request->id)->update([
-                            'status_id' => 2,
-                        ]);
-
+        $errors = [];
+    
+        foreach ($crm_requests as $crm_request) {
+            if (is_null($crm_request->agent_id) || $crm_request->agent_id == '') {
+                $errors[] = 'Agent is not assigned yet to CRM request number ' . $crm_request->id;
+                continue;
+            }
+    
+            $prev_status = $crm_request->status_id;
+            switch ($prev_status) {
+                case 1:
+                case 5:
+                    if ($prev_status != 2) {
+                        CrmRequest::where('id', $crm_request->id)->update(['status_id' => 2]);
+    
                         CrmRequestStatusHistory::create([
                             'crm_request_id' => $crm_request->id,
                             'status_id' => 6,
                             'agent_id' => Auth::id()
                         ]);
-
+    
                         NotificationsController::send(41, $crm_request->id);
+    
                         CrmRequestStatusHistory::create([
                             'crm_request_id' => $crm_request->id,
                             'status_id' => 2,
                             'agent_id' => Auth::id()
                         ]);
-
-                        if($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null){
+    
+                        if ($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null) {
                             self::delay_in_delivery_shipment_add($crm_request->id, $crm_request->shipment_id);
                         }
-
-                        if($request->prev_status == 1){
-                            if($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null){
+    
+                        if ($prev_status == 1) {
+                            if ($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null) {
                                 self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
                             }
                         }
-                        if($crm_request->case_nature_id == 4){
+    
+                        if ($crm_request->case_nature_id == 4) {
                             NotificationsController::send(117, $crm_request->id, 6);
                         }
-
-                        if($crm_request->shipper_id){
-                            $sales_tier_tag = SaleTierTag::where('user_id', $crm_request->shipper_id);
-                            if($sales_tier_tag->exists()){
-                                $sales_tier_tag = $sales_tier_tag->first();
-                                $tagged_id = $sales_tier_tag->kam;
-                                $kam_admin = Admin::find($tagged_id);
-                                if($kam_admin){
-                                    if($kam_admin->status){
-                                        if($tagged_id){
-                                            $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',4)->first();
-                                            if(!empty($tagged_crm_request)){
-                                                if($tagged_crm_request['tagged_id'] != $tagged_id) {
-                                                    CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',4)->update([
-                                                        'crm_request_tagging_type_id' => 4,
-                                                        'tagged_id' => $tagged_id
-                                                    ]);
     
-                                                    CrmRequestTaggingHistory::create([
-                                                        'crm_request_id' => $crm_request->id,
-                                                        'crm_request_tagging_type_id' => 4,
-                                                        'tagged_id' => $tagged_id,
-                                                        'agent_id' => 306,
-                                                        'hub_id' => NULL
-                                                    ]);
-                                                    NotificationsController::send(31,$crm_request->id);
-                                                }
-                                            }
-                                            else{
-                                                CrmRequestTagging::create([
-                                                    'crm_request_id' => $crm_request->id,
-                                                    'crm_request_tagging_type_id' => 4,
-                                                    'tagged_id' => $tagged_id,
-                                                    'hub_id' => NULL
-                                                ]);
+                        $this->handleSalesTierTag($crm_request);
+                        $this->handleAutoTagging($crm_request);
     
-                                                CrmRequestTaggingHistory::create([
-                                                    'crm_request_id' => $crm_request->id,
-                                                    'crm_request_tagging_type_id' => 4,
-                                                    'tagged_id' => $tagged_id,
-                                                    'agent_id' => 306,
-                                                    'hub_id' => NULL
-                                                ]);
-                                                NotificationsController::send(31,$crm_request->id);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
-                            $crm_city_id = $crm_request->shipment->pickup_address->city->id;
-                            $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id;
-    
-                        } else{
-                            $crm_city_id = $crm_request->shipment->consignee_city_id;
-                            $crm_city_area_id = ConsigneeAddressArea::where('shipment_id',$crm_request->shipment->id)->pluck('city_area_id')->first() ?? 0;
-                        } 
-                        if($crm_request->case_nature_type_id != 1){
-                            $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
-                            if($crm_auto_tag_user->exists()){
-    
-                                $crm_auto_tag_user_with_case_details = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1)->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$crm_request->case_nature_id)->where('crm_case_nature_type_id',$crm_request->case_nature_type_id);
-    
-                                if($crm_auto_tag_user_with_case_details->exists()){
-                                    $crm_auto_tag_user = $crm_auto_tag_user_with_case_details->first();
-                                }
-                                else{
-                                    $crm_auto_tag_user = $crm_auto_tag_user->first();
-                                }
-    
-                                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
-                                if(!empty($tagged_crm_request)){
-                                    if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
-                                        CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->update([
-                                            'crm_request_tagging_type_id' => 5,
-                                            'tagged_id' => $crm_auto_tag_user->admin_id
-                                        ]);
-    
-                                        CrmRequestTaggingHistory::create([
-                                            'crm_request_id' => $crm_request->id,
-                                            'crm_request_tagging_type_id' => 5,
-                                            'tagged_id' => $crm_auto_tag_user->admin_id,
-                                            'agent_id' => 306,
-                                            'hub_id' => NULL
-                                        ]);
-                                        NotificationsController::send(31,$crm_request->id);
-                                    }
-                                }
-                                else{
-                                    CrmRequestTagging::create([
-                                        'crm_request_id' => $crm_request->id,
-                                        'crm_request_tagging_type_id' => 5,
-                                        'tagged_id' => $crm_auto_tag_user->admin_id,
-                                        'hub_id' => NULL
-                                    ]);
-    
-                                    CrmRequestTaggingHistory::create([
-                                        'crm_request_id' => $crm_request->id,
-                                        'crm_request_tagging_type_id' => 5,
-                                        'tagged_id' => $crm_auto_tag_user->admin_id,
-                                        'agent_id' => 306,
-                                        'hub_id' => NULL
-                                    ]);
-                                    NotificationsController::send(31,$crm_request->id);
-                                }
-                            }
-                        }
-                        return redirect()->back()->with(['success' => 'Request marked as In-Process']);
+                        // Request marked as In-Process
+                    } else {
+                        $errors[] = 'Request is already marked as In-Process for CRM request number ' . $crm_request->id;
                     }
-                    else {
-                        return ['status' => 1, 'error' => 'Request is already marked as In-Process'];
-                    }
-                }
-
-                if ($prev_status == 2) {
+                    break;
+    
+                case 2:
                     if ($prev_status != 3) {
-                        CrmRequest::where('id', $crm_request->id)->update([
-                            'status_id' => 3
-                        ]);
+                        CrmRequest::where('id', $crm_request->id)->update(['status_id' => 3]);
                         CrmRequestStatusHistory::create([
                             'crm_request_id' => $crm_request->id,
                             'status_id' => 3,
                             'agent_id' => Auth::id()
                         ]);
-                        if(DelayInDeliveryShipment::where('crm_request_id', $crm_request->id)->exists()){
-                            DelayInDeliveryShipment::where('crm_request_id', $crm_request->id)->delete();
-                        }
-                        if(CrmPaymentShipment::where('crm_request_id', $crm_request->id)->exists()){
-                            CrmPaymentShipment::where('crm_request_id', $crm_request->id)->delete();
-                        }
     
-                        if($crm_request->case_nature_id == 4){
-                            $comment = 'Dear Customer,
-                            Please be noted that your claim has been considered and after due investigation it has been forwarded to concerned department for further adjustments. For any further clarification please approach us.
-                                                                
-                            UAN# 021-111-11-8729
-                            WhatsApp # 0348-111-8729
-                            info@trax.pk
-                            Live Chat Messenger
-                                                                
-                            Regards,
-                            TRAX-Customer Experience';
+                        $this->cleanupAfterResolution($crm_request);
     
-                            CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+                        if ($crm_request->case_nature_id == 4) {
+                            $this->addCustomerNotification($crm_request);
                         }
     
-                        return redirect()->back()->with(['success' => 'Request marked as Resolved']);
+                        // Request marked as Resolved
                     } else {
-                        return ['status' => 1, 'error' => 'Request is already marked as Resolved'];
+                        $errors[] = 'Request is already marked as Resolved for CRM request number ' . $crm_request->id;
                     }
-                }
-
-                if ($prev_status == 3) {
+                    break;
+    
+                case 3:
                     if ($prev_status != 4) {
-                        CrmRequest::where('id', $crm_request->id)->update([
-                            'status_id' => 4
-                        ]);
+                        CrmRequest::where('id', $crm_request->id)->update(['status_id' => 4]);
                         CrmRequestStatusHistory::create([
                             'crm_request_id' => $crm_request->id,
                             'status_id' => 4,
                             'agent_id' => Auth::id()
                         ]);
-
-                        if($crm_request->case_nature_id == 4) {
+    
+                        if ($crm_request->case_nature_id == 4) {
                             NotificationsController::send(117, $crm_request->id, 4);
                         }
-                        CrmRequestTagging::where('crm_request_id', $request->id)->delete();
-                        return redirect()->back()->with(['success' => 'Request marked as Closed']);
+    
+                        CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+    
+                        // Request marked as Closed
                     } else {
-                        return ['status' => 1, 'error' => 'Request is already marked as Closed'];
+                        $errors[] = 'Request is already marked as Closed for CRM request number ' . $crm_request->id;
                     }
-                }
-
-                if ($request->prev_status == 4) {
+                    break;
+    
+                case 4:
                     if ($prev_status != 5) {
-                        CrmRequest::where('id', $crm_request->id)->update([
-                            'status_id' => 5
-                        ]);
+                        CrmRequest::where('id', $crm_request->id)->update(['status_id' => 5]);
                         CrmRequestStatusHistory::create([
                             'crm_request_id' => $crm_request->id,
                             'status_id' => 5,
                             'agent_id' => Auth::id()
                         ]);
-                        return redirect()->back()->with(['success' => 'Request marked as Re-Open']);
+    
+                        // Request marked as Re-Open
                     } else {
-                        return ['status' => 1, 'error' => 'Request is already marked as Re-Open'];
+                        $errors[] = 'Request is already marked as Re-Open for CRM request number ' . $crm_request->id;
+                    }
+                    break;
+    
+                default:
+                    $errors[] = 'Unhandled status for CRM request number ' . $crm_request->id;
+                    break;
+            }
+        }
+    
+        if (empty($errors)) {
+            return redirect()->back()->with(['success' => 'All requests processed successfully.']);
+        } else {
+            return redirect()->back()->with(['errors' => $errors]);
+        }
+    }
+    
+    private function handleSalesTierTag($crm_request)
+    {
+        if ($crm_request->shipper_id) {
+            $sales_tier_tag = SaleTierTag::where('user_id', $crm_request->shipper_id);
+            if ($sales_tier_tag->exists()) {
+                $tagged_id = $sales_tier_tag->first()->kam;
+                $kam_admin = Admin::find($tagged_id);
+                if ($kam_admin && $kam_admin->status && $tagged_id) {
+                    $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)
+                        ->where('crm_request_tagging_type_id', 4)->first();
+    
+                    if ($tagged_crm_request && $tagged_crm_request['tagged_id'] != $tagged_id) {
+                        $tagged_crm_request->update(['tagged_id' => $tagged_id]);
+                        CrmRequestTaggingHistory::create([
+                            'crm_request_id' => $crm_request->id,
+                            'crm_request_tagging_type_id' => 4,
+                            'tagged_id' => $tagged_id,
+                            'agent_id' => 306
+                        ]);
+                        NotificationsController::send(31, $crm_request->id);
                     }
                 }
             }
         }
     }
+    
+    private function handleAutoTagging($crm_request)
+    {
+        if ($crm_request->case_nature_type_id != 1) {
+            $crm_city_id = $crm_request->shipment->pickup_address->city->id ?? $crm_request->shipment->consignee_city_id;
+            $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id ?? ConsigneeAddressArea::where('shipment_id', $crm_request->shipment->id)->pluck('city_area_id')->first();
+    
+            $crm_auto_tag_user = CrmAutoTagUser::where('city_id', $crm_city_id)->where('status', 1)->first();
+    
+            if ($crm_auto_tag_user) {
+                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)
+                    ->where('crm_request_tagging_type_id', 5)->first();
+    
+                if ($tagged_crm_request && $tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
+                    $tagged_crm_request->update(['tagged_id' => $crm_auto_tag_user->admin_id]);
+                    CrmRequestTaggingHistory::create([
+                        'crm_request_id' => $crm_request->id,
+                        'crm_request_tagging_type_id' => 5,
+                        'tagged_id' => $crm_auto_tag_user->admin_id,
+                        'agent_id' => 306
+                    ]);
+                    NotificationsController::send(31, $crm_request->id);
+                }
+            }
+        }
+    }
+    
+    private function cleanupAfterResolution($crm_request)
+    {
+        DelayInDeliveryShipment::where('crm_request_id', $crm_request->id)->delete();
+        CrmPaymentShipment::where('crm_request_id', $crm_request->id)->delete();
+    }
+    
+    private function addCustomerNotification($crm_request)
+    {
+        $comment = 'Dear Customer, your claim has been considered and forwarded for further adjustments.';
+        CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+    }
+    
 }
