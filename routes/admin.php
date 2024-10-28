@@ -302,7 +302,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditInternationalCityForm')->name('international.city.edit');
         Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
 
-        Route::post('/bulkCity', 'Admins\AdminDashboardController@addExcelCityHub')->name('addExcelCityHub');
+        Route::post('/bulkCity', 'Admins\AdminDashboardController@addExcelCityHub')->name('addExcelCityHub')->middleware('no.cache');;
 
         Route::put('/city/{id}/edit/form', 'Admins\AdminDashboardController@updateCity')->name('city.edit');
         Route::put('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@updateInternationalCity')->name('international.city.edit');
