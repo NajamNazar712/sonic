@@ -122,6 +122,7 @@
                                             </div>
                                         </div>
                                         <div class="row p-1">
+
                                             <div class="col">
                                                 <label>Product Content By Shipper</label>
                                                 <input class="form-control" id="shipment_content_shipper" name="shipment_content_shipper" type="text" value="shipment_content_shipper" readonly/>
@@ -134,6 +135,7 @@
                                                 <label>Remarks<span class="text-danger">*</span></label>
                                                 <input type="text" name="remarks" id="remarks" class="w-100 p-1 border-primary" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
                                             </div>
+
                                         </div>
 
                                         <div class="row p-1">
