@@ -605,7 +605,7 @@
                     {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value', text: 'Parcel Value', value: 'parcel_value', download: true},
 
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount', text: 'COD Amount', value: 'cod_amount', download: true},
-                    {data: 'adjusted_amount', name: 'adjusted_amount', class: 'align-middle adjusted_amount', text: 'Adjusted Amount', value: 'adjusted_amount', download: true},
+                    {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount', text: 'Adjusted Amount', value: 'adjusted_amount', download: true},
                     {data: 'weight_charges', name: 'change_shipment_weight_logs.new_charges', class: 'align-middle weight_charges', text: 'Weight Charges', value: 'weight_charges', download: true},
 
                     // Segment column added here
