@@ -312,7 +312,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
-                            head.push('Others');
+                            head.push('Other Sub-Segments');
 
                             head.push('Pending');
                             head.push('Pending %');
@@ -321,7 +321,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
-                            head.push('Others');
+                            head.push('Other Sub-Segments');
 
                             head.push('Delivered %');
                             head.push('Undelivered');

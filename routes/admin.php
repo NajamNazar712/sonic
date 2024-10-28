@@ -2483,7 +2483,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminRvReportsController@botRvCallLogsList')->name('list');
         });
 
-        Route::prefix('ordinary_discrepancy_report')->name('ordinary_discrepancy_report.')->group(function () {
+        Route::prefix('operation_disorder_report')->name('operation_disorder_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ordinary_discrepancy_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@ordinary_discrepancy_report_list')->name('list');
             Route::post('tracking_data', 'Admins\AdminReportsController@ordinary_discrepancy_report_tracking_data')->name('tracking_data');
