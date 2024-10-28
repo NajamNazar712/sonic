@@ -15049,6 +15049,7 @@ class AdminReportsController extends Controller
             'crcn.name as crm_request_case_nature',
             'crcnt.type as crm_request_case_nature_type',
             'adjustment.adjustment_amount as adjusted_amount',
+            'change_shipment_weight_logs.new_charges as weight_charges',
             'scs.name as sub_segment',
             'cargo_status.name as cargo_status',
             'cmb.seal_number as seal_number',
