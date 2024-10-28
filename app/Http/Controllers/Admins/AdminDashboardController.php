@@ -11144,9 +11144,12 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         DB::raw('(select max(created_at) from city_histories where city_histories.city_id = cities.id)'));
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
+
+            ->leftjoin('admins as c', 'c.id', '=', 'cities.created_by')
+
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status'])
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at'])
             ->where('cities.permanent_disabled',0);
 
         return Datatables::of($cities)
@@ -11244,6 +11247,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     return '-';
                 }
             })
+            ->editColumn('created_at', function ($cities) {
+                if ($cities->created_at) {
+                    return $cities->created_at->toDateTimeString() === '-0001-11-30 00:00:00' ? '-' : $cities->created_at->toDateTimeString();
+                }
+                return '-';
+            })
+
             ->make(true);
     }
 
@@ -11491,6 +11501,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 'gc_area' => ($request->has('gc_area')) ? 1 : 0,
                 'attempt_tat' => $request->attempt_tat,
                 'status' => 1,
+                'created_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
@@ -11582,6 +11593,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 'gc_area' => ($request->has('gc_area')) ? 1 : 0,
                 'attempt_tat' => $request->attempt_tat,
                 'status' => 1,
+                'created_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
@@ -15536,6 +15548,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $item['created_at'] = now();
                     $item['updated_at'] = now();
                     $item['is_excel'] = 1;
+                    $item['created_by'] = auth()->id();
                     $isHubArray[] = $item;
                 }
 
@@ -15545,6 +15558,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $item['created_at'] = now();
                     $item['updated_at'] = now();
                     $item['is_excel'] = 1;
+                    $item['created_by'] = auth()->id();
                     $isCityArray[] = $item;
                 }
             }
