@@ -1886,7 +1886,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(901, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.reports.ordinary_discrepancy_report.index') }}">Operation Disorder Report</a></li>
+                        <li><a class="menu-item" href="{{ route('admin.reports.operation_disorder_report.index') }}">Operation Disorder Report</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(899, session('permissions')))
