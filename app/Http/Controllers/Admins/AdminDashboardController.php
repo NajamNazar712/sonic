@@ -15324,7 +15324,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         }
 
         if (!empty($spreadsheet)) {
-            $column_count = 49;
+            $column_count = 48;
             $fields = [
                 'name', 'city_code', 'is_city', 'is_hub', 'hub_id', 'zone_id', 'address', 'attempt_tat',
                 'location_latitude', 'location_longitude', 'hub_location_latitude', 'hub_location_longitude', 'pickup', 'cut_off_time', 'gc_area',
@@ -15333,7 +15333,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 'try_and_buy_rush', 'try_and_buy_saver_plus', 'try_and_buy_swift', 'try_and_buy_same_day',
                 'reverse_pickup_rush', 'reverse_pickup_saver_plus', 'reverse_pickup_swift', 'reverse_pickup_same_day',
                 'ftl_rush', 'ftl_saver_plus', 'ftl_swift', 'ftl_same_day',
-                'walkin_rush', 'walkin_saver_plus', 'walkin_swift', 'walkin_same_day',
+                'walkin_rush', 'walkin_saver_plus', 'walkin_swift',
                 'osa_name_1','osa_rate_1','osa_name_2','osa_rate_2','osa_name_3','osa_rate_3','osa_name_4','osa_rate_4','closest_hub','vehicles_list'
             ];
 
@@ -15362,8 +15362,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $rules = [
             'name' => 'required|string',
             'city_code' => 'nullable',
-            'hub_id' => 'required_without:zone_id|required_if:is_city,1|exists:cities,id|hub_id_check',
-            'zone_id' => 'required_without:hub_id|required_if:is_hub,1|exists:zones,id|zone_id_check',
+            'hub_id' => 'required_without:zone_id|required_if:is_city,1|hub_id_check',
+            'zone_id' => 'required_without:hub_id|required_if:is_hub,1|zone_id_check',
             'is_city' => 'required_without_all:is_hub|nullable|boolean',
             'is_hub'  => 'required_without_all:is_city|nullable|boolean',
             'attempt_tat' => 'required|integer|min:1',
@@ -15418,28 +15418,32 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         ];
 
         Validator::extend('hub_id_check', function ($attribute, $value, $parameters, $validator)  {
-            $exists = City::where('id', $value)->exists();
-            if (!$exists) {
-                $validator->addReplacer('hub_name_check', function ($message, $attribute, $rule, $parameters) use($value) {
-                    return "$value does not exist.";
-                });
-                return false;
+            if(!is_null($value)){
+                $exists = City::where('id', $value)->exists();
+                if (!$exists) {
+                    $validator->addReplacer('hub_name_check', function ($message, $attribute, $rule, $parameters) use($value) {
+                        return "$value does not exist.";
+                    });
+                    return false;
+                }
+                return true;
             }
             return true;
         });
 
         Validator::extend('zone_id_check', function ($attribute, $value, $parameters, $validator)  {
-            $exists = Zone::where('id', $value)->exists();
-            if (!$exists) {
-                $validator->addReplacer('zone_name_check', function ($message, $attribute, $rule, $parameters) use($value) {
-                    return "$value does not exist.";
-                });
-                return false;
+            if(!is_null($value)){
+                $exists = Zone::where('id', $value)->exists();
+                if (!$exists) {
+                    $validator->addReplacer('zone_name_check', function ($message, $attribute, $rule, $parameters) use($value) {
+                        return "$value does not exist.";
+                    });
+                    return false;
+                }
+                return true;
             }
             return true;
         });
-
-
 
         foreach ($rows as $row_id => $row) {
             $validate = Validator::make($row, $rules, $messages);
@@ -15473,6 +15477,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $deliveryTypes = [];
             $walkInTypes = [];
             $osaList = [];
+            $forms = $rows;
 
             $keysToUnsetDeliveryTypes = [
                 'regular_rush',
@@ -15518,6 +15523,14 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $cities = City::whereIn('id', $cityID)->get()->keyBy('id');
 
             foreach ($forms as $item) {
+
+                if (isset($item['closest_hub']) && is_null($item['closest_hub'])) {
+                    unset($item['closest_hub']);
+                }
+                if (isset($item['vehicles_list']) && is_null($item['vehicles_list'])) {
+                    unset($item['vehicles_list']);
+                }
+
                 if (isset($item['is_hub']) && $item['is_hub'] == "1") {
                     $item['hub'] = 1;
                     $item['created_at'] = now();
@@ -15950,6 +15963,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $historyArray[] = $historyEntry;
             }
         }
+
+        City::whereIn('id', $cityIds)->update(['hub_id' => DB::raw('id')]);
 
         return $historyArray;
     }
