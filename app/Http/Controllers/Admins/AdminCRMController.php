@@ -913,8 +913,6 @@ class AdminCRMController extends Controller
     }
 
     public function request_details(Request $request,$id){
-
-
         $crm_request = CrmRequest::find($id);
         if($crm_request){
             $shipment_status = null;
@@ -932,10 +930,6 @@ class AdminCRMController extends Controller
                 }
                 $shipment_status_journey = ShipmentsJourney::where('shipment_id', $crm_request->shipment_id)->latest('id')->first();
                 $shipment_status_date = $shipment_status_journey->created_at;
-
-
-
-
                 $product_insurance = ShipmentItem::where('shipment_id',$crm_request->shipment_id);
                 if($product_insurance->exists()){
                     $product = $product_insurance->first();
@@ -1148,10 +1142,6 @@ class AdminCRMController extends Controller
                 $special_request_percentage_exceed = true;
                 $special_request = [];
             }
-
-
-
-            // dd($special_request);
 
             $ratings = CrmRequestRating::all();
             $crm_sms_history = CrmSmsLog::where('crm_request_id',$crm_request->id)->get();
@@ -4153,15 +4143,15 @@ class AdminCRMController extends Controller
 
                     if($crm_request->case_nature_id == 4){
                         $comment = 'Dear Customer,
-Please be noted that your claim has been considered and after due investigation it has been forwarded to concerned department for further adjustments. For any further clarification please approach us.
-                                    
-UAN# 021-111-11-8729
-WhatsApp # 0348-111-8729
-info@trax.pk
-Live Chat Messenger
-                                    
-Regards,
-TRAX-Customer Experience';
+                        Please be noted that your claim has been considered and after due investigation it has been forwarded to concerned department for further adjustments. For any further clarification please approach us.
+                                                            
+                        UAN# 021-111-11-8729
+                        WhatsApp # 0348-111-8729
+                        info@trax.pk
+                        Live Chat Messenger
+                                                            
+                        Regards,
+                        TRAX-Customer Experience';
 
                         CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
                     }
@@ -6914,7 +6904,6 @@ TRAX-Customer Experience';
      }*/
 
     public function close_reason(Request $request){
-
         if($request->has('crm_request_id')) {
             $shippers = array();
             $crm_request_ids = $request->crm_request_ids;
@@ -7023,4 +7012,195 @@ TRAX-Customer Experience';
             return redirect()->back()->with('success', 'Request(s) successfully added');
         }
     }
+
+    // bulk resolving
+    public function bulk_resolve(Request $request)
+    {
+        $crm_requests = CrmRequest::whereIn('id', $request->crm_request_ids)->get();
+        $errors = [];
+    
+        foreach ($crm_requests as $crm_request) {
+            if (is_null($crm_request->agent_id) || $crm_request->agent_id == '') {
+                $errors[] = 'Agent is not assigned yet to CRM request number ' . $crm_request->id;
+                continue;
+            }
+    
+            $prev_status = $crm_request->status_id;
+            switch ($prev_status) {
+                case 1:
+                case 5:
+                    if ($prev_status != 2) {
+                        CrmRequest::where('id', $crm_request->id)->update(['status_id' => 2]);
+    
+                        CrmRequestStatusHistory::create([
+                            'crm_request_id' => $crm_request->id,
+                            'status_id' => 6,
+                            'agent_id' => Auth::id()
+                        ]);
+    
+                        NotificationsController::send(41, $crm_request->id);
+    
+                        CrmRequestStatusHistory::create([
+                            'crm_request_id' => $crm_request->id,
+                            'status_id' => 2,
+                            'agent_id' => Auth::id()
+                        ]);
+    
+                        if ($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null) {
+                            self::delay_in_delivery_shipment_add($crm_request->id, $crm_request->shipment_id);
+                        }
+    
+                        if ($prev_status == 1) {
+                            if ($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null) {
+                                self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
+                            }
+                        }
+    
+                        if ($crm_request->case_nature_id == 4) {
+                            NotificationsController::send(117, $crm_request->id, 6);
+                        }
+    
+                        $this->handleSalesTierTag($crm_request);
+                        $this->handleAutoTagging($crm_request);
+    
+                        // Request marked as In-Process
+                    } else {
+                        $errors[] = 'Request is already marked as In-Process for CRM request number ' . $crm_request->id;
+                    }
+                    break;
+    
+                case 2:
+                    if ($prev_status != 3) {
+                        CrmRequest::where('id', $crm_request->id)->update(['status_id' => 3]);
+                        CrmRequestStatusHistory::create([
+                            'crm_request_id' => $crm_request->id,
+                            'status_id' => 3,
+                            'agent_id' => Auth::id()
+                        ]);
+    
+                        $this->cleanupAfterResolution($crm_request);
+    
+                        if ($crm_request->case_nature_id == 4) {
+                            $this->addCustomerNotification($crm_request);
+                        }
+    
+                        // Request marked as Resolved
+                    } else {
+                        $errors[] = 'Request is already marked as Resolved for CRM request number ' . $crm_request->id;
+                    }
+                    break;
+    
+                case 3:
+                    if ($prev_status != 4) {
+                        CrmRequest::where('id', $crm_request->id)->update(['status_id' => 4]);
+                        CrmRequestStatusHistory::create([
+                            'crm_request_id' => $crm_request->id,
+                            'status_id' => 4,
+                            'agent_id' => Auth::id()
+                        ]);
+    
+                        if ($crm_request->case_nature_id == 4) {
+                            NotificationsController::send(117, $crm_request->id, 4);
+                        }
+    
+                        CrmRequestTagging::where('crm_request_id', $crm_request->id)->delete();
+    
+                        // Request marked as Closed
+                    } else {
+                        $errors[] = 'Request is already marked as Closed for CRM request number ' . $crm_request->id;
+                    }
+                    break;
+    
+                case 4:
+                    if ($prev_status != 5) {
+                        CrmRequest::where('id', $crm_request->id)->update(['status_id' => 5]);
+                        CrmRequestStatusHistory::create([
+                            'crm_request_id' => $crm_request->id,
+                            'status_id' => 5,
+                            'agent_id' => Auth::id()
+                        ]);
+    
+                        // Request marked as Re-Open
+                    } else {
+                        $errors[] = 'Request is already marked as Re-Open for CRM request number ' . $crm_request->id;
+                    }
+                    break;
+    
+                default:
+                    $errors[] = 'Unhandled status for CRM request number ' . $crm_request->id;
+                    break;
+            }
+        }
+    
+        if (empty($errors)) {
+            return redirect()->back()->with(['success' => 'All requests processed successfully.']);
+        } else {
+            return redirect()->back()->with(['errors' => $errors]);
+        }
+    }
+    
+    private function handleSalesTierTag($crm_request)
+    {
+        if ($crm_request->shipper_id) {
+            $sales_tier_tag = SaleTierTag::where('user_id', $crm_request->shipper_id);
+            if ($sales_tier_tag->exists()) {
+                $tagged_id = $sales_tier_tag->first()->kam;
+                $kam_admin = Admin::find($tagged_id);
+                if ($kam_admin && $kam_admin->status && $tagged_id) {
+                    $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)
+                        ->where('crm_request_tagging_type_id', 4)->first();
+    
+                    if ($tagged_crm_request && $tagged_crm_request['tagged_id'] != $tagged_id) {
+                        $tagged_crm_request->update(['tagged_id' => $tagged_id]);
+                        CrmRequestTaggingHistory::create([
+                            'crm_request_id' => $crm_request->id,
+                            'crm_request_tagging_type_id' => 4,
+                            'tagged_id' => $tagged_id,
+                            'agent_id' => 306
+                        ]);
+                        NotificationsController::send(31, $crm_request->id);
+                    }
+                }
+            }
+        }
+    }
+    
+    private function handleAutoTagging($crm_request)
+    {
+        if ($crm_request->case_nature_type_id != 1) {
+            $crm_city_id = $crm_request->shipment->pickup_address->city->id ?? $crm_request->shipment->consignee_city_id;
+            $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id ?? ConsigneeAddressArea::where('shipment_id', $crm_request->shipment->id)->pluck('city_area_id')->first();
+    
+            $crm_auto_tag_user = CrmAutoTagUser::where('city_id', $crm_city_id)->where('status', 1)->first();
+    
+            if ($crm_auto_tag_user) {
+                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)
+                    ->where('crm_request_tagging_type_id', 5)->first();
+    
+                if ($tagged_crm_request && $tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
+                    $tagged_crm_request->update(['tagged_id' => $crm_auto_tag_user->admin_id]);
+                    CrmRequestTaggingHistory::create([
+                        'crm_request_id' => $crm_request->id,
+                        'crm_request_tagging_type_id' => 5,
+                        'tagged_id' => $crm_auto_tag_user->admin_id,
+                        'agent_id' => 306
+                    ]);
+                    NotificationsController::send(31, $crm_request->id);
+                }
+            }
+        }
+    }
+    
+    private function cleanupAfterResolution($crm_request)
+    {
+        DelayInDeliveryShipment::where('crm_request_id', $crm_request->id)->delete();
+        CrmPaymentShipment::where('crm_request_id', $crm_request->id)->delete();
+    }
+    
+    private function addCustomerNotification($crm_request)
+    {
+        $comment = 'Dear Customer, your claim has been considered and forwarded for further adjustments.';
+        CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
+    }
+    
 }
