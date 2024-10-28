@@ -1,8 +1,8 @@
 @extends('admin.layout.master')
-@section('title','Ordinary Disorder Report')
+@section('title','Operation Disorder Report')
 @section('content')
     <h1 class="mb-1">
-        Ordinary Disorder Report
+        Operation Disorder Report
     </h1> 
 
     <div class="card">
@@ -282,7 +282,7 @@
                     };
                     // AJAX request to fetch data of tracking and display values in modal 
                     $.ajax({
-                        url: "{{ route('admin.reports.ordinary_discrepancy_report.tracking_data') }}",
+                        url: "{{ route('admin.reports.operation_disorder_report.tracking_data') }}",
                         type: 'POST',
                         data: data,
                         success: function(response) {
@@ -351,7 +351,7 @@
                     formData.append('_token', '{{ csrf_token() }}');
                     // AJAX request
                     $.ajax({
-                        url: "{{ route('admin.reports.ordinary_discrepancy_report.submit_tracking') }}",
+                        url: "{{ route('admin.reports.operation_disorder_report.submit_tracking') }}",
                         type: 'POST',
                         data: formData,
                         contentType: false, 
@@ -419,7 +419,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.ordinary_discrepancy_report.list') }}',
+                        url: '{{ route('admin.reports.operation_disorder_report.list') }}',
                         data: params,
                         method: 'POST',
                         headers: {
@@ -481,7 +481,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     extend: 'excel',
-                    title: 'Ordinary Discrepancy Report',
+                    title: 'Operation Disorder Report',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -496,7 +496,7 @@
                 serverSide: true,
                 deferLoading: 0,
                 ajax: {
-                    url: '{{ route('admin.reports.ordinary_discrepancy_report.list') }}',
+                    url: '{{ route('admin.reports.operation_disorder_report.list') }}',
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
