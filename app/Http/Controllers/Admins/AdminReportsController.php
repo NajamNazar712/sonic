@@ -6866,7 +6866,7 @@ class AdminReportsController extends Controller
                     if ($days <= 0) {
                         return '-';
                     } else {
-                        return $days . 'days';
+                        return $days;
                     }
                 } else {
                     return '-';
@@ -7145,7 +7145,7 @@ class AdminReportsController extends Controller
                 Carbon::setWeekendDays([Carbon::SUNDAY]);
                 $launched_date = Carbon::parse($rowArray['launched_date']);
                 $days = $launched_date->diffInDays($current_date);
-                $rowArray['launched_to_today'] = $days <= 0 ? '-' : $days . ' days';
+                $rowArray['launched_to_today'] = $days <= 0 ? '-' : $days;
             } else {
                 $rowArray['launched_to_today'] = '-';
             }
