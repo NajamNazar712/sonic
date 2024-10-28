@@ -45,6 +45,7 @@ use App\RvShipmentTicket;
 use App\RvShipmentTicketDeleteTable;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\ProcessRvShipmentTicket;
+use GuzzleHttp\Client;
 
 trait RvTrait
 {
@@ -2043,33 +2044,53 @@ trait RvTrait
             }
         }
     }
-    static function phoneNumberValidate($phone_number){
-        $cleaned_phone = preg_replace("/[^a-zA-Z0-9]+/", "", $phone_number);
-        if (substr($cleaned_phone, 0, 2) === "00") {
-            // Remove one "0" by replacing "00" at the start with "0"
-            $phone_number = preg_replace("/^00/", "0", $cleaned_phone);
-        }
-        elseif (substr($cleaned_phone, 0, 3) === "000") {
-            // Remove one "0" by replacing "00" at the start with "0"
-            $phone_number = preg_replace("/^00/", "0", $cleaned_phone);
-        }
-        elseif (substr($phone_number, 0, 3) == '+92') {
-            $phone_number = '0' . substr($phone_number, 3);
+    static function phoneNo($phoneNumber)
+    {
+        // Clean the phone number by removing non-alphanumeric characters    
+        $cleaned_phone = preg_replace("/[^a-zA-Z0-9]+/", "", $phoneNumber);
+        if (substr($cleaned_phone, 0, 2) == "00" && substr($cleaned_phone, 0, 4) != '0092') {
+            if (substr($cleaned_phone, 0, 3) === "000") {
+                // Remove one "0" by replacing "00" at the start with "0"
+                $final_phone = '0' . substr($cleaned_phone, 3);
+            } else {
+                $final_phone = '0' . substr($cleaned_phone, 2);
+            }
+        }   // Remove one "0" by replacing "00" at the start with "0"
+        elseif (substr($cleaned_phone, 0, 3) == '+92') {
+            $final_phone = '0' . substr($cleaned_phone, 3);
         }
         //Replace 92 with 0
-        else if (substr($phone_number, 0, 2) == '92') {
-            $phone_number = '0' . substr($phone_number, 2);
+        else if (substr($cleaned_phone, 0, 2) == '92') {
+            $final_phone = '0' . substr($cleaned_phone, 2);
         }
         //Replace 0092 with 0
-        else if (substr($phone_number, 0, 4) == '0092') {
-            $phone_number = '0' . substr($phone_number, 4);
+        else if (substr($cleaned_phone, 0, 4) == '0092') {
+            $final_phone = '0' . substr($cleaned_phone, 4);
         }
         //Addition of 0
-        else if (substr($phone_number, 0, 1) != '0') {
-            $phone_number = '0' . $phone_number;
+        else if (substr($cleaned_phone, 0, 1) != '0') {
+            $final_phone = '0' . $cleaned_phone;
+        } else {
+            // No leading "00", so leave the cleaned phone number as is
+            $final_phone = $cleaned_phone;
         }
-
-        return $phone_number;
-        
+        return $final_phone;
+    }
+    static function inValidEntityEntertain($tracking_number){
+        $client = new Client(['base_uri' =>  config('app.url') . '/api/admin/bot_submit_ticket', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
+        $response = $client->post('', [
+            'headers' => [
+                'Authorization' => 'dXhTblBlMFZDYTJGbkR4MENTaWg5dWZFV250Z29leDZoaEU4MDJkT0xGZEx6d3IydGgwWHdRVjBIWDB666bb6c93c2dfe'
+            ],
+            'json' => [
+                'tracking_number' => $tracking_number,
+                'call_status' => 'NO ANSWER',
+                'input' => 0,
+                'call_finding' => 28, //invalid numbers
+                'sender_name' => 'sonic'
+            ]
+        ]);
+        $response = $response->getBody()->getContents();
+        $response = json_decode($response);
     }
 }
