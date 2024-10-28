@@ -87,6 +87,7 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\CRM\CrmClosedReason;
 use App\Http\Models\CRM\CrmClosedReasonStatus;
 use App\Http\Models\ShipmentDetail;
+use Illuminate\Support\MessageBag;
 
 class AdminCRMController extends Controller
 {
@@ -7133,9 +7134,9 @@ class AdminCRMController extends Controller
         }
     
         if (empty($errors)) {
-            return redirect()->back()->with(['success' => 'All requests processed successfully.']);
+            return redirect()->route('admin.crm.resolved.index')->with(['success' => 'All requests processed successfully.']);
         } else {
-            return redirect()->back()->with(['errors' => $errors]);
+            return redirect()->back()->with(['errors' => new MessageBag($errors)]);
         }
     }
     
@@ -7199,7 +7200,16 @@ class AdminCRMController extends Controller
     
     private function addCustomerNotification($crm_request)
     {
-        $comment = 'Dear Customer, your claim has been considered and forwarded for further adjustments.';
+        $comment = 'Dear Customer,
+                        Please be noted that your claim has been considered and after due investigation it has been forwarded to concerned department for further adjustments. For any further clarification please approach us.
+                                                            
+                        UAN# 021-111-11-8729
+                        WhatsApp # 0348-111-8729
+                        info@trax.pk
+                        Live Chat Messenger
+                                                            
+                        Regards,
+                        TRAX-Customer Experience';
         CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
     }
     
