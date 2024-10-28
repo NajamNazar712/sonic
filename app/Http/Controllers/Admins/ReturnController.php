@@ -3321,7 +3321,7 @@ class ReturnController extends Controller
             })
             ->addColumn('excel_others', function($result){
                 $count = 0;
-                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], [1,2], [6,8,9,10,11], null,'return_note_id');
+                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], [1,2], [1,3,4,6,8,9,10,11], null,'return_note_id');
                 return $count > 0 ? $count : '-';
             })
             ->addColumn("action", function ($result) {
@@ -5168,7 +5168,7 @@ class ReturnController extends Controller
             })
             ->addColumn('excel_others', function($result){
                 $count = 0;
-                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], [1,2], [6,8,9,10,11], null, 'return_note_id');
+                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], [1,2], [1,3,4,6,8,9,10,11], null, 'return_note_id');
                 return $count > 0 ? $count : '-';
             })
             ->addColumn('delivered_excel_ecom_cod', function($result){
