@@ -7136,7 +7136,7 @@ class AdminCRMController extends Controller
         if (empty($errors)) {
             return redirect()->route('admin.crm.resolved.index')->with(['success' => 'All requests processed successfully.']);
         } else {
-            return redirect()->back()->with(['errors' => new MessageBag($errors)]);
+            return ['status' => 1, 'errors' => new MessageBag($errors)];
         }
     }
     
