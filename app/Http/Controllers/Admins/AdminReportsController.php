@@ -6867,7 +6867,7 @@ class AdminReportsController extends Controller
                     if ($days <= 0) {
                         return '-';
                     } else {
-                        return $days . 'days';
+                        return $days;
                     }
                 } else {
                     return '-';
@@ -7146,7 +7146,7 @@ class AdminReportsController extends Controller
                 Carbon::setWeekendDays([Carbon::SUNDAY]);
                 $launched_date = Carbon::parse($rowArray['launched_date']);
                 $days = $launched_date->diffInDays($current_date);
-                $rowArray['launched_to_today'] = $days <= 0 ? '-' : $days . ' days';
+                $rowArray['launched_to_today'] = $days <= 0 ? '-' : $days;
             } else {
                 $rowArray['launched_to_today'] = '-';
             }
@@ -15064,6 +15064,7 @@ class AdminReportsController extends Controller
             'crcn.name as crm_request_case_nature',
             'crcnt.type as crm_request_case_nature_type',
             'adjustment.adjustment_amount as adjusted_amount',
+            'change_shipment_weight_logs.new_charges as weight_charges',
             'scs.name as sub_segment',
             'cargo_status.name as cargo_status',
             'cmb.seal_number as seal_number',
