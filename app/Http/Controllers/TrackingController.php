@@ -88,6 +88,7 @@ class TrackingController extends Controller
         $launched_by = 4;
         $name = $request->complaint_name;
         $phoneno = $request->complaint_phone;
+        $shipment = Shipment::where('id', $request->shipment_id)->first();
         if(!CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $case_nature)->exists()){
             $data = new CrmRequest();
             $data->case_nature_id = $case_nature;
@@ -95,6 +96,7 @@ class TrackingController extends Controller
             $data->description = 'Consignee :('.$name.') | Phone Number : ('.$phoneno.') | Complain : '. $discription;
             $data->channel_id =$request_channel;
             $data->status_id = 1;
+            $data->shipper_id = $shpiment->user_id;
             $data->launched_by = $launched_by;
             $data->shipment_id = $shipment_id;
 
