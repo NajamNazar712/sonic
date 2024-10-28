@@ -8452,7 +8452,7 @@ class AdminReportsController extends Controller
             ->addColumn('excel_others', function($result){
                 $count = 0;
                 $dn_ids = explode(',' , $result->dn_ids);
-                $count = DeliveryController::get_segment_type('delivery_note_shipments', $dn_ids, [1,2], [6,8,9,10,11], null, 'delivery_note_id');
+                $count = DeliveryController::get_segment_type('delivery_note_shipments', $dn_ids, [1,2], [1,3,4,6,8,9,10,11], null, 'delivery_note_id');
                 return $count > 0 ? $count : '-';
             })
             ->addColumn('delivered_excel_ecom_cod', function($result){
@@ -8492,7 +8492,7 @@ class AdminReportsController extends Controller
                 $dn_ids = explode(',' , $result->dn_ids);
                 $delivered_shipments = DeliveryController::get_delivered_shipments($dn_ids);
                 if (!empty($delivered_shipments)) {
-                    $count = DeliveryController::get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [6,8,9,10,11], 'delivered', 'delivery_note_id');
+                    $count = DeliveryController::get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
                 }
 
                 return $count > 0 ? $count : '-';
