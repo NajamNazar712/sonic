@@ -301,6 +301,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
         Route::get('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditInternationalCityForm')->name('international.city.edit');
         Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
+
+        Route::post('/bulkCity', 'Admins\AdminDashboardController@addExcelCityHub')->name('addExcelCityHub');
+
         Route::put('/city/{id}/edit/form', 'Admins\AdminDashboardController@updateCity')->name('city.edit');
         Route::put('/international/city/{id}/edit/form', 'Admins\AdminDashboardController@updateInternationalCity')->name('international.city.edit');
         Route::post('/international/city', 'Admins\AdminDashboardController@addInternationalCityHub')->name('international.city');
@@ -3668,6 +3671,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('card_data', 'Admins\CRMDashboardController@card_data')->name('card_data');
         });
 
+        // bulk resolve
+        Route::post('bulk_resolve', 'Admins\AdminCRMController@bulk_resolve')->name('bulk_resolve');
     });
 
     Route::prefix('intercept')->name('intercept.')->group(function () {
