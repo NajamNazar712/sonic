@@ -556,7 +556,7 @@ trait RvTrait
         }
 
         if (!$request->rv_assign_agent_sub_status_id || !$shipment_status_reason) { // Return confirm RVR reason_id bind in journey inserted
-            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest()->select('status_reason_id', 'remarks')->first();
+            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('verification',0)->latest()->select('status_reason_id', 'remarks')->first();
             $shipment_status_reason = $journey->status_reason_id;
             $remarks =  $journey->remarks;
         }

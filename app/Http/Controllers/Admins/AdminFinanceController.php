@@ -14424,13 +14424,13 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
                 $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
                 $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $faf_charges : 0);
-                $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
+                $row[] = (($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->nsa_osa_charges : 0) : 0);
                 $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
                 $row[] = $invoice_shipment->charges;
                 $row[] = $invoice_shipment->gst;
                 $row[] = $invoice_shipment->sms_charges;
                 $row[] = $invoice_shipment->invoice_amount;
-                $row[] = $shipment->intercept_charges;
+                $row[] = ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0) : 0;
 
                 // Assign the row to the details array
                 $details[$shipment->id] = $row;
@@ -14454,7 +14454,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
                 // Check and update NSA/OSA charges if the current value is 0
                 if ($details[$shipment->id][9] == 0) {
-                    $details[$shipment->id][9] += (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
+                    $details[$shipment->id][9] += ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->nsa_osa_charges : 0) : 0;
                 }
 
                 // Check and update adjustment charges if the current value is 0
@@ -14467,7 +14467,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $details[$shipment->id][13] += $invoice_shipment->sms_charges;
                 $details[$shipment->id][14] += $invoice_shipment->invoice_amount;
                 if ($details[$shipment->id][15] == 0) {
-                    $details[$shipment->id][15] += $invoice_shipment->intercept_charges;
+                    $details[$shipment->id][15] += ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0) : 0;
                 }
             }
 
