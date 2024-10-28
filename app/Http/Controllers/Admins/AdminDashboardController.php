@@ -15536,10 +15536,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
             foreach ($forms as $item) {
 
-                if (isset($item['closest_hub']) && is_null($item['closest_hub'])) {
+                if (array_key_exists('closest_hub', $item) && is_null($item['closest_hub'])) {
                     unset($item['closest_hub']);
                 }
-                if (isset($item['vehicles_list']) && is_null($item['vehicles_list'])) {
+                if (array_key_exists('vehicles_list', $item) && is_null($item['vehicles_list'])) {
                     unset($item['vehicles_list']);
                 }
 
