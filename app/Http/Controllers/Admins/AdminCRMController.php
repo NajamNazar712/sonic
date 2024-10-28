@@ -87,6 +87,7 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\CRM\CrmClosedReason;
 use App\Http\Models\CRM\CrmClosedReasonStatus;
 use App\Http\Models\ShipmentDetail;
+use Illuminate\Support\MessageBag;
 
 class AdminCRMController extends Controller
 {
@@ -7133,9 +7134,9 @@ class AdminCRMController extends Controller
         }
     
         if (empty($errors)) {
-            return redirect()->back()->with(['success' => 'All requests processed successfully.']);
+            return redirect()->route('admin.crm.resolved.index')->with(['success' => 'All requests processed successfully.']);
         } else {
-            return redirect()->back()->with(['errors' => $errors]);
+            return redirect()->back()->with(['errors' => new MessageBag($errors)]);
         }
     }
     
