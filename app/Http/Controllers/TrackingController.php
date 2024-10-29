@@ -96,7 +96,7 @@ class TrackingController extends Controller
             $data->description = 'Consignee :('.$name.') | Phone Number : ('.$phoneno.') | Complain : '. $discription;
             $data->channel_id =$request_channel;
             $data->status_id = 1;
-            $data->shipper_id = $shpiment->user_id;
+            $data->shipper_id = $shipment->user_id;
             $data->launched_by = $launched_by;
             $data->shipment_id = $shipment_id;
 
