@@ -13,9 +13,9 @@ class BulkShipmentPermissionSeeder extends Seeder
     public function run()
     {
         // Update bulk shipments and individual shipment
-        DB::table('module_permissions')->insert(array(
-            array('id' => 1014, 'name' => 'Bulk Shipment Update and Individual Shipment Update', 'module_id' => 8)
-        ));
+        // DB::table('module_permissions')->insert(array(
+        //     array('id' => 1014, 'name' => 'Bulk Shipment Update and Individual Shipment Update', 'module_id' => 8)
+        // ));
 
         // View bulk shipments 
         DB::table('module_permissions')->insert(array(

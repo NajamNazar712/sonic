@@ -414,7 +414,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
-                            head.push('Others');
+                            head.push('Other Sub-Segments');
 
 
                             head.push('Total Weight');
@@ -422,7 +422,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
-                            head.push('Others');
+                            head.push('Other Sub-Segments');
 
                             head.push('Assigned By');
                             head.push('Assigned Date');

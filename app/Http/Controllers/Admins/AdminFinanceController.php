@@ -4970,15 +4970,15 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $shipment = $shipment->refresh();
                         $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
 
-                        $change_shipment_weight = new ChangeShipmentWeightLog();
-
-                        $change_shipment_weight->shipment_id = $shipment->id;
-                        $change_shipment_weight->old_weight = $old_shipment_weight;
-                        $change_shipment_weight->new_weight = $weight;
-                        $change_shipment_weight->admin_id = Auth::id();
-                        $change_shipment_weight->old_charges = $previous_weight_charges;
-                        $change_shipment_weight->new_charges = $new_weight_charges;
-                        $change_shipment_weight->save();
+                        // Disable the entry of logs on view
+                        // $change_shipment_weight = new ChangeShipmentWeightLog();
+                        // $change_shipment_weight->shipment_id = $shipment->id;
+                        // $change_shipment_weight->old_weight = $old_shipment_weight;
+                        // $change_shipment_weight->new_weight = $weight;
+                        // $change_shipment_weight->admin_id = Auth::id();
+                        // $change_shipment_weight->old_charges = $previous_weight_charges;
+                        // $change_shipment_weight->new_charges = $new_weight_charges;
+                        // $change_shipment_weight->save();
 
                         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
@@ -5081,6 +5081,15 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $sheet->getColumnDimension($column)->setWidth($width);
                     }
 
+                    // Prevent caching and viewing in an online viewer
+                    header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
+                    header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+                    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+                    header("Cache-Control: post-check=0, pre-check=0", false);
+                    header("Pragma: no-cache");
+                    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                    header('Content-Disposition: attachment; filename="Shipment Charges View.xlsx"');
+
                     // Save the Excel file
                     $fileName = 'Shipment Charges View.xlsx';
                     $directory = public_path('finance');
@@ -5092,7 +5101,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $writer->save($filePath);
 
                     // Generate the download URL for the modified file
-                    $downloadUrl = url('finance/' . $fileName);
+                    $downloadUrl = url('finance/' . $fileName).'?time='.time();
                     $message = 'Total ' . $trackingNumberCount . ' Shipment(s). <a href="' . $downloadUrl . '" download>Download Excel</a>';
                     return redirect()->back()->with('success', $message);
                 } else {
@@ -5390,6 +5399,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 ->where('shipment_id', $dncc->shId)
                 ->whereNotNull('reference_1_id')
                 ->where('reference_1_id', $dncc->dncc_no)
+                ->orderBy('id', 'desc')
                 ->first();
             return optional($shipmentsJourney->shipment_status_shipper)->name;
         });
