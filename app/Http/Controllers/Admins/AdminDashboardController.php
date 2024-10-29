@@ -15408,6 +15408,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'delivery_types.required_without_all' => 'At least one delivery type must be selected.',
             'is_city.required_without_all' => 'Either city or hub must be selected.',
             'is_hub.required_without_all'  => 'Either hub or city must be selected.',
+            'zone_id_check'  => 'Zone Not Exists Or Not Required When City Is Selected.',
+            'hub_id_check'  => 'Hub Not Exists Or Not Required When Hub Is Selected.',
         ];
 
         for ($i = 1; $i <= 4; $i++) {
