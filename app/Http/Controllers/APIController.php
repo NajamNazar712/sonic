@@ -1573,10 +1573,10 @@ class APIController extends Controller
         if(in_array(0, $amounts) && !PendingPayment::check_negative_payable($user_id,$user_type['account_type_id'])){
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
-
-        if(!in_array($user_id, $bulk_booking_shippers)){
-            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
-        }
+//
+//        if(!in_array($user_id, $bulk_booking_shippers)){
+//            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
+//        }
 
         if(count($request->data) > 150){
             return response()->json(['message' => 'Bulk Booking Limit Is Max 150']);
@@ -2245,14 +2245,93 @@ class APIController extends Controller
                 'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
                 'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
-                'try_and_buy_fees' => ['required_if:service_type_id,3', 'nullable', 'numeric', 'min:0'],
-                'items' => ['required_if:service_type_id,3', 'array', 'min:1', 'max:5'],
-                'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
-                'items.*.item_description' => ['required_if:service_type_id,3', 'between:0,1000'],
-                'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
-                'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
-                'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000'],
-
+                'try_and_buy_fees' => [
+                    'required_if:service_type_id,3',
+                    'numeric',
+                    'nullable',
+                    'min:0',
+                    function ($attribute, $value, $fail) use ($request) {
+                        foreach ($request->data as $row) {
+                            if (in_array($row['service_type_id'], [1, 2])) {
+                                $fail("The $attribute field is not required for the selected service type.");
+                            }
+                        }
+                    },
+                ],
+                'items' => [
+                    'required_if:service_type_id,3',
+                    'array',
+                    'min:1',
+                    'max:5',
+                    function ($attribute, $value, $fail) use ($request) {
+                        foreach ($request->data as $row) {
+                            if (in_array($row['service_type_id'], [1, 2])) {
+                                $fail("The $attribute field is not required for the selected service type.");
+                            }
+                        }
+                    },
+                ],
+                'items.*.item_product_type_id' => [
+                    'required_if:service_type_id,3',
+                    'integer',
+                    'digits_between:1,10',
+                    'exists:products,id',
+                    function ($attribute, $value, $fail) use ($request) {
+                        foreach ($request->data as $row) {
+                            if (in_array($row['service_type_id'], [1, 2])) {
+                                $fail("The $attribute field is not required for the selected service type.");
+                            }
+                        }
+                    },
+                ],
+                'items.*.item_description' => [
+                    'required_if:service_type_id,3',
+                    'between:0,1000',
+                    function ($attribute, $value, $fail) use ($request) {
+                        foreach ($request->data as $row) {
+                            if (in_array($row['service_type_id'], [1, 2])) {
+                                $fail("The $attribute field is not required for the selected service type.");
+                            }
+                        }
+                    },
+                ],
+                'items.*.item_quantity' => [
+                    'required_if:service_type_id,3',
+                    'integer',
+                    'digits_between:1,10',
+                    'between:1,10000',
+                    function ($attribute, $value, $fail) use ($request) {
+                        foreach ($request->data as $row) {
+                            if (in_array($row['service_type_id'], [1, 2])) {
+                                $fail("The $attribute field is not required for the selected service type.");
+                            }
+                        }
+                    },
+                ],
+                'items.*.item_insurance' => [
+                    'required_if:service_type_id,3',
+                    'boolean',
+                    function ($attribute, $value, $fail) use ($request) {
+                        foreach ($request->data as $row) {
+                            if (in_array($row['service_type_id'], [1, 2])) {
+                                $fail("The $attribute field is not required for the selected service type.");
+                            }
+                        }
+                    },
+                ],
+                'items.*.product_value' => [
+                    'required_if:service_type_id,3',
+                    'integer',
+                    'digits_between:1,20',
+                    'between:1,100000',
+                    function ($attribute, $value, $fail) use ($request) {
+                        foreach ($request->data as $row) {
+                            if (in_array($row['service_type_id'], [1, 2])) {
+                                $fail("The $attribute field is not required for the selected service type.");
+                            }
+                        }
+                    },
+                ],
                 'shipper_reference_number_1' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_2' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_3' => ['nullable', 'between:0,190'],
