@@ -1,8 +1,8 @@
 @extends('admin.layout.master')
-@section('title','Ordinary Disorder Report')
+@section('title','Operation Disorder Report')
 @section('content')
     <h1 class="mb-1">
-        Ordinary Disorder Report
+        Operation Disorder Report
     </h1> 
 
     <div class="card">
@@ -65,7 +65,6 @@
                             <th class="border-primary border-darken-1">Quantity - By Shipper</th>
                             <th class="border-primary border-darken-1">COD Value</th>
                             <th class="border-primary border-darken-1">Shipment Content - By Shipper</th>
-                            <th class="border-primary border-darken-1">Shipment Content - By Admin</th>
                             <th class="border-primary border-darken-1">Image</th>
                             <th class="border-primary border-darken-1">Quantity - By Admin</th>
                             <th class="border-primary border-darken-1">Comment or Remarks</th>
@@ -123,6 +122,7 @@
                                             </div>
                                         </div>
                                         <div class="row p-1">
+
                                             <div class="col">
                                                 <label>Product Content By Shipper</label>
                                                 <input class="form-control" id="shipment_content_shipper" name="shipment_content_shipper" type="text" value="shipment_content_shipper" readonly/>
@@ -135,24 +135,20 @@
                                                 <label>Remarks<span class="text-danger">*</span></label>
                                                 <input type="text" name="remarks" id="remarks" class="w-100 p-1 border-primary" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
                                             </div>
+
                                         </div>
 
                                         <div class="row p-1">
 
                                             <div class="col form-group">
+                                                <label>ODR Nature<span class="text-danger">*</span></label>
                                                 <select name="odr_nature" id="odr_nature" class="select2 form-control" data-rule-required="true" data-msg-required="ODR Nature is required">
                                                     @foreach($odr_natures as $odr)
                                                     <option value="{{$odr->id}}">{{ $odr->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
-                                        </div>
 
-                                        <div class="row p-1">
-                                            <div class="col">
-                                                <label>Product Content By Admin (Description)<span class="text-danger">*</span></label>
-                                                <input type="text" name="shipment_content_admin" id="shipment_content_admin" class="form-control shipment_content_admin" placeholder="Product Content" data-rule-required="true" data-msg-required="Product Content is required">
-                                            </div>
                                             <div class="col">
                                                 <label>Image<span class="text-danger">*</span></label>
                                                 <input type="file" name="picture_attached" id="picture_attached" class="form-control picture_attached" title="Select File" accept="image/*" data-rule-required="true" data-msg-required="Image is required">
@@ -282,7 +278,7 @@
                     };
                     // AJAX request to fetch data of tracking and display values in modal 
                     $.ajax({
-                        url: "{{ route('admin.reports.ordinary_discrepancy_report.tracking_data') }}",
+                        url: "{{ route('admin.reports.operation_disorder_report.tracking_data') }}",
                         type: 'POST',
                         data: data,
                         success: function(response) {
@@ -346,12 +342,11 @@
                     formData.append('quantity', $('#quantity').val());
                     formData.append('remarks', $('#remarks').val());
                     formData.append('odr_nature', $('#odr_nature').val());
-                    formData.append('shipment_content_admin', $('#shipment_content_admin').val());
                     formData.append('picture_attached', $('#picture_attached')[0].files[0]);
                     formData.append('_token', '{{ csrf_token() }}');
                     // AJAX request
                     $.ajax({
-                        url: "{{ route('admin.reports.ordinary_discrepancy_report.submit_tracking') }}",
+                        url: "{{ route('admin.reports.operation_disorder_report.submit_tracking') }}",
                         type: 'POST',
                         data: formData,
                         contentType: false, 
@@ -419,7 +414,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.ordinary_discrepancy_report.list') }}',
+                        url: '{{ route('admin.reports.operation_disorder_report.list') }}',
                         data: params,
                         method: 'POST',
                         headers: {
@@ -438,7 +433,6 @@
                             head.push('Quantity by Shipper');
                             head.push('Cod Value');
                             head.push('Shipment content by Shipper');
-                            head.push('Shipment content by Admin');
                             head.push('Quantity by Admin');
                             head.push('Remarks by Admin');
                             head.push('ODR Nature');
@@ -458,7 +452,6 @@
                                 row.push(values.quantity_by_shipper);
                                 row.push(values.cod_value);
                                 row.push(values.shipment_content_by_shipper);
-                                row.push(values.shipment_content_by_admin);
                                 row.push(values.quantity_by_admin);
                                 row.push(values.remarks_by_admin);
                                 row.push(values.odr_nature)
@@ -481,7 +474,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     extend: 'excel',
-                    title: 'Ordinary Discrepancy Report',
+                    title: 'Operation Disorder Report',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -496,7 +489,7 @@
                 serverSide: true,
                 deferLoading: 0,
                 ajax: {
-                    url: '{{ route('admin.reports.ordinary_discrepancy_report.list') }}',
+                    url: '{{ route('admin.reports.operation_disorder_report.list') }}',
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -523,7 +516,6 @@
                     { data:'quantity_by_shipper' ,name: 'shipment.pieces', class: 'align-middle quantity_by_shipper'},
                     { data:'cod_value' ,name: 'shipments.amount', class: 'align-middle cod_value'},
                     { data:'shipment_content_by_shipper', name: 'si.description', class: 'align-middle shipment_content_by_shipper'},
-                    { data:'shipment_content_by_admin' ,name: 'ordinary_discrepancy_reports.product_content', class: 'align-middle shipment_content_by_admin'},
                     { data:'images' ,name: 'rdinary_discrepancy_reports.picture_path', class: 'align-middle images'},
                     { data:'quantity_by_admin' ,name: 'ordinary_discrepancy_reports.quantity', class: 'align-middle quantity_by_admin text-center'},
                     { data:'remarks_by_admin' ,name: 'ordinary_discrepancy_reports.remarks', class: 'align-middle remarks_by_admin'},

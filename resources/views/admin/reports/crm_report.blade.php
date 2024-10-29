@@ -331,7 +331,7 @@
             // });
 
             var select = $('#search_request_number').selectize({
-                placeholder: 'Search Ticket Number(s)*',
+                placeholder: 'Search Ticket Number(s)',
                 delimiter: ',',
                 createOnBlur: true,
                 persist: false,
@@ -503,7 +503,7 @@
                                 success: function(response, status, xhr) {
                                     var disposition = xhr.getResponseHeader('Content-Disposition');
                                     if (disposition && disposition.indexOf('attachment') !== -1) {
-                                        var filename = 'QSR_Report.csv';
+                                        var filename = 'CRM_Report.csv';
                                         var blob = new Blob([response], { type: 'text/csv' });
                                         var link = document.createElement('a');
                                         var url = window.URL.createObjectURL(blob);
@@ -583,7 +583,7 @@
                     {data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date', text: 'Arrival Date', value: 'arrival_date', download: true},
 
                     // Placeholder for Arrival to Today (TAT)
-                    {data: 'arrival_today', name: 'arrival_today', class: 'align-middle arrival_today', text: 'Arrival to Today (TAT)', value: 'arrival_today', download: true},
+                    {data: 'arrival_today', name: 'sj.updated_at', class: 'align-middle arrival_today', text: 'Arrival to Today (TAT)', value: 'arrival_today', download: true},
 
                     {data: 'status', name: 'ss.name', class: 'align-middle status', text: 'Status', value: 'status', download: true},
                     {data: 'last_status_date', name: 'ss.created_at', class: 'align-middle last_status_date', text: 'Last Status Date', value: 'last_status_date', download: true},
@@ -591,7 +591,7 @@
                     {data: 'case_nature_type', name: 'crcnt.type', class: 'align-middle case_nature_type', text: 'Case Nature Type', value: 'case_nature_type', download: true},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description', text: 'Description', value: 'description', download: true},
                     {data: 'launched_date', name: 'crm_requests.created_at', class: 'align-middle launched_date', text: 'Launched Date', value: 'launched_date', download: true},
-                    {data: 'launched_to_today', name: 'launched_to_today', class: 'align-middle launched_date', text: 'Aging (From Launch Date To Today) ', value: 'launched_to_today', download: true},
+                    {data: 'launched_to_today', name: 'launched_to_today', class: 'align-middle launched_date', text: 'Aging (From Launch Date To Today) ', value: 'launched_to_today', download: true , orderable: false},
 
                     {data: 'responsible_hub', name: 'h.name', class: 'align-middle responsible_hub', text: 'Responsible Hub', value: 'responsible_hub', download: true},
 
@@ -605,7 +605,7 @@
                     {data: 'parcel_value', name: 's.parcel_value', class: 'align-middle parcel_value', text: 'Parcel Value', value: 'parcel_value', download: true},
 
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount', text: 'COD Amount', value: 'cod_amount', download: true},
-                    {data: 'adjusted_amount', name: 'sj.adjusted_amount', class: 'align-middle adjusted_amount', text: 'Adjusted Amount', value: 'adjusted_amount', download: true},
+                    {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount', text: 'Adjusted Amount', value: 'adjusted_amount', download: true},
                     {data: 'weight_charges', name: 'change_shipment_weight_logs.new_charges', class: 'align-middle weight_charges', text: 'Weight Charges', value: 'weight_charges', download: true},
 
                     // Segment column added here
@@ -627,18 +627,18 @@
                     {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight', text: 'Weight', value: 'actual_weight', download: true},
 
                     // Placeholder for Key Account Category
-                    {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category', text: 'Shipper Category', value: 'shipper_category', download: true},
+                    {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category', text: 'Shipper Category', value: 'shipper_category', download: true, orderable: false},
 
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle launched_by_name', text: 'Launched By', value: 'launched_by_name', download: true},
-                    {data: 'channel', name: 'crm_requests.channel', class: 'align-middle channel', text: 'Channel', value: 'channel', download: true},
-                    {data: 'launched_by_type', name: 'crm_requests.launched_by_type', class: 'align-middle launched_by_type', text: 'Launched By Type', value: 'launched_by_type', download: true},
-                    {data: 'tagged_to', name: 'crm_requests.tagged_to', class: 'align-middle tagged_to', text: 'Tagged To', value: 'tagged_to', download: true},
+                    {data: 'channel', name: 'crc.channel', class: 'align-middle channel', text: 'Channel', value: 'channel', download: true},
+                    {data: 'launched_by_type', name: 'launched_by_type', class: 'align-middle launched_by_type', text: 'Launched By Type', value: 'launched_by_type', download: true},
+                    {data: 'tagged_to', name: 'crm_requests.tagged_to', class: 'align-middle tagged_to', text: 'Tagged To', value: 'tagged_to', download: true, orderable: false},
 
                     // Placeholder for Tagging (Manual or Auto)
-                    {data: 'tagged_manual_auto', name: 'tagged_manual_auto', class: 'align-middle tagged_manual_auto', text: 'Tagging (Manual/Auto)', value: 'tagged_manual_auto', download: true},
+                    {data: 'tagged_manual_auto', name: 'tagged_manual_auto', class: 'align-middle tagged_manual_auto', text: 'Tagging (Manual/Auto)', value: 'tagged_manual_auto', download: true, orderable: false},
 
-                    {data: 'closed_date', name: 'crm_requests.closed_date', class: 'align-middle closed_date', text: 'Closed Date', value: 'closed_date', download: true},
-                    {data: 'resolved_date', name: 'crm_requests.resolved_date', class: 'align-middle resolved_date', text: 'Resolved Date', value: 'resolved_date', download: true},
+                    {data: 'closed_date', name: 'crshc.created_at', class: 'align-middle closed_date', text: 'Closed Date', value: 'closed_date', download: true},
+                    {data: 'resolved_date', name: 'crshr.created_at', class: 'align-middle resolved_date', text: 'Resolved Date', value: 'resolved_date', download: true},
                     {data: 'case_closed_remark', name: 'sjcc.remarks', class: 'align-middle case_closed_remark', text: 'Case Closed Remark', value: 'case_closed_remark', download: true}
 
                 ],

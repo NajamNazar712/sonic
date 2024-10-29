@@ -6867,7 +6867,7 @@ class AdminReportsController extends Controller
                     if ($days <= 0) {
                         return '-';
                     } else {
-                        return $days . 'days';
+                        return $days;
                     }
                 } else {
                     return '-';
@@ -7146,7 +7146,7 @@ class AdminReportsController extends Controller
                 Carbon::setWeekendDays([Carbon::SUNDAY]);
                 $launched_date = Carbon::parse($rowArray['launched_date']);
                 $days = $launched_date->diffInDays($current_date);
-                $rowArray['launched_to_today'] = $days <= 0 ? '-' : $days . ' days';
+                $rowArray['launched_to_today'] = $days <= 0 ? '-' : $days;
             } else {
                 $rowArray['launched_to_today'] = '-';
             }
@@ -8608,7 +8608,7 @@ class AdminReportsController extends Controller
             ->addColumn('excel_others', function($result){
                 $count = 0;
                 $dn_ids = explode(',' , $result->dn_ids);
-                $count = DeliveryController::get_segment_type('delivery_note_shipments', $dn_ids, [1,2], [6,8,9,10,11], null, 'delivery_note_id');
+                $count = DeliveryController::get_segment_type('delivery_note_shipments', $dn_ids, [1,2], [1,3,4,6,8,9,10,11], null, 'delivery_note_id');
                 return $count > 0 ? $count : '-';
             })
             ->addColumn('delivered_excel_ecom_cod', function($result){
@@ -8648,7 +8648,7 @@ class AdminReportsController extends Controller
                 $dn_ids = explode(',' , $result->dn_ids);
                 $delivered_shipments = DeliveryController::get_delivered_shipments($dn_ids);
                 if (!empty($delivered_shipments)) {
-                    $count = DeliveryController::get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [6,8,9,10,11], 'delivered', 'delivery_note_id');
+                    $count = DeliveryController::get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
                 }
 
                 return $count > 0 ? $count : '-';
@@ -15064,6 +15064,7 @@ class AdminReportsController extends Controller
             'crcn.name as crm_request_case_nature',
             'crcnt.type as crm_request_case_nature_type',
             'adjustment.adjustment_amount as adjusted_amount',
+            'change_shipment_weight_logs.new_charges as weight_charges',
             'scs.name as sub_segment',
             'cargo_status.name as cargo_status',
             'cmb.seal_number as seal_number',

@@ -5399,6 +5399,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 ->where('shipment_id', $dncc->shId)
                 ->whereNotNull('reference_1_id')
                 ->where('reference_1_id', $dncc->dncc_no)
+                ->orderBy('id', 'desc')
                 ->first();
             return optional($shipmentsJourney->shipment_status_shipper)->name;
         });

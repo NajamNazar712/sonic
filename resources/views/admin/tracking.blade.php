@@ -2678,7 +2678,7 @@
                 shipment_id = $(this).attr('id');
 
                 $.ajax({
-                url:  '{{ route('admin.reports.ordinary_discrepancy_report.list_for_tracking_screen') }}',
+                url:  '{{ route('admin.reports.operation_disorder_report.list_for_tracking_screen') }}',
                 type: 'GET', 
                 data: { shipment_id: shipment_id }, 
                 success: function(response) {
@@ -2686,7 +2686,7 @@
                         '<div class="modal-dialog modal-xl" role="document">' +
                         '<div class="modal-content">' +
                         '<div class="modal-header bg-primary white">' +
-                        '<h4 class="modal-title white">Operation Discrepancy Report</h4>' +
+                        '<h4 class="modal-title white">Operation Disorder Report</h4>' +
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
                         '<span aria-hidden="true">&times;</span>' +
                         '</button>' +
