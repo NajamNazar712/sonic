@@ -559,9 +559,7 @@
                                                     'disabled' => $ro['is_city'] == 1 ? 'disabled' : null
                                                 ]) !!}
 
-                                                @if ($ro['is_city'] == 1 && isset($errors[$index]["closest_hub"]))
-                                                    {{-- No error message shown if is_city is 1 since select is disabled --}}
-                                                @elseif (isset($errors[$index]["closest_hub"]))
+                                                @if (isset($errors[$index]["closest_hub"]))
                                                     <span class="text-danger">{{ $errors[$index]["closest_hub"] }}</span>
                                                 @endif
                                             </td>
@@ -573,9 +571,7 @@
                                                     'disabled' => $ro['is_city'] == 1 ? 'disabled' : null
                                                 ]) !!}
 
-                                                @if ($ro['is_city'] == 1 && isset($errors[$index]["vehicles_list"]))
-                                                    {{-- No error message shown if is_city is 1 since select is disabled --}}
-                                                @elseif (isset($errors[$index]["vehicles_list"]))
+                                                @if (isset($errors[$index]["vehicles_list"]))
                                                     <span class="text-danger">{{ $errors[$index]["vehicles_list"] }}</span>
                                                 @endif
                                             </td>
