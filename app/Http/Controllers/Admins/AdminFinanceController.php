@@ -5101,7 +5101,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $writer->save($filePath);
 
                     // Generate the download URL for the modified file
-                    $downloadUrl = url('finance/' . $fileName);
+                    $downloadUrl = url('finance/' . $fileName).'?time='.time();
                     $message = 'Total ' . $trackingNumberCount . ' Shipment(s). <a href="' . $downloadUrl . '" download>Download Excel</a>';
                     return redirect()->back()->with('success', $message);
                 } else {
