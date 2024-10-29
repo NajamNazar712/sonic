@@ -157,8 +157,7 @@
                                                     'disabled' => ($ro['is_hub'] == 1 || isset($errors[$index]["is_hub"]) && isset($errors[$index]["is_city"])) ? 'disabled' : null // Disable if is_hub is 1
                                                 ]) !!}
 
-                                                @if ($ro['is_hub'] == 1 && isset($errors[$index]["hub_id"]))
-                                                @elseif (isset($errors[$index]["hub_id"]))
+                                                @if (isset($errors[$index]["hub_id"]))
                                                     <span class="text-danger">{{ $errors[$index]["hub_id"] }}</span>
                                                 @endif
                                             </td>
@@ -170,9 +169,7 @@
                                                     'disabled' => ($ro['is_city'] == 1 || isset($errors[$index]["is_hub"]) && isset($errors[$index]["is_city"]))    ? 'disabled' : null
                                                 ]) !!}
 
-                                                @if ($ro['is_city'] == 1 && isset($errors[$index]["zone_id"]))
-                                                    {{-- No error message shown if is_city is 1 since select is disabled --}}
-                                                @elseif (isset($errors[$index]["zone_id"]))
+                                                @if (isset($errors[$index]["zone_id"]))
                                                     <span class="text-danger">{{ $errors[$index]["zone_id"] }}</span>
                                                 @endif
                                             </td>
