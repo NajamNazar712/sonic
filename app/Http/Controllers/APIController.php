@@ -1567,10 +1567,10 @@ class APIController extends Controller
         if(in_array(0, $amounts) && !PendingPayment::check_negative_payable($user_id,$user_type['account_type_id'])){
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
-//
-//        if(!in_array($user_id, $bulk_booking_shippers)){
-//            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
-//        }
+
+        if(!in_array($user_id, $bulk_booking_shippers)){
+            return response()->json(['status' => 1, 'message' => 'You Are Not Allowed For Bulk Booking']);
+        }
 
         if(count($request->data) > 150){
             return response()->json(['message' => 'Bulk Booking Limit Is Max 150']);
@@ -2185,6 +2185,74 @@ class APIController extends Controller
             return false;
         });
 
+        Validator::extend('reg_rep_rev_service_type_id_check', function ($attribute, $value, $parameters, $validator) {
+            $data = $validator->getData();
+
+            $allowedServiceTypes = [1, 2, 5];
+
+            if (isset($data['service_type_id']) && in_array($data['service_type_id'], $allowedServiceTypes)) {
+                return true;
+            }
+
+            $validator->errors()->add($attribute, "$attribute is not allowed for service type {$data['service_type_id']}.");
+
+            return false;
+        });
+
+
+        Validator::extend('reg_rep_service_type_id_check', function ($attribute, $value, $parameters, $validator) {
+            $data = $validator->getData();
+
+            $allowedServiceTypes = [1, 2];
+
+            if (isset($data['service_type_id']) && in_array($data['service_type_id'], $allowedServiceTypes)) {
+                return true;
+            }
+
+            $validator->errors()->add($attribute, "$attribute is not allowed for service type {$data['service_type_id']}.");
+
+            return false;
+        });
+
+        Validator::extend('same_day_shipping_mode_check', function ($attribute, $value, $parameters, $validator) {
+            $data = $validator->getData();
+
+            if (isset($data['shipping_mode']) && $data['shipping_mode'] == 4) {
+                return true;
+            }
+
+            $validator->errors()->add($attribute, "$attribute is not allowed for service type {$data['shipping_mode']}.");
+
+            return false;
+        });
+
+        Validator::extend('ftl_service_type_check', function ($attribute, $value, $parameters, $validator) {
+            $data = $validator->getData();
+
+            if (isset($data['service_type_id']) && $data['service_type_id'] == 6) {
+                return true;
+            }
+
+            $validator->errors()->add($attribute, "$attribute is not allowed for service type {$data['service_type_id']}.");
+
+            return false;
+        });
+
+        Validator::extend('reg_rep_try_service_type_id_check', function ($attribute, $value, $parameters, $validator) {
+            $data = $validator->getData();
+
+            $allowedServiceTypes = [1, 2, 3];
+
+            if (isset($data['service_type_id']) && in_array($data['service_type_id'], $allowedServiceTypes)) {
+                return true;
+            }
+
+            $validator->errors()->add($attribute, "$attribute is not allowed for service type {$data['service_type_id']}.");
+
+            return false;
+        });
+
+
 //        //Corporate Delivery Check
 //        Validator::extend('corporate_delivery_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
 //            $data = $validator->getData();
@@ -2238,8 +2306,8 @@ class APIController extends Controller
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
-                'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id', 'same_day_delivery_check'],
-                'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric','between:0,999999.00', 'parcel_value_check'],
+                'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id', 'same_day_delivery_check','same_day_shipping_mode_check'],
+                'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric','between:0,999999.00', 'parcel_value_check','reg_rep_service_type_id_check'],
                 // 'parcel_value' => ['nullable','numeric','digits_between:1,1000000'],
                 'parcel_value' => ['nullable', 'numeric', 'between:0,1000000.00'],
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
@@ -2249,10 +2317,10 @@ class APIController extends Controller
                     $query->whereIn('id', [4]);
                 })],
 
-                'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
-                'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000'],
-                'item_quantity' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'between:1,10000'],
-                'item_insurance' => ['required_if:service_type_id,1,2,5', 'boolean'],
+                'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id','reg_rep_rev_service_type_id_check'],
+                'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,1000','reg_rep_rev_service_type_id_check'],
+                'item_quantity' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'between:1,10000','reg_rep_rev_service_type_id_check'],
+                'item_insurance' => ['required_if:service_type_id,1,2,5', 'boolean','reg_rep_rev_service_type_id_check'],
                 'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
                 //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
@@ -2295,11 +2363,11 @@ class APIController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if (in_array($user_id, $ccd_account_tags)) {
-                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10','reg_rep_try_service_type_id_check', Rule::exists('payment_modes', 'id')->where(function ($query) {
                         $query->whereNotIn('id', [3]);
                     })];
                 } else {
-                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10','reg_rep_try_service_type_id_check', Rule::exists('payment_modes', 'id')->where(function ($query) {
                         $query->whereNotIn('id', [2, 3]);
                     })];
                 }
@@ -2327,8 +2395,8 @@ class APIController extends Controller
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
-                'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id', 'same_day_delivery_check'],
-                'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000', 'parcel_value_check'],
+                'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id', 'same_day_delivery_check','same_day_shipping_mode_check'],
+                'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000', 'parcel_value_check','reg_rep_service_type_id_check'],
                 // 'parcel_value' => ['nullable','numeric','digits_between:1,1000000'],
                 'parcel_value' => ['nullable', 'numeric', 'between:0,1000000.00'],
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
@@ -2338,10 +2406,10 @@ class APIController extends Controller
                     $query->whereIn('id', [3]);
                 })],
 
-                'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
-                'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,500'],
-                'item_quantity' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'between:1,10000'],
-                'item_insurance' => ['required_if:service_type_id,1,2,5', 'boolean'],
+                'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id','reg_rep_rev_service_type_id_check'],
+                'item_description' => ['required_if:service_type_id,1,2,5', 'between:0,500','reg_rep_rev_service_type_id_check'],
+                'item_quantity' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'between:1,10000','reg_rep_rev_service_type_id_check'],
+                'item_insurance' => ['required_if:service_type_id,1,2,5', 'boolean','reg_rep_rev_service_type_id_check'],
                 'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
                 'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id','replacement_service_type_id_check'],
@@ -2366,8 +2434,8 @@ class APIController extends Controller
                 'open_shipment' => ['nullable', 'boolean'],
                 'substitute_user_email' => ['nullable', 'filled', 'email'],
 
-                'ftl_collection_type' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
-                'approve_freight_request' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
+                'ftl_collection_type' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10','ftl_service_type_check'],
+                'approve_freight_request' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10','ftl_service_type_check'],
                 'pieces_quantity' => [
                     'nullable',
                     'integer',
@@ -2405,11 +2473,11 @@ class APIController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if (in_array($user_id, $ccd_account_tags)) {
-                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10','reg_rep_try_service_type_id_check', Rule::exists('payment_modes', 'id')->where(function ($query) {
                         $query->whereNotIn('id', [3]);
                     })];
                 } else {
-                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                    $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10','reg_rep_try_service_type_id_check', Rule::exists('payment_modes', 'id')->where(function ($query) {
                         $query->whereNotIn('id', [2, 3]);
                     })];
                 }
@@ -2420,7 +2488,7 @@ class APIController extends Controller
                     $query->where('user_id', $user_id)->where('status', 1);
                 })];
             } else {
-                $rules['delivery_type_id'] = ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'];
+                $rules['delivery_type_id'] = ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10','reg_rep_service_type_id_check', 'exists:delivery_types,id'];
                 $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('status', 1);
                 })];
