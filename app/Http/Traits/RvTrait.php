@@ -559,7 +559,7 @@ trait RvTrait
         if (!$request->rv_assign_agent_sub_status_id || !$shipment_status_reason) { // Return confirm RVR reason_id bind in journey inserted
             $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('verification',0)->latest()->select('status_reason_id', 'remarks')->first();
             $shipment_status_reason = $journey->status_reason_id;
-            $remarks =  $journey->remarks;
+            $remarks =  ((!$remarks) ? $journey->remarks : $remarks);
         }
         //these both could be null 
         $consignee_refused_reasons = $request->consignee_refused_reasons ?? null;
@@ -798,7 +798,7 @@ trait RvTrait
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
-
+        $botInvalidNo = ($request->bot_auto_return > 0 ? 1 : 0); // bot invalid call 
         if ($rv_shipment_assign_agent) {
             try {
                 $status = new RvAgentCallHistory();
@@ -812,10 +812,23 @@ trait RvTrait
                 $status->call_status = $request->call_status ?? 'Not Connected';
                 $status->updated_at = $request->end_date ?? Carbon::now();
                 $status->save();
-                // if($request->rv_assign_agent_sub_status_id == 34){ //If the consignee is unresponsive during a bot call, the unresponsive count is set to 3, and the SAR is marked 
-                //      $rv_shipment_assign_agent->unresponsive_count = 3; 
-                // }else{
-                    // }
+                if($botInvalidNo > 0){ //If the consignee is invalid phone no during a bot call, the unresponsive count is set to 4, and the return_confirm is marked 
+                    $rv_shipment_assign_agent->unresponsive_count = 4;
+                    $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
+                    $rv_shipment_assign_agent->save();
+
+                    $rv_shipment_assign_agent->rv_assign_agent_status_id = 1;
+                    $rv_shipment_assign_agent->rv_state_id = 4;
+                    $rv_shipment_assign_agent->save();
+                    request()->request->add([
+                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                        'remarks' => $request->remarks,
+                        'rv_assign_agent_sub_status_id' => null
+                    ]);
+                    $this->return_confirm($request);
+                    return ['status' => 1, 'success' => 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
+
+                }
                 $rv_shipment_assign_agent->increment('unresponsive_count');
                 $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
                 $rv_shipment_assign_agent->save();
@@ -2084,8 +2097,12 @@ trait RvTrait
             ],
             'json' => [
                 'tracking_number' => $tracking_number,
-                'call_status' => 'NO ANSWER',
+                'call_status' => 'NOANSWER',
+                'remarks'=> 'due to invalid number',
+                'bot_auto_return' => 1, // auto returm confirm in  case of invalid number
                 'input' => 0,
+                'start_date' => date('Y-m-d H:i:s'),
+                'end_date' => date('Y-m-d H:i:s'),
                 'call_finding' => 28, //invalid numbers
                 'sender_name' => 'sonic'
             ]

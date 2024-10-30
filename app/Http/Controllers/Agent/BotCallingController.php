@@ -43,7 +43,8 @@ class BotCallingController extends Controller
         //  (new BotCallDispatch($shipmentId))->delay(60 * 1);
 
         // $this->dispatch($job);    
-            // dispatch((new BotCallDispatch($shipmentId))->delay(60 * 5));
+        // dispatch((new BotCallDispatch($shipmentId))->delay(60 * 5));
+        // dispatch(new BotCallDispatch(378138));
         return 1;
         $trackingNo = $request->tracking_number;
 
@@ -113,7 +114,6 @@ class BotCallingController extends Controller
                 return response()->json(['status' => 0, 'errors' => $validate->errors()], 422);
             }
             $findShipmentId = Shipment::where('tracking_number', $request->input('tracking_number'))->whereIn('shipper_status_id', [12, 52,65, 66])->first();
-          
             if ($findShipmentId && RvShipmentTicket::where('shipment_id', $findShipmentId->id)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
                 // RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 1]);
                 $array = [
@@ -147,7 +147,7 @@ class BotCallingController extends Controller
                     'created_at' => now(),
                 ]);
                 $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->whereIn('rv_state_id', [1, 3])->latest()->first();
-                $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => $array[$request->input]['call_finding_id'], 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1, 'call_to_id' => 1, 'call_status' => $array[$request->input]['call_status_type'],'end_date' => $request->end_date]);
+                $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => ($request->call_finding ? $request->call_finding : $array[$request->input]['call_finding_id']), 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1, 'call_to_id' => 1, 'call_status' => $array[$request->input]['call_status_type'],'end_date' => $request->end_date]);
                 // RvCronLog::create([
                 //     'message' => json_encode($request->all()),
                 // ]);
