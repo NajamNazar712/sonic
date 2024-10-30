@@ -3733,6 +3733,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');
             Route::post('shipment_details', 'AdminShipmentHandoverController@arrival_bulk_shipment_details_receive')->name('shipment_details');
+            Route::get('check_handover_bag_receive', 'AdminShipmentHandoverController@check_handover_bag_receive')->name('check_handover_bag_receive');
 
             // new handover receive screen
             Route::get('new', 'AdminShipmentHandoverController@handover_receive_index_new')->name('new_index');

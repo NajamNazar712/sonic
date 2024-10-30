@@ -1717,4 +1717,24 @@ class AdminShipmentHandoverController extends Controller
         return ['status' => 1, 'error' => 'This handover bag is fully received'];
       }
     }
+
+    public function check_handover_bag_receive(Request $request)
+    {
+      $shipent_id = Shipment::where('tracking_number', $request->tracking_number)
+      ->select(['id'])
+      ->first()->id;
+
+      $exisiting_handover_id = HandoverShipments::where('shipment_id', $shipent_id)
+      ->first()
+      ->handover_id;
+
+      $existing_bag = Handover::where('id', $exisiting_handover_id)
+      ->select('bag_number')
+      ->first()->bag_number;
+
+      if ($existing_bag != null)
+      {
+        return ['status' => 1, 'error' => 'This shipment belongs to a bag: '. $existing_bag];
+      }
+    }
 }
