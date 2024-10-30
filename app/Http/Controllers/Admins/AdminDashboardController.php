@@ -15335,11 +15335,20 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 ->toArray();
         }
 
+        $fields1 = [
+            'regular_rush', 'regular_saver_plus', 'regular_swift', 'regular_same_day',
+            'replacement_rush', 'replacement_saver_plus', 'replacement_swift', 'replacement_same_day',
+            'try_and_buy_rush', 'try_and_buy_saver_plus', 'try_and_buy_swift', 'try_and_buy_same_day',
+            'reverse_pickup_rush', 'reverse_pickup_saver_plus', 'reverse_pickup_swift', 'reverse_pickup_same_day',
+            'ftl_rush', 'ftl_saver_plus', 'ftl_swift', 'ftl_same_day',
+            'walkin_rush', 'walkin_saver_plus', 'walkin_swift'
+        ];
+
         if (!empty($spreadsheet)) {
             $column_count = 48;
             $fields = [
                 'name', 'city_code', 'is_city', 'is_hub', 'hub_id', 'zone_id', 'address', 'attempt_tat',
-                'location_latitude', 'location_longitude', 'hub_location_latitude', 'hub_location_longitude', 'pickup', 'cut_off_time', 'gc_area',
+                'location_latitude', 'location_longitude', 'hub_location_latitude', 'hub_location_longitude', 'pickup', 'pickup_cut_off_time', 'gc_area',
                 'regular_rush', 'regular_saver_plus', 'regular_swift', 'regular_same_day',
                 'replacement_rush', 'replacement_saver_plus', 'replacement_swift', 'replacement_same_day',
                 'try_and_buy_rush', 'try_and_buy_saver_plus', 'try_and_buy_swift', 'try_and_buy_same_day',
@@ -15355,12 +15364,26 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
             unset($spreadsheet[0]);
 
-            $rows = array_map(function ($row) use ($fields) {
-                return array_combine($fields, $row);
+            $rows = array_map(function ($row) use ($fields, $fields1) {
+                $combinedRow = array_combine($fields, $row);
+
+                foreach ($fields1 as $field) {
+                    if (array_key_exists($field, $combinedRow) && is_null($combinedRow[$field])) {
+                        unset($combinedRow[$field]);
+                    }
+                }
+
+                return $combinedRow;
             }, $spreadsheet);
+
         } else {
             $forms = $request->except(['_token', '_method']);
-            $rows = array_map(function ($form) {
+            $rows = array_map(function ($form) use ($fields1) {
+                foreach ($fields1 as $field) {
+                    if (array_key_exists($field, $form) && is_null($form[$field])) {
+                        unset($form[$field]);
+                    }
+                }
                 return $form;
             }, $forms);
 
@@ -15386,7 +15409,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'pickup' => 'boolean',
             'address' => 'nullable',
             'gc_area' => 'nullable|boolean',
-            'cut_off_time' => 'required_if:pickup,1|min:0|max:23',
+            'pickup_cut_off_time' => 'required_if:pickup,1|min:0|max:23',
             'closest_hub' => 'nullable|required_with:vehicles_list',
             'vehicles_list' => 'required_with:closest_hub',
             'delivery_types' => 'required_without_all:regular_rush,regular_saver_plus,regular_swift,regular_same_day,replacement_rush,replacement_saver_plus,replacement_swift,replacement_same_day,try_and_buy_rush,try_and_buy_saver_plus,try_and_buy_swift,try_and_buy_same_day,reverse_pickup_rush,reverse_pickup_saver_plus,reverse_pickup_swift,reverse_pickup_same_day,ftl_rush,ftl_saver_plus,ftl_swift,ftl_same_day|boolean',
@@ -15404,7 +15427,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'longitude.required' => 'Longitude is required.',
             'hub_latitude.required_if' => 'Hub Latitude is required when Hub is selected.',
             'hub_longitude.required_if' => 'Hub Longitude is required when Hub is selected.',
-            'cut_off_time.required_if' => 'Pickup Cut Off is required if Pickup is selected.',
+            'pickup_cut_off_time.required_if' => 'Pickup Cut Off Time is required if Pickup is selected.',
             'delivery_types.required_without_all' => 'At least one delivery type must be selected.',
             'is_city.required_without_all' => 'Either city or hub must be selected.',
             'is_hub.required_without_all'  => 'Either hub or city must be selected.',
@@ -15488,9 +15511,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         if (empty($errors)) {
             $isHubArray = [];
             $isCityArray = [];
-            $deliveryTypes = [];
-            $walkInTypes = [];
-            $osaList = [];
+
             $forms = $rows;
 
             $keysToUnsetDeliveryTypes = [
@@ -15693,13 +15714,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             }
             return redirect()->route('admin.management.city.index')->with('success', 'Hub city added successfully');
         } else {
-            $hubs = City::where('hub', 1)
-                ->where('business_category_id', 1)
-                ->where('status', 1)
-                ->pluck( 'name', 'id');
+            $hubs = City::pluck( 'name', 'id');
 
-            $zones = Zone::where('business_category_id', 1)
-                ->pluck('name', 'id');
+            $zones = Zone::pluck('name', 'id');
 
             $vehicles = Fleet::where('status', 1)->pluck('reg_number','id');
 
@@ -15790,9 +15807,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     // Function to filter types based on their prefixes
     public static function filterTypes($types) {
         $filteredTypes = [];
-        foreach ($types as $key => $item) {
-            $prefix = $item[0];
-            $filteredTypes[$prefix][$key] = $item;
+        foreach ($types as $item) {
+            preg_match('/^\d+/', $item, $matches);
+            $prefix = isset($matches[0]) ? intval($matches[0]) : 0;
+            $filteredTypes[$prefix][] = $item;
+        }
+        foreach ($filteredTypes as $prefix => $group) {
+            $group = array_values($group);
         }
         return $filteredTypes;
     }
@@ -15845,8 +15866,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     if ($bType !== null && $sType !== null) {
                         $deliveryTypesToBeInserted[] = [
                             'city_id' => $insertedIds[$key],
-                            'booking_type_id' => $bType,
-                            'shipping_mode_id' => $sType
+                            'booking_type_id' => $sType,
+                            'shipping_mode_id' => $bType
                         ];
                     }
                 }
@@ -15980,7 +16001,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             }
         }
 
-        City::whereIn('id', $cityIds)->update(['hub_id' => DB::raw('id')]);
+        City::whereIn('id', $cityIds)->where('hub', 1)->update(['hub_id' => DB::raw('id')]);
 
         return $historyArray;
     }
