@@ -72,5 +72,7 @@ class Kernel extends HttpKernel
         'ConsigneeAPIToken' => \App\Http\Middleware\ConsigneeAPIToken::class,
         'ShipperAPIToken' => \App\Http\Middleware\ShipperAPIToken::class,
         'PauseShipperBooking' => \App\Http\Middleware\PauseBookingMiddleware::class,
+        'no.cache' => \App\Http\Middleware\NoCache::class,
+
     ];
 }
