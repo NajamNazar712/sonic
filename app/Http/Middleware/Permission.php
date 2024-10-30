@@ -647,8 +647,8 @@ class Permission
 
             'reports.fintech_report.index' => 896,
             'reports.fintech_report.list' => 896,
-            'reports.ordinary_discrepancy_report.index' => 901,
-            'reports.ordinary_discrepancy_report.list' => 901,
+            'reports.operation_disorder_report.index' => 901,
+            'reports.operation_disorder_report.list' => 901,
             'reports.ibft_report.index' => 915,
             'reports.ibft_report.list' => 915,
 

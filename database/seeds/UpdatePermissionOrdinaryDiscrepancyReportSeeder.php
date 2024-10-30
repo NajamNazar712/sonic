@@ -12,7 +12,7 @@ class UpdatePermissionOrdinaryDiscrepancyReportSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 908, 'name' => 'Ordinary Discrepancy Report - Track', 'module_id' => 9),
+            array('id' => 908, 'name' => 'Operation Disorder Report - Track', 'module_id' => 9),
         ));
     }
 }
