@@ -88,6 +88,7 @@
                         <th class="border-primary border-darken-1">Title Of Account</th>
                         <th class="border-primary border-darken-1">Entry City</th>
                         <th class="border-primary border-darken-1">Expense Details</th>
+                        <th class="border-primary border-darken-1">Cost Centre</th>
                         <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Station Amount</th>
                         <th class="border-primary border-darken-1">Operation Amount</th>
@@ -301,6 +302,7 @@
                             head.push('Title Of Account');
                             head.push('Entry City');
                             head.push('Expense Details');
+                            head.push('Cost Centre');
                             head.push('Amount');
                             head.push('Station Amount');
                             head.push('Operation Amount');
@@ -336,6 +338,7 @@
                                 row.push(values.account_title);
                                 row.push(values.entry_city);
                                 row.push(values.expense_details);
+                                row.push(values.cost_centre);
                                 row.push(values.amount);
                                 row.push(values.station_amount);
                                 row.push(values.operation_amount);
@@ -410,13 +413,14 @@
                     {data: 'account_title', name: 'pct.name', class: 'align-middle account_title'},
                     {data: 'entry_city', name: 'dc.name', class: 'align-middle entry_city'},
                     {data: 'expense_details', name: 'petty_cash_statement_details.expense_details', class: 'align-middle expense_details'},
+                    {data: 'cost_centre', name: 'cost_centres.id', class: 'align-middle cost_centre'},
                     {data: 'amount', name: 'petty_cash_statement_details.amount', class: 'align-middle amount'},
                     {data: 'station_amount', name: 'petty_cash_statement_details.station_amount', class: 'align-middle station_amount'},
                     {data: 'operation_amount', name: 'petty_cash_statement_details.operation_amount', class: 'align-middle operation_amount'},
                     {data: 'finance_amount', name: 'petty_cash_statement_details.finance_amount', class: 'align-middle finance_amount'},
                     {data: 'entry_reference_no', name: 'petty_cash_statement_details.reference_no', class: 'align-middle entry_reference_no'},
                     {data: 'remarks', name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
-                    {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
+                    {data: 'status', name: 'petty_cash_statement_details.status', class: 'align-middle status'},
                     {data: 'statement_link', name: 'pcs.id', class: 'align-middle statement_link'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
                     {data: 'zone_name', name: 'zone.name', class: 'align-middle zone_name'},
