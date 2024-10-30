@@ -3701,6 +3701,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('handover')->name('handover.')->group(function () {
         Route::prefix('create')->name('create.')->group(function () {
+            // disable the old create handover route
             Route::get('', 'AdminShipmentHandoverController@handover_create_index')->name('index');
 
             // new handover create screen

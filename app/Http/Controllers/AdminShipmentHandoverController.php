@@ -36,11 +36,15 @@ class AdminShipmentHandoverController extends Controller
     }
 
     public function handover_create_index(){
-        $hub=HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
-        ->select(['c.id','c.name'])->groupBy('handover_responsibilities.hub_id')->get();
 
-        // dd($hub);
-        return view('admin.handover.index')->with(['hubs'=>$hub]);
+      // prevent users from manually accessing the old handover page
+      $hub=HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
+      ->select(['c.id','c.name'])->groupBy('handover_responsibilities.hub_id')->get();
+      return view('admin.handover_new.new_index')->with(['hubs'=>$hub]);
+
+        // $hub=HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
+        // ->select(['c.id','c.name'])->groupBy('handover_responsibilities.hub_id')->get();
+        // return view('admin.handover.index')->with(['hubs'=>$hub]);
     }
 
     public function handover_create_index_new()
