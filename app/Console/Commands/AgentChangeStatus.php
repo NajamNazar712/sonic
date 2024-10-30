@@ -61,7 +61,7 @@ class AgentChangeStatus extends Command
             // ->update(['rv_state_id' => 3]);
 
             //Query for Making Shipments Enable again in Get Tickets After their "Unresponsive" Status is Submitted.
-            // RvShipmentTicket::where('in_progress', 1)->update(['in_progress' => 0]);
+            RvShipmentTicket::where('in_progress', 1)->where('is_bot',0)->update(['in_progress' => 0]);
 
 
             //Make record of return/dashboard cards count daily to mantain history
