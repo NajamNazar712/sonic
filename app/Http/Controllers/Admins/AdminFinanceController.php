@@ -5081,6 +5081,15 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $sheet->getColumnDimension($column)->setWidth($width);
                     }
 
+                    // Prevent caching and viewing in an online viewer
+                    header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
+                    header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+                    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+                    header("Cache-Control: post-check=0, pre-check=0", false);
+                    header("Pragma: no-cache");
+                    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                    header('Content-Disposition: attachment; filename="Shipment Charges View.xlsx"');
+
                     // Save the Excel file
                     $fileName = 'Shipment Charges View.xlsx';
                     $directory = public_path('finance');
@@ -5092,7 +5101,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $writer->save($filePath);
 
                     // Generate the download URL for the modified file
-                    $downloadUrl = url('finance/' . $fileName);
+                    $downloadUrl = url('finance/' . $fileName).'?time='.time();
                     $message = 'Total ' . $trackingNumberCount . ' Shipment(s). <a href="' . $downloadUrl . '" download>Download Excel</a>';
                     return redirect()->back()->with('success', $message);
                 } else {
@@ -5390,6 +5399,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 ->where('shipment_id', $dncc->shId)
                 ->whereNotNull('reference_1_id')
                 ->where('reference_1_id', $dncc->dncc_no)
+                ->orderBy('id', 'desc')
                 ->first();
             return optional($shipmentsJourney->shipment_status_shipper)->name;
         });
@@ -6445,7 +6455,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->join('user_bank_infos as ubi', function ($join) {
                 $join->on('pending_payments.user_id', '=', 'ubi.user_id')
-                    ->where('ubi.default_bank', DB::raw(1));
+                    ->where('ubi.id', '=', DB::raw(
+                        '(select max(id) from user_bank_infos where user_id = pending_payments.user_id and default_bank = 1)'
+                    ));
             })
             ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
             ->join('payment_cycles as pc', 'u.payment_cycle_id', '=', 'pc.id')
@@ -7964,7 +7976,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             })
             ->leftJoin('user_bank_infos as ubi_default', function ($join) {
                 $join->on('ubi_default.user_id', '=', 'u.id')
-                    ->where('ubi_default.default_bank', DB::raw(1));
+                    ->where('ubi_default.id', '=', DB::raw(
+                        '(select max(id) from user_bank_infos where user_id = u.id and default_bank = 1)'
+                    ));
             })
             ->leftJoin('banks_lists as ub', function ($join) {
                 $join->where(function ($sub_query) {
@@ -14467,13 +14481,13 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
                 $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->fuel_surcharge : 0);
                 $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $faf_charges : 0);
-                $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
+                $row[] = (($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->nsa_osa_charges : 0) : 0);
                 $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
                 $row[] = $invoice_shipment->charges;
                 $row[] = $invoice_shipment->gst;
                 $row[] = $invoice_shipment->sms_charges;
                 $row[] = $invoice_shipment->invoice_amount;
-                $row[] = $shipment->intercept_charges;
+                $row[] = ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0) : 0;
 
                 // Assign the row to the details array
                 $details[$shipment->id] = $row;
@@ -14497,7 +14511,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
                 // Check and update NSA/OSA charges if the current value is 0
                 if ($details[$shipment->id][9] == 0) {
-                    $details[$shipment->id][9] += (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
+                    $details[$shipment->id][9] += ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->nsa_osa_charges : 0) : 0;
                 }
 
                 // Check and update adjustment charges if the current value is 0
@@ -14510,7 +14524,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $details[$shipment->id][13] += $invoice_shipment->sms_charges;
                 $details[$shipment->id][14] += $invoice_shipment->invoice_amount;
                 if ($details[$shipment->id][15] == 0) {
-                    $details[$shipment->id][15] += $invoice_shipment->intercept_charges;
+                    $details[$shipment->id][15] += ($invoice_shipment->type != 2) ?  (($invoice_shipment->type != 3) ? $shipment->intercept_charges : 0) : 0;
                 }
             }
 

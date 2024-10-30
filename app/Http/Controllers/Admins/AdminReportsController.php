@@ -6867,7 +6867,7 @@ class AdminReportsController extends Controller
                     if ($days <= 0) {
                         return '-';
                     } else {
-                        return $days . 'days';
+                        return $days;
                     }
                 } else {
                     return '-';
@@ -7146,7 +7146,7 @@ class AdminReportsController extends Controller
                 Carbon::setWeekendDays([Carbon::SUNDAY]);
                 $launched_date = Carbon::parse($rowArray['launched_date']);
                 $days = $launched_date->diffInDays($current_date);
-                $rowArray['launched_to_today'] = $days <= 0 ? '-' : $days . ' days';
+                $rowArray['launched_to_today'] = $days <= 0 ? '-' : $days;
             } else {
                 $rowArray['launched_to_today'] = '-';
             }
@@ -13146,7 +13146,7 @@ class AdminReportsController extends Controller
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
         ->join('shipments_journey as sj', function($join) {
             $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
-                 ->where('sj.shipper_status_id', '=', 66);
+                 ->where('sj.shipper_status_id', '=', 13);
         })
         ->leftjoin('users', 'shipments.user_id', 'users.id')
         ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
@@ -13196,12 +13196,19 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = sj_ofd.shipment_id and shipments_journey.shipper_status_id  = 5)')
                     );
         })
-
+        ->leftJoin('shipments_journey as sj_reattempt', function ($join) {
+            $join->on('sj_reattempt.shipment_id', '=', 'sj.shipment_id')
+                ->where(
+                    'sj_reattempt.id',
+                    '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = sj_reattempt.shipment_id and shipments_journey.shipper_status_id  = 13)')
+                );
+        })
         ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_number',
         'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub',
         'z.name as zone_name','shipments.consignee_phone_number_1 as consignee_phon_no',
         'sjj.created_at  as arrival_date','sj_destination.created_at as arrival_destination_date','sj_rvr.created_at as rvr_date_time',
-        'rv_shipment_assign_agent_details.updated_at as action_date','sj_ofd.created_at as ofd_date_time', 's_status.name as current_status', 'shipments.updated_at as current_status_date')
+        'rv_shipment_assign_agent_details.updated_at as action_date','sj_ofd.created_at as ofd_date_time','sj_reattempt.created_at as reattempt_time', 's_status.name as current_status', 'shipments.updated_at as current_status_date')
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
         ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
         ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
@@ -13213,6 +13220,13 @@ class AdminReportsController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$rv_report->tracking_number' class='tracking' target='_blank'>$rv_report->tracking_number</a></u>";
                 
+            })
+            ->editColumn('ofd_date_time', function($rv_report) {
+                if($rv_report['ofd_date_time'] >= $rv_report['reattempt_time'] && isset($rv_report['reattempt_time'])) {
+                    return $rv_report['ofd_date_time'];
+                }else{
+                    return '';
+                }   
             })
             ->addColumn('rvr_count', function($rv_report) use ($request) {
                         // $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('verification',1)->whereIn('shipper_status_id', [52,12,66])->count();

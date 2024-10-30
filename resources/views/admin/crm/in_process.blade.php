@@ -517,12 +517,25 @@
                                             }
                                         })
                                         .done(function (data) {
-                                            if (data.status == 1 && data.error){
-                                                toastr.error(data.error, 'Error!', {
-                                                    positionClass: 'toast-top-center',
-                                                    containerId: 'toast-top-center'
+                                            if (data.status === 1 && data.errors && Array.isArray(data.errors)) {
+                                                // Iterate over the data.errors array and extract the error messages
+                                                data.errors.forEach(function(error) {
+                                                    if (Array.isArray(error) && error.length > 0) {
+                                                        // If the error is an array, display the first element as the message
+                                                        toastr.error(error[0], 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center',
+                                                        });
+                                                    } else if (typeof error === 'string') {
+                                                        // If it's a string, display it directly
+                                                        toastr.error(error, 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center',
+                                                        });
+                                                    }
                                                 });
-                                            } else {
+                                            }
+                                            else {
                                                 window.location.href = '{!! route('admin.crm.resolved.index') !!}';
                                             }
                                         });

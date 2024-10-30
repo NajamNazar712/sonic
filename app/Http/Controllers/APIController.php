@@ -619,7 +619,7 @@ class APIController extends Controller
                 }), 'destination_return_check'],
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
-                'consignee_name' => ['required', 'between:1,100'],
+                'consignee_name' => ['required', 'string', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'phone_number'],
                 'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
@@ -708,7 +708,7 @@ class APIController extends Controller
                 }), 'destination_return_check'],
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
-                'consignee_name' => ['required', 'between:1,100'],
+                'consignee_name' => ['required', 'string', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'phone_number'],
                 'consignee_phone_number_2' => ['nullable', 'filled', 'phone_number'],
@@ -2948,20 +2948,21 @@ class APIController extends Controller
             $request_channel = 2;
             $description = $request->description;
 
-            $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first()->id;
+            $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first();
             $launched_by = 4;
             $name = $request->complaint_name;
             $phoneno = $request->complaint_phone;
 
-            if (!CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $case_nature)->exists()) {
+            if (!CrmRequest::where('shipment_id', $shipment_id->id)->where('case_nature_id', $case_nature)->exists()) {
                 $data = new CrmRequest();
                 $data->case_nature_id = $case_nature;
                 $data->case_nature_type_id = $case_nature_type;
                 $data->description = 'Consignee: (' . $name . ') | Phone Number: (' . $phoneno . ') | Complain: ' . $description;
                 $data->channel_id = $request_channel;
                 $data->status_id = 1;
+                $data->shipper_id = $shipment_id->user_id;
                 $data->launched_by = $launched_by;
-                $data->shipment_id = $shipment_id;
+                $data->shipment_id = $shipment_id->id;
 
                 $data->save();
 

@@ -163,7 +163,7 @@
                                             </td>
 
                                             <td>
-                                                {!! Form::select($index . "[zone_id]", $zones, $ro['zone_id'] ?? '', [
+                                                {!! Form::select($index . "[zone_id]", $zones, $ro['zone_id'] ?? '' , [
                                                     'class' => 'form-control zone_id select2' . (isset($errors[$index]["zone_id"]) ? ' is-invalid' : ''),
                                                     'style' => 'width:80px','placeholder' => '',
                                                     'disabled' => ($ro['is_city'] == 1 || isset($errors[$index]["is_hub"]) && isset($errors[$index]["is_city"]))    ? 'disabled' : null
