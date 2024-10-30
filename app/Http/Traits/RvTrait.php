@@ -2110,4 +2110,29 @@ trait RvTrait
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
     }
+
+    protected function shipmentDifferentStatus($shipmentId,$request){
+        $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $shipmentId)->latest()->first();
+        $assigned_agent = RvShipmentAgent::where('agent_id', $request->admin_id)->first();
+        $admin_agent = Admin::where('id', $request->admin_id)->first();
+        $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
+        $this->update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent);
+        $status = $this->callHistoryRecord($shipment_assign_agent, $request);
+        $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey, $status->id);
+    }
+
+    protected function callHistoryRecord($shipment_assign_agent, $request){
+        $status = new RvAgentCallHistory();
+        $status->shipment_id = $request->shipment_id;
+        $status->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
+        $status->call_finding_id = $request->rv_assign_agent_sub_status_id; //call finding reasons
+        $status->call_to_id = 1; //Shipper or Consignee
+        $status->remarks = $request->remarks;
+        $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
+        $status->updated_by_id = $request->admin_id;
+        $status->call_status = $request->call_status;
+        $status->updated_at = $request->end_date;
+        $status->save();
+        return $status;
+    }
 }
