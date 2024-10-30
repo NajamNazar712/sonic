@@ -571,7 +571,7 @@ class AdminShipmentHandoverController extends Controller
                 $handover_shipments->save();
                 HandoverShipmentJourneyController::add($shipment_id->id,$handover_id,1);
             }
-            return redirect()->route('admin.handover.create.new_index')->with('success','Handover Note created Successfully!');
+            return redirect()->route('admin.handover.create.new_index')->with('success','Handover Bag created Successfully!');
         }
         return redirect()->back()->with('error', 'No shipments scanned!');
     } 
@@ -707,7 +707,7 @@ class AdminShipmentHandoverController extends Controller
                 $handover->save();
             }
         }
-        return redirect()->route('admin.handover.receive.new_index')->with('success','Handover Note Received Successfully!');
+        return redirect()->route('admin.handover.receive.new_index')->with('success','Handover Bag Received Successfully!');
 
     }
 

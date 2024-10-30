@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Receive Handover Note
+                    Receive Handover Bags
                 </h1>
 
                 <div class="card">

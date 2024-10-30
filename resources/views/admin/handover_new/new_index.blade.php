@@ -4,7 +4,7 @@
 
 @section('content')
         <h1 class="mb-1">
-            Create Handover Note
+            Create Handover Bags
         </h1>
 
         <div class="card">
