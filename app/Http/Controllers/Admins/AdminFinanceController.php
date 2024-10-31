@@ -20084,7 +20084,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 if($type == 3 && $query->payment_status != 'done_paid') {
                     $query->credit = abs($query->amount2);
                     $query->debit = abs($query->payable - $query->amount);
-                }else if($type == 0 && $query->payment_status != 'done_paid') {
+                }else if($type != 3 && $query->payment_status != 'done_paid') {
                     $query->debit = abs($query->payable - $query->amount);
                     $query->credit = abs(0);
                 }else{
