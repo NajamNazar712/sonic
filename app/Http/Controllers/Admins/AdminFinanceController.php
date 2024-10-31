@@ -20029,6 +20029,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 DB::raw("'0' as credit")
 
             )
+            ->where('done_payments.user_id', $shipper_id)
             ->whereBetween('done_payments.created_at', [$from_date, $to_date])
             ->groupBy('done_payments.id');
 
