@@ -825,11 +825,14 @@ class AdminShipmentHandoverController extends Controller
             'ssj_f.location_status as forward_location_status', 'ssj_r.location_status as received_location_status',
             'caf.name as forwarded_area_name', 'car.name as received_area_name',
             'handovers.bag_number as bag_number',
+
+            // Added hyphen for shipments that have no bag numbers to them 
             DB::raw("
-                CASE 
+                CASE
+                    WHEN handovers.bag_number IS NULL THEN '-'
                     WHEN latest_journey.shipper_status_id IN ($normal_status_ids_str) THEN 'Normal'
                     WHEN latest_journey.shipper_status_id IN ($return_status_ids_str) THEN 'Return'
-                    ELSE 'Unknown'
+                    ELSE '-'  
                 END as bag_type
             "),
             'excess_handover_shipments.shipment_ids as excess_shipments'
