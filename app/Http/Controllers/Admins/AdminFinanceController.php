@@ -19974,31 +19974,130 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
      }
     public function service_charges_ledger_index()
     {
-        $users = User::where('status', 3)->get();
-        return view('admin.finance.service_charge_ledger.index', compact('users'));
+        return view('admin.finance.service_charge_ledger.index');
     }
 
     public function service_charges_ledger_list(Request $request)
     {
         $shipper_id = $request->input('formData.shippers');
-        $from_date = $request->input('formData.from_date');
-        $to_date = $request->input('formData.to_date');
+        $from_date = date('Y-m-d 00:00:00', strtotime(str_replace(',', '', $request->input('formData.from_date'))));
+        $to_date = date('Y-m-d 23:59:59', strtotime(str_replace(',', '', $request->input('formData.to_date'))));
 
-        $from_date = date('Y-m-d', strtotime(str_replace(',', '', $from_date)));
-        $to_date = date('Y-m-d', strtotime(str_replace(',', '', $to_date)));
-        
-        $shipment_ledger = ShipmentLedger::where('user_id', $shipper_id)
-        ->whereDate('shipment_book_date', '>=', $from_date)
-        ->whereDate('shipment_book_date', '<=', $to_date)
-        ->join('cities as origin_city', 'shipment_ledgers.origin', '=', 'origin_city.id')
-        ->join('cities as destination_city', 'shipment_ledgers.destination', '=', 'destination_city.id')
-        ->select('shipment_ledgers.*', 'origin_city.name as origin_city_name', 'destination_city.name as destination_city_name')
-        ->get();
+        $pendingPaymentsQuery = DB::table('pending_payment_shipments')
+            ->select(
+                'users.name as user_name', 'users.id as account_id', 'pending_payment_shipments.shipment_id',
+                'pending_payment_shipments.type', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges','shipments.amount as amount2',
+                'pending_payment_shipments.gst', 'pending_payment_shipments.sms_charges', 'pending_payment_shipments.payable',
+                'pending_payment_shipments.created_at',  'pending_payments.id as payment_id',
+                DB::raw("'pending' as payment_status"), 'shipments.tracking_number', 'shipments.shipment_type',
+                DB::raw("'0' as balance"), DB::raw("'N/A' as payment_status_journey"), DB::raw("'N/A' as paid_status"),
+                DB::raw("'0' as credit")
+            )
+            ->leftJoin('pending_payments', 'pending_payments.id', '=', 'pending_payment_shipments.pending_payment_id')
+            ->leftJoin('shipments', 'shipments.id', '=', 'pending_payment_shipments.shipment_id')
+            ->leftJoin('users', 'users.id', '=', 'pending_payments.user_id')
+            ->where('pending_payments.user_id', $shipper_id)
+            ->whereBetween('pending_payments.created_at', [$from_date, $to_date]);
 
-        return response()->json([
-            'data' => $shipment_ledger
-        ]);
+        $donePaymentsQuery = DB::table('done_payment_shipments')
+            ->select(
+                'users.name as user_name', 'users.id as account_id', 'done_payment_shipments.shipment_id',
+                'done_payment_shipments.type', 'done_payment_shipments.amount', 'done_payment_shipments.charges','shipments.amount as amount2',
+                'done_payment_shipments.gst', 'done_payment_shipments.sms_charges', 'done_payment_shipments.payable',
+                'done_payment_shipments.created_at',  'done_payments.id as payment_id',
+                DB::raw("'done' as payment_status"), 'shipments.tracking_number', 'shipments.shipment_type',
+                DB::raw("'0' as balance"), DB::raw("'N/A' as payment_status_journey"), 'done_payments.status as paid_status',
+                DB::raw("'0' as credit")
+            )
+            ->leftJoin('done_payments', 'done_payments.id', '=', 'done_payment_shipments.done_payment_id')
+            ->leftJoin('shipments', 'shipments.id', '=', 'done_payment_shipments.shipment_id')
+            ->leftJoin('users', 'users.id', '=', 'done_payments.user_id')
+            ->where('done_payments.user_id', $shipper_id)
+            ->whereBetween('done_payments.created_at', [$from_date, $to_date]);
+
+        $success_payment = DonePayment::join('done_payment_shipments', 'done_payment_shipments.done_payment_id', '=', 'done_payments.id')
+            ->leftJoin('shipments', 'shipments.id', '=', 'done_payment_shipments.shipment_id')
+            ->leftJoin('users', 'users.id', '=', 'done_payments.user_id')
+            ->select(
+                'users.name as user_name', 'users.id as account_id', 'done_payment_shipments.shipment_id',
+                DB::raw("'N/A' as type"),  DB::raw("'0' as amount"), 'done_payment_shipments.charges',DB::raw("'0' as amount2"),
+                'done_payment_shipments.gst', 'done_payment_shipments.sms_charges', DB::raw("SUM(done_payment_shipments.payable) AS payable"),
+                'done_payments.created_at',  'done_payments.id as payment_id',
+                DB::raw("'done_paid' as payment_status"), DB::raw("'Payment Paid' as tracking_number"),
+                'shipments.shipment_type',
+                DB::raw("'0' as balance"), DB::raw("'PAID' as payment_status_journey"), 'done_payments.status as paid_status',
+                DB::raw("'0' as credit")
+
+            )
+            ->whereBetween('done_payments.created_at', [$from_date, $to_date])
+            ->groupBy('done_payments.id');
+
+
+        $balance = 0;
+        $done_payment_id = [];
+        $add_row = [];
+
+        $payment_shipments =  $pendingPaymentsQuery->unionAll($donePaymentsQuery)->unionAll($success_payment)
+            ->orderBy('created_at', 'asc')->get()
+            ->map(function($query) use (&$balance, &$done_payment_id, &$add_row) {
+                $url = url('admin/tracking?tracking_number=') . $query->tracking_number;
+                $type = $query->type;
+                if ($query->payment_status != 'done_paid') {
+                    $query->tracking_number = "<a class='' target='_blank' href='{$url}'>{$query->tracking_number}</a>";
+
+                    $typeMap = [0 => 'Delivered', 1 => 'Return', 2 => 'Adjustment', 3 => 'Arrival'];
+                    $query->type = $typeMap[$type] ?? 'Arrival';
+
+                    $payment_journey_status = array();
+                    if ($type == 0) {
+                        $payment_journey_status = [1, 2, 3];
+                    } elseif ($type == 1) {
+                        $payment_journey_status = [5, 6, 7];
+                    } elseif ($type == 2) {
+                        $payment_journey_status = [4];
+                    } elseif ($type == 3) {
+                        $payment_journey_status = [8, 9, 10, 11, 12];
+                    }
+
+                    if ($query->payment_status == 'done') {
+                        $done_payment_id[$query->payment_id] = $query->payment_id;
+                        $payment_status_journey = ShipmentsPaymentJourney::join('shipment_payment_status', 'shipment_payment_status.id', '=', 'shipments_payment_journey.status_id')
+                            ->where('shipments_payment_journey.shipment_id', $query->shipment_id)
+                            ->where('shipments_payment_journey.payment_id', $query->payment_id)
+                            ->whereIn('shipments_payment_journey.status_id', $payment_journey_status)
+                            ->orderBy('shipments_payment_journey.id', 'desc')
+                            ->select('shipment_payment_status.name')
+                            ->first();
+                        $query->payment_status_journey = $payment_status_journey->name ?? 'N/A';
+                    }
+
+                }else{
+                    $query->tracking_number = '(<button class="btn btn-sm btn-outline-info align-middle payment_print" type="button" data-id="' . $query->payment_id . '" data-shipment_type="' . $query->shipment_type . '">' . str_pad($query->payment_id, 6, '0', STR_PAD_LEFT) . '</button>)';
+                }
+                $query->reference_id = $query->payment_status != 'pending'
+                    ? '(<button class="btn btn-sm btn-outline-info align-middle payment_print" type="button" data-id="' . $query->payment_id . '" data-shipment_type="' . $query->shipment_type . '">' . str_pad($query->payment_id, 6, '0', STR_PAD_LEFT) . '</button>)'
+                    : 'N/A';
+
+
+                $query->debit = abs($query->payable - $query->amount);
+                if($type == 3) {
+                    $query->credit = abs($query->amount2);
+                }else{
+                    $query->credit = abs($query->amount - $query->amount2);
+                }
+                $balance += $query->credit - $query->debit;
+                $query->balance = $balance;
+
+                $query->debit = number_format($query->debit, 2);
+                $query->credit = number_format($query->credit, 2);
+                $query->balance = number_format($query->balance, 2);
+                return $query;
+            });
+
+        return response()->json(['data' => $payment_shipments]);
     }
+
+
 
     public function payment()
     {
