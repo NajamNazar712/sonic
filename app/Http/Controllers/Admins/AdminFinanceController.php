@@ -20080,11 +20080,16 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     : 'N/A';
 
 
-                $query->debit = abs($query->payable - $query->amount);
-                if($type == 3) {
+
+                if($type == 3 && $query->payment_status != 'done_paid') {
                     $query->credit = abs($query->amount2);
+                    $query->debit = abs($query->payable - $query->amount);
+                }else if($type == 0 && $query->payment_status != 'done_paid') {
+                    $query->debit = abs($query->payable - $query->amount);
+                    $query->credit = abs(0);
                 }else{
-                    $query->credit = abs($query->amount - $query->amount2);
+                    $query->credit = abs($query->amount);
+                    $query->debit = abs($query->payable);
                 }
                 $balance += $query->credit - $query->debit;
                 $query->balance = $balance;
