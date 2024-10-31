@@ -232,14 +232,8 @@
                                                     table.order([0, 'desc']).draw();
                                                     scan_sound(1);
                                                     shipment_ids.push(data.details.id);
-                                                    // console.log(shipment_ids);
-                                                    // console.log(data.details.id);
-
-
                                                     $('#add_shipment_form button.add').prop('disabled', false);
-
                                                     $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
-
                                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                                 }
                                             }

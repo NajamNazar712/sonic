@@ -1735,7 +1735,7 @@ class AdminShipmentHandoverController extends Controller
 
       if ($existing_bag != null)
       {
-        return ['status' => 1, 'error' => 'This shipment belongs to a bag: '. $existing_bag];
+        return ['status' => 1, 'error' => 'This CN: '. $request->tracking_number . " cannot be scanned on the current screen. Please scan it on the 'New Handover Receive' screen"];
       }
     }
 }
