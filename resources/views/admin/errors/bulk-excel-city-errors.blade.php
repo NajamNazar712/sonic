@@ -157,7 +157,7 @@
                                                     'disabled' => ($ro['is_hub'] == 1 || isset($errors[$index]["is_hub"]) && isset($errors[$index]["is_city"])) ? 'disabled' : null // Disable if is_hub is 1
                                                 ]) !!}
 
-                                                @if (isset($errors[$index]["hub_id"]))
+                                                @if ($ro['is_city'] == 1 && isset($errors[$index]["hub_id"]))
                                                     <span class="text-danger">{{ $errors[$index]["hub_id"] }}</span>
                                                 @endif
                                             </td>
@@ -169,7 +169,7 @@
                                                     'disabled' => ($ro['is_city'] == 1 || isset($errors[$index]["is_hub"]) && isset($errors[$index]["is_city"]))    ? 'disabled' : null
                                                 ]) !!}
 
-                                                @if (isset($errors[$index]["zone_id"]))
+                                                @if ($ro['is_hub'] == 1 && isset($errors[$index]["zone_id"]))
                                                     <span class="text-danger">{{ $errors[$index]["zone_id"] }}</span>
                                                 @endif
                                             </td>
@@ -258,13 +258,13 @@
 
 
                                             <td>
-                                                {!! Form::text($index . "[cut_off_time]", $ro['cut_off_time'] ?? '0', [
-                                                    'class' => 'form-control' . (isset($errors[$index]["cut_off_time"]) ? ' is-invalid' : ''),
-                                                    'style' => !isset($errors[$index]["cut_off_time"])  ? 'pointer-events: none; opacity:0.5;' : ''
+                                                {!! Form::text($index . "[pickup_cut_off_time]", $ro['pickup_cut_off_time'] ?? '0', [
+                                                    'class' => 'form-control' . (isset($errors[$index]["pickup_cut_off_time"]) ? ' is-invalid' : ''),
+                                                    'style' => !isset($errors[$index]["pickup_cut_off_time"])  ? 'pointer-events: none; opacity:0.5;' : ''
                                                 ]) !!}
 
-                                                @if (isset($errors[$index]["cut_off_time"]))
-                                                    <span class="text-danger">{{ $errors[$index]["cut_off_time"] }}</span>
+                                                @if (isset($errors[$index]["pickup_cut_off_time"]))
+                                                    <span class="text-danger">{{ $errors[$index]["pickup_cut_off_time"] }}</span>
                                                 @endif
                                             </td>
 
