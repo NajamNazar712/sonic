@@ -1543,7 +1543,7 @@ trait RvTrait
                 ->where('in_progress', 0)
                 ->where('is_completed',0)
                 ->where('is_bot',0)
-                ->orderBy('created_at','asc')
+                ->orderBy('updated_at','asc')
                 ->get(['id','shipment_id']);
         return $shipments;                
     }
