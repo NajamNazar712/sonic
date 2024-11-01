@@ -13144,10 +13144,10 @@ class AdminReportsController extends Controller
 
         $rv_report = RvShipmentAssignAgentDetails::join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
-        // ->join('shipments_journey as sj', function($join) {
-        //     $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
-        //          ->where('sj.shipper_status_id', '=', 13);
-        // })
+        ->join('shipments_journey as sj', function($join) {
+            $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
+                 ->where('sj.shipper_status_id', '=', 66);
+        })
         ->leftjoin('users', 'shipments.user_id', 'users.id')
         ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
         ->leftjoin('city_areas as area', 'uso.city_area_id', 'area.id')
@@ -13210,7 +13210,7 @@ class AdminReportsController extends Controller
         'sjj.created_at  as arrival_date','sj_destination.created_at as arrival_destination_date','sj_rvr.created_at as rvr_date_time',
         'rv_shipment_assign_agent_details.updated_at as action_date','sj_ofd.created_at as ofd_date_time','sj_reattempt.created_at as reattempt_time', 's_status.name as current_status', 'shipments.updated_at as current_status_date')
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
-        ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '=', 2)
+        ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
         ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
         ->groupBy('rv_shipment_assign_agent_details.shipment_id')
         ->orderBy('rv_shipment_assign_agent_details.id','desc');
