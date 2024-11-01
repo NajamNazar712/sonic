@@ -781,3 +781,34 @@
 {{--        </div>--}}
 {{--    </div>--}}
 {{--</div>--}}
+
+<div class="modal fade text-left" id="addBulkCity" data-backdrop="static" tabindex="-1" role="dialog"
+     aria-labelledby="addCity"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Add City (Bulk Upload)</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="addCityDiv">
+                <!-- File Upload Form -->
+                <form id="bulkCityForm" action="{{route('admin.management.addExcelCityHub')}}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="form-group">
+                        <label for="cityFile">Upload Excel File:</label>
+                        <input type="file" class="form-control" id="cityFile" name="add_city" accept=".xlsx, .xls, .csv" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+
+                <div class="form-group text-right">
+                    <a href="{{ asset('file/Trax Bulk City Add.xlsx') }}" class="btn btn-primary btn-md"><i class="la la-download"></i> Trax Bulk City Add Template Download</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
