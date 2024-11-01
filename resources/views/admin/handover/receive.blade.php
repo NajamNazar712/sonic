@@ -26,19 +26,12 @@
                                 <div class="form-group">
                                     <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
 
-
-                                <div class="form-group">
-                                    <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
-
                                     <!-- <div class="d-inline-block ml-1">
                                         <a href="#" id="camera_scan_initiate" tabindex="-1">
                                             <i class="ft-camera h1"></i>
                                         </a>
                                     </div> -->
                                 </div>
-
-                                <div class="form-group ml-1">
-                                    <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
 
                                 <div class="form-group ml-1">
                                     <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
@@ -58,26 +51,12 @@
                                 </tr>
                                 </thead>
                             </table>
-                            <table class="table table-bordered datatable" id="datatable" style="width:100%; z-index: 3;">
-                                <thead>
-                                <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Tracking Number</th>
-                                    <th class="border-primary border-darken-1">Shipper</th>
-                                    <th class="border-primary border-darken-1">Phone No</th>
-                                    <th class="border-primary border-darken-1">Pickup Date</th>
-                                    <th class="border-primary border-darken-1">Special Instruction</th>
-                                    <th class="border-primary border-darken-1"></th>
-                                </tr>
-                                </thead>
-                            </table>
 
                             <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.handover.receive.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
     
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
                                 
-                                <div class="form-group ml-1">
                                 <div class="form-group ml-1">
                                     <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
                                 </div>
@@ -155,8 +134,6 @@
         $(document).ready(function() {
 
            
-
-           
             var shipment_ids = [];
         
             $('#add_shipment_form input.tracking_number').focus();
@@ -195,16 +172,12 @@
             });
 
         
-
-        
             $('#add_shipment_form input.tracking_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
             });
-           
 
-           
             $('#add_shipment_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -229,6 +202,7 @@
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
                                 });
+                                $('#add_shipment_form button.add').prop('disabled', false);
                             } else {
                                 if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                                     $.ajax({
@@ -427,13 +401,10 @@
             $('#arrival_of_shipments_form').bind('submit', function(e) {
                 e.preventDefault(); 
                 
-                
                 $('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
                 var form = this;
             //    console.log('hub_id '+hub_id);
-            //    console.log('hub_id '+hub_id);
                 swal({
-                   
                    
                     text: 'Are you sure, Select Yes to receive the Handover?',
                     icon: 'warning',
@@ -509,10 +480,7 @@
             });
 
             
-
-            
         });
-
 
     </script>
 @endsection
