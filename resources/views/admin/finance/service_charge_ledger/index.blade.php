@@ -293,8 +293,15 @@
                         // Initialize DataTable with response data
                         var table = $('#datatable').DataTable({
                             data: response.data,
-                            dom: 'ltipr',
+                            dom: 'Bltipr', // Add 'B' for Buttons
                             searching: true,
+                            buttons: [
+                                {
+                                    extend: 'excelHtml5',
+                                    text: 'Export to Excel',
+                                    title: 'Data Export'
+                                }
+                            ],
                             lengthMenu: [[5000, 10000, 20000, 30000, -1], [5000, 10000, 20000, 30000, 'All']],
                             columns: [
                                 { data: 'created_at' },
