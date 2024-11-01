@@ -1328,6 +1328,7 @@ class AdminDashboardController extends Controller
     {
         $keyword = $request->search;
         $subSegment = $request->input('sub_segment_select', null);
+        $account_tye_id = $request->input('account_type_id', null);
         $shippers = User::where('name', 'like', '%' . $keyword . '%');
         
         if($type == 'active')
@@ -1340,6 +1341,9 @@ class AdminDashboardController extends Controller
         }
         if($subSegment){
             $shippers = $shippers->where('segment_id', $subSegment);
+        }
+        if($account_tye_id){
+            $shippers = $shippers->whereIn('account_type_id', $account_tye_id);
         }
 
         $shippers = $shippers->select('id','name as text')->take(10)->get()->toArray();

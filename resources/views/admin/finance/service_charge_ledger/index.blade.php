@@ -256,6 +256,7 @@
                 data: function (params) {
                     return {
                         search: params.term,
+                        account_type_id: [1],
                     }
                 },
                 processResults: function (data) {
