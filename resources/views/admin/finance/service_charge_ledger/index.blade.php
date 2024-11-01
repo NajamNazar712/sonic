@@ -1,5 +1,5 @@
 @extends('admin.layout.master')
-@section('title','Live Shipper Ledger')
+@section('title','Live Shipper Ledger (Reimbursement)')
 
 
 @section('content')
@@ -67,6 +67,7 @@
                                         <th class="border-primary border-darken-1">Debit</th>
                                         <th class="border-primary border-darken-1">Credit</th>
                                         <th class="border-primary border-darken-1">Balance</th>
+                                        <th class="border-primary border-darken-1">Liability</th>
                                         <th class="border-primary border-darken-1">Reference</th>
                                         <th class="border-primary border-darken-1">Payment Status</th>
                                     </tr>
@@ -77,6 +78,7 @@
                                     <th class="total-debit"></th>
                                     <th class="total-credit"></th>
                                     <th class="total-balance"></th>
+                                    <th class="total-liability"></th>
                                     <th colspan="2"></th>
                                 </tr>
                                 </tfoot>
@@ -311,6 +313,7 @@
                                 { data: 'debit' },
                                 { data: 'credit' },
                                 { data: 'balance' },
+                                { data: 'liability' },
                                 { data: 'reference_id' },
                                 { data: 'payment_status_journey' },
                             ],
@@ -324,25 +327,29 @@
                                         maximumFractionDigits: decimals
                                     });
                                 }
+
                                 // Calculate total debit and credit
                                 var totalDebit = api.column(4).data().reduce(function (a, b) {
-                                    console.log(parseFloat(b.replace(/,/g, '')));
-                                    return a + parseFloat(b.replace(/,/g, '') || 0);
+                                    return a + (parseFloat(typeof b === 'string' ? b.replace(/,/g, '') : b) || 0);
                                 }, 0);
 
                                 var totalCredit = api.column(5).data().reduce(function (a, b) {
-                                    return a + parseFloat(b.replace(/,/g, '') || 0);
+                                    return a + (parseFloat(typeof b === 'string' ? b.replace(/,/g, '') : b) || 0);
                                 }, 0);
 
                                 var totalBalance = parseFloat(api.column(6).data().toArray().slice(-1)[0].replace(/,/g, '') || 0);
 
+                                var totalLiability = api.column(7).data().reduce(function (a, b) {
+                                    return a + (parseFloat(typeof b === 'string' ? b.replace(/,/g, '') : b) || 0);
+                                }, 0);
 
                                 // Update footer with totals
                                 $(api.column(4).footer()).html(numberFormat(totalDebit));
                                 $(api.column(5).footer()).html(numberFormat(totalCredit));
                                 $(api.column(6).footer()).html(numberFormat(totalBalance));
-
+                                $(api.column(7).footer()).html(numberFormat(totalLiability));
                             },
+
                             initComplete: function () {
                                 var api = this.api();
                                 $('#datatable thead tr.search').remove();
