@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Live Shipper Ledger
+        Live Shipper Ledger (Reimbursement)
     </h1>
 
     <div class="card">
