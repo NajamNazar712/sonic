@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\Log;
 
 class BotCallDispatchSecod implements ShouldQueue
 {
@@ -52,6 +53,11 @@ class BotCallDispatchSecod implements ShouldQueue
             $response = $response->getBody()->getContents();
             $response = json_decode($response);
             WebhookLogController::zong_call_log($botRecordData['user_id'],  $status_code, $this->shipmentId, 2, json_encode($response));
+            if ($response->message == 'Data Not Found' && $response->code == 400) {
+                Log::channel('botCallJobLog')->info('s ' . 'Log after  respsone condition call second-record' . $response->message);
+
+                // $this->inValidEntityEntertain($botRecordData['post']['tracking_number']);
+            }
         } else {
             return json_encode(['status' => 0, 'message' => 'Shipment isn`t at the bot call prefernce']);
         }

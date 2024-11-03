@@ -205,9 +205,9 @@ class BotCallingController extends Controller
                 }
             } else {
                 
-                $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => 38, 'rv_assign_agent_status_id' => 9, 'call_count' => 1, 'call_to_id' => 1, 'call_status' => ($request->call_status == 'ANSWER' ? 'Connected' :  'Not Connected'),'end_date' => $request->end_date]);
-                $this->shipmentDifferentStatus($findShipmentId->id,$request);
-                RvShipmentTicket::where('shipment_id', $findShipmentId->id)->delete();
+                // $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => 38, 'rv_assign_agent_status_id' => 9, 'call_count' => 1, 'call_to_id' => 1, 'call_status' => ($request->call_status == 'ANSWER' ? 'Connected' :  'Not Connected'),'end_date' => $request->end_date]);
+                // $this->shipmentDifferentStatus($findShipmentId->id,$request);
+                // RvShipmentTicket::where('shipment_id', $findShipmentId->id)->delete();
                 
                 DB::table('api_zong_logs')->insert([
                     'name' => 'zong',
