@@ -44,6 +44,8 @@ class BotCallDispatch implements ShouldQueue
 
         //
         $botRecordData = $this->botCallingDataSet($this->shipmentId);
+        Log::channel('botCallJobLog')->info('s ' . 'Log after  respsone  call first-record' . json_encode($botRecordData));
+
         if ($botRecordData) {
             $client = new Client(['base_uri' => $botRecordData['base_uri'], 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
             $response = $client->post('', [
