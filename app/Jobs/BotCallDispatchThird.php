@@ -2,9 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Http\Controllers\Webhook\WebhookLogController;
 use App\Http\Traits\RvTrait;
-use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -41,25 +39,14 @@ class BotCallDispatchThird implements ShouldQueue
     {
 
         //
-        $botRecordData = $this->botCallingDataSet($this->shipmentId);
-        if ($botRecordData) {
-            $client = new Client(['base_uri' => $botRecordData['base_uri'], 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
-            $response = $client->post('', [
-                'json' => $botRecordData['post']
-            ]);
-            $status_code = $response->getStatusCode();
+        try {
+            $botRecordData = $this->botCallingDataSet($this->shipmentId,3);
+            return $botRecordData;
+        } catch (\Throwable $th) {
+            // Log::channel('botCallJobLog')->info(' Unresponsive Count ');
 
-            $response = $response->getBody()->getContents();
-            $response = json_decode($response);
-            if ($response->message == 'Data Not Found' && $status_code == 400) {
-                
-                // $this->inValidEntityEntertain($botRecordData['post']['tracking_number']);
-            }
-            WebhookLogController::zong_call_log($botRecordData['user_id'],  $status_code, $this->shipmentId, 3, json_encode($response));
-        }else{
-            return json_encode(['status'=>0,'message'=>'Shipment isn`t at the bot call prefernce']);
+            $this->createRvCronLog($th->getMessage() . ' Unresponsive Count ');
         }
-        
        
     }
 }

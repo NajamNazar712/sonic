@@ -36,10 +36,11 @@ use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
+use App\Http\Controllers\Webhook\WebhookLogController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\ShipmentStatusReason;
-
+use App\RvCronLog;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentTicket;
 use App\RvShipmentTicketDeleteTable;
@@ -2035,7 +2036,8 @@ trait RvTrait
         dispatch(new ProcessRvShipmentTicket($rvData));
     }
 
-    static function botCallingDataSet($shipmentId){
+    static function botCallingDataSet($shipmentId,$callCount){
+    
         if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
                 $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCalls';
@@ -2051,7 +2053,15 @@ trait RvTrait
                     'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,
                     'customer_name' => $shipment->consignee_name,
                 ];
-                return ['post' => $post, 'base_uri' => $base_uri, 'user_id' => $shipment->user_id];
+                $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
+                $response = $client->post('', [
+                    'json' => $post
+                ]);
+                $status_code = $response->getStatusCode();
+                $response = $response->getBody()->getContents();
+                $response = json_decode($response);
+                WebhookLogController::zong_call_log($shipment->user_id,  $status_code, $shipmentId, $callCount, json_encode($response));
+                return true;
             } else {
                 return null;
             }
@@ -2134,5 +2144,11 @@ trait RvTrait
         $status->updated_at = $request->end_date;
         $status->save();
         return $status;
+    }
+    public function createRvCronLog($message)
+    {
+        RvCronLog::create([
+            'message' => $message,
+        ]);
     }
 }
