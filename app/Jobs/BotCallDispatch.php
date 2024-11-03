@@ -44,7 +44,6 @@ class BotCallDispatch implements ShouldQueue
 
         //
         $botRecordData = $this->botCallingDataSet($this->shipmentId);
-        Log::channel('botCallJobLog')->info('s ' . 'Log after  respsone  call first-record' . json_encode($botRecordData));
 
         if ($botRecordData) {
             $client = new Client(['base_uri' => $botRecordData['base_uri'], 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
@@ -55,8 +54,9 @@ class BotCallDispatch implements ShouldQueue
 
             $response = $response->getBody()->getContents();
             $response = json_decode($response);
-            
-            
+
+            Log::channel('botCallJobLog')->info('s ' . 'Log after  respsone  call first-record' . json_encode($response));
+
             WebhookLogController::zong_call_log($botRecordData['user_id'],  $status_code, $this->shipmentId, 1, json_encode($response));
             // if ($response->message == 'Data Not Found' && $response->code == 400) {
             //     Log::channel('botCallJobLog')->info('s ' . 'Log after  respsone condition call first-record' . $response->message);
