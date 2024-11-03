@@ -1533,7 +1533,7 @@ trait RvTrait
                     }
                     else if($agent->agent_caller_type == 2)//These Agents will get shipments pending with second call only
                     {
-                        return $query->where('call_count' , '>', 1);
+                        return $query->where('call_count' , '>', 0);
                     }
                     else
                     {

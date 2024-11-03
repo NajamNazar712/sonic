@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
-@section('title','Service Ledger')
+@section('title','Live Shipper Ledger (Reimbursement)')
 
 
 @section('content')
     <h1 class="mb-1">
-        Service Ledger
+        Live Shipper Ledger (Reimbursement)
     </h1>
 
     <div class="card">
@@ -13,16 +13,16 @@
                 @include('admin.inc.messages')
                 <form action="{{ route('admin.finance.shipment_ledger.list') }}" method="GET" id="search_form">
                     <div class="row">
+
                         <div class="col-4">
-                            <label for="">Shipper Name</label>
-                            <select name="shippers" id="shippers" class="form-control select2" data-rule-required="true" data-msg-required="Shipper is required">
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                @endforeach
-                            </select>
-                            <span class="text-danger d-none" id="shipper_error">This field is required</span>
+                            <label for="">Select Shipper</label>
+                            <fieldset class="form-group">
+                                <select name="search_shipper[]" id="search_shipper" class="form-control select2"  data-rule-required="true" data-msg-required="Shipper is required">
+                                </select>
+                                <span class="text-danger d-none" id="shipper_error">This field is required</span>
+                            </fieldset>
                         </div>
-    
+
                         <div class="col-4">
                             <label for="">Date (From)</label>
                             <div class="form-group input-group mb-0">
@@ -31,11 +31,11 @@
                                         <span class="la la-calendar-o"></span>
                                     </span>
                                 </div>
-                                <input type="text" name="from_date" id="from_date" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Date (From)" data-rule-required="true" data-msg-required="From date is required">
+                                <input type="text" name="from_date" data-value="{{ Carbon\Carbon::today()->subMonth(1) }}" id="from_date" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Date (From)" data-rule-required="true" data-msg-required="From date is required">
                             </div>
                             <span class="text-danger d-none" id="from_date_error">This field is required</span>
                         </div>
-    
+
                         <div class="col-4">
                             <label for="">Date (To)</label>
                             <div class="form-group input-group mb-0">
@@ -44,7 +44,7 @@
                                         <span class="la la-calendar-o"></span>
                                     </span>
                                 </div>
-                                <input type="text" name="to_date" id="to_date" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Date (To)" data-rule-required="true" data-msg-required="To date is required">
+                                <input type="text" data-value="{{ Carbon\Carbon::today() }}" name="to_date" id="to_date" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Date (To)" data-rule-required="true" data-msg-required="To date is required">
                             </div>
                             <span class="text-danger d-none" id="to_date_error">This field is required</span>
                         </div>
@@ -61,14 +61,28 @@
                                 <thead>
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1">Date</th>
-                                        <th class="border-primary border-darken-1">Particulars</th>
+                                        <th class="border-primary border-darken-1">Tracking Number</th>
+                                        <th class="border-primary border-darken-1">Payment Type</th>
+                                        <th class="border-primary border-darken-1">Shipper</th>
                                         <th class="border-primary border-darken-1">Debit</th>
                                         <th class="border-primary border-darken-1">Credit</th>
                                         <th class="border-primary border-darken-1">Balance</th>
-                                        <th class="border-primary border-darken-1">Referenece</th>
-                                        <th class="border-primary border-darken-1">Number of shipments</th>
+                                        <th class="border-primary border-darken-1">Liability</th>
+                                        <th class="border-primary border-darken-1">Reference</th>
+                                        <th class="border-primary border-darken-1">Payment Status</th>
                                     </tr>
                                 </thead>
+                                <tfoot>
+                                <tr>
+                                    <th colspan="4">Total</th>
+                                    <th class="total-debit"></th>
+                                    <th class="total-credit"></th>
+                                    <th class="total-balance"></th>
+                                    <th class="total-liability"></th>
+                                    <th colspan="2"></th>
+                                </tr>
+                                </tfoot>
+
                             </table>
                         </div>
                     </div>
@@ -166,6 +180,43 @@
 
     <script>
     $(document).ready(function() {
+
+        $("body").delegate('.payment_print','click', function() {
+            var id = $(this).attr('data-id');
+            var shipment_type = $(this).attr('data-shipment_type');
+
+            if (shipment_type == 1) {
+                var url = '{!! route('admin.finance.done_payments.details_print') !!}';
+            } else {
+                var url = '{!! route('admin.finance.retail.done_payments.details_print') !!}';
+            }
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    '_token': '{{ csrf_token() }}',
+                    'id': id
+                }
+            })
+                .done(function(data) {
+                    var tab = window.open('', '_blank');
+
+                    if (!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    } else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
+        });
         // from date
         $('#search_form #from_date').pickadate({
             firstDay: 1,
@@ -196,25 +247,39 @@
             }
         });
 
-        $('#shippers').prepend('<option selected></option>').select2({
-            placeholder: 'Select a Shipper',
-            width: '100%',
-            allowClear: true
+        $('#search_shipper').select2({
+            width:'100%',
+            placeholder:"Select Shipper",
+            allowClear:true,
+            minimumInputLength: 2,
+            ajax: {
+                dataType: 'json',
+                url:  '{!! route('admin.accounts.shipper_names.dropdown',['type'=>'active']) !!}',
+                data: function (params) {
+                    return {
+                        search: params.term,
+                        account_type_id: [1],
+                    }
+                },
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                },
+                delay: 700,
+            }
         });
 
         $('#search_btn').on('click', function () {
-
-            var shippers = $('#shippers').val();
+            var shippers = $('#search_shipper').val();
             var from_date = $('#from_date').val();
             var to_date = $('#to_date').val();
 
             if (shippers == '' || from_date == '' || to_date == '') {
                 $('#shipper_error, #from_date_error, #to_date_error').removeClass('d-none');
-            }
-
-            else {
+            } else {
                 var formData = {
-                    shippers: $('#shippers').val(),
+                    shippers: $('#search_shipper').val(),
                     from_date: $('#from_date').val(),
                     to_date: $('#to_date').val()
                 };
@@ -226,24 +291,65 @@
                         if ($.fn.DataTable.isDataTable('#datatable')) {
                             $('#datatable').DataTable().destroy();
                         }
+
+                        // Initialize DataTable with response data
                         var table = $('#datatable').DataTable({
                             data: response.data,
-                            dom: 'ltipr',
+                            dom: 'Bltipr', // Add 'B' for Buttons
                             searching: true,
+                            buttons: [
+                                {
+                                    extend: 'excelHtml5',
+                                    text: 'Export to Excel',
+                                    title: 'Data Export'
+                                }
+                            ],
+                            lengthMenu: [[5000, 10000, 20000, 30000, -1], [5000, 10000, 20000, 30000, 'All']],
                             columns: [
-                                { data: 'shipment_book_date' },
-                                { data: 'particulars' },
+                                { data: 'created_at' },
+                                { data: 'tracking_number' },
+                                { data: 'type' },
+                                { data: 'user_name' },
                                 { data: 'debit' },
                                 { data: 'credit' },
                                 { data: 'balance' },
+                                { data: 'liability' },
                                 { data: 'reference_id' },
-                                {
-                                    data: 'number_of_shipments',
-                                    render: function (data, type, row) {
-                                        return '<a href="#" class="shipment-link" data-id="' + row.id + '">' + data + '</a>';
-                                    }
-                                }
+                                { data: 'payment_status_journey' },
                             ],
+                            footerCallback: function (row, data, start, end, display) {
+                                var api = this.api();
+
+                                // Helper function to format numbers as needed
+                                function numberFormat(num, decimals = 2) {
+                                    return num.toLocaleString(undefined, {
+                                        minimumFractionDigits: decimals,
+                                        maximumFractionDigits: decimals
+                                    });
+                                }
+
+                                // Calculate total debit and credit
+                                var totalDebit = api.column(4).data().reduce(function (a, b) {
+                                    return a + (parseFloat(typeof b === 'string' ? b.replace(/,/g, '') : b) || 0);
+                                }, 0);
+
+                                var totalCredit = api.column(5).data().reduce(function (a, b) {
+                                    return a + (parseFloat(typeof b === 'string' ? b.replace(/,/g, '') : b) || 0);
+                                }, 0);
+
+                                var totalBalance = parseFloat(api.column(6).data().toArray().slice(-1)[0].replace(/,/g, '') || 0);
+
+                                var totalLiability = api.column(7).data().reduce(function (a, b) {
+                                    return a + (parseFloat(typeof b === 'string' ? b.replace(/,/g, '') : b) || 0);
+                                }, 0);
+
+                                // Update footer with totals
+                                $(api.column(4).footer()).html(numberFormat(totalDebit));
+                                $(api.column(5).footer()).html(numberFormat(totalCredit));
+                                $(api.column(6).footer()).html(numberFormat(totalBalance));
+                                $(api.column(7).footer()).html(numberFormat(totalLiability));
+                            },
+
                             initComplete: function () {
                                 var api = this.api();
                                 $('#datatable thead tr.search').remove();
@@ -251,15 +357,15 @@
                                 api.columns().every(function (index) {
                                     var column = this;
                                     var inputHTML = `
-                                        <td style="padding:5px;" class="border-primary border-lighten-2">
-                                            <fieldset class="form-group m-0 position-relative has-icon-right">
-                                                <input type="text" class="form-control form-control-sm input-sm primary" placeholder="Search">
-                                                <div class="form-control-position primary">
-                                                    <i class="la la-search"></i>
-                                                </div>
-                                            </fieldset>
-                                        </td>
-                                    `;
+                                <td style="padding:5px;" class="border-primary border-lighten-2">
+                                    <fieldset class="form-group m-0 position-relative has-icon-right">
+                                        <input type="text" class="form-control form-control-sm input-sm primary" placeholder="Search">
+                                        <div class="form-control-position primary">
+                                            <i class="la la-search"></i>
+                                        </div>
+                                    </fieldset>
+                                </td>
+                            `;
                                     var input = $(inputHTML).appendTo(searchRow);
                                     $('input', input).on('keyup change clear', function () {
                                         if (column.search() !== this.value) {
@@ -267,38 +373,25 @@
                                         }
                                     });
                                 });
-
-                                // Add click event for shipment links
-                                $('#datatable').on('click', 'a.shipment-link', function (e) {
-                                    e.preventDefault();
-                                    var shipmentId = $(this).data('id');
-                                    var shipmentData = response.data.find(item => item.id == shipmentId);
-
-                                    $('#tracking-number').text(shipmentData.tracking_number);
-                                    $('#origin').text(shipmentData.origin_city_name);
-                                    $('#destination').text(shipmentData.destination_city_name);
-                                    $('#cod-amount').text(shipmentData.cod_amount);
-                                    $('#type-of-charges').text(shipmentData.type_of_charges);
-                                    $('#weight-charges').text(shipmentData.weight_charges);
-                                    $('#fuel-surcharge').text(shipmentData.fuel_surcharge);
-                                    $('#gst').text(shipmentData.gst);
-                                    $('#net-payable').text(shipmentData.net_payable);
-
-                                    $('#shipmentModal').modal('show');
-                                });
-
                             }
                         });
+
+
                     }
                 });
             }
-
-
         });
 
+// Helper function to format numbers with 2 decimal places
+        function number_format(number, decimals) {
+            return Number(number).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
 
 
-    }); 
+
+
+
+    });
     </script>
 
 @endsection

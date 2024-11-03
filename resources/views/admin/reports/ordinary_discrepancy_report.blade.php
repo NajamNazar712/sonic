@@ -517,7 +517,7 @@
                     { data:'cod_value' ,name: 'shipments.amount', class: 'align-middle cod_value'},
                     { data:'shipment_content_by_shipper', name: 'si.description', class: 'align-middle shipment_content_by_shipper'},
                     { data:'images' ,name: 'rdinary_discrepancy_reports.picture_path', class: 'align-middle images'},
-                    { data:'quantity_by_admin' ,name: 'ordinary_discrepancy_reports.quantity', class: 'align-middle quantity_by_admin text-center'},
+                    { data:'quantity_by_admin' ,name: 'is.quantity', class: 'align-middle quantity_by_admin text-center'},
                     { data:'remarks_by_admin' ,name: 'ordinary_discrepancy_reports.remarks', class: 'align-middle remarks_by_admin'},
                     { data:'odr_nature' ,name: 'odr_nature', class: 'align-middle odr_nature'},
                     { data:'created_at' ,name: 'ordinary_discrepancy_reports.created_at', class: 'align-middle created_at'},

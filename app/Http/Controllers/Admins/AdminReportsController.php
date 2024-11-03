@@ -6764,7 +6764,7 @@ class AdminReportsController extends Controller
             ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 's.id')
             ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
             ->leftjoin('segments as seg','u.segment_id','seg.id')
-            ->leftjoin('shipment_items as si','si.shipment_id','seg.id')
+            ->leftjoin('shipment_items as si','si.shipment_id','s.id')
             ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
             ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
             ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
