@@ -2139,6 +2139,7 @@
                                         '<table class="table table-sm table-borderless datatable pickup_history">';
                                     shipment += '<thead>';
                                     shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Bag Number</strong></th>';
                                     shipment += '<th><strong>Handover Id</strong></th>';
                                     shipment += '<th><strong>Status</strong></th>';
                                     shipment += '<th><strong>Location</strong></th>';
@@ -2156,9 +2157,9 @@
                                     }
                                         
                                         shipment += '<tr>';
+                                        shipment += '<td>' + (history.bag_number !== null ? history.bag_number : '-') + '</td>';
                                         shipment += '<td>' + history.handover_id + '</td>';
                                         // shipment += '<td>' + history.bag_number.bag_number + '</td>';
-                                        shipment += '<td>' + (history.bag_number !== null ? history.bag_number : '-') + '</td>';
 
 
                                         shipment += '<td>' + history.status + '</td>';
