@@ -797,17 +797,23 @@ class AdminShipmentHandoverController extends Controller
         ->leftJoin('city_areas as caf', 'caf.id', '=', 'ssj_f.area_id')
         ->leftJoin('city_areas as car', 'car.id', '=', 'ssj_r.area_id')
         ->leftJoin('handover_shipments', 'handover_shipments.handover_id', '=', 'handovers.id')
-        ->leftJoin(DB::raw('(
-            SELECT sj.id, sj.shipment_id, sj.shipper_status_id
-            FROM shipments_journey sj
-            JOIN (
-                SELECT shipment_id, MAX(created_at) as max_created_at
-                FROM shipments_journey
-                GROUP BY shipment_id
-            ) latest_journey 
-            ON sj.shipment_id = latest_journey.shipment_id 
-            AND sj.created_at = latest_journey.max_created_at
-          ) as latest_journey'), 'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
+//        ->leftJoin(DB::raw('(
+//            SELECT sj.id, sj.shipment_id, sj.shipper_status_id
+//            FROM shipments_journey sj
+//            JOIN (
+//                SELECT shipment_id, MAX(created_at) as max_created_at
+//                FROM shipments_journey
+//                GROUP BY shipment_id
+//            ) latest_journey
+//            ON sj.shipment_id = latest_journey.shipment_id
+//            AND sj.created_at = latest_journey.max_created_at
+//          ) as latest_journey'), 'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
+        ->leftjoin('shipments_journey as sjj', function ($join) {
+            $join->on('sjj.shipment_id', '=', 's.id')
+                ->whereIn('sjj.shipper_status_id', [18, 51])
+                ->where('sjj.id', '=',
+                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)'));
+        })
         ->leftJoin('excess_handover_shipments', function ($join) {
             $join->on('excess_handover_shipments.handover_id', '=', 'handovers.id')
                 ->where('excess_handover_shipments.excess_shipment', '=', 1);
@@ -825,14 +831,12 @@ class AdminShipmentHandoverController extends Controller
             'ssj_f.location_status as forward_location_status', 'ssj_r.location_status as received_location_status',
             'caf.name as forwarded_area_name', 'car.name as received_area_name',
             'handovers.bag_number as bag_number',
-
-            // Added hyphen for shipments that have no bag numbers to them 
             DB::raw("
                 CASE
                     WHEN handovers.bag_number IS NULL THEN '-'
-                    WHEN latest_journey.shipper_status_id IN ($normal_status_ids_str) THEN 'Normal'
-                    WHEN latest_journey.shipper_status_id IN ($return_status_ids_str) THEN 'Return'
-                    ELSE '-'  
+                    WHEN sjj.shipper_status_id IN ($normal_status_ids_str) THEN 'Normal'
+                    WHEN sjj.shipper_status_id IN ($return_status_ids_str) THEN 'Return'
+                    ELSE '-'
                 END as bag_type
             "),
             'excess_handover_shipments.shipment_ids as excess_shipments'
@@ -847,8 +851,7 @@ class AdminShipmentHandoverController extends Controller
         //             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id ))')
         //         );
         // })
-        $handover_list->whereNotIn('latest_journey.shipper_status_id', [18, 51])
-        ->where('s.tracking_number', $tracking_number);  // Replaces HAVING clause with WHERE
+        $handover_list->where('s.tracking_number', $tracking_number);  
     }
     $handover_list->whereBetween('handovers.created_at', [$from, $to])
         ->orderBy('handovers.id', 'DESC')
@@ -866,7 +869,6 @@ class AdminShipmentHandoverController extends Controller
                   return 0;
               }
             })
-
             ->editColumn('excess_shipments', function($handover_list) {
               $excessCount = ExcessHandoverShipment::where('handover_id', $handover_list->handover_id)
               ->where('excess_shipment', 1)
