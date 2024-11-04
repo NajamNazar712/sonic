@@ -831,14 +831,14 @@ class AdminShipmentHandoverController extends Controller
             'ssj_f.location_status as forward_location_status', 'ssj_r.location_status as received_location_status',
             'caf.name as forwarded_area_name', 'car.name as received_area_name',
             'handovers.bag_number as bag_number',
-            DB::raw("
-                CASE
-                    WHEN handovers.bag_number IS NULL THEN '-'
-                    WHEN sjj.shipper_status_id IN ($normal_status_ids_str) THEN 'Normal'
-                    WHEN sjj.shipper_status_id IN ($return_status_ids_str) THEN 'Return'
-                    ELSE '-'
-                END as bag_type
-            "),
+//            DB::raw("
+//                CASE
+//                    WHEN handovers.bag_number IS NULL THEN '-'
+//                    WHEN sjj.shipper_status_id IN ($normal_status_ids_str) THEN 'Normal'
+//                    WHEN sjj.shipper_status_id IN ($return_status_ids_str) THEN 'Return'
+//                    ELSE '-'
+//                END as bag_type
+//            "),
             'excess_handover_shipments.shipment_ids as excess_shipments'
         ]);
     
@@ -851,7 +851,7 @@ class AdminShipmentHandoverController extends Controller
         //             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id ))')
         //         );
         // })
-        $handover_list->where('s.tracking_number', $tracking_number);  
+        $handover_list->where('s.tracking_number', $tracking_number);
     }
     $handover_list->whereBetween('handovers.created_at', [$from, $to])
         ->orderBy('handovers.id', 'DESC')
@@ -878,6 +878,21 @@ class AdminShipmentHandoverController extends Controller
               } else {
                   return 0;
               }
+            })
+
+            ->addColumn('bag_type', function ($handover) use($normal_status_ids,$return_status_ids) {
+                if (is_null($handover->bag_number)) {
+                    return '-';
+                }
+
+
+                if (in_array($handover->shipper_status_id, $normal_status_ids)) {
+                    return 'Normal';
+                } elseif (in_array($handover->shipper_status_id, $return_status_ids)) {
+                    return 'Return';
+                } else {
+                    return '-';
+                }
             })
 
             ->editColumn('from', function($handover_list) {
