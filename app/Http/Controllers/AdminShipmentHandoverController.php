@@ -831,6 +831,7 @@ class AdminShipmentHandoverController extends Controller
             'ssj_f.location_status as forward_location_status', 'ssj_r.location_status as received_location_status',
             'caf.name as forwarded_area_name', 'car.name as received_area_name',
             'handovers.bag_number as bag_number',
+            'hss.shipment_id',
 //            DB::raw("
 //                CASE
 //                    WHEN handovers.bag_number IS NULL THEN '-'
@@ -884,11 +885,12 @@ class AdminShipmentHandoverController extends Controller
                 if (is_null($handover->bag_number)) {
                     return '-';
                 }
-
-
-                if (in_array($handover->shipper_status_id, $normal_status_ids)) {
+                $handover_shipment_status = Shipment::where('id', $handover->shipment_id)
+                ->select(['shipper_status_id'])
+                ->first();
+                if (in_array($handover_shipment_status->shipper_status_id, $normal_status_ids)) {
                     return 'Normal';
-                } elseif (in_array($handover->shipper_status_id, $return_status_ids)) {
+                } elseif (in_array($handover_shipment_status->shipper_status_id, $return_status_ids)) {
                     return 'Return';
                 } else {
                     return '-';
