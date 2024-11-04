@@ -19974,6 +19974,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
      }
     public function service_charges_ledger_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 813);
         return view('admin.finance.service_charge_ledger.index');
     }
 
