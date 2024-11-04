@@ -33,7 +33,7 @@ use App\Http\Models\CityHistory;
 use App\Http\Models\CityOsaRate;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\SaleTierTag;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\Facades\DataTables;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\PaymentCycle;
@@ -10205,6 +10205,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 }
             })
+            ->rawColumns(['lead_id_link', 'duplication', 'id_padded', 'action'])
             ->make(true);
 
     }
