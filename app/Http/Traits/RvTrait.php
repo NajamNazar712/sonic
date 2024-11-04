@@ -39,7 +39,7 @@ use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\ShipmentStatusReason;
-
+use App\RvCronLog;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentTicket;
 use App\RvShipmentTicketDeleteTable;
@@ -2036,9 +2036,10 @@ trait RvTrait
     }
 
     static function botCallingDataSet($shipmentId){
+    
         if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
-                $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCalls';
+                $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
                 RvShipmentTicket::where('shipment_id', $shipmentId)->update(['in_progress' => 1]);
                 $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
 
@@ -2134,5 +2135,11 @@ trait RvTrait
         $status->updated_at = $request->end_date;
         $status->save();
         return $status;
+    }
+    public function createRvCronLog($message)
+    {
+        RvCronLog::create([
+            'message' => $message,
+        ]);
     }
 }
