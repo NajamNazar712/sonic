@@ -17,7 +17,7 @@ class ServiceLedgerSeeder extends Seeder
             array('id' => 813, 'screen_name' => 'Service Ledger - View', 'action'=> 'View')
         ));
         DB::table('module_permissions')->insert(array(
-            array('id' => 1017, 'name' => 'CSAT Cases-Type Setting - View', 'module_id' => 8),
+            array('id' => 1017, 'name' => 'Service Ledger - View - View', 'module_id' => 8),
 
         ));
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
