@@ -1913,6 +1913,15 @@ class AdminTrackingController extends Controller
 
                                 
                                 $journey_details = array();
+
+                                // bag number
+                                $bag_number = Handover::where('id', $journey->handover_id)->select('bag_number')->first();
+                                if (!$bag_number || is_null($bag_number->bag_number)) {
+                                    $journey_details['bag_number'] = '-';
+                                } else {
+                                    $journey_details['bag_number'] = $bag_number->bag_number;
+                                }
+                                // $journey_details['bag_number'] = $bag_number->bag_number;
                                 $journey_details['handover_id'] = $journey->handover_id;
                                 $journey_details['status'] = $journey->my_status->name;
                                 $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
