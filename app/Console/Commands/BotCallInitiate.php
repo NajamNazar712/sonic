@@ -81,7 +81,7 @@ class BotCallInitiate extends Command
             }
             
             $shipmentThirds = RvShipmentAssignAgent::join('shipments as s', 's.id', 'rv_shipment_assign_agents.shipment_id')->where(['agent_id' => 4620, ['unresponsive_attempt_time', '>=', $timeStart], ['unresponsive_attempt_time', '<=', $timeEnd], 'call_count' => 2, 'rv_assign_agent_status_id' => 6])->pluck('shipment_id');
-            // Log::channel('botCallJobLog')->info('s ' . 'Log after  shipmentThirds call  record' . count($shipmentThirds));
+            Log::channel('botCallJobLog')->info('s ' . 'Log after  shipmentThirds call  record' . count($shipmentThirds));
            
             // $third_count =1;
             if(count($shipmentThirds) > 0){
