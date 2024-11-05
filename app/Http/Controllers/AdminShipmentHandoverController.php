@@ -757,8 +757,9 @@ class AdminShipmentHandoverController extends Controller
     
     $normal_status_ids_str = implode(',', $normal_status_ids);
     $return_status_ids_str = implode(',', $return_status_ids);
-    
-    $handover_list = Handover::join('cities as c', 'c.id', '=', 'handovers.hub')
+
+    $handover_list = DB::connection('reports')->table('handovers')
+        ->leftjoin('cities as c','c.id','=','handovers.hub')
         ->leftJoin('admins as a', function ($join) {
             $join->on('a.id', '=', 'handovers.created_by')
                 ->where('a.role_id', '!=', 1);
@@ -767,11 +768,11 @@ class AdminShipmentHandoverController extends Controller
             $join->on('ad.id', '=', 'handovers.received_by')
                 ->where('ad.role_id', '!=', 1);
         })
-        ->join('handover_statuses as hs', 'hs.id', '=', 'handovers.status_id')
-        ->join('handover_responsibilities as hr', 'hr.id', '=', 'handovers.from')
-        ->join('handover_responsibilities as hor', 'hor.id', '=', 'handovers.to')
-        ->join('handover_shipments as hss', 'hss.handover_id', '=', 'handovers.id')
-        ->join('shipments as s', 's.id', '=', 'hss.shipment_id')
+        ->join('handover_statuses as hs','hs.id','=','handovers.status_id')
+        ->join('handover_responsibilities as hr','hr.id','=','handovers.from')
+        ->join('handover_responsibilities as hor','hor.id','=','handovers.to')
+        ->join('handover_shipments as hss','hss.handover_id','=','handovers.id')
+        ->join('shipments as s','s.id','=','hss.shipment_id')
         ->leftJoin('city_areas as c_from', 'c_from.id', '=', 'hr.city_area_id')
         ->leftJoin('city_areas as c_to', 'c_to.id', '=', 'hor.city_area_id')
         ->leftJoin('handover_shipments_journeys as hsj_f', function ($join) {
