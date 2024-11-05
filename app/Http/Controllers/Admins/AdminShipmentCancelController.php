@@ -37,7 +37,7 @@ use Auth;
 use DB;
 
 use Carbon\Carbon;
-use Yajra\DataTables\Facades\DataTables;
+use Yajra\DataTables\DataTables;
 
 class AdminShipmentCancelController extends Controller
 {

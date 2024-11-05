@@ -15,7 +15,7 @@ use App\Http\Models\QAEvaluationActivity;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Yajra\Datatables\Facades\Datatables;
+use Yajra\DataTables\DataTables;
 
 class QAEvaluationController extends Controller
 {

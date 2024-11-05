@@ -9,7 +9,7 @@ use App\Http\Models\Admin\CxTraining;
 use App\Http\Models\Admin\CxTrainingUnit;
 use Auth;
 use Carbon\Carbon;
-use Yajra\Datatables\Facades\Datatables;
+use Yajra\DataTables\DataTables;
 
 
 class QualityAssuranceController extends Controller

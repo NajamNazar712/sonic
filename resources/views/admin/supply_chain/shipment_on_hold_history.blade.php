@@ -92,6 +92,7 @@
                             head.push('Added By');
                             head.push('On-Hold');
                             head.push('Created At');
+                            head.push('On-Hold');
 
                             $.each(result.data, function(index, values) {
                                 row = [];

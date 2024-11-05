@@ -393,8 +393,19 @@ class AdminRunnerController extends Controller
         ->leftjoin('fleets as f', 'master_cargoes.fleet_id','=','f.id')
         ->leftjoin('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
         ->select('or.name as origin','des.name as destination','master_cargoes.id','master_cargoes.driver_name', 'master_cargoes.bags','tmv.name as vendor','rm.route_title as route_title','f.reg_number as vehicle');
-        
-         $datatables = Datatables::of($master_cargo)
+
+
+        if($route_managemnt = $request->get('search_route_managemnt')){
+            $master_cargo->where('rm.id', '=', $route_managemnt);
+        }
+
+        if($fleet = $request->get('search_fleet')){
+            $master_cargo->where('f.id', '=', $fleet);
+        }
+
+        $master_cargo->where('f.id', '<>', 0)->where('rm.id','<>',0);
+
+        $datatables = Datatables::of($master_cargo)
             ->addColumn('bags',function ($master_cargo){
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->bags . '</button>';
           
@@ -402,17 +413,8 @@ class AdminRunnerController extends Controller
             })
             ->addColumn('id_padded_link', function ($master_cargo) {
                 return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
-            });
+            })->rawColumns(['id_padded_link','bags']);
 
-            if($route_managemnt = $request->get('search_route_managemnt')){
-                $datatables->where('rm.id', '=', $route_managemnt);
-            }
-    
-            if($fleet = $request->get('search_fleet')){
-                $datatables->where('f.id', '=', $fleet);
-            }
-
-            $datatables->where('f.id', '<>', 0)->where('rm.id','<>',0);
 
         return $datatables->make(true);
             

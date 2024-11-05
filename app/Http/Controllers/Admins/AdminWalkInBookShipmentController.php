@@ -47,7 +47,7 @@ use App\Http\Models\WarehouseStock;
 use App\Http\Models\Warehouse\Warehouse;
 use Validator;
 use Illuminate\Validation\Rule;
-use Yajra\DataTables\Facades\DataTables;
+use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;

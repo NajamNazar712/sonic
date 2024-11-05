@@ -19,7 +19,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Yajra\DataTables\Facades\DataTables;
+use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\CorporateDefaultDiscountCharge;

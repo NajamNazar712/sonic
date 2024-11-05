@@ -22,7 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use IncidenceMonitoringNCLevelSeeder;
 use Yajra\Datatables\Datatables as DatatablesDatatables;
-use Yajra\Datatables\Facades\Datatables;
+use Yajra\DataTables\DataTables;
 
 class IncidenceMonitoringController extends Controller
 {
