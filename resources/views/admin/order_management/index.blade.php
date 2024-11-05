@@ -34,7 +34,7 @@
                                       </span>
                                 </div>
                                 <input type="text" name="booking_from_date"
-                                       class="form-control bg-primary border-primary white rounded-right"
+                                       class="form-control bg-primary border-primary white rounded-right"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}"
                                        id="booking_from_date" placeholder="Booking Date From">
                             </div>
                         </div>
@@ -46,7 +46,7 @@
                                         </span>
                                 </div>
                                 <input type="text" name="booking_to_date"
-                                       class="form-control bg-primary border-primary white rounded-right"
+                                       class="form-control bg-primary border-primary white rounded-right" data-value="{{ \Carbon\Carbon::now() }}"
                                        id="booking_to_date" placeholder="Booking Date To">
                             </div>
                         </div>
