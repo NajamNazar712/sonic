@@ -841,7 +841,8 @@ class AdminShipmentHandoverController extends Controller
 //                    ELSE '-'
 //                END as bag_type
 //            "),
-            'excess_handover_shipments.shipment_ids as excess_shipments'
+//            'excess_handover_shipments.shipment_ids as excess_shipments',
+            DB::raw("COUNT(excess_handover_shipments.id) AS excess_shipments")
         ]);
     
     if ($tracking_number = $request->get('search_tracking')) {
@@ -872,11 +873,9 @@ class AdminShipmentHandoverController extends Controller
               }
             })
             ->editColumn('excess_shipments', function($handover_list) {
-              $excessCount = ExcessHandoverShipment::where('handover_id', $handover_list->handover_id)
-              ->where('excess_shipment', 1)
-              ->count();
-              if ($excessCount != 0) {
-                  return '<button class="btn btn-sm btn-outline-info align-middle">' . $excessCount . '</button>';
+
+              if ($handover_list->excess_shipments > 0) {
+                  return '<button class="btn btn-sm btn-outline-info align-middle">' . $handover_list->excess_shipments . '</button>';
               } else {
                   return 0;
               }
