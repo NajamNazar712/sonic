@@ -821,7 +821,7 @@ class AdminShipmentHandoverController extends Controller
         })
         ->select([
             'handovers.id as handover_id', 'a.name as created_by', 'a.id as created_by_id',
-            'ad.name as received_by', 'ad.id as received_by_id',
+            'ad.name as received_by', 'ad.id as received_by_id','s.shipper_status_id',
             'hr.admin_id as from_admin_id', 'hor.admin_id as to_admin_id', 'c.name as hub',
             'handovers.shipments as shipment_count', 'handovers.shipments as total_shipments', 'hs.name as status',
             'handovers.received as received_shipments', 'hr.name as from_name', 'hor.name as to_name',
@@ -886,12 +886,9 @@ class AdminShipmentHandoverController extends Controller
                 if (is_null($handover->bag_number)) {
                     return '-';
                 }
-                $handover_shipment_status = Shipment::where('id', $handover->shipment_id)
-                ->select(['shipper_status_id'])
-                ->first();
-                if (in_array($handover_shipment_status->shipper_status_id, $normal_status_ids)) {
+                if (in_array($handover->shipper_status_id, $normal_status_ids)) {
                     return 'Normal';
-                } elseif (in_array($handover_shipment_status->shipper_status_id, $return_status_ids)) {
+                } elseif (in_array($handover->shipper_status_id, $return_status_ids)) {
                     return 'Return';
                 } else {
                     return '-';
