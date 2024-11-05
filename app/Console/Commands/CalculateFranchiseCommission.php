@@ -103,7 +103,7 @@ class CalculateFranchiseCommission extends Command
                 'rf.cnic as franchise_cnic',
                 'rf.phone_no as franchise_phone',
 
-                'usi.pickup_address as address',
+                'usi.pickup_address as franchise_address',
 
                'rfpp.product_percentage as product_percentage',
 
