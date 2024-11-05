@@ -462,7 +462,9 @@ class AdminPackagingMaterialController extends Controller
             }
 
     //
-            return $datatables->make(true);
+            return $datatables
+            ->rawColumns(['tracking_number_link', 'total_quantity_button', 'action'])
+            ->make(true);
     }
 
     public function request_update(Request $request)
@@ -1813,6 +1815,7 @@ class AdminPackagingMaterialController extends Controller
                 }
                 return $dropdown;
             })
+            ->rawColumns(['associated_hubs_button', 'action'])
             ->make(true);
     }
 
