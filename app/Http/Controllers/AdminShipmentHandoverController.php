@@ -809,12 +809,12 @@ class AdminShipmentHandoverController extends Controller
 //            ON sj.shipment_id = latest_journey.shipment_id
 //            AND sj.created_at = latest_journey.max_created_at
 //          ) as latest_journey'), 'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
-        ->leftjoin('shipments_journey as sjj', function ($join) {
-            $join->on('sjj.shipment_id', '=', 's.id')
-                ->whereIn('sjj.shipper_status_id', [18, 51])
-                ->where('sjj.id', '=',
-                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)'));
-        })
+//        ->leftjoin('shipments_journey as sjj', function ($join) {
+//            $join->on('sjj.shipment_id', '=', 's.id')
+//                ->whereIn('sjj.shipper_status_id', [18, 51])
+//                ->where('sjj.id', '=',
+//                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)'));
+//        })
         ->leftJoin('excess_handover_shipments', function ($join) {
             $join->on('excess_handover_shipments.handover_id', '=', 'handovers.id')
                 ->where('excess_handover_shipments.excess_shipment', '=', 1);
