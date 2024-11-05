@@ -18669,6 +18669,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     if($invoice_shipment->type == 3) {
                         $total_weight_charges[$origin] += $shipment->weight_charges;
                         $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                        $total_faf_charges[$origin] += $faf_charges;
                     }else{
                         if ($shipment->packaging_material_request) {
                             $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
@@ -18683,12 +18684,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         if(!$arrival_charges_applied){
                             $total_weight_charges[$origin] += $shipment->weight_charges;
                             $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                            $total_faf_charges[$origin] += $faf_charges;
                         }
                     }
-
-
-
-                    $total_faf_charges[$origin] += $faf_charges;
                 } else {
                     $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
                 }
