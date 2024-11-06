@@ -387,7 +387,7 @@
                                         return meta.row + 1;
                                     }
                                 },
-                                { data: 'trax_center_name' },
+                                { data: 'retail_user_name' },
                                 { data: 'franchise_code' },
                                 { data: 'trax_center_cnic' },
                                 { data: 'trax_center_phone' },

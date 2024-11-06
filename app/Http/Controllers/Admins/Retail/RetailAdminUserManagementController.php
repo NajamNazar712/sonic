@@ -1182,7 +1182,7 @@ class RetailAdminUserManagementController extends Controller
         $paid_status = $request->paid_status;
         $query = RetailUserCommission::where('month', $month);
         if (!empty($franchise)) {
-            $query->where('franchise_id', $franchise);
+            $query->where('retail_user_id', $franchise);
         }
         if (!empty($paid_status) || $paid_status == '0') {
             $query->where('is_paid', $paid_status);

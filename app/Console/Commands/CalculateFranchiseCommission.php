@@ -210,7 +210,6 @@ class CalculateFranchiseCommission extends Command
             $join->on('rc.id', '=', 'ru.category_id')
             ->where('ru.category', '=', DB::raw(2));
         })
-        ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
         ->join('retail_shipping_modes as rsm', 'rsm.id', '=', 'rs.shipping_mode')
         ->join('user_shipping_infos AS usi', 'rc.pickup_address_id', '=', 'usi.id')
         ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'shipments.pickup_address_id')
@@ -247,7 +246,7 @@ class CalculateFranchiseCommission extends Command
             'rc.name as retail_trax_name',
             'rc.cnic as retail_trax_cnic',
             'rc.phone_no as retail_trax_phone',
-
+            'ru.name as user_name',
             'usi.pickup_address as retail_trax_address',
             'rupp.product_percentage as product_percentage',
             // 'rfc.franchise_deduction as franchise_deduction',
@@ -275,6 +274,7 @@ class CalculateFranchiseCommission extends Command
             $bulkInsertData[] = [
                 'franchise_id' => $shipment->retail_trax_id,
                 'retail_user_id' => $shipment->user_id,
+                'retail_user_name' => $shipment->user_name,
                 'franchise_code' => $shipment->retail_trax_code,
                 'trax_center_name' => $shipment->retail_trax_name,
                 'trax_center_cnic' => $shipment->retail_trax_cnic,
