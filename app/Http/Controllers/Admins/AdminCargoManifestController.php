@@ -7407,6 +7407,7 @@ class AdminCargoManifestController extends Controller
                 $dropdown = '<a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a>';
                 return $dropdown;
             })
+            ->rawColumns(['remarks','action'])
             ->make(true);
     }
 
