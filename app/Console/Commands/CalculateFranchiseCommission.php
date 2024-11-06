@@ -126,8 +126,8 @@ class CalculateFranchiseCommission extends Command
             ->get();
         foreach ($shipments as $shipment) {
             $product_percentage_amount = $shipment->product_percentage / 100;
-            $weight_charges = $shipment->total_charges - $shipment->gst_amount;
-            $commission = $product_percentage_amount * $weight_charges;
+            // $weight_charges = $shipment->total_charges - $shipment->gst_amount;
+            $commission = $product_percentage_amount * $shipment->weight_charges;
             RetailFranchiseCommission::create([
                 'franchise_id' => $shipment->franchise_id,
                 'franchise_code' => $shipment->franchise_code,
@@ -141,7 +141,7 @@ class CalculateFranchiseCommission extends Command
                 'number_of_shipments' => $shipment->shipment_count,
                 'total_charges_without_gst' => $shipment->total_charges_without_gst,
                 'total_charges' => $shipment->total_charges,
-                'weight_charges' => $weight_charges,
+                'weight_charges' => $shipment->weight_charges,
                 'gst_percentage' => $shipment->gst_percentage,
                 'franchise_gst_amount' => $shipment->gst_amount,
                 'product_percentage' => $shipment->product_percentage,
@@ -165,7 +165,6 @@ class CalculateFranchiseCommission extends Command
         )
         ->groupBy('franchise_id', 'franchise_code', 'franchise_name')
         ->get();
-        
         foreach ($summed_data as $data) {
             $franchise = RetailFranchiseCommission::where('franchise_id', $data->franchise_id)->first();
             $withholding_percentage = $franchise->franchise_withholding_percentage;
