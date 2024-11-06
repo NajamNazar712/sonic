@@ -129,9 +129,9 @@
                                     </div>
             
                                     <div class="input-group mb-2">
-                                        <input type="text" name="franchise_deduction" id="deduction_percentage" class="form-control deduction_percentage" placeholder="GST*"  value="" max="100" data-rule-required="true" data-msg-required="Commission GST Deduction is required">
+                                        <input type="number" name="franchise_deduction" id="deduction_percentage" class="form-control deduction_percentage" placeholder="Deduction*"  value="" max="100" data-rule-required="true" data-msg-required="Commission Deduction is required">
                                         <div class="input-group-append">
-                                            <span class="input-group-text" id="basic-addon2">%</span>
+                                            <span class="input-group-text" id="basic-addon2"></span>
                                         </div>
                                     </div>
                                 </div>

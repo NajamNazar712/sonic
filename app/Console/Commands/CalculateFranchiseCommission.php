@@ -200,103 +200,106 @@ class CalculateFranchiseCommission extends Command
         $month = str_pad(Carbon::now()->subMonth()->month, 2, "0", STR_PAD_LEFT);
 
         $shipments = Shipment::join('retail_shipments as rs', 'rs.shipment_id', '=', 'shipments.id')
-        ->leftjoin('retail_users as ru', 'ru.id', '=', 'rs.retail_user_id')
-        ->leftjoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
-        ->leftJoin('retail_franchises as rf', function ($join) {
-            $join->on('rf.id', '=', 'ru.category_id')
-            ->where('ru.category', '=', DB::raw(1));
-        })
-            ->leftJoin('retail_trax_centers as rc', function ($join) {
-                $join->on('rc.id', '=', 'ru.category_id')
+        ->join('retail_users as ru', function ($join) {
+            $join->on('retail_shipments.retail_user_id', '=', 'retail_users.id')
                 ->where('ru.category', '=', DB::raw(2));
-            })
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->join('retail_shipping_modes as rsm', 'rsm.id', '=', 'rs.shipping_mode')
-            ->join('user_shipping_infos AS usi', 'rf.pickup_address_id', '=', 'usi.id')
-            ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'shipments.pickup_address_id')
-            ->leftJoin('shipments_journey as sj', function ($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->where(
-                    'sj.id',
-                    '=',
-                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
-                );
-            })
-            ->leftJoin('shipments_journey as dr', function ($join) {
-                $join->on('dr.shipment_id', '=', 'shipments.id')
-                ->where(
-                    'dr.id',
-                    '=',
-                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)')
-                );
-            })
-            ->leftjoin('retail_franchise_charges as rfc', 'rf.id', '=', 'rfc.franchise_id')
-            ->join('retail_franchise_product_percentages as rfpp', function ($join) {
-                $join->on('rfpp.franchise_id', '=', 'rf.id')
-                    ->on('rfpp.retail_shipping_mode_id', '=', 'rs.shipping_mode');
-            })
-            ->select([
-                DB::raw('COUNT(rs.id) as shipment_count'),
-                DB::raw('SUM(rs.total_charges_without_gst) as total_charges_without_gst'),
-                DB::raw('SUM(rs.gst) as gst_amount'),
-                DB::raw('SUM(rs.total_charges) as total_charges'),
-                DB::raw('SUM(rs.weight_charges) as weight_charges'),
-
-                'rf.id as franchise_id',
-                'rs.retail_user_id as user_id',
-                'rf.code as franchise_code',
-                'rf.name as franchise_name',
-                'rf.cnic as franchise_cnic',
-                'rf.phone_no as franchise_phone',
-
-                'usi.pickup_address as franchise_address',
-
-                'rfpp.product_percentage as product_percentage',
-
-                'rfc.franchise_deduction as franchise_deduction',
-                'rfc.franchise_gst as gst_percentage',
-                'rfc.franchise_withholding as withholding_percentage',
-
-                'rsm.id as retail_shipping_mode_id',
-                'rsm.name as shipping_mode_name',
-            ])
-            // ->select('p.product_name as category', 'shipments.id as shipment_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category', 'ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id', 'rf.name as franchise', 'rc.id as retail_account_id', 'rc.name as retail_center', 'ss.name as current_status', 'rsm.name as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone', 'shipments.amount as collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'rs.weight_charges', 'rs.cash_handling_charges', 'rs.fuel_surcharge', 'rs.total_charges as total_charges', 'rs.gst as gst', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.payable as d_net_payable', 'dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status', 'dr.shipper_status_id as dr_status_id', 'pns.retail_pickup_note_id as pncc_id', 'rtc.name as retail_trax_center_name', 'rref.ref as retail_reference', 'rf.discount as franchise_discount', 'rf.insurance as franchise_insurance', 'rtc.discount as trax_discount', 'rtc.insurance as trax_insurance', 'rs.discount as discount_amount', 'rs.insurance_charges as insurance_charges', 'rs.packaging_charges as packaging_charges', 'si.price as product_value')
-            ->whereNotIn('shipments.shipper_status_id', [1, 17])
-            ->whereYear('sj.created_at', date('Y'))
-            ->whereMonth('sj.created_at', $month)
-            ->where('shipments.shipment_type', 2)
-            ->groupBy([
-                'rs.shipping_mode',
-                'rs.retail_user_id'
-            ])
-            ->get();
+        })
+        ->leftjoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
        
+        ->leftJoin('retail_trax_centers as rc', function ($join) {
+            $join->on('rc.id', '=', 'ru.category_id')
+            ->where('ru.category', '=', DB::raw(2));
+        })
+        ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+        ->join('retail_shipping_modes as rsm', 'rsm.id', '=', 'rs.shipping_mode')
+        ->join('user_shipping_infos AS usi', 'rc.pickup_address_id', '=', 'usi.id')
+        ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'shipments.pickup_address_id')
+        ->leftJoin('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'shipments.id')
+            ->where(
+                'sj.id',
+                '=',
+                DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+            );
+        })
+        ->leftJoin('shipments_journey as dr', function ($join) {
+            $join->on('dr.shipment_id', '=', 'shipments.id')
+            ->where(
+                'dr.id',
+                '=',
+                DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)')
+            );
+        })
+        ->join('retail_user_product_percentages as rupp', function ($join) {
+            $join->on('rupp.retail_user_id', '=', 'rs.retail_user_id')
+                ->on('rupp.retail_shipping_mode_id', '=', 'rs.shipping_mode');
+        })
+        ->select([
+            DB::raw('COUNT(rs.id) as shipment_count'),
+            DB::raw('SUM(rs.total_charges_without_gst) as total_charges_without_gst'),
+            DB::raw('SUM(rs.gst) as gst_amount'),
+            DB::raw('SUM(rs.total_charges) as total_charges'),
+            DB::raw('SUM(rs.weight_charges) as weight_charges'),
+
+            'rc.id as retail_trax_id',
+            'rs.retail_user_id as user_id',
+            'rc.code as retail_trax_code',
+            'rc.name as retail_trax_name',
+            'rc.cnic as retail_trax_cnic',
+            'rc.phone_no as retail_trax_phone',
+
+            'usi.pickup_address as retail_trax_address',
+            'rupp.product_percentage as product_percentage',
+            // 'rfc.franchise_deduction as franchise_deduction',
+            // 'rfc.franchise_gst as gst_percentage',
+            // 'rfc.franchise_withholding as withholding_percentage',
+            'rtc.name',
+            'rsm.id as retail_shipping_mode_id',
+            'rsm.name as shipping_mode_name',
+        ])
+        // ->select('p.product_name as category', 'shipments.id as shipment_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category', 'ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id', 'rf.name as franchise', 'rc.id as retail_account_id', 'rc.name as retail_center', 'ss.name as current_status', 'rsm.name as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone', 'shipments.amount as collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'rs.weight_charges', 'rs.cash_handling_charges', 'rs.fuel_surcharge', 'rs.total_charges as total_charges', 'rs.gst as gst', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.payable as d_net_payable', 'dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status', 'dr.shipper_status_id as dr_status_id', 'pns.retail_pickup_note_id as pncc_id', 'rtc.name as retail_trax_center_name', 'rref.ref as retail_reference', 'rf.discount as franchise_discount', 'rf.insurance as franchise_insurance', 'rtc.discount as trax_discount', 'rtc.insurance as trax_insurance', 'rs.discount as discount_amount', 'rs.insurance_charges as insurance_charges', 'rs.packaging_charges as packaging_charges', 'si.price as product_value')
+        ->whereNotIn('shipments.shipper_status_id', [1, 17])
+        ->whereYear('sj.created_at', date('Y'))
+        ->whereMonth('sj.created_at', $month)
+        ->where('shipments.shipment_type', 2)
+        // ->where('rs.retail_user_id', 23)
+        ->groupBy([
+            'rs.shipping_mode',
+            'rs.retail_user_id'
+        ])
+        ->get();
+
         foreach ($shipments as $shipment) {
             $weight_charges = $shipment->total_charges - $shipment->gst_amount;
-            $net_commission = ($shipment->trax_center_product_percentage / 100) * $shipment->weight_charges;
-            RetailUserCommission::create([
-                'franchise_id' => $shipment->franchise_id,
+            $net_commission = ($shipment->product_percentage / 100) * $shipment->weight_charges;
+            $bulkInsertData[] = [
+                'franchise_id' => $shipment->retail_trax_id,
                 'retail_user_id' => $shipment->user_id,
-                'franchise_code' => $shipment->trax_center_code,
-                'trax_center_name' => $shipment->trax_center_name,
-                'trax_center_cnic' => $shipment->trax_center_cnic,
-                'trax_center_phone' => $shipment->trax_center_phone,
-                'franchise_address' => $shipment->franchise_address,
+                'franchise_code' => $shipment->retail_trax_code,
+                'trax_center_name' => $shipment->retail_trax_name,
+                'trax_center_cnic' => $shipment->retail_trax_cnic,
+                'trax_center_phone' => $shipment->retail_trax_phone,
+                'franchise_address' => $shipment->retail_trax_address,
                 'month' => $month,
                 'retail_shipping_mode_id' => $shipment->retail_shipping_mode_id,
-                'retail_shipping_mode_name' => $shipment->retail_shipping_mode_name,
+                'retail_shipping_mode_name' => $shipment->shipping_mode_name,
                 'number_of_shipments' => $shipment->shipment_count,
                 'total_charges_without_gst' => $shipment->total_charges_without_gst,
                 'net_commission' => $net_commission,
-                'commission' => $shipment->trax_center_product_percentage,
+                'commission' => $shipment->product_percentage,
                 'franchise_gst_amount' => $shipment->gst_amount,
                 'total_charges' => $shipment->total_charges,
                 'weight_charges' => $shipment->weight_charges,
-            ]);
+            ];
+            // error_log('bulkInsertData'.print_r($bulkInsertData, true));
+
         }
+        
+        RetailUserCommission::insert($bulkInsertData);
 
         // get summed data
-        $summed_data = RetailUserCommission::select(
+        // Get and bulk insert summed data
+        $summedData = RetailUserCommission::select(
             'retail_user_id',
             'franchise_code',
             'trax_center_name',
@@ -305,12 +308,11 @@ class CalculateFranchiseCommission extends Command
             DB::raw('SUM(franchise_gst_amount) as total_gst_amount'),
             DB::raw('SUM(weight_charges) as total_weight_charges'),
             DB::raw('SUM(number_of_shipments) as total_number_of_shipments')
-        )
-            ->groupBy('retail_user_id')
-            ->get();
+        )->groupBy('retail_user_id')->get();
 
-        foreach ($summed_data as $data) {
-            $insert_data = [
+        $totalSumInsertData = [];
+        foreach ($summedData as $data) {
+            $totalSumInsertData[] = [
                 'retail_user_id' => $data->retail_user_id,
                 'trax_center_code' => $data->franchise_code,
                 'trax_center_name' => $data->trax_center_name,
@@ -320,8 +322,9 @@ class CalculateFranchiseCommission extends Command
                 'sum_of_weight_charges' => $data->total_weight_charges,
                 'net_commission' => $data->total_commission,
             ];
-            TotalSumRetailTraxCenter::create($insert_data);
         }
+        // Bulk insert into TotalSumRetailTraxCenter
+        TotalSumRetailTraxCenter::insert($totalSumInsertData);
     }
 
 }

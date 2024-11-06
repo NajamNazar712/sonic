@@ -1028,7 +1028,7 @@ class RetailAdminUserManagementController extends Controller
 
             // Deduction GST tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6"><strong>Deducation ' . ($data->commission_gst_deduction_percent ?? 0) . '</strong></td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Deduction ' . ($data->commission_gst_deduction_percent ?? 0) . '</strong></td>';
             $html .= '<td><strong>' . number_format(round($deduction_amount)) . '</strong></td>';
             $html .= '</tr>';
 
