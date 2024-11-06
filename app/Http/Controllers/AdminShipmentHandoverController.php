@@ -797,7 +797,7 @@ class AdminShipmentHandoverController extends Controller
         ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
         ->leftJoin('city_areas as caf', 'caf.id', '=', 'ssj_f.area_id')
         ->leftJoin('city_areas as car', 'car.id', '=', 'ssj_r.area_id')
-        ->leftJoin('handover_shipments', 'handover_shipments.handover_id', '=', 'handovers.id')
+//        ->leftJoin('handover_shipments', 'handover_shipments.handover_id', '=', 'handovers.id')
 //        ->leftJoin(DB::raw('(
 //            SELECT sj.id, sj.shipment_id, sj.shipper_status_id
 //            FROM shipments_journey sj
@@ -842,7 +842,7 @@ class AdminShipmentHandoverController extends Controller
 //                END as bag_type
 //            "),
 //            'excess_handover_shipments.shipment_ids as excess_shipments',
-            DB::raw("COUNT(excess_handover_shipments.id) AS excess_shipments")
+            DB::raw("COUNT(DISTINCT excess_handover_shipments.id) AS excess_shipments")
         ]);
     
     if ($tracking_number = $request->get('search_tracking')) {
