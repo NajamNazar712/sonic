@@ -3127,7 +3127,7 @@
                                 class="la la-hand-o-right"></i>Shipment Handover</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(339, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.handover.create.index') }}">Create (Old)</a></li>
+                            {{-- <li><a class="menu-item" href="{{ route('admin.handover.create.index') }}">Create (Old)</a></li> --}}
                             <li><a class="menu-item" href="{{ route('admin.handover.create.new_index') }}">Create Handover Bag</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(341, session('permissions')))
