@@ -842,7 +842,7 @@ class AdminShipmentHandoverController extends Controller
 //                END as bag_type
 //            "),
 //            'excess_handover_shipments.shipment_ids as excess_shipments',
-            DB::raw("COUNT(excess_handover_shipments.id) AS excess_shipments")
+            DB::raw("COUNT(DISTINCT excess_handover_shipments.id) AS excess_shipments")
         ]);
     
     if ($tracking_number = $request->get('search_tracking')) {
