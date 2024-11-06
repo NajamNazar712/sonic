@@ -1704,9 +1704,12 @@ class AdminShipmentHandoverController extends Controller
       }
 
       $handover_shipments = HandoverShipments::where('shipment_id', $shipment->id)
-        ->latest()
-        ->take(3)
-        ->get();
+      ->take(3)
+      ->join('handovers', 'handover_shipments.handover_id', '=', 'handovers.id')
+      ->whereNotNull('handovers.bag_number')
+      ->orderby('handover_shipments.created_at','desc')
+      ->get();
+
       if ($handover_shipments->count() === 3) {
           $handover_ids = $handover_shipments->pluck('handover_id');
           $hubs = Handover::whereIn('id', $handover_ids)
