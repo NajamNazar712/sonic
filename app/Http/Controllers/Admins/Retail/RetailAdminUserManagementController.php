@@ -654,10 +654,11 @@ class RetailAdminUserManagementController extends Controller
     
         $grouped_data = [];
         foreach ($retail_commissions as $record) {
-            $grouped_data[$record->trax_center_name][] = $record;
+            $grouped_data[$record->retail_user_name][] = $record;
         }
     
         foreach ($grouped_data as $franchise_name => $records) {
+
             $monthNumber = $records[0]->month;
             $monthNames = [
                 '01' => 'January',
