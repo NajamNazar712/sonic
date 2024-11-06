@@ -94,7 +94,7 @@ class CalculateFranchiseCommission extends Command
                 DB::raw('COUNT(rs.id) as shipment_count'),
                 DB::raw('SUM(rs.total_charges_without_gst) as total_charges_without_gst'),
                 DB::raw('SUM(rs.gst) as gst_amount'),
-                DB::raw('SUM(rs.total_charges_without_gst + rs.gst) as total_charges'),
+                DB::raw('SUM(rs.total_charges) as total_charges'),
                 DB::raw('SUM(rs.weight_charges) as weight_charges'),
 
                 'rf.id as franchise_id',
@@ -128,7 +128,6 @@ class CalculateFranchiseCommission extends Command
             $product_percentage_amount = $shipment->product_percentage / 100;
             $weight_charges = $shipment->total_charges - $shipment->gst_amount;
             $commission = $product_percentage_amount * $weight_charges;
-
             RetailFranchiseCommission::create([
                 'franchise_id' => $shipment->franchise_id,
                 'franchise_code' => $shipment->franchise_code,
