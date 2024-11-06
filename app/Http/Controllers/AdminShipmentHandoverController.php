@@ -1582,6 +1582,109 @@ class AdminShipmentHandoverController extends Controller
       return $datatable->make(true);
     }
 
+    // public function same_hub_handover_count(Request $request)
+    // {
+    //   $shipment = Shipment::where('tracking_number', $request->tracking_number)
+    //     ->select('id')
+    //     ->first();
+    //   if (!$shipment) {
+    //     return ['status' => 0, 'error' => 'Shipment not found.'];
+    //   }
+
+    //   $handover_shipments = HandoverShipments::where('shipment_id', $shipment->id)
+    //   ->take(3)
+    //   ->join('handovers', 'handover_shipments.handover_id', '=', 'handovers.id')
+    //   ->whereNotNull('handovers.bag_number')
+    //   ->orderby('handover_shipments.created_at','desc')
+    //   ->get();
+
+    //   if ($handover_shipments->count() === 3) {
+    //       $handover_ids = $handover_shipments->pluck('handover_id');
+    //       $hubs = Handover::whereIn('id', $handover_ids)
+    //         ->pluck('hub');
+    //       if ($hubs->every(function ($hub) use ($hubs) {
+    //         return $hub == $hubs->first();
+    //       })) {
+    //           if ($hubs->first() == $request->hub_id) {
+    //             return ['status' => 1, 'error' => 'You cannot add more handovers for this hub.'];
+    //           }
+    //       }
+    //   }
+    // }
+
+    public function same_hub_handover_count(Request $request)
+    {
+      $selected_bag_type = $request->selected_bag_type;
+      $shipment = Shipment::where('tracking_number', $request->tracking_number)
+      ->select('id', 'shipper_status_id')
+      ->first();
+
+      if (!$shipment) {
+        return ['status' => 1, 'error' => 'Shipment not found.'];
+      }
+
+      $handover_shipments = HandoverShipments::where('shipment_id', $shipment->id)
+      ->take(3)
+      ->join('handovers', 'handover_shipments.handover_id', '=', 'handovers.id')
+      ->whereNotNull('handovers.bag_number')
+      ->orderby('handover_shipments.created_at','desc')
+      ->get();
+
+      if ($handover_shipments->count() === 3) {
+          $handover_ids = $handover_shipments->pluck('handover_id');
+          $hubs = Handover::whereIn('id', $handover_ids)
+            ->pluck('hub');
+          if ($hubs->every(function ($hub) use ($hubs) {
+            return $hub == $hubs->first();
+          })) {
+              if ($hubs->first() == $request->hub_id) {
+                return ['status' => 1, 'error' => 'You cannot add more handovers for this hub.'];
+              }
+          }
+      }
+
+      $handover_exists = HandoverShipments::where('shipment_id', $shipment->id)
+      ->latest('updated_at')
+      ->where('status', 1)
+      ->first();
+      
+      if ($handover_exists) {
+        return ['status' => 1, 'error' => 'Handover is already created.'];
+      }
+
+      $normal_status_ids = [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+        11, 12, 13, 14, 15, 17, 19, 49, 
+        50, 52, 53, 54, 55, 56,
+        58, 59, 61, 62, 65, 67, 68
+      ];
+
+      $return_status_ids = [
+        /* 18, */ 20, 21, 22, 23, 24, 25, 26, 
+        27, 28, 29, 30, 31, 32, 33, 34,
+        35, 36, 37, 38, 44, 45, 46, 47,
+        48, /* 51, */ 56, 57,
+        69, 70, 72, 73, 75, 76
+      ];
+
+      // normal shipments
+      if ($selected_bag_type == 1){
+        $allowed_status_ids = $normal_status_ids;
+      } 
+      // return shipments
+      else {
+        $allowed_status_ids = $return_status_ids;
+      }
+
+      if (($shipment->shipper_status_id == 18 || $shipment->shipper_status_id == 51)){
+        return ['status' => 1, 'error' => 'This shipment is related to lost or case close'];
+      }
+
+      if (!in_array($shipment->shipper_status_id, $allowed_status_ids)) {
+        return ['status' => 1, 'error' => 'Shipment type is not correct.'];
+      }
+    }
+
     public function bag_number_dropdown(Request $request)
     {
       $handover_bag_numbers = Handover::select('id', 'bag_number')
@@ -1638,16 +1741,10 @@ class AdminShipmentHandoverController extends Controller
       else {
         $allowed_status_ids = $return_status_ids;
       }
-      // $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
-      // ->orderBy('created_at', 'desc')
-      // ->orderBy('id', 'desc')
-      // ->select('shipper_status_id')
-      // ->first();
 
       if (($shipment->shipper_status_id == 18 || $shipment->shipper_status_id == 51)){
         return ['status' => 1, 'error' => 'This shipment is related to lost or case close'];
       }
-
       if (!in_array($shipment->shipper_status_id, $allowed_status_ids)) {
         return ['status' => 1, 'error' => 'Shipment type is not correct.'];
       }
@@ -1672,55 +1769,6 @@ class AdminShipmentHandoverController extends Controller
       
       if ($handover_exists) {
         return ['status' => 1, 'error' => 'Handover is already created.'];
-      }
-    }
-
-    // public function same_hub_handover_count(Request $request)
-    // {
-    //   $shipment = Shipment::where('tracking_number', $request->tracking_number)
-    //   ->select('id')
-    //   ->first();
-    //     if (!$shipment) {
-    //         return ['status' => 0, 'error' => 'Shipment not found.'];
-    //     }
-    //   $handover_shipments = HandoverShipments::where('shipment_id', $shipment->id)
-    //   ->select('handover_id')
-    //   ->get();
-    //   $handover_ids = $handover_shipments->pluck('handover_id');
-    //   $handovers = Handover::whereIn('id', $handover_ids)->get();
-    //   $hub_count = $handovers->where('hub', $request->hub_id)->count();
-    //   if ($hub_count >= 3) {
-    //     return ['status' => 1, 'error' => 'You cannot add more handovers for this hub.'];
-    //   }
-    // }
-
-    public function same_hub_handover_count(Request $request)
-    {
-      $shipment = Shipment::where('tracking_number', $request->tracking_number)
-        ->select('id')
-        ->first();
-      if (!$shipment) {
-        return ['status' => 0, 'error' => 'Shipment not found.'];
-      }
-
-      $handover_shipments = HandoverShipments::where('shipment_id', $shipment->id)
-      ->take(3)
-      ->join('handovers', 'handover_shipments.handover_id', '=', 'handovers.id')
-      ->whereNotNull('handovers.bag_number')
-      ->orderby('handover_shipments.created_at','desc')
-      ->get();
-
-      if ($handover_shipments->count() === 3) {
-          $handover_ids = $handover_shipments->pluck('handover_id');
-          $hubs = Handover::whereIn('id', $handover_ids)
-            ->pluck('hub');
-          if ($hubs->every(function ($hub) use ($hubs) {
-            return $hub == $hubs->first();
-          })) {
-              if ($hubs->first() == $request->hub_id) {
-                return ['status' => 1, 'error' => 'You cannot add more handovers for this hub.'];
-              }
-          }
       }
     }
 
