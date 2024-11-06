@@ -242,7 +242,7 @@ class CalculateFranchiseCommission extends Command
                 DB::raw('SUM(rs.total_charges) as total_charges'),
                 DB::raw('SUM(rs.weight_charges) as weight_charges'),
 
-                'rf.retail_user_id as franchise_id',
+                'rf.id as franchise_id',
                 'rs.retail_user_id as user_id',
                 'rf.code as franchise_code',
                 'rf.name as franchise_name',
