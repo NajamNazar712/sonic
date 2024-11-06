@@ -797,7 +797,7 @@ class AdminShipmentHandoverController extends Controller
         ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
         ->leftJoin('city_areas as caf', 'caf.id', '=', 'ssj_f.area_id')
         ->leftJoin('city_areas as car', 'car.id', '=', 'ssj_r.area_id')
-        ->leftJoin('handover_shipments', 'handover_shipments.handover_id', '=', 'handovers.id')
+//        ->leftJoin('handover_shipments', 'handover_shipments.handover_id', '=', 'handovers.id')
 //        ->leftJoin(DB::raw('(
 //            SELECT sj.id, sj.shipment_id, sj.shipper_status_id
 //            FROM shipments_journey sj
