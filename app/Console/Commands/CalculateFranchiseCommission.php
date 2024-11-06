@@ -201,7 +201,7 @@ class CalculateFranchiseCommission extends Command
 
         $shipments = Shipment::join('retail_shipments as rs', 'rs.shipment_id', '=', 'shipments.id')
         ->join('retail_users as ru', function ($join) {
-            $join->on('retail_shipments.retail_user_id', '=', 'retail_users.id')
+            $join->on('rs.retail_user_id', '=', 'ru.id')
                 ->where('ru.category', '=', DB::raw(2));
         })
         ->leftjoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
