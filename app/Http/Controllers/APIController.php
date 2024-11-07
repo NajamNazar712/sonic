@@ -1594,7 +1594,7 @@ class APIController extends Controller
             $timeLimits = [
                 ['min' => 1, 'max' => 50, 'limit' => 5,  'seconds' => 300],
                 ['min' => 51, 'max' => 75, 'limit' => 10, 'seconds' => 600],
-                ['min' => 76, 'max' => 150, 'limit' => 15, 'seconds' => 900]
+                ['min' => 76, 'max' => 100, 'limit' => 15, 'seconds' => 900]
             ];
 
             foreach ($timeLimits as $range) {
