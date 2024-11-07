@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use carbon\Carbon;
 class CreateInactiveRiderReportTableSeeder extends Seeder

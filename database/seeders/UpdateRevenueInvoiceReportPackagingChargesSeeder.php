@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\Admin\RevenueByInvoiceReport;
 use App\Http\Models\Invoice;
 use App\Http\Models\InvoiceForReimbursement;

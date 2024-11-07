@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
 use Carbon\Carbon;

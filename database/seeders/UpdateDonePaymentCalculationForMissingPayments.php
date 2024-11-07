@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentCalculation;
 use App\Http\Models\PendingPaymentShipment;

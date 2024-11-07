@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\CronDonePayment;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;

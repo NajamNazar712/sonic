@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use Illuminate\Database\Seeder;

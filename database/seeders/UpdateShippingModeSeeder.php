@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\ShippingMode;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;

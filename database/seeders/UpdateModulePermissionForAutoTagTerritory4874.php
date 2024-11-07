@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 
 class UpdateModulePermissionForAutoTagTerritory4874 extends Seeder

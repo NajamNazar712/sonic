@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use Illuminate\Database\Seeder;
 

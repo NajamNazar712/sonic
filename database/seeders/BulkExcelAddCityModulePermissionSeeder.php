@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 
 class BulkExcelAddCityModulePermissionSeeder extends Seeder

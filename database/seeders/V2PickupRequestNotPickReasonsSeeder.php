@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 
 class V2PickupRequestNotPickReasonsSeeder extends Seeder

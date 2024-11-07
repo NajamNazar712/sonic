@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\RvShipmentAssignAgent;
 use Illuminate\Database\Seeder;
 use App\Http\Traits\RvTrait;

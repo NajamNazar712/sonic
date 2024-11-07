@@ -1,4 +1,6 @@
 <?php
+
+namespace Database\Seeders;
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\DonePaymentShipment;

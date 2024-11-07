@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\CRM\CrmRequestChannel;
 use Illuminate\Database\Seeder;
 

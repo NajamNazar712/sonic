@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\Shipper\UserBankInfo;
 use Illuminate\Database\Seeder;
 

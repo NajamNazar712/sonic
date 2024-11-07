@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\RetailPendingPayment;
 use App\Http\Models\RetailPendingPaymentShipment;
 use Illuminate\Database\Seeder;

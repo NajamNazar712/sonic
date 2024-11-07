@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 
 class UpdateCargoConsignmentStatusTableAddJunction1Junction2StatusSeeder extends Seeder

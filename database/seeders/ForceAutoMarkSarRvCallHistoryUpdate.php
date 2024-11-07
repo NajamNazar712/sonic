@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\RvAgentCallHistory;
 use Illuminate\Database\Seeder;
 

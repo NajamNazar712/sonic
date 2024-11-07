@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\Admin\Lead\LeadTagging;
 use App\Http\Models\City;
 use Illuminate\Database\Seeder;

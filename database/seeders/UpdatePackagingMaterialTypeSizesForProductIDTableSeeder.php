@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\WMS\WmsProduct;

@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\HR\StaffCategory;
 use Illuminate\Database\Seeder;
 

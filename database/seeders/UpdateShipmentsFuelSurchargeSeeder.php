@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Controllers\Admins\ShipmentChargesController;
 
 use Illuminate\Database\Seeder;

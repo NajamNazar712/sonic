@@ -1,5 +1,7 @@
 M<?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 
 class UpdateModulePermissionTableSettingsShipmentCancellationCutOffDaysSeeder extends Seeder

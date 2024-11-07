@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\Agent\RvAgentType;
 use Illuminate\Database\Seeder;
 

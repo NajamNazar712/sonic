@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Jobs\BotCallDispatchThird;
 use Illuminate\Database\Seeder;

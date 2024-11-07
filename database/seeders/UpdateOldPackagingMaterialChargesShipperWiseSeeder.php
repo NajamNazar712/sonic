@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialTypeSizes;
 use Illuminate\Database\Seeder;

@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\EmployeeShift;
 use Illuminate\Database\Seeder;
 

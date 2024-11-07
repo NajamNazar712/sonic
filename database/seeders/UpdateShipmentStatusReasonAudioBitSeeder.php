@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\ShipmentStatusReason;
 use Illuminate\Database\Seeder;
 

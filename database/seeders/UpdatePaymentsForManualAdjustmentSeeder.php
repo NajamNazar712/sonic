@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Controllers\ShipmentsPaymentJourneyController;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Retail\RetailShipment;

@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use \App\Http\Models\HR\Employee;
 use \App\Http\Models\Admin\Admin;

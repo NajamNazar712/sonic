@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\DwsWeightCharges;

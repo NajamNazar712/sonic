@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\Rider;
 use Illuminate\Database\Seeder;
 use App\Http\Models\Admin\Admin;

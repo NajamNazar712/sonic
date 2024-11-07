@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use \App\Http\Models\City;
 use \App\Http\Models\HR\EmployeePayslip;

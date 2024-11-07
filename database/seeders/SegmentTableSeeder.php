@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Models\Shipper\User;
 use Illuminate\Database\Seeder;
 

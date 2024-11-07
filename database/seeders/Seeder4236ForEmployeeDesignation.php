@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\City;

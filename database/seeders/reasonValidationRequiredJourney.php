@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Shipment;

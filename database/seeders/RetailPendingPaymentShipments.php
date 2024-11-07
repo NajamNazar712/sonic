@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\RetailPendingPayment;
