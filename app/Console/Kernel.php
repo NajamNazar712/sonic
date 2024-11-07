@@ -164,7 +164,7 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\MissingFirstCallInitiate',
         '\App\Console\Commands\lastMileAppReportCountUpdate',
         '\App\Console\Commands\RunSpecificJob',
-        '\App\Console\Commands\UpdateShipmentAdditionalChargesDaily',
+        '\App\Console\Commands\DeleteDuplicateArrival',
 
         ];
 
@@ -571,7 +571,7 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
-        $schedule->command('update:shipment_additional_charges')->hourly()->runInBackground();
+        $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
 //        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
     }
     /**
