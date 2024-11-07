@@ -11,7 +11,7 @@ class AdminHub extends Model
 	public $incrementing = FALSE;
 	public $timestamps = FALSE;
 
-	protected function setKeysForSaveQuery(Builder $query) {
+	protected function setKeysForSaveQuery($query) {
 		$keys = $this->getKeyName();
 
 		if (!is_array($keys)) {
