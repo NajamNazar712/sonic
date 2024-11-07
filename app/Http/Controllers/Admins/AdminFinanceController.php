@@ -14474,8 +14474,8 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 // New shipment, assign the details
                 $row[] = $serial_number;
                 $row[] = $shipment->tracking_number;
-                $row[] = $shipment->pickup_address->city->name;
-                $row[] = $shipment->consignee_city->name;
+                $row[] = isset($shipment->pickup_address->city->name) ? $shipment->pickup_address->city->name : '';
+                $row[] = isset($shipment->consignee_city->name) ? $shipment->consignee_city->name : '';
                 $row[] = $shipment->created_at;
                 $row[] = $shipment->actual_weight;
                 $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
