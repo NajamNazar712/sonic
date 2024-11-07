@@ -9,7 +9,7 @@ use App\Http\Models\City;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ReceivingSheetShipment;
 use App\Http\Models\Shipment;
-use Yajra\DataTables\Facades\DataTables;
+use Yajra\DataTables\DataTables;
 use Carbon\Carbon;
 use Auth;
 use DB;
