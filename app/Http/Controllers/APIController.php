@@ -1579,7 +1579,7 @@ class APIController extends Controller
         }
 
         if(count($request->data) > 100){
-            return response()->json(['message' => 'Bulk Booking Limit Is Max 150']);
+            return response()->json(['message' => 'Bulk Booking Limit Is Max 100']);
         }
 
         $shipmentCountRecord = ShipmentBookedApiCount::where('user_id', $user_id)->latest()->first();
