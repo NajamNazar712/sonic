@@ -63,7 +63,9 @@ class DWSController extends Controller
                 } else {
                     return 0;
                 }
-            });
+            })
+            ->rawColumns(['note_id','total_shipment']);
+
 
         return $datatable->make(true);
     }

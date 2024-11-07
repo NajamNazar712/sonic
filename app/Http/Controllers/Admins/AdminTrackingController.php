@@ -17,7 +17,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\StarShipper;
 use App\LostShipmentResponsible;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\CRM\CrmRequest;
@@ -991,7 +991,8 @@ class AdminTrackingController extends Controller
                 ';
 
                 return $dropdown;
-            });
+            })
+            ->rawColumns(['tracking_number_link', 'action']);
         return $datatable->make(true);
     }
 
