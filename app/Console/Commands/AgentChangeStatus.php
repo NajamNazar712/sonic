@@ -69,7 +69,7 @@ class AgentChangeStatus extends Command
                 $shipment->save();
             }
             
-            $upshipments = RvShipmentTicket::whereDate('created_at','>','2024-11-06')->where('in_progress', 0)->where('is_bot',0)->get();
+            $upshipments = RvShipmentTicket::whereDate('created_at','>','2024-11-03')->where('in_progress', 0)->where('is_bot',0)->get();
             // ->update(['in_progress' => 0,'rv_shipment_tickets.updated_at'=> 'rv_shipment_tickets.created_ats']);
             foreach($upshipments as $shipment){
                 $shipment->updated_at = $shipment->created_at;
