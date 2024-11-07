@@ -15397,6 +15397,12 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             return redirect()->back()->with('error', 'Excel is empty');
         }
 
+        //TO-6917-limitation-setting-in-city-manag
+        if(count($rows) > 300){
+            return redirect()->route('admin.management.city.index')->with('error', 'Maximum limit of bulk is 300');
+        }
+        //END
+
         // Validation rules, messages, and attribute names
         $rules = [
             'name' => 'required|string',
