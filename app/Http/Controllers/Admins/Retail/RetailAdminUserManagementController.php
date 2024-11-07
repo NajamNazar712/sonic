@@ -658,7 +658,6 @@ class RetailAdminUserManagementController extends Controller
         }
     
         foreach ($grouped_data as $franchise_name => $records) {
-
             $monthNumber = $records[0]->month;
             $monthNames = [
                 '01' => 'January',
