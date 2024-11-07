@@ -64,6 +64,7 @@ use App\SpecialRequestReason;
 use App\SpecialRequestOption;
 use App\SpecialRequestReasonOption;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -77,7 +78,7 @@ use App\Http\Models\Admin\ModulePermission;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use phpDocumentor\Reflection\Types\Null_;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\Facades\DataTables;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\CrmAutoTagUser;
@@ -1408,6 +1409,14 @@ class AdminCRMController extends Controller
                 $launched_request = $launched_request->where('spt.admin_id', Auth::id());
             }
         }
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $launched_request->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
+
+        if($request->get('star_shipper_filter') == 1)
+        {
+            $launched_request->where('sts.status',1);
+        }
         // dd($launched_request);
         $current_date = Carbon::now();
         $datatables = Datatables::of($launched_request)
@@ -1830,14 +1839,42 @@ class AdminCRMController extends Controller
                 return $responsible_zone;
             })
             ->editColumn('arrival_today', function ($requests)use($current_date) {
-                return ($requests->arrival_date && $current_date) ? with((new Carbon($requests->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($requests->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
-                        $date->isSunday();
-                    }, $current_date)) : '-';
+                if ($requests->arrival_date && $current_date) {
+                    $arrivalDate = new Carbon($requests->arrival_date, 'UTC');
+                    $currentDate = new Carbon($current_date, 'UTC');
+
+                    // Calculate weekend days between the two dates
+                    $weekendDaysCount = $arrivalDate->diffInWeekendDays($currentDate);
+
+                    // Use CarbonPeriod to count only Sundays
+                    $period = CarbonPeriod::create($arrivalDate, $currentDate);
+                    $sundaysCount = $period->filter(function (Carbon $date) {
+                        return $date->isSunday();
+                    })->count();
+
+                    return $weekendDaysCount - $sundaysCount;
+                } else {
+                    return '-';
+                }
             })
-            ->editColumn('last_status_today', function ($request)use($current_date) {
-                return ($request->last_status_today && $current_date) ? with((new Carbon($request->last_status_today, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->last_status_today, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
-                        $date->isSunday();
-                    }, $current_date)) : '-';
+            ->editColumn('last_status_today', function ($requests)use($current_date) {
+                if ($requests->last_status_today && $current_date) {
+                    $arrivalDate = new Carbon($requests->last_status_today, 'UTC');
+                    $currentDate = new Carbon($current_date, 'UTC');
+
+                    // Calculate weekend days between the two dates
+                    $weekendDaysCount = $arrivalDate->diffInWeekendDays($currentDate);
+
+                    // Use CarbonPeriod to count only Sundays
+                    $period = CarbonPeriod::create($arrivalDate, $currentDate);
+                    $sundaysCount = $period->filter(function (Carbon $date) {
+                        return $date->isSunday();
+                    })->count();
+
+                    return $weekendDaysCount - $sundaysCount;
+                } else {
+                    return '-';
+                }
             })
             ->addColumn('shipper_category', function($requests){
                 if($requests->kae != null){
@@ -1916,15 +1953,7 @@ class AdminCRMController extends Controller
                 else{
                     return '-';
                 }
-            });
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
-        }
-
-        if($request->get('star_shipper_filter') == 1)
-        {
-            $datatables->where('sts.status',1);
-        }
+            })->rawColumns(['tracking_number_hyperlink','id_padded_link','action']);
 
         return $datatables->make(true);
     }
