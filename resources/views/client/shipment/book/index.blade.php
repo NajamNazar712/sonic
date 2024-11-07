@@ -58,11 +58,30 @@
 															@endif
 														@endif
 													@endforeach
-													<option value="0">New</option>
+													{{-- <option value="0">New</option> --}}
 												@endif
 
 												{{-- Use main account pickup addresses if no substitute addresses are found --}}
-												@if (!$substitute_account || ($substitute_account && $substitute_account_pickup_address == null))
+												@if ($substitute_account && $substitute_account_pickup_address == null)
+													@foreach($user->shipping as $shipping_information)
+														@if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
+															@if ($shipping_information['default_address'] == 1)
+																@php ($default_pickup_address = TRUE)
+																<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}" selected>
+																	{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
+																</option>
+															@else
+																<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">
+																	{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
+																</option>
+															@endif
+														@endif
+													@endforeach
+													{{-- <option value="0">New</option> --}}
+												@endif
+
+												{{-- Use main account pickup addresses if no substitute addresses are found --}}
+												@if (!$substitute_account)
 													@foreach($user->shipping as $shipping_information)
 														@if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
 															@if ($shipping_information['default_address'] == 1)

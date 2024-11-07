@@ -44,8 +44,7 @@
                                         <div class="form-group">
                                             <select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
                                                 @php ($default_pickup_address = false)
-                                                <option value="0">New</option>
-                                                
+
                                                 {{-- If substitute account has its own pickup addresses --}}
                                                 @if ($substitute_account_pickup_address != null)
                                                     @foreach ($substitute_account_pickup_address as $shipping_information)
@@ -62,7 +61,23 @@
                                                 @endif
                                         
                                                 {{-- Use main account pickup addresses if no substitute addresses are found --}}
-                                                @if (!$substitute_account || ($substitute_account && $substitute_account_pickup_address == null))
+                                                @if ($substitute_account && $substitute_account_pickup_address == null)
+                                                    @foreach ($user->shipping as $shipping_information)
+                                                        @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
+                                                            <option value="{{ $shipping_information['id'] }}" 
+                                                                    data-city-id="{{ $shipping_information['city']['id'] }}" 
+                                                                    data-city-name="{{ $shipping_information['city']['name'] }}" 
+                                                                    {{ $shipping_information['default_address'] == 1 ? 'selected' : '' }}>
+                                                                {{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
+                                                            </option>
+                                                            @php ($default_pickup_address = $default_pickup_address || $shipping_information['default_address'] == 1)
+                                                        @endif
+                                                    @endforeach
+                                                @endif
+
+                                                {{-- Use main account pickup addresses if no substitute addresses are found --}}
+                                                @if (!$substitute_account)
+                                                <option value="0">New</option>
                                                     @foreach ($user->shipping as $shipping_information)
                                                         @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
                                                             <option value="{{ $shipping_information['id'] }}" 
