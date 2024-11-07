@@ -2926,6 +2926,12 @@ class ShipperShipmentBookController extends Controller
         $user_id = session('user_id');
         $account_type = session('account_type');
         $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
+
+        $substitute_user_pickup_address = SubstituteUser::where('user_id', $user_id)
+        ->where('id', Session::get('substitute_user_id'))
+        ->select(['pickup_address_id'])
+        ->first();
+
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -3449,6 +3455,13 @@ class ShipperShipmentBookController extends Controller
                         ];
                     }
                 }
+
+                if (Session::has('substitute_user_id')){
+                    if ((int)$substitute_user_pickup_address->pickup_address_id != $row['pickup_address_id']) {
+                        $errors[$row_id]['pickup_address_id'] = 'Invalid Pickup Address';
+                    }
+                }
+
                 $validate = Validator::make($row, $rules, $messages);
 
                 $validate->setAttributeNames($names);
@@ -5100,6 +5113,11 @@ class ShipperShipmentBookController extends Controller
         }
         $rate_type_id = session('rate_type_id');
 
+        $substitute_user_pickup_address = SubstituteUser::where('user_id', $user_id)
+        ->where('id', Session::get('substitute_user_id'))
+        ->select(['pickup_address_id'])
+        ->first();
+
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
             if ($value) {
                 $value = $this->phone_number($value);
@@ -5443,6 +5461,11 @@ class ShipperShipmentBookController extends Controller
                     $rows[$key]['same_day_timing_id'] = NULL;
                 }
                  
+                if (Session::has('substitute_user_id')){
+                    if ((int)$substitute_user_pickup_address->pickup_address_id != $row['pickup_address_id']) {
+                        $errors[$row_id]['pickup_address_id'] = 'Invalid Pickup Address';
+                    }
+                }
                 
                 $validate = Validator::make($row, $rules, $messages);
 
@@ -5835,6 +5858,12 @@ class ShipperShipmentBookController extends Controller
         $user_id = session('user_id');
         $account_type = session('account_type');
         $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
+
+        $substitute_user_pickup_address = SubstituteUser::where('user_id', $user_id)
+        ->where('id', Session::get('substitute_user_id'))
+        ->select(['pickup_address_id'])
+        ->first();
+
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -6343,6 +6372,12 @@ class ShipperShipmentBookController extends Controller
                             return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
                         })
                     ];
+                }
+
+                if (Session::has('substitute_user_id')){
+                    if ((int)$substitute_user_pickup_address->pickup_address_id != $row['pickup_address_id']) {
+                        $errors[$row_id]['pickup_address_id'] = 'Invalid Pickup Address';
+                    }
                 }
 
                 $validate = Validator::make($row, $rules, $messages);

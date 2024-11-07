@@ -122,6 +122,7 @@ class ShipperSubstituteAccountManagementController extends Controller
       $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->get();
 
       $pickup_addresses = UserShippingInfo::where('user_id', auth()->user()->id)
+      ->where('hidden', 0)
       ->select([
         'id',
         'pickup_address'
@@ -208,6 +209,7 @@ class ShipperSubstituteAccountManagementController extends Controller
       if ($substitute_user->user_id == session('user_id')) {
         $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
         $pickup_addresses = UserShippingInfo::where('user_id', auth()->user()->id)
+        ->where('hidden', 0)
         ->select([
           'id',
           'pickup_address'
