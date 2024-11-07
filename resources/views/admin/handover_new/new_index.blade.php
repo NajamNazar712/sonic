@@ -583,6 +583,7 @@
                                         positionClass: 'toast-top-center',
                                         containerId: 'toast-top-center'
                                     });
+                                    $('input[name="tracking_number"]').val('');
                                     $('#add_shipment_form button.add').prop('disabled', false); // Re-enable button on error
                                 } 
                                 
