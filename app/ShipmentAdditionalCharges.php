@@ -2,6 +2,11 @@
 
 namespace App;
 
+use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\InvoiceShipment;
+use App\Http\Models\PendingInvoiceShipment;
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\Shipment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 class ShipmentAdditionalCharges extends Model
@@ -64,22 +69,55 @@ class ShipmentAdditionalCharges extends Model
         }
     }
 
-    static function check_additional_charges($shipment_id,$arrival = false ,$zero_cod = false,$return_discount =false){
+    static function check_additional_charges($shipment_id, $arrival = false, $zero_cod = false, $return_discount = false) {
+        $charges = 0; // Default to 0 to handle cases where no charge is set
         $shipment_additional_charges = ShipmentAdditionalCharges::where('shipment_id', $shipment_id);
-        if($shipment_additional_charges->exists()){
+
+        if ($shipment_additional_charges->exists()) {
             $shipment_additional_charges = $shipment_additional_charges->first();
-            if($arrival) {
+
+            if ($arrival) {
                 $charges = $shipment_additional_charges->arrival_charges_applied;
             }
-            if($zero_cod) {
+            if ($zero_cod) {
                 $charges = $shipment_additional_charges->zero_cod_discount_applied;
             }
-            if($return_discount) {
+            if ($return_discount) {
                 $charges = $shipment_additional_charges->return_cod_discount_applied;
             }
-        }else{
-            $charges = 0;
+        } else {
+            if ($arrival) {
+                $shipment = Shipment::find($shipment_id);
+
+                if (!$shipment) {
+                    return $charges; // Return default if shipment is not found
+                }
+
+                $account_type_id = $shipment->user->account_type_id;
+
+                if ($account_type_id == 1) {
+                    $pending = PendingPaymentShipment::where('shipment_id', $shipment_id)->where('type', 3)->first();
+
+                    if ($pending) {
+                        $charges = $pending->charges;
+                    } else {
+                        $done = DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', 3)->first();
+                        $charges = $done ? $done->charges : 0;
+                    }
+                } else {
+                    $pending = PendingInvoiceShipment::where('shipment_id', $shipment_id)->where('type', 3)->first();
+
+                    if ($pending) {
+                        $charges = $pending->charges;
+                    } else {
+                        $done = InvoiceShipment::where('shipment_id', $shipment_id)->where('type', 3)->first();
+                        $charges = $done ? $done->charges : 0;
+                    }
+                }
+            }
         }
+
         return $charges;
     }
+
 }
