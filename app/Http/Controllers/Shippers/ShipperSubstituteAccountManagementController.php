@@ -145,8 +145,11 @@ class ShipperSubstituteAccountManagementController extends Controller
     }
 
     public function add_store(Request $request) {
-      $substitute_user = new SubstituteUser();
+      $request->validate([
+        'pickup_address' => 'required|array|min:1',
+      ]);
 
+      $substitute_user = new SubstituteUser();
       $selected_ids = $request->input('pickup_address');
 
       $substitute_user->user_id = session('user_id');
@@ -203,7 +206,6 @@ class ShipperSubstituteAccountManagementController extends Controller
       $substitute_user = SubstituteUser::find($id);
 
       if ($substitute_user->user_id == session('user_id')) {
-        // dd($substitute_user->pickup_address_id);
         $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
         $pickup_addresses = UserShippingInfo::where('user_id', auth()->user()->id)
         ->select([
@@ -225,6 +227,10 @@ class ShipperSubstituteAccountManagementController extends Controller
     }
 
     public function update_store(Request $request, $id) {
+      $request->validate([
+        'pickup_address' => 'required|array|min:1',
+      ]);
+
       $substitute_user = SubstituteUser::find($id);
       $selected_ids = $request->input('pickup_address');
 

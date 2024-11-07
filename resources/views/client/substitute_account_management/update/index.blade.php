@@ -62,7 +62,7 @@
 										</select>
 									</div>
 
-									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 edit_pickup_address_div">
 										<label for="select_all_address">
 											Select All Addresses
 											<input type="checkbox" name="select_all_address" id="select_all_address">
@@ -178,8 +178,15 @@
 				normalizer: function(value) {
 					return $.trim(value);
 				},
+				// errorPlacement: function(error, element) {
+				// 	error.addClass('w-100').appendTo(element.parent('.form-group'));
+				// },
 				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
+					if (element.hasClass('select2')) {
+						error.addClass('w-100').appendTo(element.parent('.edit_pickup_address_div'));
+					} else {
+						error.addClass('w-100').appendTo(element.parent('.form-group'));
+					}
 				},
 				submitHandler: function(form) {
 					$(form).find('button[type=submit]').attr('disabled', 'disabled');

@@ -58,12 +58,12 @@
 									</div>
 
 									{{-- Store pickup addresses for substitute account --}}
-									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 pickup_address_div">
 										<label for="select_all_address">
 											Select All Addresses
 											<input type="checkbox" name="select_all_address" id="select_all_address">
 										</label>
-										<select name="pickup_address[]" class="select2" id="pickup_address" multiple>
+										<select name="pickup_address[]" class="select2" id="pickup_address" multiple data-rule-required="true" data-msg-required="At least select 1 pickup address">
 											@foreach ($pickup_addresses as $address)
 												<option value="{{ $address->id }}" data-name="{{ $address->pickup_address }}">{{ $address->pickup_address }}</option>
 											@endforeach
@@ -210,8 +210,15 @@
 				normalizer: function(value) {
 					return $.trim(value);
 				},
+				// errorPlacement: function(error, element) {
+				// 	error.addClass('w-100').appendTo(element.parent('.form-group'));
+				// },
 				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
+					if (element.hasClass('select2')) {
+						error.addClass('w-100').appendTo(element.parent('.pickup_address_div'));
+					} else {
+						error.addClass('w-100').appendTo(element.parent('.form-group'));
+					}
 				},
 				submitHandler: function(form) {
 					$(form).find('button[type=submit]').attr('disabled', 'disabled');
