@@ -116,10 +116,15 @@ class BotCallingController extends Controller
             $findShipmentId = Shipment::where('tracking_number', $request->input('tracking_number'))->first();
             if (in_array($findShipmentId->shipper_status_id, [12, 52, 65, 66]) && RvShipmentTicket::where('shipment_id', $findShipmentId->id)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
                 // RvShipmentTicket::where('shipment_id', $findShipmentId->id)->update(['in_progress' => 1]);
+                $noAnswer = [
+                    'ANSWER' => 34,
+                    'BUSY' => 32,
+                    'CONGESTION' => 39,
+                ];
                 $array = [
                     0 => [
                         'status_id' => 6,
-                        'call_finding_id' => ($request->call_status == 'ANSWER' ? 34 : ($request->call_status == 'BUSY' ? 32 : 33)),
+                        'call_finding_id' => (in_array($noAnswer[$request->call_status], $noAnswer) ? $noAnswer[$request->call_status] : 16),
                         'call_status_type' => ($request->call_status == 'ANSWER' ? 'Connected' :  'Not Connected'),
                     ], // unresponsive
                     1 => [
@@ -205,9 +210,9 @@ class BotCallingController extends Controller
                 }
             } else {
                 
-                // $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => 38, 'rv_assign_agent_status_id' => 9, 'call_count' => 1, 'call_to_id' => 1, 'call_status' => ($request->call_status == 'ANSWER' ? 'Connected' :  'Not Connected'),'end_date' => $request->end_date]);
-                // $this->shipmentDifferentStatus($findShipmentId->id,$request);
-                // RvShipmentTicket::where('shipment_id', $findShipmentId->id)->delete();
+                $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => 38, 'rv_assign_agent_status_id' => 9, 'call_count' => 1, 'call_to_id' => 1, 'call_status' => ($request->call_status == 'ANSWER' ? 'Connected' :  'Not Connected'),'end_date' => $request->end_date]);
+                $this->shipmentDifferentStatus($findShipmentId->id,$request);
+                RvShipmentTicket::where('shipment_id', $findShipmentId->id)->delete();
                 
                 DB::table('api_zong_logs')->insert([
                     'name' => 'zong',
