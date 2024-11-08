@@ -46,7 +46,7 @@ class CalculateFranchiseCommission extends Command
      */
     public function handle()
     {
-        // $this->franchise_commission_view();
+        $this->franchise_commission_view();
         $this->user_commission_view();
     }
 
