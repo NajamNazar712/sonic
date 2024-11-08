@@ -12,7 +12,7 @@ class ReturnNoteShipment extends Model
 	public $timestamps = FALSE;
     protected $fillable = ['return_note_id','shipment_id'];
 
-    protected function setKeysForSaveQuery(Builder $query) {
+    protected function setKeysForSaveQuery($query) {
 		$keys = $this->getKeyName();
 
 		if (!is_array($keys)) {

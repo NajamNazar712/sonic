@@ -33,7 +33,7 @@ use App\Http\Models\CityHistory;
 use App\Http\Models\CityOsaRate;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\SaleTierTag;
-use Yajra\DataTables\Facades\DataTables;
+use Yajra\DataTables\DataTables;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\PaymentCycle;
