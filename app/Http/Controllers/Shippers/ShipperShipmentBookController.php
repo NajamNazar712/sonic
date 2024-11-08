@@ -3456,8 +3456,10 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
 
-                if (Session::has('substitute_user_id')){
-                    if ((int)$substitute_user_pickup_address->pickup_address_id != $row['pickup_address_id']) {
+                if (Session::has('substitute_user_id') && $substitute_user_pickup_address && $substitute_user_pickup_address->pickup_address_id !== null)
+                {
+                    $pickupAddressIds = array_map('intval', explode(',', $substitute_user_pickup_address->pickup_address_id));
+                    if (!in_array((int)$row['pickup_address_id'], $pickupAddressIds)) {
                         $errors[$row_id]['pickup_address_id'] = 'Invalid Pickup Address';
                     }
                 }
@@ -5460,9 +5462,11 @@ class ShipperShipmentBookController extends Controller
                     $row['same_day_timing_id'] = NULL;
                     $rows[$key]['same_day_timing_id'] = NULL;
                 }
-                 
-                if (Session::has('substitute_user_id')){
-                    if ((int)$substitute_user_pickup_address->pickup_address_id != $row['pickup_address_id']) {
+
+                if (Session::has('substitute_user_id') && $substitute_user_pickup_address && $substitute_user_pickup_address->pickup_address_id !== null)
+                {
+                    $pickupAddressIds = array_map('intval', explode(',', $substitute_user_pickup_address->pickup_address_id));
+                    if (!in_array((int)$row['pickup_address_id'], $pickupAddressIds)) {
                         $errors[$row_id]['pickup_address_id'] = 'Invalid Pickup Address';
                     }
                 }
@@ -6374,8 +6378,10 @@ class ShipperShipmentBookController extends Controller
                     ];
                 }
 
-                if (Session::has('substitute_user_id')){
-                    if ((int)$substitute_user_pickup_address->pickup_address_id != $row['pickup_address_id']) {
+                if (Session::has('substitute_user_id') && $substitute_user_pickup_address && $substitute_user_pickup_address->pickup_address_id !== null)
+                {
+                    $pickupAddressIds = array_map('intval', explode(',', $substitute_user_pickup_address->pickup_address_id));
+                    if (!in_array((int)$row['pickup_address_id'], $pickupAddressIds)) {
                         $errors[$row_id]['pickup_address_id'] = 'Invalid Pickup Address';
                     }
                 }
