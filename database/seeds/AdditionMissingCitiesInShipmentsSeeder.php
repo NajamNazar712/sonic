@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class AdditionMissingCitiesInShipmentsSeeder extends Seeder
 {
@@ -20,7 +21,7 @@ class AdditionMissingCitiesInShipmentsSeeder extends Seeder
                 4878, 4967, 4626
             ])
             ->update([
-                'consignee_city_id' => \Illuminate\Support\Facades\DB::raw("
+                'consignee_city_id' => DB::raw("
             CASE 
                 WHEN consignee_city_id = 4662 THEN 6559
                 WHEN consignee_city_id = 4375 THEN 6272
@@ -57,7 +58,7 @@ class AdditionMissingCitiesInShipmentsSeeder extends Seeder
                 4878, 4967, 4626
             ])
             ->update([
-                'city_id' => \Illuminate\Support\Facades\DB::raw("
+                'city_id' =>DB::raw("
             CASE 
                 WHEN city_id = 4662 THEN 6559
                 WHEN city_id = 4375 THEN 6272
