@@ -306,7 +306,7 @@
 
 										<tbody>
 											@php
-                                                $pickup_addresses = $substitute_account_pickup_address ?? $user->shipping;
+                                                $pickup_addresses = $substitute_account_pickup_address ?? $pickup_addresses;
                                             @endphp
 											@if ($pickup_addresses->count())
 												@foreach ($pickup_addresses as $pickup_address)

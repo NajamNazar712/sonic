@@ -80,7 +80,7 @@
 													{{-- <option value="0">New</option> --}}
 												@endif
 
-												{{-- Use main account pickup addresses if no substitute addresses are found --}}
+												{{-- main account --}}
 												@if (!$substitute_account)
 													@foreach($user->shipping as $shipping_information)
 														@if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)

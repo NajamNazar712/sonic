@@ -123,6 +123,7 @@ class ShipperSubstituteAccountManagementController extends Controller
 
       $pickup_addresses = UserShippingInfo::where('user_id', auth()->user()->id)
       ->where('hidden', 0)
+      ->where('status', 1)
       ->select([
         'id',
         'pickup_address'
@@ -210,6 +211,7 @@ class ShipperSubstituteAccountManagementController extends Controller
         $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
         $pickup_addresses = UserShippingInfo::where('user_id', auth()->user()->id)
         ->where('hidden', 0)
+        ->where('status', 1)
         ->select([
           'id',
           'pickup_address'

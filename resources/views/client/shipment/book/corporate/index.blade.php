@@ -75,7 +75,7 @@
                                                     @endforeach
                                                 @endif
 
-                                                {{-- Use main account pickup addresses if no substitute addresses are found --}}
+                                                {{-- main account --}}
                                                 @if (!$substitute_account)
                                                 <option value="0">New</option>
                                                     @foreach ($user->shipping as $shipping_information)
