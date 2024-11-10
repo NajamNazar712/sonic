@@ -147,7 +147,7 @@ class BotCallingController extends Controller
                     'created_at' => now(),
                 ]);
                 $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $findShipmentId->id)->whereIn('rv_state_id', [1, 3])->latest()->first();
-                $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => ($request->call_finding ? $request->call_finding : $array[$request->input]['call_finding_id']), 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1, 'call_to_id' => 1, 'call_status' => $array[$request->input]['call_status_type'],'end_date' => $request->end_date]);
+                $request->merge(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => ($request->call_finding ? $request->call_finding : $array[$request->input]['call_finding_id']), 'rv_assign_agent_status_id' => $array[$request->input]['status_id'], 'call_count' => 1, 'call_to_id' => 1, 'call_status' => $array[$request->input]['call_status_type'],'end_date' => $request->end_date]);
                 // RvCronLog::create([
                 //     'message' => json_encode($request->all()),
                 // ]);
@@ -205,7 +205,7 @@ class BotCallingController extends Controller
                 }
             } else {
                 
-                // $request->request->add(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => 38, 'rv_assign_agent_status_id' => 9, 'call_count' => 1, 'call_to_id' => 1, 'call_status' => ($request->call_status == 'ANSWER' ? 'Connected' :  'Not Connected'),'end_date' => $request->end_date]);
+                // $request->merge(['agent_id' => $request->admin_id, 'shipment_id' => $findShipmentId->id, 'rv_assign_agent_status_id' => null, 'rv_assign_agent_sub_status_id' => 38, 'rv_assign_agent_status_id' => 9, 'call_count' => 1, 'call_to_id' => 1, 'call_status' => ($request->call_status == 'ANSWER' ? 'Connected' :  'Not Connected'),'end_date' => $request->end_date]);
                 // $this->shipmentDifferentStatus($findShipmentId->id,$request);
                 // RvShipmentTicket::where('shipment_id', $findShipmentId->id)->delete();
                 

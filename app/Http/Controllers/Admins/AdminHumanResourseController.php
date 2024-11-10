@@ -4077,7 +4077,7 @@ class AdminHumanResourseController extends Controller
 
             $filename = 'payslip_' . $payslip->id . '.pdf';
 
-            $result = $pdf->download($filename);
+            $result = $pdf->setOption('enable-local-file-access', true)->download($filename);
             $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
             return array('status' => 1, 'image' => $pdf_file);
     }

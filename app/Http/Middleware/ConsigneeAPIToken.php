@@ -24,7 +24,7 @@ class ConsigneeAPIToken
 
             if ($consignee->exists()) {
                 $consignee = $consignee->first();
-                $request->request->add(['consignee_id' => $consignee->id]);
+                $request->merge(['consignee_id' => $consignee->id]);
                 return $next($request);
             } else {
                 return response()->json([

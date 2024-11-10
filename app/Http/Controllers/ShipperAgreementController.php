@@ -1315,7 +1315,7 @@ otherwise it will be rejected</li>
                     $pdf = SnappyPDF::loadHTML($html);
 
                     $filename = 'Customer Registration Form' . '.pdf';
-                    return $pdf->download($filename);
+                    return $pdf->setOption('enable-local-file-access', true)->download($filename);
                 }
             }else{
                 return redirect(route('cod.404'));
