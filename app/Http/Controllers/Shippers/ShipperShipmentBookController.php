@@ -1455,7 +1455,7 @@ class ShipperShipmentBookController extends Controller
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                                 <tr>
                                     <td class="color secondary border twice-top twice-left"><strong>Type</strong></td>
@@ -1472,7 +1472,7 @@ class ShipperShipmentBookController extends Controller
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                                 <tr>
                                     <td class="color primary border twice-left"><strong>Type</strong></td>
@@ -1497,7 +1497,7 @@ class ShipperShipmentBookController extends Controller
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                               </tr>
                             </tbody>
@@ -1510,7 +1510,7 @@ class ShipperShipmentBookController extends Controller
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                               </tr>
                             </tbody>
@@ -1578,7 +1578,7 @@ class ShipperShipmentBookController extends Controller
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
                                 <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
                                 </td>
                         ';
 
@@ -1596,7 +1596,7 @@ class ShipperShipmentBookController extends Controller
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
                                 <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
                                 </td>
                         ';
 
@@ -2125,7 +2125,7 @@ class ShipperShipmentBookController extends Controller
                                   <span><strong>' . $piece->tracking_number . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($piece->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$piece->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                                 <td rowspan="1" class="color primary border twice-left"><strong>Origin</strong></td>
                                 <td rowspan="1" class="border">' . $shipment->pickup_address->city->name . '</td>
@@ -2137,7 +2137,7 @@ class ShipperShipmentBookController extends Controller
                                 <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right"><span class="piece_number"><strong>' . $piece->numbering . '/' . $shipment->pieces . '</strong></span>
                             </td>
@@ -2434,7 +2434,7 @@ class ShipperShipmentBookController extends Controller
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                                 <tr>
                                     <td class="color secondary border twice-top twice-left"><strong>Type</strong></td>
@@ -2451,7 +2451,7 @@ class ShipperShipmentBookController extends Controller
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                                 <tr>
                                     <td class="color primary border twice-left"><strong>Type</strong></td>
@@ -2476,7 +2476,7 @@ class ShipperShipmentBookController extends Controller
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                               </tr>
                             </tbody>
@@ -2492,7 +2492,7 @@ class ShipperShipmentBookController extends Controller
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                                 </td>
                               </tr>
                             </tbody>
@@ -4522,7 +4522,7 @@ class ShipperShipmentBookController extends Controller
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG((string)$shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                             </td>
 
                             <td class="color primary border twice-left"><strong>Service</strong></td>

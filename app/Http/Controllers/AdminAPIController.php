@@ -4868,7 +4868,7 @@ class AdminAPIController extends Controller
 
                     $filename = 'payslip_' . $payslip->id . Carbon::now()->format('Uu') . '-' . $payroll_month . '.pdf';
                     $path = 'payslip_pdf/' . $filename;
-                    $result = $pdf->download($filename);
+                    $result = $pdf->setOption('enable-local-file-access', true)->download($filename);
                     Storage::disk('public')->put($path, $result);
                     $payslip_pdf = new PayslipPdf();
                     $payslip_pdf->payslip_id = $payslip->id;
