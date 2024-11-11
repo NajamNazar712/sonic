@@ -42,10 +42,13 @@ class RevenueReportLastMonth extends Command
     {
         //from 1st to last of month
         $response = AdminRevenueReportsController::revenue_report_last_month(1);
-        echo $response;
+        echo json_encode($response);
+
         $response2 = AdminRevenueReportsController::revenue_report_last_month(2);
-        echo $response2;
-        $response3= AdminRevenueReportsController::revenue_report_last_month(2);
-        echo $response3;
+        echo json_encode($response2);
+
+        $response3 = AdminRevenueReportsController::revenue_report_last_month(3); // Changed to 3
+        echo json_encode($response3);
+
     }
 }
