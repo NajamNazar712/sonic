@@ -113,7 +113,22 @@ class IncidenceMonitoringController extends Controller
         ->join('incidence_monitoring_n_c_levels as nc_level','nc_level.id','=','incidence_monitorings.nc_level_id')
         ->join('incidence_monitoring_statuses as status','status.id','=','incidence_monitorings.status_id')
         ->select(['incidence_monitorings.id','incidence_monitorings.time_from','incidence_monitorings.time_to','incidence_monitorings.observation','incidence_monitorings.tagging_date','incidence_monitorings.clip_link','station.name as station_name','area.name as area_name','case_nature.name as case_nature_type','nc_level.name as nc_level_name','admin.name as created_by','status.status as status_name','incidence_monitorings.created_at', 'station.zone_id', 'station.hub_id']);
-        
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $data->whereBetween('incidence_monitorings.created_at', [$from,$to]);
+        }
+        if ($zone = $request->get('search_zone')) {
+            $data->where('station.zone_id', '=', $zone);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $data->where('station.hub_id', '=', $hub);
+        }
+        if ($tagged_admin = $request->get('search_admin')) {
+            $report_id = IncidenceMonitoringTaggedPerson::where('admin_id',$tagged_admin)->pluck('incidence_monitoring_id')->toArray();
+            $data->whereIn('incidence_monitorings.id', $report_id);
+        }
 
         $datatables = Datatables::of($data)
         ->addColumn('tagged_to', function($report) {
@@ -190,22 +205,8 @@ class IncidenceMonitoringController extends Controller
                 }
             }
             return $dropdown;
-        });
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $datatables->whereBetween('incidence_monitorings.created_at', [$from,$to]);
-        }
-        if ($zone = $request->get('search_zone')) {
-            $datatables->where('station.zone_id', '=', $zone);
-        }
-        if ($hub = $request->get('search_hub')) {
-            $datatables->where('station.hub_id', '=', $hub);
-        }
-        if ($tagged_admin = $request->get('search_admin')) {
-            $report_id = IncidenceMonitoringTaggedPerson::where('admin_id',$tagged_admin)->pluck('incidence_monitoring_id')->toArray();
-            $datatables->whereIn('incidence_monitorings.id', $report_id);
-        }
+        })->rawColumns(['clip_link','report_link','action']);
+
         
         return $datatables->make(true);
     }
