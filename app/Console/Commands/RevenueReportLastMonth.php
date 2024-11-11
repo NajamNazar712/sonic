@@ -14,7 +14,7 @@ class RevenueReportLastMonth extends Command
      *
      * @var string
      */
-    protected $signature = 'email:revenuereport_lastmonth';
+    protected $signature = 'email:revenuereport_lastmonth {type}';
 
     /**
      * The console command description.
@@ -40,15 +40,8 @@ class RevenueReportLastMonth extends Command
      */
     public function handle()
     {
-        //from 1st to last of month
-        $response = AdminRevenueReportsController::revenue_report_last_month(2);
-        echo json_encode($response);
-//
-//        $response2 = AdminRevenueReportsController::revenue_report_last_month(2);
-//        echo json_encode($response2);
-//
-//        $response3 = AdminRevenueReportsController::revenue_report_last_month(3); // Changed to 3
-//        echo json_encode($response3);
+        $type = $this->argument('type');
+        $response = AdminRevenueReportsController::revenue_report_last_month($type);
 
     }
 }
