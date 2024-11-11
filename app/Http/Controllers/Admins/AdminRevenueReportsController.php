@@ -144,9 +144,9 @@ class AdminRevenueReportsController extends Controller
                 $shipper = $sale->shipper;
             }
             $amount = 0;
-            if ($sale->p_collection_amount != null) {
+            if ($sale->p_collection_amount != null && $sale->p_collection_amount !=0) {
                 $amount = $sale->p_collection_amount;
-            } else if ($sale->d_collection_amount != null) {
+            } else if ($sale->d_collection_amount != null && $sale->d_collection_amount !=0) {
                 $amount = $sale->d_collection_amount;
             } else {
                 $amount = $sale->s_collection_amount;
@@ -431,9 +431,9 @@ class AdminRevenueReportsController extends Controller
                 $shipper = $sale->shipper;
             }
             $amount = 0;
-            if ($sale->p_collection_amount != null) {
+            if ($sale->p_collection_amount != null && $sale->p_collection_amount !=0) {
                 $amount = $sale->p_collection_amount;
-            } else if ($sale->d_collection_amount != null) {
+            } else if ($sale->d_collection_amount != null && $sale->d_collection_amount !=0) {
                 $amount = $sale->d_collection_amount;
             } else {
                 $amount = $sale->s_collection_amount;
