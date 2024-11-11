@@ -42,7 +42,7 @@ class APIToken
                     return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified.']);
                 }
                 else {
-                    $request->request->add(['user_id' => $user->id]);
+                    $request->merge(['user_id' => $user->id]);
 
                     return $next($request);
                 }

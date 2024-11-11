@@ -268,7 +268,7 @@ class RiderManagementController extends Controller
             $employee->area_id = $request->area;
             $employee->save();
             if ($request->rider_main_category == 3) {
-                $request->request->add(['select_rider_id' => $rider->id]);
+                $request->merge(['select_rider_id' => $rider->id]);
                 GlobalSettingsController::rider_assigned_hub_add($request);
             }
             $rider->employee_id = $employee->id;

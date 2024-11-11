@@ -195,7 +195,7 @@ trait RvTrait
 
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment)->latest()->first();
 
-                        $request->request->add([
+                        $request->merge([
                             'shipment_id' => $shipment, 'is_fake_status' => $rv_unassign_agent->is_fake_status, 'remarks' => $rv_unassign_agent->remarks,
                             'call_to_id' => $rv_unassign_agent->call_to_id, 'assigned_by' => 0
                         ]);
@@ -220,7 +220,7 @@ trait RvTrait
                 $rv_unassign_agent->save();
 
                 $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
-                $request->request->add([
+                $request->merge([
                     'shipment_id' => $shipment_id, 'is_fake_status' => $rv_unassign_agent->is_fake_status, 'remarks' => $rv_unassign_agent->remarks,
                     'call_to_id' => $rv_unassign_agent->call_to_id, 'assigned_by' => Null
                 ]);

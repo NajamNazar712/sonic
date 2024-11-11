@@ -1228,7 +1228,7 @@ class AdminAttendanceController extends Controller
 
         $pdf = SnappyPDF::loadHTML($html);
         $filename = 'Attendance' . $trax_id . '.pdf';
-        return $pdf->download($filename);
+        return $pdf->setOption('enable-local-file-access', true)->download($filename);
     }
 
 
