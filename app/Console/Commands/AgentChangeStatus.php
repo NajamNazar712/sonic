@@ -61,8 +61,14 @@ class AgentChangeStatus extends Command
             // ->update(['rv_state_id' => 3]);
 
             //Query for Making Shipments Enable again in Get Tickets After their "Unresponsive" Status is Submitted.
-            // RvShipmentTicket::where('in_progress', 1)->update(['in_progress' => 0]);
-
+            RvShipmentTicket::where('in_progress', 1)->where('is_bot', 0)->update(['in_progress' => 0]);
+            
+            $upshipments = RvShipmentTicket::whereDate('created_at','>', Carbon::parse(now()->subHours(78)->toDateTimeString())->format('Y-m-d'))->where('in_progress', 0)->where('is_bot',0)->get();
+            // ->update(['in_progress' => 0,'rv_shipment_tickets.updated_at'=> 'rv_shipment_tickets.created_ats']);
+            foreach($upshipments as $shipment){
+                $shipment->updated_at = $shipment->created_at;
+                $shipment->save();
+            }
 
             //Make record of return/dashboard cards count daily to mantain history
             if(RVDashboardDailyCount::whereDate('created_at', Carbon::today())->doesntExist()) //Max 1 record should be created each day
