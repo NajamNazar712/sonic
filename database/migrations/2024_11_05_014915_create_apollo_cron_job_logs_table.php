@@ -14,7 +14,7 @@ class CreateApolloCronJobLogsTable extends Migration
     public function up()
     {
         Schema::create('apollo_cron_job_logs', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('job_name');
             $table->timestamp('last_run_time');
             $table->timestamps();

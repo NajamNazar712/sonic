@@ -11,7 +11,7 @@ class ApolloCronJobLogsSeeder extends Seeder
      */
     public function run()
     {
-        \Illuminate\Support\Facades\DB::table('apollo_cron_job_logs')->insert([
+        DB::table('apollo_cron_job_logs')->insert([
             [
                 'id' => 1,
                 'job_name' => 'apollo:fetch-shipments-status',
