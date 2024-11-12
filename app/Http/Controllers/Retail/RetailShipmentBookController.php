@@ -565,8 +565,8 @@ class RetailShipmentBookController extends Controller
             if($request->has('retail_discount_amount') && $isCodeValid->status == 1)
             {
                 $retail_shipment->retail_discount_amount = $request->retail_discount_amount;
-                $retail_shipment->discount = $request->retail_discount_amount;
-                $retail_shipment->total_charges = $retail_shipment->total_charges - $request->retail_discount_amount;
+//                $retail_shipment->discount = $request->retail_discount_amount;
+//                $retail_shipment->total_charges = $retail_shipment->total_charges - $request->retail_discount_amount;
                 RetailDiscountCode::where('code', '=', $request->discount_code)->update(['shipment_id' => $shipment_id]);
             }
         }
@@ -2883,7 +2883,7 @@ class RetailShipmentBookController extends Controller
 
             // Deduction GST tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6"><strong>GST ' . $data->commission_gst_deduction_percent . '%</strong></td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Deduction ' . $data->commission_gst_deduction_percent . '</strong></td>';
             $html .= '<td><strong>' . number_format(round($deduction_amount)) . '</strong></td>';
             $html .= '</tr>';
 

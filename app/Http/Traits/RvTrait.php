@@ -39,12 +39,13 @@ use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\ShipmentStatusReason;
-
+use App\RvCronLog;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentTicket;
 use App\RvShipmentTicketDeleteTable;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\ProcessRvShipmentTicket;
+use GuzzleHttp\Client;
 
 trait RvTrait
 {
@@ -549,13 +550,17 @@ trait RvTrait
         $shipment_status_reason = null;
 
         if ($request->rv_assign_agent_sub_status_id) {
-            $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');
-
+            $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');  
             if ($rv_sub_status) {
                 $shipment_status_reason = ShipmentStatusReason::where('name', 'like', '%' . $rv_sub_status . '%')->value('id');
             }
         }
 
+        if (!$request->rv_assign_agent_sub_status_id || !$shipment_status_reason) { // Return confirm RVR reason_id bind in journey inserted
+            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest()->select('status_reason_id', 'remarks')->first();
+            $shipment_status_reason = $journey->status_reason_id;
+            $remarks =  ((!$remarks) ? $journey->remarks : $remarks);
+        }
         //these both could be null 
         $consignee_refused_reasons = $request->consignee_refused_reasons ?? null;
         //
@@ -793,7 +798,7 @@ trait RvTrait
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
-
+        $botInvalidNo = ($request->bot_auto_return > 0 ? 1 : 0); // bot invalid call 
         if ($rv_shipment_assign_agent) {
             try {
                 $status = new RvAgentCallHistory();
@@ -807,10 +812,23 @@ trait RvTrait
                 $status->call_status = $request->call_status ?? 'Not Connected';
                 $status->updated_at = $request->end_date ?? Carbon::now();
                 $status->save();
-                // if($request->rv_assign_agent_sub_status_id == 34){ //If the consignee is unresponsive during a bot call, the unresponsive count is set to 3, and the SAR is marked 
-                //      $rv_shipment_assign_agent->unresponsive_count = 3; 
-                // }else{
-                    // }
+                if($botInvalidNo > 0){ //If the consignee is invalid phone no during a bot call, the unresponsive count is set to 4, and the return_confirm is marked 
+                    $rv_shipment_assign_agent->unresponsive_count = 4;
+                    $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
+                    $rv_shipment_assign_agent->save();
+
+                    $rv_shipment_assign_agent->rv_assign_agent_status_id = 1;
+                    $rv_shipment_assign_agent->rv_state_id = 4;
+                    $rv_shipment_assign_agent->save();
+                    request()->request->add([
+                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                        'remarks' => $request->remarks,
+                        'rv_assign_agent_sub_status_id' => null
+                    ]);
+                    $this->return_confirm($request);
+                    return ['status' => 1, 'success' => 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
+
+                }
                 $rv_shipment_assign_agent->increment('unresponsive_count');
                 $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
                 $rv_shipment_assign_agent->save();
@@ -2017,8 +2035,111 @@ trait RvTrait
         dispatch(new ProcessRvShipmentTicket($rvData));
     }
 
-    static function botCallDispatch($shipmentid){
-        
-        
+    static function botCallingDataSet($shipmentId){
+    
+        if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
+            if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
+                $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
+                RvShipmentTicket::where('shipment_id', $shipmentId)->update(['in_progress' => 1]);
+                $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
+
+                $final_phone = self::phoneNo($shipment->consignee_phone_number_1);
+                $post = [
+                    'vpbx_id' => '66bdfd18cb67f',
+                    'caller_id' => $final_phone,
+                    'tracking_number' => $shipment->tracking_number,
+                    'cod_amount' => $shipment->amount,
+                    'brand_name' => $shipment->user->name ?? $shipment->user->brand_name,
+                    'customer_name' => $shipment->consignee_name,
+                ];
+                return ['post' => $post, 'base_uri' => $base_uri, 'user_id' => $shipment->user_id];
+            } else {
+                return null;
+            }
+        }
+    }
+    static function phoneNo($phoneNumber)
+    {
+        // Clean the phone number by removing non-alphanumeric characters    
+        $cleaned_phone = preg_replace("/[^a-zA-Z0-9]+/", "", $phoneNumber);
+        if (substr($cleaned_phone, 0, 2) == "00" && substr($cleaned_phone, 0, 4) != '0092') {
+            if (substr($cleaned_phone, 0, 3) === "000") {
+                // Remove one "0" by replacing "00" at the start with "0"
+                $final_phone = '0' . substr($cleaned_phone, 3);
+            } else {
+                $final_phone = '0' . substr($cleaned_phone, 2);
+            }
+        }   // Remove one "0" by replacing "00" at the start with "0"
+        elseif (substr($cleaned_phone, 0, 3) == '+92') {
+            $final_phone = '0' . substr($cleaned_phone, 3);
+        }
+        //Replace 92 with 0
+        else if (substr($cleaned_phone, 0, 2) == '92') {
+            $final_phone = '0' . substr($cleaned_phone, 2);
+        }
+        //Replace 0092 with 0
+        else if (substr($cleaned_phone, 0, 4) == '0092') {
+            $final_phone = '0' . substr($cleaned_phone, 4);
+        }
+        //Addition of 0
+        else if (substr($cleaned_phone, 0, 1) != '0') {
+            $final_phone = '0' . $cleaned_phone;
+        } else {
+            // No leading "00", so leave the cleaned phone number as is
+            $final_phone = $cleaned_phone;
+        }
+        return $final_phone;
+    }
+    static function inValidEntityEntertain($tracking_number){
+        $client = new Client(['base_uri' =>  config('app.url') . '/api/admin/bot_submit_ticket', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
+        $response = $client->post('', [
+            'headers' => [
+                'Authorization' => 'dXhTblBlMFZDYTJGbkR4MENTaWg5dWZFV250Z29leDZoaEU4MDJkT0xGZEx6d3IydGgwWHdRVjBIWDB666bb6c93c2dfe'
+            ],
+            'json' => [
+                'tracking_number' => $tracking_number,
+                'call_status' => 'NOANSWER',
+                'remarks'=> 'due to invalid number',
+                'bot_auto_return' => 1, // auto returm confirm in  case of invalid number
+                'input' => 0,
+                'start_date' => date('Y-m-d H:i:s'),
+                'end_date' => date('Y-m-d H:i:s'),
+                'call_finding' => 28, //invalid numbers
+                'sender_name' => 'sonic'
+            ]
+        ]);
+        $response = $response->getBody()->getContents();
+        $response = json_decode($response);
+    }
+
+    protected function shipmentDifferentStatus($shipmentId,$request){
+        $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $shipmentId)->latest()->first();
+        $assigned_agent = RvShipmentAgent::where('agent_id', $request->admin_id)->first();
+        $admin_agent = Admin::where('id', $request->admin_id)->first();
+        $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
+        $this->update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent);
+        $status = $this->callHistoryRecord($shipment_assign_agent, $request);
+        $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey, $status->id);
+    }
+
+    protected function callHistoryRecord($shipment_assign_agent, $request){
+        $status = new RvAgentCallHistory();
+        $status->shipment_id = $request->shipment_id;
+        $status->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
+        $status->call_finding_id = $request->rv_assign_agent_sub_status_id; //call finding reasons
+        $status->call_to_id = 1; //Shipper or Consignee
+        $status->remarks = $request->remarks;
+        $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
+        $status->updated_by_id = $request->admin_id;
+        $status->call_status = $request->call_status;
+        $status->updated_at = $request->end_date;
+        $status->save();
+        return $status;
+    }
+    public function createRvCronLog($message)
+    {
+        RvCronLog::create([
+            'message' => $message,
+        ]);
     }
 }
