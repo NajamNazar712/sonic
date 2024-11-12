@@ -653,30 +653,27 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
+
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                     if ($.inArray(data.delivery_note_id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
 
                     var fintech_sum = $(row).find('#myButton');
-
-                    if (fintech_sum.length > 0) {
-                        fintech_sum[0].innerText = data.amount;
-                        fintech_sum = parseFloat(fintech_sum[0].innerText.replace(/,/g, ''));
-                    }
-
                     var dccn_amount = parseFloat(data.amount.replace(/,/g, ''));
+                    fintech_sum = fintech_sum[0].innerText
+                    fintech_sum = parseFloat(fintech_sum)
 
                     if(data.transactions_amount == null){
-                        
+
                         data.transactions_amount = 0
                     }
                     value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
 
                     if (value < 0) {
                         value = 0;
-                    }                    
-                    
+                    }
+
                     $('td:eq(19)', row).html(value);
 
                 },
