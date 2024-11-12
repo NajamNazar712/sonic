@@ -756,13 +756,15 @@ class AdminHumanResourseController extends Controller
             if ($request->get('search_date_to')) {
                 $from = $request->get('search_date_from') . ' 00:00:00';
                 $to = $request->get('search_date_to') . ' 23:59:59';
-                $datatable->whereBetween('employees.created_at', [$from, $to]);
+                $employees->whereBetween('employees.created_at', [$from, $to]);
             } else {
                 $from = $request->get('search_date_from');
-                $datatable->whereDate('employees.created_at', $from);
+                $employees->whereDate('employees.created_at', $from);
             }
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function employee_directory_pin(Request $request)
@@ -2815,6 +2817,7 @@ class AdminHumanResourseController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['map', 'action'])
             ->make(true);
     }
 
@@ -3252,6 +3255,7 @@ class AdminHumanResourseController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
