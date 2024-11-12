@@ -2,30 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\CorporateShipmentReturnDiscountCharges;
-use App\CorporateZeroCodDiscountCharges;
-use App\HistoryShipmentReturnDiscountCharges;
-use App\HistoryZeroCodDiscountCharges;
-use App\Http\Models\CorporateDefaultFuelSurcharge;
-use App\Http\Models\CorporateDefaultHistoryFuelSurcharge;
-use App\Http\Models\CorporateDefaultHistoryWeightCharge;
-use App\Http\Models\CorporateDefaultWeightCharge;
-use App\Http\Models\CorporateFuelSurcharge;
-use App\Http\Models\CorporateWeightCharge;
-use App\Http\Models\CorporateWeightChargeZoneWise;
-use App\Http\Models\HistoryCorporateWeightChargeZoneWise;
-use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
-use App\Http\Models\Rates\HistoryCorporateWeightCharge;
-use App\PendingCorporateShipmentReturnDiscountCharges;
-use App\PendingCorporateZeroCodDiscountCharges;
-use App\PendingShipmentReturnDiscountCharges;
-use App\PendingZeroCodDiscountCharges;
-use App\ShipmentReturnDiscountCharges;
-use App\ZeroCodDiscountCharges;
-use App\FafCharges;
 use Exception;
 use Carbon\Carbon;
-use GuzzleHttp\Client;
+use App\FafCharges;
 use App\RouteLocations;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -45,9 +24,10 @@ use App\Http\Models\RouteType;
 use App\Http\Models\PickupType;
 use App\Http\Models\RateRemark;
 use App\Http\Models\RateStatus;
-use Illuminate\Support\Facades\Schema;
+use App\ZeroCodDiscountCharges;
 use Illuminate\Validation\Rule;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\Fleet;
 use App\Http\Models\BookingType;
 use App\Http\Models\CityHistory;
 use App\Http\Models\CityOsaRate;
@@ -82,17 +62,23 @@ use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Territory;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
+use App\Jobs\MakeDynamicHubsMapping;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\ShipmentsJourney;
+use App\HistoryZeroCodDiscountCharges;
 use App\Http\Models\HistorySmsCharges;
 use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\PendingSmsCharges;
 use App\Http\Models\Rates\RateHistory;
 use App\Http\Models\ReportingLocation;
+use App\Http\Traits\RateReusableTrait;
+use App\PendingZeroCodDiscountCharges;
+use App\ShipmentReturnDiscountCharges;
+use Illuminate\Support\Facades\Schema;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\BookingTypeCharges;
@@ -102,6 +88,7 @@ use App\Http\Models\SubCategorySegment;
 use App\Http\Models\WMS\WmsStorageType;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\CorporateZeroCodDiscountCharges;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\HR\EmployeeDomicile;
@@ -118,8 +105,10 @@ use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Models\Admin\UserCheckStatus;
+use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\ShipmentPaymentStatus;
+use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\PendingPaymentShipment;
@@ -134,16 +123,19 @@ use App\Http\Models\Rates\HistoryRateStatus;
 use App\Http\Models\Rates\PendingRateStatus;
 use App\Http\Models\WMS\WmsPerProductCharge;
 use Illuminate\Database\Eloquent\Collection;
+use App\HistoryShipmentReturnDiscountCharges;
 use App\Http\Models\Admin\UserFintectCharges;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\Rates\RateDestinationHub;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\WMS\WmsStorageTypeCharge;
+use App\PendingShipmentReturnDiscountCharges;
 use App\Http\Models\Rates\HistoryReturnCharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\PendingReturnCharge;
 use App\Http\Models\Rates\PendingWeightCharge;
+use App\CorporateShipmentReturnDiscountCharges;
 use App\Http\Models\Admin\StandardReturnCharge;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Commission\SalesCommission;
@@ -156,6 +148,7 @@ use App\Http\Models\Rates\PendingFuelSurcharge;
 use App\Http\Models\Rates\PendingRateOriginHub;
 use App\Http\Models\WMS\WmsPerSquareFootCharge;
 use App\Jobs\UserDisableBlockEmailNotification;
+use App\PendingCorporateZeroCodDiscountCharges;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\HistoryDiscountWeightCharge;
@@ -165,6 +158,7 @@ use App\Http\Models\Rates\PendingDiscountCharge;
 use App\Http\Models\WMS\WmsHistoryPackingCharge;
 use App\Http\Models\WMS\WmsPendingPackingCharge;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\CorporateDefaultWeightCharge;
 use App\Http\Models\Rates\HistoryInsuranceCharge;
 use App\Http\Models\Rates\HistoryPackagingCharge;
 use App\Http\Models\Rates\PendingInsuranceCharge;
@@ -173,6 +167,8 @@ use App\Http\Models\Admin\ShipementReceiveDetails;
 use App\Http\Models\Admin\ShipperInterceptExclude;
 use App\Http\Models\Admin\StandardInsuranceCharge;
 use App\Http\Models\Admin\StandardPackagingCharge;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\InternationalUsersInformation;
 use App\Http\Models\Operataions\OperationForecast;
 use App\Http\Models\WMS\WmsHistoryLabellingCharge;
@@ -185,6 +181,7 @@ use App\Http\Models\Rates\InternationalEconomyRate;
 use App\Http\Models\WMS\WmsHistoryPerProductCharge;
 use App\Http\Models\WMS\WmsPendingPerProductCharge;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\StandardBookingTypeCharge;
 use App\Http\Models\Rates\HistoryBookingTypeCharges;
@@ -205,20 +202,24 @@ use App\Http\Models\CorporateDefaultHistoryRateStatus;
 use App\Http\Models\PendingCorporateDefaultRateStatus;
 use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
 use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
+use App\PendingCorporateShipmentReturnDiscountCharges;
 use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Controllers\Admins\ActivityTrailController;
 
+use App\Http\Models\CorporateDefaultHistoryWeightCharge;
+use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
+use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
+use App\Http\Models\CorporateDefaultHistoryFuelSurcharge;
+use App\Http\Models\HistoryCorporateWeightChargeZoneWise;
 use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Models\Admin\CargoManifest\V2JunctionMapping;
-use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
-use App\Http\Models\Admin\CargoManifest\V2Junctions;
+use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Models\Admin\CargoManifest\V2JunctionVehicles;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
-use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Commission\SalesCommissionExternalUser;
 use App\Http\Models\Operataions\OperationForecastShipments;
 use App\Http\Models\Shipper\SubstituteUserModulePermission;
@@ -233,7 +234,6 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Http\Traits\RateReusableTrait;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait;
@@ -1328,6 +1328,7 @@ class AdminDashboardController extends Controller
     {
         $keyword = $request->search;
         $subSegment = $request->input('sub_segment_select', null);
+        $account_tye_id = $request->input('account_type_id', null);
         $shippers = User::where('name', 'like', '%' . $keyword . '%');
         
         if($type == 'active')
@@ -1340,6 +1341,9 @@ class AdminDashboardController extends Controller
         }
         if($subSegment){
             $shippers = $shippers->where('segment_id', $subSegment);
+        }
+        if($account_tye_id){
+            $shippers = $shippers->whereIn('account_type_id', $account_tye_id);
         }
 
         $shippers = $shippers->select('id','name as text')->take(10)->get()->toArray();
@@ -11144,9 +11148,12 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         DB::raw('(select max(created_at) from city_histories where city_histories.city_id = cities.id)'));
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
+
+            ->leftjoin('admins as c', 'c.id', '=', 'cities.created_by')
+
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status'])
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status', 'c.name as created_by', 'cities.created_at as created_at'])
             ->where('cities.permanent_disabled',0);
 
         return Datatables::of($cities)
@@ -11244,6 +11251,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     return '-';
                 }
             })
+            ->editColumn('created_at', function ($cities) {
+                if ($cities->created_at) {
+                    return $cities->created_at->toDateTimeString() === '-0001-11-30 00:00:00' ? '-' : $cities->created_at->toDateTimeString();
+                }
+                return '-';
+            })
+
             ->make(true);
     }
 
@@ -11491,6 +11505,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 'gc_area' => ($request->has('gc_area')) ? 1 : 0,
                 'attempt_tat' => $request->attempt_tat,
                 'status' => 1,
+                'created_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
@@ -11518,6 +11533,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ]);
 
             if (!empty($request->walk_in_delivery)) {
+//                dd($request->walk_in_delivery);
                 foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
                     WalkInCities::create([
                         'city_id' => $city->id,
@@ -11581,6 +11597,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 'gc_area' => ($request->has('gc_area')) ? 1 : 0,
                 'attempt_tat' => $request->attempt_tat,
                 'status' => 1,
+                'created_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
@@ -15041,7 +15058,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
                     if ($request->has('edit')){
-                        SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
+                        Sales::where('sales_commission_id', $sales_commission_id)->delete();
                     }
 
                     foreach($request->tier_id as $row_id => $tier){
@@ -15189,19 +15206,44 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         }
     }
 
-    public static function addManagementHubUser($admin_ids, $city_id) {
-        if (count($admin_ids) > 0) {
-            $data = [];
+    public static function addManagementHubUser($admin_ids, $insertedIds) {
+
+        // Handle insertedIds logic
+        if (is_array($insertedIds) && count($insertedIds) > 0 && count($admin_ids) > 0) {
+            foreach ($insertedIds as $city_id) {
+                // Repeat the process for each city_id
+                foreach ($admin_ids as $admin_id) {
+                    $admin_hub_exist = AdminHub::where('admin_id', $admin_id)
+                        ->where('hub_id', $city_id)
+                        ->first();
+                    if (!$admin_hub_exist) {
+                        $data[] = [
+                            'admin_id' => $admin_id,
+                            'hub_id' => $city_id
+                        ];
+                    }
+                }
+            }
+
+            if (!empty($data)) {
+                AdminHub::insert($data);
+            }
+        } else if (count($admin_ids) > 0) {
+            //For Single Normal Old
             foreach ($admin_ids as $admin_id) {
-                $admin_hub_exist = AdminHub::where('admin_id', $admin_id)->where('hub_id', $city_id)->first();
-                if(!$admin_hub_exist){
+                $admin_hub_exist = AdminHub::where('admin_id', $admin_id)
+                    ->where('hub_id', $insertedIds)
+                    ->first();
+                if (!$admin_hub_exist) {
                     $data[] = [
                         'admin_id' => $admin_id,
-                        'hub_id' => $city_id
+                        'hub_id' => $insertedIds
                     ];
                 }
             }
-            AdminHub::insert($data);
+            if (!empty($data)) {
+                AdminHub::insert($data);
+            }
         }
     }
 
@@ -15329,6 +15371,697 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         }
 
         return [CorporateDefaultFuelSurcharge::class, CorporateDefaultFuelSurcharge::class];
+    }
+
+    public function addExcelCityHub(Request $request)
+    {
+        $errors = [];
+        $rows = [];
+
+        // Check if a file is uploaded
+        if ($file = $request->file('add_city')) {
+            $spreadsheet = IOFactory::createReaderForFile($file)
+                ->setReadDataOnly(true)
+                ->load($file)
+                ->getActiveSheet()
+                ->toArray();
+        }
+
+        $fields1 = [
+            'regular_rush', 'regular_saver_plus', 'regular_swift', 'regular_same_day',
+            'replacement_rush', 'replacement_saver_plus', 'replacement_swift', 'replacement_same_day',
+            'try_and_buy_rush', 'try_and_buy_saver_plus', 'try_and_buy_swift', 'try_and_buy_same_day',
+            'reverse_pickup_rush', 'reverse_pickup_saver_plus', 'reverse_pickup_swift', 'reverse_pickup_same_day',
+            'ftl_rush', 'ftl_saver_plus', 'ftl_swift', 'ftl_same_day',
+            'walkin_rush', 'walkin_saver_plus', 'walkin_swift'
+        ];
+
+        if (!empty($spreadsheet)) {
+            $column_count = 48;
+            $fields = [
+                'name', 'city_code', 'is_city', 'is_hub', 'hub_id', 'zone_id', 'address', 'attempt_tat',
+                'location_latitude', 'location_longitude', 'hub_location_latitude', 'hub_location_longitude', 'pickup', 'pickup_cut_off_time', 'gc_area',
+                'regular_rush', 'regular_saver_plus', 'regular_swift', 'regular_same_day',
+                'replacement_rush', 'replacement_saver_plus', 'replacement_swift', 'replacement_same_day',
+                'try_and_buy_rush', 'try_and_buy_saver_plus', 'try_and_buy_swift', 'try_and_buy_same_day',
+                'reverse_pickup_rush', 'reverse_pickup_saver_plus', 'reverse_pickup_swift', 'reverse_pickup_same_day',
+                'ftl_rush', 'ftl_saver_plus', 'ftl_swift', 'ftl_same_day',
+                'walkin_rush', 'walkin_saver_plus', 'walkin_swift',
+                'osa_name_1','osa_rate_1','osa_name_2','osa_rate_2','osa_name_3','osa_rate_3','osa_name_4','osa_rate_4','closest_hub','vehicles_list'
+            ];
+
+            if (count($spreadsheet[0]) !== $column_count) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+
+            unset($spreadsheet[0]);
+
+            $rows = array_map(function ($row) use ($fields, $fields1) {
+                $combinedRow = array_combine($fields, $row);
+
+                foreach ($fields1 as $field) {
+                    if (array_key_exists($field, $combinedRow) && is_null($combinedRow[$field])) {
+                        unset($combinedRow[$field]);
+                    }
+                }
+
+                return $combinedRow;
+            }, $spreadsheet);
+
+        } else {
+            $forms = $request->except(['_token', '_method']);
+            $rows = array_map(function ($form) use ($fields1) {
+                foreach ($fields1 as $field) {
+                    if (array_key_exists($field, $form) && is_null($form[$field])) {
+                        unset($form[$field]);
+                    }
+                }
+                return $form;
+            }, $forms);
+
+        }
+
+        if(empty($rows)){
+            return redirect()->back()->with('error', 'Excel is empty');
+        }
+
+        //TO-6917-limitation-setting-in-city-manag
+        if(count($rows) > 300){
+            return redirect()->route('admin.management.city.index')->with('error', 'Maximum limit of bulk is 300');
+        }
+        //END
+
+        // Validation rules, messages, and attribute names
+        $rules = [
+            'name' => 'required|string',
+            'city_code' => 'nullable',
+            'hub_id' => 'required_without:zone_id|required_if:is_city,1|hub_id_check',
+            'zone_id' => 'required_without:hub_id|required_if:is_hub,1|zone_id_check',
+            'is_city' => 'required_without_all:is_hub|nullable|boolean',
+            'is_hub'  => 'required_without_all:is_city|nullable|boolean',
+            'attempt_tat' => 'required|integer|min:1',
+            'location_latitude' => 'required|numeric',
+            'location_longitude' => 'required|numeric',
+            'hub_location_latitude' => 'required|numeric',
+            'hub_location_longitude' => 'required|numeric',
+            'pickup' => 'boolean',
+            'address' => 'nullable',
+            'gc_area' => 'nullable|boolean',
+            'pickup_cut_off_time' => 'required_if:pickup,1|min:0|max:23',
+            'closest_hub' => 'nullable|required_with:vehicles_list',
+            'vehicles_list' => 'required_with:closest_hub',
+            'delivery_types' => 'required_without_all:regular_rush,regular_saver_plus,regular_swift,regular_same_day,replacement_rush,replacement_saver_plus,replacement_swift,replacement_same_day,try_and_buy_rush,try_and_buy_saver_plus,try_and_buy_swift,try_and_buy_same_day,reverse_pickup_rush,reverse_pickup_saver_plus,reverse_pickup_swift,reverse_pickup_same_day,ftl_rush,ftl_saver_plus,ftl_swift,ftl_same_day|boolean',
+        ];
+        for ($i = 1; $i <= 4; $i++) {
+            $rules["osa_name_$i"] = ['nullable', 'regex:/^[a-zA-Z0-9\s]+$/'];
+            $rules["osa_rate_$i"] = 'required_with:osa_name_' . $i;
+        }
+        $messages = [
+            'name.required' => 'City Name is required.',
+            'hub_id.required_without' => 'Select Hub is required when you set is_city bit to 1.',
+            'zone_id.required_without' => 'Select Zone is required when you set is_hub bit to 1.',
+            'attempt_tat.required' => 'Add Attempt TAT is required.',
+            'latitude.required' => 'Latitude is required.',
+            'longitude.required' => 'Longitude is required.',
+            'hub_latitude.required_if' => 'Hub Latitude is required when Hub is selected.',
+            'hub_longitude.required_if' => 'Hub Longitude is required when Hub is selected.',
+            'pickup_cut_off_time.required_if' => 'Pickup Cut Off Time is required if Pickup is selected.',
+            'delivery_types.required_without_all' => 'At least one delivery type must be selected.',
+            'is_city.required_without_all' => 'Either city or hub must be selected.',
+            'is_hub.required_without_all'  => 'Either hub or city must be selected.',
+            'zone_id_check'  => 'Zone Not Exists Or Not Required When City Is Selected.',
+            'hub_id_check'  => 'Hub Not Exists Or Not Required When Hub Is Selected.',
+        ];
+
+        for ($i = 1; $i <= 4; $i++) {
+            $messages["osa_rate_$i.required_if"] = "OSA Rate $i is required when OSA Name $i is provided.";
+        }
+
+        $names = [
+            'name' => 'City Name',
+            'hub_id' => 'Select Hub',
+            'zone_id' => 'Select Zone',
+            'attempt_tat' => 'Attempt TAT',
+            'latitude' => 'Latitude',
+            'longitude' => 'Longitude',
+            'hub_latitude' => 'Hub Latitude',
+            'hub_longitude' => 'Hub Longitude',
+            'is_city' => 'City',
+            'is_hub' => 'Hub',
+            'gc_area'=> 'GC Area',
+            'address'=> 'Address'
+        ];
+
+        Validator::extend('hub_id_check', function ($attribute, $value, $parameters, $validator)  {
+            if(!is_null($value)){
+                $exists = City::where('id', $value)->exists();
+                if (!$exists) {
+                    $validator->addReplacer('hub_name_check', function ($message, $attribute, $rule, $parameters) use($value) {
+                        return "$value does not exist.";
+                    });
+                    return false;
+                }
+                return true;
+            }
+            return true;
+        });
+
+        Validator::extend('zone_id_check', function ($attribute, $value, $parameters, $validator)  {
+            if(!is_null($value)){
+                $exists = Zone::where('id', $value)->exists();
+                if (!$exists) {
+                    $validator->addReplacer('zone_name_check', function ($message, $attribute, $rule, $parameters) use($value) {
+                        return "$value does not exist.";
+                    });
+                    return false;
+                }
+                return true;
+            }
+            return true;
+        });
+
+        foreach ($rows as $row_id => $row) {
+            $validate = Validator::make($row, $rules, $messages);
+            $validate->setAttributeNames($names);
+
+            $validate->after(function ($validator) use ($row, $request) {
+                if ($row['is_city'] == 1 && $row['is_hub'] == 1) {
+                    $validator->errors()->add('is_city', 'Both is_city and is_hub cannot be present at the same time.');
+                    $validator->errors()->add('is_hub', 'Both is_city and is_hub cannot be present at the same time.');
+                }
+
+                if ($row['is_city'] == 0 && $row['is_hub'] == 0) {
+                    $validator->errors()->add('is_city', 'Both is_city and is_hub cannot be 0 at the same time.');
+                    $validator->errors()->add('is_hub', 'Both is_city and is_hub cannot be 0 at the same time.');
+                }
+            });
+
+            // Check if validation fails
+            if ($validate->fails()) {
+                foreach ($validate->errors()->toArray() as $key => $error_array) {
+                    foreach ($error_array as $error) {
+                        $errors[$row_id][$key] = $error;
+                    }
+                }
+            }
+        }
+
+        if (empty($errors)) {
+            $isHubArray = [];
+            $isCityArray = [];
+
+            $forms = $rows;
+
+            $keysToUnsetDeliveryTypes = [
+                'regular_rush',
+                'regular_saver_plus',
+                'regular_swift',
+                'regular_same_day',
+                'replacement_rush',
+                'replacement_saver_plus',
+                'replacement_swift',
+                'replacement_same_day',
+                'try_and_buy_rush',
+                'try_and_buy_saver_plus',
+                'try_and_buy_swift',
+                'try_and_buy_same_day',
+                'reverse_pickup_rush',
+                'reverse_pickup_saver_plus',
+                'reverse_pickup_swift',
+                'reverse_pickup_same_day',
+                'ftl_rush',
+                'ftl_saver_plus',
+                'ftl_swift',
+                'ftl_same_day',
+                'walkin_rush',
+                'walkin_saver_plus',
+                'walkin_swift',
+            ];
+
+            $city_hub_exclude = ['is_city',
+                'is_hub'];
+
+            $walk_in_types = [ 'walkin_rush',
+                'walkin_saver_plus',
+                'walkin_swift',
+                ];
+
+            $closest_hub_types = [ 'closest_hub',
+                'vehicles_list',
+            ];
+
+            $osa_list_excluded = [ 'osa_name_1','osa_rate_1','osa_name_2','osa_rate_2','osa_name_3','osa_rate_3','osa_name_4','osa_rate_4'];
+
+            $cityID = array_column($forms, 'hub_id');
+            $cities = City::whereIn('id', $cityID)->get()->keyBy('id');
+
+            foreach ($forms as $item) {
+
+                if (array_key_exists('closest_hub', $item) && is_null($item['closest_hub'])) {
+                    unset($item['closest_hub']);
+                }
+                if (array_key_exists('vehicles_list', $item) && is_null($item['vehicles_list'])) {
+                    unset($item['vehicles_list']);
+                }
+
+                if (isset($item['is_hub']) && $item['is_hub'] == "1") {
+                    $item['hub'] = 1;
+                    $item['created_at'] = now();
+                    $item['updated_at'] = now();
+                    $item['is_excel'] = 1;
+                    $item['created_by'] = auth()->id();
+                    $isHubArray[] = $item;
+                }
+
+                if (isset($item['is_city']) && $item['is_city'] == "1") {
+                    $zone = $cities->get($item['hub_id']);
+                    $item['zone_id'] = $zone ? $zone->zone_id : null;
+                    $item['created_at'] = now();
+                    $item['updated_at'] = now();
+                    $item['is_excel'] = 1;
+                    $item['created_by'] = auth()->id();
+                    $isCityArray[] = $item;
+                }
+            }
+
+
+            if (!empty($isCityArray)) {
+                // Process the city data for delivery and walk-in types
+                list($isCityArray, $deliveryTypes, $walkInTypes, $osaList) = self::processCityArray($isCityArray, $keysToUnsetDeliveryTypes, $city_hub_exclude, $walk_in_types, $osa_list_excluded, []);
+
+                if (!empty($isCityArray)) {
+                    City::insert($isCityArray);
+                }
+
+                $insertedIds = self::getLastInsertedCityIds(count($isCityArray));
+                sort($insertedIds);
+
+                $historyArray = self::historyCityArray($insertedIds);
+
+                if(!empty($historyArray)){
+                    CityHistory::insert($historyArray);
+                }
+
+                if(!empty($osaList)){
+                    self::processOsaList($insertedIds, $osaList);
+                }
+
+                $walkInTypesFiltered = self::filterTypes($walkInTypes);
+                $deliveryTypesFiltered = self::filterTypes($deliveryTypes);
+
+
+                $walkInTypeToBeInserted = self::prepareWalkInTypes($insertedIds, $walkInTypesFiltered);
+                if (!empty($walkInTypeToBeInserted)) {
+                    WalkInCities::insert($walkInTypeToBeInserted);
+                }
+
+                $deliveryTypesToBeInserted = self::prepareDeliveryTypes($insertedIds, $deliveryTypesFiltered);
+                if (!empty($deliveryTypesToBeInserted)) {
+                    CityDelivery::insert($deliveryTypesToBeInserted);
+                }
+
+                // Insert cities into zone classes
+                self::insertCitiesToZones($insertedIds, 1);
+                self::insertCitiesToZones($insertedIds, 2);
+            }
+
+            if (!empty($isHubArray)) {
+                // Process the hub data for delivery and walk-in types
+                list($isHubArray, $deliveryTypes, $walkInTypes, $osaList, $closestHubTypes) = self::processCityArray($isHubArray, $keysToUnsetDeliveryTypes, $city_hub_exclude, $walk_in_types, $osa_list_excluded, $closest_hub_types);
+
+                if (!empty($isHubArray)) {
+                    City::insert($isHubArray);
+                }
+
+                //Inserted IDS
+                $insertedIds = self::getLastInsertedCityIds(count($isHubArray));
+                sort($insertedIds);
+
+                $historyArray = self::historyCityArray($insertedIds);
+
+                if(!empty($historyArray)){
+                    CityHistory::insert($historyArray);
+                }
+
+
+                if(!empty($osaList)){
+                    self::processOsaList($insertedIds, $osaList);
+                }
+
+                $walkInTypesFiltered = self::filterTypes($walkInTypes);
+                $deliveryTypesFiltered = self::filterTypes($deliveryTypes);
+
+                $walkInTypeToBeInserted = self::prepareWalkInTypes($insertedIds, $walkInTypesFiltered);
+                if (!empty($walkInTypeToBeInserted)) {
+                    WalkInCities::insert($walkInTypeToBeInserted);
+                }
+
+                $deliveryTypesToBeInserted = self::prepareDeliveryTypes($insertedIds, $deliveryTypesFiltered);
+                if (!empty($deliveryTypesToBeInserted)) {
+                    CityDelivery::insert($deliveryTypesToBeInserted);
+                }
+
+                // Insert hubs into zone classes
+                $this->insertCitiesToZones($insertedIds, 1);
+                $this->insertCitiesToZones($insertedIds, 2);
+
+                //Add Management Hub Users In Admin Hubs
+                $admin_ids = Admin::where('management_user', 1)->pluck('id')->toArray();
+                self::addManagementHubUser($admin_ids, $insertedIds);
+
+                // Insertion for dynamic mapping hubs
+                if (!empty($closestHubTypes) && !empty($insertedIds)) {
+                    $cities = City::findMany($insertedIds);
+
+                    $cityMap = [];
+                    foreach ($cities as $city) {
+                        $cityMap[$city->id] = $city;
+                    }
+
+                    $hubMappings = [];
+
+                    foreach ($closestHubTypes as $key => $value) {
+                        if (count($value) > 0) {
+                            $keys = array_keys($closestHubTypes);
+                            $index = array_search($key, $keys, true);
+
+                            if ($index !== false && isset($insertedIds[$index])) {
+                                $cityId = $insertedIds[$index];
+
+                                if (isset($cityMap[$cityId])) {
+                                    $hubMappings[] = [
+                                        'vehicles' => $value,
+                                        'closest_hub' => $key,
+                                        'city' => $cityMap[$cityId],
+                                    ];
+                                } else {
+                                    Log::warning("City ID {$cityId} not found in city map.");
+                                }
+                            } else {
+                                Log::warning("Index not found for key {$key} in inserted IDs.");
+                            }
+                        }
+                    }
+
+                    // Dispatch jobs for each mapping
+                    foreach ($hubMappings as $mapping) {
+                        dispatch(new MakeDynamicHubsMapping($mapping['vehicles'], $mapping['closest_hub'], $mapping['city'], auth()->id()));
+                    }
+                }
+
+            }
+            return redirect()->route('admin.management.city.index')->with('success', 'Hub city added successfully');
+        } else {
+            $hubs = City::pluck( 'name', 'id');
+
+            $zones = Zone::pluck('name', 'id');
+
+            $vehicles = Fleet::where('status', 1)->pluck('reg_number','id');
+
+            return view('admin.errors.bulk-excel-city-errors')->with([
+                'data' => $rows,
+                'errors' => $errors,
+                'hubs' => $hubs,
+                'zones' => $zones,
+                'vehicles' => $vehicles
+            ]);
+        }
+    }
+
+    // Function to process city/hub array and filter out unwanted keys
+    public static function processCityArray(
+        $array,
+        $keysToUnsetDeliveryTypes,
+        $city_hub_exclude,
+        $walk_in_types,
+        $osa_list_excluded,
+        $closest_hub_types
+    ) {
+        $deliveryTypes = [];
+        $walkInTypes = [];
+        $osaList = [];
+        $closestHubTypes = [];
+
+        foreach ($array as $key2 => $values) {
+            if (!is_array($values)) {
+                continue;
+            }
+
+            $keysToUnset = [];
+
+            // Check for delivery types
+            foreach ($values as $key3 => $value) {
+                if (in_array($key3, $keysToUnsetDeliveryTypes)) {
+                    $deliveryTypes[] = $key2 . $key3;
+                    $keysToUnset[] = $key3;
+                }
+                // Unset for city hub exclude
+                if (in_array($key3, $city_hub_exclude)) {
+                    $keysToUnset[] = $key3;
+                }
+                // Unset for walk-in types and track them
+                if (in_array($key3, $walk_in_types)) {
+                    $walkInTypes[] = $key2 . $key3;
+                    $keysToUnset[] = $key3;
+                }
+                // Unset for OSA list exclude but store the value in $osaList first
+                if (in_array($key3, $osa_list_excluded)) {
+                    if (isset($array[$key2][$key3])) {
+                        $osaList[$key2 . $key3] = $array[$key2][$key3];
+                    }
+                    $keysToUnset[] = $key3;
+                }
+                // Unset for closest hub types and store the value in $closestHubTypes
+                if (in_array($key3, $closest_hub_types)) {
+                    if (isset($array[$key2]['closest_hub']) && isset($array[$key2]['vehicles_list'])) {
+                        $closestHubTypes[$array[$key2]['closest_hub']] = $array[$key2]['vehicles_list'];
+                    } else {
+                        $closestHubTypes[$key2] = []; // For precise insertion for hub-wise index if null too
+                    }
+                    $keysToUnset[] = $key3;
+                }
+            }
+
+            foreach ($keysToUnset as $keyToUnset) {
+                unset($array[$key2][$keyToUnset]);
+            }
+        }
+
+        return [$array, $deliveryTypes, $walkInTypes, $osaList, $closestHubTypes];
+    }
+
+
+
+    // Function to retrieve the last inserted city IDs
+    public static function getLastInsertedCityIds($count) {
+        return DB::table('cities')
+            ->where('is_excel', 1)
+            ->orderBy('id', 'desc')
+            ->limit($count)
+            ->pluck('id')
+            ->toArray();
+    }
+
+    // Function to filter types based on their prefixes
+    public static function filterTypes($types) {
+        $filteredTypes = [];
+        foreach ($types as $item) {
+            preg_match('/^\d+/', $item, $matches);
+            $prefix = isset($matches[0]) ? intval($matches[0]) : 0;
+            $filteredTypes[$prefix][] = $item;
+        }
+        foreach ($filteredTypes as $prefix => $group) {
+            $group = array_values($group);
+        }
+        return $filteredTypes;
+    }
+
+    // Function to prepare walk-in types for insertion
+    public static function prepareWalkInTypes($insertedIds, $filteredTypes) {
+        $walkInTypesToBeInserted = [];
+        $cities = City::whereIn('id', $insertedIds)->get()->keyBy('id');
+
+        foreach ($filteredTypes as $key => $values) {
+            if (isset($insertedIds[$key])) {
+                $city = $cities[$insertedIds[$key]];
+
+                foreach ($values as $value) {
+                    $type = self::getWalkInType($value);
+                    if ($type !== null) {
+                        $walkInTypesToBeInserted[] = [
+                            'city_id' => $insertedIds[$key],
+                            'pickup' => $city->pickup,
+                            'delivery' => $type
+                        ];
+                    }
+                }
+            }
+        }
+        return $walkInTypesToBeInserted;
+    }
+
+    // Function to map walk-in type values
+    public static function getWalkInType($value) {
+        if (str_contains($value, 'rush')) {
+            return 1;
+        } elseif (str_contains($value, 'saver_plus')) {
+            return 2;
+        } elseif (str_contains($value, 'swift')) {
+            return 3;
+        }
+        return null;
+    }
+
+    // Function to prepare delivery types for insertion
+    public static function prepareDeliveryTypes($insertedIds, $filteredTypes) {
+        $deliveryTypesToBeInserted = [];
+
+        foreach ($filteredTypes as $key => $values) {
+            if (isset($insertedIds[$key])) {
+                foreach ($values as $value) {
+                    list($bType, $sType) = self::getDeliveryType($value);
+
+                    if ($bType !== null && $sType !== null) {
+                        $deliveryTypesToBeInserted[] = [
+                            'city_id' => $insertedIds[$key],
+                            'booking_type_id' => $sType,
+                            'shipping_mode_id' => $bType
+                        ];
+                    }
+                }
+            }
+        }
+        return $deliveryTypesToBeInserted;
+    }
+
+    // Function to map delivery type values
+    public static function getDeliveryType($value) {
+        $bType = null;
+        $sType = null;
+
+        if (str_contains($value, 'rush')) {
+            $bType = 1;
+        } elseif (str_contains($value, 'saver_plus')) {
+            $bType = 2;
+        } elseif (str_contains($value, 'swift')) {
+            $bType = 3;
+        } elseif (str_contains($value, 'same_day')) {
+            $bType = 4;
+        }
+
+        if (str_contains($value, 'regular')) {
+            $sType = 1;
+        } elseif (str_contains($value, 'replacement')) {
+            $sType = 2;
+        } elseif (str_contains($value, 'try_and_buy')) {
+            $sType = 3;
+        } elseif (str_contains($value, 'reverse_pickup')) {
+            $sType = 5;
+        } elseif (str_contains($value, 'ftl')) {
+            $sType = 6;
+        }
+
+        return [$bType, $sType];
+    }
+
+    // Function to insert cities into zone  s
+    public static function insertCitiesToZones($insertedIds, $classificationId) {
+        $zones = Zone::where('business_category_id', 1)->get();
+        $zoneClassData = [];
+
+        foreach ($insertedIds as $city) {
+            foreach ($zones as $zone) {
+                $zoneClassData[] = [
+                    'city_id' => $city,
+                    'zone_id' => $zone->id,
+                    'class' => 3,
+                    'zone_classification_id' => $classificationId,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            }
+        }
+
+        if (!empty($zoneClassData)) {
+            ZoneClassCity::insert($zoneClassData);
+        }
+    }
+
+
+    public static function processOsaList($insertedIds, $osaList)
+    {
+        $result = [];
+
+        foreach ($insertedIds as $key => $id) {
+            $tempResult = [];
+
+            foreach ($osaList as $key2 => $value) {
+                if (preg_match('/(\d+)osa_(name|rate)_(\d+)/', $key2, $matches)) {
+                    $index = $matches[1];
+                    $field = $matches[2];
+                    $sub_index = $matches[3];
+
+                    if ($index == $key) {
+                        $tempResult[$sub_index][$field] = $value;
+                    }
+                }
+            }
+
+            if (!empty($tempResult)) {
+                $result[$id] = $tempResult;
+            }
+        }
+
+        $osaListToBeInserted = [];
+        foreach($result as $key => $value){
+            foreach($value as $value2){
+                $osaListToBeInserted[]=[
+                    'city_id' => $key,
+                    'osa_name' => $value2['name'],
+                    'osa_rate' => $value2['rate'],
+                    'admin_id' => Auth::id(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            }
+        }
+        CityOsaRate::insert($osaListToBeInserted);
+    }
+
+
+    public static function historyCityArray(array $cityIds)
+    {
+        $cities = City::whereIn('id', $cityIds)->get()->keyBy('id');
+
+        $historyArray = [];
+
+        foreach ($cityIds as $cityId) {
+            if ($cities->has($cityId)) {
+                $cityData = $cities->get($cityId);
+
+                $historyEntry = [
+                    'zone_id' => $cityData->zone_id,
+                    'attempt_tat' => $cityData->attempt_tat,
+                    'location_latitude' => $cityData->location_latitude,
+                    'location_longitude' => $cityData->location_longitude,
+                    'hub_location_latitude' => $cityData->hub_location_latitude,
+                    'hub_location_longitude' => $cityData->hub_location_longitude,
+                    'address' => $cityData->address,
+                    'status' => $cityData->status,
+                    'gc_area' => $cityData->gc_area,
+                    'pickup' => $cityData->pickup,
+                    'pickup_cut_off_time' => $cityData->pickup_cut_off_time,
+                    'hub' => $cityData->hub,
+                    'city_id' => $cityData->id,
+                ];
+
+                $historyArray[] = $historyEntry;
+            }
+        }
+
+        City::whereIn('id', $cityIds)->where('hub', 1)->update(['hub_id' => DB::raw('id')]);
+
+        return $historyArray;
     }
 
 }
