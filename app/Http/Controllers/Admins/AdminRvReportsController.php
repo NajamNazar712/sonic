@@ -56,7 +56,13 @@ class AdminRvReportsController extends Controller
             DB::raw("sum(CASE WHEN rv_assign_agent_sub_status_id IN (32,33,35,36,37,34) THEN 1 ELSE 0 END) AS grandtotal"),
             DB::raw('COUNT(DISTINCT CASE WHEN call_count IN (2, 3) THEN Shipment_id ELSE NULL END) + COUNT(CASE WHEN call_count = 1 THEN Shipment_id ELSE NULL END) as no_of_shipment')
         )->groupBy(DB::raw("DATE(created_at), call_count WITH ROLLUP"));
-            $datatable = Datatables::of($rv_report);
+            $datatable = Datatables::of($rv_report)
+            ->addColumn('custom_column', function ($row) {
+                dd($row);
+                // Custom HTML or formatted content for this column
+                return '<a href="link/to/details/' . $row->id . '">View</a>';
+            });
+            // ->rawColumns(['custom_column']);
             // ->editColumn('option1_per', function ($rv_report) {
             //     if($rv_report['description'] == '1st Calls'){
             //         if($rv_report['option1_per']){
@@ -110,6 +116,7 @@ class AdminRvReportsController extends Controller
             ->groupby('api_call_logs.call_count_initiate','api_call_logs.id');
 
               $datatable = Datatables::of($rv_call_logs)
+           
             ->editColumn('tracking_number', function ($rv_call_logs) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$rv_call_logs->tracking_number' class='tracking' target='_blank'>$rv_call_logs->tracking_number</a></u>";
