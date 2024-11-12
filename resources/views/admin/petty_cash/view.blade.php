@@ -93,6 +93,7 @@
                             <th class="border-primary border-darken-1">Account Head</th>
                             <th class="border-primary border-darken-1">Account Title</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
+                            <th class="border-primary border-darken-1">Cost Centre</th>
                             <th class="border-primary border-darken-1">Amount</th>
                             <th class="border-primary border-darken-1">Employee Id</th>
                             <th class="border-primary border-darken-1">Name</th>
@@ -160,6 +161,14 @@
                             <select name="title_id" id="title_id" class="form-control select2" data-rule-required="true" data-msg-required="Title is required">
                             </select>
                             <label id="title_id-error" class="error" for="title_id"></label>
+                        </div>
+                        <div class="form-group" id="select_centre">
+                            <select name="centre_id" id="centre_id" class="form-control select2" data-rule-required="true" data-msg-required="Cost Centre is required">
+                                @foreach($cost_centres as $centre)
+                                    <option value="{{ $centre->id }}" > {{ $centre->name }} </option>
+                                @endforeach
+                            </select>
+                            <label id="centre_id-error" class="error" for="centre_id"></label>
                         </div>
                         <div class="form-group" id="select_city">
                             <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
@@ -289,6 +298,7 @@
                     {data:'account_head' ,name: 'account_head', class: 'align-middle account_head'},
                     {data:'account_title' ,name: 'account_title', class: 'align-middle account_title'},
                     {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense'},
+                    {data:'cost_centre' ,name: 'cost_centres.name', class: 'align-middle cost_centre'},
                     {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount custom-col-width'},
                     {data:'employee_trax_id' ,name: 'a.trax_id', class: 'align-middle employee_trax_id custom-col-width'},
                     {data:'employee_name' ,name: 'a.name', class: 'align-middle employee_name custom-col-width'},
@@ -428,6 +438,13 @@
                     allowClear:true,
                     dropdownParent:$('#edit_fields_form'),
                 });
+
+                $('#centre_id').prepend('<option selected></option>').select2({
+                    width:'100%',
+                    placeholder:"Select Cost Centre",
+                    allowClear:true,
+                    dropdownParent:$('#edit_fields_form'),
+                });
             });
 
 
@@ -436,6 +453,7 @@
             $('#edit_petty_cash_fields').on('show.bs.modal', function(e) {
                 var id = $(e.relatedTarget).data('id');
                 var head_id = $(e.relatedTarget).data('account_head_id');
+                var cost_centre_id = $(e.relatedTarget).data('cost_centre_id');
                 var city_id = $(e.relatedTarget).data('account_city_id');
                 var expense_details = $(e.relatedTarget).data('account_expense_details');
                 var employee_trax_id = $(e.relatedTarget).data('account_employee_trax_id');
@@ -446,6 +464,7 @@
                 html += '<input name="petty_cash_id" value="' + id + '" >';
                 $('#petty_cash_id').html(html);
                 $('#head_id').val(head_id).trigger('change');
+                $('#centre_id').val(cost_centre_id).trigger('change');
                 $('#city_id').val(city_id).trigger('change');
                 $('#expense_details').find('input').val(expense_details);
                 $('#employee_trax_id').find('input').val(employee_trax_id);
