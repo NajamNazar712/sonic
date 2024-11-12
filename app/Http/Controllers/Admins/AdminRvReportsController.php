@@ -121,7 +121,7 @@ class AdminRvReportsController extends Controller
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
                  $rvReport->where([['rv_shipment_assign_agent_details.created_at','>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
-                 $$totalQuery->where([['rv_shipment_assign_agent_details.created_at','>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
+                 $totalQuery->where([['rv_shipment_assign_agent_details.created_at','>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
             }
 
             return $datatable->make(true);
