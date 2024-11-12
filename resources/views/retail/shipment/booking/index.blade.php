@@ -1284,6 +1284,7 @@
                         }).done(function (data) {
                             if (data.status == 1) {
                                 retail_discount_percentage = data.data.discount_percentage;
+                                $('#retail_discount_percentage').val(retail_discount_percentage);
 
                                 calculateRates(shipping_mode_id,business_category,destination,weight,trax_box,length,breadth, insurance, packaging, height, admin_discount, admin_discount_type, retail_discount_applied, retail_discount_percentage);
 

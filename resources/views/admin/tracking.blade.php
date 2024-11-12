@@ -2139,6 +2139,7 @@
                                         '<table class="table table-sm table-borderless datatable pickup_history">';
                                     shipment += '<thead>';
                                     shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Bag Number</strong></th>';
                                     shipment += '<th><strong>Handover Id</strong></th>';
                                     shipment += '<th><strong>Status</strong></th>';
                                     shipment += '<th><strong>Location</strong></th>';
@@ -2154,8 +2155,13 @@
                                     if (history.area_log && history.area_log.latitude && history.area_log.longitude) {
                                         googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
                                     }
+                                        
                                         shipment += '<tr>';
+                                        shipment += '<td>' + (history.bag_number !== null ? history.bag_number : '-') + '</td>';
                                         shipment += '<td>' + history.handover_id + '</td>';
+                                        // shipment += '<td>' + history.bag_number.bag_number + '</td>';
+
+
                                         shipment += '<td>' + history.status + '</td>';
                                         shipment += '<td>' + (history.area_log ? history.area_log.location_status + ' | (' + history.area_log.area + ') | <a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>' : '') + '</td>';
 
