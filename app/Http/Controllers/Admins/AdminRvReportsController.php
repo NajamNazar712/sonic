@@ -113,16 +113,16 @@ class AdminRvReportsController extends Controller
                 DB::raw("COUNT(DISTINCT shipment_id) no_of_shipment")
             )
             ->groupBy(DB::raw('DATE(created_at)'));
-
-        // Combine the main query and total row using union
-        $rvReport = $rvReportQuery->unionAll($totalQuery)->orderBy('date', 'DESC')->orderBy('description', 'ASC');
-            $datatable = Datatables::of($rvReport);
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
-                 $rvReport->where([['rv_shipment_assign_agent_details.created_at','>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
-                 $totalQuery->where([['rv_shipment_assign_agent_details.created_at','>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
+                $rvReportQuery->where([['rv_shipment_assign_agent_details.created_at', '>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
+                $totalQuery->where([['rv_shipment_assign_agent_details.created_at', '>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
             }
+            // Combine the main query and total row using union
+            $rvReport = $rvReportQuery->unionAll($totalQuery)->orderBy('date', 'DESC')->orderBy('description', 'ASC');
+            $datatable = Datatables::of($rvReport);
+           
 
             return $datatable->make(true);
     }
