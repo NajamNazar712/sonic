@@ -833,9 +833,14 @@ trait RvTrait
                 $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
                 $rv_shipment_assign_agent->save();
 
-                $rv_shipment_ticket = RvShipmentTicket::where('shipment_id',$request->shipment_id)->increment('call_count');
+                $rv_shipment_ticket = RvShipmentTicket::where('shipment_id',$request->shipment_id)->first();
+                $rv_shipment_ticket->increment('call_count');
+                $rv_shipment_ticket->save();
                 if($rv_shipment_assign_agent->unresponsive_count <= 3 && !$botCall){
-                    RvShipmentTicket::where('shipment_id', $request->shipment_id)->update(['in_progress'=>0]);
+                    $rv_shipment_ticket->updated_at = carbon::parse($rv_shipment_ticket->updated_at)->addhours(2);
+                    $rv_shipment_ticket->in_progress = 0;
+                    $rv_shipment_ticket->save();
+                    // RvShipmentTicket::where('shipment_id', $request->shipment_id)->update(['in_progress'=>0]);
                 }
                 $reattempt_count = BoltUndeliveredReasonMapCount::where('shipment_id', $request->shipment_id)->where('count',3)->first();
                 //if reattempt count is 3 then shipment status will be auto return confirm
