@@ -263,6 +263,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
 
                             head.push('Created By');
                             head.push('Created Date');
@@ -273,6 +274,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -290,6 +292,7 @@
                                 row.push(values.excel_ecom_cod);
                                 row.push(values.excel_general_retail);
                                 row.push(values.excel_general_ecom_express);
+                                row.push(values.excel_others);
 
                                 row.push(values.assigned_by);
                                 row.push(values.created_at);
@@ -300,6 +303,8 @@
                                 row.push(values.delivered_excel_ecom_cod);
                                 row.push(values.delivered_excel_general_retail);
                                 row.push(values.delivered_excel_general_ecom_express);
+                                row.push(values.delivered_excel_others);
+
                                 body.push(row);
                             });
                         },
