@@ -127,7 +127,9 @@ class AdminFnfController extends Controller
              }
          });
      ;
-     return $datatables->make(true);
+     return $datatables
+     ->rawColumns(['actions'])
+     ->make(true);
     }
 
     public function add(){

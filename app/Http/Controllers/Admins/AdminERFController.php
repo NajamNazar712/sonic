@@ -129,7 +129,7 @@ class AdminERFController extends Controller
                     $query->where('employee_requisitions.employee_status', 2);
                 }
             })
-->editColumn('trax_id', function($erf) {
+            ->editColumn('trax_id', function($erf) {
                 if($erf->type == 1){
                     return '-';
                 }
@@ -138,7 +138,7 @@ class AdminERFController extends Controller
                     $trax_id = "";
                     $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
                     foreach ($ids as $value){
-//                        $trax_id.= $value->trax_id.",<br>";
+                        // $trax_id.= $value->trax_id.",<br>";
                         $items[] = '<br>'.$value->trax_id;
                     }
                     return $items;
@@ -183,7 +183,7 @@ class AdminERFController extends Controller
                     $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
                     foreach ($ids as $id){
                         $name = Employee::where('trax_id',$id->trax_id)->select('name')->first();
-//                        $trax_id.= $name->name.",<br>".' ';
+                        // $trax_id.= $name->name.",<br>".' ';
                         if($name){
                             $leaver_name[] = '<br>'.$name->name;
                         }
@@ -196,7 +196,7 @@ class AdminERFController extends Controller
                     return '-';
                 }
                 else{
-//                    $requested_by = Admin::where('id',$erf->requested_by)->select('name')->first();
+                    // $requested_by = Admin::where('id',$erf->requested_by)->select('name')->first();
                     return $erf->requested_by_name;
                 }
             })
@@ -258,9 +258,8 @@ class AdminERFController extends Controller
 
         if($status = $request->get('search_status')){
           
-            $datatables->where('s.id', '=', $status);
+            $erf->where('s.id', '=', $status);
         }
-
 
         return $datatables->make(true);
 

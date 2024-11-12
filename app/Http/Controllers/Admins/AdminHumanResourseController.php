@@ -3119,6 +3119,7 @@ class AdminHumanResourseController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -3170,28 +3171,28 @@ class AdminHumanResourseController extends Controller
         $datatable = Datatables::of($incentives);
 
         if ($city = $request->get('search_city')) {
-            $datatable->where('cities.id', '=', $city);
+            $incentives->where('cities.id', '=', $city);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatable->where('cities.hub_id', '=', $hub);
+            $incentives->where('cities.hub_id', '=', $hub);
         }
 
         if ($zone = $request->get('search_zone')) {
-            $datatable->where('cities.zone_id', '=', $zone);
+            $incentives->where('cities.zone_id', '=', $zone);
         }
 
         if ($employee_id = $request->get('employee_id')) {
-            $datatable->where('riders.trax_id', '=', $employee_id);
+            $incentives->where('riders.trax_id', '=', $employee_id);
         }
 
         if ($employee_name = $request->get('employee_name')) {
-            $datatable->where('riders.name', 'like', "%" . $employee_name . "%");
+            $incentives->where('riders.name', 'like', "%" . $employee_name . "%");
         }
 
         if ($request->get('search_date_from') != null && $request->get('search_date_from') != null) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('riders_incentives.date', [$from, $to]);
+            $incentives->whereBetween('riders_incentives.date', [$from, $to]);
         }
 
         return $datatable->make(true);
@@ -4681,18 +4682,20 @@ class AdminHumanResourseController extends Controller
 
             });
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('e.id', $search_admin)->where('e.employee_type_id', 1);
+            $employee_leaves->where('e.id', $search_admin)->where('e.employee_type_id', 1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('e.id', $search_rider)->where('e.employee_type_id', 2);
+            $employee_leaves->where('e.id', $search_rider)->where('e.employee_type_id', 2);
         }
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where('e.trax_id', $search_trax_id);
+            $employee_leaves->where('e.trax_id', $search_trax_id);
         }
         if ($search_cnic = $request->get('search_cnic')) {
-            $datatable->where('e.cnic', $search_cnic);
+            $employee_leaves->where('e.cnic', $search_cnic);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function leave_request(Request $request)
