@@ -164,6 +164,7 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\MissingFirstCallInitiate',
         '\App\Console\Commands\lastMileAppReportCountUpdate',
         '\App\Console\Commands\RunSpecificJob',
+        '\App\Console\Commands\DeleteDuplicateArrival',
 
         ];
 
@@ -176,7 +177,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('create:service_ledger')->dailyAt('00:00')->runInBackground();
-        $schedule->command('job:run email 25000')->dailyAt('02:02')->runInBackground();
+        // $schedule->command('job:run email 25000')->dailyAt('02:02')->runInBackground();
         $schedule->command('corporate_reimbursement_setting:update')->monthlyOn(1, '00:15')->runInBackground();
 
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
@@ -570,7 +571,11 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
+        $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
 //        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
+        $schedule->command('email:revenuereport_lastmonth 2')->dailyAt('11:15')->runInBackground();
+        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('11:30')->runInBackground();
+
     }
     /**
      * Register the commands for the application.

@@ -146,6 +146,8 @@
         });
 
         var dataTable = null;
+        var selected_rows = [];
+
         $('#search_filter_btn').on('click', function() {
             var selectedMonth = $('#month').val();
             var franchise = $('#franchise').val();
@@ -178,14 +180,15 @@
                                         className: 'select_to_pay disabled',
                                         action: function () {
                                             var selectedFranchiseNames = [];
-                                            $('#datatable > tbody > .selected').each(function(index){
+                                            $('#datatable > tbody > tr.selected').each(function(index) {
                                                 var franchiseCode = $(this).find('td:eq(1)').text().trim();
+                                                var hiddenValue = $(this).find('input[type="hidden"]').val();
+                                                var is_paid = $(this).find('td:eq(15)').text().trim();
                                                 if (franchiseCode) {
-                                                    selectedFranchiseNames.push(franchiseCode);
+                                                    selectedFranchiseNames.push(hiddenValue);
                                                 }
                                             });
                                             var franchiseCodes = selectedFranchiseNames.join(', ');
-
                                             if (franchiseCodes.length > 0) {
                                                 $.ajax({
                                                     url: '{{ route('admin.retail.users.show_retail_commission') }}',
@@ -286,12 +289,14 @@
                                     extend: 'selectAll',
                                     text: 'Select All',
                                     className: 'select_all',
-                                    action : function(e) {
+                                    action: function(e) {
                                         e.preventDefault();
                                         dataTable.rows().nodes().each(function(index) {
                                             var row = dataTable.row(index);
-                                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                            if ($(row.node().firstChild).hasClass(
+                                                'select-checkbox')) {
                                                 row.select();
+
                                                 id = parseInt(row.id());
                                             }
                                         });
@@ -319,15 +324,16 @@
                                         var selectedFranchiseNames = [];
                                         var selectedIsPaidStatuses = [];
                                         var selectedIsPaidStatuses = [];
-                                        $('#datatable > tbody > .selected').each(function(index){
+                                        $('#datatable > tbody > tr.selected').each(function(index) {
                                             var franchiseCode = $(this).find('td:eq(1)').text().trim();
+                                            var hiddenValue = $(this).find('input[type="hidden"]').val();
                                             var is_paid = $(this).find('td:eq(15)').text().trim();
                                             if (franchiseCode) {
-                                                selectedFranchiseNames.push(franchiseCode);
+                                                selectedFranchiseNames.push(hiddenValue);
                                                 selectedIsPaidStatuses.push(is_paid);
                                             }
                                         });
-
+                                        
                                         // check for paid status
                                         var allSameStatus = selectedIsPaidStatuses.every(function(status, index, array) {
                                             return status === array[0];
@@ -387,7 +393,7 @@
                                         return meta.row + 1;
                                     }
                                 },
-                                { data: 'trax_center_name' },
+                                { data: 'retail_user_name' },
                                 { data: 'franchise_code' },
                                 { data: 'trax_center_cnic' },
                                 { data: 'trax_center_phone' },
