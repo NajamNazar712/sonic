@@ -311,6 +311,10 @@
             width: 300px !important;
         }
 
+        .select-checkbox{
+            border-color: #64a0d2;
+        }
+
         .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
             background-color: #64a0d2 !important;
             border-color: #5587b4 !important;
@@ -473,6 +477,74 @@
                         }
                     },
                     @endif
+
+                    // bulk resolve button
+                    @if (session('role_id') == 1 || in_array(1013, session('permissions')))
+                        {
+                            text: 'Resolve',
+                            className: 'btn btn-primary bulk_resolve',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                swal({
+                                    title: 'Are you sure?',
+                                    text: 'Are you sure you want to mark them as resolved?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then((result) => {
+                                    if (result) {
+                                        $.ajax({
+                                            url: '{!! route('admin.crm.bulk_resolve') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'crm_request_ids': selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                        .done(function (data) {
+                                            if (data.status === 1 && data.errors && Array.isArray(data.errors)) {
+                                                // Iterate over the data.errors array and extract the error messages
+                                                data.errors.forEach(function(error) {
+                                                    if (Array.isArray(error) && error.length > 0) {
+                                                        // If the error is an array, display the first element as the message
+                                                        toastr.error(error[0], 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center',
+                                                        });
+                                                    } else if (typeof error === 'string') {
+                                                        // If it's a string, display it directly
+                                                        toastr.error(error, 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center',
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                window.location.href = '{!! route('admin.crm.resolved.index') !!}';
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        },
+                    @endif
+
                     @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
                     {
                         text: 'In-Valid',
@@ -638,21 +710,17 @@
 
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
-
                                 if ($(row.node().firstChild).hasClass('select-checkbox')) {
                                     row.select();
-
                                     id = parseInt(row.id());
-
                                     var index = $.inArray(id, selected_rows);
-
                                     if (index === -1) {
                                         selected_rows.push(id);
                                     }
-
                                     table.button('.assign').enable();
                                     table.button('.close_request').enable();
                                     table.button('.in_valid').enable();
+                                    table.button('.bulk_resolve').enable();
                                     table.button('.tag').enable();
                                     table.button('.un_tag').enable();
                                     table.button('.bulk_external_comment').enable();
@@ -670,22 +738,18 @@
 
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
-
                                 if ($(row.node().firstChild).hasClass('select-checkbox')) {
                                     row.deselect();
-
                                     id = parseInt(row.id());
-
                                     var index = $.inArray(id, selected_rows);
-
                                     if (index !== -1) {
                                         selected_rows.splice(index, 1);
                                     }
-
                                     if (selected_rows.length == 0) {
                                         table.button('.assign').disable();
                                         table.button('.close_request').disable();
                                         table.button('.in_valid').disable();
+                                        table.button('.bulk_resolve').disable();
                                         table.button('.tag').disable();
                                         table.button('.un_tag').disable();
                                         table.button('.bulk_external_comment').enable();
@@ -777,7 +841,6 @@
                 ],
                 rowCallback: function(row, data, index) {
                     $('td:eq(0)', row).addClass('select-checkbox');
-
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
@@ -1059,6 +1122,7 @@
                             table.button('.assign').disable();
                             table.button('.valid').disable();
                             table.button('.in_valid').disable();
+                            table.button('.bulk_resolve').disable();
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
@@ -1111,6 +1175,7 @@
                             table.button('.assign').disable();
                             table.button('.valid').disable();
                             table.button('.in_valid').disable();
+                            table.button('.bulk_resolve').disable();
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
@@ -1261,6 +1326,7 @@
                     table.button('.assign').enable();
                     table.button('.close_request').enable();
                     table.button('.in_valid').enable();
+                    table.button('.bulk_resolve').enable();
                     table.button('.tag').enable();
                     table.button('.un_tag').enable();
                     table.button('.bulk_external_comment').enable();
@@ -1270,6 +1336,7 @@
                     table.button('.assign').disable();
                     table.button('.close_request').disable();
                     table.button('.in_valid').disable();
+                    table.button('.bulk_resolve').disable();
                     table.button('.tag').disable();
                     table.button('.un_tag').disable();
                     table.button('.bulk_external_comment').disable();
