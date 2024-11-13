@@ -214,17 +214,19 @@ class OrderManagementController extends Controller
                 
             });
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
         if ($shipment_status_select = $request->get('shipment_status_select')) {
-            $datatable->whereIn('shipments_journey.shipper_status_id', $shipment_status_select);
+            $shipments->whereIn('shipments_journey.shipper_status_id', $shipment_status_select);
         }
         if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
             $from = $request->get('booking_from_date');
             $to = $request->get('booking_to_date');
-            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+            $shipments->whereBetween('shipments.created_at', [$from,$to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number', 'action'])
+        ->make(true);
     }
     public function get_shipment_charges(Request $request){
         $retail_shipment = '';
