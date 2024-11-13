@@ -64,7 +64,7 @@ class AdminRvReportsController extends Controller
             DB::raw("CASE 
             WHEN call_count = 1 THEN '1st Calls' 
             WHEN call_count = 2 THEN '2nd Calls' 
-            WHEN call_count = 3 THEN '3rd Calls' 
+            ELSE '3rd Calls' 
             END AS description"),
             DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END) AS option1"),
             DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END) / COUNT(DISTINCT shipment_id) * 100, 2), '%') AS option1_per"),
@@ -89,7 +89,7 @@ class AdminRvReportsController extends Controller
 
         $totalQuery = RvShipmentAssignAgentDetails::where('agent_id', 4620)
         ->whereNotNull('rv_assign_agent_status_id')
-            ->whereNotNull('call_count')
+            // ->whereNotNull('call_count')
             ->select(
                 DB::raw('DATE(created_at) AS date'),
                 DB::raw("'Total' AS description"),
