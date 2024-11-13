@@ -59,6 +59,7 @@ class AdminRvReportsController extends Controller
         $rvReportQuery = RvShipmentAssignAgentDetails::where('agent_id', 4620)
         ->whereNotNull('rv_assign_agent_status_id')
         ->whereNotNull('call_count')
+        ->whereIn('rv_assign_agent_sub_status_id',[32, 33, 35, 36, 37, 34])
         ->select(
             DB::raw('DATE(created_at) AS date'),
             DB::raw("CASE 
@@ -90,6 +91,7 @@ class AdminRvReportsController extends Controller
         $totalQuery = RvShipmentAssignAgentDetails::where('agent_id', 4620)
         ->whereNotNull('rv_assign_agent_status_id')
             ->whereNotNull('call_count')
+            ->whereIn('rv_assign_agent_sub_status_id', [32, 33, 35, 36, 37, 34])
             ->select(
             DB::raw('DATE(created_at) AS date'),
             DB::raw("'Total' AS description"),
