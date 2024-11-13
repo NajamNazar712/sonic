@@ -5392,6 +5392,19 @@ class DeliveryController extends Controller
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
 
+        if ($tracking_number = $request->get('tracking_numbers')) {
+            $deliveries->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
+                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
+                ->whereIn('s.tracking_number', explode(',', $tracking_number))
+                ->groupBy('delivery_notes.id');
+        }
+        if ($dncc = $request->get('dncc')) {
+            $deliveries->whereIn('delivery_notes.id', explode(',', $dncc));
+        }
+        if ($legend_id = $request->get('legend_filter')) {
+            $deliveries->whereIn('delivery_notes.cash_collection_status', [2, 3]);
+        }
+
         $datatable = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
@@ -5565,24 +5578,13 @@ class DeliveryController extends Controller
                     $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
                 }
                 return $count > 0 ? $count : '-';
-            });
+            })->rawColumns(['delivery_note', 'fintech_charges.link', 'shipments_count_link', 'one_link_payment_count_button','deposit_slip_view','transactions_amount_link','action']);
         //        if ($tracking_number = $request->get('search_tracking')) {
         //            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
         //                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
         //                ->where('s.tracking_number', '=', $tracking_number);
         //        }
-        if ($tracking_number = $request->get('tracking_numbers')) {
-            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
-                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
-                ->whereIn('s.tracking_number', explode(',', $tracking_number))
-                ->groupBy('delivery_notes.id');
-        }
-        if ($dncc = $request->get('dncc')) {
-            $datatable->whereIn('delivery_notes.id', explode(',', $dncc));
-        }
-        if ($legend_id = $request->get('legend_filter')) {
-            $datatable->whereIn('delivery_notes.cash_collection_status', [2, 3]);
-        }
+
         return $datatable->make(true);
     }
 
@@ -7543,6 +7545,11 @@ class DeliveryController extends Controller
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $deliveries->whereBetween('delivery_notes.created_at', [$from, $to]);
+        }
 
         $datatable = Datatables::of($deliveries)
 
@@ -7848,12 +7855,8 @@ class DeliveryController extends Controller
                     $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
                 }
                 return $count > 0 ? $count : '-';
-            });
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('delivery_notes.created_at', [$from, $to]);
-        }
+            })->rawColumns(['transactions_amount_link','one_link_payment_count_button','delivered_shipments_link','shipments_count_link','delivery_note','fintech_shipments_charges.link']);
+
         return $datatable->make(true);
     }
 
@@ -7872,6 +7875,12 @@ class DeliveryController extends Controller
             ->select(['s.tracking_number', 'rider_deliveries.picture_path', 'rider_deliveries.delivered_status', 'rider_deliveries.delivery_note_id as delivery_note_id', 'dn.pending_status', 'ca.name as area'])
             ->where('rider_deliveries.delivered_status', '1');
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $deliveries->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($delivery_note_ids = $request->get('search_delivery_note_ids')) {
+            $deliveries->whereIn('rider_deliveries.delivery_note_id', explode(',', $delivery_note_ids));
+        }
 
         $datatable = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
@@ -7902,13 +7911,8 @@ class DeliveryController extends Controller
                 } else {
                     return '-';
                 }
-            });
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('s.tracking_number', explode(',', $tracking_numbers));
-        }
-        if ($delivery_note_ids = $request->get('search_delivery_note_ids')) {
-            $datatable->whereIn('rider_deliveries.delivery_note_id', explode(',', $delivery_note_ids));
-        }
+            })->rawColumns(['delivery_note','tracking_number','picture_path']);
+
         return $datatable->make(true);
     }
 
@@ -8484,6 +8488,13 @@ class DeliveryController extends Controller
             ->select('delivery_note_shipments.delivery_note_id as delivery_note_id', 'delivery_note_shipments.shipment_id as shipment_id', 'dn.id as delivery_note', 's.amount as amount', 'h.name as hub', 'r.name as rider', 'ss.name as status', 'dn.created_at as created_at')
             ->where('delivery_note_shipments.fake_status', 1);
 
+        if ($request->has('search_tracking_no')) {
+            $tracking_number = $request->get('search_tracking_no');
+        } else {
+            $tracking_number = null;
+        }
+        $fake_status->where('s.tracking_number', '=', $tracking_number);
+
         $datatables = Datatables::of($fake_status)
             ->editColumn('tracking_number_link', function ($fake_status) {
                 $route = route('admin.tracking.index');
@@ -8494,13 +8505,8 @@ class DeliveryController extends Controller
             })
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
-            });
-        if ($request->has('search_tracking_no')) {
-            $tracking_number = $request->get('search_tracking_no');
-        } else {
-            $tracking_number = null;
-        }
-        $datatables->where('s.tracking_number', '=', $tracking_number);
+            })->rawColumns(['tracking_number_link']);
+
 
         return $datatables->make(true);
     }
@@ -10087,7 +10093,7 @@ class DeliveryController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['shipments_count_link','action']);
         return $datatables->make(true);
     }
 
@@ -10545,7 +10551,7 @@ class DeliveryController extends Controller
                     $location = '-';
                 }
                 return $location;
-            });
+            })->rawColumns(['tracking_number_link','location']);
         return $datatable->make(true);
     }
 
@@ -10605,6 +10611,15 @@ class DeliveryController extends Controller
             ->where('delivery_notes.id', '>', $delivery_note_id) //open for production
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as excel_delivery_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'delivery_notes.created_at as created_at']);
 
+        $delivery_note_numbers = $request->get('delivery_note_number');
+        if (is_array($delivery_note_numbers) && count($delivery_note_numbers) > 0) {
+            $shipments->whereIn('dns.delivery_note_id', $delivery_note_numbers);
+        }
+        $rider_id = $request->get('rider_id');
+        if (isset($rider_id) && $rider_id != null) {
+            $shipments->where('riders.trax_id', $rider_id);
+        }
+
         $datatables = Datatables::of($shipments)
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' data-id=" . $deliveries->delivery_note . " class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
@@ -10613,16 +10628,9 @@ class DeliveryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$deliveries->tracking_number' class='tracking' target='_blank'>$deliveries->tracking_number</a></u>";
 
-            });
+            })->rawColumns(['delivery_note','tracking_number']);
 
-        $delivery_note_numbers = $request->get('delivery_note_number');
-        if (is_array($delivery_note_numbers) && count($delivery_note_numbers) > 0) {
-            $datatables->whereIn('dns.delivery_note_id', $delivery_note_numbers);
-        }
-        $rider_id = $request->get('rider_id');
-        if (isset($rider_id) && $rider_id != null) {
-            $datatables->where('riders.trax_id', $rider_id);
-        }
+
 
         return $datatables->make(true);
     }

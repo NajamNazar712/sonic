@@ -8813,7 +8813,7 @@ class GlobalSettingsController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
         return $datatables->make(true);
     }
 

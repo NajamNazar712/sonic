@@ -294,7 +294,7 @@ class LastMileDebriefingController extends Controller
                     $dropdown .='</div></div>';
                 return $dropdown;
                 
-            });
+            })->rawColumns(['action','fake_shipments_link','undelivered_shipments_link','pending_shipments_link','delivered_shipments_link','shipments_count_link','delivery_note']);
 
         return $datatables->make(true);
     }
@@ -388,7 +388,7 @@ class LastMileDebriefingController extends Controller
                 else{
                     return 0;
                 }
-            });
+            })->rawColumns(['assigned_calls','completed_calls','pending_calls']);
 
          return $datatables->make(true);
     }
