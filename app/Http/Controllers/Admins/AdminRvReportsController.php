@@ -58,7 +58,7 @@ class AdminRvReportsController extends Controller
         // )->groupBy(DB::raw("DATE(created_at), call_count WITH ROLLUP"));
         $rvReportQuery = RvShipmentAssignAgentDetails::where('agent_id', 4620)
         ->whereNotNull('rv_assign_agent_status_id')
-        ->whereNotNull('call_count')
+        ->whereIn('call_count',[1,2,3])
         ->whereIn('rv_assign_agent_sub_status_id',[32, 33, 35, 36, 37, 34])
         ->select(
             DB::raw('DATE(created_at) AS date'),
@@ -90,7 +90,7 @@ class AdminRvReportsController extends Controller
 
         $totalQuery = RvShipmentAssignAgentDetails::where('agent_id', 4620)
         ->whereNotNull('rv_assign_agent_status_id')
-            ->whereNotNull('call_count')
+            ->whereIn('call_count', [1, 2, 3])
             ->whereIn('rv_assign_agent_sub_status_id', [32, 33, 35, 36, 37, 34])
             ->select(
             DB::raw('DATE(created_at) AS date'),
