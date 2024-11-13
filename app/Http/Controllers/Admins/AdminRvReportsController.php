@@ -116,8 +116,8 @@ class AdminRvReportsController extends Controller
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
-                $rvReportQuery->where([['rv_shipment_assign_agent_details.created_at', '>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
-                $totalQuery->where([['rv_shipment_assign_agent_details.created_at', '>=', $from], ['rv_shipment_assign_agent_details.created_at', '<=', $to]]);
+                $rvReportQuery->whereBetween('rv_shipment_assign_agent_details.created_at', [$from,$to]);
+                $totalQuery->whereBetween('rv_shipment_assign_agent_details.created_at',[$from, $to]);
             }
             // Combine the main query and total row using union
             $rvReport = $rvReportQuery->unionAll($totalQuery)->orderBy('date', 'DESC')->orderBy('description', 'ASC');
