@@ -4297,17 +4297,19 @@ class AdminHumanResourseController extends Controller
         });
         
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('a.id', $search_admin)->where('a.employee_type_id',1);
+            $employee_leaves->where('a.id', $search_admin)->where('a.employee_type_id',1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('a.id', $search_rider)->where('a.employee_type_id',2);
+            $employee_leaves->where('a.id', $search_rider)->where('a.employee_type_id',2);
         }
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where(function($q) use ($search_trax_id){
+            $employee_leaves->where(function($q) use ($search_trax_id){
                 $q->where('a.trax_id', $search_trax_id);
             });
         }
-       return $datatable->make(true);
+       return $datatable
+       ->rawColumns(['action'])
+       ->make(true);
     }
     public function employee_penalty_duplicate(Request $request)
     {
@@ -5565,18 +5567,18 @@ class AdminHumanResourseController extends Controller
                 return $leave_count;
             });
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('a.id', $search_admin)->where('a.employee_type_id',1);
+            $employee_leaves->where('a.id', $search_admin)->where('a.employee_type_id',1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('a.id', $search_rider)->where('a.employee_type_id',2);
+            $employee_leaves->where('a.id', $search_rider)->where('a.employee_type_id',2);
         }
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where(function($q) use ($search_trax_id){
+            $employee_leaves->where(function($q) use ($search_trax_id){
                 $q->where('a.trax_id', $search_trax_id);
             });
         }
         if ($search_cnic = $request->get('search_cnic')) {
-            $datatable->where(function($q) use ($search_cnic){
+            $employee_leaves->where(function($q) use ($search_cnic){
                 $q->where('a.cnic', $search_cnic);
             });
         }
@@ -5797,7 +5799,9 @@ class AdminHumanResourseController extends Controller
             });
         
         
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['probation_form', 'action'])
+        ->make(true);
     }
 
     public function employee_confirmation_edit(Request $request){
@@ -6069,7 +6073,9 @@ class AdminHumanResourseController extends Controller
             });
 
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
 
@@ -6227,7 +6233,8 @@ class AdminHumanResourseController extends Controller
 
                         if (count($trax_ids) > 0) {
                             if (!Employee::with('city')->where('trax_id', $row['trax_id'])->whereHas('city', function($q) use ($hub_id){ $q->where('hub_id', $hub_id); })->exists()) {
-                                $errors['Row #' . $row_id][] = 'Employee with Trax Id #' . $row['trax_id'] . ' can\'t be assigned area id' . $row['area'] . ' because hub is different';
+                                // $errors['Row #' . $row_id][] = 'Employee with Trax Id #' . $row['trax_id'] . ' can\'t be assigned area id' . $row['area'] . ' because hub is different';
+                                $errors['Row #' . $row_id][] = 'Employee with Trax Id #' . $row['trax_id'] . ' can\'t be assigned area id ' . $row['area_id'] . ' because hub is different';
                             }
                         } else {
                             $errors['Row #' . $row_id][] = 'Invalid Trax ID Entered' . $row['trax_id'];
