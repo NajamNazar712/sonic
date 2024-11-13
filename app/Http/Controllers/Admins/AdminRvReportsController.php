@@ -62,27 +62,27 @@ class AdminRvReportsController extends Controller
         ->select(
             DB::raw('DATE(created_at) AS date'),
             DB::raw("CASE 
-            WHEN call_count = 1 THEN '1st Calls' 
-            WHEN call_count = 2 THEN '2nd Calls' 
-            WHEN call_count = 3 THEN '3rd Calls'
-            END AS description"),
-            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id IN 35 THEN rv_assign_agent_sub_status_id ELSE NULL END) AS option1"),
-            DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END) / COUNT(DISTINCT shipment_id) * 100, 2), '%') AS option1_per"),
-            DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END) AS option2"),
-            DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END) / COUNT(DISTINCT shipment_id) * 100, 2), '%') AS option2_per"),
-            DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END) AS option3"),
-            DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END) / COUNT(DISTINCT shipment_id) * 100, 2), '%') AS option3_per"),
-            DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END) AS option4"),
-            DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END) / COUNT(DISTINCT shipment_id) * 100, 2), '%') AS option4_per"),
-            DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id IN (35, 36, 37, 34) THEN 1 ELSE 0 END) AS total1"),
-            DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id IN (35, 36, 37, 34) THEN 1 ELSE 0 END) / COUNT(DISTINCT shipment_id) * 100, 2), '%') AS total1_per"),
-            DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END) AS busy"),
-            DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END) / COUNT(DISTINCT shipment_id) * 100, 2), '%') AS busy_per"),
-            DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS disconnected"),
-            DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) / COUNT(DISTINCT shipment_id) * 100, 2), '%') AS disconnected_per"),
-            DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33) THEN 1 ELSE 0 END) AS total2"),
-            DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33) THEN 1 ELSE 0 END) / COUNT(DISTINCT shipment_id) * 100, 2), '%') AS total2_per"),
-            DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33, 35, 36, 37, 34) THEN 1 ELSE 0 END) AS grandtotal"),
+        WHEN call_count = 1 THEN '1st Calls' 
+        WHEN call_count = 2 THEN '2nd Calls' 
+        WHEN call_count = 3 THEN '3rd Calls' 
+        END AS description"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 END) AS option1"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 END) / COUNT(DISTINCT shipment_id) * 100, 2), '%') AS option1_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 END) AS option2"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS option2_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 END) AS option3"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS option3_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 END) AS option4"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS option4_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (35, 36, 37, 34) THEN 1 END) AS total1"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (35, 36, 37, 34) THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS total1_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 END) AS busy"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS busy_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 END) AS disconnected"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS disconnected_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33) THEN 1 END) AS total2"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33) THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS total2_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33, 35, 36, 37, 34) THEN 1 END) AS grandtotal"),
             DB::raw("COUNT(shipment_id) AS no_of_shipment")
         )
         ->groupBy(DB::raw('DATE(created_at), call_count'));
@@ -91,26 +91,26 @@ class AdminRvReportsController extends Controller
         ->whereNotNull('rv_assign_agent_status_id')
             ->whereNotNull('call_count')
             ->select(
-                DB::raw('DATE(created_at) AS date'),
-                DB::raw("'Total' AS description"),
-                DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END) AS option1"),
-                DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 ELSE 0 END) / COUNT(shipment_id) * 100, 2), '%') AS option1_per"),
-                DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END) AS option2"),
-                DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 ELSE 0 END) / COUNT(shipment_id) * 100, 2), '%') AS option2_per"),
-                DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END) AS option3"),
-                DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 ELSE 0 END) / COUNT(shipment_id) * 100, 2), '%') AS option3_per"),
-                DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END) AS option4"),
-                DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 ELSE 0 END) / COUNT(shipment_id) * 100, 2), '%') AS option4_per"),
-                DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id IN (35, 36, 37, 34) THEN 1 ELSE 0 END) AS total1"),
-                DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id IN (35, 36, 37, 34) THEN 1 ELSE 0 END) / COUNT(shipment_id) * 100, 2), '%') AS total1_per"),
-                DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END) AS busy"),
-                DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 ELSE 0 END) / COUNT(shipment_id) * 100, 2), '%') AS busy_per"),
-                DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) AS disconnected"),
-                DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 ELSE 0 END) / COUNT(shipment_id) * 100, 2), '%') AS disconnected_per"),
-                DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33) THEN 1 ELSE 0 END) AS total2"),
-                DB::raw("CONCAT(ROUND(SUM(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33) THEN 1 ELSE 0 END) / COUNT(shipment_id) * 100, 2), '%') AS total2_per"),
-                DB::raw("SUM(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33, 35, 36, 37, 34) THEN 1 ELSE 0 END) AS grandtotal"),
-                DB::raw("COUNT(DISTINCT shipment_id) no_of_shipment")
+            DB::raw('DATE(created_at) AS date'),
+            DB::raw("'Total' AS description"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 END) AS option1"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 35 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS option1_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 END) AS option2"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 36 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS option2_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 END) AS option3"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 37 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS option3_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 END) AS option4"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 34 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS option4_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (35, 36, 37, 34) THEN 1 END) AS total1"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (35, 36, 37, 34) THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS total1_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 END) AS busy"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 32 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS busy_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 END) AS disconnected"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS disconnected_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33) THEN 1 END) AS total2"),
+            DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33) THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS total2_per"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33, 35, 36, 37, 34) THEN 1 END) AS grandtotal"),
+            DB::raw("COUNT(DISTINCT shipment_id) AS no_of_shipment")
             )
             ->groupBy(DB::raw('DATE(created_at)'));
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
