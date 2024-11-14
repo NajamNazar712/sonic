@@ -2534,8 +2534,8 @@ function checkboxStatus() {
                 }).done(function(data){
                     if (data.status == 1) {
                         $.each(data.details, function(key, value) {
-                            let weightSign = value.weight === 'green' ? '↑' : (value.weight === 'red' ? '↓' : (value.weight === 'yellow' ? '←→' : 'Rates Added Only'));
-                            let weightColor = value.weight === 'green' ? 'green' : (value.weight === 'red' ? 'red' : (value.weight === 'yellow' ? 'yellow' : 'Rates Added Only'));
+                            let weightSign = value.weight === 'green' ? '↑' : (value.weight === 'red' ? '↓' : (value.weight === 'yellow' ? '←→' : 'Rates Updated Only'));
+                            let weightColor = value.weight === 'green' ? 'green' : (value.weight === 'red' ? 'red' : (value.weight === 'yellow' ? 'yellow' : 'Rates Updated Only'));
 
                             let fuelSign = value.fuel === 'green' ? '↑' : (value.fuel === 'red' ? '↓' : (value.fuel === 'yellow' ? '←→' : 'Fuel Added Only'));
                             let fuelColor = value.fuel === 'green' ? 'green' : (value.fuel === 'red' ? 'red' : (value.fuel === 'yellow' ? 'yellow' : 'Fuel Added Only'));
