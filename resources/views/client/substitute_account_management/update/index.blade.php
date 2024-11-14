@@ -62,6 +62,24 @@
 										</select>
 									</div>
 
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 edit_pickup_address_div">
+										<label for="select_all_address">
+											Select All Addresses
+											<input type="checkbox" name="select_all_address" id="select_all_address">
+										</label>
+										<select name="pickup_address[]" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="At least 1 pickup address is required" multiple>
+											@php
+												$selected_ids = explode(',', $substitute_user->pickup_address_id); // Convert the string to an array
+											@endphp
+											@foreach ($pickup_addresses as $address)
+												<option value="{{ $address->id }}" data-name="{{ $address->pickup_address }}" 
+													@if (in_array($address->id, $selected_ids)) selected @endif>
+													{{ $address->pickup_address }}
+												</option>
+											@endforeach
+										</select>
+									</div>
+
 									<div class="col-12">
 										<h4 class="form-section mb-2">Permissions</h4>
 
@@ -125,6 +143,10 @@
 				width: '100%',
 				placeholder: 'Restriction*'
 			});
+			$('#pickup_address').select2({
+				width: '100%',
+				placeholder: 'Pickup Address*'
+			});
 			$('#substitute_account_form #phone_number').inputmask({
 				'mask': '9999-9999999',
 				'clearIncomplete': true
@@ -156,8 +178,15 @@
 				normalizer: function(value) {
 					return $.trim(value);
 				},
+				// errorPlacement: function(error, element) {
+				// 	error.addClass('w-100').appendTo(element.parent('.form-group'));
+				// },
 				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
+					if (element.hasClass('select2')) {
+						error.addClass('w-100').appendTo(element.parent('.edit_pickup_address_div'));
+					} else {
+						error.addClass('w-100').appendTo(element.parent('.form-group'));
+					}
 				},
 				submitHandler: function(form) {
 					$(form).find('button[type=submit]').attr('disabled', 'disabled');
@@ -174,6 +203,17 @@
 					form.submit();
 				}
 			});
+
+			$('#select_all_address').on('change', function () {
+				if ($(this).is(':checked')) {
+					$('#pickup_address').val($('#pickup_address option').map(function() {
+						return $(this).val();
+					}).get()).trigger('change');
+				} else {
+					$('#pickup_address').val(null).trigger('change');
+				}
+			});
+
 		});
 	</script>
 @endsection
