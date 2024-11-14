@@ -837,7 +837,7 @@ trait RvTrait
                 $rv_shipment_ticket->increment('call_count');
                 $rv_shipment_ticket->save();
                 if($rv_shipment_assign_agent->unresponsive_count <= 3 && !$botCall){
-                    $rv_shipment_ticket->updated_at = carbon::parse($rv_shipment_ticket->updated_at)->addhours(2);
+                    // $rv_shipment_ticket->updated_at = carbon::parse($rv_shipment_ticket->updated_at)->addhours(2);
                     $rv_shipment_ticket->in_progress = 0;
                     $rv_shipment_ticket->save();
                     // RvShipmentTicket::where('shipment_id', $request->shipment_id)->update(['in_progress'=>0]);
