@@ -93,7 +93,9 @@ class AdminParcelHistoryController extends Controller
                     $sub_query->where('r.name', 'like', '%' . $keyword . '%');
                 });
             });
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function shipment_get_info(Request $request){

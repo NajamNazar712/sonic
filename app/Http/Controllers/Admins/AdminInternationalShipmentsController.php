@@ -89,7 +89,9 @@ class AdminInternationalShipmentsController extends Controller
                 $dropdown .= '</div></div>';
                 return $dropdown;
             });
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link', 'pod_file', 'action'])
+        ->make(true);
     }
 
     public function tracking_upload_store(Request $request){
