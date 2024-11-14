@@ -15295,7 +15295,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $latestHistory = $table2::where('user_id', $user_id)->latest('created_at')->first();
 
             if (!$latestHistory) {
-                return $table1::where('user_id', $user_id)->exists() ? 'Rates Added Only' : '';
+                return $table1::where('user_id', $user_id)->exists() ? 'Rates Updated Only' : '';
             }
 
             $currentTotal = $calculateTotal($table1, $user_id, null, $currentColumns);
@@ -15305,7 +15305,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 return $currentTotal > $previousTotal ? 'green' : ($currentTotal < $previousTotal ? 'red' : 'yellow');
             }
 
-            return 'Rates Added Only';
+            return 'Rates Updated Only';
         } else {
             $previousDate = $table2::where('user_id', $user_id)->where('created_at', '>=', $date2->created_at)->value('created_at');
             $currentDate = $table2::where('user_id', $user_id)->where('created_at', '>=', $date1->created_at)->value('created_at');
