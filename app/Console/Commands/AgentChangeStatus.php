@@ -63,8 +63,7 @@ class AgentChangeStatus extends Command
             //Query for Making Shipments Enable again in Get Tickets After their "Unresponsive" Status is Submitted.
             RvShipmentTicket::where('in_progress', 1)->where('is_bot', 0)->update(['in_progress' => 0]);
             
-            
-            $upshipments = RvShipmentTicket::whereDate('created_at','>','2024-11-03')->where('in_progress', 0)->where('is_bot',0)->get();
+            $upshipments = RvShipmentTicket::whereDate('created_at','>', Carbon::parse(now()->subHours(78)->toDateTimeString())->format('Y-m-d'))->where('in_progress', 0)->where('is_bot',0)->get();
             // ->update(['in_progress' => 0,'rv_shipment_tickets.updated_at'=> 'rv_shipment_tickets.created_ats']);
             foreach($upshipments as $shipment){
                 $shipment->updated_at = $shipment->created_at;

@@ -566,6 +566,11 @@
                         //         }
                         //     }
                         // });
+                        var tracking_number = $('#add_shipment_form input[name="tracking_number"]').val();
+
+                        if (tracking_number.trim() != ''){
+                            $('#add_shipment_form input[name="tracking_number"]').prop('disabled', true);
+                        }
 
                         $.ajax({
                             type: "GET",
@@ -585,10 +590,11 @@
                                     });
                                     $('input[name="tracking_number"]').val('');
                                     $('#add_shipment_form button.add').prop('disabled', false); // Re-enable button on error
+                                    $('#add_shipment_form input[name="tracking_number"]').prop('disabled', false).focus();
                                 } 
                                 
                                 else {
-                                    var tracking_number = $('#add_shipment_form input[name="tracking_number"]').val();
+                                    
                                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                                         $.ajax({
                                             url: '{!! route('admin.handover.create.shipment_details_new') !!}',
@@ -620,6 +626,7 @@
                                                     $('#add_shipment_form button.add').prop('disabled', false); // Re-enable button after delay
                                                 }, 0);
                                                 $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+                                                $('#add_shipment_form input[name="tracking_number"]').prop('disabled', false).focus();
                                                 
                                                 toastr.success(data.success, 'Success!', {
                                                     positionClass: 'toast-bottom-center',
@@ -667,6 +674,7 @@
                                                     containerId: 'toast-top-center'
                                                 });
                                                 $('#add_shipment_form button.add').prop('disabled', false); // Re-enable button on error
+                                                $('#add_shipment_form input[name="tracking_number"]').prop('disabled', false).focus();
                                             }
                                         });
                                     } else {
@@ -677,6 +685,7 @@
                                         });
                                         $('input[name="tracking_number"]').val(''); // clear input after error
                                         $('#add_shipment_form button.add').prop('disabled', false); // Re-enable button on error
+                                        $('#add_shipment_form input[name="tracking_number"]').prop('disabled', false).focus();
                                     }
                                 }
                             }
