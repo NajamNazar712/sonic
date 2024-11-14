@@ -7856,7 +7856,9 @@ class GlobalSettingsController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function lost_shipment_shippers_add(Request $request)
@@ -7916,7 +7918,9 @@ class GlobalSettingsController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function lost_shipment_admins_add(Request $request)

@@ -47,6 +47,7 @@ class MisroutedHistoryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->rawColumns(['tracking_number_link'])
             ->make(true);
     }
 }

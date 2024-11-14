@@ -652,9 +652,11 @@ class OrderManagementController extends Controller
             });
             
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link', 'phone'])
+        ->make(true);
     }
 
     public function supply_chain_index()
