@@ -3845,8 +3845,8 @@ class AdminReportsController extends Controller
         }
         if ($referral_name = $request->get('ref')) {
             $datatable
-            ->where('rf.id', '=', $referral_name)
-            ->orWhere('scun.id', '=',$referral_name);
+                ->where('rf.id', '=', $referral_name)
+                ->orWhere('scun.id', '=',$referral_name);
         }
         if ($search_business_category = $request->get('search_business_category')) {
             $datatable->where('shipments.business_category_id', '=', $search_business_category);
