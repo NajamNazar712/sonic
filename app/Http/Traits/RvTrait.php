@@ -2093,7 +2093,7 @@ trait RvTrait
             'json' => [
                 'tracking_number' => $tracking_number,
                 'call_status' => 'InvalidNumber',
-                'remarks'=> 'due to invalid number',
+                'remarks'=> 'Due to invalid number',
                 'bot_auto_return' => 1, // auto returm confirm in  case of invalid number
                 'input' => 0,
                 'start_date' => date('Y-m-d H:i:s'),
