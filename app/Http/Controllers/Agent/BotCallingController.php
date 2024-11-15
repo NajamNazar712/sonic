@@ -126,7 +126,7 @@ class BotCallingController extends Controller
                         'ANSWER' => 34,
                         'BUSY' => 32,
                         'CONGESTION' => 39,
-                        'NOANSWER' => 16,
+                        'NOANSWER' => 33,
                         'InvalidNumber' => 28,
                     ];            
                     $array = [

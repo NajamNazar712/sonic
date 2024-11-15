@@ -57,7 +57,8 @@
                                     <th class="border-primary border-darken-1 text-center align-middle " rowspan="2">Date</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Description</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  colspan="10">Connected Calls</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="6">Not Connected Calls</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="8">Not Connected Calls</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Shipment Another Status</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Grand Total</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">No. of Shipments</th>
                                 </tr>
@@ -72,11 +73,14 @@
                                     <th class="border-primary border-darken-1 text-center align-middle ">No Option %</th>
                                     <th class="border-primary border-darken-1 text-center align-middle ">Total</th>
                                     <th class="border-primary border-darken-1 text-center align-middle ">Total %</th>
-                                    {{-- <th class="border-primary border-darken-1">Not Answered</th> --}}
+                                    <th class="border-primary border-darken-1">Invalid No</th>
+                                    <th class="border-primary border-darken-1">Invalid No %</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Busy</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Busy %</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Disconnected</th>
                                     <th class="border-primary border-darken-1 text-center align-middle">Disconnected %</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle">Congestion</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle">Congestion %</th>
                                     {{-- <th class="border-primary border-darken-1">Invalid Number</th> --}}
                                     <th class="border-primary border-darken-1 text-center align-middle ">Total</th>
                                     <th class="border-primary border-darken-1 text-center align-middle ">Total %</th>
@@ -384,10 +388,15 @@
                             head.push('Total %');
                             head.push('Busy');
                             head.push('Busy %');
+                            head.push('Invalid No');
+                            head.push('Invalid No %');
                             head.push('Disconnected');
                             head.push('Disconnected %');
+                            head.push('Congestion');
+                            head.push('Congestion %');
                             head.push('Total');
                             head.push('Total %');
+                            head.push('Shipment Another Status');
                             head.push('Grand Total');
                             head.push('No of Shipment');
 
@@ -407,12 +416,17 @@
                                 row.push(values.option4_per);
                                 row.push(values.total1);
                                 row.push(values.total1_per);
+                                row.push(values.invalid);
+                                row.push(values.invalid_per);
                                 row.push(values.busy);
                                 row.push(values.busy_per);
                                 row.push(values.disconnected);
                                 row.push(values.disconnected_per);
+                                row.push(values.congestion);
+                                row.push(values.congestion_per);
                                 row.push(values.total2);
                                 row.push(values.total2_per);
+                                row.push(values.shipment_manual_entry);
                                 row.push(values.grandtotal);
                                 row.push(values.no_of_shipment);
                                 body.push(row);
@@ -473,12 +487,17 @@
                     {data: 'option4_per', name: 'option4_per', orderable: false, class: 'text-center align-middle option4_per', searchable: false},
                     {data: 'total1', name: 'total1', orderable: false, class: 'text-center align-middle total1', searchable: false},
                     {data: 'total1_per', name: 'total1_per', orderable: false, class: 'text-center align-middle total1_per', searchable: false},
+                    {data: 'invalid', name: 'invalid', orderable: false, class: 'text-center align-middle invalid', searchable: false},
+                    {data: 'invalid_per', name: 'invalid_per', orderable: false, class: 'text-center align-middle invalid_per', searchable: false},
                     {data: 'busy', name: 'busy', orderable: false, class: 'text-center align-middle busy', searchable: false},
                     {data: 'busy_per', name: 'busy_per', orderable: false, class: 'text-center align-middle busy_per', searchable: false},
                     {data: 'disconnected', name: 'disconnected', orderable: false, class: 'text-center align-middle disconnected', searchable: false}, // Center text
                     {data: 'disconnected_per', name: 'disconnected_per', orderable: false, class: 'text-center align-middle disconnected_per', searchable: false}, // Center text
+                    {data: 'congestion', name: 'congestion', orderable: false, class: 'text-center align-middle congestion', searchable: false}, // Center text
+                    {data: 'congestion_per', name: 'congestion_per', orderable: false, class: 'text-center align-middle congestion_per', searchable: false}, // Center text
                     {data: 'total2', name: 'total2', orderable: false, class: 'text-center align-middle total2', searchable: false},
                     {data: 'total2_per', name: 'total2_per', orderable: false, class: 'text-center align-middle total2_per', searchable: false},
+                    {data: 'shipment_manual_entry', name: 'shipment_manual_entry', orderable: false, class: 'text-center align-middle shipment_manual_entry', searchable: false},
                     {data: 'grandtotal', name: 'grandtotal', orderable: false, class: 'text-center align-middle grandtotal', searchable: false},
                     {data: 'no_of_shipment', name: 'no_of_shipment', orderable: false, class: 'text-center align-middle no_of_shipment', searchable: false},
                 ],
