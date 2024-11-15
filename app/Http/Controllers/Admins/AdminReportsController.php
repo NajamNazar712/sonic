@@ -3440,19 +3440,7 @@ class AdminReportsController extends Controller
                     );
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
-            ->leftJoin(DB::raw('
-            (
-                SELECT shipment_id, type,amount,charges,gst,sms_charges,payable,wht,"" as payment_id
-                FROM pending_payment_shipments 
-                WHERE type != 2
-                UNION ALL
-                SELECT shipment_id, type,amount,charges,gst,sms_charges,payable,wht ,done_payment_id as payment_id
-                FROM done_payment_shipments 
-                WHERE type != 2
-            ) as reimbursement
-'), function ($join) {
-                $join->on('reimbursement.shipment_id', '=', 'shipments.id');
-            })
+            ->leftJoin('reimbursement_view as reimbursement', 'reimbursement.shipment_id', '=', 'shipments.id')
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->whereIn('dr.shipper_status_id', [14, 25, 30, 36, 37])
@@ -3476,19 +3464,7 @@ class AdminReportsController extends Controller
                     ->where('spt.status', '=', 0);
             })
             ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
-            ->leftJoin(DB::raw('
-                (
-            SELECT shipment_id, type,charges,gst,sms_charges,invoice_amount,"" as invoice_number
-                    FROM pending_invoice_shipments 
-                    WHERE type != 2
-                    UNION ALL
-            SELECT shipment_id, type,charges,gst,sms_charges,invoice_amount,invoice_id as invoice_number
-                    FROM invoice_shipments 
-                    WHERE type != 2
-                    ) as combined_invoices
-            '), function ($join) {
-                            $join->on('combined_invoices.shipment_id', '=', 'shipments.id');
-            })
+            ->leftJoin('coperate_view as combined_invoices', 'combined_invoices.shipment_id', '=', 'shipments.id')
             ->leftjoin('international_shipments as ibs', 'ibs.shipment_id', '=', 'shipments.id')
             ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
             ->leftJoin('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
