@@ -2104,6 +2104,8 @@ trait RvTrait
         ]);
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
+        Log::channel('botCallJobLog')->info('s ' . 'Log after  respsoned' . json_encode($response));
+
     }
 
     protected function shipmentDifferentStatus($shipmentId,$request){
