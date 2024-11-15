@@ -3400,6 +3400,33 @@ class AdminReportsController extends Controller
         $from = str_replace('00:00:00', $arrival_from, $from);
         $to = str_replace('00:00:00', $arrival_to, $to);
 
+        $pendingPaymentSubquery = DB::table('pending_payment_shipments')
+            ->select('shipment_id', 'type', 'amount', 'charges', 'gst', 'sms_charges', 'payable', 'wht', DB::raw('"" as payment_id'))
+            ->where('type', '!=', 2);
+
+// Subquery for done payments (UNION ALL)
+        $donePaymentSubquery = DB::table('done_payment_shipments')
+            ->select('shipment_id', 'type', 'amount', 'charges', 'gst', 'sms_charges', 'payable', 'wht', 'done_payment_id as payment_id')
+            ->where('type', '!=', 2);
+
+// Combining the two subqueries with UNION ALL
+        $combinedPaymentSubquery = $pendingPaymentSubquery
+            ->unionAll($donePaymentSubquery);
+
+// Subquery for pending invoices (UNION ALL)
+        $pendingInvoiceSubquery = DB::table('pending_invoice_shipments')
+            ->select('shipment_id', 'type', 'charges', 'gst', 'sms_charges', 'invoice_amount', DB::raw('"" as invoice_number'))
+            ->where('type', '!=', 2);
+
+// Subquery for actual invoices (UNION ALL)
+        $actualInvoiceSubquery = DB::table('invoice_shipments')
+            ->select('shipment_id', 'type', 'charges', 'gst', 'sms_charges', 'invoice_amount', 'invoice_id as invoice_number')
+            ->where('type', '!=', 2);
+
+// Combining the two subqueries with UNION ALL
+        $combinedInvoiceSubquery = $pendingInvoiceSubquery
+            ->unionAll($actualInvoiceSubquery);
+
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->leftJoin('shipment_services_charges as ss_charge', 'ss_charge.shipment_id', '=', 'shipments.id')
@@ -3440,17 +3467,7 @@ class AdminReportsController extends Controller
                     );
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
-            ->leftJoin(DB::raw('
-            (
-                SELECT shipment_id, type,amount,charges,gst,sms_charges,payable,wht,"" as payment_id
-                FROM pending_payment_shipments 
-                WHERE type != 2
-                UNION ALL
-                SELECT shipment_id, type,amount,charges,gst,sms_charges,payable,wht ,done_payment_id as payment_id
-                FROM done_payment_shipments 
-                WHERE type != 2
-            ) as reimbursement
-'), function ($join) {
+            ->leftJoinSub($combinedPaymentSubquery, 'reimbursement', function ($join) {
                 $join->on('reimbursement.shipment_id', '=', 'shipments.id');
             })
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
@@ -3476,18 +3493,8 @@ class AdminReportsController extends Controller
                     ->where('spt.status', '=', 0);
             })
             ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
-            ->leftJoin(DB::raw('
-                (
-            SELECT shipment_id, type,charges,gst,sms_charges,invoice_amount,"" as invoice_number
-                    FROM pending_invoice_shipments 
-                    WHERE type != 2
-                    UNION ALL
-            SELECT shipment_id, type,charges,gst,sms_charges,invoice_amount,invoice_id as invoice_number
-                    FROM invoice_shipments 
-                    WHERE type != 2
-                    ) as combined_invoices
-            '), function ($join) {
-                            $join->on('combined_invoices.shipment_id', '=', 'shipments.id');
+            ->leftJoinSub($combinedInvoiceSubquery, 'combined_invoices', function ($join) {
+                $join->on('combined_invoices.shipment_id', '=', 'shipments.id');
             })
             ->leftjoin('international_shipments as ibs', 'ibs.shipment_id', '=', 'shipments.id')
             ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
