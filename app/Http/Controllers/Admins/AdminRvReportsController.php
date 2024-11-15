@@ -147,7 +147,7 @@ class AdminRvReportsController extends Controller
             // })    
             ->leftJoin('api_zong_logs as azl', function ($join) {
                 $join->on('azl.shipment_id', '=', 's.id')
-                    ->whereRaw('DATE_FORMAT(azl.call_date_time, "%Y-%m-%d") = DATE_FORMAT(api_call_logs.created_at, "%Y-%m-%d")');
+                    ->whereRaw('DATE_FORMAT(azl.call_date_time, "%Y-%m-%d %H") = DATE_FORMAT(api_call_logs.created_at, "%Y-%m-%d %H")');
             })
             ->select('s.tracking_number as tracking_number',
             'api_call_logs.shipment_id as shipmentNo',
@@ -170,7 +170,7 @@ class AdminRvReportsController extends Controller
                 if ($rv_call_logs['message1']) {
                     // Decode the JSON response
                     $responseData = json_decode($rv_call_logs['message1'], true);
-                    return $responseData['message'];
+                    return $responseData['message'] ?? '';
                     // Encode and escape the JSON for safe HTML output
                     // $tooltipData = htmlspecialchars(json_encode($responseData, JSON_PRETTY_PRINT));
 
@@ -231,7 +231,7 @@ class AdminRvReportsController extends Controller
             if ($request->get('search_date_from') && $request->get('search_date_to') && !$request->get('search_tracking_no')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
-                $rv_call_logs->where([['api_call_logs.created_at', '>=', $from], ['api_call_logs.created_at', '<=', $to]]);
+                $rv_call_logs->where([['azl.created_at', '>=', $from], ['azl.created_at', '<=', $to]]);
             }
             
         if($request->get('search_tracking_no')){
