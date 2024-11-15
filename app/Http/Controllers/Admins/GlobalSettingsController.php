@@ -1770,7 +1770,7 @@ class GlobalSettingsController extends Controller
                     $dropdown = '';
                 }
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
         return $datatable->make(true);
     }
 
@@ -2062,7 +2062,7 @@ class GlobalSettingsController extends Controller
                 $dropdown .= '<button type="button" data-target-id=' . $leads->head_admin_id . ' class="dropdown-item assign" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Assign</div></button>';
 
                 return $dropdown;
-            })->make(true);
+           })->rawColumns(['action','tagged_admins_count'])->make(true);
     }
 
     public function multiple_sale_tagging_submit(Request $request)
@@ -2574,7 +2574,7 @@ class GlobalSettingsController extends Controller
             ';
                 $dropdown .= '<button type="button" data-target-id=' . $requests->origin_id . ' class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 return $dropdown;
-            })->make(true);
+            })->rawColumns(['action'])->make(true);
     }
 
     public function overnight_overland_cargo_report_rad_tat_submit(Request $request)
@@ -2841,7 +2841,7 @@ class GlobalSettingsController extends Controller
                 }
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatable->make(true);
     }
@@ -3882,7 +3882,7 @@ class GlobalSettingsController extends Controller
                     $dropdown .= $disable;
                 }
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
         return $datatable->make(true);
     }
 
@@ -4413,6 +4413,7 @@ class GlobalSettingsController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -4464,6 +4465,7 @@ class GlobalSettingsController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -4921,6 +4923,7 @@ class GlobalSettingsController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -5140,7 +5143,7 @@ class GlobalSettingsController extends Controller
                     $dropdown .= $disable;
                 }
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
         return $datatable->make(true);
     }
 
@@ -5346,7 +5349,7 @@ class GlobalSettingsController extends Controller
                     $dropdown .= $disable;
                 }
                 return $dropdown;
-            });
+            })->rawColumns(['action','junctions','starting_id','end_id']);
         return $datatable->make(true);
     }
 
@@ -5458,7 +5461,7 @@ class GlobalSettingsController extends Controller
                   </div>
           ';
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
         return $datatable->make(true);
     }
 
@@ -5796,7 +5799,16 @@ class GlobalSettingsController extends Controller
                 } else {
                     return 'Disable';
                 }
-            });
+            })->rawColumns([   'zone',
+                'hub',
+                'case_nature',
+                'case_nature_type',
+                'business_segment',
+                'sub_business_segment',
+                'shipper_key',
+                'shipper_non_key',
+                'shipment_status',
+                'action']);
 
 
         return $datatables->make(true);
@@ -6790,7 +6802,7 @@ class GlobalSettingsController extends Controller
             })
             ->addColumn('service2_link', function ($roles) {
                 return '<button class="btn btn-sm btn-outline-info align-middle services_link" id="' . $roles->id . '"><span class="align-middle">' . $roles->service2 . '</span></button>';
-            });
+            })->rawColumns(['action','service2_link']);;
 
         return $datatables->make(true);
     }
@@ -6933,7 +6945,7 @@ class GlobalSettingsController extends Controller
                 } else {
                     return 'Disable';
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -7056,7 +7068,7 @@ class GlobalSettingsController extends Controller
             ';
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -7582,7 +7594,7 @@ class GlobalSettingsController extends Controller
                 } else {
                     return $roles->city_name;
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -9802,7 +9814,7 @@ class GlobalSettingsController extends Controller
                         </div>
                     ';
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
         return $datatables->make(true);
     }
 

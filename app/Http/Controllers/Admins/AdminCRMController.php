@@ -4722,7 +4722,7 @@ class AdminCRMController extends Controller
                 else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
 

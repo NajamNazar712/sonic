@@ -84,7 +84,7 @@ class SalesIncentiveController extends Controller
                 }
                 else{ return ''; }
             
-        });
+        })->rawColumns(['action','users']);;
           
         return $datatables->make(true);
     }
@@ -286,7 +286,7 @@ class SalesIncentiveController extends Controller
                 else
                 { return '';}
             
-        });
+        })->rawColumns(['action','location']);
           
         return $datatables->make(true);
     }

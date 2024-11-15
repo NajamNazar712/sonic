@@ -164,6 +164,7 @@ class AdminCargoManifestController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['origin_display','junctions_display','destination_display','action'])
             ->make(true);
     }
 

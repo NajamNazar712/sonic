@@ -255,7 +255,7 @@ class UserManagementController extends Controller
                 if ($keyword != '') {
                     $query->where('ar.name', 'like', '%' . $keyword . '%')->orWhere('ad.name', 'like', '%' . $keyword . '%');
                 }
-            });
+            })->rawColumns(['action','ahat']);
 
         return $datatables->make(true);
     }
@@ -719,7 +719,7 @@ class UserManagementController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }

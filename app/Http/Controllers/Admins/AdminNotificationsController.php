@@ -87,7 +87,7 @@ class AdminNotificationsController extends Controller
             ';
 
             return $dropdown;
-        });
+        })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -1374,7 +1374,7 @@ class AdminNotificationsController extends Controller
                 } else {
                     return "";
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
