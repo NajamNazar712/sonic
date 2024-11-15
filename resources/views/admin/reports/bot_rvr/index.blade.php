@@ -57,7 +57,7 @@
                                     <th class="border-primary border-darken-1 text-center align-middle " rowspan="2">Date</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Description</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  colspan="10">Connected Calls</th>
-                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="8">Not Connected Calls</th>
+                                    <th class="border-primary border-darken-1 text-center align-middle "  colspan="10">Not Connected Calls</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Shipment Another Status</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">Grand Total</th>
                                     <th class="border-primary border-darken-1 text-center align-middle "  rowspan="2">No. of Shipments</th>
