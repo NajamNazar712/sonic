@@ -154,6 +154,7 @@ class RiderManagementController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             // ->addColumn('zone', function ($rider) {
             //     return $rider->city;
             // })
@@ -768,6 +769,7 @@ class RiderManagementController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -850,6 +852,7 @@ class RiderManagementController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
     public function sms_history_index()
@@ -869,7 +872,7 @@ class RiderManagementController extends Controller
             ->editColumn('riders_count', function ($sms) {
                 return '<center><button class="btn btn-sm btn-outline-info align-middle">' . $sms->riders . '</button></center>';
             })
-
+            ->rawColumns(['riders_count'])
             ->make(true);
     }
     public function all_riders(Request $request)
@@ -948,6 +951,7 @@ class RiderManagementController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 

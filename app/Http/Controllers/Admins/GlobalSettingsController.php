@@ -3144,7 +3144,7 @@ class GlobalSettingsController extends Controller
                 $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatable->make(true);
     }
@@ -3770,7 +3770,7 @@ class GlobalSettingsController extends Controller
                 }
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatable->make(true);
     }
@@ -5070,6 +5070,7 @@ class GlobalSettingsController extends Controller
                 }
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -7341,6 +7342,7 @@ class GlobalSettingsController extends Controller
 
     public function return_reason_mandatory_index()
     {
+        
         ActivityTrailController::createActivityTrailLog(Auth::id(), 510);
         $already_added_shippers = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
         $shippers = User::join('cities as c', 'users.city_id', '=', 'c.id')
@@ -8018,7 +8020,7 @@ class GlobalSettingsController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -8222,7 +8224,7 @@ class GlobalSettingsController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -9630,7 +9632,7 @@ class GlobalSettingsController extends Controller
                     ';
                 }
                 return $dropdown;
-            });
+            })->rawColumns(['action','hubs']);
 
         return $datatable->make(true);
     }

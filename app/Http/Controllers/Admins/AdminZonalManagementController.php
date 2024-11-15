@@ -87,7 +87,7 @@ class AdminZonalManagementController extends Controller
             ';
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }
