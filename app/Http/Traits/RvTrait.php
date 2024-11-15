@@ -799,7 +799,7 @@ trait RvTrait
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
         $botInvalidNo = ($request->bot_auto_return > 0 ? 1 : 0); // bot invalid call 
-        dd($request->bot_auto_return);    
+
         if ($rv_shipment_assign_agent) {
             try {
                 $status = new RvAgentCallHistory();
