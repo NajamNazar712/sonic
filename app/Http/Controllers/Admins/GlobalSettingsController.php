@@ -410,6 +410,7 @@ class GlobalSettingsController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -522,6 +523,7 @@ class GlobalSettingsController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -647,6 +649,7 @@ class GlobalSettingsController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -4060,7 +4063,7 @@ class GlobalSettingsController extends Controller
                     $dropdown .= $edit . $enable;
                     return $dropdown;
                 }
-            });
+            })->rawColumns(['action']);
 
 
 
