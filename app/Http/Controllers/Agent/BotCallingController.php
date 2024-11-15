@@ -126,11 +126,13 @@ class BotCallingController extends Controller
                         'ANSWER' => 34,
                         'BUSY' => 32,
                         'CONGESTION' => 39,
-                    ];
+                        'NOANSWER' => 16,
+                        'InvalidNumber' => 28,
+                    ];            
                     $array = [
                         0 => [
                             'status_id' => 6,
-                            'call_finding_id' => (in_array($noAnswer[$request->call_status], $noAnswer) ? $noAnswer[$request->call_status] : 16),
+                            'call_finding_id' => $noAnswer[$request->call_status],
                             'call_status_type' => ($request->call_status == 'ANSWER' ? 'Connected' :  'Not Connected'),
                         ], // unresponsive
                         1 => [
