@@ -91,7 +91,7 @@ class AdminRvReportsController extends Controller
         $totalQuery = RvShipmentAssignAgentDetails::where('agent_id', 4620)
         ->whereNotNull('rv_assign_agent_status_id')
             ->whereIn('call_count', [1, 2, 3])
-            ->whereIn('rv_assign_agent_sub_status_id', [32, 33, 35, 36, 37, 34])
+            ->whereIn('rv_assign_agent_sub_status_id', [32, 33, 34,35, 36, 37])
             ->select(
             DB::raw('DATE(created_at) AS date'),
             DB::raw("'Total' AS description"),
@@ -111,7 +111,7 @@ class AdminRvReportsController extends Controller
             DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id = 33 THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS disconnected_per"),
             DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33) THEN 1 END) AS total2"),
             DB::raw("CONCAT(ROUND(COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33) THEN 1 END) / COUNT(shipment_id) * 100, 2), '%') AS total2_per"),
-            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33, 35, 36, 37, 34) THEN 1 END) AS grandtotal"),
+            DB::raw("COUNT(CASE WHEN rv_assign_agent_sub_status_id IN (32, 33, 34,35, 36, 37) THEN 1 END) AS grandtotal"),
             DB::raw("COUNT(DISTINCT shipment_id) AS no_of_shipment")
             )
             ->groupBy(DB::raw('DATE(created_at)'));
