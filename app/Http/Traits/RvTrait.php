@@ -2086,29 +2086,25 @@ trait RvTrait
     }
     static function inValidEntityEntertain($tracking_number){
         $client = new Client(['base_uri' =>  config('app.url') . '/api/admin/bot_submit_ticket', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60, 'verify' => false]);
-        $post = [
-            'tracking_number' => $tracking_number,
-            'call_status' => 'InvalidNumber',
-            'remarks' => 'Due to invalid number',
-            'bot_auto_return' => 1, // auto returm confirm in  case of invalid number
-            'input' => 0,
-            'start_date' => date('Y-m-d H:i:s'),
-            'end_date' => date('Y-m-d H:i:s'),
-            'call_finding' => 28, //invalid numbers
-            'sender_name' => 'sonic'
-        ];
-        Log::channel('botCallJobLog')->info('s ' . 'Log after  respsoned' . json_encode($post));
-
         $response = $client->post('', [
             'headers' => [
                 'Authorization' => 'dXhTblBlMFZDYTJGbkR4MENTaWg5dWZFV250Z29leDZoaEU4MDJkT0xGZEx6d3IydGgwWHdRVjBIWDB666bb6c93c2dfe'
             ],
-            'json' => $post
+            'json' => [
+                'tracking_number' => $tracking_number,
+                'call_status' => 'InvalidNumber',
+                'remarks'=> 'Due to invalid number',
+                'bot_auto_return' => 1, // auto returm confirm in  case of invalid number
+                'input' => 0,
+                'start_date' => date('Y-m-d H:i:s'),
+                'end_date' => date('Y-m-d H:i:s'),
+                'call_finding' => 28, //invalid numbers
+                'sender_name' => 'sonic'
+            ]
         ]);
-        Log::channel('botCallJobLog')->info('s ' . 'Log after  respsoned' . json_encode($response));
-
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
+        Log::channel('botCallJobLog')->info('s ' . 'Log after  respsoned' . json_encode($response));
 
     }
 
