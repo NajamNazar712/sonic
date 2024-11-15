@@ -7755,7 +7755,9 @@ class GlobalSettingsController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function referral_name(Request $request)

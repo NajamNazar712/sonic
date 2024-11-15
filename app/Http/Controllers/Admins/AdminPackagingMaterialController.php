@@ -1356,6 +1356,7 @@ class AdminPackagingMaterialController extends Controller
                 }
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
