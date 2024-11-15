@@ -3131,7 +3131,7 @@
                             <li><a class="menu-item" href="{{ route('admin.handover.create.new_index') }}">Create Handover Bag</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(341, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.handover.receive.index') }}">Receive (Old)</a></li>
+                            {{-- <li><a class="menu-item" href="{{ route('admin.handover.receive.index') }}">Receive (Old)</a></li> --}}
                             <li><a class="menu-item" href="{{ route('admin.handover.receive.new_index') }}">Receive Handover Bag</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(342, session('permissions')))
