@@ -3440,13 +3440,18 @@ class AdminReportsController extends Controller
                     );
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
-            ->leftJoin('pending_payment_shipments as pps', function ($join) use ($connection) {
-                $join->on('pps.shipment_id', '=', 'shipments.id')
-                    ->where('pps.type', '!=',2 );
-            })
-            ->leftJoin('done_payment_shipments as dps', function ($join) use ($connection) {
-                $join->on('dps.shipment_id', '=', 'shipments.id')
-                    ->where('dps.type', '!=',2 );
+            ->leftJoin(DB::raw('
+            (
+                SELECT shipment_id, type,amount,charges,gst,sms_charges,payable,wht,"" as payment_id
+                FROM pending_payment_shipments 
+                WHERE type != 2
+                UNION ALL
+                SELECT shipment_id, type,amount,charges,gst,sms_charges,payable,wht ,done_payment_id as payment_id
+                FROM done_payment_shipments 
+                WHERE type != 2
+            ) as reimbursement
+'), function ($join) {
+                $join->on('reimbursement.shipment_id', '=', 'shipments.id');
             })
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
@@ -3471,15 +3476,19 @@ class AdminReportsController extends Controller
                     ->where('spt.status', '=', 0);
             })
             ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
-            ->leftJoin('pending_invoice_shipments as pis', function ($join) use ($connection) {
-                $join->on('pis.shipment_id', '=', 'shipments.id')
-                    ->where('pis.type', '!=',2 );
+            ->leftJoin(DB::raw('
+                (
+            SELECT shipment_id, type,charges,gst,sms_charges,invoice_amount,"" as invoice_number
+                    FROM pending_invoice_shipments 
+                    WHERE type != 2
+                    UNION ALL
+            SELECT shipment_id, type,charges,gst,sms_charges,invoice_amount,invoice_id as invoice_number
+                    FROM invoice_shipments 
+                    WHERE type != 2
+                    ) as combined_invoices
+            '), function ($join) {
+                            $join->on('combined_invoices.shipment_id', '=', 'shipments.id');
             })
-            ->leftJoin('invoice_shipments as is', function ($join) use ($connection) {
-                $join->on('is.shipment_id', '=', 'shipments.id')
-                    ->where('is.type', '!=',2 );
-            })
-            ->leftjoin('invoices', 'is.invoice_id', '=', 'invoices.id')
             ->leftjoin('international_shipments as ibs', 'ibs.shipment_id', '=', 'shipments.id')
             ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
             ->leftJoin('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
@@ -3519,7 +3528,7 @@ class AdminReportsController extends Controller
             ->leftJoin('sale_tier_tags as st', 'st.user_id', '=', 'u.id')
             ->leftJoin('admins as rf', 'rf.id', '=', 'st.ref')
             ->leftjoin('shipment_additional_charges as faf_charges', 'faf_charges.shipment_id', '=', 'shipments.id')
-            ->select( 'invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.fintech_charges as fintech_charges', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', DB::raw('SUM(pps.charges) as p_total_charges'), DB::raw('SUM(pps.amount) as p_collection_amount'), DB::raw('SUM(pps.payable) as p_net_payable'), DB::raw('SUM(pps.gst) as p_gst'), DB::raw('SUM(dps.amount) as d_collection_amount'), DB::raw('SUM(dps.charges) as d_total_charges'), DB::raw('SUM(dps.payable) as d_net_payable'), DB::raw('SUM(dps.gst) as d_gst'), 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.id', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', DB::raw('SUM(is.gst) as is_gst'), DB::raw('SUM(pis.gst) as pis_gst'), 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date', 'spjproceed_date.created_at as processed_date', 'si.quantity as item_quantity', 'shipments.pieces as pieces', 'scun.id as scun_id', 'rf.id as ref_id', 'rf.name as ref', 'och.name as origin_hub', 'shipments.tracking_number as tracking_number_excel', DB::raw('SUM(pps.sms_charges) as pps_sms_charges'), DB::raw('SUM(dps.sms_charges) as dps_sms_charges'), DB::raw('SUM(pis.sms_charges) as pis_sms_charges'), DB::raw('SUM(is.sms_charges) as is_sms_charges'), DB::raw('SUM(faf_charges.faf_charges) as faf_charges'), DB::raw('SUM(ss_charge.reverse_pickup_charges) as reverse_pickup_charges'))
+            ->select( DB::raw('GROUP_CONCAT(combined_invoices.invoice_number) as invoice_number'), 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.fintech_charges as fintech_charges', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', DB::raw('SUM(reimbursement.charges) as p_total_charges'), DB::raw('SUM(reimbursement.amount) as p_collection_amount'), DB::raw('SUM(reimbursement.payable) as p_net_payable'), DB::raw('SUM(reimbursement.gst) as p_gst'), 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id',DB::raw('GROUP_CONCAT(reimbursement.payment_id) as payment_id'),  'shipments.booking_type_id', 'usi.poc', 'adsp.id', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', DB::raw('SUM(combined_invoices.gst) as pis_gst'), 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date', 'spjproceed_date.created_at as processed_date', 'si.quantity as item_quantity', 'shipments.pieces as pieces', 'scun.id as scun_id', 'rf.id as ref_id', 'rf.name as ref', 'och.name as origin_hub', 'shipments.tracking_number as tracking_number_excel', DB::raw('SUM(reimbursement.sms_charges) as pps_sms_charges'), DB::raw('SUM(combined_invoices.sms_charges) as pis_sms_charges'), DB::raw('SUM(combined_invoices.charges) as pis_total_charges'),  DB::raw('SUM(faf_charges.faf_charges) as faf_charges'), DB::raw('SUM(ss_charge.reverse_pickup_charges) as reverse_pickup_charges'))
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
 //            ->whereBetween('sj.created_at', [$from, $to])
@@ -3615,18 +3624,10 @@ class AdminReportsController extends Controller
             ->editColumn('p_total_charges', function ($shipment) {
                 return number_format($shipment->p_total_charges, 2);
             })
-            ->editColumn('d_total_charges', function ($shipment) {
-                return number_format($shipment->d_total_charges, 2);
-            })
             ->editColumn('p_net_payable', function ($shipment) {
                 return number_format($shipment->p_net_payable, 2);
             })
-            ->editColumn('d_net_payable', function ($shipment) {
-                return number_format($shipment->d_net_payable, 2);
-            })
-            ->editColumn('d_gst', function ($shipment) {
-                return number_format($shipment->d_gst, 2);
-            })
+
             ->editColumn('packaging_charges', function ($shipment) {
                 return number_format($shipment->packaging_charges, 2);
             })
@@ -3640,9 +3641,6 @@ class AdminReportsController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number_link' class='tracking' target='_blank'>$shipments->tracking_number_link</a></u>";
             })
-            ->editColumn('d_collection_amount', function ($shipment) {
-                return number_format($shipment->d_collection_amount);
-            })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
                     return $shipment->shipper . ' (' . $shipment->poc . ')';
@@ -3654,8 +3652,6 @@ class AdminReportsController extends Controller
                 $amount = '';
                 if ($sale->p_collection_amount != null && !empty($sale->p_collection_amount)) {
                     $amount = $sale->p_collection_amount;
-                } else if ($sale->d_collection_amount != null && !empty($sale->d_collection_amount)) {
-                    $amount = $sale->d_collection_amount;
                 } else {
                     $amount = $sale->s_collection_amount;
                 }
@@ -3666,14 +3662,10 @@ class AdminReportsController extends Controller
                 if ($sale->account_type_id == 1) {
                     if ($sale->p_gst != null) {
                         $gst = $sale->p_gst;
-                    } else if ($sale->d_gst != null) {
-                        $gst = $sale->d_gst;
                     }
                 } else {
                     if ($sale->pis_gst != null) {
                         $gst = $sale->pis_gst;
-                    } else if ($sale->is_gst != null) {
-                        $gst = $sale->is_gst;
                     }
                 }
                 return number_format((float) $gst, 2);
@@ -3683,24 +3675,25 @@ class AdminReportsController extends Controller
                 if ($sale->account_type_id == 1) {
                     if ($sale->pps_sms_charges != null) {
                         $sms_charges = $sale->pps_sms_charges;
-                    } else if ($sale->dps_sms_charges != null) {
-                        $sms_charges = $sale->dps_sms_charges;
                     }
                 } else {
                     if ($sale->pis_sms_charges != null) {
                         $sms_charges = $sale->pis_sms_charges;
-                    } else if ($sale->is_sms_charges != null) {
-                        $sms_charges = $sale->is_sms_charges;
                     }
                 }
                 return number_format((float) $sms_charges, 2);
             })
             ->editColumn('p_total_charges', function ($sale) {
                 $total = '';
-                if ($sale->p_total_charges != null) {
-                    $total = $sale->p_total_charges + $sale->fintech_charges;
-                } else if ($sale->d_total_charges != null) {
-                    $total = $sale->d_total_charges;
+
+                if ($sale->account_type_id == 1) {
+                    if ($sale->p_total_charges != null) {
+                        $total = $sale->p_total_charges + $sale->fintech_charges;
+                    }
+                } else {
+                    if ($sale->pis_total_charges != null) {
+                        $total = $sale->pis_total_charges;
+                    }
                 }
                 return number_format((float) $total, 2);
             })
@@ -3713,8 +3706,6 @@ class AdminReportsController extends Controller
                 $payable = '';
                 if ($sale->p_net_payable != null) {
                     $payable = $sale->p_net_payable;
-                } else if ($sale->d_net_payable != null) {
-                    $payable = $sale->d_net_payable;
                 }
                 return number_format((float) $payable, 2);
             })
