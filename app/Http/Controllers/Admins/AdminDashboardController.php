@@ -15739,7 +15739,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $hubMappings = [];
 
                     foreach ($closestHubTypes as $key => $value) {
-                        if (count($value) > 0) {
+                        foreach ($value as $val) {
+                            if (is_array($val)) {
+                                $val = implode(',', $val);
+                            }
+                            $vehicles = explode(',', $val);
+
+                            // Get the array keys for the closestHubTypes
                             $keys = array_keys($closestHubTypes);
                             $index = array_search($key, $keys, true);
 
@@ -15748,7 +15754,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                                 if (isset($cityMap[$cityId])) {
                                     $hubMappings[] = [
-                                        'vehicles' => $value,
+                                        'vehicles' => $vehicles,
                                         'closest_hub' => $key,
                                         'city' => $cityMap[$cityId],
                                     ];
@@ -15832,9 +15838,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 // Unset for closest hub types and store the value in $closestHubTypes
                 if (in_array($key3, $closest_hub_types)) {
                     if (isset($array[$key2]['closest_hub']) && isset($array[$key2]['vehicles_list'])) {
-                        $closestHubTypes[$array[$key2]['closest_hub']] = $array[$key2]['vehicles_list'];
-                    } else {
-                        $closestHubTypes[$key2] = []; // For precise insertion for hub-wise index if null too
+                        $closestHub = $array[$key2]['closest_hub'];
+                        $vehiclesList = $array[$key2]['vehicles_list'];
+
+                        if (!isset($closestHubTypes[$closestHub])) {
+                            $closestHubTypes[$closestHub] = [];
+                        }
+
+                        if (!in_array($vehiclesList, $closestHubTypes[$closestHub])) {
+                            $closestHubTypes[$closestHub][] = $vehiclesList;
+                        }
                     }
                     $keysToUnset[] = $key3;
                 }
