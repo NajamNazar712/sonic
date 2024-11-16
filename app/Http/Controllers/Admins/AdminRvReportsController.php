@@ -145,7 +145,7 @@ class AdminRvReportsController extends Controller
             //     // $join->on('azl.created_at', '>=', DB::raw("'" . $request->get('search_date_from') . "'"));
             //     // $join->on('azl.created_at', '<=', DB::raw("'" . $request->get('search_date_to') . "'"));
             // })    
-            ->leftJoin('api_zong_logs as azl', function ($join) {
+            ->join('api_zong_logs as azl', function ($join) {
                 $join->on('azl.shipment_id', '=', 's.id')
                     ->whereRaw('DATE_FORMAT(azl.call_date_time, "%Y-%m-%d %H") = DATE_FORMAT(api_call_logs.created_at, "%Y-%m-%d %H")');
             })
