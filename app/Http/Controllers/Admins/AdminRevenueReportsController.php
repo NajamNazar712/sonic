@@ -682,25 +682,25 @@ class AdminRevenueReportsController extends Controller
             });
 
             if($search_invoice_number = $request->get('search_invoice_number')){
-                $datatable->where('rbi.invoice_number','=', $search_invoice_number);
+                $invoice->where('rbi.invoice_number','=', $search_invoice_number);
             }
             if($shipper = $request->get('search_shipper')){
-                $datatable->where('rbi.user_id','=', $shipper);
+                $invoice->where('rbi.user_id','=', $shipper);
             }
             if ($origin = $request->get('search_origin')) {
-                $datatable->where('oc.id', '=', $origin);
+                $invoice->where('oc.id', '=', $origin);
             }
             if ($search_segment = $request->get('search_segment')) {
-                $datatable->where('users.segment_id', '=', $search_segment);
+                $invoice->where('users.segment_id', '=', $search_segment);
             }
             if ($search_sub_segment = $request->get('search_sub_segment')) {
-                $datatable->where('users.sub_segment_id', '=', $search_sub_segment);
+                $invoice->where('users.sub_segment_id', '=', $search_sub_segment);
             }
             if ($search_account_type = $request->get('search_account_type')) {
-                $datatable->where('users.account_type_id', '=', $search_account_type);
+                $invoice->where('users.account_type_id', '=', $search_account_type);
             }
             if ($search_business_category = $request->get('search_business_category')) {
-                $datatable->where('rbi.business_category_id', '=', $search_business_category);
+                $invoice->where('rbi.business_category_id', '=', $search_business_category);
             }
 
             return $datatable->make(true);
