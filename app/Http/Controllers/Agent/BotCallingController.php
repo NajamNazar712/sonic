@@ -115,8 +115,8 @@ class BotCallingController extends Controller
                 return response()->json(['status' => 0, 'errors' => $validate->errors()], 422);
             }
             $findShipmentId = Shipment::where('tracking_number', $request->input('tracking_number'))->first();
-            Log::channel('cronJobLog')->info('s ' . 'Request All' . json_encode($request->all()));
-            Log::channel('cronJobLog')->info('s ' . 'Api Does Not exists' . json_encode(ApiZongLog::where(['shipment_id' => $findShipmentId, 'call_date_time' => $request->start_date])->doesntExist()));
+            // Log::channel('cronJobLog')->info('s ' . 'Request All' . json_encode($request->all()));
+            // Log::channel('cronJobLog')->info('s ' . 'Api Does Not exists' . json_encode(ApiZongLog::where(['shipment_id' => $findShipmentId, 'call_date_time' => $request->start_date])->doesntExist()));
                         // Log::channel('cronJobLog')->info('s ' . 'OPS LOG' . ApiZongLog::where(['shipment_id' => $findShipmentId, 'call_date_time' => $request->start_date])->doesntExist());
 
             if(ApiZongLog::where(['shipment_id'=>$findShipmentId, 'call_date_time'=> $request->start_date])->doesntExist()){
