@@ -15567,6 +15567,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         if (empty($errors)) {
             $isHubArray = [];
             $isCityArray = [];
+            $hubMappings = [];
 
             $forms = $rows;
 
@@ -15614,6 +15615,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $cities = City::whereIn('id', $cityID)->get()->keyBy('id');
 
             foreach ($forms as $item) {
+
+                $hubMappings[] = [
+                    'closest_hub' => $item['closest_hub'],
+                    'vehicles_list' => $item['vehicles_list']
+                ];
 
                 if (array_key_exists('closest_hub', $item) && is_null($item['closest_hub'])) {
                     unset($item['closest_hub']);
@@ -15728,48 +15734,28 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 self::addManagementHubUser($admin_ids, $insertedIds);
 
                 // Insertion for dynamic mapping hubs
-                if (!empty($closestHubTypes) && !empty($insertedIds)) {
-                    $cities = City::findMany($insertedIds);
+                if (!empty($hubMappings) && !empty($insertedIds)) {
 
-                    $cityMap = [];
-                    foreach ($cities as $city) {
-                        $cityMap[$city->id] = $city;
-                    }
+                    foreach ($hubMappings as $key => $value) {
 
-                    $hubMappings = [];
+                        if(!isset($value['closest_hub'])){
+                            continue;
+                        }
 
-                    foreach ($closestHubTypes as $key => $value) {
-                        foreach ($value as $val) {
-                            if (is_array($val)) {
-                                $val = implode(',', $val);
-                            }
-                            $vehicles = explode(',', $val);
-
-                            // Get the array keys for the closestHubTypes
-                            $keys = array_keys($closestHubTypes);
-                            $index = array_search($key, $keys, true);
-
-                            if ($index !== false && isset($insertedIds[$index])) {
-                                $cityId = $insertedIds[$index];
-
-                                if (isset($cityMap[$cityId])) {
-                                    $hubMappings[] = [
-                                        'vehicles' => $vehicles,
-                                        'closest_hub' => $key,
-                                        'city' => $cityMap[$cityId],
-                                    ];
-                                } else {
-                                    Log::warning("City ID {$cityId} not found in city map.");
-                                }
-                            } else {
-                                Log::warning("Index not found for key {$key} in inserted IDs.");
-                            }
+                        if(isset($insertedIds[$key])){
+                            $hubMappings[$key] = [
+                                'closest_hub' => $value['closest_hub'],
+                                'vehicles' => explode(',' , $value['vehicles_list']),
+                                'city_id' => $insertedIds[$key],
+                            ];
                         }
                     }
 
                     // Dispatch jobs for each mapping
                     foreach ($hubMappings as $mapping) {
-                        dispatch(new MakeDynamicHubsMapping($mapping['vehicles'], $mapping['closest_hub'], $mapping['city'], auth()->id()));
+                        if(isset($mapping['closest_hub'])){
+                            dispatch(new MakeDynamicHubsMapping($mapping['vehicles'], $mapping['closest_hub'], $mapping['city_id'], auth()->id()));
+                        }
                     }
                 }
 
