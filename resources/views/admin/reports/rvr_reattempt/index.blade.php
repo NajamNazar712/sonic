@@ -94,6 +94,7 @@
                                     <th class="border-primary border-darken-1">RVR Time & Date</th>
                                     <th class="border-primary border-darken-1">RVR Action Time & Date</th>
                                     <th class="border-primary border-darken-1">OFD Time & Date</th>
+                                    {{-- <th class="border-primary border-darken-1">Before Rettempt Status</th> --}}
                                     <th class="border-primary border-darken-1">Last Status</th>
                                     <th class="border-primary border-darken-1">Last Status Date</th>
                                 </tr>
@@ -482,6 +483,7 @@
                     {data: 'rvr_date_time', name: 'rvr_date_time', class: 'align-middle reason',searchable: false},
                     {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false},
                     {data: 'ofd_date_time', name: 'ofd_date_time', class: 'align-middle action_updated_by',searchable: false},
+                    // {data: 'second_last_status', name: 'second_last_status', class: 'align-middle second_last_status',searchable: false},
                     {data: 'current_status', name: 's_status.name', class: 'align-middle current_status',searchable: false},
                     {data: 'current_status_date', name: 'current_status_date', class: 'align-middle current_status_date',searchable: false},
                 ],
