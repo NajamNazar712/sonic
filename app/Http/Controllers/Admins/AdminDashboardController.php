@@ -15824,16 +15824,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 // Unset for closest hub types and store the value in $closestHubTypes
                 if (in_array($key3, $closest_hub_types)) {
                     if (isset($array[$key2]['closest_hub']) && isset($array[$key2]['vehicles_list'])) {
-                        $closestHub = $array[$key2]['closest_hub'];
-                        $vehiclesList = $array[$key2]['vehicles_list'];
-
-                        if (!isset($closestHubTypes[$closestHub])) {
-                            $closestHubTypes[$closestHub] = [];
-                        }
-
-                        if (!in_array($vehiclesList, $closestHubTypes[$closestHub])) {
-                            $closestHubTypes[$closestHub][] = $vehiclesList;
-                        }
+                        $closestHubTypes[$array[$key2]['closest_hub']] = $array[$key2]['vehicles_list'];
+                    } else {
+                        $closestHubTypes[$key2] = []; // For precise insertion for hub-wise index if null too
                     }
                     $keysToUnset[] = $key3;
                 }
@@ -15846,8 +15839,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
         return [$array, $deliveryTypes, $walkInTypes, $osaList, $closestHubTypes];
     }
-
-
 
     // Function to retrieve the last inserted city IDs
     public static function getLastInsertedCityIds($count) {
