@@ -88,7 +88,7 @@ class MissingFirstCallInitiate extends Command
         if(!empty($rvShipmentInsert)){
             foreach($shipments as $value){
                 if(in_array($value['id'], array_unique($rvShipmentInsert))){
-                    $journey = ShipmentsJourney::where('shipment_id', $value['id'])->whereIn('shipper_status_id', [12, 52, 66])->select(DB::raw('Max(shipment_id)'),'status_reason_id')->latest()->first();
+                    $journey = ShipmentsJourney::where('shipment_id', $value['id'])->whereIn('shipper_status_id', [12, 52, 66])->select('status_reason_id')->latest()->first();
                     // Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' . $value['id']);
                     $this->rvshipmentticketInsert($value['id'], $value['shipper_status_id'], $journey['status_reason_id'], $value['user_id']);
                 }
