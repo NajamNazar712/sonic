@@ -11725,16 +11725,75 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                     //--------------x---------x---------x--------x-------x---------x----------x--------x
                     // TO-6836 (Adding the reference hub as junction in new mappings)
+                    // $newJunctions1[] = [
+                    //     'junction_mapping_id' => $mapping->id,
+                    //     'junction_id' => $closestHubId,
+                    //     'created_at' => now(),
+                    //     'updated_at' => now()
+                    // ];
+
+                    // $junctionRoute = new V2JunctionRoutes();
+                    // $junctionRoute->junction_mapping_id = $mapping->id;
+                    // $junctionRoute->starting_hub_id = $mapping->origin_id;
+                    // $junctionRoute->ending_hub_id = $mapping->destination_id;
+                    // $junctionRoute->created_at = now();
+                    // $junctionRoute->save();
+
+                    // foreach ($requestVehicles as $vehicle) {
+                    //     $junctionRouteVehicles[] = [
+                    //         'junction_route_id' => $junctionRoute->id,
+                    //         'vehicle_id' => $vehicle,
+                    //         'created_at' => now(),
+                    //         'updated_at' => now()
+                    //     ];
+                    // }
+                    // V2JunctionVehicles::insert($junctionRouteVehicles);
+
+                    //--------------x---------x---------x--------END TO-6836-------x---------x----------x--------x
+
                     $newJunctions1[] = [
                         'junction_mapping_id' => $mapping->id,
                         'junction_id' => $closestHubId,
                         'created_at' => now(),
                         'updated_at' => now()
                     ];
+                    foreach ($junctions as $j) {
+                        $newJunctions1[] = [
+                            'junction_mapping_id' => $mapping->id,
+                            'junction_id' => $j->junction_id,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+                    }
+
+                    $previous = $mapping->origin_id;
+
+                    $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
+
+                    foreach ($routeJunctions as $rj) {
+                        $route_junction = new V2JunctionRoutes();
+                        $route_junction->junction_mapping_id = $mapping->id;
+                        $route_junction->starting_hub_id = $previous;
+                        $route_junction->ending_hub_id = $rj->starting_hub_id;
+                        $route_junction->save();
+            
+                        $previous = $rj->starting_hub_id;
+
+                        $vehicles = V2JunctionVehicles::where('junction_route_id', $rj->id)->get();
+            
+                        foreach ($vehicles as $vehicle) {
+                            $newRouteVehicles1[] = [
+                                'junction_route_id' => $route_junction->id,
+                                'vehicle_id' => $vehicle->vehicle_id,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ];
+                        }
+                    }
 
                     $junctionRoute = new V2JunctionRoutes();
                     $junctionRoute->junction_mapping_id = $mapping->id;
-                    $junctionRoute->starting_hub_id = $mapping->origin_id;
+                    $junctionRoute->starting_hub_id = $previous;
                     $junctionRoute->ending_hub_id = $mapping->destination_id;
                     $junctionRoute->created_at = now();
                     $junctionRoute->save();
@@ -11748,42 +11807,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         ];
                     }
                     V2JunctionVehicles::insert($junctionRouteVehicles);
-
-                    //--------------x---------x---------x--------END TO-6836-------x---------x----------x--------x
-
-                    foreach ($junctions as $j) {
-                        $newJunctions1[] = [
-                            'junction_mapping_id' => $mapping->id,
-                            'junction_id' => $j->junction_id,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ];
-                    }
-
-                    $previous = $mapping->destination_id;
-
-                    $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
-
-                    foreach ($routeJunctions as $rj) {
-                        $route_junction = new V2JunctionRoutes();
-                        $route_junction->junction_mapping_id = $mapping->id;
-                        $route_junction->starting_hub_id = $previous;
-                        $route_junction->ending_hub_id = $rj->ending_hub_id;
-                        $route_junction->save();
-            
-                        $previous = $rj->ending_hub_id;
-
-                        $vehicles = V2JunctionVehicles::where('junction_route_id', $rj->id)->get();
-            
-                        foreach ($vehicles as $vehicle) {
-                            $newRouteVehicles1[] = [
-                                'junction_route_id' => $route_junction->id,
-                                'vehicle_id' => $vehicle->vehicle_id,
-                                'created_at' => now(),
-                                'updated_at' => now()
-                            ];
-                        }
-                    }
                     
                 }
 
@@ -11847,34 +11870,40 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                     //------x--------x------x-------x------x------x-------x-------x--------x
                     // TO-6836 (Adding the reference hub as junction in new mappings)
+                    // $newJunctions2[] = [
+                    //     'junction_mapping_id' => $mapping->id,
+                    //     'junction_id' => $closestHubId,
+                    //     'created_at' => now(),
+                    //     'updated_at' => now()
+                    // ];
+
+                    
+                    // $junctionRoute2 = new V2JunctionRoutes();
+                    // $junctionRoute2->junction_mapping_id = $mapping->id;
+                    // $junctionRoute2->starting_hub_id = $mapping->origin_id;
+                    // $junctionRoute2->ending_hub_id = $mapping->destination_id;
+                    // $junctionRoute2->created_at = now();
+                    // $junctionRoute2->save();
+
+                    // foreach ($requestVehicles as $vehicle) {
+                    //     $junctionRoute2Vehicles[] = [
+                    //         'junction_route_id' => $junctionRoute2->id,
+                    //         'vehicle_id' => $vehicle,
+                    //         'created_at' => now(),
+                    //         'updated_at' => now()
+                    //     ];
+                    // }
+                    // V2JunctionVehicles::insert($junctionRoute2Vehicles);
+
+                    //------x--------x------x-------x------END TO-6836------x-------x-------x--------x
+
                     $newJunctions2[] = [
                         'junction_mapping_id' => $mapping->id,
                         'junction_id' => $closestHubId,
                         'created_at' => now(),
                         'updated_at' => now()
                     ];
-
-                    
-                    $junctionRoute2 = new V2JunctionRoutes();
-                    $junctionRoute2->junction_mapping_id = $mapping->id;
-                    $junctionRoute2->starting_hub_id = $mapping->origin_id;
-                    $junctionRoute2->ending_hub_id = $mapping->destination_id;
-                    $junctionRoute2->created_at = now();
-                    $junctionRoute2->save();
-
-                    foreach ($requestVehicles as $vehicle) {
-                        $junctionRoute2Vehicles[] = [
-                            'junction_route_id' => $junctionRoute2->id,
-                            'vehicle_id' => $vehicle,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ];
-                    }
-                    V2JunctionVehicles::insert($junctionRoute2Vehicles);
-
-                    //------x--------x------x-------x------END TO-6836------x-------x-------x--------x
-
-                    $previous = $mapping->destination_id;
+                    $previous = $mapping->origin_id;
 
                     $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
 
@@ -11898,6 +11927,23 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             ];
                         }
                     }
+
+                    $junctionRoute2 = new V2JunctionRoutes();
+                    $junctionRoute2->junction_mapping_id = $mapping->id;
+                    $junctionRoute2->starting_hub_id = $previous;
+                    $junctionRoute2->ending_hub_id = $mapping->destination_id;
+                    $junctionRoute2->created_at = now();
+                    $junctionRoute2->save();
+
+                    foreach ($requestVehicles as $vehicle) {
+                        $junctionRoute2Vehicles[] = [
+                            'junction_route_id' => $junctionRoute2->id,
+                            'vehicle_id' => $vehicle,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+                    }
+                    V2JunctionVehicles::insert($junctionRoute2Vehicles);
                     
                 }
 
@@ -15521,6 +15567,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         if (empty($errors)) {
             $isHubArray = [];
             $isCityArray = [];
+            $hubMappings = [];
 
             $forms = $rows;
 
@@ -15568,6 +15615,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $cities = City::whereIn('id', $cityID)->get()->keyBy('id');
 
             foreach ($forms as $item) {
+
+                $hubMappings[] = [
+                    'closest_hub' => $item['closest_hub'],
+                    'vehicles_list' => $item['vehicles_list']
+                ];
 
                 if (array_key_exists('closest_hub', $item) && is_null($item['closest_hub'])) {
                     unset($item['closest_hub']);
@@ -15682,42 +15734,28 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 self::addManagementHubUser($admin_ids, $insertedIds);
 
                 // Insertion for dynamic mapping hubs
-                if (!empty($closestHubTypes) && !empty($insertedIds)) {
-                    $cities = City::findMany($insertedIds);
+                if (!empty($hubMappings) && !empty($insertedIds)) {
 
-                    $cityMap = [];
-                    foreach ($cities as $city) {
-                        $cityMap[$city->id] = $city;
-                    }
+                    foreach ($hubMappings as $key => $value) {
 
-                    $hubMappings = [];
+                        if(!isset($value['closest_hub'])){
+                            continue;
+                        }
 
-                    foreach ($closestHubTypes as $key => $value) {
-                        if (count($value) > 0) {
-                            $keys = array_keys($closestHubTypes);
-                            $index = array_search($key, $keys, true);
-
-                            if ($index !== false && isset($insertedIds[$index])) {
-                                $cityId = $insertedIds[$index];
-
-                                if (isset($cityMap[$cityId])) {
-                                    $hubMappings[] = [
-                                        'vehicles' => $value,
-                                        'closest_hub' => $key,
-                                        'city' => $cityMap[$cityId],
-                                    ];
-                                } else {
-                                    Log::warning("City ID {$cityId} not found in city map.");
-                                }
-                            } else {
-                                Log::warning("Index not found for key {$key} in inserted IDs.");
-                            }
+                        if(isset($insertedIds[$key])){
+                            $hubMappings[$key] = [
+                                'closest_hub' => $value['closest_hub'],
+                                'vehicles' => explode(',' , $value['vehicles_list']),
+                                'city_id' => $insertedIds[$key],
+                            ];
                         }
                     }
 
                     // Dispatch jobs for each mapping
                     foreach ($hubMappings as $mapping) {
-                        dispatch(new MakeDynamicHubsMapping($mapping['vehicles'], $mapping['closest_hub'], $mapping['city'], auth()->id()));
+                        if(isset($mapping['closest_hub'])){
+                            dispatch(new MakeDynamicHubsMapping($mapping['vehicles'], $mapping['closest_hub'], $mapping['city_id'], auth()->id()));
+                        }
                     }
                 }
 
@@ -15801,8 +15839,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
         return [$array, $deliveryTypes, $walkInTypes, $osaList, $closestHubTypes];
     }
-
-
 
     // Function to retrieve the last inserted city IDs
     public static function getLastInsertedCityIds($count) {
