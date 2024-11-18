@@ -799,6 +799,7 @@ trait RvTrait
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
         $botInvalidNo = ($request->bot_auto_return > 0 ? 1 : 0); // bot invalid call 
+
         if ($rv_shipment_assign_agent) {
             try {
                 $status = new RvAgentCallHistory();
@@ -813,23 +814,11 @@ trait RvTrait
                 $status->updated_at = $request->end_date ?? Carbon::now();
                 $status->save();
                 if($botInvalidNo > 0){ //If the consignee is invalid phone no during a bot call, the unresponsive count is set to 4, and the return_confirm is marked 
-                    $rv_shipment_assign_agent->unresponsive_count = 4;
-                    $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
-                    $rv_shipment_assign_agent->save();
-
-                    $rv_shipment_assign_agent->rv_assign_agent_status_id = 1;
-                    $rv_shipment_assign_agent->rv_state_id = 4;
-                    $rv_shipment_assign_agent->save();
-                    request()->request->add([
-                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
-                        'remarks' => $request->remarks,
-                        'rv_assign_agent_sub_status_id' => null
-                    ]);
-                    $this->return_confirm($request);
-                    return ['status' => 1, 'success' => 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
-
+                    $rv_shipment_assign_agent->unresponsive_count = 3;
+                    // return ['status' => 1, 'success' => 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
+                }else{
+                    $rv_shipment_assign_agent->increment('unresponsive_count');
                 }
-                $rv_shipment_assign_agent->increment('unresponsive_count');
                 $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
                 $rv_shipment_assign_agent->save();
 
@@ -837,7 +826,7 @@ trait RvTrait
                 $rv_shipment_ticket->increment('call_count');
                 $rv_shipment_ticket->save();
                 if($rv_shipment_assign_agent->unresponsive_count <= 3 && !$botCall){
-                    $rv_shipment_ticket->updated_at = carbon::parse($rv_shipment_ticket->updated_at)->addhours(2);
+                    // $rv_shipment_ticket->updated_at = carbon::parse($rv_shipment_ticket->updated_at)->addhours(2);
                     $rv_shipment_ticket->in_progress = 0;
                     $rv_shipment_ticket->save();
                     // RvShipmentTicket::where('shipment_id', $request->shipment_id)->update(['in_progress'=>0]);
@@ -2103,8 +2092,8 @@ trait RvTrait
             ],
             'json' => [
                 'tracking_number' => $tracking_number,
-                'call_status' => 'NOANSWER',
-                'remarks'=> 'due to invalid number',
+                'call_status' => 'InvalidNumber',
+                'remarks'=> 'Due to invalid number',
                 'bot_auto_return' => 1, // auto returm confirm in  case of invalid number
                 'input' => 0,
                 'start_date' => date('Y-m-d H:i:s'),
@@ -2115,6 +2104,8 @@ trait RvTrait
         ]);
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
+        Log::channel('botCallJobLog')->info('s ' . 'Log after  respsoned' . json_encode($response));
+
     }
 
     protected function shipmentDifferentStatus($shipmentId,$request){
