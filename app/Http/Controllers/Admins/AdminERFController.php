@@ -214,7 +214,7 @@ class AdminERFController extends Controller
                     foreach ($ids as $trax_id) {
                         $employee = Employee::where('trax_id', $trax_id)->select('name')->first();
                         if ($employee) {
-                            $leaver_names .= $employee->name . '<br>';
+                            $leaver_names .= $employee->name . ',<br>';
                         }
                     }
                     return $leaver_names;
