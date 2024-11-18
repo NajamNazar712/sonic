@@ -7772,7 +7772,9 @@ class GlobalSettingsController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function referral_name(Request $request)
@@ -7873,7 +7875,9 @@ class GlobalSettingsController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function lost_shipment_shippers_add(Request $request)
@@ -7933,7 +7937,9 @@ class GlobalSettingsController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function lost_shipment_admins_add(Request $request)
@@ -8830,8 +8836,10 @@ class GlobalSettingsController extends Controller
                 } else {
                     return '';
                 }
-            })->rawColumns(['action']);
-        return $datatables->make(true);
+            });
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function star_shippers_add(Request $request)
@@ -10136,7 +10144,9 @@ class GlobalSettingsController extends Controller
 
                 return $dropdown;
             });
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     public function lead_progress_update(Request $request)

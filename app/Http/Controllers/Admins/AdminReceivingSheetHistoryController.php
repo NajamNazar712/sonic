@@ -9,7 +9,7 @@ use App\Http\Models\City;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ReceivingSheetShipment;
 use App\Http\Models\Shipment;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -39,7 +39,7 @@ class AdminReceivingSheetHistoryController extends Controller
             ->join('users as u','u.id','=','receiving_sheets.user_id')
             ->select('receiving_sheets.id as receiving_sheet_id','receiving_sheets.id as id','receiving_sheets.booked as bookings', 'receiving_sheets.received as receiving', 'c.name as origin', 'usi.pickup_address as address', 'receiving_sheets.created_at as booking_date','u.name as shipper_name');
 
-        $datatable = Datatables::of($receiving_sheet)
+        $datatable = DataTables::of($receiving_sheet)
             ->editColumn('receiving_sheet_id', function ($receiving_sheet) {
                 if($receiving_sheet->receiving_sheet_id != null){
                     return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($receiving_sheet->receiving_sheet_id, 6, '0', STR_PAD_LEFT) . '</span></button>'
@@ -65,7 +65,9 @@ class AdminReceivingSheetHistoryController extends Controller
             $to = $request->get('search_date_to');
             $datatable->whereBetween('receiving_sheets.created_at', [$from,$to]);
         }
-        return $datatable->make(true);
+        return $datatable
+          ->rawColumns(['receiving_sheet_id'])
+          ->make(true);
     }
     static public function view($id, $user_type, $body_only = FALSE) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();

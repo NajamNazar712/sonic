@@ -10838,6 +10838,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 return $dropdown;
             })
+            ->rawColumns(['lead_id_link', 'duplication', 'id_padded', 'action'])
             ->make(true);
 
     }
@@ -10920,6 +10921,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 return $dropdown;
             })
+            ->rawColumns(['id_padded', 'action'])
             ->make(true);
 
     }
@@ -12696,6 +12698,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 }
                 return $dropdown;
             })
+            ->rawColumns(['accounts_button', 'action'])
             ->make(true);
 
     }
@@ -13807,6 +13810,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
@@ -13987,6 +13991,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 
                 return $url =  $surveyReport->url;
             })
+            ->rawColumns(['url', 'answers', 'url_excel'])
             ->make(true);
     }
 

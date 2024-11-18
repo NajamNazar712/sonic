@@ -2863,6 +2863,8 @@ class AdminTrackingController extends Controller
                     ? 'Not Scanned'
                     : ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             });
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 }

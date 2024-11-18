@@ -6923,6 +6923,7 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->rawColumns(['tracking_number_link', 'status_date'])
             ->make(true);
     }
 
@@ -8260,6 +8261,7 @@ class DeliveryController extends Controller
                     return 'Different Consignee';
                 }
             })
+            ->rawColumns(['tracking_number_link'])
             ->make(true);
     }
 
@@ -8580,7 +8582,9 @@ class DeliveryController extends Controller
                 return $amount;
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link', 'reason', 'amount'])
+        ->make(true);
     }
 
     public function replacement_not_collected_re_attempt(Request $request)
@@ -8866,7 +8870,9 @@ class DeliveryController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function sdn_slip_view(Request $request)

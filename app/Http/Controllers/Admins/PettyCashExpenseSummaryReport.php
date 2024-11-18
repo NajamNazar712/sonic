@@ -35,7 +35,7 @@ class PettyCashExpenseSummaryReport extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),220);
         }
-//        $petty_cash_account_detail = [];
+        // $petty_cash_account_detail = [];
         if($request->has('petty_account_switch') && $request->get('petty_account_switch') == 'head'){
             $petty_cash_account_detail = DB::connection('reports')->table('petty_cash_account_heads as pca')
             ->join('petty_cash_statement_details as pcsd', 'pca.id', '=','pcsd.account_head_id')
@@ -59,7 +59,7 @@ class PettyCashExpenseSummaryReport extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('pcsd.created_at', [$from,$to]);
+            $petty_cash_account_detail->whereBetween('pcsd.created_at', [$from,$to]);
         }
         return $datatable->make(true);
     }

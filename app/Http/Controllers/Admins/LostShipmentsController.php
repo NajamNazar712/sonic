@@ -435,7 +435,7 @@ class LostShipmentsController extends Controller
                     }
                 })
 
-                
+                ->rawColumns(['tracking_number_link', 'responsible_person_shipment', 'action'])
                 ->make(true);
               
                 

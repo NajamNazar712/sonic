@@ -113,6 +113,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                     return 'Different Consignee';
                 }
             })
+            ->rawColumns(['tracking_number_link'])
             ->make(true);
     }
 

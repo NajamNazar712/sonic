@@ -1556,27 +1556,33 @@ class RiderManagementController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
-            $datatables->whereBetween('rider_remarks.created_at', [$from, $stop_date]);
+            $rider_remarks->whereBetween('rider_remarks.created_at', [$from, $stop_date]);
         }
 
         if ($search_city = $request->get('search_city')) {
-            $datatables = $datatables->where('city_id', '=', $search_city);
+            // $datatables = $datatables->where('city_id', '=', $search_city);
+            $rider_remarks = $rider_remarks->where('city_id', '=', $search_city);
         }
 
 
         if ($search_rider = $request->get('search_rider')) {
-            $datatables = $datatables->where('rider_id', '=', $search_rider);
+            // $datatables = $datatables->where('rider_id', '=', $search_rider);
+            $rider_remarks = $rider_remarks->where('rider_id', '=', $search_rider);
         }
 
         if ($search_remark = $request->get('search_remark')) {
-            $datatables = $datatables->where('rider_remarks.id', '=', $search_remark);
+            // $datatables = $datatables->where('rider_remarks.id', '=', $search_remark);
+            $rider_remarks = $rider_remarks->where('rider_remarks.id', '=', $search_remark);
         }
 
         if ($search_rider_status = $request->get('search_rider_status')) {
-            $datatables = $datatables->where('rider_remarks.rider_remarks_status_id', '=', $search_rider_status);
+            // $datatables = $datatables->where('rider_remarks.rider_remarks_status_id', '=', $search_rider_status);
+            $rider_remarks = $rider_remarks->where('rider_remarks.rider_remarks_status_id', '=', $search_rider_status);
         }
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
 
