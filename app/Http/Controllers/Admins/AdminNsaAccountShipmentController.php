@@ -1060,8 +1060,8 @@ class AdminNsaAccountShipmentController extends Controller
                                     // ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, 50, $note->id, $rider_id);
                                     // ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, 50, $note->id, $rider_id);
 
-                                    ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id);
-                                    ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $note->id, NULL, 0, $received_by, $rider_id); 
+                                    ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, NULL, $note->id, NULL, 1, $received_by, $rider_id);
+                                    ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $note->id, NULL, 1, $received_by, $rider_id); 
                                 }
                             }
                         }
