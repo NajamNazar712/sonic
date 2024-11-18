@@ -150,8 +150,7 @@ class AdminSupplyChainController extends Controller
                 }
 
                 return $on_hold->shipment_on_hold_status;
-            });
-
+            })->rawColumns(['tracking_number_link','action']);
 
         return $datatable->make(true);
     }

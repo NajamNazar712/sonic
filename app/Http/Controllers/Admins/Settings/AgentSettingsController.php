@@ -61,7 +61,7 @@ class AgentSettingsController extends Controller
             })
             ->editColumn('agent_type.name',function($agents){
                 return $agents->agent_type ? $agents->agent_type->name : '-';
-            });
+            })->rawColumns(['action']);
 
         return $datatables->make(true);
     }

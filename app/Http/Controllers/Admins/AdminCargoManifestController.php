@@ -51,7 +51,7 @@ use App\Http\Models\Admin\CargoManifest\IssueSackBagOrigin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 use SnappyPDF;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Models\Admin\Retail\RetailShipment;
@@ -164,6 +164,7 @@ class AdminCargoManifestController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['origin_display','junctions_display','destination_display','action'])
             ->make(true);
     }
 
@@ -558,6 +559,26 @@ class AdminCargoManifestController extends Controller
             ->select('dlm.city_id', 'delivery_location_mapping_keywords.keyword', 'dlm.area_name as area_name')
             ->get()
             ->groupBy('city_id'); // Group by city_id for easy access later
+
+        if ($shipment_type = $request->get('shipment_type')) {
+            if ($shipment_type == 0) {
+                $shipments->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68,69,70,72,73,75,76]);
+            } else if ($shipment_type == 1) {
+                $shipments->whereIn('shipments.shipper_status_id', [2, 49, 55,11,68]);
+            } else if ($shipment_type == 2) {
+                $shipments->whereIn('shipments.shipper_status_id', [20, 30, 37,69,70,72,73,75,76]);
+            }
+        } else {
+            $shipments->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68,69,70,72,73,75,76]);
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $shipments->where('sm.id', '=', $mode);
+        }
+
+        if ($request->get('star_shipper_filter') == 1) {
+            $shipments->where('sts.status', 1);
+        }
+
         $datatables = Datatables::of($shipments)
             ->setTotalRecords(count($destination_city_id))
             ->setRowAttr([
@@ -784,27 +805,8 @@ class AdminCargoManifestController extends Controller
             })
             ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dc.name, IF (shipments.shipper_status_id = 49, olddc.name, IF (shipments.shipper_status_id = 55, olddci.name, oc.name)))') . ' $1')
             ->orderColumn('ohc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dhc.name, IF (shipments.shipper_status_id = 49, olddhc.name, IF (shipments.shipper_status_id = 55, olddhci.name, oc.name)))') . ' $1')
-            ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), oc.name, dc.name)') . ' $1');
-
-
-        if ($shipment_type = $request->get('shipment_type')) {
-            if ($shipment_type == 0) {
-                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68,69,70,72,73,75,76]);
-            } else if ($shipment_type == 1) {
-                $datatables->whereIn('shipments.shipper_status_id', [2, 49, 55,11,68]);
-            } else if ($shipment_type == 2) {
-                $datatables->whereIn('shipments.shipper_status_id', [20, 30, 37,69,70,72,73,75,76]);
-            }
-        } else {
-            $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68,69,70,72,73,75,76]);
-        }
-        if ($mode = $request->get('search_shipping_mode')) {
-            $datatables->where('sm.id', '=', $mode);
-        }
-
-        if ($request->get('star_shipper_filter') == 1) {
-            $datatables->where('sts.status', 1);
-        }
+            ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), oc.name, dc.name)') . ' $1')
+            ->rawColumns(['tracking_number']);
 
         return $datatables->make(true);
     }
@@ -2618,6 +2620,38 @@ class AdminCargoManifestController extends Controller
             });
         }
 
+
+        if ($bag_type = $request->get('bag_type')) {
+            if ($bag_type != 0) {
+                $bags->where('cargo_manifest_bags.type', $bag_type);
+            }
+        }
+
+        if ($tracking_number = $request->get('tracking_number')) {
+            $bags->join('cargo_manifest_bag_shipments as bssh', 'cargo_manifest_bags.id', '=', 'bssh.cargo_manifest_bag_id')
+                ->join('shipments as s', 'bssh.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
+        }
+
+        if ($bag_number = $request->get('bag_number'))
+            $bags->where('cargo_manifest_bags.seal_number', $bag_number);
+
+
+        if ($request->get('search_date_from') != null && $request->get('search_date_to') != null) {
+
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $bags->whereBetween('cargo_manifest_bags.created_at', [$from, $to]);
+        }
+
+        if ($search_origin = $request->get('search_origin')) {
+            $bags = $bags->where('oh.id', '=', $search_origin);
+        }
+
+        if ($search_destination = $request->get('search_destination')) {
+            $bags = $bags->where('dh.id', '=', $search_destination);
+        }
+
         $datatables = Datatables::of($bags)
             ->addColumn('shipments_count', function ($bag) {
                 return $bag->shipments;
@@ -2672,38 +2706,7 @@ class AdminCargoManifestController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            });
-
-        if ($bag_type = $request->get('bag_type')) {
-            if ($bag_type != 0) {
-                $datatables->where('cargo_manifest_bags.type', $bag_type);
-            }
-        }
-
-        if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('cargo_manifest_bag_shipments as bssh', 'cargo_manifest_bags.id', '=', 'bssh.cargo_manifest_bag_id')
-                ->join('shipments as s', 'bssh.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
-        }
-
-        if ($bag_number = $request->get('bag_number'))
-            $datatables->where('cargo_manifest_bags.seal_number', $bag_number);
-
-
-        if ($request->get('search_date_from') != null && $request->get('search_date_to') != null) {
-
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatables->whereBetween('cargo_manifest_bags.created_at', [$from, $to]);
-        }
-
-        if ($search_origin = $request->get('search_origin')) {
-            $datatables = $datatables->where('oh.id', '=', $search_origin);
-        }
-
-        if ($search_destination = $request->get('search_destination')) {
-            $datatables = $datatables->where('dh.id', '=', $search_destination);
-        }
+            })->rawColumns(['shipments','junctions','short_received_shipments','manifest_id','lost_shipments']);
 
         return $datatables->make(true);
     }
@@ -3535,6 +3538,44 @@ class AdminCargoManifestController extends Controller
             });
 
 
+        if ($tracking_number = $request->get('tracking_number')) {
+            $bags->join('cargo_manifest_bag_shipments as bssh', 'cargo_manifest_bags.id', '=', 'bssh.cargo_manifest_bag_id')
+                ->join('shipments as s', 'bssh.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
+        }
+
+        if ($bag_number = $request->get('bag_number')) {
+            $bags->where('cargo_manifest_bags.seal_number', '=', $bag_number);
+        }
+        if ($vehicle_number = $request->get('vehicle_number')) {
+            /*$datatables->where('cm.vehicle_id', '=', $vehicle_number);*/
+            $fleet = Fleet::where('reg_number', $vehicle_number)->first();
+            if ($fleet) {
+                $bags->where('cm.vehicle_id', 'like', '%' . $fleet->id . '%');
+            } else {
+                $bags->where('cm.vehicle_number', 'like', '%' . $vehicle_number . '%');
+            }
+        }
+
+        if ($manifest_id = $request->get('manifest_number')) {
+            $bags->where('cm.id', '=', $manifest_id);
+        }
+
+        if ($request->get('search_date_from') != null && $request->get('search_date_to') != null) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+            $bags->whereBetween('cmbj.created_at', [$from, $stop_date]);
+        }
+
+        if ($search_origin = $request->get('search_origin')) {
+            $bags = $bags->where('oh.id', '=', $search_origin);
+        }
+
+        if ($search_destination = $request->get('search_destination')) {
+            $bags = $bags->where('dh.id', '=', $search_destination);
+        }
+
         $datatables = Datatables::of($bags)
             ->setRowAttr([
                 'class' => function ($bags) {
@@ -3616,9 +3657,17 @@ class AdminCargoManifestController extends Controller
                 }
                 return $vehicle_data;
             })
-            ->editColumn('remarks', function ($remarks) {
+            ->addColumn('remarks', function ($remarks) {
                 if (!empty($remarks->remarks)) {
                     return "<button ref='$remarks->id' class='btn btn-sm btn-outline-info align-middle remarks'>" . $remarks->remarks . "</button>";
+                } else {
+                    return  '-';
+                }
+            })
+
+            ->addColumn('remarks_excel', function ($remarks) {
+                if (!empty($remarks->remarks)) {
+                    return $remarks->remarks;
                 } else {
                     return  '-';
                 }
@@ -3630,47 +3679,8 @@ class AdminCargoManifestController extends Controller
                 } else {
                     $query->where('cm.vehicle_number', 'like', '%' . $keyword . '%');
                 }
-            });
-
-        if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('cargo_manifest_bag_shipments as bssh', 'cargo_manifest_bags.id', '=', 'bssh.cargo_manifest_bag_id')
-                ->join('shipments as s', 'bssh.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
-        }
-
-        if ($bag_number = $request->get('bag_number')) {
-            $datatables->where('cargo_manifest_bags.seal_number', '=', $bag_number);
-        }
-        if ($vehicle_number = $request->get('vehicle_number')) {
-            /*$datatables->where('cm.vehicle_id', '=', $vehicle_number);*/
-            $fleet = Fleet::where('reg_number', $vehicle_number)->first();
-            if ($fleet) {
-                $datatables->where('cm.vehicle_id', 'like', '%' . $fleet->id . '%');
-            } else {
-                $datatables->where('cm.vehicle_number', 'like', '%' . $vehicle_number . '%');
-            }
-        }
-
-        if ($manifest_id = $request->get('manifest_number')) {
-            $datatables->where('cm.id', '=', $manifest_id);
-        }
-
-        if ($request->get('search_date_from') != null && $request->get('search_date_to') != null) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
-            $datatables->whereBetween('cmbj.created_at', [$from, $stop_date]);
-        }
-
-        if ($search_origin = $request->get('search_origin')) {
-            $datatables = $datatables->where('oh.id', '=', $search_origin);
-        }
-
-        if ($search_destination = $request->get('search_destination')) {
-            $datatables = $datatables->where('dh.id', '=', $search_destination);
-        }
-
-
+            })
+            ->rawColumns(['vehicles','junctions','short_received_shipments','bag_shipments','manifest_id','action', 'remarks']);
         return $datatables->make(true);
     }
 
@@ -5051,6 +5061,7 @@ class AdminCargoManifestController extends Controller
 
     public function manifest_history_list(Request $request)
     {
+
         //        dd($request->get('transit_from_date') , $request->get('transit_to_date') , $request->get('search_filter_origin') , $request->get('search_filter_destination'));
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 410);
@@ -5066,6 +5077,44 @@ class AdminCargoManifestController extends Controller
             ->leftjoin('transport_modes as tm', 'cargo_manifests.transport_mode_id', '=', 'tm.id')
             //            ->select('cargo_manifests.id as manifest_id','cargo_manifests.route_name', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id','cargo_manifests.vendor_name as vendor' ,'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status','cargo_manifests.id as manifest','cargo_manifests.short_received_bags as short_received_bags');
             ->select('cargo_manifests.id as manifest_id', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifests.vendor_name as vendor', 'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status', 'cargo_manifests.id as manifest', 'cargo_manifests.short_received_bags as short_received_bags');
+
+        if (($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != '') {
+            $receive_cargo->join('manifest_bags as mb', 'cargo_manifests.id', '=', 'mb.cargo_manifest_id')
+                ->join('cargo_manifest_bags as b', 'b.id', '=', 'mb.cargo_manifest_bag_id');
+
+            if ($tracking_number = $request->get('tracking_number')) {
+                $receive_cargo->join('cargo_manifest_bag_shipments as bs', 'b.id', '=', 'bs.cargo_manifest_bag_id')
+                    ->join('shipments as s', 'bs.shipment_id', '=', 's.id')
+                    ->where('s.tracking_number', '=', $tracking_number);
+            }
+
+            if ($bag_number = $request->get('bag_number')) {
+                $receive_cargo->where('b.seal_number', '=', $bag_number);
+            }
+        }
+
+        if ($request->get('transit_from_date') && $request->get('transit_to_date')) {
+            $from = $request->get('transit_from_date');
+            $to = $request->get('transit_to_date');
+
+            // $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+            $receive_cargo->whereBetween('cargo_manifests.created_at', [$from, $to]);
+        }
+        if (($request->search_filter_origin != null) && ($request->search_filter_destination != null)) {
+            $origin = $request->get('search_filter_origin');
+            $destination = $request->get('search_filter_destination');
+            $receive_cargo->where('oh.name', '=', $origin)
+                ->where('dh.name', '=', $destination);
+        }
+
+        if ($request->search_filter_origin != null) {
+            $origin = $request->get('search_filter_origin');
+            $receive_cargo->where('oh.name', '=', $origin);
+        }
+        if ($request->search_filter_destination != null) {
+            $destination = $request->get('search_filter_destination');
+            $receive_cargo->where('dh.name', '=', $destination);
+        }
 
         $datatables = Datatables::of($receive_cargo)
             ->editColumn('status', function ($master_cargo) {
@@ -5225,45 +5274,10 @@ class AdminCargoManifestController extends Controller
                     return $shipment_mode_count;
                 else
                     return '--';
-            });
+            })->rawColumns(['short_received_bags', 'bags','manifest_id','shipments']);
 
-        if (($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != '') {
-            $datatables->join('manifest_bags as mb', 'cargo_manifests.id', '=', 'mb.cargo_manifest_id')
-                ->join('cargo_manifest_bags as b', 'b.id', '=', 'mb.cargo_manifest_bag_id');
 
-            if ($tracking_number = $request->get('tracking_number')) {
-                $datatables->join('cargo_manifest_bag_shipments as bs', 'b.id', '=', 'bs.cargo_manifest_bag_id')
-                    ->join('shipments as s', 'bs.shipment_id', '=', 's.id')
-                    ->where('s.tracking_number', '=', $tracking_number);
-            }
 
-            if ($bag_number = $request->get('bag_number')) {
-                $datatables->where('b.seal_number', '=', $bag_number);
-            }
-        }
-
-        if ($request->get('transit_from_date') && $request->get('transit_to_date')) {
-            $from = $request->get('transit_from_date');
-            $to = $request->get('transit_to_date');
-
-            // $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
-            $datatables->whereBetween('cargo_manifests.created_at', [$from, $to]);
-        }
-        if (($request->search_filter_origin != null) && ($request->search_filter_destination != null)) {
-            $origin = $request->get('search_filter_origin');
-            $destination = $request->get('search_filter_destination');
-            $datatables->where('oh.name', '=', $origin)
-                ->where('dh.name', '=', $destination);
-        }
-
-        if ($request->search_filter_origin != null) {
-            $origin = $request->get('search_filter_origin');
-            $datatables->where('oh.name', '=', $origin);
-        }
-        if ($request->search_filter_destination != null) {
-            $destination = $request->get('search_filter_destination');
-            $datatables->where('dh.name', '=', $destination);
-        }
 
         return $datatables->make(true);
     }
@@ -7394,6 +7408,7 @@ class AdminCargoManifestController extends Controller
                 $dropdown = '<a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a>';
                 return $dropdown;
             })
+            ->rawColumns(['remarks','action'])
             ->make(true);
     }
 

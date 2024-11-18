@@ -696,7 +696,7 @@
 
                     var fintech_sum = $(row).find('#myButton');
                     var dccn_amount = parseFloat(data.amount.replace(/,/g, ''));
-                    fintech_sum = fintech_sum[0].innerText
+                     fintech_sum = fintech_sum[0] ? fintech_sum[0].innerText : 0;
                     fintech_sum = parseFloat(fintech_sum)
 
                     if(data.transactions_amount == null){
