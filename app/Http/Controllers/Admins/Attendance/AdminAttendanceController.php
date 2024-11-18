@@ -20,7 +20,7 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\Facades\DataTables;
 
 class AdminAttendanceController extends Controller
 {
@@ -735,7 +735,7 @@ class AdminAttendanceController extends Controller
                 } else {
                     return 'Clock-Out';
                 }
-            });
+            })->rawColumns(['latitude']);
         return $datatable->make(true);
     }
 

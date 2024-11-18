@@ -74,7 +74,7 @@ class AdminCommissionController extends Controller
 
                     return $dropdown;
 
-            });
+            })->rawColumns(['action']);
 
         return  $datatable->make(true);
     }

@@ -856,6 +856,21 @@ class AdminShipmentHandoverController extends Controller
         // })
         $handover_list->where('s.tracking_number', $tracking_number);
     }
+
+    if ($hub = $request->get('search_hub')) {
+      $handover_list->where('handovers.hub', '=', $hub);
+    }
+
+    if ($from_admin = $request->get('search_from_admin')) {
+        $handover_list->where('handovers.from', '=', $from_admin);
+    }
+    if ($to_admin = $request->get('search_to_admin')) {
+        $handover_list->where('handovers.to', '=', $to_admin);
+    }
+    if ($bag_number = $request->get('search_bag_number')) {
+      $handover_list->where('handovers.bag_number', '=', $bag_number);
+    }
+
     $handover_list->whereBetween('handovers.created_at', [$from, $to])
         ->orderBy('handovers.id', 'DESC')
         ->groupBy('handovers.id');
@@ -976,24 +991,12 @@ class AdminShipmentHandoverController extends Controller
           $received_area_name = $handover_list->received_area_name ?? '-';
       
           return $received_area_name . ' | ' . $received_location_status;
-        });
+        })->rawColumns(['shipment_pieces','remaining_shipment_count','excess_shipments','shipment_count']);
 
     
 
         
-        if ($hub = $request->get('search_hub')) {
-            $datatable->where('handovers.hub', '=', $hub);
-        }
-
-        if ($from_admin = $request->get('search_from_admin')) {
-            $datatable->where('handovers.from', '=', $from_admin);
-        }
-        if ($to_admin = $request->get('search_to_admin')) {
-            $datatable->where('handovers.to', '=', $to_admin);
-        }
-        if ($bag_number = $request->get('search_bag_number')) {
-          $datatable->where('handovers.bag_number', '=', $bag_number);
-        }
+     
         // if ($search_area = $request->get('search_area')) {
         //   $datatable->where(function($query) use ($search_area) {
         //       $query->where('ssj_f.area_id', '=', $search_area)
@@ -1356,7 +1359,7 @@ class AdminShipmentHandoverController extends Controller
 
                     return $dropdown;
 
-            });
+            })->rawColumns(['action']);
 
         return  $datatable->make(true);
 

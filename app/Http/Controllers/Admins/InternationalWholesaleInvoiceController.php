@@ -58,6 +58,13 @@ class InternationalWholesaleInvoiceController extends Controller
             ->leftjoin('admins as ub', 'ub.id', '=', 'wholesale_invoices.updated_by')
             ->select('wu.id as shipper_id', 'wu.name as shipper_name', 'wholesale_invoices.id as invoice_id', 'wholesale_invoices.invoice_number', 'ub.name as updated_by', 'wholesale_invoices.updated_at','wholesale_invoices.status', 'wholesale_invoices.total_courier_charges', 'wholesale_invoices.service_charges', 'wholesale_invoices.gst', 'wholesale_invoices.created_at');
 
+        
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $invoices = $invoices->whereBetween('wholesale_users.created_at', [$from,$to]);
+        }
+
         $datatable = Datatables::of($invoices)
             ->addColumn('shipper_id_padded', function ($invoice) {
                 return str_pad($invoice->shipper_id, 6, '0', STR_PAD_LEFT);
@@ -121,12 +128,8 @@ class InternationalWholesaleInvoiceController extends Controller
                 } else {
                     return '';
                 }
-            });
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable = $datatable->whereBetween('wholesale_users.created_at', [$from,$to]);
-        }
+            })
+            ->rawColumns(['action']);        
 
         return $datatable->make(true);
     }

@@ -146,7 +146,17 @@ class AdminRvReportsController extends Controller
             'azl.created_at as date_time')
             ->groupby('api_call_logs.call_count_initiate','api_call_logs.id');
 
-              $datatable = Datatables::of($rv_call_logs)
+        if ($request->get('search_date_from') && $request->get('search_date_to') && !$request->get('search_tracking_no')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rv_call_logs->where([['api_call_logs.created_at', '>=', $from], ['api_call_logs.created_at', '<=', $to]]);
+        }
+
+        if($request->get('search_tracking_no')){
+            $rv_call_logs->where('s.tracking_number', $request->get('search_tracking_no'));
+        }
+
+        $datatable = Datatables::of($rv_call_logs)
             ->editColumn('tracking_number', function ($rv_call_logs) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$rv_call_logs->tracking_number' class='tracking' target='_blank'>$rv_call_logs->tracking_number</a></u>";

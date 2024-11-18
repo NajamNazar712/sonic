@@ -310,7 +310,7 @@ class LeadManagementController extends Controller
 
 
                 return $dropdown;
-            })->make(true);
+            })->rawColumns(['lead_id_link','action'])->make(true);
     }
 
     public function pam_index()
@@ -388,6 +388,7 @@ class LeadManagementController extends Controller
             ->addColumn('item_count_button', function ($lead) {
                 return "<button class='btn btn-sm btn-outline-info align-middle show_lead_items'>" . $lead->item_count . "</button>";
             })
+            ->rawColumns(['item_count_button','images_link_btn','video_link_btn','action'])
             ->make(true);
     }
 

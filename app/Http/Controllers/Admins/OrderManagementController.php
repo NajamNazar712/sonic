@@ -36,7 +36,7 @@ use App\Http\Models\ShipmentDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 
 class OrderManagementController extends Controller
 {
@@ -673,6 +673,7 @@ class OrderManagementController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),71);
         }
+
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -693,6 +694,21 @@ class OrderManagementController extends Controller
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.pieces as pieces','si.quantity as quantity','shipments_journey.created_at as status_date','shipments.actual_weight as weight','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.created_at as booking_date','shipments.shipper_status_id','shipments.booking_type_id','shipments_journey.shipper_status_id as status_id'])
         ->whereIn('ss.id',[1,2,3,4,20,21]);
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($shipment_status_select = $request->get('shipment_status_select')) {
+            $shipments->whereIn('ss.id', $shipment_status_select);
+        }
+        if ($shipper = $request->get('shipper')) {
+            $shipments->whereIn('shipments.user_id', $shipper);
+        }
+        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
+            $from = $request->get('booking_from_date');
+            $to = $request->get('booking_to_date');
+            $shipments->whereBetween('shipments.created_at', [$from,$to]);
+        }
 
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
@@ -739,22 +755,9 @@ class OrderManagementController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            });
+            })->rawColumns(['tracking_number']);
 
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        }
-        if ($shipment_status_select = $request->get('shipment_status_select')) {
-            $datatable->whereIn('ss.id', $shipment_status_select);
-        }
-        if ($shipper = $request->get('shipper')) {
-            $datatable->whereIn('shipments.user_id', $shipper);
-        }
-        if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
-            $from = $request->get('booking_from_date');
-            $to = $request->get('booking_to_date');
-            $datatable->whereBetween('shipments.created_at', [$from,$to]);
-        }
+
         return $datatable->make(true);
     }
 

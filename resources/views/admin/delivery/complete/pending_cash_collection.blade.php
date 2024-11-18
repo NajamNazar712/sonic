@@ -665,15 +665,15 @@
                     fintech_sum = parseFloat(fintech_sum)
 
                     if(data.transactions_amount == null){
-                        
+
                         data.transactions_amount = 0
                     }
                     value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
 
                     if (value < 0) {
                         value = 0;
-                    }                    
-                    
+                    }
+
                     $('td:eq(19)', row).html(value);
 
                 },

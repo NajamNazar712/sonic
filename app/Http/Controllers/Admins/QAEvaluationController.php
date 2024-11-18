@@ -15,7 +15,7 @@ use App\Http\Models\QAEvaluationActivity;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Yajra\Datatables\Facades\Datatables;
+use Yajra\DataTables\DataTables;
 
 class QAEvaluationController extends Controller
 {
@@ -135,6 +135,15 @@ class QAEvaluationController extends Controller
             ->join('admins as ev', 'ev.id', '=', 'q_a_evaluations.evaluated_by')
             ->select(['q_a_evaluations.created_at', 'q_a_evaluations.id', 'ad.name as agent_name', 'ev.name as evaluated_by', 'en.nature as nature', 'ec.campaign as campaign', 'q_a_evaluations.updated_at as evaluation_date', 'q_a_evaluations.date_time as date_time', 'q_a_evaluations.status as status', 'q_a_evaluations.score as score', 'q_a_evaluations.score as score', 'q_a_evaluations.remarks as remarks']);
 
+        if ($request->get('evaluation_from_date') && $request->get('evaluation_to_date')) {
+
+            $from = Carbon::parse($request->get('evaluation_from_date'))->startOfDay();
+
+            $to = $request->get('evaluation_to_date');
+            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+            $evaluation->whereBetween('q_a_evaluations.updated_at', [$from, $stop_date]);
+        }
+
 
         $datatables = Datatables::of($evaluation)
             ->editColumn('status', function ($evaluation) {
@@ -188,16 +197,9 @@ class QAEvaluationController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
            
-        if ($request->get('evaluation_from_date') && $request->get('evaluation_to_date')) {
-            
-            $from = Carbon::parse($request->get('evaluation_from_date'))->startOfDay();
-          
-            $to = $request->get('evaluation_to_date');
-            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
-            $datatables->whereBetween('q_a_evaluations.updated_at', [$from, $stop_date]);
-        }
+
 
         return $datatables->make(true);
     }

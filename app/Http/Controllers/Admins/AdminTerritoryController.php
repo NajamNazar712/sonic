@@ -86,7 +86,7 @@ class AdminTerritoryController extends Controller
                 ';
 
                 return $dropdown;
-            });
+            })->rawColumns(['action']);
 
         return $datatable->make(true);
     }
@@ -230,7 +230,7 @@ class AdminTerritoryController extends Controller
                 else {
                     $query->whereRaw('FALSE');
                 }
-            });
+            })->rawColumns(['action']);
         return $datatable->make(true);
 
     }
