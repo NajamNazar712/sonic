@@ -5800,47 +5800,52 @@ class AdminReportsController extends Controller
                 return number_format($amount);
             })
             ->editColumn('p_gst', function ($sale) {
-                $gst = '';
+                $gst = 0;
                 if ($sale->account_type_id == 1) {
                     if ($sale->p_gst != null) {
-                        $gst = $sale->p_gst;
-                    } else if ($sale->d_gst != null) {
-                        $gst = $sale->d_gst;
+                        $gst+= $sale->p_gst;
+                    }
+                    if ($sale->d_gst != null) {
+                        $gst+= $sale->d_gst;
                     }
                 } else {
                     if ($sale->pis_gst != null) {
-                        $gst = $sale->pis_gst;
-                    } else if ($sale->is_gst != null) {
-                        $gst = $sale->is_gst;
+                        $gst+= $sale->pis_gst;
+                    }
+                    if ($sale->is_gst != null) {
+                        $gst+= $sale->is_gst;
                     }
                 }
                 return number_format((float) $gst, 2);
             })
             ->editColumn('pps_sms_charges', function ($sale) {
-                $sms_charges = '';
+                $sms_charges = 0;
                 if ($sale->account_type_id == 1) {
                     if ($sale->pps_sms_charges != null) {
-                        $sms_charges = $sale->pps_sms_charges;
-                    } else if ($sale->dps_sms_charges != null) {
-                        $sms_charges = $sale->dps_sms_charges;
+                        $sms_charges += $sale->pps_sms_charges;
+                    }
+                    if ($sale->dps_sms_charges != null) {
+                        $sms_charges += $sale->dps_sms_charges;
                     }
                 } else {
                     if ($sale->pis_sms_charges != null) {
-                        $sms_charges = $sale->pis_sms_charges;
-                    } else if ($sale->is_sms_charges != null) {
-                        $sms_charges = $sale->is_sms_charges;
+                        $sms_charges += $sale->pis_sms_charges;
+                    }
+                    if ($sale->is_sms_charges != null) {
+                        $sms_charges += $sale->is_sms_charges;
                     }
                 }
                 return number_format((float) $sms_charges, 2);
             })
             ->editColumn('p_total_charges', function ($sale) {
-                $total = '';
+                $total = 0;
                 if ($sale->p_total_charges != null) {
-                    $total = $sale->p_total_charges + $sale->fintech_amount;
-                } else if ($sale->d_total_charges != null) {
-                    $total = $sale->d_total_charges;
+                    $total += $sale->p_total_charges;
                 }
-                return number_format((float) $total, 2);
+                if ($sale->d_total_charges != null) {
+                    $total += $sale->d_total_charges;
+                }
+                return number_format((float) $total+$sale->fintech_amount, 2);
             })
             ->addColumn('estimated_charges', function ($sale) {
                 $estimated = '';
@@ -5848,11 +5853,12 @@ class AdminReportsController extends Controller
                 return number_format((float) $estimated, 2);
             })
             ->editColumn('p_net_payable', function ($sale) {
-                $payable = '';
+                $payable = 0;
                 if ($sale->p_net_payable != null) {
-                    $payable = $sale->p_net_payable;
-                } else if ($sale->d_net_payable != null) {
-                    $payable = $sale->d_net_payable;
+                    $payable += $sale->p_net_payable;
+                }
+                if ($sale->d_net_payable != null) {
+                    $payable += $sale->d_net_payable;
                 }
                 return number_format((float) $payable, 2);
             })
