@@ -573,8 +573,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('update:zero_arrival_charges')->hourly()->runInBackground();
         $schedule->command('delete:duplicate_arrival')->hourly()->runInBackground();
 //        $schedule->command('storage:amazon')->dailyAt('15:05')->runInBackground();
-        $schedule->command('email:revenuereport_lastmonth 2')->dailyAt('11:15')->runInBackground();
-        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('11:30')->runInBackground();
+//        $schedule->command('email:revenuereport_lastmonth 2')->dailyAt('11:15')->runInBackground();
+//        $schedule->command('email:revenuereport_lastmonth 3')->dailyAt('11:30')->runInBackground();
 
     }
     /**
