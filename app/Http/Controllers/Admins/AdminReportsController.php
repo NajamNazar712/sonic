@@ -5668,7 +5668,7 @@ class AdminReportsController extends Controller
             });
         }
 
-        $sales->select('shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_amount','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges',DB::raw('SUM(pps.charges) as p_total_charges'),DB::raw('SUM(pps.amount) as p_collection_amount'),DB::raw('SUM(pps.payable) as p_net_payable'),DB::raw('SUM(pps.gst) as p_gst'),DB::raw('SUM(dps.amount) as d_collection_amount'),DB::raw('SUM(dps.charges) as d_total_charges'),DB::raw('SUM(dps.payable) as d_net_payable'),DB::raw('SUM(dps.gst) as d_gst'),'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class','oc.id as origin_city_id','dc.id as destination_city_id','dnsdn.station_deposit_note_id as sdn_id','dps.done_payment_id as payment_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','shipments.nsa_osa_charges','u.account_type_id as account_type_id',DB::raw('SUM(pis.gst) as pis_gst'),DB::raw('SUM(is.gst) as is_gst'),'shipments.packaging_charges','shipments.intercept_charges','bc.name','dr.shipper_status_id as dr_status_id','shipments.shipment_type','invoices.invoice_number','rc.name as return_city',DB::raw('SUM(ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),DB::raw('SUM(pps.sms_charges) as pps_sms_charges'),DB::raw('SUM(dps.sms_charges) as dps_sms_charges'),DB::raw('SUM(pis.sms_charges) as pis_sms_charges'),DB::raw('SUM(is.sms_charges) as is_sms_charges'), 'faf_charges.faf_charges')
+        $sales->select('shipments.id as shipment_id','shipments.tracking_number','shipments.fintech_charges as fintech_amount','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class','oc.id as origin_city_id','dc.id as destination_city_id','dnsdn.station_deposit_note_id as sdn_id','dps.done_payment_id as payment_id','shipments.booking_type_id','usi.poc','shipments.shipper_status_id as shipment_status','shipments.nsa_osa_charges','u.account_type_id as account_type_id',DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),'shipments.packaging_charges','shipments.intercept_charges','bc.name','dr.shipper_status_id as dr_status_id','shipments.shipment_type','invoices.invoice_number','rc.name as return_city',DB::raw('SUM(DISTINCT ss_charge.reverse_pickup_charges) as reverse_pickup_charges'),DB::raw('SUM(DISTINCT pps.sms_charges) as pps_sms_charges'),DB::raw('SUM(DISTINCT dps.sms_charges) as dps_sms_charges'),DB::raw('SUM(DISTINCT pis.sms_charges) as pis_sms_charges'),DB::raw('SUM(DISTINCT is.sms_charges) as is_sms_charges'), 'faf_charges.faf_charges')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358]);
 
@@ -13222,10 +13222,10 @@ class AdminReportsController extends Controller
 
         $rv_report = RvShipmentAssignAgentDetails::join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
-        // ->join('shipments_journey as sj.', function($join) {
-        //     $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
-        //          ->where('sj.shipper_status_id', '=', 66);
-        // })
+        ->join('shipments_journey as sj', function($join) {
+            $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
+                 ->whereIn('sj.shipper_status_id',[13,66]);
+        })
         ->leftjoin('users', 'shipments.user_id', 'users.id')
         ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
         ->leftjoin('city_areas as area', 'uso.city_area_id', 'area.id')
@@ -13235,15 +13235,15 @@ class AdminReportsController extends Controller
         ->leftjoin('zones as z', 'z.id', 'hub.zone_id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftJoin('shipments_journey as sjj', function ($join) {
-                $join->on('sjj.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+                $join->on('sjj.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sjj.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = rv_shipment_assign_agents.shipment_id and shipments_journey.shipper_status_id  = 2)')
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = sj.shipment_id and shipments_journey.shipper_status_id  = 2)')
                     );
         })
         ->leftJoin('shipments_journey as sjj_destination', function ($join) {
-                $join->on('sjj_destination.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+                $join->on('sjj_destination.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sjj_destination.id',
                         '=',
@@ -13251,7 +13251,7 @@ class AdminReportsController extends Controller
                     );
         })
         ->leftJoin('shipments_journey as sj_destination', function ($join) {
-                $join->on('sj_destination.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+                $join->on('sj_destination.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sj_destination.id',
                         '=',
@@ -13259,7 +13259,7 @@ class AdminReportsController extends Controller
                     );
         })
         ->leftJoin('shipments_journey as sj_rvr', function ($join) {
-                $join->on('sj_rvr.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+                $join->on('sj_rvr.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sj_rvr.id',
                         '=',
@@ -13267,7 +13267,7 @@ class AdminReportsController extends Controller
                     );
         })
         ->leftJoin('shipments_journey as sj_ofd', function ($join) {
-                $join->on('sj_ofd.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+                $join->on('sj_ofd.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sj_ofd.id',
                         '=',
@@ -13275,7 +13275,7 @@ class AdminReportsController extends Controller
                     );
         })
         ->leftJoin('shipments_journey as sj_reattempt', function ($join) {
-            $join->on('sj_reattempt.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+            $join->on('sj_reattempt.shipment_id', '=', 'sj.shipment_id')
                 ->where(
                     'sj_reattempt.id',
                     '=',
@@ -13288,7 +13288,7 @@ class AdminReportsController extends Controller
         'sjj.created_at  as arrival_date','sj_destination.created_at as arrival_destination_date','sj_rvr.created_at as rvr_date_time',
         'rv_shipment_assign_agent_details.updated_at as action_date','sj_ofd.created_at as ofd_date_time','sj_reattempt.created_at as reattempt_time', 's_status.name as current_status', 'shipments.updated_at as current_status_date')
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
-        ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', 2)
+        ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
         ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
         ->groupBy('rv_shipment_assign_agent_details.shipment_id')
         ->orderBy('rv_shipment_assign_agent_details.id','desc');
@@ -13311,6 +13311,11 @@ class AdminReportsController extends Controller
                         $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('verification',0)->whereIn('shipper_status_id', [12])->count();
                         return $rvr_count;
             });
+            // ->addColumn('second_last_status', function($rv_report) use ($request) {
+            //             // $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('verification',1)->whereIn('shipper_status_id', [52,12,66])->count();
+            //             $sjsecondLast = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->whereNotIn('shipper_status_id',[13,66])->orderBy('id', 'desc')->skip(1)->take(1)->select('shipper_status_id')->first();
+            //             return $sjsecondLast->shipment_status_shipper->name;
+            // });
                     
                     
         if ($tracking_num = $request->get('search_tracking_no')) {
@@ -13323,7 +13328,7 @@ class AdminReportsController extends Controller
         if ($agent_id = $request->get('search_agent_name')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
+            $rv_report->where('rv_shipment_assign_agent_details.id', '=', $agent_id);
             // $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
             // $rv_report->where('rv_shipment_assign_agent_details.updated_type_id',2);
 

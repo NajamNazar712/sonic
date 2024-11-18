@@ -49,12 +49,14 @@ class ProcessRvShipmentTicket implements ShouldQueue
                 ->whereIn('type', [
                     'rv_disable_shippers_excluded_shippers',
                     'rv_disable_shippers_only_shippers',
-                    'rv_disable_shippers_all_shippers'
+                    'rv_disable_shippers_all_shippers',
+                    'bot_call_enable_disable'
                 ])
                 ->get(['setting_value', 'type', 'text']);
-
             $isShipperDisabled = 0;
+            $botcallenable = 0;
             $excludedShippers = [];
+            $botCallStatus = [];
             $onlyShippers = [];
 
             foreach ($globalSettings as $globalSetting) {
@@ -68,9 +70,12 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     case 'rv_disable_shippers_only_shippers':
                         $onlyShippers = array_merge($onlyShippers, explode(',', $globalSetting->text));
                         break;
+                    case 'bot_call_enable_disable':
+                        $botCallStatus = array_merge($onlyShippers, explode(',', $globalSetting->text));
+                        $botcallenable = 1;
+                        break;
                 }
             }
-
             if (in_array($this->shipment['shipment_user_id'], $excludedShippers)) { //Mark Shipper Not Disabled if It's user id found in Excluded Shippers
                 $isShipperDisabled = 0;
             }
@@ -80,7 +85,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
             }
             // $userId = [2234, 23825, 13060, 1049];
             // Log::channel('cronJobLog')->info('s ' . 'rv_shipment_ticket Saved');
-            $isBot = ((array_key_exists($this->shipment['status_reason_id'], array_flip([8, 5, 1, 19, 38, 52, 60, 63])) && GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists() && $isShipperDisabled == 0) ? 1 : 0);
+            $isBot = ((in_array($this->shipment['status_reason_id'], $botCallStatus) && $botcallenable && $isShipperDisabled == 0) ? 1 : 0);
             RvShipmentTicket::withTrashed()->updateOrCreate(
                 ['shipment_id' => $this->shipment['shipment_id']],
                 [

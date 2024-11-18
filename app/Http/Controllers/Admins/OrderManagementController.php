@@ -67,22 +67,22 @@ class OrderManagementController extends Controller
     {
         $connection = 'reports_2';
         $shipments = DB::connection($connection)->table('shipments')
-            ->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftJoin('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
-            ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftJoin('payment_modes as pm', 'pm.id', '=', 'shipments.payment_mode_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->join('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+            ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->join('business_categories as bc', 'shipments.business_category_id', '=' , 'bc.id')
+            ->leftJoin('business_categories as bc', 'shipments.business_category_id', '=' , 'bc.id')
             ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2', 'shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','usi.vendor as vendor','shipments_journey.shipper_status_id as status_id', 'bc.name as business_category', 'pm.mode as payment_mode','shipments.amount']);
 
         if(session('department_id') == 7){
