@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CrmRequestFeedback extends Model
 {
 
+    protected $table = 'crm_request_feedbacks';
     protected $fillable = ['crm_request_id','rating_id'];
     
     public function crm_request() {
