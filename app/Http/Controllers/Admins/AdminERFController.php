@@ -129,19 +129,32 @@ class AdminERFController extends Controller
                     $query->where('employee_requisitions.employee_status', 2);
                 }
             })
+            // ->editColumn('trax_id', function($erf) {
+            //     if($erf->type == 1){
+            //         return '-';
+            //     }
+            //     else{
+            //         $items = array();
+            //         $trax_id = "";
+            //         $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
+            //         foreach ($ids as $value){
+            //             // $trax_id.= $value->trax_id.",<br>";
+            //             $items[] = '<br>'.$value->trax_id;
+            //         }
+            //         return $items;
+            //     }
+            // })
+
             ->editColumn('trax_id', function($erf) {
-                if($erf->type == 1){
+                if ($erf->type == 1) {
                     return '-';
-                }
-                else{
-                    $items = array();
-                    $trax_id = "";
-                    $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
-                    foreach ($ids as $value){
-                        // $trax_id.= $value->trax_id.",<br>";
-                        $items[] = '<br>'.$value->trax_id;
+                } else {
+                    $trax_ids = EmployeeRequisitionReplacement::where('er_id', $erf->erf_id)->pluck('trax_id');
+                    $trax_id_string = '';
+                    foreach ($trax_ids as $trax_id) {
+                        $trax_id_string .= $trax_id . '<br>';
                     }
-                    return $items;
+                    return $trax_id_string;
                 }
             })
             ->editColumn('trax_id_for_excel', function($erf) {
@@ -173,22 +186,38 @@ class AdminERFController extends Controller
                     return $trax_id;
                 }
             })
+            // ->addColumn('leaver_name', function($erf) {
+            //     if($erf->type == 1){
+            //         return '-';
+            //     }
+            //     else{
+            //         $trax_id = "";
+            //         $leaver_name = array();
+            //         $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
+            //         foreach ($ids as $id){
+            //             $name = Employee::where('trax_id',$id->trax_id)->select('name')->first();
+            //             // $trax_id.= $name->name.",<br>".' ';
+            //             if($name){
+            //                 $leaver_name[] = '<br>'.$name->name;
+            //             }
+            //         }
+            //         return $leaver_name;
+            //     }
+            // })
+
             ->addColumn('leaver_name', function($erf) {
-                if($erf->type == 1){
+                if ($erf->type == 1) {
                     return '-';
-                }
-                else{
-                    $trax_id = "";
-                    $leaver_name = array();
-                    $ids = EmployeeRequisitionReplacement::where('er_id',$erf->erf_id)->select('trax_id')->get();
-                    foreach ($ids as $id){
-                        $name = Employee::where('trax_id',$id->trax_id)->select('name')->first();
-                        // $trax_id.= $name->name.",<br>".' ';
-                        if($name){
-                            $leaver_name[] = '<br>'.$name->name;
+                } else {
+                    $leaver_names = '';
+                    $ids = EmployeeRequisitionReplacement::where('er_id', $erf->erf_id)->pluck('trax_id');
+                    foreach ($ids as $trax_id) {
+                        $employee = Employee::where('trax_id', $trax_id)->select('name')->first();
+                        if ($employee) {
+                            $leaver_names .= $employee->name . '<br>';
                         }
                     }
-                    return $leaver_name;
+                    return $leaver_names;
                 }
             })
             ->editColumn('requested_by_name', function($erf) {
@@ -261,7 +290,9 @@ class AdminERFController extends Controller
             $erf->where('s.id', '=', $status);
         }
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['trax_id', 'action', 'leaver_name'])
+        ->make(true);
 
     }
 
