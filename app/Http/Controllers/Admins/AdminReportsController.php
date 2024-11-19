@@ -3662,47 +3662,52 @@ class AdminReportsController extends Controller
                 return number_format($amount);
             })
             ->editColumn('p_gst', function ($sale) {
-                $gst = '';
+                $gst = 0;
                 if ($sale->account_type_id == 1) {
                     if ($sale->p_gst != null) {
-                        $gst = $sale->p_gst;
-                    } else if ($sale->d_gst != null) {
-                        $gst = $sale->d_gst;
+                        $gst+= $sale->p_gst;
+                    }
+                    if ($sale->d_gst != null) {
+                        $gst+= $sale->d_gst;
                     }
                 } else {
                     if ($sale->pis_gst != null) {
-                        $gst = $sale->pis_gst;
-                    } else if ($sale->is_gst != null) {
-                        $gst = $sale->is_gst;
+                        $gst+= $sale->pis_gst;
+                    }
+                    if ($sale->is_gst != null) {
+                        $gst+= $sale->is_gst;
                     }
                 }
                 return number_format((float) $gst, 2);
             })
             ->editColumn('pps_sms_charges', function ($sale) {
-                $sms_charges = '';
+                $sms_charges = 0;
                 if ($sale->account_type_id == 1) {
                     if ($sale->pps_sms_charges != null) {
-                        $sms_charges = $sale->pps_sms_charges;
-                    } else if ($sale->dps_sms_charges != null) {
-                        $sms_charges = $sale->dps_sms_charges;
+                        $sms_charges+= $sale->pps_sms_charges;
+                    }
+                    if ($sale->dps_sms_charges != null) {
+                        $sms_charges+= $sale->dps_sms_charges;
                     }
                 } else {
                     if ($sale->pis_sms_charges != null) {
-                        $sms_charges = $sale->pis_sms_charges;
-                    } else if ($sale->is_sms_charges != null) {
-                        $sms_charges = $sale->is_sms_charges;
+                        $sms_charges += $sale->pis_sms_charges;
+                    }
+                    if ($sale->is_sms_charges != null) {
+                        $sms_charges += $sale->is_sms_charges;
                     }
                 }
                 return number_format((float) $sms_charges, 2);
             })
             ->editColumn('p_total_charges', function ($sale) {
-                $total = '';
+                $total = 0;
                 if ($sale->p_total_charges != null) {
-                    $total = $sale->p_total_charges + $sale->fintech_charges;
-                } else if ($sale->d_total_charges != null) {
-                    $total = $sale->d_total_charges;
+                    $total+= $sale->p_total_charges;
                 }
-                return number_format((float) $total, 2);
+                if ($sale->d_total_charges != null) {
+                    $total+= $sale->d_total_charges;
+                }
+                return number_format((float) $total+$sale->fintech_charges, 2);
             })
             ->addColumn('estimated_charges', function ($sale) {
                 $estimated = '';
@@ -3710,11 +3715,12 @@ class AdminReportsController extends Controller
                 return number_format((float) $estimated, 2);
             })
             ->editColumn('p_net_payable', function ($sale) {
-                $payable = '';
+                $payable = 0;
                 if ($sale->p_net_payable != null) {
-                    $payable = $sale->p_net_payable;
-                } else if ($sale->d_net_payable != null) {
-                    $payable = $sale->d_net_payable;
+                    $payable+= $sale->p_net_payable;
+                }
+                if ($sale->d_net_payable != null) {
+                    $payable+= $sale->d_net_payable;
                 }
                 return number_format((float) $payable, 2);
             })
@@ -5795,47 +5801,52 @@ class AdminReportsController extends Controller
                 return number_format($amount);
             })
             ->editColumn('p_gst', function ($sale) {
-                $gst = '';
+                $gst = 0;
                 if ($sale->account_type_id == 1) {
                     if ($sale->p_gst != null) {
-                        $gst = $sale->p_gst;
-                    } else if ($sale->d_gst != null) {
-                        $gst = $sale->d_gst;
+                        $gst+= $sale->p_gst;
+                    }
+                    if ($sale->d_gst != null) {
+                        $gst+= $sale->d_gst;
                     }
                 } else {
                     if ($sale->pis_gst != null) {
-                        $gst = $sale->pis_gst;
-                    } else if ($sale->is_gst != null) {
-                        $gst = $sale->is_gst;
+                        $gst+= $sale->pis_gst;
+                    }
+                    if ($sale->is_gst != null) {
+                        $gst+= $sale->is_gst;
                     }
                 }
                 return number_format((float) $gst, 2);
             })
             ->editColumn('pps_sms_charges', function ($sale) {
-                $sms_charges = '';
+                $sms_charges = 0;
                 if ($sale->account_type_id == 1) {
                     if ($sale->pps_sms_charges != null) {
-                        $sms_charges = $sale->pps_sms_charges;
-                    } else if ($sale->dps_sms_charges != null) {
-                        $sms_charges = $sale->dps_sms_charges;
+                        $sms_charges += $sale->pps_sms_charges;
+                    }
+                    if ($sale->dps_sms_charges != null) {
+                        $sms_charges += $sale->dps_sms_charges;
                     }
                 } else {
                     if ($sale->pis_sms_charges != null) {
-                        $sms_charges = $sale->pis_sms_charges;
-                    } else if ($sale->is_sms_charges != null) {
-                        $sms_charges = $sale->is_sms_charges;
+                        $sms_charges += $sale->pis_sms_charges;
+                    }
+                    if ($sale->is_sms_charges != null) {
+                        $sms_charges += $sale->is_sms_charges;
                     }
                 }
                 return number_format((float) $sms_charges, 2);
             })
             ->editColumn('p_total_charges', function ($sale) {
-                $total = '';
+                $total = 0;
                 if ($sale->p_total_charges != null) {
-                    $total = $sale->p_total_charges + $sale->fintech_amount;
-                } else if ($sale->d_total_charges != null) {
-                    $total = $sale->d_total_charges;
+                    $total += $sale->p_total_charges;
                 }
-                return number_format((float) $total, 2);
+                if ($sale->d_total_charges != null) {
+                    $total += $sale->d_total_charges;
+                }
+                return number_format((float) $total+$sale->fintech_amount, 2);
             })
             ->addColumn('estimated_charges', function ($sale) {
                 $estimated = '';
@@ -5843,11 +5854,12 @@ class AdminReportsController extends Controller
                 return number_format((float) $estimated, 2);
             })
             ->editColumn('p_net_payable', function ($sale) {
-                $payable = '';
+                $payable = 0;
                 if ($sale->p_net_payable != null) {
-                    $payable = $sale->p_net_payable;
-                } else if ($sale->d_net_payable != null) {
-                    $payable = $sale->d_net_payable;
+                    $payable += $sale->p_net_payable;
+                }
+                if ($sale->d_net_payable != null) {
+                    $payable += $sale->d_net_payable;
                 }
                 return number_format((float) $payable, 2);
             })
@@ -13145,10 +13157,10 @@ class AdminReportsController extends Controller
 
         $rv_report = RvShipmentAssignAgentDetails::join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
-        // ->join('shipments_journey as sj.', function($join) {
-        //     $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
-        //          ->where('sj.shipper_status_id', '=', 66);
-        // })
+        ->join('shipments_journey as sj', function($join) {
+            $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
+                 ->whereIn('sj.shipper_status_id',[13,66]);
+        })
         ->leftjoin('users', 'shipments.user_id', 'users.id')
         ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
         ->leftjoin('city_areas as area', 'uso.city_area_id', 'area.id')
@@ -13158,15 +13170,15 @@ class AdminReportsController extends Controller
         ->leftjoin('zones as z', 'z.id', 'hub.zone_id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftJoin('shipments_journey as sjj', function ($join) {
-                $join->on('sjj.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+                $join->on('sjj.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sjj.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = rv_shipment_assign_agents.shipment_id and shipments_journey.shipper_status_id  = 2)')
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = sj.shipment_id and shipments_journey.shipper_status_id  = 2)')
                     );
         })
         ->leftJoin('shipments_journey as sjj_destination', function ($join) {
-                $join->on('sjj_destination.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+                $join->on('sjj_destination.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sjj_destination.id',
                         '=',
@@ -13174,7 +13186,7 @@ class AdminReportsController extends Controller
                     );
         })
         ->leftJoin('shipments_journey as sj_destination', function ($join) {
-                $join->on('sj_destination.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+                $join->on('sj_destination.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sj_destination.id',
                         '=',
@@ -13182,7 +13194,7 @@ class AdminReportsController extends Controller
                     );
         })
         ->leftJoin('shipments_journey as sj_rvr', function ($join) {
-                $join->on('sj_rvr.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+                $join->on('sj_rvr.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sj_rvr.id',
                         '=',
@@ -13190,7 +13202,7 @@ class AdminReportsController extends Controller
                     );
         })
         ->leftJoin('shipments_journey as sj_ofd', function ($join) {
-                $join->on('sj_ofd.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+                $join->on('sj_ofd.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sj_ofd.id',
                         '=',
@@ -13198,7 +13210,7 @@ class AdminReportsController extends Controller
                     );
         })
         ->leftJoin('shipments_journey as sj_reattempt', function ($join) {
-            $join->on('sj_reattempt.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+            $join->on('sj_reattempt.shipment_id', '=', 'sj.shipment_id')
                 ->where(
                     'sj_reattempt.id',
                     '=',
@@ -13211,7 +13223,7 @@ class AdminReportsController extends Controller
         'sjj.created_at  as arrival_date','sj_destination.created_at as arrival_destination_date','sj_rvr.created_at as rvr_date_time',
         'rv_shipment_assign_agent_details.updated_at as action_date','sj_ofd.created_at as ofd_date_time','sj_reattempt.created_at as reattempt_time', 's_status.name as current_status', 'shipments.updated_at as current_status_date')
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
-        ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', 2)
+        ->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', '!=', '')
         ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
         ->groupBy('rv_shipment_assign_agent_details.shipment_id')
         ->orderBy('rv_shipment_assign_agent_details.id','desc');
@@ -13234,6 +13246,11 @@ class AdminReportsController extends Controller
                         $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('verification',0)->whereIn('shipper_status_id', [12])->count();
                         return $rvr_count;
             });
+            // ->addColumn('second_last_status', function($rv_report) use ($request) {
+            //             // $rvr_count = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('verification',1)->whereIn('shipper_status_id', [52,12,66])->count();
+            //             $sjsecondLast = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->whereNotIn('shipper_status_id',[13,66])->orderBy('id', 'desc')->skip(1)->take(1)->select('shipper_status_id')->first();
+            //             return $sjsecondLast->shipment_status_shipper->name;
+            // });
                     
                     
         if ($tracking_num = $request->get('search_tracking_no')) {
@@ -13246,7 +13263,7 @@ class AdminReportsController extends Controller
         if ($agent_id = $request->get('search_agent_name')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
+            $rv_report->where('rv_shipment_assign_agent_details.id', '=', $agent_id);
             // $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
             // $rv_report->where('rv_shipment_assign_agent_details.updated_type_id',2);
 

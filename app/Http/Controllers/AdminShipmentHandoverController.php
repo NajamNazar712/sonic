@@ -293,13 +293,18 @@ class AdminShipmentHandoverController extends Controller
     }
 
 
-    //receive
+    //receive old screen
     public function handover_receive_index(){
-      return view('admin.handover.receive');
+      // return view('admin.handover.receive');
+      $handover_bag_numbers = Handover::select('id', 'bag_number')
+      ->whereNotNull('bag_number')
+      ->orderBy('id', 'desc')
+      ->get();
+      return view('admin.handover_new.new_receive', compact('handover_bag_numbers'));
     }
     
 
-    //receive
+    //receive new screen
     public function handover_receive_index_new(){
       $handover_bag_numbers = Handover::select('id', 'bag_number')
       ->whereNotNull('bag_number')
