@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Apizonglogaddcolumn extends Migration
+class UpdateAddColumnIsExcelToCitiesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class Apizonglogaddcolumn extends Migration
      */
     public function up()
     {
-        //
-        Schema::table('api_zong_logs', function (Blueprint $table) {
-            $table->timestamp('updated_at')->nullable();
+        Schema::table('cities', function (Blueprint $table) {
+            $table->boolean('is_excel')->default(0)->after('iata_code');
         });
     }
 
@@ -26,9 +25,8 @@ class Apizonglogaddcolumn extends Migration
      */
     public function down()
     {
-        //
-        Schema::table('api_zong_logs', function (Blueprint $table) {
-            $table->dropColumn('updated_at');
+        Schema::table('cities', function (Blueprint $table) {
+            $table->dropColumn('is_excel');
         });
     }
 }

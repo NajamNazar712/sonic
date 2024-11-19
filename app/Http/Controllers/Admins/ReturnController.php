@@ -3248,7 +3248,6 @@ class ReturnController extends Controller
     public function return_receive_deliveries_list(Request $request)
     {
 
-
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 309);
         }
@@ -3319,6 +3318,11 @@ class ReturnController extends Controller
                 $count_ecomm = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], 2, 7, null,'return_note_id');
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('excel_others', function($result){
+                $count = 0;
+                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], [1,2], [1,3,4,6,8,9,10,11], null,'return_note_id');
+                return $count > 0 ? $count : '-';
             })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.return.receive.status', ['id' => $result->return_note]);
@@ -5162,7 +5166,11 @@ class ReturnController extends Controller
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
             })
-
+            ->addColumn('excel_others', function($result){
+                $count = 0;
+                $count = DeliveryController::get_segment_type('return_note_shipments', [$result->return_note], [1,2], [1,3,4,6,8,9,10,11], null, 'return_note_id');
+                return $count > 0 ? $count : '-';
+            })
             ->addColumn('delivered_excel_ecom_cod', function($result){
                 $delivered_shipments = $this->return_delivered_shipment($result->return_note);
                 $count = 0;
@@ -5189,6 +5197,14 @@ class ReturnController extends Controller
                 }
                 $total_count = $count_general + $count_ecomm;
                 return $total_count > 0 ? $total_count : '-';
+            })
+            ->addColumn('delivered_excel_others', function($result){
+                $delivered_shipments = $this->return_delivered_shipment($result->return_note);
+                $count = 0;
+                if (!empty($delivered_shipments)) {
+                    $count = DeliveryController::get_segment_type('return_note_shipments', $delivered_shipments, 2, 5, 'returned', 'return_note_id');
+                }
+                return $count > 0 ? $count : '-';
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -7840,22 +7856,23 @@ class ReturnController extends Controller
         $unresponsive_shipments_error = false;
 
         foreach ($shipment_ids as $shipment_id) {
-            $shipment = Shipment::find($shipment_id);
+            $shipment = Shipment::find($shipment_id);      
             $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52, 66])->latest()->first();
             if (!$shipment) {
                 return response()->json(['status' => 0]);
             }
-
+            if (!in_array($shipment->shipper_status_id, [12, 52, 66])) {
+                return response()->json(['status' => 0, 'message' => 'Shipment is in different status, Cannot mark it as Another Status!', 'custom_check' => 1]);
+            }
             $exist_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->latest()->first();
             $assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_state_id', 1)->where('assigned_to_type_id', 1)->where('agent_id', Auth::id())->latest()->first();
-            $unresponsive_shipments = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_assign_agent_status_id', 6)->where('rv_state_id', 2)->where('unresponsive_count', '>=', 1)->latest()->first();
+            $unresponsive_shipments = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('unresponsive_attempt_time', '>=', Carbon::parse(now())->subHour(2)->format('Y-m-d H:i:s'))->where('rv_assign_agent_status_id', 6)->where('rv_state_id', 2)->where('unresponsive_count', '>=', 1)->latest()->first();
             // $unassigned_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 2)->latest()->first();
             $open_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->whereIn('rv_state_id', [3, 4])->where('unresponsive_count', 1)->latest()->first();
-            $sar_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 3)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
+            $sar_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 3)->where('updated_type_id', 3)->where('unresponsive_count', 3)->latest()->first();
             $completed_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->whereIn('rv_state_id', [3, 4])->where('unresponsive_count', '>=', 2)->latest()->first();
             $completed_shipment_first_unresponsive = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 4)->where('unresponsive_count', 0)->latest()->first();
             $old_completed_shipments = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_assign_agent_status_id', '!=', 6)->whereIn('rv_state_id', [2, 4])->latest()->first();
-
             if ($exist_shipment) {
                 if ($unresponsive_shipments) {
                     $unresponsive_invalid_shipments[] = $shipment_id;
@@ -8031,23 +8048,25 @@ class ReturnController extends Controller
                     } else {
                         $unresponsive_invalid_shipments[] = $shipment_id;
                     }
-                }else{ 
-                    
-                    $exist_shipment->increment('call_count');
-                    $exist_shipment->increment('unresponsive_count');
-                    $exist_shipment->updated_by_id = Auth::id();
-                    $exist_shipment->updated_type_id = 1;
-                    $exist_shipment->rv_state_id = 1; // Force fully update call history then rv_state_id set is 1
-                    $exist_shipment->save();
-                    //adding new row in rv_agent_call_histories and updating unresposive count
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
+                }else{
+                    if (RvShipmentAssignAgent::where(['shipment_id' => $shipment_id, ['unresponsive_count' ,'<=', 3]])->doesntExist()) {
+                        $exist_shipment->increment('call_count');
+                        $exist_shipment->increment('unresponsive_count');
+                        $exist_shipment->updated_by_id = Auth::id();
+                        $exist_shipment->updated_type_id = 1;
+                        $exist_shipment->rv_state_id = 1; // Force fully update call history then rv_state_id set is 1
+                        $exist_shipment->save();
+                        //adding new row in rv_agent_call_histories and updating unresposive count
+                        $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
 
-                    $new_call_history = $this->unresponsive($request);
-                    if ($new_call_history) {
-                        $exist_shipment->update(['rv_state_id' => 2]);
-                        $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $exist_shipment, $shipments_journey);
-                        $successfull_updated_shipments[] = $shipment_id;
-                    } else {
+                        $new_call_history = $this->unresponsive($request);
+                        if ($new_call_history) {
+                            $exist_shipment->update(['rv_state_id' => 2]);
+                            $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $exist_shipment, $shipments_journey);
+                            $successfull_updated_shipments[] = $shipment_id;
+                        } 
+                    }
+                    else {
                         $unresponsive_invalid_shipments[] = $shipment_id;
                     }
                 }
@@ -8090,9 +8109,9 @@ class ReturnController extends Controller
         if (!empty($unresponsive_invalid_shipments)) {
             if (!empty($unresponsive_invalid_shipments)) {
                 $unresponsive_invalid_shipments_Message = implode(', ', $unresponsive_invalid_shipments);
-                $errorMessages = 'No Shipment Of These Numbers Are updated ' . $unresponsive_invalid_shipments_Message . ' try to update the shipments after 24 hours And Rest Has Been updated';
+                $errorMessages = 'No Shipment Of These Numbers are not updated ' . $unresponsive_invalid_shipments_Message . ' as the maximum number of unresponsive attempts has been reached.';
                 if ($unresponsive_shipments_error) {
-                    $errorMessages = 'Try to update the shipment after 24 hours';
+                    $errorMessages = 'Try to update the shipment after 2 hours';
                 }
             }
             return response()->json(['status' => 0, 'message' => $errorMessages, 'custom_check' => $unresponsive_shipments_error ? 1 : 0]);

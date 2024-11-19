@@ -210,6 +210,7 @@
                             head.push('E-Comm (COD)');
                             head.push('General Logistics (Retail)');
                             head.push('General Logistics - E-Comm (Express)');
+                            head.push('Other Sub-Segments');
 
                             head.push('No. Of Pending Shipments');
                             head.push('Assigned By');
@@ -229,6 +230,7 @@
                                 row.push(values.excel_ecom_cod);
                                 row.push(values.excel_general_retail);
                                 row.push(values.excel_general_ecom_express);
+                                row.push(values.excel_others);
                                 row.push(values.shipments_unverified_count);
                                 row.push(values.assignee);
                                 row.push(values.created_at);

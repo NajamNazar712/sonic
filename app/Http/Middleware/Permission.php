@@ -465,6 +465,7 @@ class Permission
 
             'finance.tracking_number_wise_dncc_info.index' => 984,
             'finance.tracking_number_wise_dncc_info.list' => 984,
+            'finance.shipment_ledger.index' => 1017,
 
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
@@ -647,8 +648,8 @@ class Permission
 
             'reports.fintech_report.index' => 896,
             'reports.fintech_report.list' => 896,
-            'reports.ordinary_discrepancy_report.index' => 901,
-            'reports.ordinary_discrepancy_report.list' => 901,
+            'reports.operation_disorder_report.index' => 901,
+            'reports.operation_disorder_report.list' => 901,
             'reports.ibft_report.index' => 915,
             'reports.ibft_report.list' => 915,
 

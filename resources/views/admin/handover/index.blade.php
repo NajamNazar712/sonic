@@ -3,11 +3,8 @@
 @section('title', 'Create Handover Note')
 
 @section('content')
-
-
-
         <h1 class="mb-1">
-            Create Handover Note
+            Create Handover Note (Old)
         </h1>
 
         <div class="card">

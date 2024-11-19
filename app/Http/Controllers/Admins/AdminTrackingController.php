@@ -78,6 +78,7 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\CrmCaseNatureRemark;
+use App\Http\Models\InterceptReBookRequestHistory;
 
 class AdminTrackingController extends Controller
 {
@@ -1243,7 +1244,20 @@ class AdminTrackingController extends Controller
                         $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
                         $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
-                        $details['consignee']['address'] = $shipment->consignee_address;
+
+                        $consignee_address = InterceptReBookRequestHistory::where('shipment_id', $shipment->id)
+                        ->select([
+                            'new_consignee_address',
+                        ])
+                        ->first();
+
+                        if ($consignee_address){
+                            $details['consignee']['address'] = $consignee_address->new_consignee_address;
+                        } else {
+                            $details['consignee']['address'] = $shipment->consignee_address;
+                        }
+
+                        // $details['consignee']['address'] = $shipment->consignee_address;
                         $details['consignee']['email'] = $shipment->consignee_email;
 
                         $details['consignee']['crm_status'] = 0;
@@ -1902,6 +1916,15 @@ class AdminTrackingController extends Controller
 
                                 
                                 $journey_details = array();
+
+                                // bag number
+                                $bag_number = Handover::where('id', $journey->handover_id)->select('bag_number')->first();
+                                if (!$bag_number || is_null($bag_number->bag_number)) {
+                                    $journey_details['bag_number'] = '-';
+                                } else {
+                                    $journey_details['bag_number'] = $bag_number->bag_number;
+                                }
+                                // $journey_details['bag_number'] = $bag_number->bag_number;
                                 $journey_details['handover_id'] = $journey->handover_id;
                                 $journey_details['status'] = $journey->my_status->name;
                                 $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);

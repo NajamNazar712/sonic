@@ -17,6 +17,7 @@ class Apizonglogaddcolumn extends Migration
         Schema::table('api_zong_logs', function (Blueprint $table) {
             $table->integer('shipment_id')->index()->nullable();
         });
+
     }
 
     /**

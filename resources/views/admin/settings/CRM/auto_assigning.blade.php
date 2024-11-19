@@ -266,7 +266,7 @@
                     {data: 'shipper_key', name: 'shipper_key', class: ' shipper_key', orderable: false, searchable: false,},
                     {data: 'shipper_non_key', name: 'shipper_non_key', class: ' shipper_non_key', orderable: false, searchable: false,},
                     {data: 'shipment_status', name: 'shipment_status', class: ' shipment_status', orderable: false, searchable: false,},
-                    {data: 'status', name: 'crm_agents.status', class: ' status'},
+                    {data: 'status', name: 'crm_agent_auto_assigns.status', class: ' status'},
                     {data: 'created_at', name: 'crm_agent_auto_assigns.created_at', class: ' created_at'},
                     {data: 'action', name: 'action', class: 'text-center  action p-1', orderable: false, searchable: false}
                 ],
