@@ -13161,15 +13161,15 @@ class AdminReportsController extends Controller
             $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
                  ->whereIn('sj.shipper_status_id',[13,66]);
         })
-        ->leftjoin('users', 'shipments.user_id', 'users.id')
-        ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
-        ->leftjoin('city_areas as area', 'uso.city_area_id', 'area.id')
-        ->leftjoin('cities as origin_city', 'uso.city_id', 'origin_city.id')
-        ->leftjoin('cities as destination_city', 'shipments.consignee_city_id', 'destination_city.id')
-        ->leftjoin('cities as hub', 'destination_city.hub_id', 'hub.id')
-        ->leftjoin('zones as z', 'z.id', 'hub.zone_id')
-        ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
-        ->leftJoin('shipments_journey as sjj', function ($join) {
+        ->join('users', 'shipments.user_id', 'users.id')
+        ->join('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
+        ->join('city_areas as area', 'uso.city_area_id', 'area.id')
+        ->join('cities as origin_city', 'uso.city_id', 'origin_city.id')
+        ->join('cities as destination_city', 'shipments.consignee_city_id', 'destination_city.id')
+        ->join('cities as hub', 'destination_city.hub_id', 'hub.id')
+        ->join('zones as z', 'z.id', 'hub.zone_id')
+        ->join('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
+        ->join('shipments_journey as sjj', function ($join) {
                 $join->on('sjj.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sjj.id',
@@ -13209,19 +13209,19 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = sj_ofd.shipment_id and shipments_journey.shipper_status_id  = 5)')
                     );
         })
-        ->leftJoin('shipments_journey as sj_reattempt', function ($join) {
-            $join->on('sj_reattempt.shipment_id', '=', 'sj.shipment_id')
-                ->where(
-                    'sj_reattempt.id',
-                    '=',
-                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = sj_reattempt.shipment_id and shipments_journey.shipper_status_id  = 13)')
-                );
-        })
+        // ->leftJoin('shipments_journey as sj_reattempt', function ($join) {
+        //     $join->on('sj_reattempt.shipment_id', '=', 'sj.shipment_id')
+        //         ->where(
+        //             'sj_reattempt.id',
+        //             '=',
+        //             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = sj_reattempt.shipment_id and shipments_journey.shipper_status_id  = 13)')
+        //         );
+        // })
         ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_number',
         'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub',
         'z.name as zone_name','shipments.consignee_phone_number_1 as consignee_phon_no',
         'sjj.created_at  as arrival_date','sj_destination.created_at as arrival_destination_date','sj_rvr.created_at as rvr_date_time',
-        'rv_shipment_assign_agent_details.updated_at as action_date','sj_ofd.created_at as ofd_date_time','sj_reattempt.created_at as reattempt_time', 's_status.name as current_status', 'shipments.updated_at as current_status_date')
+        'rv_shipment_assign_agent_details.updated_at as action_date','sj_ofd.created_at as ofd_date_time', 's_status.name as current_status', 'shipments.updated_at as current_status_date')
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
         ->whereIn('rv_shipment_assign_agent_details.rv_assign_agent_status_id',[2, 7])
         ->whereColumn('rv_shipment_assign_agent_details.agent_id', 'rv_shipment_assign_agent_details.updated_by_id')
@@ -13235,7 +13235,7 @@ class AdminReportsController extends Controller
                 
             })
             ->editColumn('ofd_date_time', function($rv_report) {
-                if($rv_report['ofd_date_time'] >= $rv_report['reattempt_time'] && isset($rv_report['reattempt_time'])) {
+                if($rv_report['ofd_date_time'] >= ShipmentsJourney::where('shipment_id',$rv_report['shipment_id'])->where('shipper_status_id',13)->latest()->select('created_at')->first()) {
                     return $rv_report['ofd_date_time'];
                 }else{
                     return '';
