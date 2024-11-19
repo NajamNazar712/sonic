@@ -156,6 +156,7 @@ class RetailReturnController extends Controller
                 return $dropdown;
 
             })
+            ->rawColumns(['tracking_number', 'consignee_phone', 'shipment_remarks', 'action'])
             ->make(true);
     }
 

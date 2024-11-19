@@ -1883,7 +1883,9 @@ class RetailShipmentBookController extends Controller
 
                 return $dropdown;
             });
-        return  $datatable->make(true);
+        return  $datatable
+        ->rawColumns(['tracking_number_link', 'slip_image', 'action'])
+        ->make(true);
     }
 
     public function tracking_slip_upload(Request $request){
@@ -1927,10 +1929,12 @@ class RetailShipmentBookController extends Controller
 
         if ($request->get('search_date')) {
             $date = $request->get('search_date');
-            $datatable->whereDate('retail_shipments.created_at', $date);
+            $shipments->whereDate('retail_shipments.created_at', $date);
         }
 
-        return  $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function excel_index() {
