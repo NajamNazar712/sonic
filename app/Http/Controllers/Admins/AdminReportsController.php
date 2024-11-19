@@ -13154,13 +13154,16 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 807);
         }
-
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+        }
         $rv_report = RvShipmentAssignAgentDetails::join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
-        ->join('shipments_journey as sj', function($join, $request) {
+        ->join('shipments_journey as sj', function($join,$from,$to) {
             $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
                  ->whereIn('sj.shipper_status_id',[13,66])
-                 ->whereBetween('rv_shipment_assign_agent_details.created_at', [$request->get('search_date_from'), $request->get('search_date_from')]);
+                 ->whereBetween('sj.created_at', [$from, $to]);
         })
         ->join('users', 'shipments.user_id', 'users.id')
         ->join('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
