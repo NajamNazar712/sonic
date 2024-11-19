@@ -13159,7 +13159,8 @@ class AdminReportsController extends Controller
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
         ->join('shipments_journey as sj', function($join) {
             $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
-                 ->whereIn('sj.shipper_status_id',[13,66]);
+                 ->whereIn('sj.shipper_status_id',[13,66])
+                 ->whereBetween('rv_shipment_assign_agent_details.created_at', [$request->get('search_date_from'), $request->get('search_date_from')]);
         })
         ->join('users', 'shipments.user_id', 'users.id')
         ->join('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
