@@ -899,6 +899,16 @@ class AdminShipmentHandoverController extends Controller
                 }
             })
 
+            ->filterColumn('bag_type', function ($query, $keyword) use ($normal_status_ids, $return_status_ids) {
+                $query->where(function ($subQuery) use ($keyword, $normal_status_ids, $return_status_ids) {
+                    if ($keyword == 'Normal') {
+                        $subQuery->whereIn('handovers.shipper_status_id', $normal_status_ids);
+                    } elseif ($keyword == 'Return') {
+                        $subQuery->whereIn('handovers.shipper_status_id', $return_status_ids);
+                    }
+                });
+            })
+
             ->editColumn('from', function($handover_list) {
               if (isset($handover_list->from_admin_id)) {
                   return Admin::where('id', $handover_list->from_admin_id)->first()->name;
