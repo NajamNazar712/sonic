@@ -13165,15 +13165,15 @@ class AdminReportsController extends Controller
                  ->whereIn('sj.shipper_status_id',[13,66])
                  ->whereBetween('sj.created_at', [$from, $to]);
         })
-        ->join('users', 'shipments.user_id', 'users.id')
-        ->join('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
-        ->join('city_areas as area', 'uso.city_area_id', 'area.id')
-        ->join('cities as origin_city', 'uso.city_id', 'origin_city.id')
-        ->join('cities as destination_city', 'shipments.consignee_city_id', 'destination_city.id')
-        ->join('cities as hub', 'destination_city.hub_id', 'hub.id')
-        ->join('zones as z', 'z.id', 'hub.zone_id')
-        ->join('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
-        ->join('shipments_journey as sjj', function ($join) {
+        ->leftJoin('users', 'shipments.user_id', 'users.id')
+        ->leftJoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
+        ->leftJoin('city_areas as area', 'uso.city_area_id', 'area.id')
+        ->leftJoin('cities as origin_city', 'uso.city_id', 'origin_city.id')
+        ->leftJoin('cities as destination_city', 'shipments.consignee_city_id', 'destination_city.id')
+        ->leftJoin('cities as hub', 'destination_city.hub_id', 'hub.id')
+        ->leftJoin('zones as z', 'z.id', 'hub.zone_id')
+        ->leftJoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
+        ->leftJoin('shipments_journey as sjj', function ($join) {
                 $join->on('sjj.shipment_id', '=', 'sj.shipment_id')
                     ->where(
                 'sjj.id',
