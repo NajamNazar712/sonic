@@ -803,24 +803,6 @@ class AdminShipmentHandoverController extends Controller
         ->leftJoin('shipment_scanning_journey_area_logs as ssj_r', 'ssj_r.shipment_scanning_journey_id', '=', 'ssj_hss_r.id')
         ->leftJoin('city_areas as caf', 'caf.id', '=', 'ssj_f.area_id')
         ->leftJoin('city_areas as car', 'car.id', '=', 'ssj_r.area_id')
-//        ->leftJoin('handover_shipments', 'handover_shipments.handover_id', '=', 'handovers.id')
-//        ->leftJoin(DB::raw('(
-//            SELECT sj.id, sj.shipment_id, sj.shipper_status_id
-//            FROM shipments_journey sj
-//            JOIN (
-//                SELECT shipment_id, MAX(created_at) as max_created_at
-//                FROM shipments_journey
-//                GROUP BY shipment_id
-//            ) latest_journey
-//            ON sj.shipment_id = latest_journey.shipment_id
-//            AND sj.created_at = latest_journey.max_created_at
-//          ) as latest_journey'), 'handover_shipments.shipment_id', '=', 'latest_journey.shipment_id')
-//        ->leftjoin('shipments_journey as sjj', function ($join) {
-//            $join->on('sjj.shipment_id', '=', 's.id')
-//                ->whereIn('sjj.shipper_status_id', [18, 51])
-//                ->where('sjj.id', '=',
-//                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)'));
-//        })
         ->leftJoin('excess_handover_shipments', function ($join) {
             $join->on('excess_handover_shipments.handover_id', '=', 'handovers.id')
                 ->where('excess_handover_shipments.excess_shipment', '=', 1);
@@ -839,27 +821,10 @@ class AdminShipmentHandoverController extends Controller
             'caf.name as forwarded_area_name', 'car.name as received_area_name',
             'handovers.bag_number as bag_number',
             'hss.shipment_id',
-//            DB::raw("
-//                CASE
-//                    WHEN handovers.bag_number IS NULL THEN '-'
-//                    WHEN sjj.shipper_status_id IN ($normal_status_ids_str) THEN 'Normal'
-//                    WHEN sjj.shipper_status_id IN ($return_status_ids_str) THEN 'Return'
-//                    ELSE '-'
-//                END as bag_type
-//            "),
-//            'excess_handover_shipments.shipment_ids as excess_shipments',
             DB::raw("COUNT(DISTINCT excess_handover_shipments.id) AS excess_shipments")
         ]);
     
     if ($tracking_number = $request->get('search_tracking')) {
-        // $handover_list->join('shipments_journey as sjl', function ($join) {
-        //     $join->on('sjl.shipment_id', '=', 's.id')
-        //         ->where(
-        //             'sjl.id',
-        //             '=',
-        //             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id ))')
-        //         );
-        // })
         $handover_list->where('s.tracking_number', $tracking_number);
     }
     $handover_list->whereBetween('handovers.created_at', [$from, $to])
@@ -878,12 +843,23 @@ class AdminShipmentHandoverController extends Controller
                   return 0;
               }
             })
-            ->editColumn('excess_shipment', function($handover_list) {
 
+            ->filterColumn('excess_shipments', function  ($query, $keyword) {
+                $query->whereRaw("
+                      (
+                          SELECT COUNT(DISTINCT excess_handover_shipments.id)
+                          FROM excess_handover_shipments
+                          WHERE excess_handover_shipments.handover_id = handovers.id
+                          AND excess_handover_shipments.excess_shipment = 1
+                      ) = ?
+                  ", [$keyword]);
+            })
+
+            ->editColumn('excess_shipments', function($handover_list) {
               if ($handover_list->excess_shipments > 0) {
-                  return '<button class="btn btn-sm btn-outline-info align-middle">' . $handover_list->excess_shipments . '</button>';
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $handover_list->excess_shipments . '</button>';
               } else {
-                  return 0;
+                return 0;
               }
             })
 
@@ -1032,12 +1008,13 @@ class AdminShipmentHandoverController extends Controller
         if ($bag_number = $request->get('search_bag_number')) {
           $datatable->where('handovers.bag_number', '=', $bag_number);
         }
-        // if ($search_area = $request->get('search_area')) {
-        //   $datatable->where(function($query) use ($search_area) {
-        //       $query->where('ssj_f.area_id', '=', $search_area)
-        //             ->orWhere('ssj_r.area_id', '=', $search_area);
-        //   });
-        // } 
+
+        if ($search_area = $request->get('search_area')) {
+          $datatable->where(function($query) use ($search_area) {
+              $query->where('ssj_f.area_id', '=', $search_area)
+                    ->orWhere('ssj_r.area_id', '=', $search_area);
+          });
+        } 
         return  $datatable->make(true);
 
     }
