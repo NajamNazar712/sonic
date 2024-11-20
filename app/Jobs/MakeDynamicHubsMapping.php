@@ -21,16 +21,16 @@ class MakeDynamicHubsMapping implements ShouldQueue
 
     protected $requestVehicles;
     protected $closestHubId;
-    protected $city;
+    protected $cityID;
     protected $authId;
 
 
-    public function __construct(array $requestVehicles, int $closestHubId, $city, $authId)
+    public function __construct(array $requestVehicles, int $closestHubId, $cityID, $authId)
     {
         $this->queue = 'make_dynamic_hubs_mapping';
         $this->requestVehicles = $requestVehicles;
         $this->closestHubId = $closestHubId;
-        $this->city = $city;
+        $this->cityID = $cityID;
         $this->authId = $authId;
 
     }
@@ -39,7 +39,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
     {
         //take this hub as reference hub
         $closestHubId = $this->closestHubId;
-        $city = $this->city;
+        $cityID = $this->cityID;
         $requestVehicles = $this->requestVehicles;
         $authId = $this->authId;
 
@@ -59,7 +59,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
 
                 $mapping = new V2JunctionMapping();
 
-                $mapping->origin_id = $city->id; //here origin will be the newly created hub for all mappings
+                $mapping->origin_id = $cityID; //here origin will be the newly created hub for all mappings
                 $mapping->destination_id = $closestHubMapping->destination_id;//destinations will be of the closest hub
                 $mapping->status = $closestHubMapping->status;
                 $mapping->updated_by = $authId;
@@ -161,7 +161,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
             //for creating mapping between the newly created hub and the closest hub
             $mapping1 = new V2JunctionMapping();
 
-            $mapping1->origin_id = $city->id;
+            $mapping1->origin_id = $cityID;
             $mapping1->destination_id = $closestHubId;
             $mapping1->updated_by = $authId;
             $mapping1->save();
@@ -197,7 +197,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
                 $mapping = new V2JunctionMapping();
 
                 $mapping->origin_id = $closestHubMapping->origin_id; //here origin will be the closest hub for all mappings
-                $mapping->destination_id = $city->id;//here destination will be the newly created hub for all mappings
+                $mapping->destination_id = $cityID;//here destination will be the newly created hub for all mappings
                 $mapping->status = $closestHubMapping->status;
                 $mapping->updated_by = $authId;
                 $mapping->save();
@@ -299,7 +299,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
             $mapping2 = new V2JunctionMapping();
 
             $mapping2->origin_id = $closestHubId;
-            $mapping2->destination_id = $city->id;
+            $mapping2->destination_id = $cityID;
             $mapping2->updated_by = $authId;
             $mapping2->save();
 

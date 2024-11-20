@@ -7,7 +7,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class SubstituteUser extends Authenticatable
 {
 	protected $guard = 'substitute_users';
-    protected $fillable = ['name', 'email', 'password', 'phone_number', 'cnic', 'status'];
+    protected $fillable = [
+        'name', 
+        'email', 
+        'password', 
+        'phone_number', 
+        'cnic', 
+        'status',
+        'pickup_address_id',
+    ];
     protected $hidden = ['password', 'remember_token'];
 
     public function permissions() {
