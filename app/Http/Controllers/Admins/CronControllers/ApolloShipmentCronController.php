@@ -14,6 +14,7 @@ class ApolloShipmentCronController extends Controller
     public static function fetch_shipment_statuses()
     {
 
+
         $time_stamp = Carbon::now();
         $apollo_booking_journeys=[];
         $apollo_piece_journeys=[];
@@ -35,122 +36,135 @@ class ApolloShipmentCronController extends Controller
             $journeys = $shipmentJourneys->orderBy('sj.id')->get();
 
             if($journeys->isNotEmpty()){
-                // Collect unique IDs for batch queries
-                $rider_ids = $journeys->pluck('rider_id')->filter()->unique()->toArray();
-                $admin_ids = $journeys->pluck('admin_id')->filter()->unique()->toArray();
-                $user_ids = $journeys->pluck('user_id')->filter()->unique()->toArray();
 
-                // Perform batch queries
-                $riders = DB::connection('apollo_db')->table('riders')
-                    ->whereIn('sonic_rider_id', $rider_ids)
-                    ->pluck('id', 'sonic_rider_id'); // key: sonic_rider_id, value: id
+                    // Collect unique IDs for batch queries
+                    $rider_ids = $journeys->pluck('rider_id')->filter()->unique()->toArray();
+                    $admin_ids = $journeys->pluck('admin_id')->filter()->unique()->toArray();
+                    $user_ids = $journeys->pluck('user_id')->filter()->unique()->toArray();
 
-                $admins = DB::connection('apollo_db')->table('admins')
-                    ->whereIn('sonic_admin_id', $admin_ids)
-                    ->pluck('id', 'sonic_admin_id'); // key: sonic_admin_id, value: id
+                    // Perform batch queries
+                    $riders = DB::connection('apollo_db')->table('riders')
+                        ->whereIn('sonic_rider_id', $rider_ids)
+                        ->pluck('id', 'sonic_rider_id'); // key: sonic_rider_id, value: id
 
-                $users = DB::connection('apollo_db')->table('shippers')
-                    ->whereIn('sonic_shipper_id', $user_ids)
-                    ->pluck('id', 'sonic_shipper_id'); // key: sonic_shipper_id, value: id
+                    $admins = DB::connection('apollo_db')->table('admins')
+                        ->whereIn('sonic_admin_id', $admin_ids)
+                        ->pluck('id', 'sonic_admin_id'); // key: sonic_admin_id, value: id
 
-                foreach ($journeys as $journey) {
+                    $users = DB::connection('apollo_db')->table('shippers')
+                        ->whereIn('sonic_shipper_id', $user_ids)
+                        ->pluck('id', 'sonic_shipper_id'); // key: sonic_shipper_id, value: id
 
-                    $rider_id = $journey->rider_id ? $riders->get($journey->rider_id) : null;
-                    $admin_id = $journey->admin_id ? $admins->get($journey->admin_id) : null;
-                    $user_id = $journey->user_id ? $users->get($journey->user_id) : null;
+                    foreach ($journeys as $journey) {
 
-                    if($journey->apollo_is_piece == 0) {
+                        $rider_id = $journey->rider_id ? $riders->get($journey->rider_id) : null;
+                        $admin_id = $journey->admin_id ? $admins->get($journey->admin_id) : null;
+                        $user_id = $journey->user_id ? $users->get($journey->user_id) : null;
 
-                        $apollo_booking_journeys[]= [
-//                            'id' => $journey->id,
-                            'booking_id'=> $journey->apollo_shipment_id,
-                            'verification' => 1,
-                            'origin_id' => null,
-                            'destination_id' =>null,
-                            'rider_id' => $rider_id,
-                            'user_id' => $user_id,
-                            'admin_id' => $admin_id,
-                            'city_id' => $journey->city_id,
-                            'shipper_status_id' => $journey->shipper_status_id,
-                            'consignee_status_id' => $journey->consignee_status_id,
-                            'ip_address' => $journey->ip_address,
-                            'created_at' => $journey->created_at,
-                            'updated_at' => $journey->updated_at,
-                        ];
+                        if($journey->apollo_is_piece == 0) {
+
+                            $apollo_booking_journeys[]= [
+    //                            'id' => $journey->id,
+                                'booking_id'=> $journey->apollo_shipment_id,
+                                'verification' => 1,
+                                'origin_id' => null,
+                                'destination_id' =>null,
+                                'rider_id' => $rider_id,
+                                'user_id' => $user_id,
+                                'admin_id' => $admin_id,
+                                'city_id' => $journey->city_id,
+                                'shipper_status_id' => $journey->shipper_status_id,
+                                'consignee_status_id' => $journey->consignee_status_id,
+                                'ip_address' => $journey->ip_address,
+                                'created_at' => $journey->created_at,
+                                'updated_at' => $journey->updated_at,
+                            ];
+                        }
+                        else if($journey->apollo_is_piece == 1){
+
+                            $apollo_piece_journeys[]= [
+    //                            'id' => $journey->id,
+                                'piece_id'=> $journey->apollo_shipment_id,
+                                'verification' => 1,
+                                'origin_id' => null,
+                                'destination_id' =>null,
+                                'rider_id' => $rider_id,
+                                'user_id' => $user_id,
+                                'admin_id' => $admin_id,
+                                'city_id' => $journey->city_id,
+                                'shipper_status_id' => $journey->shipper_status_id,
+                                'consignee_status_id' => $journey->consignee_status_id,
+                                'ip_address' => $journey->ip_address,
+                                'created_at' => $journey->created_at,
+                                'updated_at' => $journey->updated_at,
+                            ];
+                        }
+
                     }
-
-                    else if($journey->apollo_is_piece == 1){
-
-                        $apollo_piece_journeys[]= [
-//                            'id' => $journey->id,
-                            'piece_id'=> $journey->apollo_shipment_id,
-                            'verification' => 1,
-                            'origin_id' => null,
-                            'destination_id' =>null,
-                            'rider_id' => $rider_id,
-                            'user_id' => $user_id,
-                            'admin_id' => $admin_id,
-                            'city_id' => $journey->city_id,
-                            'shipper_status_id' => $journey->shipper_status_id,
-                            'consignee_status_id' => $journey->consignee_status_id,
-                            'ip_address' => $journey->ip_address,
-                            'created_at' => $journey->created_at,
-                            'updated_at' => $journey->updated_at,
-                        ];
-                    }
-
-                }
 
                     try {
 
-                        DB::connection('apollo_db')->beginTransaction();
+                            DB::connection('apollo_db')->beginTransaction();
 
-                        if(!empty($apollo_booking_journeys))
-                        {
-                            DB::connection('apollo_db')->table('booking_journeys')->insert($apollo_booking_journeys);
-                            $booking_ids = array_unique(array_column($apollo_booking_journeys, 'booking_id'));
+                            if(!empty($apollo_booking_journeys)) {
 
-                            $max_booking_statuses = DB::connection('apollo_db')->table('booking_journeys')
-                                ->whereIn('booking_id', $booking_ids)
-                                ->select('booking_id', DB::raw('MAX(shipper_status_id) as shipper_status_id'), DB::raw('MAX(created_at) as created_at'), DB::raw('MAX(id) as max_id'))
-                                ->groupBy('booking_id')
-                                ->get();
+                                DB::connection('apollo_db')->table('booking_journeys')->insert($apollo_booking_journeys);
+                                $booking_ids = array_unique(array_column($apollo_booking_journeys, 'booking_id'));
 
-                            foreach ($max_booking_statuses as $booking_status) {
-                                DB::connection('apollo_db')->table('trax_logistic_bookings')
-                                    ->where('id', $booking_status->booking_id) // Match the correct booking id
-                                    ->update([
-                                        'shipper_status_id' => $booking_status->shipper_status_id,
-                                        'consignee_status_id' => $booking_status->shipper_status_id,
-                                        'updated_at' => $booking_status->created_at, // You might want to update this field as well
-                                    ]);
+//                                $max_booking_statuses = DB::connection('apollo_db')->table('booking_journeys')
+//                                    ->whereIn('booking_id', $booking_ids)
+//                                    ->select('booking_id', DB::raw('MAX(shipper_status_id) as shipper_status_id'), DB::raw('MAX(created_at) as created_at'), DB::raw('MAX(id) as max_id'))
+//                                    ->groupBy('booking_id')
+//                                    ->get();
+
+                                $max_booking_statuses = DB::connection('apollo_db')->table('booking_journeys as bj')
+                                    ->joinSub(
+                                        DB::table('booking_journeys')
+                                            ->select('booking_id', DB::raw('MAX(id) as max_id'))
+                                            ->groupBy('booking_id'), 'subquery',
+                                        function ($join) {
+                                            $join->on('bj.booking_id', '=', 'subquery.booking_id')
+                                                ->on('bj.id', '=', 'subquery.max_id');
+                                        }
+                                    )->whereIn('bj.booking_id',$booking_ids) // Replace with your booking IDs
+                                    ->select('bj.booking_id', 'bj.shipper_status_id', 'bj.id as max_id')
+                                    ->get();
+
+                                foreach ($max_booking_statuses as $booking_status) {
+                                    DB::connection('apollo_db')->table('trax_logistic_bookings')
+                                        ->where('id', $booking_status->booking_id) // Match the correct booking id
+                                        ->update([
+                                            'shipper_status_id' => $booking_status->shipper_status_id,
+                                            'consignee_status_id' => $booking_status->shipper_status_id,
+                                            'updated_at' => $booking_status->created_at, // You might want to update this field as well
+                                        ]);
+                                }
                             }
-                        }
 
-                        if(!empty($apollo_piece_journeys)) {
+                            if(!empty($apollo_piece_journeys)) {
 
-                            DB::connection('apollo_db')->table('booking_piece_journeys')->insert($apollo_piece_journeys);
-                            $piece_ids = array_unique(array_column($apollo_piece_journeys, 'piece_id'));
+                                DB::connection('apollo_db')->table('booking_piece_journeys')->insert($apollo_piece_journeys);
+                                $piece_ids = array_unique(array_column($apollo_piece_journeys, 'piece_id'));
 
-                            $max_piece_statuses = DB::connection('apollo_db')->table('booking_piece_journeys')
-                                ->whereIn('piece_id', $piece_ids)
-                                ->select('piece_id', DB::raw('MAX(shipper_status_id) as shipper_status_id'), DB::raw('MAX(created_at) as created_at'), DB::raw('MAX(id) as max_id'))
-                                ->groupBy('piece_id')
-                                ->get();
+                                $max_piece_statuses = DB::connection('apollo_db')->table('booking_piece_journeys')
+                                    ->whereIn('piece_id', $piece_ids)
+                                    ->select('piece_id', DB::raw('MAX(shipper_status_id) as shipper_status_id'), DB::raw('MAX(created_at) as created_at'), DB::raw('MAX(id) as max_id'))
+                                    ->groupBy('piece_id')
+                                    ->get();
 
-                            foreach ($max_piece_statuses as $piece_status) {
-                                DB::connection('apollo_db')->table('trax_booking_pieces')
-                                    ->where('id', $piece_status->piece_id) // Match the correct booking id
-                                    ->update([
-                                        'shipper_status_id' => $piece_status->shipper_status_id,
-                                        'updated_at' => $piece_status->created_at, // You might want to update this field as well
-                                    ]);
+                                foreach ($max_piece_statuses as $piece_status) {
+                                    DB::connection('apollo_db')->table('trax_booking_pieces')
+                                        ->where('id', $piece_status->piece_id) // Match the correct booking id
+                                        ->update([
+                                            'shipper_status_id' => $piece_status->shipper_status_id,
+                                            'updated_at' => $piece_status->created_at, // You might want to update this field as well
+                                        ]);
+                                }
                             }
-                        }
 
-                        ApolloCronJobLog::where('id',1)->update(['last_run_time'=>$time_stamp]);
+                            ApolloCronJobLog::where('id',1)->update(['last_run_time'=>$time_stamp]);
 
-                        DB::connection('apollo_db')->commit();
+                            DB::connection('apollo_db')->commit();
 
                     } catch (\Throwable $th) {
                         DB::connection('apollo_db')->rollBack();
