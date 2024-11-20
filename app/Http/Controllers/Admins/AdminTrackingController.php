@@ -1320,10 +1320,13 @@ class AdminTrackingController extends Controller
 
                         $fintech_payment  = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
                             ->where('trax_pay_transactions.shipment_id',$shipment->id)
-                            ->orderBy('fintech_payment_details.id', 'desc');
+                            ->orderBy('fintech_payment_details.id', 'desc')
+                            ->select('fintech_payment_details.transaction_id')
+                            ->first();
 
-                        if($fintech_payment->exists()){
-                            $fintech_paid = '<button class="btn btn-sm btn-success align-middle"> Paid <i class="la la-lg la-credit-card"></i></button>';
+                        if(!empty($fintech_payment)){
+                            $transaction_id = $fintech_payment->transaction_id;
+                            $fintech_paid = '<button class="btn btn-sm btn-success align-middle"> Paid <br> PayFast('.$transaction_id.') <i class="la la-lg la-credit-card"></i></button>';
                         }
 
                         if ($shipment->booking_type_id != 4) {
