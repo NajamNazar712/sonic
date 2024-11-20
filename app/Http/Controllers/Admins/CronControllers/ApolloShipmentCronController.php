@@ -126,8 +126,8 @@ class ApolloShipmentCronController extends Controller
                                             $join->on('bj.booking_id', '=', 'subquery.booking_id')
                                                 ->on('bj.id', '=', 'subquery.max_id');
                                         }
-                                    )->whereIn('bj.booking_id',$booking_ids) // Replace with your booking IDs
-                                    ->select('bj.booking_id', 'bj.shipper_status_id', 'bj.id as max_id')
+                                    )->whereIn('bj.booking_id',$booking_ids)
+                                    ->select('bj.booking_id', 'bj.shipper_status_id', 'bj.id as max_id','bj.created_at')
                                     ->get();
 
                                 foreach ($max_booking_statuses as $booking_status) {
@@ -146,10 +146,26 @@ class ApolloShipmentCronController extends Controller
                                 DB::connection('apollo_db')->table('booking_piece_journeys')->insert($apollo_piece_journeys);
                                 $piece_ids = array_unique(array_column($apollo_piece_journeys, 'piece_id'));
 
-                                $max_piece_statuses = DB::connection('apollo_db')->table('booking_piece_journeys')
-                                    ->whereIn('piece_id', $piece_ids)
-                                    ->select('piece_id', DB::raw('MAX(shipper_status_id) as shipper_status_id'), DB::raw('MAX(created_at) as created_at'), DB::raw('MAX(id) as max_id'))
-                                    ->groupBy('piece_id')
+//                                $max_piece_statuses = DB::connection('apollo_db')->table('booking_piece_journeys')
+//                                    ->whereIn('piece_id', $piece_ids)
+//                                    ->select('piece_id', DB::raw('MAX(shipper_status_id) as shipper_status_id'), DB::raw('MAX(created_at) as created_at'), DB::raw('MAX(id) as max_id'))
+//                                    ->groupBy('piece_id')
+//                                    ->get();
+                                $max_piece_statuses = DB::connection('apollo_db')
+                                    ->table('booking_piece_journeys as bpj')
+                                    ->joinSub(
+                                        DB::connection('apollo_db')
+                                            ->table('booking_piece_journeys')
+                                            ->select('piece_id', DB::raw('MAX(id) as max_id'))
+                                            ->groupBy('piece_id'),
+                                        'max_rows',
+                                        function ($join) {
+                                            $join->on('bpj.piece_id', '=', 'max_rows.piece_id')
+                                                ->on('bpj.id', '=', 'max_rows.max_id');
+                                        }
+                                    )
+                                    ->whereIn('bpj.piece_id', $piece_ids) // Ensure $piece_ids is a valid array of IDs
+                                    ->select('bpj.piece_id', 'bpj.shipper_status_id', 'bpj.created_at', 'bpj.id as max_id')
                                     ->get();
 
                                 foreach ($max_piece_statuses as $piece_status) {
@@ -168,7 +184,10 @@ class ApolloShipmentCronController extends Controller
 
                     } catch (\Throwable $th) {
                         DB::connection('apollo_db')->rollBack();
-                        Log::channel('cronJobLog')->error('apollo-sync-shipment_journey:failed'. json_encode($th->getMessage()), ['trace' => json_encode($th->getTraceAsString())]);
+                        Log::channel('cronJobLog')->error('apollo-sync-shipment_journey:failed', [
+                            'error_message' => $th->getMessage(),
+                            'line' => $th->getLine(),
+                        ]);
                     }
 
                 }
