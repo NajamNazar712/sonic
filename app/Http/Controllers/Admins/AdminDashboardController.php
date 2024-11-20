@@ -10838,6 +10838,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 return $dropdown;
             })
+            ->rawColumns(['lead_id_link', 'duplication', 'id_padded', 'action'])
             ->make(true);
 
     }
@@ -10920,6 +10921,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 return $dropdown;
             })
+            ->rawColumns(['id_padded', 'action'])
             ->make(true);
 
     }
@@ -11727,16 +11729,75 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                     //--------------x---------x---------x--------x-------x---------x----------x--------x
                     // TO-6836 (Adding the reference hub as junction in new mappings)
+                    // $newJunctions1[] = [
+                    //     'junction_mapping_id' => $mapping->id,
+                    //     'junction_id' => $closestHubId,
+                    //     'created_at' => now(),
+                    //     'updated_at' => now()
+                    // ];
+
+                    // $junctionRoute = new V2JunctionRoutes();
+                    // $junctionRoute->junction_mapping_id = $mapping->id;
+                    // $junctionRoute->starting_hub_id = $mapping->origin_id;
+                    // $junctionRoute->ending_hub_id = $mapping->destination_id;
+                    // $junctionRoute->created_at = now();
+                    // $junctionRoute->save();
+
+                    // foreach ($requestVehicles as $vehicle) {
+                    //     $junctionRouteVehicles[] = [
+                    //         'junction_route_id' => $junctionRoute->id,
+                    //         'vehicle_id' => $vehicle,
+                    //         'created_at' => now(),
+                    //         'updated_at' => now()
+                    //     ];
+                    // }
+                    // V2JunctionVehicles::insert($junctionRouteVehicles);
+
+                    //--------------x---------x---------x--------END TO-6836-------x---------x----------x--------x
+
                     $newJunctions1[] = [
                         'junction_mapping_id' => $mapping->id,
                         'junction_id' => $closestHubId,
                         'created_at' => now(),
                         'updated_at' => now()
                     ];
+                    foreach ($junctions as $j) {
+                        $newJunctions1[] = [
+                            'junction_mapping_id' => $mapping->id,
+                            'junction_id' => $j->junction_id,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+                    }
+
+                    $previous = $mapping->origin_id;
+
+                    $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
+
+                    foreach ($routeJunctions as $rj) {
+                        $route_junction = new V2JunctionRoutes();
+                        $route_junction->junction_mapping_id = $mapping->id;
+                        $route_junction->starting_hub_id = $previous;
+                        $route_junction->ending_hub_id = $rj->starting_hub_id;
+                        $route_junction->save();
+            
+                        $previous = $rj->starting_hub_id;
+
+                        $vehicles = V2JunctionVehicles::where('junction_route_id', $rj->id)->get();
+            
+                        foreach ($vehicles as $vehicle) {
+                            $newRouteVehicles1[] = [
+                                'junction_route_id' => $route_junction->id,
+                                'vehicle_id' => $vehicle->vehicle_id,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ];
+                        }
+                    }
 
                     $junctionRoute = new V2JunctionRoutes();
                     $junctionRoute->junction_mapping_id = $mapping->id;
-                    $junctionRoute->starting_hub_id = $mapping->origin_id;
+                    $junctionRoute->starting_hub_id = $previous;
                     $junctionRoute->ending_hub_id = $mapping->destination_id;
                     $junctionRoute->created_at = now();
                     $junctionRoute->save();
@@ -11750,42 +11811,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         ];
                     }
                     V2JunctionVehicles::insert($junctionRouteVehicles);
-
-                    //--------------x---------x---------x--------END TO-6836-------x---------x----------x--------x
-
-                    foreach ($junctions as $j) {
-                        $newJunctions1[] = [
-                            'junction_mapping_id' => $mapping->id,
-                            'junction_id' => $j->junction_id,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ];
-                    }
-
-                    $previous = $mapping->destination_id;
-
-                    $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
-
-                    foreach ($routeJunctions as $rj) {
-                        $route_junction = new V2JunctionRoutes();
-                        $route_junction->junction_mapping_id = $mapping->id;
-                        $route_junction->starting_hub_id = $previous;
-                        $route_junction->ending_hub_id = $rj->ending_hub_id;
-                        $route_junction->save();
-            
-                        $previous = $rj->ending_hub_id;
-
-                        $vehicles = V2JunctionVehicles::where('junction_route_id', $rj->id)->get();
-            
-                        foreach ($vehicles as $vehicle) {
-                            $newRouteVehicles1[] = [
-                                'junction_route_id' => $route_junction->id,
-                                'vehicle_id' => $vehicle->vehicle_id,
-                                'created_at' => now(),
-                                'updated_at' => now()
-                            ];
-                        }
-                    }
                     
                 }
 
@@ -11849,34 +11874,40 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                     //------x--------x------x-------x------x------x-------x-------x--------x
                     // TO-6836 (Adding the reference hub as junction in new mappings)
+                    // $newJunctions2[] = [
+                    //     'junction_mapping_id' => $mapping->id,
+                    //     'junction_id' => $closestHubId,
+                    //     'created_at' => now(),
+                    //     'updated_at' => now()
+                    // ];
+
+                    
+                    // $junctionRoute2 = new V2JunctionRoutes();
+                    // $junctionRoute2->junction_mapping_id = $mapping->id;
+                    // $junctionRoute2->starting_hub_id = $mapping->origin_id;
+                    // $junctionRoute2->ending_hub_id = $mapping->destination_id;
+                    // $junctionRoute2->created_at = now();
+                    // $junctionRoute2->save();
+
+                    // foreach ($requestVehicles as $vehicle) {
+                    //     $junctionRoute2Vehicles[] = [
+                    //         'junction_route_id' => $junctionRoute2->id,
+                    //         'vehicle_id' => $vehicle,
+                    //         'created_at' => now(),
+                    //         'updated_at' => now()
+                    //     ];
+                    // }
+                    // V2JunctionVehicles::insert($junctionRoute2Vehicles);
+
+                    //------x--------x------x-------x------END TO-6836------x-------x-------x--------x
+
                     $newJunctions2[] = [
                         'junction_mapping_id' => $mapping->id,
                         'junction_id' => $closestHubId,
                         'created_at' => now(),
                         'updated_at' => now()
                     ];
-
-                    
-                    $junctionRoute2 = new V2JunctionRoutes();
-                    $junctionRoute2->junction_mapping_id = $mapping->id;
-                    $junctionRoute2->starting_hub_id = $mapping->origin_id;
-                    $junctionRoute2->ending_hub_id = $mapping->destination_id;
-                    $junctionRoute2->created_at = now();
-                    $junctionRoute2->save();
-
-                    foreach ($requestVehicles as $vehicle) {
-                        $junctionRoute2Vehicles[] = [
-                            'junction_route_id' => $junctionRoute2->id,
-                            'vehicle_id' => $vehicle,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ];
-                    }
-                    V2JunctionVehicles::insert($junctionRoute2Vehicles);
-
-                    //------x--------x------x-------x------END TO-6836------x-------x-------x--------x
-
-                    $previous = $mapping->destination_id;
+                    $previous = $mapping->origin_id;
 
                     $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
 
@@ -11900,6 +11931,23 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             ];
                         }
                     }
+
+                    $junctionRoute2 = new V2JunctionRoutes();
+                    $junctionRoute2->junction_mapping_id = $mapping->id;
+                    $junctionRoute2->starting_hub_id = $previous;
+                    $junctionRoute2->ending_hub_id = $mapping->destination_id;
+                    $junctionRoute2->created_at = now();
+                    $junctionRoute2->save();
+
+                    foreach ($requestVehicles as $vehicle) {
+                        $junctionRoute2Vehicles[] = [
+                            'junction_route_id' => $junctionRoute2->id,
+                            'vehicle_id' => $vehicle,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+                    }
+                    V2JunctionVehicles::insert($junctionRoute2Vehicles);
                     
                 }
 
@@ -12696,6 +12744,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 }
                 return $dropdown;
             })
+            ->rawColumns(['accounts_button', 'action'])
             ->make(true);
 
     }
@@ -13592,19 +13641,41 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 if ($old_reimbursement_account->exists()) {
                     $old_reimbursement_account_dates = $old_reimbursement_account->select('created_at')->groupBy('created_at')->get();
-                    foreach ($old_reimbursement_account_dates as $date) {
+                    $count = $old_reimbursement_account_dates->count();
+                    $lastIndex = count($old_reimbursement_account_dates) - 1;
+
+                    foreach ($old_reimbursement_account_dates as $key => $date) {
                         $date = Carbon::parse($date->created_at)->toDateString();
-                        if (!in_array($date, $details)) {
-                            $details[] = $date;
+                        $firstValue = false;
+                        if (isset($old_reimbursement_account_dates[$key], $old_reimbursement_account_dates[$key - 1])) {
+                            if ($key == 0){
+                                $date1 = $old_reimbursement_account_dates[$key];
+                                $date2 = null;
+                                $firstValue = true;
+                            } elseif ($key == $lastIndex) {
+                                $date1 = $old_reimbursement_account_dates[$key];
+                                $date2 = null;
+                            } else {
+                                $date1 = $old_reimbursement_account_dates[$key];
+                                $date2 = $old_reimbursement_account_dates[$key - 1];
+                            }
+                        } else {
+                            $date1 = $date;
+                            $date2 = null;
+                            $firstValue = true;
+                        }
+
+                        //Weight Check
+                        $compare_weight = $this->compareWeightCharges($user_id, WeightCharge::class, HistoryWeightCharge::class, $date1 ?? null, $date2 ?? null, $firstValue, $count);
+
+                        //Fuel Check
+                        $compare_fuel_surcharge = $this->compareFuelCharges($user_id, FuelSurcharge::class, HistoryFuelSurcharge::class, $date1 ?? null, $date2 ?? null, $firstValue, $count);
+
+                        if (!array_key_exists($date, $details)) {
+                            $details[$date]['weight'] = $compare_weight;
+                            $details[$date]['fuel'] = $compare_fuel_surcharge;
                         }
                     }
-
-                    //Weight Check
-                    $compare_weight = $this->compareWeightCharges($user_id, WeightCharge::class, HistoryWeightCharge::class);
-
-                    //Fuel Check
-                    $compare_fuel_surcharge = $this->compareFuelCharges($user_id, FuelSurcharge::class, HistoryFuelSurcharge::class);
-
 
                     return response()->json(['status' => 1, 'account_type' => 1, 'details' => $details, 'user_id' => $user_id, 'compare_weight' => $compare_weight ?? '', 'compare_fuel_surcharge' => $compare_fuel_surcharge ?? '']);
                 } else {
@@ -13615,61 +13686,48 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                 if ($old_corporate_account->exists()) {
                     $old_corporate_account_dates = $old_corporate_account->select('created_at')->groupBy('created_at')->get();
-                    foreach ($old_corporate_account_dates as $date) {
-                        $date = Carbon::parse($date->created_at)->toDateString();
-                        if (!in_array($date, $details)) {
-                            $details[] = $date;
+                    $count = $old_corporate_account_dates->count();
+                    $lastIndex = count($old_corporate_account_dates) - 1;
+
+                    foreach ($old_corporate_account_dates as $key => $date) {
+                        $date = Carbon::parse($date['created_at'])->toDateString();
+                        $firstValue = false;
+                        if (isset($old_corporate_account_dates[$key], $old_corporate_account_dates[$key - 1])) {
+                            if ($key == 0){
+                                $date1 = $old_corporate_account_dates[$key];
+                                $date2 = null;
+                                $firstValue = true;
+                            } elseif ($key == $lastIndex) {
+                                $date1 = $old_corporate_account_dates[$key];
+                                $date2 = null;
+                            } else {
+                                $date1 = $old_corporate_account_dates[$key];
+                                $date2 = $old_corporate_account_dates[$key - 1];
+                            }
+                        } else {
+                            $date1 = $date;
+                            $date2 = null;
+                            $firstValue = true;
+                        }
+
+                        $user = User::find($user_id);
+                        $corporateRateType = $user->corporate_rate_type_id;
+
+                        list($table1, $table2) = $this->getWeightTables($corporateRateType);
+
+                        $compare_weight = $this->compareWeightCharges(
+                            $user_id, $table1, $table2, $date1, $date2, $firstValue, $count
+                        );
+
+                        list($fTable1, $fTable2) = $this->getFuelTables($corporateRateType);
+
+                        $compare_fuel_surcharge =  $this->compareFuelCharges($user_id, $fTable1, $fTable2, $date1, $date2, $firstValue, $count);
+
+                        if (!array_key_exists($date, $details)) {
+                            $details[$date]['weight'] = $compare_weight;
+                            $details[$date]['fuel'] = $compare_fuel_surcharge;
                         }
                     }
-
-                    $user = User::find($user_id);
-                    if (!$user->corporate_rate_type_id) {
-                        $compare_weight = "Weight History Not Found";
-                    }
-
-                    $corporateRateType = $user->corporate_rate_type_id;
-                    switch ($corporateRateType) {
-                        case 1:
-                            $table1 = CorporateWeightCharge::class;
-                            $table2 = HistoryCorporateWeightCharge::class;
-                            break;
-
-                        case 2:
-                            $table1 = CorporateWeightChargeZoneWise::class;
-                            $table2 = HistoryCorporateWeightChargeZoneWise::class;
-                            break;
-
-                        default:
-                            $table1 = CorporateDefaultWeightCharge::class;
-                            $table2 = CorporateDefaultHistoryWeightCharge::class;
-                            break;
-                    }
-
-                    $compare_weight = $this->compareWeightCharges($user_id, $table1, $table2);
-
-
-                    $fTable1 = null;
-                    $fTable2 = null;
-                    switch ($corporateRateType) {
-                        case 1:
-                            $fTable1 = CorporateFuelSurcharge::class;
-                            $fTable2 = HistoryCorporateFuelSurcharge::class;
-                            break;
-
-                        case 3:
-                            $fTable1 = CorporateDefaultFuelSurcharge::class;
-                            $fTable2 = CorporateDefaultHistoryFuelSurcharge::class;
-                            break;
-                        default:
-                            $compare_fuel_surcharge = '';
-                            break;
-                    }
-
-                    // Compare fuel surcharges
-                    if($fTable1 && $fTable1){
-                        $compare_fuel_surcharge = $this->compareFuelCharges($user_id, $fTable1, $fTable2);
-                    }
-
                     return response()->json(['status' => 1, 'success', 'account_type' => 2, 'details' => $details, 'user_id' => $user_id, 'compare_weight' => $compare_weight ?? '', 'compare_fuel_surcharge' => $compare_fuel_surcharge ?? '']);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'No Data Found']);
@@ -13749,14 +13807,14 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 557);
         $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->get();
-        
+
         return view('admin.accounts.disable_account_intimation_survey')->with(['disabled_shippers' => $disabled_shippers]);
 
     }
 
     public function disable_account_intimation_survey_list(Request $request)
     {
-        
+
 
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 558);
@@ -13778,7 +13836,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                 $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
-    
+
                 $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -13790,7 +13848,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         $dropdown .= $edit_button;
                     }
                 }
-    
+
                 if (session('role_id') == 1 || in_array(765, session('permissions'))) {
                     if ($notification->status) {
                         $dropdown .= $disable_button;
@@ -13799,23 +13857,24 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         $dropdown .= $enable_button;
                     }
                 }
-    
+
                 $dropdown .= '
                       </div>
                     </div>
                 ';
-    
+
                 return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
     public function details(Request $request) {
-        
+
         $notification = DisableAccountIntimationQuestion::find($request->id);
 
         return $notification;
-        
+
     }
 
     public function edit(Request $request) {
@@ -13831,9 +13890,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $notification->option3 = $request->get('option3');
                 $notification->option4 = $request->get('option4');
                 $notification->updated_by = Auth::id();
-    
+
                 $notification->save();
-    
+
                 return ['status' => 0, 'success' => 'Question has been edited'];
 
             }
@@ -13841,7 +13900,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 return ['status' => 1, 'error' => 'Some one disabled this question please refresh your page'];
             }
 
-           
+
         }
         else {
             return ['status' => 1, 'error' => 'No Question with given ID is present'];
@@ -13863,15 +13922,15 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $notification->created_at = $timestamp;
         $notification->updated_at = $timestamp;
         $notification->save();
-    
+
         return ['status' => 0, 'success' => 'Question has been Added'];
     }
-    
+
 
     public function status(Request $request) {
-        
+
         $notification = DisableAccountIntimationQuestion::find($request->id);
-        
+
         if ($notification) {
 
             $notification->status = $request->status;
@@ -13895,14 +13954,14 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         if($request)
         {
             $disabled_shippers = "";
-           
+
             if($request->all_shippers_checkbox == "on")
             {
-                $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->select(['id','email','name','phone'])->get(); 
+                $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->select(['id','email','name','phone'])->get();
             }
             else if($request->all_shippers_checkbox == "off"){
 
-                $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->whereIn("id",$request->shipper_ids)->select(['id','email','name','phone'])->get(); 
+                $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->whereIn("id",$request->shipper_ids)->select(['id','email','name','phone'])->get();
             }
 
             if($request->send_via == "email")
@@ -13910,13 +13969,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 // id 179 is used for email notification Disable Account Intimation Survey
                 NotificationsController::send(179, $disabled_shippers);
                 return ['status' => 0, 'success' => 'Email Notification Send Sucessfully'];
-                
+
             }
             else if($request->send_via == "sms")
-            {    
+            {
                 // id 180 is used for sms notification Disable Account Intimation Survey
                 NotificationsController::send(180, $disabled_shippers);
-               
+
                 return ['status' => 0, 'success' => 'SMS Notification Send Sucessfully'];
             }
             else if($request->send_via == "both")
@@ -13938,10 +13997,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     public function survey_report(Request $request)
     {
-        
+
         ActivityTrailController::createActivityTrailLog(Auth::id(), 559);
         $disabled_shippers = User::where('status', '=', 4)->where('blacklist', '=', 0)->get();
-        
+
         return view('admin.accounts.disable_account_intimation_survey_report')->with(['disabled_shippers' => $disabled_shippers]);
     }
 
@@ -13954,7 +14013,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $surveyReport = DisableAccountIntimationSendSurvey::join('users','disable_account_intimation_send_surveys.shipper_id','users.id')
         ->join('admins as send_by','send_by.id','disable_account_intimation_send_surveys.send_by')
         ->select(['users.name as shipper_name','users.email','users.phone','disable_account_intimation_send_surveys.random_id','disable_account_intimation_send_surveys.send_via','send_by.name as send_by','disable_account_intimation_send_surveys.status','disable_account_intimation_send_surveys.url','disable_account_intimation_send_surveys.created_at']);
-        
+
 
         return Datatables::of($surveyReport)
             ->editColumn('status', function ($surveyReport) {
@@ -13972,7 +14031,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 }
             })
             ->editColumn('url', function ($surveyReport) {
-                
+
                 return $url = "<a href='$surveyReport->url' target='_blank'> $surveyReport->url</a>";
             })
             ->editColumn('answers', function ($surveyReport) {
@@ -13981,12 +14040,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 } else {
                     return $url = "<button class='btn btn-sm btn-outline-info align-middle show_answers'> Show Answers </button>";
                 }
-                
+
             })
             ->addColumn('url_excel', function ($surveyReport) {
-                
+
                 return $url =  $surveyReport->url;
             })
+            ->rawColumns(['url', 'answers', 'url_excel'])
             ->make(true);
     }
 
@@ -14004,12 +14064,12 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         {
             $submit_survey_data = $submit_survey_answers->get();
             return response()->json(['status' => 1, 'submit_survey_data' => $submit_survey_data]);
-                
+
         }
         else{
             return response()->json(['status' => 0, 'submit_survey_data' => []]);
         }
-        
+
     }
 
 
@@ -14398,7 +14458,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     public function substitute_accounts_email(Request $request,$id = null) {
         if ($request->filled('email')) {
             $email = SubstituteUser::where('email', $request->input('email'));
-  
+
             if ($id) {
                 $email = $email->where('id', '!=', $id);
             }
@@ -14425,10 +14485,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         ->select('merged_sister_accounts.user_id','users.name','merged_sister_accounts.merged_head_id')
         ->whereIn('merged_sister_accounts.merged_head_id',$merged_head_account_ids)
         ->where('merged_sister_accounts.user_id', '!=' , $shipper_id)->get();
-        
+
         return view('admin.accounts.substitute_account_management.add.index')->with(['shipper_id' => $shipper_id,'permissions' => $permissions , 'sister_accounts' => $sister_accounts]);
     }
-  
+
     public function substitute_accounts_add_store(Request $request,$id) {
 
         $substitute_user = new SubstituteUser();
@@ -14445,16 +14505,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $substitute_user->save();
 
         if ($request->has('account_ids')) {
-            
+
             foreach($request->input('account_ids') as $merge_head_id => $account_ids) {
                 foreach($account_ids as  $account_id) {
                     $Substitute_user_merge_sister_account_mapping = new SubstituteUserMergeSisterAccountMapping();
-    
+
                     $Substitute_user_merge_sister_account_mapping->substitute_user_id = $substitute_user->id;
                     $Substitute_user_merge_sister_account_mapping->merged_head_id = $merge_head_id;
                     $Substitute_user_merge_sister_account_mapping->head_user_id = $id;
                     $Substitute_user_merge_sister_account_mapping->sister_user_id = $account_id;
-        
+
                     $Substitute_user_merge_sister_account_mapping->save();
                 }
             }
@@ -14508,7 +14568,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     }
 
     public function substitute_accounts_update_index($shipper_id , $id) {
-        
+
         $permissions = SubstituteUserModulePermission::whereIn('id', [10])->get();
         $substitute_user = SubstituteUser::find($id);
 
@@ -14517,14 +14577,14 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         ->select('merged_sister_accounts.user_id','users.name','merged_sister_accounts.merged_head_id')
         ->whereIn('merged_sister_accounts.merged_head_id',$merged_head_account_ids)
         ->where('merged_sister_accounts.user_id', '!=' , $shipper_id)->get();
-        
+
         $merged_accounts = SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$id)->pluck('sister_user_id')->toArray();
 
         $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
 
         return view('admin.accounts.substitute_account_management.update.index')->with(['permissions' => $permissions, 'substitute_user' => $substitute_user, 'substitute_user_permissions' => $substitute_user_permissions, 'shipper_id' => $shipper_id , "id" => $id, 'sister_accounts' => $sister_accounts , 'merged_accounts' => $merged_accounts]);
     }
-  
+
     public function substitute_accounts_update_store(Request $request, $shipper_id , $id) {
 
         $substitute_user = SubstituteUser::find($id);
@@ -14538,7 +14598,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         if ($request->filled('password')) {
         $substitute_user->password = bcrypt($request->input('password'));
         }
-       
+
         $substitute_user->save();
         SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$id)->delete();
 
@@ -14548,12 +14608,12 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             foreach($request->input('account_ids') as $merge_head_id => $account_ids) {
                 foreach($account_ids as  $account_id) {
                     $Substitute_user_merge_sister_account_mapping = new SubstituteUserMergeSisterAccountMapping();
-    
+
                     $Substitute_user_merge_sister_account_mapping->substitute_user_id = $substitute_user->id;
                     $Substitute_user_merge_sister_account_mapping->merged_head_id = $merge_head_id;
                     $Substitute_user_merge_sister_account_mapping->head_user_id = $shipper_id;
                     $Substitute_user_merge_sister_account_mapping->sister_user_id = $account_id;
-        
+
                     $Substitute_user_merge_sister_account_mapping->save();
                 }
             }
@@ -14585,7 +14645,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
 
     public function shipment_received_details(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 669);        
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 669);
         $admin = Admin::select('id', 'name', 'trax_id')->where('status', 1)->get();
         return view('admin.management.shipment_received.index');
     }
@@ -14605,8 +14665,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'shipment_receiver_details.created_at',
             'admins.name as created_by'
             );
-        
-            
+
+
         $datatable = Datatables::of($all_received);
 
         return $datatable->make(true);
@@ -14638,10 +14698,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         if ($file = $request->file('receivers_excel')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
-            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();     
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
             $header = ['Tracking Number', 'Receiver Name', 'Receiver Cnic', 'Receiver Relationship'];
         }
-        
+
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
 
@@ -14679,7 +14739,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 unset($spreadsheet);
             }
         }
-        
+
         $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
         $shippers = explode(',', $shippers->text);
         $special_dashboard_shippers = User::whereIn('id', $shippers)->pluck('id')->toArray();
@@ -14969,7 +15029,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
     public function disable_booking_status(Request $request){
         $userIDS = $request->input('userIDS', []);
-   
+
         if(!is_array($userIDS) || empty($userIDS)){
             return response()->json(['status' => 'Invalid IDS'], 400);
         }
@@ -14984,10 +15044,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         City::whereIn('id', $userIDS)->update(['booking_enable_status' => '0']);
         return response()->json(['status' => 200]);
     }
-   
+
     public function enable_booking_status(Request $request){
         $userIDS = $request->input('userIDS', []);
-   
+
         if(!is_array($userIDS) || empty($userIDS)){
             return response()->json(['status' => 'Invalid IDS'], 400);
         }
@@ -14999,14 +15059,14 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         }else if (count($error) > 0 && count($userIDS) != count($error)){
             return response()->json(['status' => 'Some Of The Selected Cities Are Already Enabled']);
         }
-   
+
         City::whereIn('id', $userIDS)->update(['booking_enable_status' => '1']);
         return response()->json(['status' => 200]);
-      
-    }
-   
 
-   
+    }
+
+
+
 
     public function add_rate_commission_corporate_reimb(Request $request, $shipper_ids)
     {
@@ -15060,7 +15120,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     foreach($request->tier_id as $row_id => $tier){
                         $sales_tier = SalesTier::find($tier);
                         if(isset($request->user_id[$row_id])){
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                            if (strpos($request->user_id[$row_id], 'riders') !== false) {
                                 preg_match('/\d+/', $request->user_id[$row_id], $matches);
                                 $rider_id = isset($matches[0]) ? $matches[0] : null;
                                 $same_user = SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->where('user_id', $rider_id);
@@ -15081,15 +15141,15 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
                                 $index = intval($request->user_id[$row_id]);
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {
                                     $sales_commission_user->user_type = "2";
-                                }  
+                                }
 
                                 if(isset($user_type[$index]) && $user_type[$index] == "2"){
                                     $sales_commission_user->user_type = "2";
                                 }
                                 $sales_commission_user->user_id = $request->user_id[$row_id];
-                              
+
                             }else if($sales_tier->tier_type == 2){
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -15104,7 +15164,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     }
                     $sales_commission->commission = $total_commission;
                     $sales_commission->save();
-    
+
                 }else{
                     $sales_commission = new SalesCommission();
                     $sales_commission->shipper_id = $shipper_id;
@@ -15122,16 +15182,16 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {
                                     $sales_commission_user->user_type = "2";
-                                }  
+                                }
 
-                                
+
                                 if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
                                     $sales_commission_user->user_type = "2";
                                 }
-                        
-                                $sales_commission_user->user_id = $request->user_id[$row_id]; 
+
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
                             }else if($sales_tier->tier_type == 2){
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -15168,8 +15228,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $sale_tier_object->kam = $request->user_id[$row_id];
                     $sale_tier_object->save();
                 } else {
-                    $sale_tier_object = $sale_tier_tag->first(); 
-                    $sale_tier_object->kam = $request->user_id[$row_id]; 
+                    $sale_tier_object = $sale_tier_tag->first();
+                    $sale_tier_object->kam = $request->user_id[$row_id];
                     $sale_tier_object->save();
                 }
             }
@@ -15182,7 +15242,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     public function balance_count_commission($shipperId)
     {
         $sales_commission = SalesCommission::where('shipper_id', $shipperId)->first();
-    
+
         if ($sales_commission) {
             $sales_commission_id = $sales_commission->id;
             $actual_commission = SalesCommissionUser::whereIn('sales_commission_id', [$sales_commission_id])->pluck('commission')->toArray();
@@ -15261,7 +15321,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
         return redirect()->back()->with('success', 'FAF Charges Status Updated');
     }
-    public static function compareWeightCharges($user_id, $table1, $table2)
+
+    public static function compareWeightCharges($user_id, $table1, $table2, $date1 = null, $date2 = null, $firstValue, $count_list)
     {
         $excludeColumns = [
             'id',
@@ -15273,59 +15334,99 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'base'
         ];
 
-        $currentWeightChargeColumns = array_diff((new $table1)->getFillable(), $excludeColumns);
-        $previousWeightChargeColumns = array_diff((new $table2)->getFillable(), $excludeColumns);
+        $currentColumns = array_diff((new $table1)->getFillable(), $excludeColumns);
+        $previousColumns = array_diff((new $table2)->getFillable(), $excludeColumns);
 
-        $latestHistory = $table2::where('user_id', $user_id)->latest('created_at')->first();
-
-        if (!$latestHistory) {
-            if ($table1::where('user_id', $user_id)->exists()) {
-                return 'Rates Added Only';
+        $calculateTotal = function ($table, $user_id, $date, $columns) {
+            $query = $table::where('user_id', $user_id);
+            if ($date) {
+                $query->where('created_at', $date);
             }
-            return '';
+            return $query->selectRaw('SUM(' . implode(') + SUM(', $columns) . ') as total')->value('total');
+        };
+
+        if (empty($date2)) {
+            $latestHistory = $table2::where('user_id', $user_id)->latest('created_at')->first();
+
+            if (!$latestHistory) {
+                return $table1::where('user_id', $user_id)->exists() ? 'Rates Updated Only' : '';
+            }
+
+            $currentTotal = $calculateTotal($table1, $user_id, null, $currentColumns);
+            $previousTotal = $calculateTotal($table2, $user_id, $latestHistory->created_at, $previousColumns);
+
+            if (!$firstValue || ($count_list) == 1) {
+                return $currentTotal > $previousTotal ? 'green' : ($currentTotal < $previousTotal ? 'red' : 'yellow');
+            }
+
+            return 'Rates Updated Only';
+        } else {
+            $previousDate = $table2::where('user_id', $user_id)->where('created_at', '>=', $date2->created_at)->value('created_at');
+            $currentDate = $table2::where('user_id', $user_id)->where('created_at', '>=', $date1->created_at)->value('created_at');
+
+            $currentTotal = $calculateTotal($table2, $user_id, $currentDate, $currentColumns);
+            $previousTotal = $calculateTotal($table2, $user_id, $previousDate, $previousColumns);
+
+            return $currentTotal > $previousTotal ? 'green' : ($currentTotal < $previousTotal ? 'red' : 'yellow');
         }
-
-        $currentTotal = $table1::where('user_id', $user_id)
-            ->selectRaw('SUM(' . implode(') + SUM(', $currentWeightChargeColumns) . ') as total')
-            ->value('total');
-
-        $previousTotal = $table2::where('user_id', $user_id)
-            ->where('created_at', $latestHistory->created_at)
-            ->selectRaw('SUM(' . implode(') + SUM(', $previousWeightChargeColumns) . ') as total')
-            ->value('total');
-
-        if ($currentTotal > $previousTotal) {
-            return 'green';
-        } elseif ($currentTotal < $previousTotal) {
-            return 'red';
-        }
-
-        return 'yellow';
     }
 
 
-    public static function compareFuelCharges($user_id, $table1, $table2)
+    public static function compareFuelCharges($user_id, $table1, $table2, $date1 = null, $date2 = null, $firstValue, $count_list)
     {
-        $latestDate = $table2::where('user_id', $user_id)
-            ->latest('created_at')
-            ->value('created_at');
 
-        $history_fuel_surcharge = $table2::where('user_id', $user_id);
+        // Helper function to get fuel surcharge sum based on user ID and optional date
+        $getFuelSurchargeSum = function($table, $user_id, $date = null) {
+            $query = $table::where('user_id', $user_id);
+            if ($date) {
+                $query->where('created_at', $date);
+            }
+            return $query->sum('fuel_surcharge');
+        };
 
-        if ($latestDate) {
-            $history_fuel_surcharge->where('created_at', $latestDate);
+        if (empty($date2)) {
+            // Case where date2 is empty
+            $latestDate = $table2::where('user_id', $user_id)->latest('created_at')->value('created_at');
+            $historyFuelSurchargeSum = $getFuelSurchargeSum($table2, $user_id, $latestDate);
+            $existingFuelSurchargeSum = $getFuelSurchargeSum($table1, $user_id);
+
+        } else {
+            // Case with both dates provided
+            $historyDate = $table2::where('user_id', $user_id)->where('created_at', '>=', $date2->created_at)->value('created_at');
+            $historyFuelSurchargeSum = $getFuelSurchargeSum($table2, $user_id, $historyDate);
+
+            $nextDate = $table2::where('user_id', $user_id)->where('created_at', '>=', $date1->created_at)->value('created_at');
+            $existingFuelSurchargeSum = $getFuelSurchargeSum($table2, $user_id, $nextDate);
         }
 
-        $history_fuel_surcharge_sum = $history_fuel_surcharge->sum('fuel_surcharge');
-
-        $existing_fuel_surcharge_sum = $table1::where('user_id', $user_id)->sum('fuel_surcharge');
-
-        if ($existing_fuel_surcharge_sum && $history_fuel_surcharge_sum) {
-            return $existing_fuel_surcharge_sum > $history_fuel_surcharge_sum ? 'green'
-                : ($existing_fuel_surcharge_sum < $history_fuel_surcharge_sum ? 'red' : 'yellow');
+        // Comparison of fuel surcharges
+        if (!$firstValue || ($count_list) == 1) {
+            return $existingFuelSurchargeSum > $historyFuelSurchargeSum ? 'green'
+                : ($existingFuelSurchargeSum < $historyFuelSurchargeSum ? 'red' : 'yellow');
         }
 
         return 'Fuel Added Only';
+    }
+
+    private function getWeightTables(int $weightType): array
+    {
+        switch ($weightType) {
+            case 1:
+                return [CorporateWeightCharge::class, HistoryCorporateWeightCharge::class];
+            case 2:
+                return [CorporateWeightChargeZoneWise::class, HistoryCorporateWeightChargeZoneWise::class];
+            default:
+                return [CorporateDefaultWeightCharge::class, CorporateDefaultHistoryWeightCharge::class];
+        }
+    }
+
+    private function getFuelTables(int $fuelType): array
+    {
+        if ($fuelType === 1 || $fuelType === 2) {
+            return [CorporateFuelSurcharge::class, HistoryCorporateFuelSurcharge::class];
+        }
+
+        return [CorporateDefaultFuelSurcharge::class, CorporateDefaultFuelSurcharge::class];
     }
 
     public function addExcelCityHub(Request $request)
@@ -15524,6 +15625,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         if (empty($errors)) {
             $isHubArray = [];
             $isCityArray = [];
+            $hubMappings = [];
 
             $forms = $rows;
 
@@ -15571,6 +15673,11 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             $cities = City::whereIn('id', $cityID)->get()->keyBy('id');
 
             foreach ($forms as $item) {
+
+                $hubMappings[] = [
+                    'closest_hub' => $item['closest_hub'],
+                    'vehicles_list' => $item['vehicles_list']
+                ];
 
                 if (array_key_exists('closest_hub', $item) && is_null($item['closest_hub'])) {
                     unset($item['closest_hub']);
@@ -15685,42 +15792,28 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 self::addManagementHubUser($admin_ids, $insertedIds);
 
                 // Insertion for dynamic mapping hubs
-                if (!empty($closestHubTypes) && !empty($insertedIds)) {
-                    $cities = City::findMany($insertedIds);
+                if (!empty($hubMappings) && !empty($insertedIds)) {
 
-                    $cityMap = [];
-                    foreach ($cities as $city) {
-                        $cityMap[$city->id] = $city;
-                    }
+                    foreach ($hubMappings as $key => $value) {
 
-                    $hubMappings = [];
+                        if(!isset($value['closest_hub'])){
+                            continue;
+                        }
 
-                    foreach ($closestHubTypes as $key => $value) {
-                        if (count($value) > 0) {
-                            $keys = array_keys($closestHubTypes);
-                            $index = array_search($key, $keys, true);
-
-                            if ($index !== false && isset($insertedIds[$index])) {
-                                $cityId = $insertedIds[$index];
-
-                                if (isset($cityMap[$cityId])) {
-                                    $hubMappings[] = [
-                                        'vehicles' => $value,
-                                        'closest_hub' => $key,
-                                        'city' => $cityMap[$cityId],
-                                    ];
-                                } else {
-                                    Log::warning("City ID {$cityId} not found in city map.");
-                                }
-                            } else {
-                                Log::warning("Index not found for key {$key} in inserted IDs.");
-                            }
+                        if(isset($insertedIds[$key])){
+                            $hubMappings[$key] = [
+                                'closest_hub' => $value['closest_hub'],
+                                'vehicles' => explode(',' , $value['vehicles_list']),
+                                'city_id' => $insertedIds[$key],
+                            ];
                         }
                     }
 
                     // Dispatch jobs for each mapping
                     foreach ($hubMappings as $mapping) {
-                        dispatch(new MakeDynamicHubsMapping($mapping['vehicles'], $mapping['closest_hub'], $mapping['city'], auth()->id()));
+                        if(isset($mapping['closest_hub'])){
+                            dispatch(new MakeDynamicHubsMapping($mapping['vehicles'], $mapping['closest_hub'], $mapping['city_id'], auth()->id()));
+                        }
                     }
                 }
 
@@ -15804,8 +15897,6 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
         return [$array, $deliveryTypes, $walkInTypes, $osaList, $closestHubTypes];
     }
-
-
 
     // Function to retrieve the last inserted city IDs
     public static function getLastInsertedCityIds($count) {

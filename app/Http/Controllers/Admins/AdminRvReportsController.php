@@ -233,6 +233,8 @@ class AdminRvReportsController extends Controller
             $rv_call_logs->where('s.tracking_number', $request->get('search_tracking_no'));
         }   
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number'])
+        ->make(true);
     }
 }

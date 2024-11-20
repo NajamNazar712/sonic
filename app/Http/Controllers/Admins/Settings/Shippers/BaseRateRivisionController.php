@@ -276,7 +276,9 @@ class BaseRateRivisionController extends Controller
                 return '';
             });
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['file_view', 'action'])
+        ->make(true);
     }
 
     public function shippersWithRates($baseRateRevisionId)

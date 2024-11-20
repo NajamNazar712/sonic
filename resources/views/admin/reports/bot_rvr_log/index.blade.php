@@ -352,7 +352,7 @@
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 22:00:00',
+                formatSubmit: 'yyyy-mm-dd 22:01:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                 }

@@ -215,9 +215,13 @@
 
                             $.each(result.data, function(index, values) {
                                 row = [];
-
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
+
+                                // Removed all the html elements when downloading excel sheet for tracking number column
+                                let tracking_number = new DOMParser().parseFromString(values.tracking_number, 'text/html').body.textContent.trim();
+                                
+                                // row.push(values.tracking_number);
+                                row.push(tracking_number);
                                 row.push(values.destination);
                                 row.push(values.rider_detail);
                                 row.push(values.transaction_amount);
@@ -286,7 +290,7 @@
                     this.api().table().columns.adjust();
                 }
             });
-            dd(url)
+            // dd(url)
             
 
         });

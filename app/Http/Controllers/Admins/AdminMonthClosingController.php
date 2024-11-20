@@ -271,7 +271,9 @@ class AdminMonthClosingController extends Controller
                 return $dropdown;
 
             });
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link', 'action'])
+        ->make(true);
 
     }
     public function assign_responsible_submit(Request $request){
@@ -415,7 +417,9 @@ class AdminMonthClosingController extends Controller
                 $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
                 return $remark;
             });
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link', 'claim_id_link', 'shipment_remarks'])
+        ->make(true);
 
     }
     public function month_closing_closed(Request $request){

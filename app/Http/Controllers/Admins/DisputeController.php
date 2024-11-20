@@ -152,7 +152,7 @@ class DisputeController extends Controller
                     return '';
                 }
             })
-
+            ->rawColumns(['no_of_shipments', 'action'])
             ->make(true);
     }
     static public function add_short_received_shipments($receiving,$shipments){

@@ -459,7 +459,44 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users, 'parcel_bypass' => $parcel_bypass]);
+        $viewData = [
+            'booking_types' => $booking_types,
+            'user' => $user,
+            'multi_piece' => $multi_piece,
+            'cities' => $cities,
+            'products' => $products,
+            'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings,
+            'payment_modes' => $payment_modes,
+            'consignee_cities' => $consignee_cities,
+            'check' => $check,
+            'charges_modes' => $charges_modes,
+            'date' => $date,
+            'air_waybill' => $air_waybill,
+            'omni_user' => $omni_user,
+            'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users,
+            'parcel_bypass' => $parcel_bypass
+        ];
+        
+        $substitute_account = null;
+        $substitute_account_pickup_address = null;
+
+        if (session('substitute_user_id')) {
+            $substitute_account = SubstituteUser::find(session('substitute_user_id'));
+            if ($substitute_account && $substitute_account->pickup_address_id) {
+                // Convert the comma-separated string to an array
+                $pickup_address_ids = explode(',', $substitute_account->pickup_address_id);
+                // Retrieve the UserShippingInfo records
+                $substitute_account_pickup_address = UserShippingInfo::whereIn('id', $pickup_address_ids)->get();
+            }
+        }
+
+        // Add the substitute account pickup addresses to view data
+        $viewData['substitute_account'] = $substitute_account;
+        $viewData['substitute_account_pickup_address'] = $substitute_account_pickup_address;
+
+        // return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users, 'parcel_bypass' => $parcel_bypass]);
+        return view('client.shipment.book.index')->with($viewData);
+
     }
 
     public function shipping_modes(Request $request)
@@ -2850,7 +2887,38 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-        return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes, 'omni_user' => $omni_user]);
+        $viewData = [
+            'booking_types' => $booking_types,
+            'user' => $user,
+            'pickup_addresses' => $pickup_addresses,
+            'cities' => $cities,
+            'products' => $products,
+            'shipping_modes' => $shipping_modes,
+            'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings,
+            'payment_modes' => $payment_modes,
+            'charges_modes' => $charges_modes,
+            'omni_user' => $omni_user,
+        ];
+
+        $substitute_account = null;
+        $substitute_account_pickup_address = null;
+
+        if (session('substitute_user_id')) {
+            $substitute_account = SubstituteUser::find(session('substitute_user_id'));
+            if ($substitute_account && $substitute_account->pickup_address_id) {
+                // Convert the comma-separated string to an array
+                $pickup_address_ids = explode(',', $substitute_account->pickup_address_id);
+                // Retrieve the UserShippingInfo records
+                $substitute_account_pickup_address = UserShippingInfo::whereIn('id', $pickup_address_ids)->get();
+            }
+        }
+
+        // Add the substitute account pickup addresses to view data
+        $viewData['substitute_account'] = $substitute_account;
+        $viewData['substitute_account_pickup_address'] = $substitute_account_pickup_address;
+
+        // return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes, 'omni_user' => $omni_user]);
+        return view('client.shipment.book.excel')->with($viewData);
     }
 
     public function excel_store(Request $request)
@@ -2858,6 +2926,12 @@ class ShipperShipmentBookController extends Controller
         $user_id = session('user_id');
         $account_type = session('account_type');
         $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
+
+        $substitute_user_pickup_address = SubstituteUser::where('user_id', $user_id)
+        ->where('id', Session::get('substitute_user_id'))
+        ->select(['pickup_address_id'])
+        ->first();
+
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -3381,6 +3455,15 @@ class ShipperShipmentBookController extends Controller
                         ];
                     }
                 }
+
+                if (Session::has('substitute_user_id') && $substitute_user_pickup_address && $substitute_user_pickup_address->pickup_address_id !== null)
+                {
+                    $pickupAddressIds = array_map('intval', explode(',', $substitute_user_pickup_address->pickup_address_id));
+                    if (!in_array((int)$row['pickup_address_id'], $pickupAddressIds)) {
+                        $errors[$row_id]['pickup_address_id'] = 'Invalid Pickup Address';
+                    }
+                }
+
                 $validate = Validator::make($row, $rules, $messages);
 
                 $validate->setAttributeNames($names);
@@ -3916,7 +3999,46 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types, 'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user]);
+        $viewData = [
+            'booking_types' => $booking_types,
+            'multi_piece' => $multi_piece,
+            'user' => $user,
+            'cities' => $cities,
+            'distribution_products' => $distribution_products,
+            'products' => $products,
+            'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings,
+            'payment_modes' => $payment_modes,
+            'consignee_cities' => $consignee_cities,
+            'check' => $check,
+            'delivery_type' => $delivery_type,
+            'charges_modes' => $charges_modes,
+            'date' => $date,
+            'air_waybill' => $air_waybill,
+            'user_delivery_types' => $user_delivery_types,
+            'approve_ftl_requests' => $approve_ftl_requests,
+            'omni_user' => $omni_user,
+        ];
+
+        $substitute_account = null;
+        $substitute_account_pickup_address = null;
+
+        if (session('substitute_user_id')) {
+            $substitute_account = SubstituteUser::find(session('substitute_user_id'));
+            if ($substitute_account && $substitute_account->pickup_address_id) {
+                // Convert the comma-separated string to an array
+                $pickup_address_ids = explode(',', $substitute_account->pickup_address_id);
+                // Retrieve the UserShippingInfo records
+                $substitute_account_pickup_address = UserShippingInfo::whereIn('id', $pickup_address_ids)->get();
+            }
+        }
+
+        // Add the substitute account pickup addresses to view data
+        $viewData['substitute_account'] = $substitute_account;
+        $viewData['substitute_account_pickup_address'] = $substitute_account_pickup_address;
+
+        // return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types, 'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types, 'approve_ftl_requests' => $approve_ftl_requests, 'omni_user' => $omni_user]);
+        return view('client.shipment.book.corporate.index')->with($viewData);
+
     }
 
     public function corporate_store(Request $request) {
@@ -4812,11 +4934,10 @@ class ShipperShipmentBookController extends Controller
 
     public function corporate_excel_index()
     {
-
-//        if(session('user_id') == 10354)
-//        {
-//            return back();
-//        }
+        //        if(session('user_id') == 10354)
+        //        {
+        //            return back();
+        //        }
 
         $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
@@ -4876,7 +4997,42 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-        return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights, 'distribution_products' => $distribution_products, 'omni_user' => $omni_user]);
+        $viewData = [
+            'booking_types' => $booking_types,
+            'user' => $user,
+            'pickup_addresses' => $pickup_addresses,
+            'cities' => $cities,
+            'products' => $products,
+            'shipping_modes' => $shipping_modes,
+            'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings,
+            'payment_modes' => $payment_modes,
+            'delivery_types' => $delivery_types,
+            'charges_modes' => $charges_modes,
+            'min_chargeable_weights' => $min_chargeable_weights,
+            'distribution_products' => $distribution_products,
+            'omni_user' => $omni_user
+        ];
+
+        $substitute_account = null;
+        $substitute_account_pickup_address = null;
+
+        if (session('substitute_user_id')) {
+            $substitute_account = SubstituteUser::find(session('substitute_user_id'));
+            if ($substitute_account && $substitute_account->pickup_address_id) {
+                // Convert the comma-separated string to an array
+                $pickup_address_ids = explode(',', $substitute_account->pickup_address_id);
+                // Retrieve the UserShippingInfo records
+                $substitute_account_pickup_address = UserShippingInfo::whereIn('id', $pickup_address_ids)->get();
+            }
+        }
+
+        // Add the substitute account pickup addresses to view data
+        $viewData['substitute_account'] = $substitute_account;
+        $viewData['substitute_account_pickup_address'] = $substitute_account_pickup_address;
+
+        // return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights, 'distribution_products' => $distribution_products, 'omni_user' => $omni_user]);
+        return view('client.shipment.book.corporate.excel')->with($viewData);
+
     }
 
     public function corporate_excel_mms_index()
@@ -4958,6 +5114,11 @@ class ShipperShipmentBookController extends Controller
             $omni = $request->omni;
         }
         $rate_type_id = session('rate_type_id');
+
+        $substitute_user_pickup_address = SubstituteUser::where('user_id', $user_id)
+        ->where('id', Session::get('substitute_user_id'))
+        ->select(['pickup_address_id'])
+        ->first();
 
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
             if ($value) {
@@ -5301,7 +5462,14 @@ class ShipperShipmentBookController extends Controller
                     $row['same_day_timing_id'] = NULL;
                     $rows[$key]['same_day_timing_id'] = NULL;
                 }
-                 
+
+                if (Session::has('substitute_user_id') && $substitute_user_pickup_address && $substitute_user_pickup_address->pickup_address_id !== null)
+                {
+                    $pickupAddressIds = array_map('intval', explode(',', $substitute_user_pickup_address->pickup_address_id));
+                    if (!in_array((int)$row['pickup_address_id'], $pickupAddressIds)) {
+                        $errors[$row_id]['pickup_address_id'] = 'Invalid Pickup Address';
+                    }
+                }
                 
                 $validate = Validator::make($row, $rules, $messages);
 
@@ -5694,6 +5862,12 @@ class ShipperShipmentBookController extends Controller
         $user_id = session('user_id');
         $account_type = session('account_type');
         $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
+
+        $substitute_user_pickup_address = SubstituteUser::where('user_id', $user_id)
+        ->where('id', Session::get('substitute_user_id'))
+        ->select(['pickup_address_id'])
+        ->first();
+
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -6202,6 +6376,14 @@ class ShipperShipmentBookController extends Controller
                             return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
                         })
                     ];
+                }
+
+                if (Session::has('substitute_user_id') && $substitute_user_pickup_address && $substitute_user_pickup_address->pickup_address_id !== null)
+                {
+                    $pickupAddressIds = array_map('intval', explode(',', $substitute_user_pickup_address->pickup_address_id));
+                    if (!in_array((int)$row['pickup_address_id'], $pickupAddressIds)) {
+                        $errors[$row_id]['pickup_address_id'] = 'Invalid Pickup Address';
+                    }
                 }
 
                 $validate = Validator::make($row, $rules, $messages);

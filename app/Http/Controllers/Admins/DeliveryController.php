@@ -6006,6 +6006,74 @@ class DeliveryController extends Controller
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
         }
 
+
+        if ($tracking_number = $request->get('search_tracking')) {
+            $shipment = Shipment::where('tracking_number', $tracking_number)->get()->first();
+            if ($shipment) {
+                $sdn->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
+                    ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
+                    ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
+                    ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
+                    ->where('s.tracking_number', '=', $tracking_number)
+                    ->groupBy('station_deposit_notes.id');
+            }
+            // $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
+            //     ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
+            //     ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
+            //     ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
+            //     ->where('s.tracking_number', '=', $tracking_number)
+            //     ->orWhere(function ($query) use ($tracking_number) {
+            //         $query->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
+            //             ->join('retail_pickup_notes as rpn', 'pnsdn.retail_pickup_note_id', '=', 'rpn.id')
+            //             ->join('retail_pickup_note_shipments as rpns', 'rpns.retail_pickup_note_id', '=', 'rpn.id')
+            //             ->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
+            //             ->where('s.tracking_number', '=', $tracking_number);
+            //     })
+            //     ->groupBy('station_deposit_notes.id');
+
+
+
+        }
+        if ($tracking_number = $request->get('search_tracking_retail')) {
+            $shipment = Shipment::where('tracking_number', $tracking_number)->get()->first();
+            if ($shipment) {
+                // $retail_shipment = RetailShipment::where('shipment_id',$shipment->id);
+                // if($retail_shipment->exists()){
+                $sdn->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
+                    ->join('retail_pickup_notes as rpn', 'pnsdn.retail_pickup_note_id', '=', 'rpn.id')
+                    ->join('retail_pickup_note_shipments as rpns', 'rpns.retail_pickup_note_id', '=', 'rpn.id')
+                    ->join('shipments as rs', 'rpns.shipment_id', '=', 'rs.id')
+                    ->where('rs.tracking_number', '=', $tracking_number)
+                    ->groupBy('station_deposit_notes.id');
+                // }
+            }
+        }
+
+
+        if ($dncc = $request->get('scan_dncc')) {
+            $sdn->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
+                ->where('dnsdns.delivery_note_id', '=', $dncc)
+                ->groupBy('station_deposit_notes.id');
+        }
+        if ($rncc = $request->get('scan_rncc')) {
+            $sdn->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
+                ->where('pnsdn.retail_pickup_note_id', '=', $rncc)
+                ->groupBy('station_deposit_notes.id');
+        }
+        if ($sdn_request = $request->get('scan_sdn')) {
+            $sdn->whereIn('station_deposit_notes.id', explode(',', $sdn_request));
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $sdn->whereBetween('station_deposit_notes.status_updated_at', [$from, $to]);
+        }
+        if ($request->get('search_date_from_deposited') && $request->get('search_date_to_deposited')) {
+            $from = $request->get('search_date_from_deposited');
+            $to = $request->get('search_date_to_deposited');
+            $sdn->where('station_deposit_notes.status', 1);
+            $sdn->whereBetween('station_deposit_notes.created_at', [$from, $to]);
+        }
         $datatable = Datatables::of($sdn)
             ->setRowAttr([
                 'data-type' => function ($sdn) {
@@ -6390,7 +6458,9 @@ class DeliveryController extends Controller
                 } else {
                     return '-';
                 }
-            });
+            })
+            ->rawColumns(['sdn','adjusted_reference_link','deposit_slip', 'dncc_link','delivered_shipments_link' , 'action']);
+
 
         // ->filterColumn('zone', function ($query, $keyword) {
         //     if ($keyword == 0) {
@@ -6405,73 +6475,7 @@ class DeliveryController extends Controller
         //         $query->whereRaw('false');
         //     }
         // });
-        if ($tracking_number = $request->get('search_tracking')) {
-            $shipment = Shipment::where('tracking_number', $tracking_number)->get()->first();
-            if ($shipment) {
-                $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
-                    ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
-                    ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
-                    ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
-                    ->where('s.tracking_number', '=', $tracking_number)
-                    ->groupBy('station_deposit_notes.id');
-            }
-            // $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
-            //     ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
-            //     ->join('delivery_note_shipments as dnss', 'dnss.delivery_note_id', '=', 'dn.id')
-            //     ->join('shipments as s', 'dnss.shipment_id', '=', 's.id')
-            //     ->where('s.tracking_number', '=', $tracking_number)
-            //     ->orWhere(function ($query) use ($tracking_number) {
-            //         $query->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
-            //             ->join('retail_pickup_notes as rpn', 'pnsdn.retail_pickup_note_id', '=', 'rpn.id')
-            //             ->join('retail_pickup_note_shipments as rpns', 'rpns.retail_pickup_note_id', '=', 'rpn.id')
-            //             ->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
-            //             ->where('s.tracking_number', '=', $tracking_number);
-            //     })
-            //     ->groupBy('station_deposit_notes.id');
-
-
-
-        }
-        if ($tracking_number = $request->get('search_tracking_retail')) {
-            $shipment = Shipment::where('tracking_number', $tracking_number)->get()->first();
-            if ($shipment) {
-                // $retail_shipment = RetailShipment::where('shipment_id',$shipment->id);
-                // if($retail_shipment->exists()){
-                $datatable->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
-                    ->join('retail_pickup_notes as rpn', 'pnsdn.retail_pickup_note_id', '=', 'rpn.id')
-                    ->join('retail_pickup_note_shipments as rpns', 'rpns.retail_pickup_note_id', '=', 'rpn.id')
-                    ->join('shipments as rs', 'rpns.shipment_id', '=', 'rs.id')
-                    ->where('rs.tracking_number', '=', $tracking_number)
-                    ->groupBy('station_deposit_notes.id');
-                // }
-            }
-        }
-
-
-        if ($dncc = $request->get('scan_dncc')) {
-            $datatable->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
-                ->where('dnsdns.delivery_note_id', '=', $dncc)
-                ->groupBy('station_deposit_notes.id');
-        }
-        if ($rncc = $request->get('scan_rncc')) {
-            $datatable->join('pickup_note_station_deposit_notes as pnsdn', 'station_deposit_notes.id', '=', 'pnsdn.station_deposit_note_id')
-                ->where('pnsdn.retail_pickup_note_id', '=', $rncc)
-                ->groupBy('station_deposit_notes.id');
-        }
-        if ($sdn = $request->get('scan_sdn')) {
-            $datatable->whereIn('station_deposit_notes.id', explode(',', $sdn));
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('station_deposit_notes.status_updated_at', [$from, $to]);
-        }
-        if ($request->get('search_date_from_deposited') && $request->get('search_date_to_deposited')) {
-            $from = $request->get('search_date_from_deposited');
-            $to = $request->get('search_date_to_deposited');
-            $datatable->where('station_deposit_notes.status', 1);
-            $datatable->whereBetween('station_deposit_notes.created_at', [$from, $to]);
-        }
+        
         return $datatable->make(true);
     }
 
@@ -6919,6 +6923,7 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->rawColumns(['tracking_number_link', 'status_date'])
             ->make(true);
     }
 
@@ -8256,6 +8261,7 @@ class DeliveryController extends Controller
                     return 'Different Consignee';
                 }
             })
+            ->rawColumns(['tracking_number_link'])
             ->make(true);
     }
 
@@ -8576,7 +8582,9 @@ class DeliveryController extends Controller
                 return $amount;
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link', 'reason', 'amount'])
+        ->make(true);
     }
 
     public function replacement_not_collected_re_attempt(Request $request)
@@ -8862,7 +8870,9 @@ class DeliveryController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function sdn_slip_view(Request $request)

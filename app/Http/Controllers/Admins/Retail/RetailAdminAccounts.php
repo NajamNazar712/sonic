@@ -74,7 +74,9 @@ class RetailAdminAccounts extends Controller
             })
         ;
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['action'])
+        ->make(true);
 
     }
     public function retail_bank_info(Request $request){

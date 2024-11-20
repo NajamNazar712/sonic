@@ -307,7 +307,9 @@ class AdminDailyVisitController extends Controller
             $datatables->whereBetween('daily_visits.created_at', [$from, $to]);
         }
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['b_c_photo', 'l_photo', 'location', 'action'])
+        ->make(true);
     }
 
 
