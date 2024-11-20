@@ -978,7 +978,14 @@ class AdminShipmentHandoverController extends Controller
         ->filterColumn('created_at_area', function ($query, $keyword) {
           $keyword = '%' . strtolower(trim($keyword)) . '%';
           $query->where(function ($subQuery) use ($keyword) {
-              $subQuery->where('ssj_f.location_status', 'like', $keyword);
+              $subQuery->whereRaw('LOWER(caf.name) LIKE ?', [$keyword])
+                ->orWhereRaw(
+                  'LOWER(CASE 
+                  WHEN ssj_f.location_status = 0 THEN "off-site"
+                  WHEN ssj_f.location_status = 1 THEN "on-site"
+                  ELSE "-" 
+                  END
+                ) LIKE ?', [$keyword]);
           });
         })
 
@@ -991,7 +998,13 @@ class AdminShipmentHandoverController extends Controller
         ->filterColumn('received_at_area', function ($query, $keyword) {
           $keyword = '%' . strtolower(trim($keyword)) . '%';
           $query->where(function ($subQuery) use ($keyword) {
-              $subQuery->where('ssj_r.location_status', 'like', $keyword);
+              $subQuery->whereRaw('LOWER(car.name) LIKE ?', [$keyword])
+                ->orWhereRaw(
+                    'LOWER(CASE 
+                        WHEN ssj_r.location_status = 0 THEN "off-site"
+                        WHEN ssj_r.location_status = 1 THEN "on-site"
+                        ELSE "-" 
+                    END) LIKE ?', [$keyword]);
           });
         });
 
@@ -1010,9 +1023,18 @@ class AdminShipmentHandoverController extends Controller
         }
 
         if ($search_area = $request->get('search_area')) {
-          $datatable->where(function($query) use ($search_area) {
-              $query->where('ssj_f.area_id', '=', $search_area)
-                    ->orWhere('ssj_r.area_id', '=', $search_area);
+          // $datatable->where(function($query) use ($search_area) {
+          //     $query->where('ssj_f.area_id', '=', $search_area)
+          //     ->orWhere('ssj_r.area_id', '=', $search_area);
+          // });
+
+          $area_name = CityArea::where('id', (int)$search_area)
+              ->select('name')
+              ->first();
+
+          $datatable->where(function($query) use ($area_name) {
+            $query->where('c_from.name', '=', $area_name->name)
+              ->orWhere('c_to.name', '=', $area_name->name);
           });
         } 
         return  $datatable->make(true);
