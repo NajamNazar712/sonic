@@ -223,6 +223,7 @@ class ShipperReturnController extends Controller
 
                 return $dropdown;
             })
+            ->rawColumns(['tracking_number','consignee_phone','shipment_remarks','action'])
             ->make(true);
     }
     public function check_consolidation($shipment_id)
@@ -606,6 +607,7 @@ class ShipperReturnController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->rawColumns(['tracking_number'])
             ->make(true);
     }
     public function blacklist_search_consignee(Request $request)
@@ -689,7 +691,7 @@ class ShipperReturnController extends Controller
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->select('shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'u.name as shipper', 'u.phone as shipper_phone1', 'u.phone2 as shipper_phone2', 'oc.name as origin', 'dc.name as destination', 'shipments.order_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.id as reason_id', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as last_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.remarks as shipper_remarks', 'shipments.shipper_status_id as current_status_id', 'shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted', 'dc.id as consignee_city_id', 'shipments.shipping_mode_id')
             ->where('shipments.user_id', session('user_id'))
-            ->where('shipments.shipper_status_id', DB::raw(20))
+//            ->where('shipments.shipper_status_id', DB::raw(20))
             ->groupBy('shipments.id');
         if (session('user_type') == 2) {
             if (session('restriction') == 1) {
@@ -698,6 +700,13 @@ class ShipperReturnController extends Controller
                         ->where('sus.substitute_user_id', '=', Auth::id());
                 });
             }
+        }
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $shipments->where('sm.id', '=', $mode);
         }
 
         $datatable = Datatables::of($shipments)
@@ -834,13 +843,8 @@ class ShipperReturnController extends Controller
 
                 return $dropdown;
             });
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        }
-        if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', '=', $mode);
-        }
-        return $datatable->make(true);
+
+        return $datatable->rawColumns(['tracking_number','action'])->make(true);
     }
     public function return_sheet_pending_index()
     {
@@ -868,8 +872,7 @@ class ShipperReturnController extends Controller
                     );
             })
             ->select('s.id as shId', 's.tracking_number', 's.tracking_number as tracking', 'oc.name as origin', 'dc.name as destination', 's.order_id', 'h.name as hub', 's.consignee_name', 's.consignee_phone_number_1', 's.consignee_phone_number_2', 's.consignee_address', 's.amount', 'sm.mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'usi.poc', 'shipments_journey.remarks as shipper_remarks')
-            ->where('return_sheets.user_id', session('user_id'))
-            ->where('return_sheets.status_id', DB::raw(0));
+            ->where('return_sheets.user_id', session('user_id'));
         if (session('user_type') == 2) {
             if (session('restriction') == 1) {
                 $shipments = $shipments->join('substitute_user_shipments as sus', function ($join) {
@@ -914,7 +917,7 @@ class ShipperReturnController extends Controller
                     return '-';
                 }
             });
-        return $datatable->make(true);
+        return $datatable->rawColumns(['tracking_number'])->make(true);
     }
 
     public function return_sheet_receive_index()
@@ -1049,6 +1052,6 @@ class ShipperReturnController extends Controller
                     return '-';
                 }
             });
-        return $datatable->make(true);
+        return $datatable->rawColumns(['tracking_number'])->make(true);
     }
 }

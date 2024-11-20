@@ -23,7 +23,8 @@ class AdminReceivingSheetHistoryController extends Controller
         $this->middleware('Permission');
     }
     public function receiving_sheet_index()
-    {   ActivityTrailController::createActivityTrailLog(Auth::id(),273);
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),273);
         $shipper_name=User::select('id','name')->get();
         $origin=City::select('id','name')->where('pickup',1)->get();
         return view('admin.shipment.receiving_sheet.index')->with(['shipper_name'=>$shipper_name,'origin'=> $origin]);

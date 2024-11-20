@@ -34,6 +34,12 @@ class ShipperShipmentPieceController extends Controller
             ->where('shipments.shipper_status_id', 62)
             ->where('shipment_pieces_requests.status', 1);
 
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments->whereBetween('shipment_pieces_requests.created_at', [$from,$to]);
+        }
+
         $datatables = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('cod.tracking.index');
@@ -81,13 +87,9 @@ class ShipperShipmentPieceController extends Controller
                         return '-';
                     }
                     return $dropdown;
-            });
+            })->rawColumns(['tracking_number_link','action']);
 
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $shipments->whereBetween('shipment_pieces_requests.created_at', [$from,$to]);
-        }
+
 
         return $datatables->make(true);
     }
@@ -182,6 +184,12 @@ class ShipperShipmentPieceController extends Controller
             ->where('shipments.user_id', session('user_id'))
             ->where('shipment_pieces_requests.status', 2);
 
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments->whereBetween('shipment_pieces_requests.created_at', [$from,$to]);
+        }
+
         $datatables = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('cod.tracking.index');
@@ -197,13 +205,9 @@ class ShipperShipmentPieceController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            });
+            })->rawColumns('tracking_number_link');
 
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $shipments->whereBetween('shipment_pieces_requests.created_at', [$from,$to]);
-        }
+
 
         return $datatables->make(true);
     }
