@@ -310,7 +310,7 @@ class ShipperReturnController extends Controller
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 15, 'consignee_status_id' => 15]);
                     ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, $user_id, NULL);
 
-                    request()->request->add(['shipment_id' => $shipmentId]);
+                    $request->merge(['shipment_id' => $shipmentId]);
 
                     $updated_by_id = $user_id;
                     $updated_type_id = 3; //updated by shipper;
@@ -356,7 +356,7 @@ class ShipperReturnController extends Controller
                     ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
 
                     // Update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to completed(4)
-                    request()->request->add(['shipment_id' => $shipment]);
+                    $request->merge(['shipment_id' => $shipment]);
 
                     $updated_by_id = Auth::id();
                     $updated_type_id = 3; //updated by shipper
@@ -385,7 +385,7 @@ class ShipperReturnController extends Controller
                 // Update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to completed(4)
                 // $this->shipment_status_update_shipper($request, 7, 2, 4);
 
-                request()->request->add(['shipment_id' => $parcel->id]);
+                $request->merge(['shipment_id' => $parcel->id]);
 
                 $updated_by_id = Auth::id();
                 $updated_type_id = 3; //updated by shipper;
@@ -412,7 +412,7 @@ class ShipperReturnController extends Controller
                         $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 65)->where('status_reason_id', 12)->latest('id')->first();
                         // Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
                         if (SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists()) { // If shipper is lay on AList then will be auto re-attempt
-                            request()->request->add(['shipment_id' => $shipment]);
+                            $request->merge(['shipment_id' => $shipment]);
                             $this->reattempt($request, session('user_id'));
                             //return response()->json(['status' => 1, 'success' => "We're reattempting your shipment request directly, without a call request"]);
                             continue;
@@ -438,7 +438,7 @@ class ShipperReturnController extends Controller
                         $this->rvshipmentticketInsert($shipment, 66, $last_reason_id, $parcel->user_id,2);
                         //update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to open(3)
                         // $this->shipment_status_update_shipper($request, 7, 2, 3);
-                        request()->request->add(['shipment_id' => $shipment]);
+                        $request->merge(['shipment_id' => $shipment]);
                         $updated_by_id = Auth::id();
                         $updated_type_id = 3; //updated by shipper;
                         $updated_rv_assign_agent_status_id = 2; //reattempt call request
@@ -488,10 +488,10 @@ class ShipperReturnController extends Controller
         //             ShipmentsJourneyController::add($shipment, 66, 66, $last_reason_id, $remarks, session('user_id'), NULL, $reference_1_id);
 
         //             //update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to open(3)
-        //             // request()->request->add(['shipment_id' => $shipment]);
+        //             // $request->merge(['shipment_id' => $shipment]);
         //             // $this->shipment_status_update_shipper($request, 7, 2, 3);
 
-        //             request()->request->add(['shipment_id' => $shipment]);
+        //             $request->merge(['shipment_id' => $shipment]);
         //             //$updated_type_id updated by shipper = 3
         //             //$updated_rv_assign_agent_status_id, reattempt i.e is 2 
         //             //$updated_rv_state_id updating rv status to 4 i.e completed 
@@ -530,7 +530,7 @@ class ShipperReturnController extends Controller
                     
                     
                     if (SpecifiedShipper::where(['user_id' => $parcel->user_id, 'status' => 1])->exists()) { // If shipper is lay on AList then will be auto re-attempt
-                        request()->request->add(['shipment_id' => $request->shipment_id]);
+                        $request->merge(['shipment_id' => $request->shipment_id]);
                         $this->reattempt($request, session('user_id'));
                         return response()->json(['status' => 1, 'success' => "We're reattempting your shipment request directly, without a call request"]);
                     }
@@ -563,7 +563,7 @@ class ShipperReturnController extends Controller
                     // $this->shipment_status_update_shipper($request, 7, 2, 3);
 
 
-                    request()->request->add(['shipment_id' => $parcel->id]);
+                    $request->merge(['shipment_id' => $parcel->id]);
 
                     $updated_by_id = Auth::id();
                     $updated_type_id = 3; //updated by shipper;

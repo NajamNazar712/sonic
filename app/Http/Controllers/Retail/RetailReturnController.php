@@ -265,7 +265,7 @@ class RetailReturnController extends Controller
                        $return_assign_log->save();
                    }
 
-                   request()->request->add(['shipment_id' => $request->shipment_id]);
+                   $request->merge(['shipment_id' => $request->shipment_id]);
                     //$updated_type_id updated by retail = 5
                     //$updated_rv_assign_agent_status_id, reattempt requested i.e is 2
                     //$updated_rv_state_id updating rv status to 3 i.e open 
