@@ -21,16 +21,16 @@ class MakeDynamicHubsMapping implements ShouldQueue
 
     protected $requestVehicles;
     protected $closestHubId;
-    protected $city;
+    protected $cityID;
     protected $authId;
 
 
-    public function __construct(array $requestVehicles, int $closestHubId, $city, $authId)
+    public function __construct(array $requestVehicles, int $closestHubId, $cityID, $authId)
     {
         $this->queue = 'make_dynamic_hubs_mapping';
         $this->requestVehicles = $requestVehicles;
         $this->closestHubId = $closestHubId;
-        $this->city = $city;
+        $this->cityID = $cityID;
         $this->authId = $authId;
 
     }
@@ -39,7 +39,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
     {
         //take this hub as reference hub
         $closestHubId = $this->closestHubId;
-        $city = $this->city;
+        $cityID = $this->cityID;
         $requestVehicles = $this->requestVehicles;
         $authId = $this->authId;
 
@@ -59,7 +59,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
 
                 $mapping = new V2JunctionMapping();
 
-                $mapping->origin_id = $city->id; //here origin will be the newly created hub for all mappings
+                $mapping->origin_id = $cityID; //here origin will be the newly created hub for all mappings
                 $mapping->destination_id = $closestHubMapping->destination_id;//destinations will be of the closest hub
                 $mapping->status = $closestHubMapping->status;
                 $mapping->updated_by = $authId;
@@ -70,16 +70,75 @@ class MakeDynamicHubsMapping implements ShouldQueue
 
                 //--------------x---------x---------x--------x-------x---------x----------x--------x
                 // TO-6836 (Adding the reference hub as junction in new mappings)
+                // $newJunctions1[] = [
+                //     'junction_mapping_id' => $mapping->id,
+                //     'junction_id' => $closestHubId,
+                //     'created_at' => now(),
+                //     'updated_at' => now()
+                // ];
+
+                // $junctionRoute = new V2JunctionRoutes();
+                // $junctionRoute->junction_mapping_id = $mapping->id;
+                // $junctionRoute->starting_hub_id = $mapping->origin_id;
+                // $junctionRoute->ending_hub_id = $mapping->destination_id;
+                // $junctionRoute->created_at = now();
+                // $junctionRoute->save();
+
+                // foreach ($requestVehicles as $vehicle) {
+                //     $junctionRouteVehicles[] = [
+                //         'junction_route_id' => $junctionRoute->id,
+                //         'vehicle_id' => $vehicle,
+                //         'created_at' => now(),
+                //         'updated_at' => now()
+                //     ];
+                // }
+                // V2JunctionVehicles::insert($junctionRouteVehicles);
+
+                //--------------x---------x---------x--------END TO-6836-------x---------x----------x--------x
+
                 $newJunctions1[] = [
                     'junction_mapping_id' => $mapping->id,
                     'junction_id' => $closestHubId,
                     'created_at' => now(),
                     'updated_at' => now()
                 ];
+                foreach ($junctions as $j) {
+                    $newJunctions1[] = [
+                        'junction_mapping_id' => $mapping->id,
+                        'junction_id' => $j->junction_id,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
+                }
+
+                $previous = $mapping->origin_id;
+
+                $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
+
+                foreach ($routeJunctions as $rj) {
+                    $route_junction = new V2JunctionRoutes();
+                    $route_junction->junction_mapping_id = $mapping->id;
+                    $route_junction->starting_hub_id = $previous;
+                    $route_junction->ending_hub_id = $rj->starting_hub_id;
+                    $route_junction->save();
+
+                    $previous = $rj->starting_hub_id;
+
+                    $vehicles = V2JunctionVehicles::where('junction_route_id', $rj->id)->get();
+
+                    foreach ($vehicles as $vehicle) {
+                        $newRouteVehicles1[] = [
+                            'junction_route_id' => $route_junction->id,
+                            'vehicle_id' => $vehicle->vehicle_id,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+                    }
+                }
 
                 $junctionRoute = new V2JunctionRoutes();
                 $junctionRoute->junction_mapping_id = $mapping->id;
-                $junctionRoute->starting_hub_id = $mapping->origin_id;
+                $junctionRoute->starting_hub_id = $previous;
                 $junctionRoute->ending_hub_id = $mapping->destination_id;
                 $junctionRoute->created_at = now();
                 $junctionRoute->save();
@@ -94,42 +153,6 @@ class MakeDynamicHubsMapping implements ShouldQueue
                 }
                 V2JunctionVehicles::insert($junctionRouteVehicles);
 
-                //--------------x---------x---------x--------END TO-6836-------x---------x----------x--------x
-
-                foreach ($junctions as $j) {
-                    $newJunctions1[] = [
-                        'junction_mapping_id' => $mapping->id,
-                        'junction_id' => $j->junction_id,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ];
-                }
-
-                $previous = $mapping->destination_id;
-
-                $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
-
-                foreach ($routeJunctions as $rj) {
-                    $route_junction = new V2JunctionRoutes();
-                    $route_junction->junction_mapping_id = $mapping->id;
-                    $route_junction->starting_hub_id = $previous;
-                    $route_junction->ending_hub_id = $rj->ending_hub_id;
-                    $route_junction->save();
-
-                    $previous = $rj->ending_hub_id;
-
-                    $vehicles = V2JunctionVehicles::where('junction_route_id', $rj->id)->get();
-
-                    foreach ($vehicles as $vehicle) {
-                        $newRouteVehicles1[] = [
-                            'junction_route_id' => $route_junction->id,
-                            'vehicle_id' => $vehicle->vehicle_id,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ];
-                    }
-                }
-
             }
 
             V2Junctions::insert($newJunctions1);
@@ -138,7 +161,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
             //for creating mapping between the newly created hub and the closest hub
             $mapping1 = new V2JunctionMapping();
 
-            $mapping1->origin_id = $city->id;
+            $mapping1->origin_id = $cityID;
             $mapping1->destination_id = $closestHubId;
             $mapping1->updated_by = $authId;
             $mapping1->save();
@@ -174,7 +197,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
                 $mapping = new V2JunctionMapping();
 
                 $mapping->origin_id = $closestHubMapping->origin_id; //here origin will be the closest hub for all mappings
-                $mapping->destination_id = $city->id;//here destination will be the newly created hub for all mappings
+                $mapping->destination_id = $cityID;//here destination will be the newly created hub for all mappings
                 $mapping->status = $closestHubMapping->status;
                 $mapping->updated_by = $authId;
                 $mapping->save();
@@ -192,34 +215,40 @@ class MakeDynamicHubsMapping implements ShouldQueue
 
                 //------x--------x------x-------x------x------x-------x-------x--------x
                 // TO-6836 (Adding the reference hub as junction in new mappings)
+                // $newJunctions2[] = [
+                //     'junction_mapping_id' => $mapping->id,
+                //     'junction_id' => $closestHubId,
+                //     'created_at' => now(),
+                //     'updated_at' => now()
+                // ];
+
+
+                // $junctionRoute2 = new V2JunctionRoutes();
+                // $junctionRoute2->junction_mapping_id = $mapping->id;
+                // $junctionRoute2->starting_hub_id = $mapping->origin_id;
+                // $junctionRoute2->ending_hub_id = $mapping->destination_id;
+                // $junctionRoute2->created_at = now();
+                // $junctionRoute2->save();
+
+                // foreach ($requestVehicles as $vehicle) {
+                //     $junctionRoute2Vehicles[] = [
+                //         'junction_route_id' => $junctionRoute2->id,
+                //         'vehicle_id' => $vehicle,
+                //         'created_at' => now(),
+                //         'updated_at' => now()
+                //     ];
+                // }
+                // V2JunctionVehicles::insert($junctionRoute2Vehicles);
+
+                //------x--------x------x-------x------END TO-6836------x-------x-------x--------x
+
                 $newJunctions2[] = [
                     'junction_mapping_id' => $mapping->id,
                     'junction_id' => $closestHubId,
                     'created_at' => now(),
                     'updated_at' => now()
                 ];
-
-
-                $junctionRoute2 = new V2JunctionRoutes();
-                $junctionRoute2->junction_mapping_id = $mapping->id;
-                $junctionRoute2->starting_hub_id = $mapping->origin_id;
-                $junctionRoute2->ending_hub_id = $mapping->destination_id;
-                $junctionRoute2->created_at = now();
-                $junctionRoute2->save();
-
-                foreach ($requestVehicles as $vehicle) {
-                    $junctionRoute2Vehicles[] = [
-                        'junction_route_id' => $junctionRoute2->id,
-                        'vehicle_id' => $vehicle,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ];
-                }
-                V2JunctionVehicles::insert($junctionRoute2Vehicles);
-
-                //------x--------x------x-------x------END TO-6836------x-------x-------x--------x
-
-                $previous = $mapping->destination_id;
+                $previous = $mapping->origin_id;
 
                 $routeJunctions = V2JunctionRoutes::where('junction_mapping_id', $closestHubMapping->id)->get();
 
@@ -244,6 +273,23 @@ class MakeDynamicHubsMapping implements ShouldQueue
                     }
                 }
 
+                $junctionRoute2 = new V2JunctionRoutes();
+                $junctionRoute2->junction_mapping_id = $mapping->id;
+                $junctionRoute2->starting_hub_id = $previous;
+                $junctionRoute2->ending_hub_id = $mapping->destination_id;
+                $junctionRoute2->created_at = now();
+                $junctionRoute2->save();
+
+                foreach ($requestVehicles as $vehicle) {
+                    $junctionRoute2Vehicles[] = [
+                        'junction_route_id' => $junctionRoute2->id,
+                        'vehicle_id' => $vehicle,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
+                }
+                V2JunctionVehicles::insert($junctionRoute2Vehicles);
+
             }
 
             V2Junctions::insert($newJunctions2);
@@ -253,7 +299,7 @@ class MakeDynamicHubsMapping implements ShouldQueue
             $mapping2 = new V2JunctionMapping();
 
             $mapping2->origin_id = $closestHubId;
-            $mapping2->destination_id = $city->id;
+            $mapping2->destination_id = $cityID;
             $mapping2->updated_by = $authId;
             $mapping2->save();
 

@@ -85,6 +85,7 @@
                             <th class="border-primary border-darken-1">Account Head</th>
                             <th class="border-primary border-darken-1">Account Title</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
+                            <th class="border-primary border-darken-1">Cost Centre</th>
                             <th class="border-primary border-darken-1"> Amount </th>
                             <th class="border-primary border-darken-1"> Employee Id </th>
                             <th class="border-primary border-darken-1"> Name </th>
@@ -368,6 +369,7 @@
                     {data:'account_head' ,name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
                     {data:'account_title' ,name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
                     {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense form-group doe-col-width'},
+                    {data:'cost_centre', name: 'cost_centre', class: 'align-middle cost_centre custom-col-width form-group'},
                     {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount custom-col-width form-group'},
                     {data:'employee_trax_id' ,name: 'a.trax_id', class: 'align-middle employee_trax_id custom-col-width form-group'},
                     {data:'employee_name' ,name: 'petty_cash_statement_details.employee_name', class: 'align-middle custom-col-width employee_name form-group'},
@@ -390,6 +392,11 @@
                 drawCallback: function (settings) {
                     var this_table = this;
 
+                    $(".cost_centre_select").select2({
+                        placeholder: "Select Cost Centre",
+                        width:'100%',
+                        allowClear:true,
+                    });
                     $(".head_select").select2({
                         placeholder: "Select Account Head",
                         width:'100%'
@@ -452,7 +459,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.status') || $(header).is('.date') || $(header).is('.hub_name') || $(header).is('.account_head') || $(header).is('.account_title') || $(header).is('.action') || $(header).is('.reference_document')) {
+                        if ($(header).is('.serial_number') || $(header).is('.status') || $(header).is('.date') || $(header).is('.hub_name') || $(header).is('.account_head') || $(header).is('.account_title') || $(header).is('.action') || $(header).is('.reference_document') || $(header).is('.cost_centre')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -689,6 +696,7 @@
                         $(row.node()).find('td.account_title select').attr('disabled',false);
                         $(row.node()).find('td.zone select').attr('disabled',false);
                         $(row.node()).find('td.details_of_expense textarea').attr('disabled',false);
+                        $(row.node()).find('td.cost_centre select').attr('disabled',false);
                         $(row.node()).find('td.dncc select').attr('disabled',false);
                         $(row.node()).find('td.expense_amount input').attr('disabled',false);
                         $(row.node()).find('td.reference_no input').attr('disabled',false);
