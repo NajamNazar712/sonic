@@ -732,12 +732,12 @@ class LostShipmentsController extends Controller
                     $shipment_details->save();
                     ShipmentsJourneyController::add($shipment_details->id, 18, NULL, $shipment_status_reason_for_shipment_lost_id, $remarks[$shipment_details->id],NULL,Auth::id(), NULL, NULL, 0);
 
-                    $lostShipmentsTime = ShipmentsJourney::where([
+                    $lostShipmentTime = ShipmentsJourney::where([
                         'shipment_id' => $shipment,
                         'shipper_status_id' => 18,
                     ])->latest()->first();
 
-                    $lostShipmentsTime[$shipment] = !empty($lostShipmentsTime->created_at) ? $lostShipmentsTime->created_at : now();
+                    $lostShipmentsTime[$shipment] = !empty($lostShipmentTime->created_at) ? $lostShipmentTime->created_at : now();
 
                     $lost_shipments_array[] = $shipment;
 
