@@ -271,6 +271,31 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            // $('#search_date_from').pickadate({
+            //     firstDay: 1,
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 00:00:00',
+            //     hiddenSuffix: '_formatted',
+            //     onSet: function (context) {
+            //         if (context.select) {
+            //             $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+            //         }
+            //     }
+            // });
+            // $('#search_date_to').pickadate({
+            //     firstDay: 1,
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 23:59:59',
+            //     hiddenSuffix: '_formatted',
+            //     onSet: function (context) {
+            //         if (context.select) {
+            //             $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+            //         }
+            //     }
+            // })
+
             $('#search_date_from').pickadate({
                 firstDay: 1,
                 selectYears: true,
@@ -279,10 +304,16 @@
                 hiddenSuffix: '_formatted',
                 onSet: function (context) {
                     if (context.select) {
-                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                        const fromPicker = $('#search_date_from').pickadate('picker');
+                        const toPicker = $('#search_date_to').pickadate('picker');
+                        toPicker.set('min', fromPicker.get('select'));
+                        const maxDate = new Date(fromPicker.get('select').pick);
+                        maxDate.setMonth(maxDate.getMonth() + 6);
+                        toPicker.set('max', maxDate);
                     }
                 }
             });
+
             $('#search_date_to').pickadate({
                 firstDay: 1,
                 selectYears: true,
@@ -291,10 +322,15 @@
                 hiddenSuffix: '_formatted',
                 onSet: function (context) {
                     if (context.select) {
-                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                        const toPicker = $('#search_date_to').pickadate('picker');
+                        const fromPicker = $('#search_date_from').pickadate('picker');
+                        fromPicker.set('max', toPicker.get('select'));
+                        const minDate = new Date(toPicker.get('select').pick);
+                        minDate.setMonth(minDate.getMonth() - 6);
+                        fromPicker.set('min', minDate);
                     }
                 }
-            })
+            });
 
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Hub',
