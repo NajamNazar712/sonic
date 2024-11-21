@@ -20,6 +20,7 @@
         "laravel/framework": "^9.19",
         "laravel/tinker": "^2.7",
         "laravel/ui": "^3.4.6",
+        "laravelcollective/html": "^6.4",
         "league/flysystem-aws-s3-v3": "^3.0",
         "milon/barcode": "^9.0",
         "phpoffice/phpspreadsheet": "^1.3",
