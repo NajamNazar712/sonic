@@ -284,7 +284,7 @@ class RetailAdminUserManagementController extends Controller
     {
         $request->validate([
             'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
-            'franchise_deduction' => 'required|numeric',
+            // 'franchise_deduction' => 'required|numeric',
             'franchise_withholding' => 'required|numeric',
             'name' => 'required',
             'phone_number' => 'required',
