@@ -248,63 +248,63 @@ class RetailTrackingController extends Controller
                                     }
                                 }
 
-    //                        if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
-    //                            if ($journey->shipper_status_id == 3) {
-    //                                $bag = Bag::where('id', $journey->reference_1_id);
-    //                                if($bag->exists()){
-    //                                    $bag = $bag->first();
-    //                                    $master_cargo_bags = MasterCargoBag::where('bag_id', $bag->id);
-    //                                    if($master_cargo_bags->exists()){
-    //                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
-    //                                    }
-    //                                    else{
-    //                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
-    //                                    }
-    //                                }
-    //                                else{
-    //                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
-    //                                }
-    //                            }
-    //                            elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
-    //                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-    //                            }
-    //                            else {
-    //                                if(in_array($journey->shipper_status_id, [23, 24, 25, 28, 29, 31, 44, 45, 47, 48])){
-    ////                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle return_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-    //                                    $journey_details['status'] .= $journey->reference_1_id;
-    //                                    if($journey->shipper_status_id == 25 && $journey->reference_1_id){
-    //                                        $return_note = ReturnNote::find($journey->reference_1_id);
-    //                                        if($return_note && $return_note->actual_date != null){
-    //                                            $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
-    //                                        }
-    //                                    }
-    //                                }
-    //                                else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
-    ////                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-    ////                                    $journey_details['status'] .= $journey->reference_1_id;
-    //                                }
-    //                                else{
-    //                                    //$journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
-    //                                    $journey_details['status'] .= $journey->reference_1_id;
-    //                                }
-    //
-    //                                if ($journey->reference_2_id) {
-    //                                    if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
-    //                                        $rider = Rider::find($journey->reference_2_id);
-    //                                        if($rider){
-    ////                                            $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
-    //
-    //                                        }
-    //
-    //                                    }
-    //                                    else {
-    //                                        $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
-    //                                    }
-    //                                }
-    //                            }
+                           if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
+                               if ($journey->shipper_status_id == 3) {
+                                   $bag = Bag::where('id', $journey->reference_1_id);
+                                   if($bag->exists()){
+                                       $bag = $bag->first();
+                                       $master_cargo_bags = MasterCargoBag::where('bag_id', $bag->id);
+                                       if($master_cargo_bags->exists()){
+                                           $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                                       }
+                                       else{
+                                           $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                       }
+                                   }
+                                   else{
+                                       $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
+                                   }
+                               }
+                               elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
+                                   $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                               }
+                               else {
+                                   if(in_array($journey->shipper_status_id, [23, 24, 25, 28, 29, 31, 44, 45, 47, 48])){
+                                       $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle return_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                       $journey_details['status'] .= $journey->reference_1_id;
+                                       if($journey->shipper_status_id == 25 && $journey->reference_1_id){
+                                           $return_note = ReturnNote::find($journey->reference_1_id);
+                                           if($return_note && $return_note->actual_date != null){
+                                               $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
+                                           }
+                                       }
+                                   }
+                                   else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
+                                       $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                    //    $journey_details['status'] .= $journey->reference_1_id;
+                                   }
+                                   else{
+                                       $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+                                    //    $journey_details['status'] .= $journey->reference_1_id;
+                                   }
+    
+                                   if ($journey->reference_2_id) {
+                                       if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
+                                           $rider = Rider::find($journey->reference_2_id);
+                                           if($rider){
+                                               $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+    
+                                           }
+    
+                                       }
+                                       else {
+                                           $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                       }
+                                   }
+                               }
 
-                                //$journey_details['status'] .= ')';
-                                //}
+                                $journey_details['status'] .= ')';
+                                }
                                 $user = '';
                                 if($journey->admin_id){
                                     $user = $journey->admin->name;
@@ -317,8 +317,8 @@ class RetailTrackingController extends Controller
                                 $journey_details['user'] = $user;
                                 $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
                                 $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
-    //                        $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
-    //                        $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
+                                $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
+                                $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
 
                                 $details['tracking_history'][] = $journey_details;
                             }
@@ -582,5 +582,25 @@ class RetailTrackingController extends Controller
 
         return $tracking;
     }
+    
+    public function rider_information(Request $request)
+    {
+        $rider = Rider::find($request->id);
 
+        $information = array();
+
+        $information['id'] = $rider->id;
+        $information['name'] = $rider->name;
+        $information['phone_number'] = $rider->phone;
+        $information['city'] = $rider->city->name;
+        $information['category'] = $rider->rider_category->name;
+        if ($rider->route) {
+            $information['route'] = $rider->route->code . ' (' . $rider->route->start . ' to ' . $rider->route->end . ')';
+        } else {
+            $information['route'] = '';
+        }
+
+
+        return $information;
+    }
 }
