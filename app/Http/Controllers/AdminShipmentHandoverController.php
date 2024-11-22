@@ -960,13 +960,35 @@ class AdminShipmentHandoverController extends Controller
               })
             
 
-              ->addColumn('user_type', function($handover_list) {
-                if(isset($handover_list->from_admin_id, $handover_list->to_admin_id)){
-                  return 'User';
-                }else{
-                  return 'Department';
+            ->addColumn('user_type', function($handover_list) {
+              if(isset($handover_list->from_admin_id, $handover_list->to_admin_id)){
+                return 'User';
+              }else{
+                return 'Department';
+              }
+            })
+
+            ->filterColumn('user_type', function($query, $keyword) {
+              $query->where(function($query) use ($keyword) {
+                $keyword = strtolower($keyword);
+
+                if (stripos('user', $keyword) !== false) {
+                  $query->whereNotNull('hr.admin_id')
+                          ->whereNotNull('hor.admin_id');
+                }  
+                elseif (stripos('department', $keyword) !== false) {
+                    $query->whereNull('hr.admin_id')
+                          ->whereNull('hor.admin_id');
+                } 
+                elseif (stripos('department', $keyword) === false || stripos('user', $keyword) === false) {
+                  $query->whereRaw('1 = 0');
                 }
-              })
+              });
+            })  
+          
+
+
+
           ->addColumn('remaining_shipment_count', function($handover_list) {
               if ($handover_list->shipment_count != 0 && $handover_list->received_shipments != 0) {
                   $remaining = $handover_list->shipment_count - $handover_list->received_shipments;
