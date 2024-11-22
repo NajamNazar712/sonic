@@ -931,6 +931,16 @@ class AdminShipmentHandoverController extends Controller
                     return $handover_list->from_name;
                 }
               })
+
+              ->filterColumn('from', function ($query, $keyword) {
+                $to_admin_ids = Admin::where('name', 'LIKE', '%' . $keyword . '%')->pluck('id');
+                if ($to_admin_ids->isNotEmpty()) {
+                  $query->whereIn('hr.admin_id', $to_admin_ids);
+                } else {
+                  $query->whereRaw('1 = 0');
+                }
+              })
+
               ->editColumn('to', function($handover_list) {
                 if (isset($handover_list->to_admin_id)) {
                     return Admin::where('id', $handover_list->to_admin_id)->first()->name;
