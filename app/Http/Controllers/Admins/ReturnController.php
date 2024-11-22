@@ -2196,7 +2196,7 @@ class ReturnController extends Controller
                             //updating rows in RvShipmentAssignAgent as Return Confirm
                             // $rcp_assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_assign_agent_status_id', null)->where('rv_state_id', 1);
                             // if($rcp_assigned_shipment->exists()){
-                            // request()->request->add(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks]);
+                            // $request->merge(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks]);
                             // $this->return_confirm($request);
                             // }
                             // $rv_assign_agent_sub_status_id = RvAssignAgentSubStatus::where('shipment_status_reason_id', $shipment_history->status_reason_id)->first()->id ?? null;
@@ -2242,7 +2242,7 @@ class ReturnController extends Controller
                             //updating rows in RvShipmentAssignAgent as Return Confirm
                             // $rcp_assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_assign_agent_status_id', null)->where('rv_state_id', 1);
                             // if($rcp_assigned_shipment->exists()){
-                            // request()->request->add(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks, 'charges'=>$estimation_charges]);
+                            // $request->merge(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks, 'charges'=>$estimation_charges]);
                             // $this->reattempt($request);
                             // }
                             $rv_shipment_assign_agent_data = [

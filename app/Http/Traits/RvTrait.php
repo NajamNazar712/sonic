@@ -841,7 +841,7 @@ trait RvTrait
                         $rv_shipment_assign_agent->save();
                     }
 
-                    request()->request->add([
+                    $request->merge([
                         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
                         'remarks' => $request->remarks,
                         'rv_assign_agent_sub_status_id' => null
@@ -873,7 +873,7 @@ trait RvTrait
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
                 else if ($rv_shipment_assign_agent->unresponsive_count > 3) {
 
-                    request()->request->add([
+                    $request->merge([
                         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
                         'remarks' => $request->remarks,
                         'rv_assign_agent_sub_status_id' => null
@@ -883,7 +883,7 @@ trait RvTrait
 
                 //if unresponsive and current status of shipment is 52 (shipment reattempt requested) then shipment status will be auto return confirm
                 else if ($shipment->shipper_status_id == 52) {
-                    request()->request->add([
+                    $request->merge([
                         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
                         'remarks' => $request->remarks,
                         'rv_assign_agent_sub_status_id' => null
@@ -929,7 +929,7 @@ trait RvTrait
                 $reattempt_count = BoltUndeliveredReasonMapCount::where('shipment_id', $shipment)->where('count', 3)->first();
                 //if reattempt count is 3 then shipment status will be auto return confirm
                 // if ($rv_shipment_assign_agent->unresponsive_count > 0 && $reattempt_count) {
-                //     request()->request->add([
+                //     $request->merge([
                 //         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
                 //         'remarks' => $request->remarks,
                 //         'rv_assign_agent_sub_status_id' => null
@@ -955,7 +955,7 @@ trait RvTrait
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
                 // else if ($rv_shipment_assign_agent->unresponsive_count > 2) {
 
-                //     request()->request->add([
+                //     $request->merge([
                 //         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
                 //         'remarks' => $request->remarks,
                 //         'rv_assign_agent_sub_status_id' => null
@@ -965,7 +965,7 @@ trait RvTrait
 
                 //if unresponsive and current status of shipment is 52 (shipment reattempt requested) then shipment status will be auto return confirm
                 // else if ($shipment->shipper_status_id == 52) {
-                //     request()->request->add([
+                //     $request->merge([
                 //         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
                 //         'remarks' => $request->remarks,
                 //         'rv_assign_agent_sub_status_id' => null
