@@ -749,7 +749,8 @@ class VigilanceController extends Controller
         if ($return_note = $request->get('search_return_note')) {
             $datatable->leftjoin('vigilance_note_shipments as vns', 'vigilance_notes.id', '=', 'vns.vigilance_note_id')
                 ->where('vns.note_id', '=', $return_note)
-                ->where('vgigilance_notes.vigilance_note_type_id', 2)
+                // ->where('vgigilance_notes.vigilance_note_type_id', 2)
+                ->where('vigilance_notes.vigilance_note_type_id', 2)
                 ->groupBy('vigilance_notes.id');;
         }
 

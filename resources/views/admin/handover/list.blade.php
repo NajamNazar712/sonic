@@ -40,7 +40,7 @@
                                 <fieldset class="form-group">
                                     <select name="search_from_admin" id="search_from_admin" class="form-control select2">
                                         @foreach($handover_admins as $admin)
-                                            <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                            <option value="{{$admin->handover_responsibility_id}}">{{$admin->name}}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
@@ -49,7 +49,7 @@
                                 <fieldset class="form-group">
                                     <select name="search_to_admin" id="search_to_admin" class="form-control select2">
                                         @foreach($handover_admins as $admin)
-                                            <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                            <option value="{{$admin->handover_responsibility_id}}">{{$admin->name}}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
@@ -300,40 +300,43 @@
                 placeholder:'Select Hub',
                 width:'100%',
                 allowClear:true
-            }).bind("change",function(){
-                var search_from_admin = $('#search_from_admin');
-                var search_to_admin = $('#search_to_admin');
-                let id = $(this).val();
-                search_from_admin.attr("disabled", true);
-                search_to_admin.attr("disabled", true);
-                if(id) {
-                    $.ajax({
-                        url: '{!! route('admin.handover.list.get_user') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'city_id': id
-                        }
-                    })
-                    .done(function (data) {
-                        search_from_admin.empty();
-                        search_to_admin.empty();
-                        if(data.users.length > 0){
-                            search_from_admin.attr("disabled", false);
-                            search_to_admin.attr("disabled", false);
-                            $.each(data.users, function (key, value) {
-                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
-                                search_from_admin.append(newOption);
-                                search_to_admin.append(newOption);
-                            });
-                        }else{
-                            search_from_admin.attr("disabled", true);
-                            search_to_admin.attr("disabled", true);
-                        }
-
-                    });
-                }
             });
+            
+            // .bind("change",function(){
+            //     var search_from_admin = $('#search_from_admin');
+            //     var search_to_admin = $('#search_to_admin');
+            //     let id = $(this).val();
+            //     search_from_admin.attr("disabled", true);
+            //     search_to_admin.attr("disabled", true);
+            //     if(id) {
+            //         $.ajax({
+            //             url: '{!! route('admin.handover.list.get_user') !!}',
+            //             method: 'POST',
+            //             data: {
+            //                 '_token': '{{ csrf_token() }}',
+            //                 'city_id': id
+            //             }
+            //         })
+            //         .done(function (data) {
+            //             search_from_admin.empty();
+            //             search_to_admin.empty();
+            //             if(data.users.length > 0){
+            //                 search_from_admin.attr("disabled", false);
+            //                 search_to_admin.attr("disabled", false);
+            //                 $.each(data.users, function (key, value) {
+            //                     var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+            //                     search_from_admin.append(newOption);
+            //                     search_to_admin.append(newOption);
+            //                 });
+            //             }else{
+            //                 search_from_admin.attr("disabled", true);
+            //                 search_to_admin.attr("disabled", true);
+            //             }
+
+            //         });
+            //     }
+            // });
+
             $('#search_from_admin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select From Person',
                 width:'100%',
@@ -610,7 +613,6 @@
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_area = $("#search_area").val();
-
                     }
                 },
                 rowId: 'handover_id',
@@ -620,15 +622,15 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'bag_number', name: 'bag_number', class: 'align-middle bag_number'},
                     {data: 'handover_id_padded', name: 'handovers.id', class: 'align-middle handover_id_padded'},
-                    {data: 'bag_type', name: 'bag_type', class: 'align-middle bag_type'},
+                    {data: 'bag_type', name: 'bag_type', class: 'align-middle bag_type', orderable: false},
                     {data: 'created_at', name: 'handovers.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
-                    {data: 'created_at_area', name: 'created_at_area', class: 'align-middle created_at_area'},
+                    {data: 'created_at_area', name: 'created_at_area', class: 'align-middle created_at_area', orderable: false},
                     {data: 'from', name: 'hr.admin_id', class: 'align-middle from'},
                     {data: 'from_area', name: 'c_from.name', class: 'align-middle from_area'},
                     {data: 'from_dept_area_desg', name: 'from_dept_area_desg', class: 'align-middle from_dept_area_desg'},
                     {data: 'to', name: 'hor.admin_id', class: 'align-middle to'},
-                    {data: 'user_type', name: 'user_type', class: 'align-middle user_type'},
+                    {data: 'user_type', name: 'user_type', class: 'align-middle user_type', orderable: false},
                     {data: 'to_area', name: 'c_to.name', class: 'align-middle to_area'},
                     {data: 'to_dept_area_desg', name: 'to_dept_area_desg', class: 'align-middle to_dept_area_desg'},
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},
@@ -640,7 +642,7 @@
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle text-center shipment_pieces', orderable: false, searchable: false},
                     {data: 'received_by', name: 'ad.name', class: 'align-middle received_by'},
                     {data: 'received_at', name: 'handovers.received_at', class: 'align-middle received_at'},
-                    {data: 'received_at_area', name: 'received_at_area', class: 'align-middle received_at_area'},
+                    {data: 'received_at_area', name: 'received_at_area', class: 'align-middle received_at_area', orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     // var info = table.page.info();
