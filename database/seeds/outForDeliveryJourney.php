@@ -26,16 +26,18 @@ class outForDeliveryJourney extends Seeder
     {
         //
         $shipmentId = [22320245535981,   22320245636771,   22320245640256,   20220245688127,   20220245688128,   20220245689037,   20220245689038,   20220245703834,   20220245758780];
-        
+
         if ($shipmentId) {
-            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id', 5)->get();
+            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)
+            // ->where('shipper_status_id', 5)
+            ->get();
             echo count($shipmentId);
-            $serial = 19; 
+            $serial = 19;
 
             foreach ($shipmentId as $shipment) {
 
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest()->first();
-                if(!$deliveryNoteId){
+                if (!$deliveryNoteId) {
                     $deliveryNoteId =  new DeliveryNoteShipment();
                     $deliveryNoteId->delivery_note_id = 2550144;
                     $deliveryNoteId->status = 1;
@@ -47,11 +49,11 @@ class outForDeliveryJourney extends Seeder
                     $serial++;
                 }
                 $delivertNote   = DeliveryNote::find($deliveryNoteId->delivery_note_id);
-                
-                if($delivertNote->request_note_id){
+
+                if ($delivertNote->request_note_id) {
                     $rider_for_delivery = RiderDeliveryNoteRequest::find($delivertNote->request_note_id);
                 }
-                ShipmentsJourneyController::add($shipment->id, 5, 5, null, null,null, 346, $deliveryNoteId->delivery_note_id, $rider_for_delivery->rider_id);
+                ShipmentsJourneyController::add($shipment->id, 5, 5, null, null, null, 346, $deliveryNoteId->delivery_note_id, $rider_for_delivery->rider_id);
             }
         }
     }
