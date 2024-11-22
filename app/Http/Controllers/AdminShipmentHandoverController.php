@@ -23,9 +23,11 @@ use App\Http\Models\Handover\HandoverShipmentsJourney;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\ShipmentsJourney;
 use App\ShipmentScanningJourneyAreaLog;
 use App\Http\Models\Handover\ExcessHandoverShipment;
+use App\Http\Models\HR\EmployeeDesignation;
 
 class AdminShipmentHandoverController extends Controller
 {
@@ -766,18 +768,30 @@ class AdminShipmentHandoverController extends Controller
 
     $handover_list = DB::connection('reports')->table('handovers')
         ->leftjoin('cities as c','c.id','=','handovers.hub')
+
         ->leftJoin('admins as a', function ($join) {
             $join->on('a.id', '=', 'handovers.created_by')
                 ->where('a.role_id', '!=', 1);
         })
+
         ->leftJoin('admins as ad', function ($join) {
-            $join->on('ad.id', '=', 'handovers.received_by')
-                ->where('ad.role_id', '!=', 1);
+          $join->on('ad.id', '=', 'handovers.received_by')
+              ->where('ad.role_id', '!=', 1);
         })
+
         ->join('handover_statuses as hs','hs.id','=','handovers.status_id')
         ->join('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->join('handover_responsibilities as hor','hor.id','=','handovers.to')
         ->join('handover_shipments as hss','hss.handover_id','=','handovers.id')
+
+        ->leftJoin('admins', 'hr.admin_id', '=', 'admins.id')
+        ->leftJoin('employee_designations', 'admins.designation_id', '=', 'employee_designations.id')
+        ->leftJoin('admin_departments', 'employee_designations.department_id', '=', 'admin_departments.id')
+
+        ->leftJoin('admins as to_admin', 'hor.admin_id', '=', 'to_admin.id')
+        ->leftJoin('employee_designations as ed', 'to_admin.designation_id', '=', 'ed.id')
+        ->leftJoin('admin_departments as adp', 'ed.department_id', '=', 'adp.id')
+
         ->join('shipments as s','s.id','=','hss.shipment_id')
         ->leftJoin('city_areas as c_from', 'c_from.id', '=', 'hr.city_area_id')
         ->leftJoin('city_areas as c_to', 'c_to.id', '=', 'hor.city_area_id')
@@ -813,7 +827,8 @@ class AdminShipmentHandoverController extends Controller
             'hr.admin_id as from_admin_id', 'hor.admin_id as to_admin_id', 'c.name as hub',
             'handovers.shipments as shipment_count', 'handovers.shipments as total_shipments', 'hs.name as status',
             'handovers.received as received_shipments', 'hr.name as from_name', 'hor.name as to_name',
-            'handovers.from_dept_area_desg as from_dept_area_desg', 'handovers.to_dept_area_desg as to_dept_area_desg',
+            'admin_departments.name as from_dept_area_desg', 'adp.name as to_dept_area_desg',
+  
             'handovers.received_at', 'handovers.created_at',
             DB::raw('(select shipments - received_shipments from handovers where handovers.id = hss.handover_id) as remaining'),
             DB::raw('SUM(s.pieces) as shipment_pieces'), 'c_from.name as from_area', 'c_to.name as to_area',
@@ -908,8 +923,6 @@ class AdminShipmentHandoverController extends Controller
                   }
               });          
             })          
-            
-
               ->editColumn('from', function($handover_list) {
                 if (isset($handover_list->from_admin_id)) {
                     return Admin::where('id', $handover_list->from_admin_id)->first()->name;
@@ -918,33 +931,6 @@ class AdminShipmentHandoverController extends Controller
                     return $handover_list->from_name;
                 }
               })
-
-              ->editColumn('from_dept_area_desg', function($handover_list){
-                if (isset($handover_list->from_admin_id)) {
-                  $admin = Admin::where('id', $handover_list->from_admin_id)->first();
-                  if(isset($admin->Edesignation) && isset($admin->Edesignation->department)){
-                    return $admin->Edesignation->department->name;
-                  }else{
-                    return '-';
-                  }
-                }else {
-                    return '-';
-                }            
-            })
-
-            ->editColumn('to_dept_area_desg', function($handover_list){
-              if (isset($handover_list->to_admin_id)) {
-                $admin = Admin::where('id', $handover_list->to_admin_id)->first();
-                if(isset($admin->Edesignation) && isset($admin->Edesignation->department)){
-                  return $admin->Edesignation->department->name;
-                }else{
-                  return '-';
-                }
-              }else {
-                return '-';
-              }            
-          })
-
               ->editColumn('to', function($handover_list) {
                 if (isset($handover_list->to_admin_id)) {
                     return Admin::where('id', $handover_list->to_admin_id)->first()->name;
@@ -953,6 +939,17 @@ class AdminShipmentHandoverController extends Controller
                     return $handover_list->to_name;
                 }
               })
+
+              ->filterColumn('to', function ($query, $keyword) {
+                $to_admin_ids = Admin::where('name', 'LIKE', '%' . $keyword . '%')->pluck('id');
+                if ($to_admin_ids->isNotEmpty()) {
+                  $query->whereIn('hor.admin_id', $to_admin_ids);
+                } else {
+                  $query->whereRaw('1 = 0');
+                }
+              })
+            
+
               ->addColumn('user_type', function($handover_list) {
                 if(isset($handover_list->from_admin_id, $handover_list->to_admin_id)){
                   return 'User';
