@@ -308,7 +308,7 @@
                         const toPicker = $('#search_date_to').pickadate('picker');
                         toPicker.set('min', fromPicker.get('select'));
                         const maxDate = new Date(fromPicker.get('select').pick);
-                        maxDate.setMonth(maxDate.getMonth() + 6);
+                        maxDate.setMonth(maxDate.getMonth() + 5);
                         toPicker.set('max', maxDate);
                     }
                 }
@@ -326,7 +326,7 @@
                         const fromPicker = $('#search_date_from').pickadate('picker');
                         fromPicker.set('max', toPicker.get('select'));
                         const minDate = new Date(toPicker.get('select').pick);
-                        minDate.setMonth(minDate.getMonth() - 6);
+                        minDate.setMonth(minDate.getMonth() - 5);
                         fromPicker.set('min', minDate);
                     }
                 }

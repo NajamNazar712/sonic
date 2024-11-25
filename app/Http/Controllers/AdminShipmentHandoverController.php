@@ -745,7 +745,7 @@ class AdminShipmentHandoverController extends Controller
         $to = date('Y-m-d 23:59:59', strtotime($request->get('search_date_to')));
     } else {
         $date = date('Y-m-d');
-        $from = date('Y-m-d 00:00:01', strtotime($date . '-6 month'));
+        $from = date('Y-m-d 00:00:01', strtotime($date . '-5 month'));
         $to = date('Y-m-d 23:59:59', strtotime($date));
     }
     
