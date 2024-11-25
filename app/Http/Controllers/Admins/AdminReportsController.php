@@ -13223,7 +13223,7 @@ class AdminReportsController extends Controller
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
         ->join('shipments_journey as sj', function($join) use ($from, $to) {
             $join->on('sj.shipment_id', '=', 'rv_shipment_assign_agent_details.shipment_id')
-                 ->whereIn('sj.shipper_status_id',[13,66])
+                 ->where('sj.shipper_status_id',13)
                  ->whereBetween('sj.created_at', [$from, $to]);
         })
         ->leftJoin('users', 'shipments.user_id', 'users.id')
