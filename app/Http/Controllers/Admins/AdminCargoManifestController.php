@@ -5075,8 +5075,49 @@ class AdminCargoManifestController extends Controller
             ->join('admins as a', 'cargo_manifests.created_by', '=', 'a.id')
             ->leftjoin('fleets as f', 'cargo_manifests.vehicle_id', '=', 'f.id')
             ->leftjoin('transport_modes as tm', 'cargo_manifests.transport_mode_id', '=', 'tm.id')
+
+            ->leftJoin('cargo_manifest_bag_shipments as cargo_shipments', 'cargo_shipments.cargo_manifest_bag_id', '=', 'cargo_manifests.id')
+            ->leftJoin('shipments', 'cargo_shipments.shipment_id', '=', 'shipments.id')
+            ->leftJoin('users as cod', 'cod.id', '=', 'shipments.user_id')
+            ->leftJoin('sub_category_segments as sub_segment', 'cod.sub_segment_id', '=', 'sub_segment.id') 
+
             //            ->select('cargo_manifests.id as manifest_id','cargo_manifests.route_name', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id','cargo_manifests.vendor_name as vendor' ,'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status','cargo_manifests.id as manifest','cargo_manifests.short_received_bags as short_received_bags');
-            ->select('cargo_manifests.id as manifest_id', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifests.vendor_name as vendor', 'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status', 'cargo_manifests.id as manifest', 'cargo_manifests.short_received_bags as short_received_bags');
+            // ->select('cargo_manifests.id as manifest_id', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifests.vendor_name as vendor', 'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status', 'cargo_manifests.id as manifest', 'cargo_manifests.short_received_bags as short_received_bags')
+            
+
+            ->select(
+                'cargo_manifests.id as manifest_id',
+                'cargo_manifests.status_id',
+                'oh.id as origin_id',
+                'oh.name as origin',
+                'dh.id as destination_id',
+                'dh.name as destination',
+                'cargo_manifests.shipments',
+                'cargo_manifests.bags',
+                'cargo_manifests.driver_name',
+                'f.reg_number as vehicle',
+                'cargo_manifests.driver_phone',
+                'sm.mode as shipping_mode',
+                'tm.name as transport_mode',
+                'cargo_manifests.bags_weight',
+                'cargo_manifests.actual_weight',
+                'cargo_manifests.created_at as transit_at',
+                'a.name as transitted_by',
+                'oh.hub_id as origin_hub_id',
+                'dh.hub_id as destination_hub_id',
+                'cargo_manifests.vendor_name as vendor',
+                'cargo_manifests.driver_phone as phone_number',
+                'cargo_manifests.status_id as status',
+                'cargo_manifests.id as manifest',
+                'cargo_manifests.short_received_bags as short_received_bags',
+                'sub_segment.name'
+            )
+            ->groupBy('cargo_manifests.id');
+        
+        dd(
+            $receive_cargo
+            ->pluck('sub_segment.name')
+        );
 
         if (($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != '') {
             $receive_cargo->join('manifest_bags as mb', 'cargo_manifests.id', '=', 'mb.cargo_manifest_id')
