@@ -98,7 +98,8 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'is_completed' => 0,
                     'deleted_at' => null,
                     'disabled_shipper' => $isShipperDisabled,
-                    'delete_reason' => null
+                    'delete_reason' => null,
+                    'created_at' => date('Y-m-d h:i:s')
                 ]
             );
             //need to Continue This
