@@ -72,7 +72,7 @@
                                 </span>
                                 </div>
     
-                                <input type="text" name="search_date_from" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)" data-rule-required="true" data-msg-required="From date is required">
+                                <input type="text" name="search_date_from" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)">
                             </div>
                             <div class="col-3 form-group input-group">
                                 <div class="input-group-prepend">
@@ -81,7 +81,7 @@
                                 </span>
                                 </div>
     
-                                <input type="text" name="search_date_to" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)" data-rule-required="true" data-msg-required="To date is required">
+                                <input type="text" name="search_date_to" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)">
                             </div>
     
                             <div class="col-2">
@@ -722,7 +722,15 @@
             });
 
             $('#search_filter_btn').on('click',function () {
-                table.draw();
+                if ($('#search_date_to').val() == '' || $('#search_date_from').val() == ''){
+                    scan_sound(2);
+                    toastr.error('To and From date is required', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                } else {
+                    table.draw();
+                }
             });
 
 
