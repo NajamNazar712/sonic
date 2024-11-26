@@ -72,7 +72,7 @@
                                 </span>
                                 </div>
     
-                                <input type="text" name="search_date_from" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)">
+                                <input type="text" name="search_date_from" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)" data-rule-required="true" data-msg-required="From date is required">
                             </div>
                             <div class="col-3 form-group input-group">
                                 <div class="input-group-prepend">
@@ -81,7 +81,7 @@
                                 </span>
                                 </div>
     
-                                <input type="text" name="search_date_to" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)">
+                                <input type="text" name="search_date_to" data-value="" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)" data-rule-required="true" data-msg-required="To date is required">
                             </div>
     
                             <div class="col-2">
@@ -308,7 +308,7 @@
                         const toPicker = $('#search_date_to').pickadate('picker');
                         toPicker.set('min', fromPicker.get('select'));
                         const maxDate = new Date(fromPicker.get('select').pick);
-                        maxDate.setMonth(maxDate.getMonth() + 5);
+                        maxDate.setMonth(maxDate.getMonth() + 3);
                         toPicker.set('max', maxDate);
                     }
                 }
@@ -326,7 +326,7 @@
                         const fromPicker = $('#search_date_from').pickadate('picker');
                         fromPicker.set('max', toPicker.get('select'));
                         const minDate = new Date(toPicker.get('select').pick);
-                        minDate.setMonth(minDate.getMonth() - 5);
+                        minDate.setMonth(minDate.getMonth() - 3);
                         fromPicker.set('min', minDate);
                     }
                 }
