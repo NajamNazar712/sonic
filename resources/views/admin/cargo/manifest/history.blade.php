@@ -373,7 +373,6 @@
 
                             $.each(result.data, function (index, values) {
                                 row = [];
-
                                 row.push(index + 1);
                                 row.push(values.manifest);
                                 row.push(values.bags_count);
@@ -381,7 +380,29 @@
                                 row.push(values.shipments_count);
 
                                 // new columns start
+                                row.push(values.cod || '--');
+                                row.push(values.cod_weight || '--');
 
+                                row.push(values.express || '--');
+                                row.push(values.express_weight || '--');
+
+                                row.push(values.retail || '--');
+                                row.push(values.retail_weight || '--');
+
+                                row.push(values.logistics || '--');
+                                row.push(values.logistics_weight || '--');
+
+                                row.push(values.warehouse || '--');
+                                row.push(values.warehouse_weight || '--');
+
+                                row.push(values.fod || '--');
+                                row.push(values.fod_weight || '--');
+
+                                row.push(values.hyperlocal || '--');
+                                row.push(values.hyperlocal_weight || '--');
+
+                                row.push(values.international || '--');
+                                row.push(values.international_weight || '--');
                                 // new columns end
 
                                 row.push(values.origin);
