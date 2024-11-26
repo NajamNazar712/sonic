@@ -308,7 +308,7 @@
                         const toPicker = $('#search_date_to').pickadate('picker');
                         toPicker.set('min', fromPicker.get('select'));
                         const maxDate = new Date(fromPicker.get('select').pick);
-                        maxDate.setMonth(maxDate.getMonth() + 5);
+                        maxDate.setMonth(maxDate.getMonth() + 3);
                         toPicker.set('max', maxDate);
                     }
                 }
@@ -326,7 +326,7 @@
                         const fromPicker = $('#search_date_from').pickadate('picker');
                         fromPicker.set('max', toPicker.get('select'));
                         const minDate = new Date(toPicker.get('select').pick);
-                        minDate.setMonth(minDate.getMonth() - 5);
+                        minDate.setMonth(minDate.getMonth() - 3);
                         fromPicker.set('min', minDate);
                     }
                 }
@@ -722,7 +722,15 @@
             });
 
             $('#search_filter_btn').on('click',function () {
-                table.draw();
+                if ($('#search_date_to').val() == '' || $('#search_date_from').val() == ''){
+                    scan_sound(2);
+                    toastr.error('To and From date is required', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                } else {
+                    table.draw();
+                }
             });
 
 
