@@ -167,13 +167,20 @@ class RiderManagementController extends Controller
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
         $route_types = RouteType::all();
-        $operation_riders = OperationRidersCategory::all();
+        // {Ticket Number - 6892} //
+
+        // $operation_riders = OperationRidersCategory::where('id', 1)->first();
+        $operation_rider = OperationRidersCategory::find(1);
+
+        // {End Ticket Number - 6892} //
+
+
         $shifts = EmployeeShift::where('status', 1)->get();
         $hubs = City::select('id', 'name')->where('hub', 1)->get();
 
         $reporting_locations = ReportingLocation::where('status', 1)->get();
 
-        return view('admin.management.add_rider_form')->with(['cities' => $city, 'categories' => $category, 'route_types' => $route_types, 'cities' => $city, 'operation_riders' => $operation_riders, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations, 'hubs' => $hubs]);
+        return view('admin.management.add_rider_form')->with(['cities' => $city, 'categories' => $category, 'route_types' => $route_types, 'cities' => $city, 'operation_rider' => $operation_rider, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations, 'hubs' => $hubs]);
     }
     public function addRiderDetails(Request $request)
     {
@@ -302,13 +309,18 @@ class RiderManagementController extends Controller
         $route_types = RouteType::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id', $rider->city_id)->get();
-        $operation_rider_ids =  OperationRidersCategory::all();
+        // {Ticket Number - 6892} //
+
+        // $operation_rider_ids =  OperationRidersCategory::all();
+        $operation_rider = OperationRidersCategory::find(1);
+
+        // {End Ticket Number - 6892} //
         $shifts =  EmployeeShift::where('status', 1)->get();
         $reporting_locations = ReportingLocation::where('status', 1)->get();
         $areas_list = CityArea::where('city_id', $rider->city_id)->select('id', 'name')->get();
         $hubs = City::select('id', 'name')->where('hub', 1)->get();
         $riderhubIsd = RiderAssignedHubForDeliveryNote::where('rider_id', $id)->select('hubs')->first();
-        return view('admin.management.edit_rider_form')->with(['rider_id' => $id, 'cities' => $city, 'categories' => $category, 'rider' => $rider, 'routes' => $route, 'route_types' => $route_types, 'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations, 'areas_list' => $areas_list, 'hubs' => $hubs, 'hubIds' => $riderhubIsd]);
+        return view('admin.management.edit_rider_form')->with(['rider_id' => $id, 'cities' => $city, 'categories' => $category, 'rider' => $rider, 'routes' => $route, 'route_types' => $route_types, 'operation_rider' => $operation_rider, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations, 'areas_list' => $areas_list, 'hubs' => $hubs, 'hubIds' => $riderhubIsd]);
     }
     public function editRiderDetails(Request $request, $id)
     {

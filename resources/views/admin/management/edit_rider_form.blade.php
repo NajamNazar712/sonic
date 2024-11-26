@@ -152,11 +152,18 @@ if (isset($main_category[2]) && $type == 1) {
             </div>
             <div class="col">
                 <fieldset class="form-group">
-                    <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                        @foreach($operation_rider_ids as $operation)
-                            <option value="{{$operation->id}}">{{$operation->name}}</option>
-                        @endforeach
-                    </select>
+                    <fieldset class="form-group">
+                        {{-- {Ticket Number - 6892} --}}
+
+                        {{-- <option value="" selected>Select a Category</option>--}}
+                        {{-- @foreach($operation_riders as $operation)--}}
+                        {{-- <option value="{{$operation->id}}">{{$operation->name}}</option>--}}
+                        {{-- @endforeach--}}
+                        <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                            <option value="{{$operation_rider->id}}" selected>{{$operation_rider->name}}</option>
+                        </select>
+                        {{-- {EndTicket Number - 6892} --}}
+                    </fieldset>
                 </fieldset>
             </div>
         </div>
@@ -350,28 +357,28 @@ if (isset($main_category[2]) && $type == 1) {
                 dropdownParent:$('#editRiderForm')
             });
          @endif
-        @if($rider->operation_rider_id != Null)
-        $('#operation_rider_id').val({!! $rider->operation_rider_id !!}).trigger('change').bind('change', function () {
-                var id = parseInt($(this).val());
-                if(id == 2){
-                    $('#allow_delivered_row').removeClass('d-none');
-                }else{
-                    $('#allow_delivered_row').addClass('d-none');
-                }
-        });
-        @else
-        $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select Functional Category',
-            dropdownParent: $("#editRiderForm")
-        }).bind('change', function () {
-                var id = parseInt($(this).val());
-                if(id == 2){
-                    $('#allow_delivered_row').removeClass('d-none');
-                }else{
-                    $('#allow_delivered_row').addClass('d-none');
-                }
-        });
-        @endif
+{{--        @if($rider->operation_rider_id != Null)--}}
+{{--        $('#operation_rider_id').val({!! $rider->operation_rider_id !!}).trigger('change').bind('change', function () {--}}
+{{--                var id = parseInt($(this).val());--}}
+{{--                if(id == 2){--}}
+{{--                    $('#allow_delivered_row').removeClass('d-none');--}}
+{{--                }else{--}}
+{{--                    $('#allow_delivered_row').addClass('d-none');--}}
+{{--                }--}}
+{{--        });--}}
+{{--        @else--}}
+{{--        $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({--}}
+{{--            placeholder:'Select Functional Category',--}}
+{{--            dropdownParent: $("#editRiderForm")--}}
+{{--        }).bind('change', function () {--}}
+{{--                var id = parseInt($(this).val());--}}
+{{--                if(id == 2){--}}
+{{--                    $('#allow_delivered_row').removeClass('d-none');--}}
+{{--                }else{--}}
+{{--                    $('#allow_delivered_row').addClass('d-none');--}}
+{{--                }--}}
+{{--        });--}}
+{{--        @endif--}}
 
         $('#city_list').on('change',function () {
             var routelist = $('#route_list');

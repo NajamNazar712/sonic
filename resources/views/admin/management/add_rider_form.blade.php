@@ -136,10 +136,14 @@ if (isset($main_category[2]) && $type == 1) {
         <div class="col">
             <fieldset class="form-group">
                 <select name="operation_rider_id" id="operation_rider_id_add" class="form-control select2" required>
-                    <option value="" selected>Select a Category</option>
-                    @foreach($operation_riders as $operation)
-                        <option value="{{$operation->id}}">{{$operation->name}}</option>
-                    @endforeach
+                    {{-- {Ticket Number - 6892} --}}
+                    {{-- <option value="" selected>Select a Category</option>--}}
+                    {{-- @foreach($operation_riders as $operation)--}}
+                    {{-- <option value="{{$operation->id}}">{{$operation->name}}</option>--}}
+                    {{-- @endforeach--}}
+                    <option value="{{$operation_rider->id}}" selected>{{$operation_rider->name}}</option>
+                </select>
+                {{-- {EndTicket Number - 6892} --}}
                 </select>
                 <div class="danger" id="rider_error" style="display:none;">This field is required</div>
             </fieldset>
@@ -245,19 +249,19 @@ if (isset($main_category[2]) && $type == 1) {
             placeholder:'Select Rider Sub-Category',
             dropdownParent: $("#addRiderForm")
         });
-        $('#category_main_list').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select Rider Main Category',
-            dropdownParent: $("#addRiderForm")
-        }).bind('change', function () {
-                var id = parseInt($(this).val());
-                if(id == 1){
-                    $('#incentive_amount_div_add').removeClass('d-none');
-                }else{
-                    $('#incentive_amount_div_add').addClass('d-none');
-                }
-                (id == 3 ? $('#rider_hub_add').removeClass('d-none') : $('#rider_hub_add').addClass('d-none'));
-                
-            });
+        // $('#category_main_list').prepend('<option value="" selected="selected"></option>').select2({
+        //     placeholder:'Select Rider Main Category',
+        //     dropdownParent: $("#addRiderForm")
+        // }).bind('change', function () {
+        //         var id = parseInt($(this).val());
+        //         if(id == 1){
+        //             $('#incentive_amount_div_add').removeClass('d-none');
+        //         }else{
+        //             $('#incentive_amount_div_add').addClass('d-none');
+        //         }
+        //         (id == 3 ? $('#rider_hub_add').removeClass('d-none') : $('#rider_hub_add').addClass('d-none'));
+        //
+        //     });
         $('#shift_list_add').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Shift',
             dropdownParent: $("#addRiderForm")
