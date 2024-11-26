@@ -270,28 +270,28 @@
                                 row.push(values.shipments_count);
 
                                 // new columns start
-                                row.push(values.cod || '--');
+                                row.push(values.cod_count || '--');
                                 row.push(values.cod_weight || '--');
 
-                                row.push(values.express || '--');
+                                row.push(values.express_count || '--');
                                 row.push(values.express_weight || '--');
 
-                                row.push(values.retail || '--');
+                                row.push(values.retail_count || '--');
                                 row.push(values.retail_weight || '--');
 
-                                row.push(values.logistics || '--');
+                                row.push(values.logistics_count || '--');
                                 row.push(values.logistics_weight || '--');
 
-                                row.push(values.warehouse || '--');
+                                row.push(values.warehouse_count || '--');
                                 row.push(values.warehouse_weight || '--');
 
-                                row.push(values.fod || '--');
+                                row.push(values.fod_count || '--');
                                 row.push(values.fod_weight || '--');
 
-                                row.push(values.hyperlocal || '--');
+                                row.push(values.hyperlocal_count || '--');
                                 row.push(values.hyperlocal_weight || '--');
 
-                                row.push(values.international || '--');
+                                row.push(values.international_count || '--');
                                 row.push(values.international_weight || '--');
                                 // new columns end
 
