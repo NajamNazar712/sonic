@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Shipment;
 use App\RvShipmentAgent;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Bus;
 
 class ProcessRvShipmentTicket implements ShouldQueue
@@ -99,7 +100,7 @@ class ProcessRvShipmentTicket implements ShouldQueue
                     'deleted_at' => null,
                     'disabled_shipper' => $isShipperDisabled,
                     'delete_reason' => null,
-                    'created_at' => date('Y-m-d h:i:s')
+                    'created_at' => Carbon::now()->format('Y-m-d H:i:s')
                 ]
             );
             //need to Continue This
