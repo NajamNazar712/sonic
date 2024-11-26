@@ -843,7 +843,7 @@ class AdminShipmentHandoverController extends Controller
     }
 
     $handover_list->whereBetween('handovers.created_at', [$from, $to])
-        ->orderBy('handovers.id', 'DESC')
+        // ->orderBy('handovers.id', 'DESC')
         ->groupBy('handovers.id');
     
         $datatable = Datatables::of($handover_list)

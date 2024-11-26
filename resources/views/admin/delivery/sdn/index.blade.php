@@ -950,6 +950,7 @@
 
                     //--------------------------------------
 
+                @if (session('role_id') == 1 || in_array(1018, session('permissions')))
                     {
                         text: 'Resolved',
                         className: 'btn btn-primary resolved',
@@ -1007,9 +1008,8 @@
                             });
                         }
                     },
-
+                    @endif
                     //--------------------------------------
-
                     {
                         extend: 'excel',
                         title: 'Station Deposit Notes',
