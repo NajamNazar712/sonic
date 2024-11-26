@@ -23,9 +23,11 @@ use App\Http\Models\Handover\HandoverShipmentsJourney;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\ShipmentsJourney;
 use App\ShipmentScanningJourneyAreaLog;
 use App\Http\Models\Handover\ExcessHandoverShipment;
+use App\Http\Models\HR\EmployeeDesignation;
 
 class AdminShipmentHandoverController extends Controller
 {
@@ -743,7 +745,7 @@ class AdminShipmentHandoverController extends Controller
         $to = date('Y-m-d 23:59:59', strtotime($request->get('search_date_to')));
     } else {
         $date = date('Y-m-d');
-        $from = date('Y-m-d 00:00:01', strtotime($date . '-6 month'));
+        $from = date('Y-m-d 00:00:01', strtotime($date . '-5 month'));
         $to = date('Y-m-d 23:59:59', strtotime($date));
     }
     
@@ -766,18 +768,30 @@ class AdminShipmentHandoverController extends Controller
 
     $handover_list = DB::connection('reports')->table('handovers')
         ->leftjoin('cities as c','c.id','=','handovers.hub')
+
         ->leftJoin('admins as a', function ($join) {
             $join->on('a.id', '=', 'handovers.created_by')
                 ->where('a.role_id', '!=', 1);
         })
+
         ->leftJoin('admins as ad', function ($join) {
-            $join->on('ad.id', '=', 'handovers.received_by')
-                ->where('ad.role_id', '!=', 1);
+          $join->on('ad.id', '=', 'handovers.received_by')
+              ->where('ad.role_id', '!=', 1);
         })
+
         ->join('handover_statuses as hs','hs.id','=','handovers.status_id')
         ->join('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->join('handover_responsibilities as hor','hor.id','=','handovers.to')
         ->join('handover_shipments as hss','hss.handover_id','=','handovers.id')
+
+        ->leftJoin('admins', 'hr.admin_id', '=', 'admins.id')
+        ->leftJoin('employee_designations', 'admins.designation_id', '=', 'employee_designations.id')
+        ->leftJoin('admin_departments', 'employee_designations.department_id', '=', 'admin_departments.id')
+
+        ->leftJoin('admins as to_admin', 'hor.admin_id', '=', 'to_admin.id')
+        ->leftJoin('employee_designations as ed', 'to_admin.designation_id', '=', 'ed.id')
+        ->leftJoin('admin_departments as adp', 'ed.department_id', '=', 'adp.id')
+
         ->join('shipments as s','s.id','=','hss.shipment_id')
         ->leftJoin('city_areas as c_from', 'c_from.id', '=', 'hr.city_area_id')
         ->leftJoin('city_areas as c_to', 'c_to.id', '=', 'hor.city_area_id')
@@ -813,7 +827,8 @@ class AdminShipmentHandoverController extends Controller
             'hr.admin_id as from_admin_id', 'hor.admin_id as to_admin_id', 'c.name as hub',
             'handovers.shipments as shipment_count', 'handovers.shipments as total_shipments', 'hs.name as status',
             'handovers.received as received_shipments', 'hr.name as from_name', 'hor.name as to_name',
-            'handovers.from_dept_area_desg as from_dept_area_desg', 'handovers.to_dept_area_desg as to_dept_area_desg',
+            'admin_departments.name as from_dept_area_desg', 'adp.name as to_dept_area_desg',
+  
             'handovers.received_at', 'handovers.created_at',
             DB::raw('(select shipments - received_shipments from handovers where handovers.id = hss.handover_id) as remaining'),
             DB::raw('SUM(s.pieces) as shipment_pieces'), 'c_from.name as from_area', 'c_to.name as to_area',
@@ -824,12 +839,21 @@ class AdminShipmentHandoverController extends Controller
             DB::raw("COUNT(DISTINCT excess_handover_shipments.id) AS excess_shipments")
         ]);
     
-    if ($tracking_number = $request->get('search_tracking')) {
-        $handover_list->where('s.tracking_number', $tracking_number);
-    }
-    $handover_list->whereBetween('handovers.created_at', [$from, $to])
-        // ->orderBy('handovers.id', 'DESC')
-        ->groupBy('handovers.id');
+      // if($tracking_number = $request->get('search_tracking')) {
+      //   $handover_list->where('s.tracking_number', $tracking_number);
+      // }
+
+      if ($tracking_number = $request->get('search_tracking')) {
+        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+        $handover_list->where(function ($query) use ($tracking_number, $shipment) {
+            $query->where('s.tracking_number', $tracking_number)
+              ->orWhere('excess_handover_shipments.shipment_ids', optional($shipment)->id);
+        });
+      }
+      
+      $handover_list->whereBetween('handovers.created_at', [$from, $to])
+      // ->orderBy('handovers.id', 'DESC')
+      ->groupBy('handovers.id');
     
         $datatable = Datatables::of($handover_list)
             ->addColumn('handover_id_padded', function ($handover) {
@@ -844,106 +868,98 @@ class AdminShipmentHandoverController extends Controller
               }
             })
 
-            ->filterColumn('excess_shipments', function  ($query, $keyword) {
-                $query->whereRaw("
-                      (
-                          SELECT COUNT(DISTINCT excess_handover_shipments.id)
-                          FROM excess_handover_shipments
-                          WHERE excess_handover_shipments.handover_id = handovers.id
-                          AND excess_handover_shipments.excess_shipment = 1
-                      ) = ?
-                  ", [$keyword]);
-            })
+              ->filterColumn('excess_shipments', function  ($query, $keyword) {
+                  $query->whereRaw("
+                        (
+                            SELECT COUNT(DISTINCT excess_handover_shipments.id)
+                            FROM excess_handover_shipments
+                            WHERE excess_handover_shipments.handover_id = handovers.id
+                            AND excess_handover_shipments.excess_shipment = 1
+                        ) = ?
+                    ", [$keyword]);
+              })
 
-            ->editColumn('excess_shipments', function($handover_list) {
-              if ($handover_list->excess_shipments > 0) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $handover_list->excess_shipments . '</button>';
-              } else {
-                return 0;
-              }
-            })
-
-            ->addColumn('bag_type', function ($handover) use($normal_status_ids,$return_status_ids) {
-                if (is_null($handover->bag_number)) {
-                    return '-';
-                }
-                if (in_array($handover->shipper_status_id, $normal_status_ids)) {
-                    return 'Normal';
-                } elseif (in_array($handover->shipper_status_id, $return_status_ids)) {
-                    return 'Return';
+              ->editColumn('excess_shipments', function($handover_list) {
+                if ($handover_list->excess_shipments > 0) {
+                  return '<button class="btn btn-sm btn-outline-info align-middle">' . $handover_list->excess_shipments . '</button>';
                 } else {
-                    return '-';
+                  return 0;
                 }
-            })
+              })
 
-            ->filterColumn('bag_type', function ($query, $keyword) use ($normal_status_ids, $return_status_ids) {
-              $query->where(function ($subQuery) use ($keyword, $normal_status_ids, $return_status_ids) {
-                // Normalize the keyword for case-insensitivity and trim spaces
-                $keyword = strtolower(trim($keyword));
-                if ($keyword === 'r' || $keyword === 'n') {
-                    // Show both "Normal" and "Return"
-                    $subQuery->whereIn('s.shipper_status_id', array_merge($normal_status_ids, $return_status_ids))
-                      ->whereNotNull('handovers.bag_number');
-                } elseif (str_starts_with('normal', $keyword)) {
-                    $subQuery->whereIn('s.shipper_status_id', $normal_status_ids)
-                      ->whereNotNull('handovers.bag_number');
-                } elseif (str_starts_with('return', $keyword)) {
-                    $subQuery->whereIn('s.shipper_status_id', $return_status_ids)
-                      ->whereNotNull('handovers.bag_number');
-                } elseif ($keyword === '-') {
-                    // Include only rows where bag_number is NULL
-                    $subQuery->whereNull('handovers.bag_number');
+              ->addColumn('bag_type', function ($handover) use($normal_status_ids,$return_status_ids) {
+                  if (is_null($handover->bag_number)) {
+                      return '-';
+                  }
+                  if (in_array($handover->shipper_status_id, $normal_status_ids)) {
+                      return 'Normal';
+                  } elseif (in_array($handover->shipper_status_id, $return_status_ids)) {
+                      return 'Return';
+                  } else {
+                      return '-';
+                  }
+              })
+
+              ->filterColumn('bag_type', function ($query, $keyword) use ($normal_status_ids, $return_status_ids) {
+                $query->where(function ($subQuery) use ($keyword, $normal_status_ids, $return_status_ids) {
+                  // Normalize the keyword for case-insensitivity and trim spaces
+                  $keyword = strtolower(trim($keyword));
+                  if ($keyword === 'r' || $keyword === 'n') {
+                      // Show both "Normal" and "Return"
+                      $subQuery->whereIn('s.shipper_status_id', array_merge($normal_status_ids, $return_status_ids))
+                        ->whereNotNull('handovers.bag_number');
+                  } elseif (str_starts_with('normal', $keyword)) {
+                      $subQuery->whereIn('s.shipper_status_id', $normal_status_ids)
+                        ->whereNotNull('handovers.bag_number');
+                  } elseif (str_starts_with('return', $keyword)) {
+                      $subQuery->whereIn('s.shipper_status_id', $return_status_ids)
+                        ->whereNotNull('handovers.bag_number');
+                  } elseif ($keyword === '-') {
+                      // Include only rows where bag_number is NULL
+                      $subQuery->whereNull('handovers.bag_number');
+                  } else {
+                      // Fallback for invalid keywords: force no results
+                      $subQuery->whereRaw('1 = 0');
+                  }
+              });          
+            })          
+              ->editColumn('from', function($handover_list) {
+                if (isset($handover_list->from_admin_id)) {
+                    return Admin::where('id', $handover_list->from_admin_id)->first()->name;
+                }
+                else {
+                    return $handover_list->from_name;
+                }
+              })
+
+              ->filterColumn('from', function ($query, $keyword) {
+                $to_admin_ids = Admin::where('name', 'LIKE', '%' . $keyword . '%')->pluck('id');
+                if ($to_admin_ids->isNotEmpty()) {
+                  $query->whereIn('hr.admin_id', $to_admin_ids);
                 } else {
-                    // Fallback for invalid keywords: force no results
-                    $subQuery->whereRaw('1 = 0');
+                  $query->whereRaw('1 = 0');
                 }
-            });          
-          })          
-          
+              })
 
-            ->editColumn('from', function($handover_list) {
-              if (isset($handover_list->from_admin_id)) {
-                  return Admin::where('id', $handover_list->from_admin_id)->first()->name;
-              }
-              else {
-                  return $handover_list->from_name;
-              }
-            })
+              ->editColumn('to', function($handover_list) {
+                if (isset($handover_list->to_admin_id)) {
+                    return Admin::where('id', $handover_list->to_admin_id)->first()->name;
+                }
+                else {
+                    return $handover_list->to_name;
+                }
+              })
 
-            ->editColumn('from_dept_area_desg', function($handover_list){
-              if (isset($handover_list->from_admin_id)) {
-                 $admin = Admin::where('id', $handover_list->from_admin_id)->first();
-                 if(isset($admin->Edesignation) && isset($admin->Edesignation->department)){
-                  return $admin->Edesignation->department->name;
-                 }else{
-                  return '-';
-                 }
-              }else {
-                  return '-';
-              }            
-          })
+              ->filterColumn('to', function ($query, $keyword) {
+                $to_admin_ids = Admin::where('name', 'LIKE', '%' . $keyword . '%')->pluck('id');
+                if ($to_admin_ids->isNotEmpty()) {
+                  $query->whereIn('hor.admin_id', $to_admin_ids);
+                } else {
+                  $query->whereRaw('1 = 0');
+                }
+              })
+            
 
-          ->editColumn('to_dept_area_desg', function($handover_list){
-            if (isset($handover_list->to_admin_id)) {
-               $admin = Admin::where('id', $handover_list->to_admin_id)->first();
-               if(isset($admin->Edesignation) && isset($admin->Edesignation->department)){
-                return $admin->Edesignation->department->name;
-               }else{
-                return '-';
-               }
-            }else {
-              return '-';
-            }            
-        })
-
-            ->editColumn('to', function($handover_list) {
-              if (isset($handover_list->to_admin_id)) {
-                  return Admin::where('id', $handover_list->to_admin_id)->first()->name;
-              }
-              else {
-                  return $handover_list->to_name;
-              }
-            })
             ->addColumn('user_type', function($handover_list) {
               if(isset($handover_list->from_admin_id, $handover_list->to_admin_id)){
                 return 'User';
@@ -951,95 +967,117 @@ class AdminShipmentHandoverController extends Controller
                 return 'Department';
               }
             })
-        ->addColumn('remaining_shipment_count', function($handover_list) {
-            if ($handover_list->shipment_count != 0 && $handover_list->received_shipments != 0) {
-                $remaining = $handover_list->shipment_count - $handover_list->received_shipments;
-                if($remaining > 0){
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $remaining  . '</button>';
+
+            ->filterColumn('user_type', function($query, $keyword) {
+              $query->where(function($query) use ($keyword) {
+                $keyword = strtolower($keyword);
+
+                if (stripos('user', $keyword) !== false) {
+                  $query->whereNotNull('hr.admin_id')
+                          ->whereNotNull('hor.admin_id');
+                }  
+                elseif (stripos('department', $keyword) !== false) {
+                    $query->whereNull('hr.admin_id')
+                          ->whereNull('hor.admin_id');
+                } 
+                elseif (stripos('department', $keyword) === false || stripos('user', $keyword) === false) {
+                  $query->whereRaw('1 = 0');
                 }
-                else{
-                    return 0;
-                }
-            }
-            else {
-                return 0;
-            }
-        })
-        ->addColumn('shipment_pieces', function($handover_list) {
-            return '<button class="btn btn-sm btn-outline-info shipment_pieces align-middle">Piece(s) Breakup</button>';
-        })
+              });
+            })  
+          
 
-        ->editColumn('created_at_area', function($handover_list) {
-          $forward_location_status = $handover_list->forward_location_status === 0 ? 'Off-site' : ($handover_list->forward_location_status === 1 ? 'On-site' : '-');
-          $forwarded_area_name = $handover_list->forwarded_area_name ?? '-';
-          return $forwarded_area_name . ' | ' . $forward_location_status;
-        })
 
-        ->filterColumn('created_at_area', function ($query, $keyword) {
-          $keyword = '%' . strtolower(trim($keyword)) . '%';
-          $query->where(function ($subQuery) use ($keyword) {
-              $subQuery->whereRaw('LOWER(caf.name) LIKE ?', [$keyword])
-                ->orWhereRaw(
-                  'LOWER(CASE 
-                  WHEN ssj_f.location_status = 0 THEN "off-site"
-                  WHEN ssj_f.location_status = 1 THEN "on-site"
-                  ELSE "-" 
-                  END
-                ) LIKE ?', [$keyword]);
-          });
-        })
 
-        ->editColumn('received_at_area', function($handover_list) {
-          $received_location_status = $handover_list->received_location_status === 0 ? 'Off-site' : ($handover_list->received_location_status === 1 ? 'On-site' : '-');
-          $received_area_name = $handover_list->received_area_name ?? '-';
-          return $received_area_name . ' | ' . $received_location_status;
-        })
+          ->addColumn('remaining_shipment_count', function($handover_list) {
+              if ($handover_list->shipment_count != 0 && $handover_list->received_shipments != 0) {
+                  $remaining = $handover_list->shipment_count - $handover_list->received_shipments;
+                  if($remaining > 0){
+                      return '<button class="btn btn-sm btn-outline-info align-middle">' . $remaining  . '</button>';
+                  }
+                  else{
+                      return 0;
+                  }
+              }
+              else {
+                  return 0;
+              }
+          })
+          ->addColumn('shipment_pieces', function($handover_list) {
+              return '<button class="btn btn-sm btn-outline-info shipment_pieces align-middle">Piece(s) Breakup</button>';
+          })
 
-        ->filterColumn('received_at_area', function ($query, $keyword) {
-          $keyword = '%' . strtolower(trim($keyword)) . '%';
-          $query->where(function ($subQuery) use ($keyword) {
-              $subQuery->whereRaw('LOWER(car.name) LIKE ?', [$keyword])
-                ->orWhereRaw(
+          ->editColumn('created_at_area', function($handover_list) {
+            $forward_location_status = $handover_list->forward_location_status === 0 ? 'Off-site' : ($handover_list->forward_location_status === 1 ? 'On-site' : '-');
+            $forwarded_area_name = $handover_list->forwarded_area_name ?? '-';
+            return $forwarded_area_name . ' | ' . $forward_location_status;
+          })
+
+          ->filterColumn('created_at_area', function ($query, $keyword) {
+            $keyword = '%' . strtolower(trim($keyword)) . '%';
+            $query->where(function ($subQuery) use ($keyword) {
+                $subQuery->whereRaw('LOWER(caf.name) LIKE ?', [$keyword])
+                  ->orWhereRaw(
                     'LOWER(CASE 
-                        WHEN ssj_r.location_status = 0 THEN "off-site"
-                        WHEN ssj_r.location_status = 1 THEN "on-site"
-                        ELSE "-" 
-                    END) LIKE ?', [$keyword]);
+                    WHEN ssj_f.location_status = 0 THEN "off-site"
+                    WHEN ssj_f.location_status = 1 THEN "on-site"
+                    ELSE "-" 
+                    END
+                  ) LIKE ?', [$keyword]);
+            });
+          })
+
+          ->editColumn('received_at_area', function($handover_list) {
+            $received_location_status = $handover_list->received_location_status === 0 ? 'Off-site' : ($handover_list->received_location_status === 1 ? 'On-site' : '-');
+            $received_area_name = $handover_list->received_area_name ?? '-';
+            return $received_area_name . ' | ' . $received_location_status;
+          })
+
+          ->filterColumn('received_at_area', function ($query, $keyword) {
+            $keyword = '%' . strtolower(trim($keyword)) . '%';
+            $query->where(function ($subQuery) use ($keyword) {
+                $subQuery->whereRaw('LOWER(car.name) LIKE ?', [$keyword])
+                  ->orWhereRaw(
+                      'LOWER(CASE 
+                          WHEN ssj_r.location_status = 0 THEN "off-site"
+                          WHEN ssj_r.location_status = 1 THEN "on-site"
+                          ELSE "-" 
+                      END) LIKE ?', [$keyword]);
+            });
           });
-        });
 
-        if ($hub = $request->get('search_hub')) {
-            $datatable->where('handovers.hub', '=', $hub);
-        }
+          if ($hub = $request->get('search_hub')) {
+              $datatable->where('handovers.hub', '=', $hub);
+          }
 
-        if ($from_admin = $request->get('search_from_admin')) {
-            $datatable->where('handovers.from', '=', $from_admin);
-        }
-        if ($to_admin = $request->get('search_to_admin')) {
-            $datatable->where('handovers.to', '=', $to_admin);
-        }
-        if ($bag_number = $request->get('search_bag_number')) {
-          $datatable->where('handovers.bag_number', '=', $bag_number);
-        }
+          if ($from_admin = $request->get('search_from_admin')) {
+              $datatable->where('handovers.from', '=', $from_admin);
+          }
+          if ($to_admin = $request->get('search_to_admin')) {
+              $datatable->where('handovers.to', '=', $to_admin);
+          }
+          if ($bag_number = $request->get('search_bag_number')) {
+            $datatable->where('handovers.bag_number', '=', $bag_number);
+          }
 
-        if ($search_area = $request->get('search_area')) {
-          // $datatable->where(function($query) use ($search_area) {
-          //     $query->where('ssj_f.area_id', '=', $search_area)
-          //     ->orWhere('ssj_r.area_id', '=', $search_area);
-          // });
+          if ($search_area = $request->get('search_area')) {
+            // $datatable->where(function($query) use ($search_area) {
+            //     $query->where('ssj_f.area_id', '=', $search_area)
+            //     ->orWhere('ssj_r.area_id', '=', $search_area);
+            // });
 
-          $area_name = CityArea::where('id', (int)$search_area)
-              ->select('name')
-              ->first();
+            $area_name = CityArea::where('id', (int)$search_area)
+                ->select('name')
+                ->first();
 
-          $datatable->where(function($query) use ($area_name) {
-            $query->where('c_from.name', '=', $area_name->name)
-              ->orWhere('c_to.name', '=', $area_name->name);
-          });
-        } 
-        return  $datatable->make(true);
+            $datatable->where(function($query) use ($area_name) {
+              $query->where('c_from.name', '=', $area_name->name)
+                ->orWhere('c_to.name', '=', $area_name->name);
+            });
+          } 
+          return  $datatable->make(true);
 
-    }
+      }
 
     public function handover_shipments_count(Request $request){
 
