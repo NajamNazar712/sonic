@@ -219,6 +219,33 @@
                             head.push('Destination');
                             head.push('Manifest Id');
                             head.push('Shipment(s)');
+
+                            // new columns start
+                            head.push('COD Shipment Count');
+                            head.push('COD Shipment Weight');
+
+                            head.push('Express Shipment Count');
+                            head.push('Express Shipment Weight');
+
+                            head.push('Retail Shipment Count');
+                            head.push('Retail Shipment Weight');
+
+                            head.push('Logistics Shipment Count');
+                            head.push('Logistics Shipment Weight');
+
+                            head.push('Warehouse Shipment Count');
+                            head.push('Warehouse Shipment Weight');
+
+                            head.push('FOD Shipment Count');
+                            head.push('FOD Shipment Weight');
+
+                            head.push('Hyperlocal Shipment Count');
+                            head.push('Hyperlocal Shipment Weight');
+
+                            head.push('International Shipment Count');
+                            head.push('International Shipment Weight');
+                            // new columns end
+
                             head.push('Lost Shipment(s)');
                             head.push('Short Received Shipment(s)');
                             head.push('Shipping Mode');
@@ -241,6 +268,33 @@
                                 row.push(values.destination);
                                 row.push(values.manifest);
                                 row.push(values.shipments_count);
+
+                                // new columns start
+                                row.push(values.cod || '--');
+                                row.push(values.cod_weight || '--');
+
+                                row.push(values.express || '--');
+                                row.push(values.express_weight || '--');
+
+                                row.push(values.retail || '--');
+                                row.push(values.retail_weight || '--');
+
+                                row.push(values.logistics || '--');
+                                row.push(values.logistics_weight || '--');
+
+                                row.push(values.warehouse || '--');
+                                row.push(values.warehouse_weight || '--');
+
+                                row.push(values.fod || '--');
+                                row.push(values.fod_weight || '--');
+
+                                row.push(values.hyperlocal || '--');
+                                row.push(values.hyperlocal_weight || '--');
+
+                                row.push(values.international || '--');
+                                row.push(values.international_weight || '--');
+                                // new columns end
+
                                 row.push(values.ls);
                                 row.push(values.short_received);
                                 row.push(values.shipping_mode);

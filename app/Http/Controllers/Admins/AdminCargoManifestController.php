@@ -2734,8 +2734,10 @@ class AdminCargoManifestController extends Controller
             ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
             ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
 
-            ->leftJoin('cargo_manifest_bag_shipments as cargo_shipments', '')
-
+            ->leftJoin('cargo_manifest_bag_shipments as cargo_shipments', 'cargo_shipments.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
+            ->leftJoin('shipments', 'shipments.id', '=', 'cargo_shipments.shipment_id')
+            ->leftJoin('users as user', 'user.id', '=', 'shipments.user_id')
+            ->leftJoin('sub_category_segments as sub_segment', 'user.sub_segment_id', '=', 'sub_segment.id')
 
             ->select(
                 'cargo_manifest_bags.id',
@@ -2772,8 +2774,11 @@ class AdminCargoManifestController extends Controller
                 'cargo_manifest_bags.short_received_shipments as short_received',
                 'cargo_manifest_bags.lost_shipments as lost_shipments',
                 'cargo_manifest_bags.lost_shipments as ls',
-                'cargo_manifest_bags.received_at as received_at'
-            );
+                'cargo_manifest_bags.received_at as received_at',
+                'sub_segment.name as segment_name',
+                'shipments.actual_weight as shipment_actual_weight',
+            )
+            ->groupBy('cargo_manifest_bags.id');
 
         if (session('role_id') != 1) {
             $bags = $bags->where(function ($query) {
@@ -2866,19 +2871,62 @@ class AdminCargoManifestController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            })->rawColumns(['shipments','junctions','short_received_shipments','manifest_id','lost_shipments']);
+            })
+            
+            ->editColumn('logistics_count', function ($row) {
+                return $row->segment_name == 'Logistics' ? $row->shipments->count() : 0;
+            })
+            ->editColumn('express_count', function ($row) {
+                return $row->segment_name == 'Express' ? $row->shipments->count(): 0;
+            })
+            ->editColumn('warehouse_count', function ($row) {
+                return $row->segment_name == 'Warehouse' ? $row->shipments->count() : 0;
+            })
+            ->editColumn('international_count', function ($row) {
+                return $row->segment_name == 'International' ? $row->shipments->count() : 0;
+            })
+            ->editColumn('cod_count', function ($row) {
+                return $row->segment_name == 'COD' ? $row->shipments->count() : 0;
+            })
+            ->editColumn('hyperlocal_count', function ($row) {
+                return $row->segment_name == 'Hyperlocal' ? $row->shipments->count() : 0;
+            })
+            ->editColumn('fod_count', function ($row) {
+                return $row->segment_name == 'FOD' ? $row->shipments->count() : 0;
+            })
+            ->editColumn('retail_count', function ($row) {
+                return $row->segment_name == 'Retail' ? $row->shipments->count() : 0;
+            })
+            
+            ->editColumn('logistics_weight', function ($row) {
+                return $row->segment_name == 'Logistics' ? $row->actual_weight : 0;
+            })
+            ->editColumn('express_weight', function ($row) {
+                return $row->segment_name == 'Express' ? $row->actual_weight : 0;
+            })
+            ->editColumn('warehouse_weight', function ($row) {
+                return $row->segment_name == 'Warehouse' ? $row->actual_weight : 0;
+            })
+            ->editColumn('international_weight', function ($row) {
+                return $row->segment_name == 'International' ? $row->actual_weight : 0;
+            })
+            ->editColumn('cod_weight', function ($row) {
+                return $row->segment_name == 'COD' ? $row->actual_weight : 0;
+            })
+            ->editColumn('hyperlocal_weight', function ($row) {
+                return $row->segment_name == 'Hyperlocal' ? $row->actual_weight : 0;
+            })
+            ->editColumn('fod_weight', function ($row) {
+                return $row->segment_name == 'FOD' ? $row->actual_weight : 0;
+            })
+            ->editColumn('retail_weight', function ($row) {
+                return $row->segment_name == 'Retail' ? $row->actual_weight : 0;
+            })
+
+            ->rawColumns(['shipments','junctions','short_received_shipments','manifest_id','lost_shipments']);
 
         return $datatables->make(true);
     }
-
-
-
-
-
-
-
-
-
 
     public function create_manifest()
     {
