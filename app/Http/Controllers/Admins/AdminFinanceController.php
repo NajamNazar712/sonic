@@ -19356,7 +19356,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         }else{
                             $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
                             if($pending_payment->arrival_shipment -1 == 0 && $pending_payment->arrival_shipment < $pending_payment->total_shipments){
-                                $pending_payment->arrival_shipment =  $pending_payment->total_shipments;
+                                $pending_payment->arrival_shipment =  isset($pending_payment->pending_payment_shipments_arrival) ? count($pending_payment->pending_payment_shipments_arrival) : $pending_payment->total_shipments;
                             }
                         }
                         if ($type == 0) {

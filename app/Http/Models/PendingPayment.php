@@ -10,6 +10,9 @@ class PendingPayment extends Model
 	public function pending_payment_shipments() {
 		return $this->hasMany('App\Http\Models\PendingPaymentShipment');
 	}
+    public function pending_payment_shipments_arrival() {
+		return $this->hasMany('App\Http\Models\PendingPaymentShipment','pending_payment_id','id')->where('type',3);
+	}
 
     public function pending_payment_calculation(){
         return $this->hasOne('App\Http\Models\PendingPaymentCalculation');
