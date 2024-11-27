@@ -2982,13 +2982,16 @@ class APIController extends Controller
             }
 
             if ($shipment_pre_book) {
-                $tracking_number[] = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
-                $tracking_number[] = (!empty($order_id) ? "order ID : ($order_id)" : 'No Order Id');
+                $tracking_number[] = [
+                    "tracking_number" => ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id),
+                    "order_id" => (!empty($order_id) ? $order_id : 'No Order Id')
+                ];
             } else {
-                $tracking_number[] = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
-                $tracking_number[] = (!empty($order_id) ? "order ID : ($order_id)" : 'No Order Id');
+                $tracking_number[] = [
+                    "tracking_number" => ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id),
+                    "order_id" => (!empty($order_id) ? $order_id : 'No Order Id')
+                ];
             }
-
             if (!isset($row['shipment_id'])) {
                 $row['shipment_id'] = $shipment_id;
             }
@@ -3064,7 +3067,7 @@ class APIController extends Controller
             $return_array = array(
                 'status' => 0,
                 'message' => 'Shipment has been Booked!',
-                'tracking_number' => $tracking_number,
+                'tracking_numbers' => $tracking_number,
                 'messages' => []
             );
 
