@@ -42,6 +42,7 @@ class DeleteDuplicateArrival extends Command
     {
 
         $startDate =  Carbon::now()->subDays(1)->format('Y-m-d 00:00:00');
+        $startDate2 =  Carbon::now()->subDays(30)->format('Y-m-d 00:00:00');
         $endDate = Carbon::now()->format('Y-m-d 23:59:59');
         $type = 3;
 
@@ -156,6 +157,35 @@ class DeleteDuplicateArrival extends Command
         } else {
             echo "No duplicate records found for deletion.";
         }
+
+        $results = DB::table('pending_payment_shipments')
+            ->select(
+                'pending_payments.arrival_shipment',
+                DB::raw('COUNT(pending_payment_shipments.shipment_id) AS total_arrival'),
+                'pending_payment_shipments.pending_payment_id'
+            )
+            ->join('pending_payments', 'pending_payments.id', '=', 'pending_payment_shipments.pending_payment_id')
+            ->whereBetween('pending_payments.created_at', [$startDate2, $endDate])
+            ->whereIn('pending_payment_shipments.type', [3])
+            ->groupBy('pending_payment_shipments.pending_payment_id')
+            ->havingRaw('pending_payments.arrival_shipment != total_arrival')
+            ->get();
+
+// Prepare updates in bulk
+        $updateData = [];
+        foreach ($results as $payment) {
+            $updateData[$payment->pending_payment_id] = [
+                'arrival_shipment' => $payment->total_arrival,
+            ];
+        }
+
+// Perform updates
+        foreach ($updateData as $pendingPaymentId => $data) {
+            DB::table('pending_payments')
+                ->where('id', $pendingPaymentId)
+                ->update($data);
+        }
+
 
     }
 }
