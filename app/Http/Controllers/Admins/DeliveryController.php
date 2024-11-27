@@ -2512,6 +2512,7 @@ class DeliveryController extends Controller
                       <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
                     </div></span>";
             })
+            ->rawColumns(['action','relation', 'cnic', 'ccd_image','remarks', 'reason', 'status','open_box' ,'received_or_refused_by'])
             ->make(true);
     }
 
@@ -3859,6 +3860,7 @@ class DeliveryController extends Controller
             //                    return $relation;
             //                }
             //            })
+            ->rawColumns(['ccd_image','existing_location', 'rider_location', 'confirm_location', 'open_box' ,'fake_status', 'call_verification', 'remarks' ,'reason', 'status', 'consignee_phone' ,'tracking_number_link'])
             ->make(true);
     }
 
