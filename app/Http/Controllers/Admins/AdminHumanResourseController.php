@@ -434,7 +434,12 @@ class AdminHumanResourseController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 57);
         $rider_type = RiderType::all();
         $route = Route::all();
-        $operation_rider_category = OperationRidersCategory::all();
+
+        /* TO-6892 */
+        //$operation_rider_category = OperationRidersCategory::all();
+        $operation_rider_category = OperationRidersCategory::find(1);
+        /* */
+
         $rider_categories = RiderCategory::all();
         $rider_main_categories = RiderMainCategory::all();
         $route_types = RouteType::all();

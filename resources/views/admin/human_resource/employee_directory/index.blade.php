@@ -345,9 +345,14 @@
                                 <fieldset class="form-group">
                                     <select name="category" id="category" class="form-control select2"
                                             data-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($operation_rider_category as $category)
-                                            <option value="{{$category->id}}">{{$category->name}}</option>
-                                        @endforeach
+                                        {{-- TO - 6892 --}}
+                                        {{--@foreach($operation_rider_category as $category)--}}
+                                           {{--<option value="{{$category->id}}">{{$category->name}}</option>--}}
+                                        {{--@endforeach--}}
+
+                                        <option value="{{$operation_rider_category->id}}">{{$operation_rider_category->name}}</option>
+
+                                        {{--END--}}
                                     </select>
                                 </fieldset>
                             </div>
@@ -2123,7 +2128,12 @@
                 $('#area_list').val(area_id).trigger('change');
                 if(check_bit != null)
                 {
-                    $('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');
+
+                    /* TO - 6892 */
+                    /*$('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');*/
+                    $('#category').val('1').trigger('change');
+                    /* END */
+
                     route_id = table.row($(elm).parents('tr')).data().route_id;
                     trax_id = table.row($(elm).parents('tr')).data().trax_id;
                     var ccd = table.row($(elm).parents('tr')).data().ccd;

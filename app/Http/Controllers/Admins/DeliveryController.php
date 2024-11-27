@@ -9305,32 +9305,46 @@ class DeliveryController extends Controller
 
     public function operation_riders(Request $request)
     {
-
         $operation_id = $request->operation_rider_type;
-
-        $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
-            ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
-            //            ->select(['riders.*','h.name as hub_name'])
-            ->where('riders.operation_rider_id', $operation_id)
-            ->whereNotNull('riders.employee_id')
-            ->where('riders.status', 1);
-        if (session('role_id') != 1) {
-            if ($operation_id == 1) {
-                if (!$request->has('carrefour')) {
-                    $riders->where('riders.rider_type_id', 2);
+        if($operation_id != 1){
+            /*TO-6892*/
+            $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+                ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')->whereIn('riders.name', [
+                    'NSA',
+                    'OSA',
+                    'Incomplete Address',
+                    'Hold for Self Collection',
+                    'Friday/ Saturday Closed',
+                    'Restricted Area',
+                    'Hold in OPS',
+                    'Damaged',
+                    'Delivery Stopped',
+                    'Wrong Destination'
+            ]);
+            /*END*/
+        }else{
+            $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+                ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+                ->where('riders.operation_rider_id', $operation_id)
+                ->whereNotNull('riders.employee_id')
+                ->where('riders.status', 1);
+            if (session('role_id') != 1) {
+                if ($operation_id == 1) {
+                    if (!$request->has('carrefour')) {
+                        $riders->where('riders.rider_type_id', 2);
+                    }
                 }
+            }
+
+            if (session('role_id') != 1) {
+                $riders = $riders->whereHas('city', function ($query) {
+                    $query->whereIn('hub_id', session('hubs'));
+                });
             }
         }
 
-
-        if (session('role_id') != 1) {
-            $riders = $riders->whereHas('city', function ($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            });
-        }
         if ($riders) {
             $riders = $riders->select('riders.id', 'riders.name', 'riders.trax_id', 'h.name as hub_name')->get();
-            //            dd($riders);
             return response()->json(['status' => 1, 'riders' => $riders, 'success' => 'Riders Found']);
         } else {
             return response()->json(['status' => 0, 'error' => 'No Riders Found']);
