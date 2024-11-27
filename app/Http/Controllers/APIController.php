@@ -2518,7 +2518,7 @@ class APIController extends Controller
             }
         }
         $errors = [];
-
+        $validData = [];
 
         foreach ($request->data as $key2 => $row) {
             $key_inc = $key2 + 1;
@@ -2536,16 +2536,19 @@ class APIController extends Controller
                         }
                     }
                 }
+            } else {
+                $validData[] = $row;
             }
         }
-        if(!empty($errors)){
+
+        if(!empty($errors) && empty($validData)){
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $errors]);
         }
 
-        if(empty($errors))
+        if(!empty($validData))
         $array_piece_quantity_count = 0;
 
-        foreach ($request->data as $key2 => $row) {
+        foreach ($validData as $key2 => $row) {
 //                if ($request->input('amount') == 0 || $request->input('amount') === null) {
 //                    $amount = $request->input('amount');
 //                    $parcel_value = $request->input('parcel_value');
@@ -3061,7 +3064,8 @@ class APIController extends Controller
             $return_array = array(
                 'status' => 0,
                 'message' => 'Shipment has been Booked!',
-                'tracking_numbers' => $tracking_number,
+                'Booked Tracking Numbers' => $tracking_number,
+                'Errors' => $errors,
                 'messages' => []
             );
 
