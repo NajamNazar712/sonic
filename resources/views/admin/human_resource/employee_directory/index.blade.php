@@ -2129,10 +2129,8 @@
                 if(check_bit != null)
                 {
 
-                    /* TO - 6892 */
-                    /*$('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');*/
-                    $('#category').val('1').trigger('change');
-                    /* END */
+
+                    $('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');
 
                     route_id = table.row($(elm).parents('tr')).data().route_id;
                     trax_id = table.row($(elm).parents('tr')).data().trax_id;
