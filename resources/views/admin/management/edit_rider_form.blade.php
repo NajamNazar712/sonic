@@ -357,28 +357,28 @@ if (isset($main_category[2]) && $type == 1) {
                 dropdownParent:$('#editRiderForm')
             });
          @endif
-{{--        @if($rider->operation_rider_id != Null)--}}
-{{--        $('#operation_rider_id').val({!! $rider->operation_rider_id !!}).trigger('change').bind('change', function () {--}}
-{{--                var id = parseInt($(this).val());--}}
-{{--                if(id == 2){--}}
-{{--                    $('#allow_delivered_row').removeClass('d-none');--}}
-{{--                }else{--}}
-{{--                    $('#allow_delivered_row').addClass('d-none');--}}
-{{--                }--}}
-{{--        });--}}
-{{--        @else--}}
-{{--        $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({--}}
-{{--            placeholder:'Select Functional Category',--}}
-{{--            dropdownParent: $("#editRiderForm")--}}
-{{--        }).bind('change', function () {--}}
-{{--                var id = parseInt($(this).val());--}}
-{{--                if(id == 2){--}}
-{{--                    $('#allow_delivered_row').removeClass('d-none');--}}
-{{--                }else{--}}
-{{--                    $('#allow_delivered_row').addClass('d-none');--}}
-{{--                }--}}
-{{--        });--}}
-{{--        @endif--}}
+        @if($rider->operation_rider_id != Null)
+        $('#operation_rider_id').val({!! $rider->operation_rider_id !!}).trigger('change').bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id == 2){
+                    $('#allow_delivered_row').removeClass('d-none');
+                }else{
+                    $('#allow_delivered_row').addClass('d-none');
+                }
+        });
+        @else
+        $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Functional Category',
+            dropdownParent: $("#editRiderForm")
+        }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id == 2){
+                    $('#allow_delivered_row').removeClass('d-none');
+                }else{
+                    $('#allow_delivered_row').addClass('d-none');
+                }
+        });
+        @endif
 
         $('#city_list').on('change',function () {
             var routelist = $('#route_list');
