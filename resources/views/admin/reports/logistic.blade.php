@@ -116,6 +116,7 @@
                         <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">In Transit Date</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Address</th>
@@ -352,6 +353,7 @@
                             head.push('Description');
                             head.push('Order ID');
                             head.push('Tracking No.');
+                            head.push('In Transit Date.');
                             head.push('Shipper');
                             head.push('Consignee Name');
                             head.push('Consignee Address');
@@ -375,6 +377,7 @@
                                 row.push(values.description);
                                 row.push(values.order_id);
                                 row.push(values.tracking_number);
+                                row.push(values.in_transit_date);
                                 row.push(values.shipper);
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_address);
@@ -439,10 +442,11 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'}, 
                     { data:'arrival_date' ,name: 'arrival_date', class: 'align-middle arrival_date'}, 
-                    { data:'shipper_address' ,name:'shipments.shipper_address', class: 'align-middle shipper_address'},
-                    { data:'description' ,name:'sj.description', class: 'align-middle description'},
+                    { data:'shipper_address' ,name:'shipper_address', class: 'align-middle shipper_address'},
+                    { data:'description' ,name:'si.description', class: 'align-middle description'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
+                    { data:'in_transit_date' ,name: 'in_transit_date', class: 'align-middle text-center in_transit_date'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'consignee_name' ,name:'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data:'consignee_address' ,name:'shipments.consignee_address', class: 'align-middle consignee_address'},
