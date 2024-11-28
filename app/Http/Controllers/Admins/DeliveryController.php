@@ -2088,7 +2088,7 @@ class DeliveryController extends Controller
                 $rider_id = $rider->trax_id;
             }
             $category = $rider->rider_category->name;
-            $route_name = $delivery_note_details->route->code . '( ' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ' )';
+            $route_name = $delivery_note_details->route ? $delivery_note_details->route->code . '( ' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ' )' : 'Hold In Route';
 
             //HBL Konnect Integration
             $hbl_transactions_amount = 0;
