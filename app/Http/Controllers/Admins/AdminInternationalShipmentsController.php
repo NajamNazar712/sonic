@@ -44,7 +44,7 @@ class AdminInternationalShipmentsController extends Controller
         }
         $shipments = InternationalShipment::join('shipments', 'shipments.id', '=', 'international_shipments.shipment_id')
         ->leftjoin('international_shipment_service_providers as issp', 'issp.id', '=', 'international_shipments.service_provider_id')
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number','international_shipments.international_tracking_number','international_shipments.postal_code','shipments.created_at as booking_date','international_shipments.actual_weight as actual_weight', 'issp.name as provider','international_shipments.seal_number', 'shipments.shipper_status_id');
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number','international_shipments.international_tracking_number','international_shipments.postal_code','shipments.created_at as booking_date','international_shipments.actual_weight as actual_weight', 'issp.name as provider','international_shipments.seal_number', 'shipments.shipper_status_id', 'international_shipments.cost');
 
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
@@ -101,6 +101,7 @@ class AdminInternationalShipmentsController extends Controller
             'international_tracking_number' => 'Tracking Number',
             'actual_weight' => 'Actual Weight',
             'service_provider_id' => 'Service Provider',
+            'cost' => 'Cost',
         ];
 
         $messages = [
@@ -126,8 +127,11 @@ class AdminInternationalShipmentsController extends Controller
             $header = ['Tracking Number', 'International Tracking Number', 'Actual Weight', 'Service Provider'];
 
             if (isset($spreadsheet)) {
-                if (count($spreadsheet[0]) == 4){
-                    $fields = [0 => 'tracking_number', 1 => 'international_tracking_number', 2 => 'actual_weight', 3 => 'service_provider_id'];
+                // if (count($spreadsheet[0]) == 4){
+                //     $fields = [0 => 'tracking_number', 1 => 'international_tracking_number', 2 => 'actual_weight', 3 => 'service_provider_id'];
+                // }
+                if (count($spreadsheet[0]) == count($names)) {
+                    $fields = array_keys($names);
                 }
                 else{
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
@@ -197,6 +201,7 @@ class AdminInternationalShipmentsController extends Controller
                         $international_tracking_number = trim($row['international_tracking_number']);
                         $international_shipment_weight = $row['actual_weight'];
                         $service_provider_id = $row['service_provider_id'];
+                        $cost = $row['cost'];
                         $shipment_details = Shipment::where('tracking_number',$tracking)->first();
                         $shipment_id = $shipment_details->id;
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment_id);
@@ -206,6 +211,7 @@ class AdminInternationalShipmentsController extends Controller
                             $international_shipment->actual_weight = $international_shipment_weight;
                             $international_shipment->sync = 1;
                             $international_shipment->service_provider_id = $service_provider_id;
+                            $international_shipment->cost = $cost;
                             $international_shipment->save();
 
                             if($international_shipment_weight != NULL){

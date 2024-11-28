@@ -67,7 +67,8 @@
 
                         <div class="col ml-auto">
                             <div class="form-group text-right">
-                                <a href="{{ asset('file/International Tracking Upload Template.xlsx') }}?v=28_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                {{-- <a href="{{ asset('file/International Tracking Upload Template.xlsx') }}?v=28_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Template</a> --}}
+                                <a href="{{ asset('file/International Tracking Upload Template New.xlsx') }}?v=28_11_2024" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                             </div>
                         </div>
                     </div>
@@ -81,6 +82,7 @@
                         <th class="border-primary border-darken-1">Tracking No. Booking Date</th>
                         <th class="border-primary border-darken-1">3PL Tracking Number</th>
                         <th class="border-primary border-darken-1">3PL Service Provider</th>
+                        <th class="border-primary border-darken-1">Cost</th>
                         <th class="border-primary border-darken-1">Seal Number</th>
                         <th class="border-primary border-darken-1">Postal Code</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
@@ -251,6 +253,7 @@
                             head.push('Tracking No. Booking Date');
                             head.push('3PL Tracking Number');
                             head.push('3PL Service Provider');
+                            head.push('Cost');
                             head.push('Seal Number');
                             head.push('Postal Code');
                             head.push('Actual Weight');
@@ -264,6 +267,7 @@
                                 row.push(values.booking_date);
                                 row.push(values.international_tracking_number);
                                 row.push(values.provider);
+                                row.push(values.cost);
                                 row.push(values.seal_number);
                                 row.push(values.postal_code);
                                 row.push(values.actual_weight);
@@ -302,6 +306,7 @@
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'international_tracking_number', name: 'international_shipments.international_tracking_number', class: 'align-middle international_tracking_number'},
                     {data: 'provider', name: 'issp.name', class: 'align-middle provider'},
+                    {data: 'cost', name: 'international_shipments.cost', class: 'align-middle international_shipments_cost'},
                     {data: 'seal_number', name: 'international_shipments.seal_number', class: 'align-middle seal_number'},
                     {data: 'postal_code', name: 'international_shipments.postal_code', class: 'align-middle postal_code'},
                     {data: 'actual_weight', name: 'international_shipments.actual_weight', class: 'align-middle actual_weight'},
