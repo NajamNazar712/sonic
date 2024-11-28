@@ -2,6 +2,8 @@
 
 namespace App\Http\Traits;
 
+use App\Http\Models\City;
+use App\Http\Models\CityArea;
 use Carbon\Carbon;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeLeave;
@@ -134,5 +136,27 @@ trait CommonTrait
             $location_status = 0;
         }
         return $location_status;
+    }
+
+    function setJourneyDetails($scanning_data)
+    {
+        if (isset($scanning_data)) {
+            return [
+                'latitude' => $scanning_data['latitude'] ?? '-',
+                'longitude' => $scanning_data['longitude'] ?? '-',
+                'location_status' => ($scanning_data['location_status'] == 1) ? 'On-Site' : 'Off-site',
+                'area' => CityArea::find($scanning_data['area_id'])->name ?? '-',
+                'city' => City::where(['id' => $scanning_data['hub_id'], 'hub' => "1"])->first()->name ?? '-',
+
+            ];
+        } else {
+            return [
+                'latitude' => '-',
+                'longitude' => '-',
+                'area' => '-',
+                'city' => '-',
+                'location_status' => '-',
+            ];
+        }
     }
 }
