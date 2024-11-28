@@ -5580,7 +5580,7 @@ class DeliveryController extends Controller
                     $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
                 }
                 return $count > 0 ? $count : '-';
-            })->rawColumns(['delivery_note', 'fintech_charges.link', 'shipments_count_link', 'one_link_payment_count_button','deposit_slip_view','transactions_amount_link','action']);
+            })->rawColumns(['delivery_note', 'fintech_charges.link', 'shipments_count_link', 'one_link_payment_count_button','deposit_slip_view','transactions_amount_link','action' ,'delivered_shipments_link']);
         //        if ($tracking_number = $request->get('search_tracking')) {
         //            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
         //                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
@@ -5920,6 +5920,7 @@ class DeliveryController extends Controller
                 $reason = '<input class="form-control" name="remarks[' . $deliveries->delivery_note_id . ']" placeholder="Enter Remarks">';
                 return $reason;
             })
+            ->rawColumns(['remarks'])
             ->make(true);
     }
 
