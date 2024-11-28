@@ -1080,12 +1080,13 @@ class DeliveryController extends Controller
 
     public function create_delivery_note(Request $request)
     {
+        $holdInCheck = $request->holdInCheck ?? true; //TO-6892
 
         if ($request->hub_id == '') {
             return redirect()->back()->with('error', 'Hub not found!');
         }
 
-        if ($request->selected_route_id == '') {
+        if ($request->selected_route_id == '' && !$holdInCheck) { //TO-6892
             return redirect()->back()->with('error', 'Route not selected!');
         }
 
@@ -1157,7 +1158,7 @@ class DeliveryController extends Controller
                 $note = DeliveryNote::create([
                     'hub_id' => $request->hub_id,
                     'rider_id' => $request->selected_rider_id,
-                    'route_id' => $request->selected_route_id,
+                    'route_id' => empty($request->selected_route_id) ? '1837' : $request->selected_route_id,  //TO-6892
                     'shipments_count' => $shipments_count,
                     'admin_id' => $admin,
                     'total_cod_amount' => $total_cod_amount,
@@ -9306,12 +9307,12 @@ class DeliveryController extends Controller
     public function operation_riders(Request $request)
     {
         $operation_id = $request->operation_rider_type;
+        $holdInCheck = false;
         if($operation_id != 1){
             /*TO-6892*/
             $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
                 ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')->whereIn('riders.name', [
-                    'NSA',
-                    'OSA',
+                    'NSA/OSA',
                     'Incomplete Address',
                     'Hold for Self Collection',
                     'Friday/ Saturday Closed',
@@ -9321,6 +9322,7 @@ class DeliveryController extends Controller
                     'Delivery Stopped',
                     'Wrong Destination'
             ]);
+            $holdInCheck = true;
             /*END*/
         }else{
             $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
@@ -9345,7 +9347,7 @@ class DeliveryController extends Controller
 
         if ($riders) {
             $riders = $riders->select('riders.id', 'riders.name', 'riders.trax_id', 'h.name as hub_name')->get();
-            return response()->json(['status' => 1, 'riders' => $riders, 'success' => 'Riders Found']);
+            return response()->json(['status' => 1, 'holdInCheck' => $holdInCheck, 'riders' => $riders, 'success' => 'Riders Found']);
         } else {
             return response()->json(['status' => 0, 'error' => 'No Riders Found']);
         }
