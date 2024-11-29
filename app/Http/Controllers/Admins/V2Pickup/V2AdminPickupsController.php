@@ -225,9 +225,10 @@ class V2AdminPickupsController extends Controller
         }
 
         if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
-            $from = $request->get('requested_from_date');
-            $to = $request->get('requested_to_date');
-            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+            $from = Carbon::parse($request->get('requested_from_date'))->format('Y-m-d');
+            //$to = $request->get('requested_to_date');
+            $stop_date = Carbon::parse($request->get('requested_to_date'))->addDay(1)->format('Y-m-d');
+            //$stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
             $pickup_requests->whereBetween('v2_pickup_requests.created_at', [$from, $stop_date]);
         }
 
