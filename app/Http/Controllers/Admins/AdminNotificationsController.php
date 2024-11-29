@@ -1270,6 +1270,12 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = ['Booking_at','preview'];
         }
+        else if ($id == 234)
+        {
+            $details['receiver'] = [''];
+
+            $details['fields'] = [''];
+        }
 
         return $details;
     }
