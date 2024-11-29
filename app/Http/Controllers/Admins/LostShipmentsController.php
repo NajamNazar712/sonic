@@ -459,8 +459,12 @@ class LostShipmentsController extends Controller
                         if($lost_shipments_admins->exists()){
 //                    if (!$parcel->packaging_material_request) {
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-                        CargoManifestBagShipments::where('shipment_id', $shipment)->update(['removed' => 1]);
-                        ShipmentChargesController::return ($shipment);
+
+                        if (CargoManifestBagShipments::where('shipment_id', $shipment)->exists()) {
+                            CargoManifestBagShipments::where('shipment_id', $shipment)->update(['removed' => 1]);
+                        }
+
+                            ShipmentChargesController::return ($shipment);
 
                         ShipmentsJourneyController::add($shipment, 20, 20, $request->reason, NULL, NULL, Auth::id());
 
@@ -475,7 +479,11 @@ class LostShipmentsController extends Controller
                     }else{
 //                    if (!$parcel->packaging_material_request) {
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-                        CargoManifestBagShipments::where('shipment_id', $shipment)->update(['removed' => 1]);
+
+                        if (CargoManifestBagShipments::where('shipment_id', $shipment)->exists()) {
+                            CargoManifestBagShipments::where('shipment_id', $shipment)->update(['removed' => 1]);
+                        }
+
                         ShipmentChargesController::return ($shipment);
                         ShipmentsJourneyController::add($shipment, 20, 20, $request->reason, NULL, NULL, Auth::id());
 
@@ -513,7 +521,11 @@ class LostShipmentsController extends Controller
                         $lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
                         if($lost_shipments_admins->exists()){
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => 13, 'consignee_status_id' => 13]);
-                            CargoManifestBagShipments::where('shipment_id', $shipment)->update(['removed' => 1]);
+
+                            if (CargoManifestBagShipments::where('shipment_id', $shipment)->exists()) {
+                                CargoManifestBagShipments::where('shipment_id', $shipment)->update(['removed' => 1]);
+                            }
+
                             ShipmentsJourneyController::add($shipment, 13, 13, NULL, $request->remarks, NULL, Auth::id());
                             if($parcel->packaging_material_request == 1) {
                                 $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
@@ -532,7 +544,11 @@ class LostShipmentsController extends Controller
                         }
                     }else{
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 13, 'consignee_status_id' => 13]);
-                        CargoManifestBagShipments::where('shipment_id', $shipment)->update(['removed' => 1]);
+
+                        if (CargoManifestBagShipments::where('shipment_id', $shipment)->exists()) {
+                            CargoManifestBagShipments::where('shipment_id', $shipment)->update(['removed' => 1]);
+                        }
+
                         ShipmentsJourneyController::add($shipment, 13, 13, NULL, $request->remarks, NULL, Auth::id());
                         if($parcel->packaging_material_request == 1) {
                             $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
