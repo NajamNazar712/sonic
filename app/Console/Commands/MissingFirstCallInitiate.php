@@ -60,6 +60,12 @@ class MissingFirstCallInitiate extends Command
             $timeEnd = Carbon::now()->subHour(1)->format('Y-m-d H') . ':59:59';
             $timeStart = Carbon::now()->subHour(1)->format('Y-m-d H') . ':00:00';
         }
+        $upshipments = RvShipmentTicket::where('in_progress', 0)->where('is_bot', 0)->get();
+        // ->update(['in_progress' => 0,'rv_shipment_tickets.updated_at'=> 'rv_shipment_tickets.created_ats']);
+        foreach ($upshipments as $shipment) {
+            $shipment->updated_at = $shipment->created_at;
+            $shipment->save();
+        }
         Log::channel('botCallJobLog')->info('s ' . 'bot call misisng entry ' . $timeStart . ' bot call time End '. $timeEnd);
         $globalSettings = GlobalSettings::where('setting_value', 1)
         ->whereIn('type',[ 'rv_disable_shippers_only_shippers', 'bot_call_enable_disable'])
@@ -88,7 +94,7 @@ class MissingFirstCallInitiate extends Command
         if(!empty($rvShipmentInsert)){
             foreach($shipments as $value){
                 if(in_array($value['id'], array_unique($rvShipmentInsert))){
-                    $journey = ShipmentsJourney::where('shipment_id', $value['id'])->whereIn('shipper_status_id', [12, 52, 66])->select(DB::raw('Max(shipment_id)'),'status_reason_id')->latest()->first();
+                    $journey = ShipmentsJourney::where('shipment_id', $value['id'])->whereIn('shipper_status_id', [12, 52, 66])->select('status_reason_id')->latest()->first();
                     // Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' . $value['id']);
                     $this->rvshipmentticketInsert($value['id'], $value['shipper_status_id'], $journey['status_reason_id'], $value['user_id']);
                 }

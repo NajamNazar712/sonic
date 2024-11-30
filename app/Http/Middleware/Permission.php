@@ -465,6 +465,7 @@ class Permission
 
             'finance.tracking_number_wise_dncc_info.index' => 984,
             'finance.tracking_number_wise_dncc_info.list' => 984,
+            'finance.shipment_ledger.index' => 1017,
 
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,

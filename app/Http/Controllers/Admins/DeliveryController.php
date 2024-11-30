@@ -6153,7 +6153,7 @@ class DeliveryController extends Controller
                 //     $dropdown .= $closed_status;
                 // }
 
-                if (($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) <= 0 && $result->status != 2) {
+                if ((session('role_id') == 1 || in_array(1018, session('permissions'))) && ($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) <= 0 && $result->status != 2) {
                     $reconcile_to_resolved = '<button type="button" class="dropdown-item update_status_resolved"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Update Status To Resolved</div></button>';
                     $dropdown .= $reconcile_to_resolved;
                 }

@@ -2,19 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Webhook\WebhookLogController;
-use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\RvShipmentAssignAgent;
-use App\Http\Models\Shipment;
 use App\Jobs\BotCallDispatchSecod;
 use App\Jobs\BotCallDispatchThird;
 use App\RvCronLog;
-use App\RvShipmentTicket;
 use Carbon\Carbon;
-use GuzzleHttp\Client;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
-
 
 class BotCallInitiate extends Command
 {

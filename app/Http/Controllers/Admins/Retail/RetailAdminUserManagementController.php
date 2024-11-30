@@ -284,7 +284,7 @@ class RetailAdminUserManagementController extends Controller
     {
         $request->validate([
             'attachment_1' => 'required|mimes:jpeg,png,jpg,pdf,doc,docx|max:2048',
-            'franchise_deduction' => 'required|numeric',
+            // 'franchise_deduction' => 'required|numeric',
             'franchise_withholding' => 'required|numeric',
             'name' => 'required',
             'phone_number' => 'required',
@@ -654,7 +654,7 @@ class RetailAdminUserManagementController extends Controller
     
         $grouped_data = [];
         foreach ($retail_commissions as $record) {
-            $grouped_data[$record->trax_center_name][] = $record;
+            $grouped_data[$record->retail_user_name][] = $record;
         }
     
         foreach ($grouped_data as $franchise_name => $records) {
@@ -1028,7 +1028,7 @@ class RetailAdminUserManagementController extends Controller
 
             // Deduction GST tax row
             $html .= '<tr>';
-            $html .= '<td class="text-center" colspan="6"><strong>GST ' . ($data->commission_gst_deduction_percent ?? 0) . '%</strong></td>';
+            $html .= '<td class="text-center" colspan="6"><strong>Deduction ' . ($data->commission_gst_deduction_percent ?? 0) . '</strong></td>';
             $html .= '<td><strong>' . number_format(round($deduction_amount)) . '</strong></td>';
             $html .= '</tr>';
 
@@ -1182,7 +1182,7 @@ class RetailAdminUserManagementController extends Controller
         $paid_status = $request->paid_status;
         $query = RetailUserCommission::where('month', $month);
         if (!empty($franchise)) {
-            $query->where('franchise_id', $franchise);
+            $query->where('retail_user_id', $franchise);
         }
         if (!empty($paid_status) || $paid_status == '0') {
             $query->where('is_paid', $paid_status);

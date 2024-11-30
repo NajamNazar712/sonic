@@ -40,6 +40,69 @@
 
 										<div class="form-group">
 											<select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
+												@php ($default_pickup_address = FALSE)
+
+												{{-- If substitute account has its own pickup addresses --}}
+												@if ($substitute_account_pickup_address != null)
+													@foreach($substitute_account_pickup_address as $shipping_information)
+														@if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
+															@if ($shipping_information['default_address'] == 1)
+																@php ($default_pickup_address = TRUE)
+																<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}" selected>
+																	{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
+																</option>
+															@else
+																<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">
+																	{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
+																</option>
+															@endif
+														@endif
+													@endforeach
+													{{-- <option value="0">New</option> --}}
+												@endif
+
+												{{-- Use main account pickup addresses if no substitute addresses are found --}}
+												@if ($substitute_account && $substitute_account_pickup_address == null)
+													@foreach($user->shipping as $shipping_information)
+														@if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
+															@if ($shipping_information['default_address'] == 1)
+																@php ($default_pickup_address = TRUE)
+																<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}" selected>
+																	{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
+																</option>
+															@else
+																<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">
+																	{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
+																</option>
+															@endif
+														@endif
+													@endforeach
+													{{-- <option value="0">New</option> --}}
+												@endif
+
+												{{-- main account --}}
+												@if (!$substitute_account)
+													@foreach($user->shipping as $shipping_information)
+														@if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
+															@if ($shipping_information['default_address'] == 1)
+																@php ($default_pickup_address = TRUE)
+																<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}" selected>
+																	{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
+																</option>
+															@else
+																<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">
+																	{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}
+																</option>
+															@endif
+														@endif
+													@endforeach
+													<option value="0">New</option>
+												@endif
+											</select>
+										</div>
+
+										{{-- <div class="form-group">
+											<select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
 
 												@php ($default_pickup_address = FALSE)
 
@@ -56,7 +119,7 @@
 												@endforeach
 												<option value="0">New</option>
 											</select>
-										</div>
+										</div> --}}
 
 										<div class="form-group">
 											<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="pickup_city_name"></p>

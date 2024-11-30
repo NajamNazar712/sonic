@@ -39,7 +39,7 @@ use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\ShipmentStatusReason;
-
+use App\RvCronLog;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentTicket;
 use App\RvShipmentTicketDeleteTable;
@@ -557,7 +557,7 @@ trait RvTrait
         }
 
         if (!$request->rv_assign_agent_sub_status_id || !$shipment_status_reason) { // Return confirm RVR reason_id bind in journey inserted
-            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('verification',0)->latest()->select('status_reason_id', 'remarks')->first();
+            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest()->select('status_reason_id', 'remarks')->first();
             $shipment_status_reason = $journey->status_reason_id;
             $remarks =  ((!$remarks) ? $journey->remarks : $remarks);
         }
@@ -799,6 +799,7 @@ trait RvTrait
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
         $botInvalidNo = ($request->bot_auto_return > 0 ? 1 : 0); // bot invalid call 
+
         if ($rv_shipment_assign_agent) {
             try {
                 $status = new RvAgentCallHistory();
@@ -813,29 +814,22 @@ trait RvTrait
                 $status->updated_at = $request->end_date ?? Carbon::now();
                 $status->save();
                 if($botInvalidNo > 0){ //If the consignee is invalid phone no during a bot call, the unresponsive count is set to 4, and the return_confirm is marked 
-                    $rv_shipment_assign_agent->unresponsive_count = 4;
-                    $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
-                    $rv_shipment_assign_agent->save();
-
-                    $rv_shipment_assign_agent->rv_assign_agent_status_id = 1;
-                    $rv_shipment_assign_agent->rv_state_id = 4;
-                    $rv_shipment_assign_agent->save();
-                    request()->request->add([
-                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
-                        'remarks' => $request->remarks,
-                        'rv_assign_agent_sub_status_id' => null
-                    ]);
-                    $this->return_confirm($request);
-                    return ['status' => 1, 'success' => 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
-
+                    $rv_shipment_assign_agent->unresponsive_count = 3;
+                    // return ['status' => 1, 'success' => 'Shipment Updated Successfully', 'rv_agent_call_history_record_id' => $status->id];
+                }else{
+                    $rv_shipment_assign_agent->increment('unresponsive_count');
                 }
-                $rv_shipment_assign_agent->increment('unresponsive_count');
                 $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
                 $rv_shipment_assign_agent->save();
 
-                $rv_shipment_ticket = RvShipmentTicket::where('shipment_id',$request->shipment_id)->increment('call_count');
+                $rv_shipment_ticket = RvShipmentTicket::where('shipment_id',$request->shipment_id)->first();
+                $rv_shipment_ticket->increment('call_count');
+                $rv_shipment_ticket->save();
                 if($rv_shipment_assign_agent->unresponsive_count <= 3 && !$botCall){
-                    RvShipmentTicket::where('shipment_id', $request->shipment_id)->update(['in_progress'=>0]);
+                    // $rv_shipment_ticket->updated_at = carbon::parse($rv_shipment_ticket->created_at)->addhours(2);
+                    $rv_shipment_ticket->in_progress = 0;
+                    $rv_shipment_ticket->save();
+                    // RvShipmentTicket::where('shipment_id', $request->shipment_id)->update(['in_progress'=>0]);
                 }
                 $reattempt_count = BoltUndeliveredReasonMapCount::where('shipment_id', $request->shipment_id)->where('count',3)->first();
                 //if reattempt count is 3 then shipment status will be auto return confirm
@@ -2036,9 +2030,10 @@ trait RvTrait
     }
 
     static function botCallingDataSet($shipmentId){
+    
         if (GlobalSettings::where(['type' => 'bot_call_enable_disable', 'setting_value' => 1])->exists()) {
             if (RvShipmentTicket::where('shipment_id', $shipmentId)->whereNull('deleted_at')->where('is_bot', 1)->exists()) {
-                $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCalls';
+                $base_uri = 'https://cap.zong.com.pk:8444/vpbx-apis/roboCalls/outboundCall';
                 RvShipmentTicket::where('shipment_id', $shipmentId)->update(['in_progress' => 1]);
                 $shipment = Shipment::with(['user:id,name,brand_name'])->select('user_id', 'consignee_phone_number_1', 'consignee_name', 'tracking_number', 'amount')->find($shipmentId);
 
@@ -2097,8 +2092,8 @@ trait RvTrait
             ],
             'json' => [
                 'tracking_number' => $tracking_number,
-                'call_status' => 'NOANSWER',
-                'remarks'=> 'due to invalid number',
+                'call_status' => 'InvalidNumber',
+                'remarks'=> 'Due to invalid number',
                 'bot_auto_return' => 1, // auto returm confirm in  case of invalid number
                 'input' => 0,
                 'start_date' => date('Y-m-d H:i:s'),
@@ -2109,6 +2104,8 @@ trait RvTrait
         ]);
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
+        Log::channel('botCallJobLog')->info('s ' . 'Log after  respsoned' . json_encode($response));
+
     }
 
     protected function shipmentDifferentStatus($shipmentId,$request){
@@ -2134,5 +2131,11 @@ trait RvTrait
         $status->updated_at = $request->end_date;
         $status->save();
         return $status;
+    }
+    public function createRvCronLog($message)
+    {
+        RvCronLog::create([
+            'message' => $message,
+        ]);
     }
 }

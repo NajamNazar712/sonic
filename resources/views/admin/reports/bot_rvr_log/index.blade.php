@@ -332,7 +332,7 @@
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 10:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
 
@@ -352,7 +352,7 @@
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                formatSubmit: 'yyyy-mm-dd 22:01:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                 }
@@ -461,9 +461,9 @@
                   order: [[3, 'asc']], // Order by 'created_at' DESC and 'description' ASC
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
-                    {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle tracking_number', searchable: true},
+                    {data: 'tracking_number', name: 's.tracking_number', class: 'text-center align-middle tracking_number', searchable: true},
                     {data: 'shipmentNo', name: 'shipmentNo', class: 'align-middle shipmentNo', searchable: false},
-                    {data: 'call_count', name: 'call_count', orderable: false, class: 'text-center align-middle call_count', searchable: false},
+                    {data: 'call_count', name: 'call_count_initiate', orderable: false, class: 'text-center align-middle call_count', searchable: true},
                     {data: 'message1', name: 'response', orderable: false, class: 'text-center align-middle response', searchable: false},
                     // {data: 'call_message', name: 'call_message', orderable: false, class: 'text-center align-middle call_message', searchable: false},
                     {data: 'created_at', name: 'created_at', orderable: false, class: 'text-center align-middle created_at', searchable: false},
@@ -480,6 +480,40 @@
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>')
+                        .appendTo(this.api().table().header());
+
+                    var td =
+                        '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input =
+                        '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon =
+                        '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                   
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.select') || $(header).is('.serial_number') ||  $(header).is('.shipmentNo') 
+                        || $(header).is('.response') || $(header).is('.created_at') || $(header).is('.shipmentNo1')
+                        || $(header).is('.message') || $(header).is('.call_start_date') || $(header).is('.call_end_date')
+                        || $(header).is('.input') || $(header).is('.date_time')) {
+                            $(td).appendTo($(search));
+                        } else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                   
+
+                    
+                }
         });
 
         $('#search_form').bind('submit', function (e) {

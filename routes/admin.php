@@ -3713,18 +3713,55 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('handover')->name('handover.')->group(function () {
         Route::prefix('create')->name('create.')->group(function () {
+            // disable the old create handover route
             Route::get('', 'AdminShipmentHandoverController@handover_create_index')->name('index');
+
+            // new handover create screen
+            Route::get('new', 'AdminShipmentHandoverController@handover_create_index_new')->name('new_index');
+
             Route::post('fetch', 'AdminShipmentHandoverController@handover_dropdown_val_fetch_from')->name('fetch');
             Route::post('fetch1', 'AdminShipmentHandoverController@handover_dropdown_val_fetch_to')->name('fetch1');
             Route::post('shipment_details', 'AdminShipmentHandoverController@arrival_bulk_shipment_details')->name('shipment_details');
+
+            // new handover create screen
+            Route::post('shipment_details_new', 'AdminShipmentHandoverController@arrival_bulk_shipment_details_new')->name('shipment_details_new');
+
+
             Route::post('store', 'AdminShipmentHandoverController@bulk_handover_submit')->name('store');
+
+            // new handover create store
+            Route::post('store_new', 'AdminShipmentHandoverController@bulk_handover_submit_new')->name('store_new');
+
             Route::post('shipments_pieces', 'AdminShipmentHandoverController@add_handover_shipments_pieces')->name('shipments_pieces');
             Route::post('sub_area', 'AdminShipmentHandoverController@sub_area')->name('sub_area');
+
+            // AJAX routes found in new handover create blade file
+            Route::get('unique_bag_number', 'AdminShipmentHandoverController@unique_bag_number')->name('unique_bag_number');
+            Route::get('check_bag_type', 'AdminShipmentHandoverController@check_bag_type')->name('check_bag_type');
+            Route::get('handover_exists', 'AdminShipmentHandoverController@handover_exists')->name('handover_exists');
+            Route::get('same_hub_handover_count', 'AdminShipmentHandoverController@same_hub_handover_count')->name('same_hub_handover_count');
+            Route::get('permission_to_create_handover', 'AdminShipmentHandoverController@permission_to_create_handover')->name('permission_to_create_handover');
         });
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');
             Route::post('shipment_details', 'AdminShipmentHandoverController@arrival_bulk_shipment_details_receive')->name('shipment_details');
+            Route::get('check_handover_bag_receive', 'AdminShipmentHandoverController@check_handover_bag_receive')->name('check_handover_bag_receive');
+
+            // new handover receive screen
+            Route::get('new', 'AdminShipmentHandoverController@handover_receive_index_new')->name('new_index');
+
+            // new receive screen shipment details
+            Route::post('shipment_details_new', 'AdminShipmentHandoverController@arrival_bulk_shipment_details_receive_new')->name('shipment_details_new');
+
             Route::post('store', 'AdminShipmentHandoverController@bulk_handover_submit_receive')->name('store');
+
+            // new handover receive submit 
+            Route::post('store_new', 'AdminShipmentHandoverController@bulk_handover_submit_receive_new')->name('store_new');
+
+            // AJAX routes found in the new handover receive blade file 
+            Route::get('handover_shipment_type', 'AdminShipmentHandoverController@handover_shipment_type')->name('handover_shipment_type');
+            Route::get('bag_number_dropdown', 'AdminShipmentHandoverController@bag_number_dropdown')->name('bag_number_dropdown');
+            Route::get('check_full_bag', 'AdminShipmentHandoverController@check_full_bag')->name('check_full_bag');
         });
         Route::prefix('list')->name('list.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_list_index')->name('index');
@@ -3735,6 +3772,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print', 'AdminShipmentHandoverController@handover_print')->name('print');
             Route::post('pieces_list', 'AdminShipmentHandoverController@handover_shipments_pieces')->name('pieces_list');
             Route::post('get_user', 'AdminShipmentHandoverController@get_user')->name('get_user');
+            Route::post('excess_handover_shipments', 'AdminShipmentHandoverController@excess_handover_shipments_count')->name('excess_handover_shipments');
         });
         Route::prefix('responsibles')->name('responsibles.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@responsibles_index')->name('index');

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\TraxPayTransaction;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\Shipment;
@@ -187,7 +189,7 @@ class ShipperReportsController extends Controller
             });
         }
 
-        $sales->select('p.product_name as product_name','ssreason.name as reason_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status',DB::raw('SUM(pps.charges) as p_total_charges'),DB::raw('SUM(pps.amount) as p_total_amount'),DB::raw('SUM(pps.payable) as p_net_payable'),DB::raw('SUM(pps.gst) as p_gst'),DB::raw('SUM(dps.amount) as d_collection_amount'),DB::raw('SUM(dps.charges) as d_total_charges'),DB::raw('SUM(dps.payable) as d_net_payable'),DB::raw('SUM(dps.gst) as d_gst'),DB::raw('SUM(is.gst) as is_gst'),DB::raw('SUM(pis.gst) as pis_gst'),'shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','sm.mode as shipping_mode','dr.created_at as delivered_or_returned','dr.received_or_refused_by','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','sod.order_date as order_date','shipments.estimated_weight','ssr.reference_1 as reference_1','ssr.reference_2 as reference_2','ssr.reference_3 as reference_3','ssr.reference_4 as reference_4','ssr.reference_5 as reference_5','dr.shipper_status_id as dr_status_id','usi.vendor','dps.done_payment_id as payment_id','shipments.shipper_status_id as shipment_status','shipments.chargeable_weight','shipments.insurance_charges','shipments.packaging_material_charges','shipments.fuel_surcharge','shipments.return_charges','shipments.replacement_charges','shipments.try_and_buy_charges','shipments.nsa_osa_charges','shipments.gst','shipments.intercept_charges','shipments.packaging_charges','u.account_type_id as account_type_id','usi.pickup_address as pickup_address','dr.cnic as dr_cnic','dr.relation as dr_relation','shipments.consignee_address as consignee_address','spjpaid_date.created_at as paid_date','spjproceed_date.created_at as processed_date','si.quantity as item_quantity','shipments.pieces as pieces'
+        $sales->select('p.product_name as product_name','ssreason.name as reason_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),'shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','sm.mode as shipping_mode','dr.created_at as delivered_or_returned','dr.received_or_refused_by','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','sod.order_date as order_date','shipments.estimated_weight','ssr.reference_1 as reference_1','ssr.reference_2 as reference_2','ssr.reference_3 as reference_3','ssr.reference_4 as reference_4','ssr.reference_5 as reference_5','dr.shipper_status_id as dr_status_id','usi.vendor','dps.done_payment_id as payment_id','shipments.shipper_status_id as shipment_status','shipments.chargeable_weight','shipments.insurance_charges','shipments.packaging_material_charges','shipments.fuel_surcharge','shipments.return_charges','shipments.replacement_charges','shipments.try_and_buy_charges','shipments.nsa_osa_charges','shipments.gst','shipments.intercept_charges','shipments.packaging_charges','u.account_type_id as account_type_id','usi.pickup_address as pickup_address','dr.cnic as dr_cnic','dr.relation as dr_relation','shipments.consignee_address as consignee_address','spjpaid_date.created_at as paid_date','spjproceed_date.created_at as processed_date','si.quantity as item_quantity','shipments.pieces as pieces','shipments.fintech_charges as fintech_amount','shipments.id as shipment_id'
         )->whereNotIn('shipments.shipper_status_id', [1, 17]);
 
 
@@ -263,14 +265,30 @@ class ShipperReportsController extends Controller
             ->editColumn('intercept_charges', function($shipment){
                 return number_format($shipment->intercept_charges, 2);
             })
-            ->editColumn('p_total_charges',function($sale){
-                $total = '';
-                if($sale->p_total_charges != null){
-                    $total = $sale->p_total_charges;
-                }else if($sale->d_total_charges != null){
-                    $total = $sale->d_total_charges;
+            ->addColumn('fintech_revenue', function ($shipment) {
+                $fintech_revenue = '-';
+                if ($shipment->fintech_amount != null) {
+                    $trax_pay_transaction = TraxPayTransaction::where('shipment_id', $shipment->shipment_id);
+                    if ($trax_pay_transaction->exists()) {
+                        $trax_pay_transaction = $trax_pay_transaction->first();
+                        $fintech_payment_details = FintechPaymentDetails::where('trax_pay_id', $trax_pay_transaction->id);
+                        if ($fintech_payment_details->exists()) {
+                            $fintech_payment_details = $fintech_payment_details->first();
+                            $fintech_revenue = number_format($fintech_payment_details->revenue);
+                        }
+                    }
                 }
-                return number_format((float)$total, 2);
+                return $fintech_revenue;
+            })
+            ->editColumn('p_total_charges',function($sale){
+                $total = 0;
+                if ($sale->p_total_charges != null) {
+                    $total += $sale->p_total_charges;
+                }
+                if ($sale->d_total_charges != null) {
+                    $total += $sale->d_total_charges;
+                }
+                return number_format((float) $total+$sale->fintech_amount, 2);
             })
             ->addColumn('estimated_charges',function($sale){
                 $estimated = '';
@@ -278,31 +296,33 @@ class ShipperReportsController extends Controller
                 return number_format((float)$estimated, 2);
             })
             ->editColumn('p_net_payable',function($sale){
-                $payable = '';
-                if($sale->p_net_payable != null){
-                    $payable = $sale->p_net_payable;
-                }else if($sale->d_net_payable != null){
-                    $payable = $sale->d_net_payable;
+                $payable = 0;
+                if ($sale->p_net_payable != null) {
+                    $payable += $sale->p_net_payable;
                 }
-                return number_format((float)$payable, 2);
+                if ($sale->d_net_payable != null) {
+                    $payable += $sale->d_net_payable;
+                }
+                return number_format((float) $payable, 2);
             })
             ->editColumn('p_gst',function($sale){
-                $gst = '';
-                if($sale->account_type_id == 1){
-                    if($sale->p_gst != null){
-                        $gst = $sale->p_gst;
-                    }else if($sale->d_gst != null){
-                        $gst = $sale->d_gst;
+                $gst = 0;
+                if ($sale->account_type_id == 1) {
+                    if ($sale->p_gst != null) {
+                        $gst+= $sale->p_gst;
+                    }
+                    if ($sale->d_gst != null) {
+                        $gst+= $sale->d_gst;
+                    }
+                } else {
+                    if ($sale->pis_gst != null) {
+                        $gst+= $sale->pis_gst;
+                    }
+                    if ($sale->is_gst != null) {
+                        $gst+= $sale->is_gst;
                     }
                 }
-                else{
-                    if($sale->pis_gst != null){
-                        $gst = $sale->pis_gst;
-                    }else if($sale->is_gst != null){
-                        $gst = $sale->is_gst;
-                    }
-                }
-                return number_format((float)$gst, 2);
+                return number_format((float) $gst, 2);
             })
             ->editColumn('delivered_or_returned', function ($sale) {
                 if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {

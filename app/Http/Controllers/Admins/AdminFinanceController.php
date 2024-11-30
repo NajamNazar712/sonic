@@ -14474,8 +14474,8 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 // New shipment, assign the details
                 $row[] = $serial_number;
                 $row[] = $shipment->tracking_number;
-                $row[] = $shipment->pickup_address->city->name;
-                $row[] = $shipment->consignee_city->name;
+                $row[] = isset($shipment->pickup_address->city->name) ? $shipment->pickup_address->city->name : '';
+                $row[] = isset($shipment->consignee_city->name) ? $shipment->consignee_city->name : '';
                 $row[] = $shipment->created_at;
                 $row[] = $shipment->actual_weight;
                 $row[] = (($invoice_shipment->type != 2 && ($invoice_shipment->type == 3 || (!$arrival_charges_applied))) ? $shipment->weight_charges : 0);
@@ -18669,6 +18669,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     if($invoice_shipment->type == 3) {
                         $total_weight_charges[$origin] += $shipment->weight_charges;
                         $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                        $total_faf_charges[$origin] += $faf_charges;
                     }else{
                         if ($shipment->packaging_material_request) {
                             $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
@@ -18683,12 +18684,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         if(!$arrival_charges_applied){
                             $total_weight_charges[$origin] += $shipment->weight_charges;
                             $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                            $total_faf_charges[$origin] += $faf_charges;
                         }
                     }
-
-
-
-                    $total_faf_charges[$origin] += $faf_charges;
                 } else {
                     $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
                 }
@@ -19358,7 +19356,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         }else{
                             $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
                             if($pending_payment->arrival_shipment -1 == 0 && $pending_payment->arrival_shipment < $pending_payment->total_shipments){
-                                $pending_payment->arrival_shipment =  $pending_payment->total_shipments;
+                                $pending_payment->arrival_shipment =  isset($pending_payment->pending_payment_shipments_arrival) ? count($pending_payment->pending_payment_shipments_arrival) : $pending_payment->total_shipments;
                             }
                         }
                         if ($type == 0) {
@@ -19974,6 +19972,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
      }
     public function service_charges_ledger_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 813);
         return view('admin.finance.service_charge_ledger.index');
     }
 
@@ -19991,7 +19990,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 'pending_payment_shipments.created_at',  'pending_payments.id as payment_id',
                 DB::raw("'pending' as payment_status"), 'shipments.tracking_number', 'shipments.shipment_type',
                 DB::raw("'0' as balance"), DB::raw("'N/A' as payment_status_journey"), DB::raw("'N/A' as paid_status"),
-                DB::raw("'0' as credit")
+                DB::raw("'0' as credit"),
+                DB::raw("'0' as liability"),
+                'pending_payment_shipments.type as type2'
             )
             ->leftJoin('pending_payments', 'pending_payments.id', '=', 'pending_payment_shipments.pending_payment_id')
             ->leftJoin('shipments', 'shipments.id', '=', 'pending_payment_shipments.shipment_id')
@@ -20007,7 +20008,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 'done_payment_shipments.created_at',  'done_payments.id as payment_id',
                 DB::raw("'done' as payment_status"), 'shipments.tracking_number', 'shipments.shipment_type',
                 DB::raw("'0' as balance"), DB::raw("'N/A' as payment_status_journey"), 'done_payments.status as paid_status',
-                DB::raw("'0' as credit")
+                DB::raw("'0' as credit"),
+                DB::raw("'0' as liability"),
+                'done_payment_shipments.type as type2'
             )
             ->leftJoin('done_payments', 'done_payments.id', '=', 'done_payment_shipments.done_payment_id')
             ->leftJoin('shipments', 'shipments.id', '=', 'done_payment_shipments.shipment_id')
@@ -20026,7 +20029,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 DB::raw("'done_paid' as payment_status"), DB::raw("'Payment Paid' as tracking_number"),
                 'shipments.shipment_type',
                 DB::raw("'0' as balance"), DB::raw("'PAID' as payment_status_journey"), 'done_payments.status as paid_status',
-                DB::raw("'0' as credit")
+                DB::raw("'0' as credit"),
+                DB::raw("'0' as liability"),
+                DB::raw("'N/A' as type2")
 
             )
             ->where('done_payments.user_id', $shipper_id)
@@ -20038,9 +20043,26 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         $done_payment_id = [];
         $add_row = [];
 
+        function getShipmentAmount($data, $shipment_id,$amount)
+        {
+            $true = true;
+
+            foreach ($data as $shipment) {
+                $shipment = (array) $shipment;
+                if ($shipment['shipment_id'] === $shipment_id) {
+                    if (in_array($shipment['type2'], [0, 1])) {
+                        $true = false;
+                    }
+                }
+            }
+            return ($true) ? $amount : 0;
+        }
+
         $payment_shipments =  $pendingPaymentsQuery->unionAll($donePaymentsQuery)->unionAll($success_payment)
-            ->orderBy('created_at', 'asc')->get()
-            ->map(function($query) use (&$balance, &$done_payment_id, &$add_row) {
+            ->orderBy('created_at', 'asc')->get();
+        $data = $payment_shipments->toArray();;
+        $payment_shipments->map(function($query) use (&$balance, &$done_payment_id, &$add_row,&$data) {
+
                 $url = url('admin/tracking?tracking_number=') . $query->tracking_number;
                 $type = $query->type;
                 if ($query->payment_status != 'done_paid') {
@@ -20048,6 +20070,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
                     $typeMap = [0 => 'Delivered', 1 => 'Return', 2 => 'Adjustment', 3 => 'Arrival'];
                     $query->type = $typeMap[$type] ?? 'Arrival';
+
+                    $query->liability = getShipmentAmount($data, $query->shipment_id,$query->amount2);
+
 
                     $payment_journey_status = array();
                     if ($type == 0) {
@@ -20082,11 +20107,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
 
                 if($type == 3 && $query->payment_status != 'done_paid') {
-                    $query->credit = abs($query->amount2);
+                    $query->credit = abs($query->amount);
                     $query->debit = abs($query->payable - $query->amount);
                 }else if($type != 3 && $query->payment_status != 'done_paid') {
                     $query->debit = abs($query->payable - $query->amount);
-                    $query->credit = abs(0);
+                    $query->credit = abs($query->amount);
                 }else{
                     $query->credit = abs($query->amount);
                     $query->debit = abs($query->payable);
