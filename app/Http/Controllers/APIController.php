@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\FafCharges;
+use App\FinjaSmsLog;
 use App\ShipmentAdditionalCharges;
 use DB;
 use SnappyPDF;
@@ -10037,6 +10038,49 @@ class APIController extends Controller
         } else {
             return ['status' => 0, 'message' => 'Access Denied!'];
         }
+    }
+
+    public function fin_sms(Request $request)
+    {
+
+        $rules = [
+            'phone' => ['required'],
+            'text' => ['required', 'min:1','max:160'],
+            'source' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $phone = $request->phone;
+            $text = $request->text;
+            $source = $request->source;
+
+            $array =  array(
+                'phone'=>$phone,
+                'text'=>$text,
+                'source'=>$source,
+            );
+
+            NotificationsController::send(234, 0,0,0,$array);
+
+            $finja_sms_log = new FinjaSmsLog();
+            $finja_sms_log->phone = $phone;
+            $finja_sms_log->text = $text;
+            $finja_sms_log->source = $source;
+            $finja_sms_log->save();
+
+            return response()->json(['status' => 1, 'message' => 'Message Received']);
+        }
+
+
+
+
+
     }
 
 
