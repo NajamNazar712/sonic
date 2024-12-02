@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\Admin;
@@ -1299,7 +1298,9 @@ class VisionSoftAPIController extends Controller
 
     }
     static public function cod_payable_excel(){
-        $links = "";
+
+        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
+        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
 
         // $shippers = User::join('shipments as s', 's.user_id', '=', 'users.id')
         //     ->join('shipments_journey as sj', function($join) use ($startDate,$endDate) {
@@ -1310,14 +1311,8 @@ class VisionSoftAPIController extends Controller
         //     ->whereBetween('sj.created_at', [$startDate, $endDate])
         //     ->groupBy('users.id')
         //     ->get();
-
-        for ($i = 1; $i <= 30; $i++) {
-            $day = str_pad($i, 2, '0', STR_PAD_LEFT); // Ensures two digits
-            $startDate = Carbon::now()->subMonth(3)->startOfMonth()->format("Y-m-$day 00:00:01");
-            $endDate = Carbon::now()->subMonth(3)->endOfMonth()->format("Y-m-$day 23:59:59");
-
-            $shippers = DB::select(
-                "SELECT 
+        $shippers = DB::select(
+            "SELECT 
                 users.id AS account_id, 
                 users.name AS account_name,
                 cities.name AS city, 
@@ -1345,63 +1340,57 @@ class VisionSoftAPIController extends Controller
             JOIN cities ON cities.id = users.city_id
             WHERE sj.created_at BETWEEN '$startDate' AND '$endDate'
             GROUP BY users.id");
-            if (count($shippers) > 0) {
+        if(count($shippers) > 0){
 
-                $shipper_array['header'] = ['S. No.', 'Account ID', 'Account Name', 'City', 'Amount'];
-                $serial = 1;
+            $shipper_array['header'] = ['S. No.','Account ID', 'Account Name','City', 'Amount'];
+            $serial = 1;
 
-                foreach ($shippers as $shipper) {
-                    $shipper_array[] = ['serial' => $serial, 'Account ID' => $shipper->account_id, 'Account Name' => $shipper->account_name, 'City' => $shipper->city, 'Amount' => number_format($shipper->amount)];
-                    $serial++;
-                }
-
-                $cell_st = [
-                    'font' => ['bold' => true],
-                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                    'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
-                ];
-                // $sps_count  = count($sale_person_shipments);
-                $sps_count = $serial;
-                $tas = "D3:D" . $sps_count;
-                $spreadsheet = new Spreadsheet();
-                $sheet = $spreadsheet->getActiveSheet();
-                $sheet->getDefaultColumnDimension()->setWidth(20);
-
-                $sheet->fromArray($shipper_array, NULL, 'A2', true);
-                $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
-                // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-                //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
-
-                // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
-                $sheet->setTitle('COD Payable');
-                $writer = new Xlsx($spreadsheet);
-
-                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                header('Content-Disposition: attachment;filename="vs_cod_payable_excel_.xlsx"');
-                header('Cache-Control: max-age=0');
-                $date_file_name = Carbon::parse($startDate)->format('Y_m_d');
-                $time_string = Carbon::now()->toTimeString();
-                $time_string = Carbon::parse($time_string)->format('h_i_s');
-
-                $file_name_without_path = "reports/vs_cod_payable_excel_" . $date_file_name . ".xlsx";
-                $file_name = public_path() . "/reports/vs_cod_payable_excel_" . $date_file_name . ".xlsx";
-                $writer->save($file_name);
-
-                $cod_payment_excel = url('/') . '/' . $file_name_without_path;
-
-                if (!empty($cod_payment_excel)) {
-                    $links .= "<strong>COD Payable: </strong> <br>" . "<a download='$cod_payment_excel' href='$cod_payment_excel' >$cod_payment_excel</a>" . "<br>";
-                }
-
-
+            foreach ($shippers as $shipper){
+                $shipper_array[] = ['serial' => $serial, 'Account ID' => $shipper->account_id, 'Account Name' => $shipper->account_name,'City' => $shipper->city ,'Amount' => number_format($shipper->amount)];
+                $serial++;
             }
-        }
-        if (!empty($cod_payment_excel)) {
-            NotificationsController::send(213, $links);
+
+            $cell_st =[
+                'font' =>['bold' => true],
+                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            // $sps_count  = count($sale_person_shipments);
+            $sps_count = $serial;
+            $tas = "D3:D" . $sps_count;
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+
+            $sheet->fromArray($shipper_array, NULL, 'A2', true);
+            $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
+            // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
+            //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+
+            // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
+            $sheet->setTitle('COD Payable');
+            $writer = new Xlsx($spreadsheet);
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="vs_cod_payable_excel_.xlsx"');
+            header('Cache-Control: max-age=0');
+            $date_file_name = Carbon::parse($startDate)->format('Y_m_d');
+            $time_string = Carbon::now()->toTimeString();
+            $time_string = Carbon::parse($time_string)->format('h_i_s');
+
+            $file_name_without_path = "reports/vs_cod_payable_excel_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/vs_cod_payable_excel_" . $date_file_name . ".xlsx";
+            $writer->save($file_name);
+
+            return url('/') . '/' . $file_name_without_path;
+
         }
     }
 
     static public function cod_receivable_excel(){
+
+        $startDate = Carbon::now()->subDays(1)->format('Y-m-d 00:00:01');
+        $endDate = Carbon::now()->subDays(1)->format('Y-m-d 23:59:59');
 
         // $cities = City::join('shipments as s', 's.consignee_city_id', '=', 'cities.id')
         //     ->join('cities as hc', 'hc.id', '=', 'cities.hub_id')
@@ -1414,14 +1403,8 @@ class VisionSoftAPIController extends Controller
         //     ->whereNotIn('s.user_id', [8761, 9358])
         //     ->groupBy('hc.id')
         //     ->get();
-        $links = "";
-        for ($i = 1; $i <= 30; $i++) {
-            $day = str_pad($i, 2, '0', STR_PAD_LEFT); // Ensures two digits
-            $startDate = Carbon::now()->subMonth(3)->startOfMonth()->format("Y-m-$day 00:00:01");
-            $endDate = Carbon::now()->subMonth(3)->endOfMonth()->format("Y-m-$day 23:59:59");
-
-            $cities = DB::select(
-                "SELECT hc.id AS hub_id, 
+        $cities = DB::select(
+            "SELECT hc.id AS hub_id, 
                 SUM(s.amount) AS amount,
                 hc.name AS hub_name
             FROM cities
@@ -1444,58 +1427,49 @@ class VisionSoftAPIController extends Controller
                 AND sj.id = sj3.id
             WHERE sj.created_at BETWEEN '$startDate' AND '$endDate'
             GROUP BY hc.id"
-            );
-            if (count($cities) > 0) {
-                $shipper_array['header'] = ['S. No.', 'HUB ID', 'HUB Name', 'Amount'];
-                $serial = 1;
+        );
+        if(count($cities) > 0){
+            $shipper_array['header'] = ['S. No.','HUB ID', 'HUB Name','Amount'];
+            $serial = 1;
 
-                foreach ($cities as $value) {
-                    $shipper_array[] = ['serial' => $serial, 'HUB ID' => $value->hub_id, 'HUB Name' => $value->hub_name, 'Amount' => number_format($value->amount)];
-                    $serial++;
-                }
-
-                $cell_st = [
-                    'font' => ['bold' => true],
-                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                    'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
-                ];
-                // $sps_count  = count($sale_person_shipments);
-                $sps_count = $serial;
-                $tas = "D3:D" . $sps_count;
-                $spreadsheet = new Spreadsheet();
-                $sheet = $spreadsheet->getActiveSheet();
-                $sheet->getDefaultColumnDimension()->setWidth(20);
-
-                $sheet->fromArray($shipper_array, NULL, 'A2', true);
-                $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
-                // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-                //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
-
-                // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
-                $sheet->setTitle('COD Receivable');
-                $writer = new Xlsx($spreadsheet);
-
-                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                header('Content-Disposition: attachment;filename="vs_cod_receivable_excel_.xlsx"');
-                header('Cache-Control: max-age=0');
-                $date_file_name = Carbon::parse($startDate)->format('Y_m_d');
-                $time_string = Carbon::now()->toTimeString();
-                $time_string = Carbon::parse($time_string)->format('h_i_s');
-
-                $file_name_without_path = "reports/vs_cod_receivable_excel_" . $date_file_name . ".xlsx";
-                $file_name = public_path() . "/reports/vs_cod_receivable_excel_" . $date_file_name . ".xlsx";
-                $writer->save($file_name);
-
-                $cod_receivable_excel = url('/') . '/' . $file_name_without_path;
-
-                if (!empty($cod_receivable_excel)) {
-                    $links .= "<strong>COD Payable: </strong> <br>" . "<a download='$cod_receivable_excel' href='$cod_receivable_excel' >$cod_receivable_excel</a>" . "<br>";
-                }
+            foreach ($cities as $value){
+                $shipper_array[] = ['serial' => $serial, 'HUB ID' => $value->hub_id, 'HUB Name' => $value->hub_name, 'Amount' => number_format($value->amount)];
+                $serial++;
             }
-        }
 
-        if (!empty($cod_receivable_excel)) {
-            NotificationsController::send(213, $links);
+            $cell_st =[
+                'font' =>['bold' => true],
+                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+            ];
+            // $sps_count  = count($sale_person_shipments);
+            $sps_count = $serial;
+            $tas = "D3:D" . $sps_count;
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+
+            $sheet->fromArray($shipper_array, NULL, 'A2', true);
+            $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
+            // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
+            //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+
+            // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
+            $sheet->setTitle('COD Receivable');
+            $writer = new Xlsx($spreadsheet);
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="vs_cod_receivable_excel_.xlsx"');
+            header('Cache-Control: max-age=0');
+            $date_file_name = Carbon::parse($startDate)->format('Y_m_d');
+            $time_string = Carbon::now()->toTimeString();
+            $time_string = Carbon::parse($time_string)->format('h_i_s');
+
+            $file_name_without_path = "reports/vs_cod_receivable_excel_" . $date_file_name . ".xlsx";
+            $file_name = public_path() . "/reports/vs_cod_receivable_excel_" . $date_file_name . ".xlsx";
+            $writer->save($file_name);
+
+            return url('/') . '/' . $file_name_without_path;
         }
     }
 }
