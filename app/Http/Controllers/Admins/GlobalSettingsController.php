@@ -8805,7 +8805,7 @@ class GlobalSettingsController extends Controller
     public function aListShipperView()
     {
         $alistShipper = SpecifiedShipper::join('users as u', 'specified_shippers.user_id', '=', 'u.id')
-            ->select('u.name as shipper_name', 'specified_shippers.id as id', 'specified_shippers.status as status', 'specified_shippers.created_at as created_at');
+            ->select('u.name as shipper_name', 'specified_shippers.id as id', 'specified_shippers.status as status', 'specified_shippers.created_at as created');
 
         $datatables = Datatables::of($alistShipper)
             ->editColumn('status', function ($alistShipper) {
