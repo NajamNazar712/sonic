@@ -487,13 +487,6 @@ class LostShipmentsController extends Controller
 
                     $this->updateLostShipmentApproval($shipment, 'rejection_count', 1);
 
-                    $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment);
-                    if($cargo_manifest_bag_shipments->exists()){
-                        $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
-                        $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                        $bag->status_id = 8;
-                        $bag->save();
-                    }
 
                 }
             }
@@ -554,14 +547,6 @@ class LostShipmentsController extends Controller
                     }
                     
                     $this->updateLostShipmentApproval($shipment, 'rejection_count', 1);
-
-                    $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment);
-                    if($cargo_manifest_bag_shipments->exists()){
-                        $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
-                        $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                        $bag->status_id = 8;
-                        $bag->save();
-                    }
                     
                 }
             }
@@ -982,6 +967,13 @@ class LostShipmentsController extends Controller
     public function shipment_approve_status(Request $request){
         
         foreach ($request->shipment_ids as $shipment_id) {
+            $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment_id);
+            if($cargo_manifest_bag_shipments->exists()){
+                $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
+                $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
+                $bag->status_id = 8;
+                $bag->save();
+            }
             ShipmentsJourneyController::add($shipment_id, 18, NULL, NULL, NULL, NULL, Auth::id(), NULL, NULL, $request->approve);
             $this->updateLostShipmentApproval($shipment_id, 'approval_count', 1);
         }
