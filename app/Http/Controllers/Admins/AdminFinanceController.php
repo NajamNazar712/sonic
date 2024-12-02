@@ -170,7 +170,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         return $amount_in_words;
     }
 
-    static private function international_gst()
+    static public function international_gst()
     {
         $gst_charges = GlobalSettings::where('type', 'international_gst_rate');
         if ($gst_charges->exists()) {
@@ -181,7 +181,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         }
     }
 
-    static private function gst($zone_id,$city_id = Null)
+    static public function gst($zone_id,$city_id = Null)
     {
         $zone = Zone::find($zone_id);
         if (!is_null($city_id) && $city_id !== '') {
