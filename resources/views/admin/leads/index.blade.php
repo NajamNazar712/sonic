@@ -1245,7 +1245,7 @@
                     }
                 },
                 rowId: 'leadid',
-                order: [[13, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {data: 'lead_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
