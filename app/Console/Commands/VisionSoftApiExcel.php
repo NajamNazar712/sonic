@@ -43,14 +43,14 @@ class VisionSoftApiExcel extends Command
         $cod_receivable_excel = VisionSoftAPIController::cod_receivable_excel();
         $links = "";
 
-//        if(!empty($cod_receivable_excel)) {
-//            $links .= "<strong>COD Receivables: </strong> <br>" . "<a download='$cod_receivable_excel' href='$cod_receivable_excel' >$cod_receivable_excel</a>" . "<br>";
-//        }
-//        if(!empty($cod_payment_excel)) {
-//            $links .= "<strong>COD Payable: </strong> <br>" . "<a download='$cod_payment_excel' href='$cod_payment_excel' >$cod_payment_excel</a>" . "<br>";
-//        }
-//        if(!empty($cod_payment_excel) || !empty($cod_receivable_excel)) {
-//            NotificationsController::send(213, $links);
-//        }
+        if(!empty($cod_receivable_excel)) {
+            $links .= "<strong>COD Receivables: </strong> <br>" . "<a download='$cod_receivable_excel' href='$cod_receivable_excel' >$cod_receivable_excel</a>" . "<br>";
+        }
+        if(!empty($cod_payment_excel)) {
+            $links .= "<strong>COD Payable: </strong> <br>" . "<a download='$cod_payment_excel' href='$cod_payment_excel' >$cod_payment_excel</a>" . "<br>";
+        }
+        if(!empty($cod_payment_excel) || !empty($cod_receivable_excel)) {
+            NotificationsController::send(213, $links);
+        }
     }
 }
