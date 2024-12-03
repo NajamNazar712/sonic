@@ -971,8 +971,10 @@ class LostShipmentsController extends Controller
             if($cargo_manifest_bag_shipments->exists()){
                 $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
                 $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                $bag->status_id = 8;
-                $bag->save();
+                if($bag->status_id != 7){
+                    $bag->status_id = 8;
+                    $bag->save();
+                }
             }
             ShipmentsJourneyController::add($shipment_id, 18, NULL, NULL, NULL, NULL, Auth::id(), NULL, NULL, $request->approve);
             $this->updateLostShipmentApproval($shipment_id, 'approval_count', 1);
