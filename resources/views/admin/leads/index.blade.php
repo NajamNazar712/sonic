@@ -1277,7 +1277,7 @@
 
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason_id', name: 'leads.reason', class: 'align-middle reason_id'},
-                    {data: 'call_status', name: 'leads.call_status', class: 'align-middle call_status'},
+                    {data: 'call_status_name', name: 'leads.call_status', class: 'align-middle call_status_name'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'updated', name: 'leads.updated_at', class: 'align-middle updated'},
                     {data: 'via_channel', name: 'leads.via_channel', class: 'align-middle via_channel'},
