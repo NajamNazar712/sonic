@@ -25,7 +25,7 @@ class outForDeliveryJourney extends Seeder
     public function run(Request $request)
     {
         //
-        $shipmentId = [22320245464488, 20220245749619];
+        $shipmentId = [14424545997007, 22315246025825, 22324546101615, 20224546117250];
 
         if ($shipmentId) {
             $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)
