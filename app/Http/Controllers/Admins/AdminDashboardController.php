@@ -9454,14 +9454,30 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         $data['email'] = ($user->email) ? $user->email : '';
     
         // Get user IDs with same phone number
-        $similarUsersPhone = User::where('phone', $duplicate->phone)
+        // $similarUsersPhone = User::where('phone', $duplicate->phone)
+        //     ->where('id', '!=', $shipper_id)
+        //     ->where('created_at', '<', $user->created_at)
+        //     ->pluck('id')
+        //     ->toArray();
+
+        $similarUsersPhone = User::whereNotNull('phone')
+            ->where('phone', '!=', '')
+            ->where('phone', $duplicate->phone)
             ->where('id', '!=', $shipper_id)
             ->where('created_at', '<', $user->created_at)
             ->pluck('id')
             ->toArray();
     
         // Get user IDs with same CNIC
-        $similarUsersCnic = User::where('cnic', $duplicate->cnic)
+        // $similarUsersCnic = User::where('cnic', $duplicate->cnic)
+        //     ->where('id', '!=', $shipper_id)
+        //     ->where('created_at', '<', $user->created_at)
+        //     ->pluck('id')
+        //     ->toArray();
+
+        $similarUsersCnic = User::whereNotNull('cnic')
+            ->where('cnic', '!=', '')
+            ->where('cnic', $duplicate->cnic)
             ->where('id', '!=', $shipper_id)
             ->where('created_at', '<', $user->created_at)
             ->pluck('id')
