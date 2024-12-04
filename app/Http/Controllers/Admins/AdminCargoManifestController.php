@@ -2734,10 +2734,12 @@ class AdminCargoManifestController extends Controller
             ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
             ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
 
+            ->leftJoin('manifest_bags', 'manifest_bags.cargo_manifest_id', '=', 'cargo_manifests.id')
+            ->leftJoin('cargo_manifest_bags', 'cargo_manifest_bags.id', '=', 'manifest_bags.cargo_manifest_bag_id')
             ->leftJoin('cargo_manifest_bag_shipments as cargo_shipments', 'cargo_shipments.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
             ->leftJoin('shipments', 'shipments.id', '=', 'cargo_shipments.shipment_id')
-            ->leftJoin('users as user', 'user.id', '=', 'shipments.user_id')
-            ->leftJoin('sub_category_segments as sub_segment', 'user.sub_segment_id', '=', 'sub_segment.id')
+            ->leftJoin('users as cod', 'cod.id', '=', 'shipments.user_id')
+            ->leftJoin('sub_category_segments as sub_segment', 'cod.sub_segment_id', '=', 'sub_segment.id')
 
             ->select(
                 'cargo_manifest_bags.id',
@@ -5509,7 +5511,9 @@ class AdminCargoManifestController extends Controller
             ->leftjoin('fleets as f', 'cargo_manifests.vehicle_id', '=', 'f.id')
             ->leftjoin('transport_modes as tm', 'cargo_manifests.transport_mode_id', '=', 'tm.id')
 
-            ->leftJoin('cargo_manifest_bag_shipments as cargo_shipments', 'cargo_shipments.cargo_manifest_bag_id', '=', 'cargo_manifests.id')
+            ->leftJoin('manifest_bags', 'manifest_bags.cargo_manifest_id', '=', 'cargo_manifests.id')
+            ->leftJoin('cargo_manifest_bags', 'cargo_manifest_bags.id', '=', 'manifest_bags.cargo_manifest_bag_id')
+            ->leftJoin('cargo_manifest_bag_shipments as cargo_shipments', 'cargo_shipments.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
             ->leftJoin('shipments', 'shipments.id', '=', 'cargo_shipments.shipment_id')
             ->leftJoin('users as cod', 'cod.id', '=', 'shipments.user_id')
             ->leftJoin('sub_category_segments as sub_segment', 'cod.sub_segment_id', '=', 'sub_segment.id') 
