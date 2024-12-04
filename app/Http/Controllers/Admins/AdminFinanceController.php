@@ -4622,7 +4622,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
-        $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+        $account_type_id = $shipment->user->account_type_id;
+        if($account_type_id == 1){
+            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+        }else{
+            $pending_payment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
+        }
         if($arrival_charges_applied){
             $pending_payment = $pending_payment->where('type',3);
         }
@@ -4640,7 +4645,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
             self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
         } else {
-            $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+            $account_type_id = $shipment->user->account_type_id;
+            if($account_type_id == 1){
+                $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+            }else{
+                $done_payment = InvoiceShipment::where('shipment_id', $shipment->id);
+            }
             if($arrival_charges_applied){
                 $done_payment = $done_payment->where('type',3);
             }
@@ -4813,7 +4823,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
                         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
-                        $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+                        $account_type_id = $shipment->user->account_type_id;
+                        if($account_type_id == 1){
+                            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+                        }else{
+                            $pending_payment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
+                        }
                         if($arrival_charges_applied){
                             $pending_payment = $pending_payment->where('type',3);
                         }
@@ -4833,7 +4848,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
 
                         } else {
-                            $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+                            $account_type_id = $shipment->user->account_type_id;
+                            if($account_type_id == 1){
+                                $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+                            }else{
+                                $done_payment = InvoiceShipment::where('shipment_id', $shipment->id);
+                            }
                             if($arrival_charges_applied){
                                 $done_payment = $done_payment->where('type',3);
                             }
@@ -5032,7 +5052,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
                         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
-                        $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+                        $account_type_id = $shipment->user->account_type_id;
+                        if($account_type_id == 1){
+                            $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+                        }else{
+                            $pending_payment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
+                        }
                         if($arrival_charges_applied){
                             $pending_payment = $pending_payment->where('type',3);
                         }
@@ -5052,7 +5077,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
 
                         } else {
-                            $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+                            $account_type_id = $shipment->user->account_type_id;
+                            if($account_type_id == 1){
+                                $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+                            }else{
+                                $done_payment = InvoiceShipment::where('shipment_id', $shipment->id);
+                            }
                             if($arrival_charges_applied){
                                 $done_payment = $done_payment->where('type',3);
                             }
