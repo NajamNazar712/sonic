@@ -223,6 +223,7 @@ class FuelManagementController extends Controller
                     });
                 }
             })
+            ->rawColumns(['action','fuel_request_id'])
             ->make(true);
     }
 

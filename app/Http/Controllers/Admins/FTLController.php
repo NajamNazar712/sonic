@@ -19,7 +19,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\CorporateDefaultDiscountCharge;
@@ -123,7 +123,8 @@ class FTLController extends Controller
                 ';
                 }
                 return $dropdown;
-            });
+            })->rawColumns(['tracking_number_link','action']);
+
 
         return $datatables->make(true);
     }

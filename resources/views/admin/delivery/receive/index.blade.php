@@ -484,7 +484,7 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    
+
                     this.api().table().columns.adjust();
                 }
             });

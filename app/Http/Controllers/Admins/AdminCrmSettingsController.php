@@ -306,7 +306,7 @@ class AdminCrmSettingsController extends Controller
                 else {
                     return '';
                 }
-            });
+            })->rawColumns(['action','view_statuses']);
         return $datatables->make(true);
     }
 
@@ -509,7 +509,8 @@ class AdminCrmSettingsController extends Controller
                 else {
                     return '';
                 }
-            });
+            })->rawColumns(['view_hubs', 'view_statuses', 'view_levels', 'action']);
+
         return $datatables->make(true);
     }
 

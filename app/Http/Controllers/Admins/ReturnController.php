@@ -548,6 +548,71 @@ class ReturnController extends Controller
             }
         }
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $shipments->where('sm.id', '=', $mode);
+        }
+
+        if ($request->get('search_rvr_value_div') === "1") {
+            $shipments->where('shipments.shipper_status_id', 12);
+        }
+
+        if ($request->get('search_sar_value_div') === "2") {
+            $shipments->where('shipments.shipper_status_id', 65);
+        }
+
+        if ($request->get('search_total_value_div') === "3") {
+            $shipments->whereIn('shipments.shipper_status_id', [12, 65, 66, 52]);
+        }
+
+        if ($request->get('search_unresponsive_value_div') === "4") {
+            $shipments->where('rvsaa.rv_assign_agent_status_id', 6)->where('rvsaa.unresponsive_count', '>', 0);
+        }
+
+        if ($request->get('number_of_pending_tickets_value_div') === "5") {
+            $shipments->where('rvsaa.rv_state_id', 3);
+        }
+
+        if ($request->get('number_of_inprocess_tickets_value_div') === "6") {
+            $shipments->where('rvsaa.rv_state_id', 1);
+        }
+
+        if ($request->get('number_of_available_agents_value_div') == '7') {
+            $shipments->where('ea.attendance_date', Carbon::now()->format('Y-m-d'));
+        }
+
+        if ($request->get('number_of_oldest_shipments_value_div') == '8') {
+            $this->return_view();
+            $value = array_filter($this->total_of_shipments_exclude);
+            $shipments->whereNotIn('shipments.id', $value)->where('shipments_journey.shipper_status_id', 12)->whereDate('shipments_journey.created_at', '<', Carbon::today());
+        }
+
+        $shipments->when($request->get('star_shipper_filter') == 1, function ($query) {
+            return $query->where('sts.status', 1);
+        })
+            ->when($request->get('complaint_filter') == 1, function ($query) {
+                return $query->whereNotNull('crm.id');
+            })
+            ->when($request->get('out_of_service_area_filter') == 1, function ($query) {
+                return $query->where('ssr.id', 12);
+            })
+            ->when($request->get('shipment_re_attempt_request_filter') == 1, function ($query) {
+                return $query->whereIn('shipments.shipper_status_id', [52, 66]);
+            })
+            ->when($request->get('try_buy_filter') == 1, function ($query) {
+                return $query->where('shipments.booking_type_id', 3);
+            })
+            ->when($request->get('return_confirmation_pending_filter') == 1, function ($query) {
+                return $query->where([
+                    ['shipments.shipper_status_id', 12],
+                    ['rider_deliveries.rider_status_id', 12],
+                    ['ssr.id', 8],
+                    ['rider_deliveries.otp_entered', 1]
+                ]);
+            });
+
         $datatable = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
@@ -919,71 +984,8 @@ class ReturnController extends Controller
                 } else {
                     return '';
                 }
-            });
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        }
-        if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', '=', $mode);
-        }
+            })->rawColumns(['action','tracking_number','status_date','shipment_remarks','consignee_phone','remarks']);
 
-        if ($request->get('search_rvr_value_div') === "1") {
-            $datatable->where('shipments.shipper_status_id', 12);
-        }
-
-        if ($request->get('search_sar_value_div') === "2") {
-            $datatable->where('shipments.shipper_status_id', 65);
-        }
-
-        if ($request->get('search_total_value_div') === "3") {
-            $datatable->whereIn('shipments.shipper_status_id', [12, 65, 66, 52]);
-        }
-
-        if ($request->get('search_unresponsive_value_div') === "4") {
-            $datatable->where('rvsaa.rv_assign_agent_status_id', 6)->where('rvsaa.unresponsive_count', '>', 0);
-        }
-
-        if ($request->get('number_of_pending_tickets_value_div') === "5") {
-            $datatable->where('rvsaa.rv_state_id', 3);
-        }
-
-        if ($request->get('number_of_inprocess_tickets_value_div') === "6") {
-            $datatable->where('rvsaa.rv_state_id', 1);
-        }
-
-        if ($request->get('number_of_available_agents_value_div') == '7') {
-            $datatable->where('ea.attendance_date', Carbon::now()->format('Y-m-d'));
-        }
-
-        if ($request->get('number_of_oldest_shipments_value_div') == '8') {
-            $this->return_view();
-            $value = array_filter($this->total_of_shipments_exclude);
-            $datatable->whereNotIn('shipments.id', $value)->where('shipments_journey.shipper_status_id', 12)->whereDate('shipments_journey.created_at', '<', Carbon::today());
-        }
-
-        $datatable->when($request->get('star_shipper_filter') == 1, function ($query) {
-            return $query->where('sts.status', 1);
-        })
-            ->when($request->get('complaint_filter') == 1, function ($query) {
-                return $query->whereNotNull('crm.id');
-            })
-            ->when($request->get('out_of_service_area_filter') == 1, function ($query) {
-                return $query->where('ssr.id', 12);
-            })
-            ->when($request->get('shipment_re_attempt_request_filter') == 1, function ($query) {
-                return $query->whereIn('shipments.shipper_status_id', [52, 66]);
-            })
-            ->when($request->get('try_buy_filter') == 1, function ($query) {
-                return $query->where('shipments.booking_type_id', 3);
-            })
-            ->when($request->get('return_confirmation_pending_filter') == 1, function ($query) {
-                return $query->where([
-                    ['shipments.shipper_status_id', 12],
-                    ['rider_deliveries.rider_status_id', 12],
-                    ['ssr.id', 8],
-                    ['rider_deliveries.otp_entered', 1]
-                ]);
-            });
         if ($request->get('excel') && $request->get('excel') == true) {
 
             $exportData = $datatable->make(true);
@@ -2194,7 +2196,7 @@ class ReturnController extends Controller
                             //updating rows in RvShipmentAssignAgent as Return Confirm
                             // $rcp_assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_assign_agent_status_id', null)->where('rv_state_id', 1);
                             // if($rcp_assigned_shipment->exists()){
-                            // request()->request->add(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks]);
+                            // $request->merge(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks]);
                             // $this->return_confirm($request);
                             // }
                             // $rv_assign_agent_sub_status_id = RvAssignAgentSubStatus::where('shipment_status_reason_id', $shipment_history->status_reason_id)->first()->id ?? null;
@@ -2240,7 +2242,7 @@ class ReturnController extends Controller
                             //updating rows in RvShipmentAssignAgent as Return Confirm
                             // $rcp_assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_assign_agent_status_id', null)->where('rv_state_id', 1);
                             // if($rcp_assigned_shipment->exists()){
-                            // request()->request->add(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks, 'charges'=>$estimation_charges]);
+                            // $request->merge(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks, 'charges'=>$estimation_charges]);
                             // $this->reattempt($request);
                             // }
                             $rv_shipment_assign_agent_data = [
@@ -2450,6 +2452,16 @@ class ReturnController extends Controller
             });
         }
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $shipments->where('sm.id', '=', $mode);
+        }
+
+        if ($request->get('star_shipper_filter') == 1) {
+            $shipments->where('sts.status', 1);
+        }
 
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
@@ -2671,17 +2683,8 @@ class ReturnController extends Controller
                 } else {
                     return '';
                 }
-            });
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatables->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        }
-        if ($mode = $request->get('search_shipping_mode')) {
-            $datatables->where('sm.id', '=', $mode);
-        }
+            })->rawColumns(['action','shipment_remarks','status_date','tracking_number']);
 
-        if ($request->get('star_shipper_filter') == 1) {
-            $datatables->where('sts.status', 1);
-        }
         return $datatables->make(true);
     }
 
@@ -3247,7 +3250,6 @@ class ReturnController extends Controller
 
     public function return_receive_deliveries_list(Request $request)
     {
-
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 309);
         }
@@ -3258,12 +3260,20 @@ class ReturnController extends Controller
             ->select([
                 'return_notes.id as return_note', 'return_notes.id', 'return_notes.id as return_note_id', 'oc.name as hub', 'riders.name as rider',
                 'admins.name as assignee', 'return_notes.created_at', 'return_notes.shipments_count', 'return_notes.shipments_count as shipments_count_link',
-                'return_notes.status', 'riders.trax_id as rider_trax_id', DB::raw('(SELECT COUNT(shipment_id) FROM return_note_shipments WHERE return_note_id = return_notes.id AND status = 0) AS shipments_unverified_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id in (25, 31, 38) and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count'), 'ca.name as area'
+                'return_notes.status', 'riders.trax_id as rider_trax_id', DB::raw('(SELECT COUNT(shipment_id) FROM return_note_shipments WHERE return_note_id = return_notes.id AND status = 0) AS shipments_unverified_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id in (25, 31, 38) and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count'), 'ca.name as area' ,'return_notes.created_at as created'
             ])
             ->whereIn('return_notes.status', [0, 3]);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
+        }
+        if ($tracking_number = $request->get('search_tracking')) {
+            $deliveries->join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
+                ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
+        }
+        if ($return_note_number = $request->get('return_note_number')) {
+            $deliveries->where('return_notes.id', '=', $return_note_number);
         }
 
         $datatables = Datatables::of($deliveries)
@@ -3359,16 +3369,9 @@ class ReturnController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action','shipments_count_link','return_note']);
 
-        if ($tracking_number = $request->get('search_tracking')) {
-            $datatables->join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
-                ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
-        }
-        if ($return_note_number = $request->get('return_note_number')) {
-            $datatables->where('return_notes.id', '=', $return_note_number);
-        }
+
 
         return $datatables->make(true);
     }
@@ -5087,6 +5090,11 @@ class ReturnController extends Controller
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
         }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $deliveries->whereBetween('return_notes.created_at', [$from, $to]);
+        }
 
         $datatables = Datatables::of($deliveries)
             ->editColumn('return_note', function ($deliveries) {
@@ -5205,12 +5213,8 @@ class ReturnController extends Controller
                     $count = DeliveryController::get_segment_type('return_note_shipments', $delivered_shipments, 2, 5, 'returned', 'return_note_id');
                 }
                 return $count > 0 ? $count : '-';
-            });
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatables->whereBetween('return_notes.created_at', [$from, $to]);
-        }
+            })->rawColumns(['delivered_to_shipper_count','shipments_count_link','image','return_note']);
+
 
         return $datatables->make(true);
     }
@@ -5446,7 +5450,7 @@ class ReturnController extends Controller
                 } else {
                     return " - ";
                 }
-            });
+            })->rawColumns(['status_date','tracking_number']);
 
         return $datatables->make(true);
     }
@@ -6454,7 +6458,7 @@ class ReturnController extends Controller
                 } else {
                     return 0;
                 }
-            });
+            })->rawColumns(['update_via_dbf','update_via_app','total_shipments_link','return_note']);
         return $datatable->make(true);
     }
 
@@ -7035,7 +7039,7 @@ class ReturnController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            });
+            })->rawColumns(['tracking_number']);
 
         return $datatable->make(true);
     }
@@ -7087,7 +7091,7 @@ class ReturnController extends Controller
                 } else {
                     return 'Not Delivered';
                 }
-            });
+            })->rawColumns(['tracking_number','message']);
 
         return $datatable->make(true);
     }
@@ -7267,9 +7271,9 @@ class ReturnController extends Controller
             ->leftjoin('admins as ad', 'ad.id', '=', 'rider_return_note_requests.updated_by')
             ->join('rider_types', 'rider_types.id', '=', 'r.rider_type_id')
             ->join('zones as z', 'c.zone_id', '=', 'z.id')
-            ->whereDate('rider_return_note_requests.created_at', Carbon::today())
-            ->where('rider_return_note_requests.status', 0)
-            ->select('rider_return_note_requests.id as id', 'rider_return_note_requests.id as request_note_id', 'rider_return_note_requests.created_at as date', 'r.name as rider_name', 'c.name as hub', 'ro.code as code', 'ro.start as start', 'ro.end as end', 'rider_return_note_requests.shipment_count as shipments_count', 'rider_return_note_requests.shipment_count as shipments_count_link', 'z.name as zone_name', 'r.operation_rider_id', 'r.rider_type_id', 'rider_types.name as rt', 'ad.name as admin_name', 'rider_return_note_requests.updated_at as updated_at')
+//            ->whereDate('rider_return_note_requests.created_at', Carbon::today())
+//            ->where('rider_return_note_requests.status', 0)
+            ->select('rider_return_note_requests.id as id', 'rider_return_note_requests.id as request_note_id', 'rider_return_note_requests.created_at as date', 'r.name as rider_name', 'c.name as hub', 'ro.code as code', 'ro.start as start', 'ro.end as end', 'rider_return_note_requests.shipment_count as shipments_count', 'rider_return_note_requests.shipment_count as shipments_count_link', 'z.name as zone_name', 'r.operation_rider_id', 'r.rider_type_id', 'rider_types.name as rt', 'ad.name as admin_name', 'rider_return_note_requests.updated_at as updated')
             ->orderBy('rider_return_note_requests.id', 'DESC');
 
         // dd($return_note_requests->get());
@@ -7350,7 +7354,7 @@ class ReturnController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action','shipments_count_link']);
         return $datatables->make(true);
     }
 
@@ -7766,7 +7770,7 @@ class ReturnController extends Controller
                         $sub_query->WhereNull('rider_deliveries.otp_entered');
                     }
                 });
-            });
+            })->rawColumns(['tracking_number']);
         return $datatable->make(true);
     }
 
@@ -7806,6 +7810,14 @@ class ReturnController extends Controller
             ->where('return_notes.id', '>', $return_note_id) //open for production
             ->select(['return_notes.id as return_note', 'return_notes.id as excel_return_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'return_notes.created_at as created_at']);
 
+        $return_note_numbers = $request->get('return_note_number');
+        if (is_array($return_note_numbers) && count($return_note_numbers) > 0) {
+            $shipments->whereIn('rns.return_note_id', $return_note_numbers);
+        }
+        $rider_id = $request->get('rider_id');
+        if (isset($rider_id) && $rider_id != null) {
+            $shipments->where('riders.trax_id', $rider_id);
+        }
 
         $datatables = Datatables::of($shipments)
             ->editColumn('return_note', function ($return) {
@@ -7814,16 +7826,7 @@ class ReturnController extends Controller
             ->editColumn('tracking_number', function ($return) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$return->tracking_number' class='tracking' target='_blank'>$return->tracking_number</a></u>";
-            });
-
-        $return_note_numbers = $request->get('return_note_number');
-        if (is_array($return_note_numbers) && count($return_note_numbers) > 0) {
-            $datatables->whereIn('rns.return_note_id', $return_note_numbers);
-        }
-        $rider_id = $request->get('rider_id');
-        if (isset($rider_id) && $rider_id != null) {
-            $datatables->where('riders.trax_id', $rider_id);
-        }
+            })->rawColumns(['return_note','tracking_number']);
 
         return $datatables->make(true);
     }
@@ -7894,7 +7897,7 @@ class ReturnController extends Controller
                     $assigned_shipment->call_to_id = $request->call_to_id;
                     $assigned_shipment->save();
 
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
+                    $request->merge(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
 
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
@@ -7919,7 +7922,7 @@ class ReturnController extends Controller
                     $open_unresponsive_shipment->increment('call_count');
                     $open_unresponsive_shipment->save();
 
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
+                    $request->merge(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
 
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
@@ -7948,7 +7951,7 @@ class ReturnController extends Controller
                     $completed_shipment->increment('call_count');
                     $completed_shipment->save();
 
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
+                    $request->merge(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
 
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
@@ -7971,7 +7974,7 @@ class ReturnController extends Controller
                     $sar_unresponsive_shipment->save();
 
 
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
+                    $request->merge(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
 
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
@@ -8000,7 +8003,7 @@ class ReturnController extends Controller
                     $completed_shipment_first_unresponsive->increment('call_count');
                     $completed_shipment_first_unresponsive->save();
 
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
+                    $request->merge(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
 
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
@@ -8037,7 +8040,7 @@ class ReturnController extends Controller
 
                     $old_completed_shipments->save();
 
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
+                    $request->merge(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
 
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
@@ -8057,7 +8060,7 @@ class ReturnController extends Controller
                         $exist_shipment->rv_state_id = 1; // Force fully update call history then rv_state_id set is 1
                         $exist_shipment->save();
                         //adding new row in rv_agent_call_histories and updating unresposive count
-                        $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
+                        $request->merge(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
 
                         $new_call_history = $this->unresponsive($request);
                         if ($new_call_history) {
@@ -8093,7 +8096,7 @@ class ReturnController extends Controller
                 $add_call_status->save();
 
 
-                $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
+                $request->merge(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
 
                 //adding new row in rv_agent_call_histories and updating unresposive count
                 $new_call_history = $this->unresponsive($request);
@@ -8440,6 +8443,17 @@ class ReturnController extends Controller
                 'ras.assigned_status as assigned_status'
             )->orderby('agent_status_date', 'desc');
 
+        if ($request->get('from_date') && $request->get('to_date')) {
+            $from = $request->get('from_date');
+            $to = $request->get('to_date');
+            $agent_productivity = $agent_productivity->whereBetween('s.created_at', [$from, $to]);
+            $agent_productivity = $agent_productivity->whereBetween('s.created_at', [$from, $to]);
+        }
+        if ($request->get('agent')) {
+            $agent_ids = $request->get('agent');
+            $agent_productivity = $agent_productivity->whereIn('a.id', $agent_ids);
+        }
+
         $datatable = Datatables::of($agent_productivity)
 
 
@@ -8499,19 +8513,10 @@ class ReturnController extends Controller
                 } else {
                     return 'Intern';
                 }
-            });
+            })->rawColumns(['tracking_number_link']);
 
 
-        if ($request->get('from_date') && $request->get('to_date')) {
-            $from = $request->get('from_date');
-            $to = $request->get('to_date');
-            $agent_productivity = $agent_productivity->whereBetween('new_ras.created_at', [$from, $to]);
-            $agent_productivity = $agent_productivity->whereBetween('ras.created_at', [$from, $to]);
-        }
-        if ($request->get('agent')) {
-            $agent_ids = $request->get('agent');
-            $agent_productivity = $agent_productivity->whereIn('a.id', $agent_ids);
-        }
+
 
         return $datatable->make(true);
     }
@@ -8560,6 +8565,25 @@ class ReturnController extends Controller
             ->join('cities as rc', 'rc.id', 'rider.city_id')
             ->select('s.id as shId', 's.tracking_number', 's.tracking_number as tracking', 'oc.name as origin', 'dc.name as destination', 's.order_id', 'h.name as hub', 's.consignee_name', 's.consignee_phone_number_1', 's.consignee_phone_number_2', 's.consignee_address', 's.amount', 'sm.mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'usi.poc', 'shipments_journey.remarks as shipper_remarks', 'return_sheets.remarks as received_remarks', 'return_sheets.received_at as received_date', 'u.name as shipper', 'return_sheets.return_note_id', 'rider.name as rider_name', 'rider.trax_id as rider_trax_id', 'rc.name as rider_city')
             ->whereIn('return_sheets.status_id', [DB::raw(1), DB::raw(2)]);
+
+        // date filter
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments->whereBetween('return_sheets.received_at', [$from, $to]);
+        }
+
+        // rider filter
+        if ($request->get('rider_id')) {
+            $rider_id = $request->get('rider_id');
+            $shipments->where('rn.rider_id', $rider_id);
+        }
+
+        // shipper filter
+        if ($request->get('shipper_id')) {
+            $shipper_id = $request->get('shipper_id');
+            $shipments->where('return_sheets.user_id', $shipper_id);
+        }
 
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
@@ -8611,26 +8635,9 @@ class ReturnController extends Controller
                 } else {
                     return '-';
                 }
-            });
+            })->rawColumns(['return_note_id','tracking_number']);
 
-        // date filter
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('return_sheets.received_at', [$from, $to]);
-        }
 
-        // rider filter
-        if ($request->get('rider_id')) {
-            $rider_id = $request->get('rider_id');
-            $datatable->where('rn.rider_id', $rider_id);
-        }
-
-        // shipper filter
-        if ($request->get('shipper_id')) {
-            $shipper_id = $request->get('shipper_id');
-            $datatable->where('return_sheets.user_id', $shipper_id);
-        }
 
         return $datatable->make(true);
     }

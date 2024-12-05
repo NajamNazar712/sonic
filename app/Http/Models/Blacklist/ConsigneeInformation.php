@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ConsigneeInformation extends Model
 {
+
+    protected $table = 'consignee_informations';
     public function consignee_city() {
         return $this->belongsTo('App\Http\Models\City', 'city_id', 'id');
     }

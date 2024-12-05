@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 
 class AdminLogisticSetupController extends Controller
 {
@@ -94,7 +94,8 @@ class AdminLogisticSetupController extends Controller
                 } else{
                     return '';
                 }
-            });
+            })
+            ->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -211,25 +212,26 @@ class AdminLogisticSetupController extends Controller
              }
              return  'Inactive';
          }) ->addColumn('action',function ($trax_shipper_detail){
-         if (session('role_id') == 1 || count(array_intersect([954], session('permissions'))) !== 0) {
-             $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                if (session('role_id') == 1 || count(array_intersect([954], session('permissions'))) !== 0) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
-             $dropdown = '
-                            <div class="btn-group">
-                              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                              <div class="dropdown-menu dropdown-menu-sm">
-                        ';
-             $dropdown .= $edit_button;
-             $dropdown .= '
-                              </div>
-                            </div>
-                       
-                         ';
-             return $dropdown;
-         } else{
-             return '';
-         }
-     });
+                    $dropdown = '
+                                    <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                                    <div class="dropdown-menu dropdown-menu-sm">
+                                ';
+                    $dropdown .= $edit_button;
+                    $dropdown .= '
+                                    </div>
+                                    </div>
+                            
+                                ';
+                    return $dropdown;
+                } else{
+                    return '';
+                }
+        })
+        ->rawColumns(['action']);
 
          return $datatables->make(true);
      }
@@ -351,7 +353,8 @@ class AdminLogisticSetupController extends Controller
                 } else{
                     return '';
                 }
-            });
+            })
+            ->rawColumns(['action']);
         return $datatables->make(true);
     }
 
@@ -473,7 +476,7 @@ class AdminLogisticSetupController extends Controller
                 } else{
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
         return $datatables->make(true);
     }
 

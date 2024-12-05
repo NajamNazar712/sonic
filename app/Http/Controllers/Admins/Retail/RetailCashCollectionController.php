@@ -39,7 +39,6 @@ class RetailCashCollectionController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),82);
         }
-
          // $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
         //     // ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
         //     ->leftjoin('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
@@ -68,6 +67,11 @@ class RetailCashCollectionController extends Controller
                         ->select(['rpn.id', 'retail_cash_deposits.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','a.name as assignee',  'rpn.assigned_at', 'retail_cash_deposits.total_cn as shipments_count', 'retail_cash_deposits.total_cash as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category', 'rpn.status', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code','retail_cash_deposits.status as rcd_status'])
                         ->whereIn('rpn.status', [1,2,3])
                         ->where('rpn.pncc_status', '=', 0);
+
+        if ($tracking_number = $request->get('search_tracking')) {
+            $deliveries->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
+        }
 
         $datatable = Datatables::of($deliveries)
             ->addColumn('count', function($deliveries) {
@@ -184,11 +188,8 @@ class RetailCashCollectionController extends Controller
                         ';
 
                     return $dropdown;
-            });
-        if ($tracking_number = $request->get('search_tracking')) {
-            $datatable->join('shipments as s', 'rpns.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
-        }
+            })->rawColumns(['count','hbl_konnect_cash','action']);
+
         return $datatable->make(true);
     }
 

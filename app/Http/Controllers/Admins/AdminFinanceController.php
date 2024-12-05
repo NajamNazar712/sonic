@@ -400,7 +400,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ';
 
                 return $dropdown;
-            });
+            })
+            ->rawColumns(['sdn_number','dncc_count_link','adjusted_reference_link','delivered_shipments_link', 'deposit_slip','action' ]);
+
 
         return $datatables->make(true);
     }
@@ -1022,6 +1024,62 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             $shipments = $shipments->where('s.shipment_type',2);
         }
 
+        if ($recovery_status = $request->get('recovery_status')) {
+            if ($recovery_status == 7) {
+                $shipments->where('delivery_note_shipments.status', '=', 7);
+            } else if ($recovery_status == 11) {
+                $shipments->where('delivery_note_shipments.status', '=', 11);
+            } else {
+                $shipments->whereIn('delivery_note_shipments.status', [4, 5, 6]);
+            }
+        } else {
+            $shipments->whereIn('delivery_note_shipments.status', [4, 5, 6]);
+        }
+
+        if ($hub = $request->get('hub')) {
+            $shipments->where('hc.id', '=', $hub);
+        }
+
+        if ($service = $request->get('service')) {
+            $shipments->where('bt.id', '=', $service);
+        }
+
+        if ($sub_segment = $request->get('sub_segment')) {
+            $shipments->where('u.sub_segment_id', '=', $sub_segment);
+        }
+
+        if ($delivery_date_from = $request->get('delivery_date_from')) {
+            $shipments->where('sjd.created_at', '>=', $delivery_date_from);
+        }
+
+        if ($delivery_date_to = $request->get('delivery_date_to')) {
+            $shipments->where('sjd.created_at', '<', Carbon::parse($delivery_date_to)->addDay()->toDateTimeString());
+        }
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
+
+        //------x-------x------------x------TO-6827---------x----------x-----------
+        $adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
+
+        if(!App::environment('production'))
+        {
+            $adminId = 3335;//if admin is 3335 for testing in staging
+        }
+
+        if(Auth::id() == $adminId)
+        {
+            $mmsSettingShippers = GlobalSettings::where('type', 'mms_setting')->first();
+            if($mmsSettingShippers)
+            {
+                $shipperIds = array_map('intval', explode(',', $mmsSettingShippers->text));
+                $shipments->whereIn('u.id', $shipperIds);
+            }
+        }
+
+        //------x-------x------------x------!TO-6827!---------x----------x-----------
+
         $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
         if ($check_lost_shipments_admins->exists()) {
             $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
@@ -1206,64 +1264,8 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 } else {
                     return '';
                 }
-            });
-
-        if ($recovery_status = $request->get('recovery_status')) {
-            if ($recovery_status == 7) {
-                $datatables->where('delivery_note_shipments.status', '=', 7);
-            } else if ($recovery_status == 11) {
-                $datatables->where('delivery_note_shipments.status', '=', 11);
-            } else {
-                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6]);
-            }
-        } else {
-            $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6]);
-        }
-
-        if ($hub = $request->get('hub')) {
-            $datatables->where('hc.id', '=', $hub);
-        }
-
-        if ($service = $request->get('service')) {
-            $datatables->where('bt.id', '=', $service);
-        }
-
-        if ($sub_segment = $request->get('sub_segment')) {
-            $datatables->where('u.sub_segment_id', '=', $sub_segment);
-        }
-
-        if ($delivery_date_from = $request->get('delivery_date_from')) {
-            $datatables->where('sjd.created_at', '>=', $delivery_date_from);
-        }
-
-        if ($delivery_date_to = $request->get('delivery_date_to')) {
-            $datatables->where('sjd.created_at', '<', Carbon::parse($delivery_date_to)->addDay()->toDateTimeString());
-        }
-
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
-        }
-
-        //------x-------x------------x------TO-6827---------x----------x-----------
-        $adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
-
-        if(!App::environment('production'))
-        {
-            $adminId = 3335;//if admin is 3335 for testing in staging
-        }
-
-        if(Auth::id() == $adminId)
-        {
-            $mmsSettingShippers = GlobalSettings::where('type', 'mms_setting')->first();
-            if($mmsSettingShippers)
-            {
-                $shipperIds = array_map('intval', explode(',', $mmsSettingShippers->text));
-                $datatables->whereIn('u.id', $shipperIds);
-            }
-        }
-
-        //------x-------x------------x------!TO-6827!---------x----------x-----------
-
+            })
+            ->rawColumns(['tracking_number','sdn_link','revert_requested_image_button', 'dncc_link' , 'action']);
 
         return $datatables->make(true);
     }
@@ -1387,6 +1389,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ->where('shipments.booking_type_id', 4)->where('shipments.shipper_status_id', '!=', 17);
 
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
         $datatables = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -1453,11 +1458,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })
+            ->rawColumns(['tracking_number','action']);
 
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatables->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        }
+
+        
         return $datatables->make(true);
     }
 
@@ -5391,9 +5396,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         ->editColumn('dncc_no', function ($deliveries) {
             return str_pad($deliveries->dncc_no, 6, '0', STR_PAD_LEFT);
         })
-        ->filterColumn('dncc_no', function ($query, $keyword) {
-            return $query->where('delivery_notes.id', '=', $keyword);
-        })
+        // ->filterColumn('dncc_no', function ($query, $keyword) {
+        //     return $query->where('delivery_notes.id', '=', $keyword);
+        // })
         ->addColumn('shipment_status', function ($dncc) {
             $shipmentsJourney = ShipmentsJourney::with('shipment_status_shipper')
                 ->where('shipment_id', $dncc->shId)
@@ -6482,6 +6487,114 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             $pending_payments = $pending_payments->whereIn('c.hub_id', session('hubs'));
         }
 
+        if ($payment_filter = $request->get('payment_filter')) {
+            $datatables = $pending_payments->where(function ($query) use ($payment_filter) {
+                if ($payment_filter == 1) {
+                    $dayOfWeek = Carbon::today()->dayOfWeek;
+                    $dayOfMonth = Carbon::today()->format('d');
+                    $query->where(function ($sub_query) {
+                        $sub_query->where('u.payment_cycle_id', 1);
+                    })->orWhere(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                        $sub_query->whereIn('u.payment_cycle_id', [2, 3, 4, 5, 6])
+                            ->where(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                                $sub_query->where(function ($sub_query) use ($dayOfWeek) {
+                                    $sub_query->where('u.payment_cycle_id', 2)
+                                        ->where('u.payment_cycle_days', $dayOfWeek);
+                                })->orWhere(function ($sub_query) use ($dayOfMonth) {
+                                    $sub_query->where('u.payment_cycle_id', 3)
+                                        ->where('u.payment_cycle_days', $dayOfMonth);
+                                })->orWhere(function ($sub_query) use ($dayOfWeek) {
+                                    $sub_query->whereIn('u.payment_cycle_id', [4, 5])
+                                        ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfWeek]);
+                                })->orWhere(function ($sub_query) use ($dayOfMonth) {
+                                    $sub_query->where('u.payment_cycle_id', 6)
+                                        ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfMonth]);
+                                });
+                            });
+                    });
+                } else {
+                    $query->whereIn('u.payment_cycle_id', [1, 2, 3, 4, 5, 6]);
+                }
+            });
+        }
+
+        if ($tracking_number = $request->get('tracking_number')) {
+            $shipments_data = Shipment::where('tracking_number', $tracking_number)->select('id')->first();
+
+            if (!empty($shipments_data)) {
+                $shipment_id = $shipments_data->id; // Get the shipment ID from the retrieved data
+
+                $pending_payments
+                    ->join('pending_payment_shipments as pps', function ($join) use ($shipment_id) {
+                        $join->on('pps.pending_payment_id', '=', 'pending_payments.id')
+                            ->where('pps.id', '=', DB::connection('reports')->raw("(SELECT MAX(id) FROM pending_payment_shipments WHERE pending_payment_shipments.shipment_id = $shipment_id)"));
+                    });
+            }
+        }
+
+
+        if ($positive_negative_filter = $request->get('positive_negative_filter')) {
+            if ($positive_negative_filter == 1) {
+                $pending_payments->having('total_payable', '>=', 0);
+            } else if ($positive_negative_filter == 2) {
+                $pending_payments->having('total_payable', '<', 0);
+            }
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+            $pending_payments->where('u.id', '=', $shipper);
+        }
+
+
+        if ($payment_cycle_days = $request->get('payment_cycle_days')) {
+            $pending_payments->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$payment_cycle_days]);
+        }
+
+        if ($shipper_status = $request->get('shipper_status')) {
+            if ($shipper_status == 1) {
+                $pending_payments->where('u.status', '=', 3)->where('u.blacklist', 0);
+            } else {
+                $pending_payments->where('u.status', '!=', 3);
+            }
+        }
+        if ($request->get('shipper_document_status') !== null) {
+            $shipper_document_status = $request->get('shipper_document_status');
+            if ($shipper_document_status == 0) {
+                $pending_payments->where('u.documents_status', '=', 0);
+            } else if ($shipper_document_status == 1) {
+                $pending_payments->where('u.documents_status', '=', 1);
+            } else if ($shipper_document_status == 2) {
+                $pending_payments->where('u.documents_status', '=', 2);
+            } else if ($shipper_document_status == 3) {
+                $pending_payments->where('u.documents_status', '=', 3);
+            } else {
+                $pending_payments->whereRaw('false');
+            }
+        }
+
+        if ($request->get('payment_cycles') !== null) {
+            $payment_cycles = $request->get('payment_cycles');
+            if ($payment_cycles == 1) {
+                $pending_payments->where('u.payment_cycle_id', '=', 1);
+            } else if ($payment_cycles == 2) {
+                $pending_payments->where('u.payment_cycle_id', '=', 2);
+            } else if ($payment_cycles == 3) {
+                $pending_payments->where('u.payment_cycle_id', '=', 3);
+            } else if ($payment_cycles == 4) {
+                $pending_payments->where('u.payment_cycle_id', '=', 4);
+            } else if ($payment_cycles == 5) {
+                $pending_payments->where('u.payment_cycle_id', '=', 5);
+            } else if ($payment_cycles == 6) {
+                $pending_payments->where('u.payment_cycle_id', '=', 6);
+            } else {
+                $pending_payments->whereRaw('false');
+            }
+        }
+
+        if ($request->get('star_shipper_filter') == 1) {
+            $pending_payments->where('sts.status', 1);
+        }
+
         $datatables = Datatables::of($pending_payments)
             ->setRowAttr([
                 'class' => function ($pending_payments) {
@@ -6707,115 +6820,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
-
-        if ($payment_filter = $request->get('payment_filter')) {
-            $datatables = $datatables->where(function ($query) use ($payment_filter) {
-                if ($payment_filter == 1) {
-                    $dayOfWeek = Carbon::today()->dayOfWeek;
-                    $dayOfMonth = Carbon::today()->format('d');
-                    $query->where(function ($sub_query) {
-                        $sub_query->where('u.payment_cycle_id', 1);
-                    })->orWhere(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
-                        $sub_query->whereIn('u.payment_cycle_id', [2, 3, 4, 5, 6])
-                            ->where(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
-                                $sub_query->where(function ($sub_query) use ($dayOfWeek) {
-                                    $sub_query->where('u.payment_cycle_id', 2)
-                                        ->where('u.payment_cycle_days', $dayOfWeek);
-                                })->orWhere(function ($sub_query) use ($dayOfMonth) {
-                                    $sub_query->where('u.payment_cycle_id', 3)
-                                        ->where('u.payment_cycle_days', $dayOfMonth);
-                                })->orWhere(function ($sub_query) use ($dayOfWeek) {
-                                    $sub_query->whereIn('u.payment_cycle_id', [4, 5])
-                                        ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfWeek]);
-                                })->orWhere(function ($sub_query) use ($dayOfMonth) {
-                                    $sub_query->where('u.payment_cycle_id', 6)
-                                        ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfMonth]);
-                                });
-                            });
-                    });
-                } else {
-                    $query->whereIn('u.payment_cycle_id', [1, 2, 3, 4, 5, 6]);
-                }
-            });
-        }
-
-        if ($tracking_number = $request->get('tracking_number')) {
-            $shipments_data = Shipment::where('tracking_number', $tracking_number)->select('id')->first();
-
-            if (!empty($shipments_data)) {
-                $shipment_id = $shipments_data->id; // Get the shipment ID from the retrieved data
-
-                $datatables
-                    ->join('pending_payment_shipments as pps', function ($join) use ($shipment_id) {
-                        $join->on('pps.pending_payment_id', '=', 'pending_payments.id')
-                            ->where('pps.id', '=', DB::connection('reports')->raw("(SELECT MAX(id) FROM pending_payment_shipments WHERE pending_payment_shipments.shipment_id = $shipment_id)"));
-                    });
-            }
-        }
-
-
-        if ($positive_negative_filter = $request->get('positive_negative_filter')) {
-            if ($positive_negative_filter == 1) {
-                $datatables->having('total_payable', '>=', 0);
-            } else if ($positive_negative_filter == 2) {
-                $datatables->having('total_payable', '<', 0);
-            }
-        }
-
-        if ($shipper = $request->get('search_shipper')) {
-            $datatables->where('u.id', '=', $shipper);
-        }
-
-
-        if ($payment_cycle_days = $request->get('payment_cycle_days')) {
-            $datatables->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$payment_cycle_days]);
-        }
-
-        if ($shipper_status = $request->get('shipper_status')) {
-            if ($shipper_status == 1) {
-                $datatables->where('u.status', '=', 3)->where('u.blacklist', 0);
-            } else {
-                $datatables->where('u.status', '!=', 3);
-            }
-        }
-        if ($request->get('shipper_document_status') !== null) {
-            $shipper_document_status = $request->get('shipper_document_status');
-            if ($shipper_document_status == 0) {
-                $datatables->where('u.documents_status', '=', 0);
-            } else if ($shipper_document_status == 1) {
-                $datatables->where('u.documents_status', '=', 1);
-            } else if ($shipper_document_status == 2) {
-                $datatables->where('u.documents_status', '=', 2);
-            } else if ($shipper_document_status == 3) {
-                $datatables->where('u.documents_status', '=', 3);
-            } else {
-                $datatables->whereRaw('false');
-            }
-        }
-
-        if ($request->get('payment_cycles') !== null) {
-            $payment_cycles = $request->get('payment_cycles');
-            if ($payment_cycles == 1) {
-                $datatables->where('u.payment_cycle_id', '=', 1);
-            } else if ($payment_cycles == 2) {
-                $datatables->where('u.payment_cycle_id', '=', 2);
-            } else if ($payment_cycles == 3) {
-                $datatables->where('u.payment_cycle_id', '=', 3);
-            } else if ($payment_cycles == 4) {
-                $datatables->where('u.payment_cycle_id', '=', 4);
-            } else if ($payment_cycles == 5) {
-                $datatables->where('u.payment_cycle_id', '=', 5);
-            } else if ($payment_cycles == 6) {
-                $datatables->where('u.payment_cycle_id', '=', 6);
-            } else {
-                $datatables->whereRaw('false');
-            }
-        }
-
-        if ($request->get('star_shipper_filter') == 1) {
-            $datatables->where('sts.status', 1);
-        }
+            ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1')
+            ->rawColumns(['shipper','delivered_shipments','returned_shipments','adjusted_shipments','action' ]);
+        
 
         return $datatables->make(true);
     }
@@ -8023,6 +8030,102 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             $done_payments = $done_payments->whereIn('c.hub_id', session('hubs'));
         }
 
+        if ($payment_filter = $request->get('payment_filter')) {
+            $datatables =  $done_payments->where(function ($query) use ($payment_filter) {
+                if ($payment_filter == 1) {
+                    $dayOfWeek = Carbon::today()->dayOfWeek;
+                    $dayOfMonth = Carbon::today()->format('d');
+                    $query->where(function ($sub_query) {
+                        $sub_query->where('u.payment_cycle_id', 1);
+                    })->orWhere(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                        $sub_query->whereIn('u.payment_cycle_id', [2, 3, 4, 5, 6])
+                            ->where(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                                $sub_query->where(function ($sub_query) use ($dayOfWeek) {
+                                    $sub_query->where('u.payment_cycle_id', 2)
+                                        ->where('u.payment_cycle_days', $dayOfWeek);
+                                })->orWhere(function ($sub_query) use ($dayOfMonth) {
+                                    $sub_query->where('u.payment_cycle_id', 3)
+                                        ->where('u.payment_cycle_days', $dayOfMonth);
+                                })->orWhere(function ($sub_query) use ($dayOfWeek) {
+                                    $sub_query->whereIn('u.payment_cycle_id', [4, 5])
+                                        ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfWeek]);
+                                })->orWhere(function ($sub_query) use ($dayOfMonth) {
+                                    $sub_query->where('u.payment_cycle_id', 6)
+                                        ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfMonth]);
+                                });
+                            });
+                    });
+                } else {
+                    $query->whereIn('u.payment_cycle_id', [1, 2, 3, 4, 5, 6]);
+                }
+            });
+        }
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+             $done_payments->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
+                ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
+                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers))
+                ->groupby('done_payments.id');
+        }
+        if ($payment_ids = $request->get('search_payment_ids')) {
+             $done_payments->whereIn('done_payments.id', explode(',', $payment_ids));
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+             $done_payments->where('u.id', '=', $shipper);
+        }
+
+        if ($payment_cycle_days = $request->get('payment_cycle_days')) {
+             $done_payments->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$payment_cycle_days]);
+        }
+
+        if ($shipper_status = $request->get('search_shipper_status')) {
+            if ($shipper_status == 1) {
+                 $done_payments->where('u.status', '=', 3)->where('u.blacklist', 0);
+            } else {
+                 $done_payments->where('u.status', '!=', 3);
+            }
+        }
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+             $done_payments->whereBetween('done_payments.created_at', [$from, $to]);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+             $done_payments->whereBetween('done_payments.status_updated_at', [$from, $to]);
+        }
+
+        if ($request->get('payment_cycles') !== null) {
+            $payment_cycles = $request->get('payment_cycles');
+            if ($payment_cycles == 1) {
+                 $done_payments->where('u.payment_cycle_id', '=', 1);
+            } else if ($payment_cycles == 2) {
+                 $done_payments->where('u.payment_cycle_id', '=', 2);
+            } else if ($payment_cycles == 3) {
+                 $done_payments->where('u.payment_cycle_id', '=', 3);
+            } else if ($payment_cycles == 4) {
+                 $done_payments->where('u.payment_cycle_id', '=', 4);
+            } else if ($payment_cycles == 5) {
+                 $done_payments->where('u.payment_cycle_id', '=', 5);
+            } else if ($payment_cycles == 6) {
+                 $done_payments->where('u.payment_cycle_id', '=', 6);
+            } else {
+                 $done_payments->whereRaw('false');
+            }
+        }
+
+        if ($payment_cycle_days = $request->get('payment_cycle_days')) {
+             $done_payments->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$payment_cycle_days]);
+        }
+
+        if ($request->get('star_shipper_filter') == 1) {
+             $done_payments->where('sts.status', 1);
+        }
+
 
         $datatables = Datatables::of($done_payments)
             ->setTotalRecords($count)
@@ -8331,103 +8434,10 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
+            ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1')
+            ->rawColumns(['shipper','payment_id','delivered_shipments','returned_shipments','adjusted_shipments','arrival_shipment', 'action']);
 
-        if ($payment_filter = $request->get('payment_filter')) {
-            $datatables = $datatables->where(function ($query) use ($payment_filter) {
-                if ($payment_filter == 1) {
-                    $dayOfWeek = Carbon::today()->dayOfWeek;
-                    $dayOfMonth = Carbon::today()->format('d');
-                    $query->where(function ($sub_query) {
-                        $sub_query->where('u.payment_cycle_id', 1);
-                    })->orWhere(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
-                        $sub_query->whereIn('u.payment_cycle_id', [2, 3, 4, 5, 6])
-                            ->where(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
-                                $sub_query->where(function ($sub_query) use ($dayOfWeek) {
-                                    $sub_query->where('u.payment_cycle_id', 2)
-                                        ->where('u.payment_cycle_days', $dayOfWeek);
-                                })->orWhere(function ($sub_query) use ($dayOfMonth) {
-                                    $sub_query->where('u.payment_cycle_id', 3)
-                                        ->where('u.payment_cycle_days', $dayOfMonth);
-                                })->orWhere(function ($sub_query) use ($dayOfWeek) {
-                                    $sub_query->whereIn('u.payment_cycle_id', [4, 5])
-                                        ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfWeek]);
-                                })->orWhere(function ($sub_query) use ($dayOfMonth) {
-                                    $sub_query->where('u.payment_cycle_id', 6)
-                                        ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfMonth]);
-                                });
-                            });
-                    });
-                } else {
-                    $query->whereIn('u.payment_cycle_id', [1, 2, 3, 4, 5, 6]);
-                }
-            });
-        }
-
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatables->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
-                ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
-                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers))
-                ->groupby('done_payments.id');
-        }
-        if ($payment_ids = $request->get('search_payment_ids')) {
-            $datatables->whereIn('done_payments.id', explode(',', $payment_ids));
-        }
-
-        if ($shipper = $request->get('search_shipper')) {
-            $datatables->where('u.id', '=', $shipper);
-        }
-
-        if ($payment_cycle_days = $request->get('payment_cycle_days')) {
-            $datatables->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$payment_cycle_days]);
-        }
-
-        if ($shipper_status = $request->get('search_shipper_status')) {
-            if ($shipper_status == 1) {
-                $datatables->where('u.status', '=', 3)->where('u.blacklist', 0);
-            } else {
-                $datatables->where('u.status', '!=', 3);
-            }
-        }
-
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $datatables->whereBetween('done_payments.created_at', [$from, $to]);
-        }
-
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatables->whereBetween('done_payments.status_updated_at', [$from, $to]);
-        }
-
-        if ($request->get('payment_cycles') !== null) {
-            $payment_cycles = $request->get('payment_cycles');
-            if ($payment_cycles == 1) {
-                $datatables->where('u.payment_cycle_id', '=', 1);
-            } else if ($payment_cycles == 2) {
-                $datatables->where('u.payment_cycle_id', '=', 2);
-            } else if ($payment_cycles == 3) {
-                $datatables->where('u.payment_cycle_id', '=', 3);
-            } else if ($payment_cycles == 4) {
-                $datatables->where('u.payment_cycle_id', '=', 4);
-            } else if ($payment_cycles == 5) {
-                $datatables->where('u.payment_cycle_id', '=', 5);
-            } else if ($payment_cycles == 6) {
-                $datatables->where('u.payment_cycle_id', '=', 6);
-            } else {
-                $datatables->whereRaw('false');
-            }
-        }
-
-        if ($payment_cycle_days = $request->get('payment_cycle_days')) {
-            $datatables->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$payment_cycle_days]);
-        }
-
-        if ($request->get('star_shipper_filter') == 1) {
-            $datatables->where('sts.status', 1);
-        }
+        
         return $datatables->make(true);
     }
 
@@ -13789,6 +13799,26 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             }
         }
 
+
+        if ($request->get('invoice_from') && $request->get('invoice_to')) {
+            $from = date('Y-m-d 00:00:00', strtotime($request->get('invoice_from')));
+            $to = date('Y-m-d 23:59:59', strtotime($request->get('invoice_to')));
+            $invoice->whereBetween('invoices.invoicing_date', [$from, $to]);
+
+        }
+
+        if ($request->get('generation_from') && $request->get('generation_to')) {
+            $from = date('Y-m-d 00:00:00', strtotime($request->get('generation_from')));
+            $to = date('Y-m-d 23:59:59', strtotime($request->get('generation_to')));
+            $invoice->whereBetween('invoices.created_at', [$from, $to]);
+
+        }
+
+        if ($request->get('star_shipper_filter') == 1) {
+            $invoice->where('invoices.star_status', 1);
+        }
+
+
         $invoices = DB::query()->fromSub($reim_invoice->union($invoice), 'invoices');
 
 
@@ -14043,25 +14073,8 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ';
 
                 return $dropdown;
-            });
-
-        if ($request->get('invoice_from') && $request->get('invoice_to')) {
-            $from = date('Y-m-d 00:00:00', strtotime($request->get('invoice_from')));
-            $to = date('Y-m-d 23:59:59', strtotime($request->get('invoice_to')));
-            $datatables->whereBetween('invoices.invoicing_date', [$from, $to]);
-
-        }
-
-        if ($request->get('generation_from') && $request->get('generation_to')) {
-            $from = date('Y-m-d 00:00:00', strtotime($request->get('generation_from')));
-            $to = date('Y-m-d 23:59:59', strtotime($request->get('generation_to')));
-            $datatables->whereBetween('invoices.created_at', [$from, $to]);
-
-        }
-
-        if ($request->get('star_shipper_filter') == 1) {
-            $datatables->where('invoices.star_status', 1);
-        }
+            })
+            ->rawColumns(['shipper','invoice_number_btn','deposit_slip','invoice_adjustment', 'action']);
 
         return $datatables->make(true);
     }
@@ -15509,13 +15522,16 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     }
                 }
                 $shippers = User::whereIn('id', $sales_person_shippers)->select('id', 'name')->get();
+                $shippers_id = User::whereIn('id', $sales_person_shippers)->select('id')->get();
+
             } else {
                 $shippers = User::select('id', 'name')->whereIn('id', $pickup_wise_accounts)->get();
+                $shippers_id = User::whereIn('id', $pickup_wise_accounts)->select('id')->get();
             }
             $shipper_status = [1 => 'Active', 2 => 'Inactive'];
-            $total_amount = PendingPaymentShipment::join('pending_payments', 'pending_payments.id', '=', 'pending_payment_shipments.pending_payment_id')->whereIn('pending_payments.user_id', $shippers)->sum('pending_payment_shipments.amount');
-            $total_charges = PendingPaymentShipment::join('pending_payments', 'pending_payments.id', '=', 'pending_payment_shipments.pending_payment_id')->whereIn('pending_payments.user_id', $shippers)->sum('pending_payment_shipments.charges');
-            $total_payable = PendingPaymentShipment::join('pending_payments', 'pending_payments.id', '=', 'pending_payment_shipments.pending_payment_id')->whereIn('pending_payments.user_id', $shippers)->sum('pending_payment_shipments.payable');
+            $total_amount = PendingPaymentShipment::join('pending_payments', 'pending_payments.id', '=', 'pending_payment_shipments.pending_payment_id')->whereIn('pending_payments.user_id', $shippers_id)->sum('pending_payment_shipments.amount');
+            $total_charges = PendingPaymentShipment::join('pending_payments', 'pending_payments.id', '=', 'pending_payment_shipments.pending_payment_id')->whereIn('pending_payments.user_id', $shippers_id)->sum('pending_payment_shipments.charges');
+            $total_payable = PendingPaymentShipment::join('pending_payments', 'pending_payments.id', '=', 'pending_payment_shipments.pending_payment_id')->whereIn('pending_payments.user_id', $shippers_id)->sum('pending_payment_shipments.payable');
             ActivityTrailController::createActivityTrailLog(Auth::id(), 31);
             return view('admin.finance.make_payments_pickup_wise')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers]);
         }
@@ -15563,6 +15579,51 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 //        }
         if (session('role_id') != 1) {
             $pending_payments = $pending_payments->whereIn('c.hub_id', session('hubs'));
+        }
+
+        if ($tracking_number = $request->get('tracking_number')) {
+             $pending_payments->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
+                ->where('ss.tracking_number', '=', $tracking_number);
+        }
+
+        if ($positive_negative_filter = $request->get('positive_negative_filter')) {
+            if ($positive_negative_filter == 1) {
+                 $pending_payments->having('total_payable', '>=', 0);
+            } else if ($positive_negative_filter == 2) {
+                 $pending_payments->having('total_payable', '<', 0);
+            }
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+             $pending_payments->where('u.id', '=', $shipper);
+        }
+
+        if ($shipper_status = $request->get('shipper_status')) {
+            if ($shipper_status == 1) {
+                 $pending_payments->where('u.status', '=', 3)->where('u.blacklist', 0);
+            } else {
+                 $pending_payments->where('u.status', '!=', 3);
+            }
+        }
+        if ($request->get('shipper_document_status') !== null) {
+            $shipper_document_status = $request->get('shipper_document_status');
+            if ($shipper_document_status == 0) {
+                 $pending_payments->where('u.documents_status', '=', 0);
+            } else if ($shipper_document_status == 1) {
+                 $pending_payments->where('u.documents_status', '=', 1);
+            } else if ($shipper_document_status == 2) {
+                 $pending_payments->where('u.documents_status', '=', 2);
+            } else if ($shipper_document_status == 3) {
+                 $pending_payments->where('u.documents_status', '=', 3);
+            } else {
+                 $pending_payments->whereRaw('false');
+            }
+        }
+        if ($request->get('payment_filter') !== null) {
+            $payment_amount = $request->get('payment_filter');
+
+             $pending_payments->having('total_payable', '>', $payment_amount);
+
         }
 
         $datatables = Datatables::of($pending_payments)
@@ -15695,52 +15756,8 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
-
-        if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
-                ->where('ss.tracking_number', '=', $tracking_number);
-        }
-
-        if ($positive_negative_filter = $request->get('positive_negative_filter')) {
-            if ($positive_negative_filter == 1) {
-                $datatables->having('total_payable', '>=', 0);
-            } else if ($positive_negative_filter == 2) {
-                $datatables->having('total_payable', '<', 0);
-            }
-        }
-
-        if ($shipper = $request->get('search_shipper')) {
-            $datatables->where('u.id', '=', $shipper);
-        }
-
-        if ($shipper_status = $request->get('shipper_status')) {
-            if ($shipper_status == 1) {
-                $datatables->where('u.status', '=', 3)->where('u.blacklist', 0);
-            } else {
-                $datatables->where('u.status', '!=', 3);
-            }
-        }
-        if ($request->get('shipper_document_status') !== null) {
-            $shipper_document_status = $request->get('shipper_document_status');
-            if ($shipper_document_status == 0) {
-                $datatables->where('u.documents_status', '=', 0);
-            } else if ($shipper_document_status == 1) {
-                $datatables->where('u.documents_status', '=', 1);
-            } else if ($shipper_document_status == 2) {
-                $datatables->where('u.documents_status', '=', 2);
-            } else if ($shipper_document_status == 3) {
-                $datatables->where('u.documents_status', '=', 3);
-            } else {
-                $datatables->whereRaw('false');
-            }
-        }
-        if ($request->get('payment_filter') !== null) {
-            $payment_amount = $request->get('payment_filter');
-
-            $datatables->having('total_payable', '>', $payment_amount);
-
-        }
+            ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1')
+            ->rawColumns(['action']);
 
         return $datatables->make(true);
     }
@@ -15855,6 +15872,23 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             $pending_payments = $pending_payments->whereIn('c.hub_id', session('hubs'));
         }
 
+        if ($tracking_number = $request->get('tracking_number')) {
+            $pending_payments->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
+                ->where('ss.tracking_number', '=', $tracking_number);
+        }
+
+        if ($positive_negative_filter = $request->get('positive_negative_filter')) {
+            if ($positive_negative_filter == 1) {
+                $pending_payments->having('total_payable', '>=', 0);
+            } else if ($positive_negative_filter == 2) {
+                $pending_payments->having('total_payable', '<', 0);
+            }
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+            $pending_payments->where('rsi.id', '=', $shipper);
+        }
+
         $datatables = Datatables::of($pending_payments)
             ->editColumn('delivered_shipments', function ($pending_payment) {
                 if ($pending_payment->delivered_shipments != 0) {
@@ -15928,24 +15962,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->orderColumn('phone_numbers', 'rsi.shipper_phone_no $1');
+            ->orderColumn('phone_numbers', 'rsi.shipper_phone_no $1')
+            ->rawColumns(['delivered_shipments','returned_shipments','adjusted_shipments','arrival_shipment', 'action']);
 
-        if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
-                ->where('ss.tracking_number', '=', $tracking_number);
-        }
 
-        if ($positive_negative_filter = $request->get('positive_negative_filter')) {
-            if ($positive_negative_filter == 1) {
-                $datatables->having('total_payable', '>=', 0);
-            } else if ($positive_negative_filter == 2) {
-                $datatables->having('total_payable', '<', 0);
-            }
-        }
-
-        if ($shipper = $request->get('search_shipper')) {
-            $datatables->where('rsi.id', '=', $shipper);
-        }
+        
 
         return $datatables->make(true);
     }
@@ -16582,6 +16603,32 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             $done_payments = $done_payments->whereIn('c.hub_id', session('hubs'));
         }
 
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $done_payments->join('retail_done_payment_shipments as dps', 'retail_done_payments.id', '=', 'dps.retail_done_payment_id')
+                ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
+                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers))
+                ->groupby('retail_done_payments.id');
+        }
+        if ($payment_ids = $request->get('search_payment_ids')) {
+            $done_payments->whereIn('retail_done_payments.id', explode(',', $payment_ids));
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+            $done_payments->where('rsi.id', '=', $shipper);
+        }
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $done_payments->whereBetween('retail_done_payments.created_at', [$from, $to]);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $done_payments->whereBetween('retail_done_payments.status_updated_at', [$from, $to]);
+        }
+
         $datatables = Datatables::of($done_payments)
             ->addColumn('id_padded', function ($done_payment) {
                 return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
@@ -16681,33 +16728,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            });
+            })
+            ->rawColumns(['payment_id','delivered_shipments','adjusted_shipments', 'action']);
 
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatables->join('retail_done_payment_shipments as dps', 'retail_done_payments.id', '=', 'dps.retail_done_payment_id')
-                ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
-                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers))
-                ->groupby('retail_done_payments.id');
-        }
-        if ($payment_ids = $request->get('search_payment_ids')) {
-            $datatables->whereIn('retail_done_payments.id', explode(',', $payment_ids));
-        }
 
-        if ($shipper = $request->get('search_shipper')) {
-            $datatables->where('rsi.id', '=', $shipper);
-        }
-
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $datatables->whereBetween('retail_done_payments.created_at', [$from, $to]);
-        }
-
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatables->whereBetween('retail_done_payments.status_updated_at', [$from, $to]);
-        }
+        
         return $datatables->make(true);
     }
 
@@ -17570,7 +17595,9 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             ';
 
                 return $dropdown;
-            });
+            })
+            ->rawColumns(['invoice_number_button', 'action']);
+
 
         return $datatables->make(true);
     }

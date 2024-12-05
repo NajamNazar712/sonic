@@ -248,7 +248,7 @@ class RetailAdminUserManagementController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action','location']);
             
         return $datatables->make(true);
     }
@@ -1276,7 +1276,7 @@ class RetailAdminUserManagementController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action','location']);
         return $datatables->make(true);
     }
 
@@ -1619,7 +1619,7 @@ class RetailAdminUserManagementController extends Controller
                 } else {
                     return '';
                 }
-            });
+            })->rawColumns(['action']);
         return $datatables->make(true);
     }
 

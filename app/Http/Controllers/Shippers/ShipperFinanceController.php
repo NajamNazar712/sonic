@@ -87,6 +87,12 @@ class ShipperFinanceController extends Controller
                 ->orwhereIn('done_payments.user_id', session('sister_users'));
         });
 
+        if ($tracking_number = $request->get('tracking_number')) {
+            $done_payments->join('shipments as s', 'dps.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
+        }
+
+
         $datatables = Datatables::of($done_payments)
             ->addColumn('id_padded', function ($done_payment) {
                 return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
@@ -252,12 +258,8 @@ class ShipperFinanceController extends Controller
             })
             ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
-        if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('shipments as s', 'dps.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
-        }
 
-        return $datatables->make(true);
+        return $datatables->rawColumns(['count_fintech_shipments','delivered_shipments','returned_shipments','adjusted_shipments','arrival_shipments','action'])->make(true);
     }
 
     public function payments_delivered_shipments(Request $request)
@@ -1109,7 +1111,7 @@ class ShipperFinanceController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            });
+            })->rawColumns(['tracking_number']);
 
         return $datatables->make(true);
     }
@@ -1216,7 +1218,7 @@ class ShipperFinanceController extends Controller
             ';
 
                 return $dropdown;
-            });
+            })->rawColumns(['invoice_number_button','action']);
 
         return $datatables->make(true);
     }

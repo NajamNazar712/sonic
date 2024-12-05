@@ -16,7 +16,7 @@ use App\Http\Models\CityArea;
 use App\Http\Models\Shipment;
 use App\Http\Models\WeightType;
 use App\Http\Models\Admin\Admin;
-use Yajra\Datatables\Datatables;
+use Yajra\DataTables\DataTables;
 use App\Http\Models\PickupAction;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
@@ -114,7 +114,7 @@ class V2AdminPickupsController extends Controller
 
     public function pending_list(Request $request)
     {
-//        dd($request->all());
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 66);
         }
@@ -175,6 +175,66 @@ class V2AdminPickupsController extends Controller
                 $id = $id->first();
                 $pickup_requests = $pickup_requests->where('u.id', $id->setting_value);
             }
+        }
+
+        if ($legend_filter = $request->get('legend_filter')) {
+            if ($legend_filter == 8) {
+                $pickup_requests->where('v2_pickup_requests.reverse_pickup', 1);
+            } elseif ($legend_filter == 2) {
+                $pickup_requests->where('v2_pickup_requests.vendor', '<>', null);
+            } elseif ($legend_filter == 3) {
+                $pickup_requests->where('v2_pickup_requests.try_and_buy', 1)
+                    ->where('v2_pickup_requests.vendor', null);
+            } elseif ($legend_filter == 4) {
+                $pickup_requests->where('v2_pickup_requests.status_id', 3)->where('v2_pickup_requests.attempts', 1)
+                    ->where('v2_pickup_requests.try_and_buy', null)
+                    ->where('v2_pickup_requests.vendor', null);
+            } elseif ($legend_filter == 5) {
+                $pickup_requests->where('v2_pickup_requests.status_id', 3)->where('v2_pickup_requests.attempts', 2)
+                    ->where('v2_pickup_requests.try_and_buy', null)
+                    ->where('v2_pickup_requests.vendor', null);
+            } elseif ($legend_filter == 6) {
+                $pickup_requests->where('v2_pickup_requests.status_id', 3)->where('v2_pickup_requests.attempts', '>', 2)
+                    ->where('v2_pickup_requests.try_and_buy', null)
+                    ->where('v2_pickup_requests.vendor', null);
+            } elseif ($legend_filter == 7) {
+                $pickup_requests->where('v2_pickup_requests.after_cut_off_time', '<>', null)
+                    ->where('v2_pickup_requests.status_id', '<>', 3)
+                    ->where('v2_pickup_requests.try_and_buy', null)
+                    ->where('v2_pickup_requests.vendor', null);
+            } elseif ($legend_filter == 1) {
+                $pickup_requests->where('v2_pickup_requests.created_at', '<=', Carbon::now()->startOfDay()->addDays(6))
+                    ->where('v2_pickup_requests.after_cut_off_time', null)
+                    ->where('v2_pickup_requests.status_id', '<>', 3)
+                    ->where('v2_pickup_requests.try_and_buy', null)
+                    ->where('v2_pickup_requests.vendor', null)
+                    ->where('v2_pickup_requests.reverse_pickup', null);
+            }
+        }
+        if ($legend_filter = $request->get('before_cut_off_time')) {
+            //to be made as before cut off time
+
+            $cut_off_time = '17:30:00';
+            $setting = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+            if ($setting->exists()) {
+                $setting = $setting->first();
+                $cut_off_time = $setting->setting_value . ':00:00';
+                $cut_off_time = Carbon::parse($cut_off_time)->format('H:i:s');
+                $pickup_requests->whereTime('v2_pickup_requests.created_at', '<=', $cut_off_time);
+            }
+        }
+
+        if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
+            $from = Carbon::parse($request->get('requested_from_date'))->format('Y-m-d');
+            //$to = $request->get('requested_to_date');
+            $stop_date = Carbon::parse($request->get('requested_to_date'))->addDay(1)->format('Y-m-d');
+            //$stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+            $pickup_requests->whereBetween('v2_pickup_requests.created_at', [$from, $stop_date]);
+        }
+
+        if($request->get('star_shipper_filter') == 1)
+        {
+            $pickup_requests->where('ss.status',1);
         }
 
         $datatables = Datatables::of($pickup_requests)
@@ -373,68 +433,10 @@ class V2AdminPickupsController extends Controller
                 } else {
                     return '-';
                 }
-            });
+            })
+            ->rawColumns(['pickup_request_id', 'bookings_link','received_link','pickup_note_no', 'action','all_remarks']);
             
-        if ($legend_filter = $request->get('legend_filter')) {
-            if ($legend_filter == 8) {
-                $datatables->where('v2_pickup_requests.reverse_pickup', 1);
-            } elseif ($legend_filter == 2) {
-                $datatables->where('v2_pickup_requests.vendor', '<>', null);
-            } elseif ($legend_filter == 3) {
-                $datatables->where('v2_pickup_requests.try_and_buy', 1)
-                    ->where('v2_pickup_requests.vendor', null);
-            } elseif ($legend_filter == 4) {
-                $datatables->where('v2_pickup_requests.status_id', 3)->where('v2_pickup_requests.attempts', 1)
-                    ->where('v2_pickup_requests.try_and_buy', null)
-                    ->where('v2_pickup_requests.vendor', null);
-            } elseif ($legend_filter == 5) {
-                $datatables->where('v2_pickup_requests.status_id', 3)->where('v2_pickup_requests.attempts', 2)
-                    ->where('v2_pickup_requests.try_and_buy', null)
-                    ->where('v2_pickup_requests.vendor', null);
-            } elseif ($legend_filter == 6) {
-                $datatables->where('v2_pickup_requests.status_id', 3)->where('v2_pickup_requests.attempts', '>', 2)
-                    ->where('v2_pickup_requests.try_and_buy', null)
-                    ->where('v2_pickup_requests.vendor', null);
-            } elseif ($legend_filter == 7) {
-                $datatables->where('v2_pickup_requests.after_cut_off_time', '<>', null)
-                    ->where('v2_pickup_requests.status_id', '<>', 3)
-                    ->where('v2_pickup_requests.try_and_buy', null)
-                    ->where('v2_pickup_requests.vendor', null);
-            } elseif ($legend_filter == 1) {
-                $datatables->where('v2_pickup_requests.created_at', '<=', Carbon::now()->startOfDay()->addDays(6))
-                    ->where('v2_pickup_requests.after_cut_off_time', null)
-                    ->where('v2_pickup_requests.status_id', '<>', 3)
-                    ->where('v2_pickup_requests.try_and_buy', null)
-                    ->where('v2_pickup_requests.vendor', null)
-                    ->where('v2_pickup_requests.reverse_pickup', null);
-            }
-        }
-        if ($legend_filter = $request->get('before_cut_off_time')) {
-            //to be made as before cut off time
-
-            $cut_off_time = '17:30:00';
-            $setting = GlobalSettings::where('type', 'pickup_request_cut_off_time');
-            if ($setting->exists()) {
-                $setting = $setting->first();
-                $cut_off_time = $setting->setting_value . ':00:00';
-                $cut_off_time = Carbon::parse($cut_off_time)->format('H:i:s');
-                $datatables->whereTime('v2_pickup_requests.created_at', '<=', $cut_off_time);
-            }
-        }
-        //
-
-        if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
-            $from = $request->get('requested_from_date');
-            $to = $request->get('requested_to_date');
-            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
-            $datatables->whereBetween('v2_pickup_requests.created_at', [$from, $stop_date]);
-        }
-
-        if($request->get('star_shipper_filter') == 1)
-        {
-            $datatables->where('ss.status',1);
-        }
-                    return $datatables->make(true);
+            return $datatables->make(true);
     }
 
     public function pending_assign(Request $request)
@@ -3080,6 +3082,20 @@ class V2AdminPickupsController extends Controller
             $rider_pickups = $rider_pickups->whereIn('c.hub_id', session('hubs'));
         }
 
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from, $to]);
+        }
+        if (isset($request->search_hub) && !empty($request->search_hub)) {
+            $search_hub = $request->get('search_hub');
+            $rider_pickups->where('usi.city_id', $search_hub);
+        }
+
+        if (isset($request->search_area) && !empty($request->search_area)) {
+            $search_area = $request->get('search_area');
+            $rider_pickups->where('usi.city_area_id', $search_area);
+        }
         $datatables = Datatables::of($rider_pickups)
             ->editColumn('pickup_note_id', function ($rider_pickup) {
                 return str_pad($rider_pickup->pickup_note_id, 6, '0', STR_PAD_LEFT);
@@ -3159,21 +3175,9 @@ class V2AdminPickupsController extends Controller
                 } else {
                     return '-';
                 }
-            });
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from, $to]);
-        }
-        if (isset($request->search_hub) && !empty($request->search_hub)) {
-            $search_hub = $request->get('search_hub');
-            $rider_pickups->where('usi.city_id', $search_hub);
-        }
-
-        if (isset($request->search_area) && !empty($request->search_area)) {
-            $search_area = $request->get('search_area');
-            $rider_pickups->where('usi.city_area_id', $search_area);
-        }
+            })
+            ->rawColumns(['distance_from_start_to_actual' , 'distance_from_current_to_actual', 'picture_path','signature_via_app','audio_path']);
+        
         return $datatables->make(true);
     }
     public function pickups_action_log_index_v2()
@@ -3216,15 +3220,6 @@ class V2AdminPickupsController extends Controller
         if (session('role_id') != 1) {
             $rider_pickup_action_logs = $rider_pickup_action_logs->whereIn('c.hub_id', session('hubs'));
         }
-
-        $datatables = Datatables::of($rider_pickup_action_logs)
-            // ->editColumn('pickup_note_id', function ($rider_pickup_action_log) {
-            //     return str_pad($rider_pickup_action_log->pickup_note_id, 6, '0', STR_PAD_LEFT);
-            // })
-            ->editColumn('pickup_request_id', function ($rider_pickup_action_log) {
-                return str_pad($rider_pickup_action_log->pickup_request_id, 6, '0', STR_PAD_LEFT);
-            });
-
         if ($pn_no = $request->get('search_pn_no')) {
             $rider_pickup_action_logs->where('v2_rider_pickup_action_logs.pickup_request_id', '=', $pn_no);
         }
@@ -3245,6 +3240,16 @@ class V2AdminPickupsController extends Controller
             $to = $request->get('search_date_to');
             $rider_pickup_action_logs->whereBetween('pr.created_at', [$from, $to]);
         }
+
+        $datatables = Datatables::of($rider_pickup_action_logs)
+            // ->editColumn('pickup_note_id', function ($rider_pickup_action_log) {
+            //     return str_pad($rider_pickup_action_log->pickup_note_id, 6, '0', STR_PAD_LEFT);
+            // })
+            ->editColumn('pickup_request_id', function ($rider_pickup_action_log) {
+                return str_pad($rider_pickup_action_log->pickup_request_id, 6, '0', STR_PAD_LEFT);
+            });
+
+        
 
         return $datatables->make(true);
     }
@@ -3909,7 +3914,8 @@ class V2AdminPickupsController extends Controller
                 } else {
                     return 0;
                 }
-            });
+            })
+            ->rawColumns(['note_id','total_shipment','total_arrived']);
 
         return $datatable->make(true);
     }
@@ -3944,7 +3950,7 @@ class V2AdminPickupsController extends Controller
         }
         $routes = Route::join('cities', 'routes.city_id', '=', 'cities.id')
             ->leftjoin('riders', 'riders.route_id', '=', 'routes.id')
-            ->select(['cities.name as city', 'routes.id as id', 'routes.code as code', 'routes.start', 'routes.end', 'routes.junction', 'routes.status as status', 'routes.created_at', 'riders.name as rider', 'riders.trax_id as rider_trax_id'])->where('routes.route_type_id', 1);
+            ->select(['cities.name as city', 'routes.id as id', 'routes.code as code', 'routes.start', 'routes.end', 'routes.junction', 'routes.status as status', 'routes.created_at as created', 'riders.name as rider', 'riders.trax_id as rider_trax_id'])->where('routes.route_type_id', 1);
 
         if (session('role_id') != 1) {
             $routes = $routes->whereIn('cities.hub_id', session('hubs'));
@@ -3998,6 +4004,7 @@ class V2AdminPickupsController extends Controller
                     return '';
                 }
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 

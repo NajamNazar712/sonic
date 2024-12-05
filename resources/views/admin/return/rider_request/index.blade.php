@@ -162,7 +162,7 @@
                                 // row.push(values.amount);
                                 row.push(values.date);
                                 row.push(values.admin_name);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 body.push(row);
                             });
                         },
@@ -224,7 +224,7 @@
                     // {data: 'amount', name: 'rider_return_note_requests.total_cod_amount', class: 'align-middle amount'},
                     {data: 'date', name: 'rider_return_note_requests.created_at', class: 'align-middle date'},
                     {data: 'admin_name', name: 'ad.name', class: 'align-middle admin_name'},
-                    {data: 'updated_at', name: 'rider_return_note_requests.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'rider_return_note_requests.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {

@@ -552,7 +552,7 @@
                             row = [];
 
                             row.push(index + 1);
-                            row.push(values.pickup_request_id);
+                            row.push(values.id);
                             row.push(values.requested_date);
                             row.push(values.current_rider);
                             row.push(values.last_rider);

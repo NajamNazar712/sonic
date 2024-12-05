@@ -3244,6 +3244,7 @@ class AdminCargoController extends Controller
 
                     return $dropdown;
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 

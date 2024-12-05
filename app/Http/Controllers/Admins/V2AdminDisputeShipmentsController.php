@@ -61,6 +61,29 @@ class V2AdminDisputeShipmentsController extends Controller
             });
         }
 
+        if ($origin = $request->get('search_origin')) {
+            $dispute->where('oc.id', '=', $origin);
+        }
+        if ($destination = $request->get('search_destination')) {
+            $dispute->where('dc.id', '=', $destination);
+        }
+
+        if ($reason = $request->get('search_reason')) {
+            $dispute->where('v2_disputes.reason_id', '=', $reason);
+        }
+        if ($status = $request->get('search_status')) {
+            $dispute->where('v2_disputes.status_id', '=', $status);
+        }
+        if ($launched_by = $request->get('search_launched_by')) {
+            $dispute->where('v2_disputes.added_by', '=', $launched_by);
+        }
+
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $dispute->whereBetween('v2_disputes.created_at', [$from,$to]);
+        }
         $datatables = Datatables::of($dispute)
             ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -136,31 +159,7 @@ class V2AdminDisputeShipmentsController extends Controller
                 } else {
                     return '';
                 }
-            });
-
-        if ($origin = $request->get('search_origin')) {
-            $dispute->where('oc.id', '=', $origin);
-        }
-        if ($destination = $request->get('search_destination')) {
-            $dispute->where('dc.id', '=', $destination);
-        }
-
-        if ($reason = $request->get('search_reason')) {
-            $dispute->where('v2_disputes.reason_id', '=', $reason);
-        }
-        if ($status = $request->get('search_status')) {
-            $dispute->where('v2_disputes.status_id', '=', $status);
-        }
-        if ($launched_by = $request->get('search_launched_by')) {
-            $dispute->where('v2_disputes.added_by', '=', $launched_by);
-        }
-
-
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $dispute->whereBetween('v2_disputes.created_at', [$from,$to]);
-        }
+            })->rawColumns(['tracking_number_link','image_view','action']);
 
         return $datatables->make(true);
     }

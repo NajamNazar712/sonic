@@ -50,7 +50,9 @@ class BarcodeGeneratorController extends Controller
                 $html = '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($data->barcode_key, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">';
                 return $html;
             });
-            return $datatable->make(true);
+            return $datatable
+            ->rawColumns(['barcode'])
+            ->make(true);
     }
 
     /**

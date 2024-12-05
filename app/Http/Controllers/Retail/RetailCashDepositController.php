@@ -146,7 +146,9 @@ class RetailCashDepositController extends Controller
             $to = $request->get('search_to');
             $cash_deposit->whereBetween('retail_cash_deposits.created_at', [$from,$to]);
         }
-        return  $datatable->make(true);
+        return $datatable
+        ->rawColumns(['shipments_button', 'hbl_konnect_cash', 'performa_button'])
+        ->make(true);
     }
 
     public function shipments(Request $request){

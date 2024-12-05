@@ -23,6 +23,7 @@ use App\Http\Models\BanksList;
 use App\RiderWiseDeliveryNote;
 use App\Http\Models\WeightType;
 use App\Http\Models\Admin\Admin;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\CRM\CRMCount;
 use App\Http\Models\Shipper\User;
@@ -543,17 +544,41 @@ class AdminReportsController extends Controller
             ->join('admins as cr', 'cr.id', '=', 'return_notes.admin_id')
             ->leftjoin('admins as up', 'up.id', '=', 'return_notes.updated_by')
             ->select(['return_notes.id', 'return_notes.id as return_note_id', 'return_notes.id as return_note_link', 'up.name as updated_by', 'return_notes.shipments_count', 'return_notes.shipments_count as shipments_count_link', 'return_notes.updated_at', 'return_notes.updated_at as submission_date', 'riders.name as rider', 'cr.name as created_by', 'return_notes.created_at as created_at', 'return_notes.image', DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])->groupBy('return_notes.id');
-        if (session('role_id') != 1 || !in_array(session('id'), session('sale_users_bypass'))) {
-            $return_note = $return_note->whereIn('return_notes.hub_id', session('hubs'));
-        }
-        if (session('department_id') == 7) {
-            if (!in_array(session('id'), session('sale_users_bypass'))) {
-                $return_note = $return_note->whereIn('shipments.user_id', session('tagged_shippers'));
-            }
-        }
+
 
         if (session('department_id') == 8) {
             $return_note = $return_note->where('shipments.shipment_type', 2);
+        }
+        if ($rn_no = $request->get('search_rn_no')) {
+            $return_note->where('return_notes.id', '=', $rn_no);
+        }
+        if ($tracking = $request->get('search_tracking')) {
+            $return_note->join('return_note_shipments as rnst', 'rnst.return_note_id', '=', 'return_notes.id')
+                ->join('shipments as s', 'rnst.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking);
+        }
+        if ($rider = $request->get('search_rider')) {
+            $return_note->where('riders.id', '=', $rider);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $return_note->where('oc.id', '=', $hub);
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $return_note->where('shipments.booking_type_id', '=', $mode);
+        }
+        if ($created_by = $request->get('search_created_by')) {
+            $return_note->where('cr.id', '=', $created_by);
+        }
+        if ($submitted_by = $request->get('search_submitted_by')) {
+            $return_note->where('up.id', '=', $submitted_by);
+        }
+        if ($submission_date = $request->get('search_submission')) {
+            $return_note->whereDate('return_notes.updated_at', $submission_date);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $return_note->whereBetween('return_notes.created_at', [$from, $to]);
         }
         $return = Datatables::of($return_note)
             ->addColumn('aging', function ($return_note) {
@@ -587,39 +612,9 @@ class AdminReportsController extends Controller
                 } else {
                     return 0;
                 }
-            });
+            })->rawColumns(['return_note_link','delivered_to_shipper_count_link','image','shipments_count_link']);
 
-        if ($rn_no = $request->get('search_rn_no')) {
-            $return->where('return_notes.id', '=', $rn_no);
-        }
-        if ($tracking = $request->get('search_tracking')) {
-            $return->join('return_note_shipments as rnst', 'rnst.return_note_id', '=', 'return_notes.id')
-                ->join('shipments as s', 'rnst.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking);
-        }
-        if ($rider = $request->get('search_rider')) {
-            $return->where('riders.id', '=', $rider);
-        }
-        if ($hub = $request->get('search_hub')) {
-            $return->where('oc.id', '=', $hub);
-        }
-        if ($mode = $request->get('search_shipping_mode')) {
-            $return->where('shipments.booking_type_id', '=', $mode);
-        }
-        if ($created_by = $request->get('search_created_by')) {
-            $return->where('cr.id', '=', $created_by);
-        }
-        if ($submitted_by = $request->get('search_submitted_by')) {
-            $return->where('up.id', '=', $submitted_by);
-        }
-        if ($submission_date = $request->get('search_submission')) {
-            $return->whereDate('return_notes.updated_at', $submission_date);
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $return->whereBetween('return_notes.created_at', [$from, $to]);
-        }
+
         return $return->make(true);
     }
 
@@ -671,6 +666,7 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 124);
         }
+
         $pickup_note = DB::connection('reports')->table('pickup_notes')->join('cities', 'cities.id', '=', 'pickup_notes.city_id')
             ->leftjoin('riders', 'riders.id', '=', 'pickup_notes.rider_id')
             ->leftjoin('admins as ab', 'ab.id', '=', 'pickup_notes.assigned_by_user_id')
@@ -687,27 +683,6 @@ class AdminReportsController extends Controller
                 $pickup_note = $pickup_note->whereIn('pr.shipper_id', session('tagged_shippers'));
             }
         }
-        $pickup_note = Datatables::of($pickup_note)
-            ->editColumn('pn_id', function ($pickup_note) {
-                return str_pad($pickup_note->pn_id, 6, '0', STR_PAD_LEFT);
-            })
-            ->editColumn('pickup_note_no', function ($pickup_note) {
-                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_note->pickup_note_no, 6, '0', STR_PAD_LEFT) . '</span></button>';
-            })
-            ->addColumn('aging', function ($pickup_note) {
-                $assigned_date = Carbon::parse($pickup_note->assigned_date)->startOfDay();
-
-                $completed_date = Carbon::parse($pickup_note->completed_date)->startOfDay();
-
-                return $assigned_date->diffInDays($completed_date) . 'd';
-            })
-            ->addColumn('bookings_link', function ($pickup_notes) {
-                if ($pickup_notes->received != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->received . '</button>';
-                } else {
-                    return 0;
-                }
-            });
 
         if ($pn_no = $request->get('search_pn_no')) {
             $pickup_note->where('pickup_notes.id', '=', $pn_no);
@@ -738,6 +713,29 @@ class AdminReportsController extends Controller
             $to = $request->get('search_date_to');
             $pickup_note->whereBetween('pickup_notes.created_at', [$from, $to]);
         }
+        $pickup_note = Datatables::of($pickup_note)
+            ->editColumn('pn_id', function ($pickup_note) {
+                return str_pad($pickup_note->pn_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('pickup_note_no', function ($pickup_note) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_note->pickup_note_no, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->addColumn('aging', function ($pickup_note) {
+                $assigned_date = Carbon::parse($pickup_note->assigned_date)->startOfDay();
+
+                $completed_date = Carbon::parse($pickup_note->completed_date)->startOfDay();
+
+                return $assigned_date->diffInDays($completed_date) . 'd';
+            })
+            ->addColumn('bookings_link', function ($pickup_notes) {
+                if ($pickup_notes->received != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->received . '</button>';
+                } else {
+                    return 0;
+                }
+            })->rawColumns(['pickup_note_no', 'bookings_link']);
+
+
         return $pickup_note->make(true);
     }
 
@@ -795,6 +793,39 @@ class AdminReportsController extends Controller
                 $query->whereIn('oc.hub_id', session('hubs'))->orWhereIn('h.hub_id', session('hubs'));
             });
         }
+        if ($cargo_no = $request->get('search_cargo_no')) {
+            $cargo_received->where('cargo_consignments.id', '=', $cargo_no);
+        }
+        if ($tracking = $request->get('search_tracking')) {
+            $cargo_received->join('cargo_consignment_shipments as ccs', 'ccs.cargo_consignment_id', '=', 'cargo_consignments.id')
+                ->join('shipments as s', 'ccs.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking);
+        }
+        if ($origin = $request->get('search_origin')) {
+            $cargo_received->where('oc.id', '=', $origin);
+        }
+        if ($destination = $request->get('search_destination')) {
+            $cargo_received->where('h.id', '=', $destination);
+        }
+        if ($mode = $request->get('search_shippimg_modes')) {
+            $cargo_received->where('sm.id', '=', $mode);
+        }
+        if ($transit_date = $request->get('search_transit_date')) {
+            $cargo_received->whereDate('cargo_consignments.created_at', $transit_date);
+        }
+        if ($received_date = $request->get('search_received_date')) {
+            $cargo_received->whereDate('cargo_consignments.updated_at', $received_date);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $cargo_received->whereBetween('cargo_consignments.created_at', [$from, $to]);
+        }
+        if ($cargo_type = $request->get('cargo_type')) {
+            if ($cargo_type != 0) {
+                $cargo_received->where('cargo_consignments.type', $cargo_type);
+            }
+        }
         $cargo = Datatables::of($cargo_received)
             ->addColumn('aging', function ($cargo_received) {
                 return ($cargo_received->received_at && $cargo_received->transit_at) ? Carbon::parse($cargo_received->received_at)->diffInDays($cargo_received->transit_at) : '-';
@@ -812,41 +843,9 @@ class AdminReportsController extends Controller
             })
             ->editColumn('shipments_link', function ($cargo_received) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $cargo_received->shipments . '</button>';
-            });
+            })->rawColumns(['cargo_id_link','shipments_link']);
 
-        if ($cargo_no = $request->get('search_cargo_no')) {
-            $cargo->where('cargo_consignments.id', '=', $cargo_no);
-        }
-        if ($tracking = $request->get('search_tracking')) {
-            $cargo->join('cargo_consignment_shipments as ccs', 'ccs.cargo_consignment_id', '=', 'cargo_consignments.id')
-                ->join('shipments as s', 'ccs.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking);
-        }
-        if ($origin = $request->get('search_origin')) {
-            $cargo->where('oc.id', '=', $origin);
-        }
-        if ($destination = $request->get('search_destination')) {
-            $cargo->where('h.id', '=', $destination);
-        }
-        if ($mode = $request->get('search_shippimg_modes')) {
-            $cargo->where('sm.id', '=', $mode);
-        }
-        if ($transit_date = $request->get('search_transit_date')) {
-            $cargo->whereDate('cargo_consignments.created_at', $transit_date);
-        }
-        if ($received_date = $request->get('search_received_date')) {
-            $cargo->whereDate('cargo_consignments.updated_at', $received_date);
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $cargo->whereBetween('cargo_consignments.created_at', [$from, $to]);
-        }
-        if ($cargo_type = $request->get('cargo_type')) {
-            if ($cargo_type != 0) {
-                $cargo->where('cargo_consignments.type', $cargo_type);
-            }
-        }
+
         return $cargo->make(true);
     }
 
@@ -901,6 +900,17 @@ class AdminReportsController extends Controller
                 'user_bank_infos.default_bank as default',
                 'user_bank_infos.created_at as bank_added_at'
             ]);
+        if ($ibanNo = $request->get('search_iban_no')) {
+            $iban_received->where('user_bank_infos.iban', '=', $ibanNo);
+        }
+        if ($shipper = $request->get('search_shipper')) {
+            $iban_received->where('u.id', '=', $shipper);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $iban_received->whereBetween('user_bank_infos.created_at', [$from, $to]);
+        }
         $user_bank = Datatables::of($iban_received)
             ->editColumn('default', function ($bank) {
                 if ($bank->default == 0) {
@@ -910,17 +920,7 @@ class AdminReportsController extends Controller
                 }
             });
 
-        if ($ibanNo = $request->get('search_iban_no')) {
-            $user_bank->where('user_bank_infos.iban', '=', $ibanNo);
-        }
-        if ($shipper = $request->get('search_shipper')) {
-            $user_bank->where('u.id', '=', $shipper);
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $user_bank->whereBetween('user_bank_infos.created_at', [$from, $to]);
-        }
+
 
 
         return $user_bank->make(true);
@@ -1126,6 +1126,35 @@ class AdminReportsController extends Controller
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
+        if ($tracking = $request->get('search_tracking_no')) {
+            $shipments->where('shipments.tracking_number', '=', $tracking);
+        }
+        if ($shipper = $request->get('search_shipper')) {
+            $shipments->where('u.id', '=', $shipper);
+        }
+        if ($origin = $request->get('search_origin')) {
+            $shipments->where('oc.id', '=', $origin);
+        }
+        if ($destination = $request->get('search_destination')) {
+            $shipments->where('dc.id', '=', $destination);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $shipments->where('h.id', '=', $hub);
+        }
+        if ($status = $request->get('search_status')) {
+            $shipments->where('ss.id', '=', $status);
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $shipments->where('shipments.shipping_mode_id', '=', $mode);
+        }
+        if ($sub_segment = $request->get('sub_segment')) {
+            $shipments->where('u.sub_segment_id', '=', $sub_segment);
+        }
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments->whereBetween('sj.created_at', [$from, $to]);
+        }
         $lead_time = Datatables::of($shipments)
             ->editColumn('account_no', function ($shipments) {
                 return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
@@ -1241,36 +1270,8 @@ class AdminReportsController extends Controller
                 return ($shipments->arrival_date && $shipments->latest_journey_date) ? with((new Carbon($shipments->arrival_date, 'UTC'))->diffInWeekDays($shipments->latest_journey_date) - (new Carbon($shipments->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
                     $date->isSunday();
                 }, $shipments->latest_journey_date)) : '-';
-            });
-        if ($tracking = $request->get('search_tracking_no')) {
-            $lead_time->where('shipments.tracking_number', '=', $tracking);
-        }
-        if ($shipper = $request->get('search_shipper')) {
-            $lead_time->where('u.id', '=', $shipper);
-        }
-        if ($origin = $request->get('search_origin')) {
-            $lead_time->where('oc.id', '=', $origin);
-        }
-        if ($destination = $request->get('search_destination')) {
-            $lead_time->where('dc.id', '=', $destination);
-        }
-        if ($hub = $request->get('search_hub')) {
-            $lead_time->where('h.id', '=', $hub);
-        }
-        if ($status = $request->get('search_status')) {
-            $lead_time->where('ss.id', '=', $status);
-        }
-        if ($mode = $request->get('search_shipping_mode')) {
-            $lead_time->where('shipments.shipping_mode_id', '=', $mode);
-        }
-        if ($sub_segment = $request->get('sub_segment')) {
-            $lead_time->where('u.sub_segment_id', '=', $sub_segment);
-        }
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $lead_time->whereBetween('sj.created_at', [$from, $to]);
-        }
+            })->rawColumns(['tracking_number_link']);
+
         return $lead_time->make(true);
     }
 
@@ -1585,6 +1586,32 @@ class AdminReportsController extends Controller
         if (session('role_id') != 1 || in_array(session('id'), session('sale_users_bypass'))) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
+        if ($recovery_status = $request->get('search_recovery_status')) {
+            if ($recovery_status == 0) {
+                $shipments->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
+            } else if ($recovery_status == 1) {
+                $shipments->whereIn('delivery_note_shipments.status', [4, 5, 6]);
+            } else if ($recovery_status == 7) {
+                $shipments->where('delivery_note_shipments.status', '=', 7);
+            } else if ($recovery_status == 11) {
+                $shipments->where('delivery_note_shipments.status', '=', 11);
+            }
+        }
+
+        if ($mode = $request->get('search_shipping_mode')) {
+            $shipments->where('s.booking_type_id', '=', $mode);
+        }
+        if ($hub = $request->get('hub')) {
+            $shipments->where('hc.id', '=', $hub);
+        }
+
+        if ($delivery_date_from = $request->get('delivery_date_from')) {
+            $shipments->where('sjd.created_at', '>=', $delivery_date_from);
+        }
+
+        if ($delivery_date_to = $request->get('delivery_date_to')) {
+            $shipments->where('sjd.created_at', '<', Carbon::parse($delivery_date_to)->addDay()->toDateTimeString());
+        }
         $datatables = Datatables::of($shipments)
             ->setTotalRecords($count)
             ->setRowAttr([
@@ -1672,33 +1699,8 @@ class AdminReportsController extends Controller
                 } else if ($shipment->recovery_status == 11) {
                     return "Revert Requested";
                 }
-            });
-        if ($recovery_status = $request->get('search_recovery_status')) {
-            if ($recovery_status == 0) {
-                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 11]);
-            } else if ($recovery_status == 1) {
-                $datatables->whereIn('delivery_note_shipments.status', [4, 5, 6]);
-            } else if ($recovery_status == 7) {
-                $datatables->where('delivery_note_shipments.status', '=', 7);
-            } else if ($recovery_status == 11) {
-                $datatables->where('delivery_note_shipments.status', '=', 11);
-            }
-        }
+            })->rawColumns(['dncc_link','sdn_link','tracking_number_link']);
 
-        if ($mode = $request->get('search_shipping_mode')) {
-            $datatables->where('s.booking_type_id', '=', $mode);
-        }
-        if ($hub = $request->get('hub')) {
-            $datatables->where('hc.id', '=', $hub);
-        }
-
-        if ($delivery_date_from = $request->get('delivery_date_from')) {
-            $datatables->where('sjd.created_at', '>=', $delivery_date_from);
-        }
-
-        if ($delivery_date_to = $request->get('delivery_date_to')) {
-            $datatables->where('sjd.created_at', '<', Carbon::parse($delivery_date_to)->addDay()->toDateTimeString());
-        }
 
         return $datatables->make(true);
     }
@@ -2525,7 +2527,7 @@ class AdminReportsController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
         $sheet->getStyle('D3:R3')
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $sheet->getStyle('D3:R3')->getAlignment()->setWrapText(true);
@@ -2550,7 +2552,7 @@ class AdminReportsController extends Controller
         $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
         $sheet->getStyle($total_style_cell)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $shipper_cell = 'D' . $count_shipping_mode; //D13
@@ -2571,7 +2573,7 @@ class AdminReportsController extends Controller
 
         $sheet->getStyle($total_style_cell)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $details_shipper_cell = 'D' . $count_details;
@@ -2951,6 +2953,49 @@ class AdminReportsController extends Controller
             $deliveries = $deliveries->where('shipments.shipment_type', 2);
         }
 
+        if ($rn_no = $request->get('search_dn_no')) {
+            $deliveries->where('delivery_notes.id', '=', $rn_no);
+        }
+        if ($tracking = $request->get('search_tracking')) {
+            $deliveries->join('delivery_note_shipments as rns', 'rns.delivery_note_id', '=', 'delivery_notes.id')
+                ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking);
+        }
+        if ($rider = $request->get('search_rider')) {
+            $deliveries->where('riders.id', '=', $rider);
+        }
+        if ($rider = $request->get('rider_cnic')) {
+            $deliveries->where('riders.id', '=', $rider);
+        }
+        if ($created_by = $request->get('search_assigned_by')) {
+            $deliveries->where('admins.id', '=', $created_by);
+        }
+        if ($submitted_by = $request->get('search_updated_by')) {
+            $deliveries->where('ub.id', '=', $submitted_by);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $deliveries->where('oc.id', '=', $hub);
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $deliveries->where('shipments.booking_type_id', '=', $mode);
+        }
+        if ($courier_id = $request->get('courier_id')) {
+            $deliveries->where('rider_categories.id', '=', $courier_id);
+        }
+        if ($submission_date = $request->get('search_submission')) {
+            $deliveries->whereDate('delivery_notes.updated_at', $submission_date);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $deliveries->whereBetween('delivery_notes.created_at', [$from, $to]);
+        }
+        if ($request->get('update_date_from') && $request->get('update_date_to')) {
+            $from = $request->get('update_date_from');
+            $to = $request->get('update_date_to');
+            $deliveries->whereBetween('delivery_notes.status_updated_at', [$from, $to]);
+        }
+
         $datatable = Datatables::of($deliveries)
             ->addColumn('aging_create_update', function ($deliveries) {
                 return ($deliveries->created_at && $deliveries->updated_at) ? Carbon::parse($deliveries->updated_at)->diffInDays($deliveries->created_at) : '-';
@@ -3001,49 +3046,8 @@ class AdminReportsController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            });
-        if ($rn_no = $request->get('search_dn_no')) {
-            $datatable->where('delivery_notes.id', '=', $rn_no);
-        }
-        if ($tracking = $request->get('search_tracking')) {
-            $datatable->join('delivery_note_shipments as rns', 'rns.delivery_note_id', '=', 'delivery_notes.id')
-                ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking);
-        }
-        if ($rider = $request->get('search_rider')) {
-            $datatable->where('riders.id', '=', $rider);
-        }
-        if ($rider = $request->get('rider_cnic')) {
-            $datatable->where('riders.id', '=', $rider);
-        }
-        if ($created_by = $request->get('search_assigned_by')) {
-            $datatable->where('admins.id', '=', $created_by);
-        }
-        if ($submitted_by = $request->get('search_updated_by')) {
-            $datatable->where('ub.id', '=', $submitted_by);
-        }
-        if ($hub = $request->get('search_hub')) {
-            $datatable->where('oc.id', '=', $hub);
-        }
-        if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('shipments.booking_type_id', '=', $mode);
-        }
-        if ($courier_id = $request->get('courier_id')) {
-            $datatable->where('rider_categories.id', '=', $courier_id);
-        }
-        if ($submission_date = $request->get('search_submission')) {
-            $datatable->whereDate('delivery_notes.updated_at', $submission_date);
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('delivery_notes.created_at', [$from, $to]);
-        }
-        if ($request->get('update_date_from') && $request->get('update_date_to')) {
-            $from = $request->get('update_date_from');
-            $to = $request->get('update_date_to');
-            $datatable->whereBetween('delivery_notes.status_updated_at', [$from, $to]);
-        }
+            })->rawColumns(['delivered_shipments_link','shipments_count_link','delivery_note_link']);
+
         return $datatable->make(true);
     }
 
@@ -3555,6 +3559,74 @@ class AdminReportsController extends Controller
             }
         }
 
+        if ($tracking = $request->get('search_tracking')) {
+            $sales->where('shipments.tracking_number', '=', $tracking);
+        }
+        if ($sales_person = $request->get('search_sales_person')) {
+            $sales->where('adsp.id', '=', $sales_person);
+        }
+        if ($search_shipper = $request->get('search_shipper')) {
+            $sales->where('shipments.user_id', '=', $search_shipper);
+        }
+        if ($search_shippers = $request->get('search_shippers')) {
+            $sales->whereIn('shipments.user_id', $search_shippers);
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $sales->where('sm.id', '=', $mode);
+        }
+        if ($origin = $request->get('search_origin')) {
+            $sales->where('oc.id', '=', $origin);
+        }
+        if ($destination = $request->get('search_destination')) {
+            $sales->where('dc.id', '=', $destination);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $sales->where('h.id', '=', $hub);
+        }
+        if ($status = $request->get('search_status')) {
+            $sales->where('ss.id', '=', $status);
+        }
+        if ($sub_segment = $request->get('sub_segment')) {
+            $sales->where('u.sub_segment_id', '=', $sub_segment);
+        }
+        if ($referral_name = $request->get('ref')) {
+            $sales
+                ->where('rf.id', '=', $referral_name)
+                ->orWhere('scun.id', '=',$referral_name);
+        }
+        if ($search_business_category = $request->get('search_business_category')) {
+            $sales->where('shipments.business_category_id', '=', $search_business_category);
+        }
+//        $sales->whereBetween('sj.created_at', [$from, $to]);
+        if ($search_origin_hub = $request->get('search_origin_hub')) {
+            $sales->where('och.id', '=', $search_origin_hub);
+        }
+        if ($search_origin_zone = $request->get('search_origin_zone')) {
+            $sales->where('ocz.id', '=', $search_origin_zone);
+        }
+        if ($service_type_select = $request->get('service_type_select')) {
+            $sales->where('bt.id', '=', $service_type_select);
+        }
+
+
+        $sales_tiers = DB::table('sales_tiers')->where('tier_name' , 'Referral')->orWhere('tier_name', 'REF')->orWhere('tier_name', 'ref')->first()->id ?? null;
+
+        if ($request->get('rider_type_referral') == 1) {
+            $sales->where(['scu.tier_id' => $sales_tiers, 'scu.user_type' => 2]);
+        }
+
+        if ($request->get('rider_type_referral') == 2) {
+            $sales->where(['scu.tier_id' => $sales_tiers, 'scu.user_type' => 1]);
+        }
+
+        if ($request->get('rider_type_referral') == 3) {
+            $sales->WhereNotExists(function ($subquery) {
+                $subquery->from('sales_commission_users')
+                    ->whereColumn('sales_commission_id', 'scu.sales_commission_id')
+                    ->where('tier_id', 4);
+            });
+        }
+
         $datatable = Datatables::of($sales)
             ->addColumn('attempts', function ($shipment) {
                 $out_for_delivery = DB::connection('reports')->table('shipments_journey')->where('shipment_id', $shipment->shipment_id)->where('shipper_status_id', 5)->count();
@@ -3819,75 +3891,9 @@ class AdminReportsController extends Controller
                 }
 
                 return '-';
-            });
-
-        if ($tracking = $request->get('search_tracking')) {
-            $datatable->where('shipments.tracking_number', '=', $tracking);
-        }
-        if ($sales_person = $request->get('search_sales_person')) {
-            $datatable->where('adsp.id', '=', $sales_person);
-        }
-        if ($search_shipper = $request->get('search_shipper')) {
-            $datatable->where('shipments.user_id', '=', $search_shipper);
-        }
-        if ($search_shippers = $request->get('search_shippers')) {
-            $datatable->whereIn('shipments.user_id', $search_shippers);
-        }
-        if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', '=', $mode);
-        }
-        if ($origin = $request->get('search_origin')) {
-            $datatable->where('oc.id', '=', $origin);
-        }
-        if ($destination = $request->get('search_destination')) {
-            $datatable->where('dc.id', '=', $destination);
-        }
-        if ($hub = $request->get('search_hub')) {
-            $datatable->where('h.id', '=', $hub);
-        }
-        if ($status = $request->get('search_status')) {
-            $datatable->where('ss.id', '=', $status);
-        }
-        if ($sub_segment = $request->get('sub_segment')) {
-            $datatable->where('u.sub_segment_id', '=', $sub_segment);
-        }
-        if ($referral_name = $request->get('ref')) {
-            $datatable
-            ->where('rf.id', '=', $referral_name)
-            ->orWhere('scun.id', '=',$referral_name);
-        }
-        if ($search_business_category = $request->get('search_business_category')) {
-            $datatable->where('shipments.business_category_id', '=', $search_business_category);
-        }
-//        $datatable->whereBetween('sj.created_at', [$from, $to]);
-        if ($search_origin_hub = $request->get('search_origin_hub')) {
-            $datatable->where('och.id', '=', $search_origin_hub);
-        }
-        if ($search_origin_zone = $request->get('search_origin_zone')) {
-            $datatable->where('ocz.id', '=', $search_origin_zone);
-        }
-        if ($service_type_select = $request->get('service_type_select')) {
-            $datatable->where('bt.id', '=', $service_type_select);
-        }
+            })->rawColumns(['tracking_number_link']);
 
 
-        $sales_tiers = DB::table('sales_tiers')->where('tier_name' , 'Referral')->orWhere('tier_name', 'REF')->orWhere('tier_name', 'ref')->first()->id ?? null;
-
-        if ($request->get('rider_type_referral') == 1) {
-            $datatable->where(['scu.tier_id' => $sales_tiers, 'scu.user_type' => 2]);
-        }
-
-        if ($request->get('rider_type_referral') == 2) {
-            $datatable->where(['scu.tier_id' => $sales_tiers, 'scu.user_type' => 1]);
-        }
-
-        if ($request->get('rider_type_referral') == 3) {
-            $datatable->WhereNotExists(function ($subquery) {
-                $subquery->from('sales_commission_users')
-                    ->whereColumn('sales_commission_id', 'scu.sales_commission_id')
-                    ->where('tier_id', 4);
-            });
-        }
 
         return $datatable->make(true);
     }
@@ -4200,21 +4206,21 @@ class AdminReportsController extends Controller
             });
 
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('s.booking_type_id', '=', $mode);
+            $negative->where('s.booking_type_id', '=', $mode);
         }
 
         if ($shipper = $request->get('search_shipper')) {
-            $datatable->where('u.id', '=', $shipper);
+            $negative->where('u.id', '=', $shipper);
         }
 
         if ($sale_persons = $request->get('sale_persons')) {
-            $datatable = $datatable->whereIn('a.id', $sale_persons);
+            $negative = $negative->whereIn('a.id', $sale_persons);
         }
         if ($status = $request->get('status_select')) {
             if ($status == 1) {
-                $datatable = $datatable->havingRaw('shipment_exist is null');
+                $negative = $negative->havingRaw('shipment_exist is null');
             } else {
-                $datatable = $datatable->havingRaw('shipment_exist is not null');
+                $negative = $negative->havingRaw('shipment_exist is not null');
             }
         }
 
@@ -4263,14 +4269,16 @@ class AdminReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_no' class='tracking' target='_blank'>$shipments->tracking_no</a></u>";
             });
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('s.booking_type_id', '=', $mode);
+            $call_verification_report->where('s.booking_type_id', '=', $mode);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('sj.created_at', [$from, $to]);
+            $call_verification_report->whereBetween('sj.created_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_no'])
+        ->make(true);
     }
 
     public function petty_cash_statements_index()
@@ -4312,7 +4320,7 @@ class AdminReportsController extends Controller
                     ->orWhereIn('pcs.hub_id', session('hubs'));
             });
         }
-        $petty = Datatables::of($petty)
+        $datatable = Datatables::of($petty)
             ->editColumn('statement_link', function ($petty) {
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
             })
@@ -4385,7 +4393,9 @@ class AdminReportsController extends Controller
             $petty->whereBetween('pcs.created_at', [$from, $to]);
         }
 
-        return $petty->make(true);
+        return $datatable
+        ->rawColumns(['statement_link', 'petty_cash_statement_link', 'sdn_id_link', 'dncc_link'])
+        ->make(true);
     }
 
     public function fake_status_index()
@@ -4442,21 +4452,21 @@ class AdminReportsController extends Controller
                 }
             });
         if ($rider = $request->get('rider')) {
-            $datatables->where('r.id', '=', $rider);
+            $delivery_note->where('r.id', '=', $rider);
         }
         if ($hub = $request->get('hub')) {
-            $datatables->where('delivery_notes.hub_id', $hub);
+            $delivery_note->where('delivery_notes.hub_id', $hub);
         }
         if ($tracking_number = $request->get('search_tracking_no')) {
-            $datatables->where('s.tracking_number', $tracking_number);
+            $delivery_note->where('s.tracking_number', $tracking_number);
         }
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatables->where('s.booking_type_id', '=', $mode);
+            $delivery_note->where('s.booking_type_id', '=', $mode);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->where(function ($query) use ($from, $to) {
+            $delivery_note->where(function ($query) use ($from, $to) {
                 $query->where(function ($sub_query) use ($from, $to) {
                     $sub_query->WhereNull('delivery_notes.status_verified_at')
                         ->whereBetween('delivery_notes.created_at', [$from, $to]);
@@ -4468,7 +4478,9 @@ class AdminReportsController extends Controller
             });
             //            $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
         }
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['shipments_count_link', 'shipment_fake_status_link', 'undelivered_shipments_link'])
+        ->make(true);
     }
 
     public function fake_status_shipments_total(Request $request)
@@ -5214,7 +5226,7 @@ class AdminReportsController extends Controller
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->select('shipments.tracking_number as tracking_number', 'ss.name as status', 'ss.id as status_id', 'sj.created_at as return_confirm_date', 'sjc.created_at as dispatching_aging', 'cc.id as cargo_no', 'cc.created_at as cargo_creation_date', 'shipment_origin_city.name as shipment_origin_city_name', 'shipment_origin_hub.name as shipment_origin_hub_name', 'shipment_destination_city.name as shipment_destination_city_name', 'shipment_destination_hub.name as shipment_destination_hub_name')
             ->whereIn('shipments.shipper_status_id', [20, 21, 26, 30, 32, 37]);
-        $cargo_returns_Shipment = Datatables::of($cargo_returns_Shipment)
+        $datatable = Datatables::of($cargo_returns_Shipment)
             ->editColumn('dispatching_aging', function ($shipments) {
                 $from = Carbon::parse($shipments->dispatching_aging);
                 $days = Carbon::now()->diffInDays($from);
@@ -5268,7 +5280,9 @@ class AdminReportsController extends Controller
 
             $cargo_returns_Shipment->whereBetween('sj.created_at', [$from, $to]);
         }
-        return $cargo_returns_Shipment->make(true);
+        return $datatable
+        ->rawColumns(['cargo_id_padded_link', 'tracking_number_link'])
+        ->make(true);
     }
 
 
@@ -5351,20 +5365,22 @@ class AdminReportsController extends Controller
                 }
             });
         if ($city = $request->get('search_city')) {
-            $datatable->where('dc.id', '=', $city);
+            $shipments->where('dc.id', '=', $city);
         }
 
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('shipments.booking_type_id', '=', $mode);
+            $shipments->where('shipments.booking_type_id', '=', $mode);
         }
 
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('return_confirm_date', [$from, $to]);
+            $shipments->whereBetween('return_confirm_date', [$from, $to]);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link', ''])
+        ->make(true);
     }
 
     public function multiple_payment_report_index()
@@ -5443,9 +5459,11 @@ class AdminReportsController extends Controller
                 }
             });
         if ($tracking_number = $request->get('tracking_number')) {
-            $datatable->where('s.tracking_number', '=', $tracking_number);
+            $payments->where('s.tracking_number', '=', $tracking_number);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['payment_id_link', 'tracking_number_link'])
+        ->make(true);
     }
 
     public function revenue_index()
@@ -5905,25 +5923,25 @@ class AdminReportsController extends Controller
                 return $sale->faf_charges ?? '-';
             });
         if ($tracking = $request->get('search_tracking')) {
-            $datatable->where('shipments.tracking_number', '=', $tracking);
+            $sales->where('shipments.tracking_number', '=', $tracking);
         }
         if ($shipper = $request->get('search_shipper')) {
-            $datatable->where('u.id', '=', $shipper);
+            $sales->where('u.id', '=', $shipper);
         }
         if ($origin = $request->get('search_origin')) {
-            $datatable->where('oc.id', '=', $origin);
+            $sales->where('oc.id', '=', $origin);
         }
         if ($destination = $request->get('search_destination')) {
-            $datatable->where('dc.id', '=', $destination);
+            $sales->where('dc.id', '=', $destination);
         }
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('shipments.booking_type_id', '=', $mode);
+            $sales->where('shipments.booking_type_id', '=', $mode);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatable->where('h.id', '=', $hub);
+            $sales->where('h.id', '=', $hub);
         }
         if ($status = $request->get('search_status')) {
-            $datatable->where('ss.id', '=', $status);
+            $sales->where('ss.id', '=', $status);
         }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
@@ -5931,26 +5949,28 @@ class AdminReportsController extends Controller
             $to = $request->get('search_date_to');
 
             if ($from_to_ids) {
-                $datatable->where('sj.id', '>=', $from_id)
+                $sales->where('sj.id', '>=', $from_id)
                     ->where('sj.id', '<=', $to_id);
             } else {
-                $datatable->whereBetween('sj.created_at', [$from, $to]);
+                $sales->whereBetween('sj.created_at', [$from, $to]);
             }
         }
 
         if (!($request->get('search_date_from') && $request->get('search_date_to')) && !($request->get('dr_search_date_from') && $request->get('dr_search_date_to'))) {
-            $datatable->whereRaw('false');
+            $sales->whereRaw('false');
         }
 
         if ($search_business_category = $request->get('search_business_category')) {
-            $datatable->where('shipments.business_category_id', '=', $search_business_category);
+            $sales->where('shipments.business_category_id', '=', $search_business_category);
         }
 
         if ($service_type_select = $request->get('service_type_select')) {
-            $datatable->where('bt.id', '=', $service_type_select);
+            $sales->where('bt.id', '=', $service_type_select);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['invoice_number_button', 'tracking_number_link'])
+        ->make(true);
     }
 
     public static function revenue_excel_download()
@@ -7097,52 +7117,52 @@ class AdminReportsController extends Controller
             ->orderColumn('launched_by_name', DB::connection('reports')->raw('IF (crm_requests.launched_by = 0, a.name, IF (crm_requests.launched_by = 1, us.name, IF (crm_requests.launched_by = 2, su.name, "")))') . ' $1');
         if ($tracking = $request->get('search_tracking_no')) {
             $tracking_numbers = explode(',', $tracking);
-            $datatable->whereIn('s.tracking_number', $tracking_numbers);
+            $crm->whereIn('s.tracking_number', $tracking_numbers);
         }
         if ($rnumber = $request->get('search_request_number')) {
             $rnumber = explode(',', $rnumber);
-            $datatable->whereIn('crm_requests.id', $rnumber);
+            $crm->whereIn('crm_requests.id', $rnumber);
         }
         if ($shipper = $request->get('search_shipper')) {
 
-            $datatable->whereIn('u.id', $shipper);
+            $crm->whereIn('u.id', $shipper);
         }
         //        if($origin = $request->get('search_origin')){
         //            $datatable->where('oc.id', '=', $origin);
         //        }
         if ($destination = $request->get('search_destination')) {
-            $datatable->where('dc.id', '=', $destination);
+            $crm->where('dc.id', '=', $destination);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatable->where('h.id', '=', $hub);
+            $crm->where('h.id', '=', $hub);
         }
         if ($zone = $request->get('search_zone')) {
-            $datatable->where('z.id', '=', $zone);
+            $crm->where('z.id', '=', $zone);
         }
         if ($case_nature = $request->get('search_case_nature')) {
-            $datatable->where('crcn.id', '=', $case_nature);
+            $crm->where('crcn.id', '=', $case_nature);
         }
         if ($case_nature_type = $request->get('search_case_nature_type')) {
-            $datatable->where('crcnt.id', '=', $case_nature_type);
+            $crm->where('crcnt.id', '=', $case_nature_type);
         }
 
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('s.booking_type_id', '=', $mode);
+            $crm->where('s.booking_type_id', '=', $mode);
         }
         if ($agent = $request->get('search_agent')) {
-            $datatable->where('a.id', '=', $agent);
+            $crm->where('a.id', '=', $agent);
         }
         if ($status = $request->get('search_status')) {
-            $datatable->whereIn('crs.id', $status);
+            $crm->whereIn('crs.id', $status);
         }
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('crm_requests.created_at', [$from, $to]);
+            $crm->whereBetween('crm_requests.created_at', [$from, $to]);
         }
 
         if ($service_type_select = $request->get('service_type_select')) {
-            $datatable->where('bt.id', '=', $service_type_select);
+            $crm->where('bt.id', '=', $service_type_select);
         }
 
 
@@ -7153,7 +7173,9 @@ class AdminReportsController extends Controller
             $this->fetchCsvCrm($headers,$fieldsToRetrieve,$crm,$select);
             ActivityTrailController::createActivityTrailLog(Auth::id(), 174);
         }else{
-            return $datatable->make(true);
+            return $datatable
+            ->rawColumns(['tracking_number_link', 'id_padded_link', ''])
+            ->make(true);
         }
     }
 
@@ -7581,12 +7603,12 @@ class AdminReportsController extends Controller
                 $arrived_sj_to_id=0;
             }
         }
-//        if(!is_int($sj_from_id)){
-//            dd($sj_from_id);
-//
-//            $shipments = DB::connection($connection)->table('shipments')->whereRaw('false');
-//            return $shipments;
-//        }
+        // if(!is_int($sj_from_id)){
+        //     dd($sj_from_id);
+
+        //     $shipments = DB::connection($connection)->table('shipments')->whereRaw('false');
+        //     return $shipments;
+        // }
 
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -7718,50 +7740,52 @@ class AdminReportsController extends Controller
         //            $datatable->where('shipments.user_id','=', $shipper);
         //        }
         if ($origin = $request->get('search_origin')) {
-            $datatable->where('oc.id', '=', $origin);
+            $shipments->where('oc.id', '=', $origin);
         }
         if ($destination = $request->get('search_destination')) {
-            $datatable->where('dc.id', '=', $destination);
+            $shipments->where('dc.id', '=', $destination);
         }
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('shipments.booking_type_id', '=', $mode);
+            $shipments->where('shipments.booking_type_id', '=', $mode);
         }
         if ($card = $request->get('cards_filter')) {
             switch ($card) {
                 case 'total':
                     $today = Carbon::now()->endOfDay();
                     $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
-                    $datatable->whereBetween('shipments.created_at', [$thirtyDays, $today]);
+                    $shipments->whereBetween('shipments.created_at', [$thirtyDays, $today]);
                     break;
                 case 'booked':
-                    $datatable->where('shipments.shipper_status_id', 1);
+                    $shipments->where('shipments.shipper_status_id', 1);
                     break;
                 case 'received':
-                    $datatable->whereIn('shipments.shipper_status_id', [2, 3, 4]);
+                    $shipments->whereIn('shipments.shipper_status_id', [2, 3, 4]);
                     break;
                 case 'delivered':
-                    $datatable->whereIn('shipments.shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                    $shipments->whereIn('shipments.shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
                     break;
                 case 'returned':
-                    $datatable->whereIn('shipments.shipper_status_id', [25]);
+                    $shipments->whereIn('shipments.shipper_status_id', [25]);
                     break;
                 case 'returned_intransit':
-                    $datatable->where('shipments.shipper_status_id', 21);
+                    $shipments->where('shipments.shipper_status_id', 21);
                     break;
                 case 'in_process':
-                    $datatable->whereIn('shipments.shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52]);
+                    $shipments->whereIn('shipments.shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52]);
                     break;
                 case 'cancelled':
-                    $datatable->where('shipments.shipper_status_id', 17);
+                    $shipments->where('shipments.shipper_status_id', 17);
                     break;
             }
         }
 
         if ($service_type_select = $request->get('service_type_select')) {
-            $datatable->where('bt.id', '=', $service_type_select);
+            $shipments->where('bt.id', '=', $service_type_select);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function account_activation_index()
@@ -7846,23 +7870,25 @@ class AdminReportsController extends Controller
             });
 
         if ($tracking_number = $request->get('search_tracking')) {
-            $datatable->where('s.tracking_number', '=', $tracking_number);
+            $adjustments->where('s.tracking_number', '=', $tracking_number);
         }
         if ($shipper = $request->get('search_shipper')) {
-            $datatable->where('u.id', '=', $shipper);
+            $adjustments->where('u.id', '=', $shipper);
         }
         if ($type = $request->get('search_type')) {
-            $datatable->where('adjustment_logs.type', '=', $type);
+            $adjustments->where('adjustment_logs.type', '=', $type);
         }
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('s.booking_type_id', '=', $mode);
+            $adjustments->where('s.booking_type_id', '=', $mode);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable = $datatable->whereBetween('adjustment_logs.created_at', [$from, $to]);
+            $adjustments = $adjustments->whereBetween('adjustment_logs.created_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link', 'done_payment_link'])
+        ->make(true);
     }
 
     public function sdn_index(Request $request)
@@ -7969,15 +7995,17 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('station_deposit_notes.created_at', [$from, $to]);
+            $sdn->whereBetween('station_deposit_notes.created_at', [$from, $to]);
         }
         if ($sdn_no = $request->get('search_sdn_no')) {
-            $datatable->where('station_deposit_notes.id', '=', $sdn_no);
+            $sdn->where('station_deposit_notes.id', '=', $sdn_no);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatable->where('oc.id', '=', $hub);
+            $sdn->where('oc.id', '=', $hub);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['sdn', 'deposit_slip', 'dncc_link', 'delivered_shipments_link'])
+        ->make(true);
     }
 
     public function account_edit_index()
@@ -8069,14 +8097,16 @@ class AdminReportsController extends Controller
             });
 
         if ($tracking_number = $request->get('search_tracking_no')) {
-            $datatable = $datatable->where('s.tracking_number', '=', $tracking_number);
+            $shipments = $shipments->where('s.tracking_number', '=', $tracking_number);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable = $datatable->whereBetween('shipment_information_logs.created_at', [$from, $to]);
+            $shipments = $shipments->whereBetween('shipment_information_logs.created_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function booked_and_cancelled_index()
@@ -8127,27 +8157,29 @@ class AdminReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             });
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
 
         if ($shipper = $request->get('search_shipper')) {
-            $datatable = $datatable->where('u.id', '=', $shipper);
+            $shipments = $shipments->where('u.id', '=', $shipper);
         }
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
-            $datatable = $datatable->where('sm.id', '=', $search_shipping_mode);
+            $shipments = $shipments->where('sm.id', '=', $search_shipping_mode);
         }
         if ($service_type = $request->get('search_service_type')) {
-            $datatable = $datatable->where('bt.id', '=', $service_type);
+            $shipments = $shipments->where('bt.id', '=', $service_type);
         }
         if ($status = $request->get('search_status')) {
-            $datatable = $datatable->where('ss.id', '=', $status);
+            $shipments = $shipments->where('ss.id', '=', $status);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable = $datatable->whereBetween('shipments.created_at', [$from, $to]);
+            $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number', 'tracking_number_link'])
+        ->make(true);
     }
 
     public function fake_status_shipments_index()
@@ -8195,29 +8227,31 @@ class AdminReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             });
         if ($rider = $request->get('rider')) {
-            $datatables->where('r.id', '=', $rider);
+            $delivery_note->where('r.id', '=', $rider);
         }
         if ($hub = $request->get('hub')) {
-            $datatables->where('h.id', $hub);
+            $delivery_note->where('h.id', $hub);
         }
         if ($destination = $request->get('destination')) {
-            $datatables->where('dc.id', $destination);
+            $delivery_note->where('dc.id', $destination);
         }
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatables->where('s.id', '=', $mode);
+            $delivery_note->where('s.id', '=', $mode);
         }
         if ($tracking_number = $request->get('search_tracking_no')) {
-            $datatables->where('s.tracking_number', $tracking_number);
+            $delivery_note->where('s.tracking_number', $tracking_number);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->whereBetween('delivery_note_shipments.fake_status_updated_at', [$from, $to]);
+            $delivery_note->whereBetween('delivery_note_shipments.fake_status_updated_at', [$from, $to]);
         }
         if ($zone = $request->get('zone')) {
-            $datatables->where('z.id', '=', $zone);
+            $delivery_note->where('z.id', '=', $zone);
         }
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function daily_visit_index()
@@ -8368,20 +8402,22 @@ class AdminReportsController extends Controller
 
         //AdminUser Filter
         if ($team_member = $request->get('team_member')) {
-            $datatables->where('a.id', $team_member);
+            $daily_visit->where('a.id', $team_member);
         }
 
         if ($rating = $request->get('rating')) {
-            $datatables->where('daily_visits.rating_id', $rating);
+            $daily_visit->where('daily_visits.rating_id', $rating);
         }
         //VisitDate filter
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->whereBetween('daily_visits.created_at', [$from, $to]);
+            $daily_visit->whereBetween('daily_visits.created_at', [$from, $to]);
         }
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['b_c_photo', 'l_photo', 'location', 'action'])
+        ->make(true);
     }
 
 
@@ -8444,13 +8480,13 @@ class AdminReportsController extends Controller
         $datatables = Datatables::of($delivered_shipments);
 
         if ($rider = $request->get('search_rider')) {
-            $datatables = $datatables->where('riders.id', '=', $rider);
+            $delivered_shipments = $delivered_shipments->where('riders.id', '=', $rider);
         }
         if ($station = $request->get('search_station')) {
-            $datatables = $datatables->where('c.id', '=', $station);
+            $delivered_shipments = $delivered_shipments->where('c.id', '=', $station);
         }
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatables->where('s.booking_type_id', '=', $mode);
+            $delivered_shipments->where('s.booking_type_id', '=', $mode);
         }
         return $datatables->make(true);
     }
@@ -8729,27 +8765,29 @@ class AdminReportsController extends Controller
             });
 
         if ($rider = $request->get('search_rider')) {
-            $datatables = $datatables->where('r.id', '=', $rider);
+            $route_distribution_summary = $route_distribution_summary->where('r.id', '=', $rider);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatables = $datatables->where('c.hub_id', '=', $hub);
+            $route_distribution_summary = $route_distribution_summary->where('c.hub_id', '=', $hub);
         }
         if ($zone = $request->get('search_zone')) {
-            $datatables = $datatables->where('c.zone_id', '=', $zone);
+            $route_distribution_summary = $route_distribution_summary->where('c.zone_id', '=', $zone);
         }
         if ($destination = $request->get('search_destination')) {
-            $datatables = $datatables->where('c.id', '=', $destination);
+            $route_distribution_summary = $route_distribution_summary->where('c.id', '=', $destination);
         }
         if ($search_rider_cat = $request->get('search_rider_cat')) {
-            $datatables = $datatables->where('r.operation_rider_id', $search_rider_cat);
+            $route_distribution_summary = $route_distribution_summary->where('r.operation_rider_id', $search_rider_cat);
         }
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from, $to]);
+            $route_distribution_summary = $route_distribution_summary->whereBetween('delivery_notes.created_at', [$from, $to]);
         }
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['dn_no'])
+        ->make(true);
     }
 
     public function destination_delivery_received_index()
@@ -8907,13 +8945,13 @@ class AdminReportsController extends Controller
                 }
             });
         if ($hub = $request->get('search_hub')) {
-            $datatables = $datatables->where('cities.id', '=', $hub);
+            $route_distribution_summary = $route_distribution_summary->where('cities.id', '=', $hub);
         }
         if ($zone = $request->get('search_zone')) {
-            $datatables = $datatables->where('cities.zone_id', '=', $zone);
+            $route_distribution_summary = $route_distribution_summary->where('cities.zone_id', '=', $zone);
         }
         if ($destination = $request->get('search_destination')) {
-            $datatables = $datatables->where('cities.id', '=', $destination);
+            $route_distribution_summary = $route_distribution_summary->where('cities.id', '=', $destination);
         }
         return $datatables->make(true);
     }
@@ -8951,7 +8989,9 @@ class AdminReportsController extends Controller
                     return 'Return';
                 }
             });
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function last_mile_status_index()
@@ -9247,7 +9287,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $report->whereBetween('completed_aging_reports.date', [$from, $to]);
+            $aging_report->whereBetween('completed_aging_reports.date', [$from, $to]);
         }
 
 
@@ -9276,7 +9316,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $report->whereBetween('pending_cash_collection_aging_reports.created_at', [$from, $to]);
+            $aging_report->whereBetween('pending_cash_collection_aging_reports.created_at', [$from, $to]);
         }
 
 
@@ -9382,7 +9422,7 @@ class AdminReportsController extends Controller
             });
         if ($request->get('search_date')) {
             $date = $request->get('search_date');
-            $datatable = $datatable->whereDate('station_recovery_reports.date', $date);
+            $station_recovery = $station_recovery->whereDate('station_recovery_reports.date', $date);
         }
         return $datatable->make(true);
     }
@@ -9451,9 +9491,11 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable = $datatable->whereBetween('adjustment_logs.created_at', [$from, $to]);
+            $adjustments = $adjustments->whereBetween('adjustment_logs.created_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function daily_monthly_adjustment_summary_list(Request $request)
@@ -9482,7 +9524,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable = $datatable->whereBetween('adjustment_logs.created_at', [$from, $to]);
+            $adjustments = $adjustments->whereBetween('adjustment_logs.created_at', [$from, $to]);
         }
         return $datatable->make(true);
     }
@@ -9518,7 +9560,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('v2_rider_pickups.created_at', [$from, $to]);
+            $v2_rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from, $to]);
         }
         return $datatable->make(true);
     }
@@ -10265,13 +10307,13 @@ class AdminReportsController extends Controller
         }
 
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('r.id', $search_rider);
+            $new_deliveries->where('r.id', $search_rider);
         }
         if ($search_zone = $request->get('search_zone')) {
-            $datatable->where('z.id', $search_zone);
+            $new_deliveries->where('z.id', $search_zone);
         }
         if ($search_hub = $request->get('search_hub')) {
-            $datatable->where('h.id', $search_hub);
+            $new_deliveries->where('h.id', $search_hub);
         }
 
         //        if ($tracking = $request->get('search_tracking')) {
@@ -10282,10 +10324,12 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('rider_wise_delivery_note_summaries.created_at', [$from, $to]);
+            $new_deliveries->whereBetween('rider_wise_delivery_note_summaries.created_at', [$from, $to]);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['delivery_note', 'total_shipments_link', 'updated_via_rider'])
+        ->make(true);
     }
 
     public function last_mile_app_shipments_list(Request $request)
@@ -10573,6 +10617,40 @@ class AdminReportsController extends Controller
             });
         }
 
+
+        if ($search_shipping_mode = $request->get('search_shipping_mode')) {
+            $shipments->where('shipments.shipping_mode_id', $search_shipping_mode);
+        }
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        if ($user = $request->get('search_user')) {
+            $shipments->where('shipments.user_id', $user);
+        }
+        if ($hub = $request->get('search_origin_hub')) {
+            // $datatable->where('oc.hub_id', $hub);
+            $shipments->whereIn('oc.hub_id', $hub);
+        }
+        if ($hub = $request->get('search_destination_hub')) {
+            $shipments->where('dc.hub_id', $hub);
+        }
+        if ($zone = $request->get('search_zone')) {
+            $shipments->where('dc.zone_id', $zone);
+        }
+        if ($sub_segment = $request->get('sub_segment')) {
+            $shipments->where('u.sub_segment_id', '=', $sub_segment);
+        }
+        if ($weight_type = $request->get('weight_type')) {
+            $shipments->where('sw.weight_type', $weight_type);
+        }
+        if ($weighted_as = $request->get('weighted_as')) {
+            if ($weighted_as == 1) {
+                $shipments->whereNull('shipments.length')->whereNull('shipments.breadth')->whereNull('shipments.height');
+            } else {
+                $shipments->whereNotNull('shipments.length')->whereNotNull('shipments.breadth')->whereNotNull('shipments.height');
+            }
+        }
+
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipment) {
                 $route = route('admin.tracking.index');
@@ -10592,7 +10670,7 @@ class AdminReportsController extends Controller
             ->addColumn('difference', function ($shipment) {
                 $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
                 return $difference;
-            });
+            })->rawColumns(['tracking_number_link']);
             // ->addColumn('charges_diff', function ($shipment){
             //     $charges_diff = $shipment->arrival_weight_charges - $shipment->shipper_weight_charges;
             //     return $charges_diff;
@@ -10603,38 +10681,6 @@ class AdminReportsController extends Controller
             // });
 
 
-        if ($search_shipping_mode = $request->get('search_shipping_mode')) {
-            $datatable->where('shipments.shipping_mode_id', $search_shipping_mode);
-        }
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-        }
-        if ($user = $request->get('search_user')) {
-            $datatable->where('shipments.user_id', $user);
-        }
-        if ($hub = $request->get('search_origin_hub')) {
-            // $datatable->where('oc.hub_id', $hub);
-            $datatable->whereIn('oc.hub_id', $hub);
-        }
-        if ($hub = $request->get('search_destination_hub')) {
-            $datatable->where('dc.hub_id', $hub);
-        }
-        if ($zone = $request->get('search_zone')) {
-            $datatable->where('dc.zone_id', $zone);
-        }
-        if ($sub_segment = $request->get('sub_segment')) {
-            $datatable->where('u.sub_segment_id', '=', $sub_segment);
-        }
-        if ($weight_type = $request->get('weight_type')) {
-            $datatable->where('sw.weight_type', $weight_type);
-        }
-        if ($weighted_as = $request->get('weighted_as')) {
-            if ($weighted_as == 1) {
-                $datatable->whereNull('shipments.length')->whereNull('shipments.breadth')->whereNull('shipments.height');
-            } else {
-                $datatable->whereNotNull('shipments.length')->whereNotNull('shipments.breadth')->whereNotNull('shipments.height');
-            }
-        }
         return $datatable->make(true);
     }
 
@@ -10718,7 +10764,9 @@ class AdminReportsController extends Controller
                     $query->whereRaw('false');
                 }
             });
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['id_padded_link', 'shipments', 'short_received'])
+        ->make(true);
     }
 
     public function in_transit_shipments(Request $request)
@@ -10851,7 +10899,9 @@ class AdminReportsController extends Controller
                     return 'Return';
                 }
             });
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link', 'id_padded_link'])
+        ->make(true);
     }
 
     public function shipper_insurance_index()
@@ -10911,7 +10961,9 @@ class AdminReportsController extends Controller
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link', 'charges'])
+        ->make(true);
     }
 
     public function shipper_insurance_charges(Request $request)
@@ -11063,30 +11115,32 @@ class AdminReportsController extends Controller
             $shipments = $shipments->whereIn('shipments.user_id', $search_shipper);
         }
         if ($origin = $request->get('search_origin')) {
-            $datatable->where('oc.id', '=', $origin);
+            $shipments->where('oc.id', '=', $origin);
         }
         if ($destination = $request->get('search_destination')) {
-            $datatable->where('dc.id', '=', $destination);
+            $shipments->where('dc.id', '=', $destination);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatable->where('h.id', '=', $hub);
+            $shipments->where('h.id', '=', $hub);
         }
         if ($shipping_mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', '=', $shipping_mode);
+            $shipments->where('sm.id', '=', $shipping_mode);
         }
         if ($request->get('arrival_date_from') && $request->get('arrival_date_to')) {
             $from = $request->get('arrival_date_from');
             $to = $request->get('arrival_date_to');
-            $datatable->whereBetween('sj.created_at', [$from, $to]);
+            $shipments->whereBetween('sj.created_at', [$from, $to]);
         }
 
         if ($status = $request->get('search_status')) {
-            $datatable->where('shipments.shipper_status_id', '=', $status);
+            $shipments->where('shipments.shipper_status_id', '=', $status);
         }
         if ($zone = $request->get('search_zone')) {
-            $datatable->where('z.id', '=', $zone);
+            $shipments->where('z.id', '=', $zone);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
 
@@ -11165,29 +11219,29 @@ class AdminReportsController extends Controller
             });
 
         if ($tracking_number = $request->get('tracking_number')) {
-            $datatable->whereIn('sh.tracking_number', explode(',', $tracking_number));
+            $shipments->whereIn('sh.tracking_number', explode(',', $tracking_number));
         }
 
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('shipments_journey.created_at', [$from, $to]);
+            $shipments->whereBetween('shipments_journey.created_at', [$from, $to]);
         }
         if ($shipper_id = $request->get('search_shipper')) {
-            $datatable->where('sh.user_id', $shipper_id);
+            $shipments->where('sh.user_id', $shipper_id);
         }
 
         if ($status_marked = $request->get('status_marked')) {
-            $datatable->whereIn('ss.id', $status_marked);
+            $shipments->whereIn('ss.id', $status_marked);
         }
         if ($rider_id = $request->get('search_rider')) {
-            $datatable->where('shipments_journey.rider_id', $rider_id);
+            $shipments->where('shipments_journey.rider_id', $rider_id);
         }
         if ($admins_id = $request->get('search_admin')) {
-            $datatable->where('shipments_journey.admin_id', $admins_id);
+            $shipments->where('shipments_journey.admin_id', $admins_id);
         }
         if ($search_last_rider = $request->get('search_last_rider')) {
-            $datatable->where(function ($query) use ($search_last_rider) {
+            $shipments->where(function ($query) use ($search_last_rider) {
                 $query->where([
                     ['dn.rider_id', '=', $search_last_rider],
                     ['shipments_journey.shipper_status_id', '=', '5']
@@ -11215,7 +11269,9 @@ class AdminReportsController extends Controller
         }
 
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function reverse_pickup_index()
@@ -11256,9 +11312,11 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('sj.created_at', [$from, $to]);
+            $shipments->whereBetween('sj.created_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
 
@@ -11297,10 +11355,10 @@ class AdminReportsController extends Controller
                 return $data->designation_code . '-' . $data->territory_code;
             });
         if ($admin_id = $request->get('admin_id')) {
-            $datatable->where('a.id', $admin_id);
+            $incentive->where('a.id', $admin_id);
         }
         if ($city_id = $request->get('city_id')) {
-            $datatable->where('c.id', $city_id);
+            $incentive->where('c.id', $city_id);
         }
         return $datatable->make(true);
     }
@@ -11334,7 +11392,7 @@ class AdminReportsController extends Controller
         $datatable = Datatables::of($incentive);
 
         if ($admin_id = $request->get('admin_id')) {
-            $datatable->where('a.id', $admin_id);
+            $incentive->where('a.id', $admin_id);
         }
         return $datatable->make(true);
     }
@@ -11394,12 +11452,14 @@ class AdminReportsController extends Controller
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('sj.created_at', [$from, $to]);
+            $shipments->whereBetween('sj.created_at', [$from, $to]);
         }
         if ($tracking_number = $request->get('tracking_number')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_number));
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_number));
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link', 'dws_image'])
+        ->make(true);
     }
 
     public function osa_charges_index()
@@ -11438,7 +11498,9 @@ class AdminReportsController extends Controller
             $to = $request->get('search_to');
             $shipments = $shipments->whereBetween('nc.updated_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number'])
+        ->make(true);
     }
 
     public function return_revert_log()
@@ -11471,7 +11533,9 @@ class AdminReportsController extends Controller
             $to = $request->get('search_to');
             $shipments = $shipments->whereBetween('rr.updated_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number'])
+        ->make(true);
     }
 
 
@@ -11570,7 +11634,9 @@ class AdminReportsController extends Controller
             $to = $request->get('search_to');
             $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
-        return $pickup_history->make(true);
+        return $pickup_history
+        ->rawColumns(['tracking_number_link', 'pickup_note_no_print', 'arrival_status_badge'])
+        ->make(true);
     }
 
     public function crm_count_index()
@@ -11826,7 +11892,9 @@ class AdminReportsController extends Controller
                 return round($break / 60, 0) . ' Minute(s)';
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['assigned_calls', 'completed_calls'])
+        ->make(true);
     }
 
     public function crm_special_approval_index()
@@ -11911,19 +11979,21 @@ class AdminReportsController extends Controller
 
         if ($tracking = $request->get('search_tracking_no')) {
             $tracking_numbers = explode(',', $tracking);
-            $datatable->whereIn('s.tracking_number', $tracking_numbers);
+            $crm->whereIn('s.tracking_number', $tracking_numbers);
         }
         if ($rnumber = $request->get('search_request_number')) {
             $rnumber = explode(',', $rnumber);
-            $datatable->whereIn('crm_requests.id', $rnumber);
+            $crm->whereIn('crm_requests.id', $rnumber);
         }
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('sar.created_at', [$from, $to]);
+            $crm->whereBetween('sar.created_at', [$from, $to]);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['approved_by', 'id_padded_link', 'tracking_number_link'])
+        ->make(true);
     }
 
     public function get_approvers(Request $request)
@@ -11972,12 +12042,12 @@ class AdminReportsController extends Controller
                 }
             });
         if ($status = $request->get('search_status')) {
-            $datatable->where('rider_unresponsive_statuses.status', $status);
+            $data->where('rider_unresponsive_statuses.status', $status);
         }
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('rider_unresponsive_statuses.created_at', [$from, $to]);
+            $data->whereBetween('rider_unresponsive_statuses.created_at', [$from, $to]);
         }
 
         return $datatable->make(true);
@@ -12102,19 +12172,21 @@ class AdminReportsController extends Controller
             });
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('tracking_number', explode(',', $tracking_numbers));
+            $one_link_data->whereIn('tracking_number', explode(',', $tracking_numbers));
         }
 
         if ($delivery_note_id = $request->get('delivery_note_id')) {
-            $datatable->where('delivery_note_id', $delivery_note_id);
+            $one_link_data->where('delivery_note_id', $delivery_note_id);
         }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('created_at', [$from, $to]);
+            $one_link_data->whereBetween('created_at', [$from, $to]);
         }
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number'])
+        ->make(true);
     }
 
     public function rider_pickup_index()
@@ -12204,7 +12276,9 @@ class AdminReportsController extends Controller
                 return '';
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['scanned_shipments_btn', 'arrived_shipments_btn', 'without_scan_shipments_btn', 'pickup_note_id_btn'])
+        ->make(true);
     }
 
     public function rider_pickup_scanned_shipments(Request $request)
@@ -12367,10 +12441,10 @@ class AdminReportsController extends Controller
         // }
         // $datatables = Datatables::of($project_arrival);
         if ($user = $request->get('search_shipper')) {
-            $datatables = $datatables->where('shipments.user_id', '=', $user);
+            $project_arrival = $project_arrival->where('shipments.user_id', '=', $user);
         }
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatables = $datatables->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+            $project_arrival = $project_arrival->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
         // if($hub = $request->get('search_hub')){
         //     $datatables = $datatables->where('c.hub_id', '=', $hub);
@@ -12379,10 +12453,12 @@ class AdminReportsController extends Controller
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatables = $datatables->whereBetween('shipments.created_at', [$from, $to]);
+            $project_arrival = $project_arrival->whereBetween('shipments.created_at', [$from, $to]);
         }
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function rider_picked_index()
@@ -12428,21 +12504,23 @@ class AdminReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$crm_request->tracking_number' class='tracking' target='_blank'>$crm_request->tracking_number</a></u>";
             });
         if ($rider = $request->get('search_rider')) {
-            $datatables = $datatables->where('r.id', '=', $rider);
+            $rider_pickup = $rider_pickup->where('r.id', '=', $rider);
         }
         if ($user = $request->get('search_shipper')) {
-            $datatables = $datatables->where('shipments.user_id', '=', $user);
+            $rider_pickup = $rider_pickup->where('shipments.user_id', '=', $user);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatables = $datatables->where('rh.hub_id', '=', $hub);
+            $rider_pickup = $rider_pickup->where('rh.hub_id', '=', $hub);
         }
 
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatables = $datatables->whereBetween('sj.created_at', [$from, $to]);
+            $rider_pickup = $rider_pickup->whereBetween('sj.created_at', [$from, $to]);
         }
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
     public function quick_scanned_report_index()
     {
@@ -12533,7 +12611,9 @@ class AdminReportsController extends Controller
                 }
             });
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number_hyperlink'])
+        ->make(true);
     }
 
     public function overland_index()
@@ -12811,40 +12891,42 @@ class AdminReportsController extends Controller
             });
 
         if ($tracking = $request->get('search_tracking')) {
-            $datatable->where('shipments.tracking_number', '=', $tracking);
+            $overland->where('shipments.tracking_number', '=', $tracking);
         }
         if ($sales_person = $request->get('search_sales_person')) {
-            $datatable->where('adsp.id', '=', $sales_person);
+            $overland->where('adsp.id', '=', $sales_person);
         }
         if ($search_shipper = $request->get('search_shipper')) {
-            $datatable->where('shipments.user_id', '=', $search_shipper);
+            $overland->where('shipments.user_id', '=', $search_shipper);
         }
         if ($search_shippers = $request->get('search_shippers')) {
-            $datatable->whereIn('shipments.user_id', $search_shippers);
+            $overland->whereIn('shipments.user_id', $search_shippers);
         }
         if ($mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', '=', $mode);
+            $overland->where('sm.id', '=', $mode);
         }
         if ($origin = $request->get('search_origin')) {
-            $datatable->where('oc.id', '=', $origin);
+            $overland->where('oc.id', '=', $origin);
         }
         if ($destination = $request->get('search_destination')) {
-            $datatable->where('dc.id', '=', $destination);
+            $overland->where('dc.id', '=', $destination);
         }
         if ($hub = $request->get('search_hub')) {
-            $datatable->where('h.id', '=', $hub);
+            $overland->where('h.id', '=', $hub);
         }
         if ($status = $request->get('search_status')) {
-            $datatable->where('ss.id', '=', $status);
+            $overland->where('ss.id', '=', $status);
         }
         if ($sub_segment = $request->get('sub_segment')) {
-            $datatable->where('u.sub_segment_id', '=', $sub_segment);
+            $overland->where('u.sub_segment_id', '=', $sub_segment);
         }
         if ($search_business_category = $request->get('search_business_category')) {
-            $datatable->where('shipments.business_category_id', '=', $search_business_category);
+            $overland->where('shipments.business_category_id', '=', $search_business_category);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number_link'])
+        ->make(true);
     }
 
     public function rv_report_index()
@@ -13052,7 +13134,9 @@ class AdminReportsController extends Controller
             $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number', 'unresponsive_count'])
+        ->make(true);
     }
 
     public function rv_call_history(Request $request)
@@ -13188,7 +13272,9 @@ class AdminReportsController extends Controller
             $rv_report->whereBetween('rv_agent_call_histories.created_at', [$from, $to]);
         }   
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number'])
+        ->make(true);
     }
     //ReAttempt RV Report
     public function reattemptRvReport()
@@ -13339,7 +13425,9 @@ class AdminReportsController extends Controller
             $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
         }
 
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number'])
+        ->make(true);
     }
 
      public function operations_performance_index()
@@ -13847,13 +13935,13 @@ class AdminReportsController extends Controller
 
 
         if ($delivery_note_id = $request->get('delivery_note_id')) {
-            $datatable->where('delivery_note_id', $delivery_note_id);
+            $hbl_konect_data->where('delivery_note_id', $delivery_note_id);
         }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('created_at', [$from, $to]);
+            $hbl_konect_data->whereBetween('created_at', [$from, $to]);
         }
         return $datatable->make(true);
     }
@@ -13892,17 +13980,17 @@ class AdminReportsController extends Controller
             });
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('tracking_number', explode(',', $tracking_numbers));
+            $trax_pay->whereIn('tracking_number', explode(',', $tracking_numbers));
         }
 
         if ($delivery_note_id = $request->get('delivery_note_id')) {
-            $datatable->where('delivery_note_id', $delivery_note_id);
+            $trax_pay->where('delivery_note_id', $delivery_note_id);
         }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('trax_pay_transactions.created_at', [$from, $to]);
+            $trax_pay->whereBetween('trax_pay_transactions.created_at', [$from, $to]);
         }
         return $datatable->make(true);
     }
@@ -14021,37 +14109,39 @@ class AdminReportsController extends Controller
 
         if ($search_riders = $request->get('search_riders')) {
 
-            $datatables->where('riders.id', $search_riders);
+            $fintech->where('riders.id', $search_riders);
         }
         if ($search_shippers = $request->get('search_shippers')) {
-            $datatables->where('users.id', $search_shippers);
+            $fintech->where('users.id', $search_shippers);
         }
 
         if ($search_fintech_companies = $request->get('search_fintech_companies')) {
-            $datatables->where('fc.id', $search_fintech_companies);
+            $fintech->where('fc.id', $search_fintech_companies);
         }
         if ($search_hub = $request->get('search_hubs')) {
-            $datatables->where('shipments.consignee_city_id', $search_hub);
+            $fintech->where('shipments.consignee_city_id', $search_hub);
         }
 
         if ($search_fintech_transactions = $request->get('search_fintech_transactions')) {
-            $datatables->where('trax_pay_transactions.id', $search_fintech_transactions);
+            $fintech->where('trax_pay_transactions.id', $search_fintech_transactions);
         }
 
         if ($search_tracking_no = $request->get('search_tracking_no')) {
-            $datatables->where('shipments.tracking_number', $search_tracking_no);
+            $fintech->where('shipments.tracking_number', $search_tracking_no);
         }
 
         if ($delivery_notes = $request->get('search_delivery_notes')) {
-            $datatables->where('trax_pay_transactions.delivery_note_id', $delivery_notes);
+            $fintech->where('trax_pay_transactions.delivery_note_id', $delivery_notes);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->whereBetween('sjd.created_at', [$from, $to]);
+            $fintech->whereBetween('sjd.created_at', [$from, $to]);
         }
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['tracking_number'])
+        ->make(true);
     }
 
     public function ordinary_discrepancy_report_index()
@@ -14126,10 +14216,12 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->whereBetween('ordinary_discrepancy_reports.created_at', [$from, $to]);
+            $tracking_data->whereBetween('ordinary_discrepancy_reports.created_at', [$from, $to]);
         }
 
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['images'])
+        ->make(true);
     }
 
     public function ordinary_discrepancy_report_tracking_data(Request $request)
@@ -14313,17 +14405,17 @@ class AdminReportsController extends Controller
         });
 
         if ($agent_id = $request->get('agents')) {
-            $datatable->where('crm_requests.agent_id', $agent_id);
+            $csat_report->where('crm_requests.agent_id', $agent_id);
         }
 
         if ($rating_id = $request->get('ratings')) {
-            $datatable->where('crmf.rating_id', $rating_id);
+            $csat_report->where('crmf.rating_id', $rating_id);
         }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('crm_requests.created_at', [$from, $to]);
+            $csat_report->whereBetween('crm_requests.created_at', [$from, $to]);
         }
 
         return $datatable->make(true);
@@ -14584,7 +14676,7 @@ class AdminReportsController extends Controller
         return view('admin.reports.ibft_report')->with('shippers', $shippers);
     }
 
-    public function ibft_report_list(Request $request)
+        public function ibft_report_list(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 716);
@@ -14607,7 +14699,7 @@ class AdminReportsController extends Controller
                 'shipments.tracking_number'
             )->groupBy('done_payment_id');
 
-        $ibft_report = Datatables::of($ibft_report)
+        $datatables = Datatables::of($ibft_report)
             ->editColumn('status', function ($status) {
                 if ($status->status == 0) {
                     return "Processed";
@@ -14635,7 +14727,7 @@ class AdminReportsController extends Controller
         }
 
 
-        return $ibft_report->make(true);
+        return $datatables->make(true);
     }
     
     public function rv_action_count_report_index()
@@ -14781,7 +14873,9 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             });
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['sack_bag_count_btn'])
+        ->make(true);
     }
 
     public function get_sack_bag_list(Request $request)
@@ -15629,7 +15723,7 @@ class AdminReportsController extends Controller
                 }
 
                 return '-';
-            });
+            })->rawColumns(['crm_id_padded_link','tracking_number_link']);
 
       
 
@@ -15890,7 +15984,9 @@ class AdminReportsController extends Controller
             $route = route('admin.tracking.index');
             return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
         });
-        return $datatable->make(true);
+        return $datatable
+        ->rawColumns(['tracking_number'])
+        ->make(true);
     }
 
     public function list_for_tracking_screen(Request $request)

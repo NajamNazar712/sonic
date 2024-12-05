@@ -1,0 +1,22 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+
+class RiderCategoryTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::table('rider_categories')->truncate();
+        DB::table('rider_categories')->insert(array(
+            array('name'=>'Light'),
+            array('name'=>'Heavy')
+        ));
+    }
+}
