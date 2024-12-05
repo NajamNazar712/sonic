@@ -1748,7 +1748,7 @@ class AdminPackagingMaterialController extends Controller
             ->leftJoin('warehouse_fulfilment_hubs as wfh', function ($join) {
                 $join->on('wfh.warehouse_id', '=', 'warehouses.id');
             })
-            ->select('warehouses.id', 'h.name as hub', 'warehouses.status', 'warehouses.created_at', 'warehouses.updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('count(wfh.id) as associated_hubs'))
+            ->select('warehouses.id', 'h.name as hub', 'warehouses.status', 'warehouses.created_at as created', 'warehouses.updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('count(wfh.id) as associated_hubs'))
             ->where('warehouses.master_type', '!=', 1)
             ->groupBy('warehouses.id');
         return Datatables::of($types)

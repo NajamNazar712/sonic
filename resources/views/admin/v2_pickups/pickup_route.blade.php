@@ -422,7 +422,7 @@
                                 row.push(values.start);
                                 row.push(values.end);
                                 row.push(values.junction);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.status);
                                /* row.push(values.route_type);*/
 
@@ -485,7 +485,7 @@
                     {data: 'start', name: 'routes.start', class: 'align-middle start'},
                     {data: 'end', name: 'routes.end', class: 'align-middle end'},
                     {data: 'junction', name: 'routes.junction', class: 'align-middle junction'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'routes.created_at', class: 'align-middle created_at'},
                     {data: 'status', name: 'routes.status', class: 'align-middle status'},
                   /*  {data: 'route_type', name: 'rt.id', class: 'align-middle route_type'},*/
                     {data: 'action', name: 'action', class: 'align-middle action text-center', orderable: false, searchable: false}
