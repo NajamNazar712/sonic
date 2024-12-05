@@ -529,9 +529,7 @@ class DeliveryController extends Controller
                     return '-';
                 }
             })->editColumn('entry_method', function ($shipment) {
-                return $shipment->entry_method === null
-                    ? 'Not Scanned'
-                    : ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
+                return  ($shipment->entry_method == 1 ? 'Scanned' : 'Manual');
             });
             
         if ($mode = $request->get('search_shipping_mode')) {
