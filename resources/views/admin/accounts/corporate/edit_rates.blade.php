@@ -2126,7 +2126,7 @@
                                              }else{
                                             $e_ol_discount_insurance_sw = '';
                                             }
-                                            @en
+                                            // @en
                                             @endphp
                                             <div class="col text-center">
                                                 <fieldset>

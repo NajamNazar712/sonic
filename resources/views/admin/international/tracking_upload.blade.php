@@ -130,6 +130,11 @@
                                 @endforeach
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <label class="label" for="cost">Cost</label>
+                            <input type="text" class="form-control" name="cost" id="edit_cost">
+                        </div>
                         
                     </div>
                     <div class="modal-footer">
@@ -228,6 +233,11 @@
                 'max':100000,
             });
 
+            $('#edit_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             $('#EditTrackingModal #service_provider').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Service Provider",
@@ -387,6 +397,8 @@
                                 $('#edit_international_tracking_number').val(data.details.international_tracking_number);
                                 $('#edit_shipment_id').val(data.details.id);
                                 $('#actual_weight').val(data.details.actual_weight);
+                                $('#edit_cost').val(data.details.cost);
+                                $('#EditTrackingModal #service_provider').val(data.details.service_provider_id).trigger('change');
 
                                 if(data.details.shipment_status == 1){
                                     $("#edit_actual_weight").prop("readonly", true);

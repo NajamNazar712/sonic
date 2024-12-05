@@ -95,7 +95,6 @@ class AdminInternationalShipmentsController extends Controller
     }
 
     public function tracking_upload_store(Request $request){
-
         $names = [
             'tracking_number' => 'Tracking Number',
             'international_tracking_number' => 'Tracking Number',
@@ -184,6 +183,11 @@ class AdminInternationalShipmentsController extends Controller
                         if (!Shipment::where('tracking_number', $row['tracking_number'])->exists()) {
                             $errors['Row #' . $row_id][] = 'Shipment is already updated from Booked Status #' . $row['tracking_number'];
                         }
+
+                        if (Shipment::where('tracking_number', $row['tracking_number'])->where('business_category_id', 1)->exists()) {
+                            $errors['Row #' . $row_id][] = $row['tracking_number'] . ' is a domestic shipment';
+                        }
+
                         $shipment = Shipment::where('tracking_number', $row['tracking_number']);
                         if($shipment->exists()){
                             $shipment = $shipment->first();
@@ -193,6 +197,7 @@ class AdminInternationalShipmentsController extends Controller
                         }
                     }
                 }
+
                 if(empty($errors)){
                     $tracking_numbers = array();
                     foreach ($rows as $key => $row) {
@@ -267,6 +272,8 @@ class AdminInternationalShipmentsController extends Controller
                 $details['shipment_status'] = $shipment->shipper_status_id;
                 $details['actual_weight'] = $international_shipment->actual_weight;
                 $details['international_tracking_number'] = $international_shipment->international_tracking_number;
+                $details['cost'] = $international_shipment->cost;
+                $details['service_provider_id'] = $international_shipment->service_provider_id;
                 return response()->json(['status' => 0, 'details' => $details]);
             }
         }
@@ -279,6 +286,7 @@ class AdminInternationalShipmentsController extends Controller
         $tracking_number = $request->tracking_number;
         $international_tracking_number = $request->international_tracking_number;
         $service_provider_id = $request->service_provider;
+        $cost = $request->cost;
 
         if($international_shipment_id){
             $international_shipment = InternationalShipment::find($international_shipment_id);
@@ -292,6 +300,7 @@ class AdminInternationalShipmentsController extends Controller
                         $international_shipment->actual_weight = $actual_weight;
                         $international_shipment->sync = 1;
                         $international_shipment->service_provider_id = $service_provider_id;
+                        $international_shipment->cost = $cost;
                         $international_shipment->save();
                         $shipment->actual_weight = $actual_weight;
                         $shipment->save();
