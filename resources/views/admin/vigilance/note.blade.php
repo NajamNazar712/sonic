@@ -371,6 +371,7 @@
                                     'rider_id': rider_id,
                                     'note_type': note_type,
                                     'tracking_number': tracking_number,
+                                    'action': window.lastAction,
                                     '_token': '{{ csrf_token() }}'
                                 }
                             })
