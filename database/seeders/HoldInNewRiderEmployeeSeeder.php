@@ -46,7 +46,7 @@ class HoldInNewRiderEmployeeSeeder extends Seeder
             $nameIndex = ($nameIndex + 1) % count($names);
 
             $riderData = [
-                'city_id' => 0,
+                'city_id' => 202,
                 'name' => $currentName,
                 'phone' => $faker->phoneNumber,
                 'cnic' => $faker->unique()->numerify('###########'),

@@ -1401,7 +1401,7 @@ class AdminHumanResourseController extends Controller
         $genders = EmployeeGender::all();
         $rider_types = RiderType::all();
         $main_categories = RiderMainCategory::all();
-        $functional_categories = OperationRidersCategory::all();
+        $functional_categories = OperationRidersCategory::find(1);
         $sub_categories = RiderCategory::all();
         $rider_routes = Route::all();
         $rider_functional_category = $employee->rider->operation_rider_id ?? null;
