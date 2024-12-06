@@ -25,6 +25,7 @@ use Illuminate\Http\Request;
     Route::post('store_device_token', 'APIController@store_device_token')->name('store_device_token');
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
+    Route::post('fin_sms', 'APIController@fin_sms')->name('fin_sms');
 
     Route::post('employee_attendance_details', 'APIController@employee_checkin')->name('employee_attendance_details');
 

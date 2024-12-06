@@ -271,6 +271,31 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            // $('#search_date_from').pickadate({
+            //     firstDay: 1,
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 00:00:00',
+            //     hiddenSuffix: '_formatted',
+            //     onSet: function (context) {
+            //         if (context.select) {
+            //             $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+            //         }
+            //     }
+            // });
+            // $('#search_date_to').pickadate({
+            //     firstDay: 1,
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 23:59:59',
+            //     hiddenSuffix: '_formatted',
+            //     onSet: function (context) {
+            //         if (context.select) {
+            //             $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+            //         }
+            //     }
+            // })
+
             $('#search_date_from').pickadate({
                 firstDay: 1,
                 selectYears: true,
@@ -279,10 +304,16 @@
                 hiddenSuffix: '_formatted',
                 onSet: function (context) {
                     if (context.select) {
-                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                        const fromPicker = $('#search_date_from').pickadate('picker');
+                        const toPicker = $('#search_date_to').pickadate('picker');
+                        toPicker.set('min', fromPicker.get('select'));
+                        const maxDate = new Date(fromPicker.get('select').pick);
+                        maxDate.setMonth(maxDate.getMonth() + 3);
+                        toPicker.set('max', maxDate);
                     }
                 }
             });
+
             $('#search_date_to').pickadate({
                 firstDay: 1,
                 selectYears: true,
@@ -291,10 +322,15 @@
                 hiddenSuffix: '_formatted',
                 onSet: function (context) {
                     if (context.select) {
-                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                        const toPicker = $('#search_date_to').pickadate('picker');
+                        const fromPicker = $('#search_date_from').pickadate('picker');
+                        fromPicker.set('max', toPicker.get('select'));
+                        const minDate = new Date(toPicker.get('select').pick);
+                        minDate.setMonth(minDate.getMonth() - 3);
+                        fromPicker.set('min', minDate);
                     }
                 }
-            })
+            });
 
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Hub',
@@ -622,17 +658,23 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'bag_number', name: 'bag_number', class: 'align-middle bag_number'},
                     {data: 'handover_id_padded', name: 'handovers.id', class: 'align-middle handover_id_padded'},
-                    {data: 'bag_type', name: 'bag_type', class: 'align-middle bag_type'},
+                    {data: 'bag_type', name: 'bag_type', class: 'align-middle bag_type', orderable: false},
                     {data: 'created_at', name: 'handovers.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
-                    {data: 'created_at_area', name: 'created_at_area', class: 'align-middle created_at_area'},
-                    {data: 'from', name: 'hr.admin_id', class: 'align-middle from'},
+                    {data: 'created_at_area', name: 'created_at_area', class: 'align-middle created_at_area', orderable: false},
+                    // {data: 'from', name: 'hr.admin_id', class: 'align-middle from'},
+                    {data: 'from', name: 'from', class: 'align-middle from'},
                     {data: 'from_area', name: 'c_from.name', class: 'align-middle from_area'},
-                    {data: 'from_dept_area_desg', name: 'from_dept_area_desg', class: 'align-middle from_dept_area_desg'},
-                    {data: 'to', name: 'hor.admin_id', class: 'align-middle to'},
-                    {data: 'user_type', name: 'user_type', class: 'align-middle user_type'},
+                    {data: 'from_dept_area_desg', name: 'admin_departments.name', class: 'align-middle from_dept_area_desg'},
+                    // {data: 'from_dept_area_desg', name: 'add.name', class: 'align-middle from_dept_area_desg'},
+                    // {data: 'from_dept_area_desg', name: 'ed.name', class: 'align-middle from_dept_area_desg'},
+                    // {data: 'to', name: 'hor.admin_id', class: 'align-middle to'},
+                    {data: 'to', name: 'to', class: 'align-middle to'},
+                    {data: 'user_type', name: 'user_type', class: 'align-middle user_type', orderable: false},
                     {data: 'to_area', name: 'c_to.name', class: 'align-middle to_area'},
-                    {data: 'to_dept_area_desg', name: 'to_dept_area_desg', class: 'align-middle to_dept_area_desg'},
+                    // {data: 'to_dept_area_desg', name: 'to_dept_area_desg', class: 'align-middle to_dept_area_desg'},
+                    // {data: 'to_dept_area_desg', name: 'addp.name', class: 'align-middle to_dept_area_desg'},
+                    {data: 'to_dept_area_desg', name: 'adp.name', class: 'align-middle to_dept_area_desg'},
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},
                     {data: 'shipment_count', name: 'handovers.shipments', class: 'align-middle text-center shipment_count'},
@@ -642,7 +684,7 @@
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle text-center shipment_pieces', orderable: false, searchable: false},
                     {data: 'received_by', name: 'ad.name', class: 'align-middle received_by'},
                     {data: 'received_at', name: 'handovers.received_at', class: 'align-middle received_at'},
-                    {data: 'received_at_area', name: 'received_at_area', class: 'align-middle received_at_area'},
+                    {data: 'received_at_area', name: 'received_at_area', class: 'align-middle received_at_area', orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     // var info = table.page.info();
@@ -680,7 +722,15 @@
             });
 
             $('#search_filter_btn').on('click',function () {
-                table.draw();
+                if ($('#search_date_to').val() == '' || $('#search_date_from').val() == ''){
+                    scan_sound(2);
+                    toastr.error('To and From date is required', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                } else {
+                    table.draw();
+                }
             });
 
 

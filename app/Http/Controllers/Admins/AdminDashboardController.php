@@ -15666,15 +15666,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
             foreach ($forms as $item) {
 
-                $hubMappings[] = [
-                    'closest_hub' => $item['closest_hub'],
-                    'vehicles_list' => $item['vehicles_list']
-                ];
-
-                if (array_key_exists('closest_hub', $item) && is_null($item['closest_hub'])) {
+                if ((array_key_exists('closest_hub', $item) && is_null($item['closest_hub'])) || $item['is_city'] == 1) {
                     unset($item['closest_hub']);
                 }
-                if (array_key_exists('vehicles_list', $item) && is_null($item['vehicles_list'])) {
+                if ((array_key_exists('vehicles_list', $item) && is_null($item['vehicles_list'])) || $item['is_city'] == 1) {
                     unset($item['vehicles_list']);
                 }
 
@@ -15685,6 +15680,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                     $item['is_excel'] = 1;
                     $item['created_by'] = auth()->id();
                     $isHubArray[] = $item;
+                    $hubMappings[] = [
+                        'closest_hub' => $item['closest_hub'] ?? null,
+                        'vehicles_list' => $item['vehicles_list'] ?? null
+                    ];
                 }
 
                 if (isset($item['is_city']) && $item['is_city'] == "1") {
@@ -15793,9 +15792,14 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         }
 
                         if(isset($insertedIds[$key])){
+                            if (is_array($value['vehicles_list'])) {
+                                $vehicles_list = implode(',', $value['vehicles_list']);
+                            } else {
+                                $vehicles_list = $value['vehicles_list'];
+                            }
                             $hubMappings[$key] = [
                                 'closest_hub' => $value['closest_hub'],
-                                'vehicles' => explode(',' , $value['vehicles_list']),
+                                'vehicles' => explode(',' , $vehicles_list),
                                 'city_id' => $insertedIds[$key],
                             ];
                         }
@@ -15803,7 +15807,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                     // Dispatch jobs for each mapping
                     foreach ($hubMappings as $mapping) {
-                        if(isset($mapping['closest_hub'])){
+                        if(isset($mapping['closest_hub'], $mapping['vehicles'], $mapping['city_id'])) {
                             dispatch(new MakeDynamicHubsMapping($mapping['vehicles'], $mapping['closest_hub'], $mapping['city_id'], auth()->id()));
                         }
                     }

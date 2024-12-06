@@ -351,7 +351,7 @@ class NotificationsController extends Controller
         }
     }
 
-    static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL)
+    static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL,$array_data = array())
     {
         $notification = Notification::find($id);
 
@@ -11312,6 +11312,14 @@ class NotificationsController extends Controller
                         }
 
                     }
+
+                }
+                else if($id == 234) {
+                    $subject = $notification->subject;
+                    
+                    $body = $array_data['text'];
+                    $to = $array_data['phone'];
+                    self::sms($body, $to, NULL,NULL, $id);
 
                 }
 

@@ -376,7 +376,7 @@
                 
 
                 {data: 'last_location_screen_location_name', name: 'last_screen_location.name', as:'last_location_screen_location_name', class: 'align-middle last_location_screen_location_name'},
-                {data: 'entry_method', name: 'last_screen_location.entry_method', as:'entry_method', class: 'align-middle entry_method'},
+                {data: 'entry_method', name: 'ssj_last_location.entry_method', as:'entry_method', class: 'align-middle entry_method'},
                 {data: 'ca_scanning_last_location_name', name: 'ca_scanning_last_location_name.name', as:'ca_scanning_last_location_name', class: 'align-middle ca_scanning_last_location_name'},
                 {data: 'last_location_updated_at', name: 'ssjal_last_location.updated_at', as:'last_location_updated_at', class: 'align-middle last_location_updated_at'},
 

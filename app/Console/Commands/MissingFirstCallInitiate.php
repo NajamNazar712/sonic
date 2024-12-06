@@ -60,7 +60,7 @@ class MissingFirstCallInitiate extends Command
             $timeEnd = Carbon::now()->subHour(1)->format('Y-m-d H') . ':59:59';
             $timeStart = Carbon::now()->subHour(1)->format('Y-m-d H') . ':00:00';
         }
-        $upshipments = RvShipmentTicket::whereDate('created_at', '>', Carbon::parse(now()->subHours(78)->toDateTimeString())->format('Y-m-d'))->where('in_progress', 0)->where('is_bot', 0)->get();
+        $upshipments = RvShipmentTicket::where('in_progress', 0)->where('is_bot', 0)->get();
         // ->update(['in_progress' => 0,'rv_shipment_tickets.updated_at'=> 'rv_shipment_tickets.created_ats']);
         foreach ($upshipments as $shipment) {
             $shipment->updated_at = $shipment->created_at;
