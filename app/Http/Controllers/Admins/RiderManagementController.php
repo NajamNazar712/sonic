@@ -797,6 +797,19 @@ class RiderManagementController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 351);
         }
+
+        $names = [
+            'NSA/OSA',
+            'Incomplete Address',
+            'Hold for Self Collection',
+            'Friday/ Saturday Closed',
+            'Restricted Area',
+            'Hold in OPS',
+            'Damaged',
+            'Delivery Stopped',
+            'Wrong Destination'
+        ];
+
         $rider = Rider::join('cities', 'riders.city_id', '=', 'cities.id')
             ->join('cities as c', 'cities.hub_id', '=', 'c.id')
             ->leftjoin('zones as z', 'cities.zone_id', '=', 'z.id')
@@ -841,17 +854,17 @@ class RiderManagementController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn("action", function ($rider) {
-                if ((session('role_id') == 1 || count(array_intersect([99, 382], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id', $rider->rider_id)->doesntExist())) {
+            ->addColumn("action", function ($rider) use ($names) {
+                if (in_array($rider->rider, $names) && (session('role_id') == 1 || count(array_intersect([99, 382], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id', $rider->rider_id)->doesntExist())) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-//                    if (session('role_id') == 1 || in_array(382, session('permissions'))) {
-//                        $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Unblock</div></button>';
-//                    }
+                    if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Unblock</div></button>';
+                    }
 
 
                     $dropdown .= '
