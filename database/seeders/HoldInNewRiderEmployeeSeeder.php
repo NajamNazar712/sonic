@@ -12,6 +12,8 @@ class HoldInNewRiderEmployeeSeeder extends Seeder
 {
     public function run()
     {
+        Rider::where('operation_rider_id', 2)->update(['blacklist'=> 1]);
+
         $faker = Faker::create();
         $globalSetting = GlobalSettings::firstOrCreate(
             ['type' => 'latest_employee_id'],
@@ -101,5 +103,6 @@ class HoldInNewRiderEmployeeSeeder extends Seeder
                 $rider->save();
             }
         }
+
     }
 }
