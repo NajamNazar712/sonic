@@ -9321,7 +9321,7 @@ class DeliveryController extends Controller
                     'Damaged',
                     'Delivery Stopped',
                     'Wrong Destination'
-            ]);
+            ])->where('blacklist', 0);
             $holdInCheck = true;
             /*END*/
         }else{
