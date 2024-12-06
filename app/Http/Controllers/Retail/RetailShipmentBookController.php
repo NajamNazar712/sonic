@@ -62,6 +62,9 @@ use App\Http\Models\TotalSumFranchiseCommission;
 use App\Http\Models\TotalSumRetailTraxCenter;
 use App\Http\Models\RetailFranchiseCharge;
 use App\RetailDiscountCode;
+use Illuminate\Support\Facades\Log;
+use App\Http\Models\ShipperSegmentLogs;
+use App\Http\Models\Shipper\User;
 
 class RetailShipmentBookController extends Controller
 {
@@ -637,6 +640,25 @@ class RetailShipmentBookController extends Controller
         $retail_reference->save();
 
         $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address, $shipper_info->id);
+
+        try {
+            // Maintaining shipper segment logs on booking when origin and destination are different
+            if ($consignee_city_id != $user_shipping_info->city_id) {
+
+                $user_id = Shipment::where('id', $shipment_id)->select('user_id')->first();
+                $user_segments = User::where('id', $user_id->user_id)
+                ->select(['segment_id', 'sub_segment_id'])
+                ->first();
+
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_segments->segment_id,
+                    'sub_segment_id' => $user_segments->sub_segment_id
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+        }
 
         if($request->book_button == 0){
             return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);

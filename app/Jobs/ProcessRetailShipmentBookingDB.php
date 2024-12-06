@@ -27,7 +27,9 @@ use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\RetailUserProductPercentage;
 use App\Http\Models\Admin\Retail\RetailUser;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Models\ShipperSegmentLogs;
+use Illuminate\Support\Facades\Log;
+use App\Http\Models\Shipper\User;
 class ProcessRetailShipmentBookingDB implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -370,5 +372,25 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
 
         AdminPickupsController::generate($shipment_id);
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
+
+        try {
+            // Maintaining shipper segment logs on booking when origin and destination are different
+            if ($consignee_city_id != $user_shipping_info->city_id) {
+
+                $user_id = Shipment::where('id', $shipment_id)->select('user_id')->first();
+                $user_segments = User::where('id', $user_id->user_id)
+                ->select(['segment_id', 'sub_segment_id'])
+                ->first();
+
+                ShipperSegmentLogs::create([
+                    'shipment_id' => $shipment_id,
+                    'segment_id' => $user_segments->segment_id,
+                    'sub_segment_id' => $user_segments->sub_segment_id
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+        }
+
     }
 }
