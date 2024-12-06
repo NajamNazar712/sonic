@@ -12903,7 +12903,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words(ROUND($total_invoice_amount[$origin], 0, PHP_ROUND_HALF_DOWN)) . ' Only</td>
+                          <td class="color secondary">' . self::amount_to_words(ROUND($total_invoice_amount[$gst], 0, PHP_ROUND_HALF_DOWN)) . ' Only</td>
                         </tr>
                       </tbody>
                     </table>
