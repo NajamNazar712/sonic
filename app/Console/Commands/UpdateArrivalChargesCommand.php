@@ -41,7 +41,7 @@ class UpdateArrivalChargesCommand extends Command
     public function handle()
     {
 
-        $startDate =  Carbon::now()->subMonth()->startOfMonth()->format('Y-m-d 00:00:00');
+        $startDate =  Carbon::now()->subDay(1)->format('Y-m-d 00:00:00');
         $endDate = Carbon::now()->format('Y-m-d 23:59:59');
 
 
