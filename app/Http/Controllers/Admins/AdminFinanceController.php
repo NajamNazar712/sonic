@@ -19409,7 +19409,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                 $valid = FALSE;
             }
             if ($valid) {
-                if($sms_charges_status == 1) {
+                if($sms_charges_status == 1 && $type != 3 ) {
                     $shipment_sms_count = 0;
                     $shipment_sms = ShipmentSmsLogs::select('notification_id', DB::raw('count(*) as count'))->where('shipment_id' , $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
 
@@ -20936,7 +20936,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
             }
 
             if ($valid) {
-                if ($sms_charges_status == 1) {
+                if ($sms_charges_status == 1 && $type != 3) {
                     $shipment_sms_count = 0;
                     $shipment_sms = ShipmentSmsLogs::select('notification_id', DB::raw('count(*) as count'))->where('shipment_id', $shipment->id)->where('paid', 0)->groupBy('notification_id')->get();
 
