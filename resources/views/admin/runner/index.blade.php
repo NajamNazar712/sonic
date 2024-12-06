@@ -177,7 +177,7 @@
                                 row.push(values.driver_name);
                                 row.push(values.vehicle_no);
                                 row.push(values.contact_no);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.created_by);
                                 row.push(values.status);
 
@@ -228,7 +228,7 @@
                     {data: 'driver_name', name: 'runner_details.driver_name', class: 'align-middle text-center driver_name'},
                     {data: 'vehicle_no', name: 'runner_details.vehicle_no', class: 'align-middle text-center vehicle_no'},
                     {data: 'contact_no', name: 'runner_details.contact_no', class: 'align-middle text-center contact_no'},
-                    {data: 'created_at', name: 'runner_details.created_at', class: 'align-middle text-center created_at'},
+                    {data: 'created', name: 'runner_details.created_at', class: 'align-middle text-center created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle text-center created_by'},
                     {data: 'status', name: 'runner_details.status', class: 'align-middle text-center status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
