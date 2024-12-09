@@ -5616,8 +5616,8 @@ class AdminCargoManifestController extends Controller
                 'dh.hub_id as destination_hub_id',
                 'cargo_manifests.vendor_name as vendor', 
                 'cargo_manifests.short_received_bags as short_received_bags',
-            );
-            // ->groupBy('cargo_manifests.id');
+            )
+            ->groupBy('cargo_manifests.id');
 
         if (($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != '') {
             $receive_cargo->join('manifest_bags as mb', 'cargo_manifests.id', '=', 'mb.cargo_manifest_id')
