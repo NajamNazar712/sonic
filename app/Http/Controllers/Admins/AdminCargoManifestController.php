@@ -2780,8 +2780,8 @@ class AdminCargoManifestController extends Controller
                 DB::raw('GROUP_CONCAT(sub_segment.name) as segment_names'),
                 DB::raw('COUNT(DISTINCT sub_segment.name) as segment_count'),
                 DB::raw('GROUP_CONCAT(shipments.actual_weight) as segment_weights')
-            );
-            // ->groupBy('cargo_manifest_bags.id');
+            )
+            ->groupBy('cargo_manifest_bags.id');
 
         if (session('role_id') != 1) {
             $bags = $bags->where(function ($query) {
