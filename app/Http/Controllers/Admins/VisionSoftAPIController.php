@@ -39,6 +39,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PHPExcel_Style_Fill;
 use PHPExcel_Cell;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class VisionSoftAPIController extends Controller
 {
@@ -1365,7 +1366,7 @@ class VisionSoftAPIController extends Controller
             $sheet->fromArray($shipper_array, NULL, 'A2', true);
             $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
             // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-            //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+            //$sheet->getStyle($tas)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
 
             // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
             $sheet->setTitle('COD Payable');
@@ -1452,7 +1453,7 @@ class VisionSoftAPIController extends Controller
             $sheet->fromArray($shipper_array, NULL, 'A2', true);
             $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
             // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-            //$sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+            //$sheet->getStyle($tas)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
 
             // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
             $sheet->setTitle('COD Receivable');

@@ -2597,7 +2597,7 @@ class AdminReportsController extends Controller
          $total_shipper_style_cell = "D$total_shipper_rows".":T".$total_shipper_rows;
          $sheet->getStyle($shipper_style_cell)
              ->getFill()
-             ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+             ->setFillType(Fill::FILL_SOLID)
              ->getStartColor()
              ->setRGB('CECECE');
         // $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
@@ -13881,7 +13881,7 @@ class AdminReportsController extends Controller
                 $sheet->getDefaultColumnDimension()->setWidth(20);
                 $sheet->getStyle('A1:AT1')
                     ->getFill()
-                    ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                    ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()
                     ->setRGB('CECECE');
                 $sheet->getStyle('A1:AT1')->getAlignment()->setWrapText(true);
