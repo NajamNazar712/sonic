@@ -56,6 +56,7 @@ class HoldInNewRiderEmployeeSeeder extends Seeder
                 'rider_category_id' => 1,
                 'operation_rider_id' => 2,
                 'status' => 1,
+                'allow_delivered_status' => 1,
                 'special_rider' => 0,
                 'ccd' => 0,
                 'pin' => bcrypt(1234),
