@@ -56,7 +56,6 @@ class HoldInNewRiderEmployeeSeeder extends Seeder
                 'rider_category_id' => 1,
                 'operation_rider_id' => 2,
                 'status' => 1,
-                'allow_delivered_status' => 1,
                 'special_rider' => 0,
                 'ccd' => 0,
                 'pin' => bcrypt(1234),
@@ -67,7 +66,7 @@ class HoldInNewRiderEmployeeSeeder extends Seeder
                 'rider_type_id' => 1,
                 'shift_id' => 1,
                 'incentive_amount' => null,
-                'allow_delivered_status' => null,
+                'allow_delivered_status' => 1,
             ];
 
             $employeeData = [
