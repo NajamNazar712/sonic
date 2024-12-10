@@ -14678,7 +14678,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'shipment_receiver_details.receiver_name as receiverName',
             'shipment_receiver_details.receiver_cnic as receiverCnic',
             'shipment_receiver_details.receiver_relationship as relationship',
-            'shipment_receiver_details.created_at',
+            'shipment_receiver_details.created_at as created',
             'admins.name as created_by'
             );
 

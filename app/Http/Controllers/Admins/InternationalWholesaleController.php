@@ -41,7 +41,7 @@ class InternationalWholesaleController extends Controller
             ->join('admins as cb', 'cb.id', '=', 'wholesale_users.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'wholesale_users.updated_by')
             ->join('banks_lists as bl', 'bl.id', '=', 'wholesale_users.bank_id')
-            ->select('wholesale_users.id as shipper_id', 'wholesale_users.name as shipper_name', 'wholesale_users.phone', 'wholesale_users.address', 'c.name as city', 'wholesale_users.email', 'bl.name as bank_name', 'wholesale_users.bank_account', 'wholesale_users.ntn', 'cb.name as created_by', 'ub.name as updated_by', 'wholesale_users.margin', 'wholesale_users.created_at', 'wholesale_users.updated_at', 'wholesale_users.is_document', 'wholesale_users.status');
+            ->select('wholesale_users.id as shipper_id', 'wholesale_users.name as shipper_name', 'wholesale_users.phone', 'wholesale_users.address', 'c.name as city', 'wholesale_users.email', 'bl.name as bank_name', 'wholesale_users.bank_account', 'wholesale_users.ntn', 'cb.name as created_by', 'ub.name as updated_by', 'wholesale_users.margin', 'wholesale_users.created_at as created', 'wholesale_users.updated_at as updated', 'wholesale_users.is_document', 'wholesale_users.status');
 
 
         if (session('role_id') != 1) {
