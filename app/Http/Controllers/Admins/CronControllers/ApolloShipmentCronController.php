@@ -40,8 +40,8 @@ class ApolloShipmentCronController extends Controller
 
         if($journeys->isNotEmpty()) {
 
-            $url = 'http://localhost:9001/api/sonic/shipments/journeys/bulk-create'; // Replace with your actual API URL
-//            $url = 'https://api-apollo-staging.sonic.pk/api/sonic/shipments/journeys/bulk-create';
+//            $url = 'http://localhost:9001/api/sonic/shipments/journeys/bulk-create'; // Replace with your actual API URL
+            $url = 'https://api-apollo-staging.sonic.pk/api/sonic/shipments/journeys/bulk-create';
             $client = new \GuzzleHttp\Client();
             $response = $client->post($url, [
                 'json' => [
