@@ -13,6 +13,7 @@ use DB;
 use PHPExcel_Style_Fill;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class DailyPickupSalesReportController extends Controller
 {
@@ -424,7 +425,7 @@ class DailyPickupSalesReportController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
         $sheet->getStyle('D3:R3')
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $sheet->getStyle('D3:R3')->getAlignment()->setWrapText(true);
@@ -440,7 +441,7 @@ class DailyPickupSalesReportController extends Controller
         $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
         $sheet->getStyle($total_style_cell)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $shipper_cell = 'D'.$count_shipping_mode; //D13
@@ -461,7 +462,7 @@ class DailyPickupSalesReportController extends Controller
 
         $sheet->getStyle($total_style_cell)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $details_shipper_cell = 'D'.$count_details;
@@ -923,7 +924,7 @@ class DailyPickupSalesReportController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
         $sheet->getStyle('D3:R3')
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $sheet->getStyle('D3:R3')->getAlignment()->setWrapText(true);
@@ -948,7 +949,7 @@ class DailyPickupSalesReportController extends Controller
         $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
         $sheet->getStyle($total_style_cell)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $shipper_cell = 'D'.$count_shipping_mode; //D13
@@ -969,7 +970,7 @@ class DailyPickupSalesReportController extends Controller
 
         $sheet->getStyle($total_style_cell)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $details_shipper_cell = 'D'.$count_details;
@@ -993,7 +994,7 @@ class DailyPickupSalesReportController extends Controller
          $total_shipper_style_cell = "D$total_shipper_rows".":T".$total_shipper_rows;
          $sheet->getStyle($shipper_style_cell)
              ->getFill()
-             ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+             ->setFillType(Fill::FILL_SOLID)
              ->getStartColor()
              ->setRGB('CECECE');
  //        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
@@ -1456,7 +1457,7 @@ class DailyPickupSalesReportController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
         $sheet->getStyle('D3:R3')
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $sheet->getStyle('D3:R3')->getAlignment()->setWrapText(true);
@@ -1481,7 +1482,7 @@ class DailyPickupSalesReportController extends Controller
         $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
         $sheet->getStyle($total_style_cell)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $shipper_cell = 'D'.$count_shipping_mode; //D13
@@ -1502,7 +1503,7 @@ class DailyPickupSalesReportController extends Controller
 
         $sheet->getStyle($total_style_cell)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $details_shipper_cell = 'D'.$count_details;
@@ -1526,7 +1527,7 @@ class DailyPickupSalesReportController extends Controller
          $total_shipper_style_cell = "D$total_shipper_rows".":T".$total_shipper_rows;
          $sheet->getStyle($shipper_style_cell)
              ->getFill()
-             ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+             ->setFillType(Fill::FILL_SOLID)
              ->getStartColor()
              ->setRGB('CECECE');
  //        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
@@ -1984,7 +1985,7 @@ class DailyPickupSalesReportController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
         $sheet->getStyle('D3:R3')
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $sheet->getStyle('D3:R3')->getAlignment()->setWrapText(true);
@@ -2009,7 +2010,7 @@ class DailyPickupSalesReportController extends Controller
         $sheet->getStyle($total_style_cell)->applyFromArray($cell_st);
         $sheet->getStyle($total_style_cell)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $shipper_cell = 'D'.$count_shipping_mode; //D13
@@ -2030,7 +2031,7 @@ class DailyPickupSalesReportController extends Controller
 
         $sheet->getStyle($total_style_cell)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('CECECE');
         $details_shipper_cell = 'D'.$count_details;
@@ -2054,7 +2055,7 @@ class DailyPickupSalesReportController extends Controller
          $total_shipper_style_cell = "D$total_shipper_rows".":T".$total_shipper_rows;
          $sheet->getStyle($shipper_style_cell)
              ->getFill()
-             ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+             ->setFillType(Fill::FILL_SOLID)
              ->getStartColor()
              ->setRGB('CECECE');
  //        $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
