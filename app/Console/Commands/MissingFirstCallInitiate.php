@@ -90,32 +90,32 @@ class MissingFirstCallInitiate extends Command
         $rvShipmentInsert = array_diff($shipmentIds, $rvShipmentTickets);
         Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' .json_encode(($rvShipmentInsert)));
 
-            // if(!empty($rvShipmentInsert)){
-            //     foreach($shipments as $value){
-            //         if(in_array($value['id'], array_unique($rvShipmentInsert))){
-            //             $journey = ShipmentsJourney::where('shipment_id', $value['id'])->whereIn('shipper_status_id', [12, 52, 66])->select('status_reason_id')->latest()->first();
-            //             // Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' . $value['id']);
-            //             $this->rvshipmentticketInsert($value['id'], $value['shipper_status_id'], $journey['status_reason_id'], $value['user_id']);
-            //         }
-            //     }
-            // }
-            if ($this->argument('startDate') != 0 && $this->argument('endDate') != 0) {
-                $rvShipments = RvShipmentTicket::where([['rv_shipment_tickets.updated_at', '>=', $timeStart], ['rv_shipment_tickets.updated_at', '<=', $timeEnd]])->where('is_bot',1)
-                    ->where('in_progress',1)
-                    ->where('disabled_shipper',0)
-                    ->pluck('shipment_id')
-                    ->toArray();
-
-                $apicallLogs = ApiCallLog::where([['api_call_logs.updated_at', '>=', $timeStart], ['api_call_logs.updated_at', '<=', $timeEnd]])
-                    ->pluck('shipment_id')
-                    ->toArray();
-
-                // Debugging step: check the result
-                $apiCallogsInsert = array_diff( $rvShipments,$apicallLogs);
-                foreach($apiCallogsInsert as $ids){
-                    dispatch(new BotCallDispatch($ids));
+            if(!empty($rvShipmentInsert)){
+                foreach($shipments as $value){
+                    if(in_array($value['id'], array_unique($rvShipmentInsert))){
+                        $journey = ShipmentsJourney::where('shipment_id', $value['id'])->whereIn('shipper_status_id', [12, 52, 66])->select('status_reason_id')->latest()->first();
+                        // Log::channel('botCallJobLog')->info('s ' . 'call missing entry check' . $value['id']);
+                        $this->rvshipmentticketInsert($value['id'], $value['shipper_status_id'], $journey['status_reason_id'], $value['user_id']);
+                    }
                 }
             }
+            // if ($this->argument('startDate') != 0 && $this->argument('endDate') != 0) {
+            //     $rvShipments = RvShipmentTicket::where([['rv_shipment_tickets.updated_at', '>=', $timeStart], ['rv_shipment_tickets.updated_at', '<=', $timeEnd]])->where('is_bot',1)
+            //         ->where('in_progress',1)
+            //         ->where('disabled_shipper',0)
+            //         ->pluck('shipment_id')
+            //         ->toArray();
+
+            //     $apicallLogs = ApiCallLog::where([['api_call_logs.updated_at', '>=', $timeStart], ['api_call_logs.updated_at', '<=', $timeEnd]])
+            //         ->pluck('shipment_id')
+            //         ->toArray();
+
+            //     // Debugging step: check the result
+            //     $apiCallogsInsert = array_diff( $rvShipments,$apicallLogs);
+            //     foreach($apiCallogsInsert as $ids){
+            //         dispatch(new BotCallDispatch($ids));
+            //     }
+            // }
         } catch (\Throwable $th) {
             Log::channel('botCallJobLog')->info($th->getMessage());
 
