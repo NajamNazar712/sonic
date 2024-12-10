@@ -8767,7 +8767,7 @@ class GlobalSettingsController extends Controller
     public function star_shippers_list()
     {
         $star_shippers = StarShipper::join('users as u', 'star_shippers.user_id', '=', 'u.id')
-            ->select('u.name as shipper_name', 'star_shippers.id as id', 'star_shippers.status as status', 'star_shippers.created_at as created_at');
+            ->select('u.name as shipper_name', 'star_shippers.id as id', 'star_shippers.status as status', 'star_shippers.created_at as created');
 
         $datatables = Datatables::of($star_shippers)
             ->editColumn('status', function ($star_shippers) {
