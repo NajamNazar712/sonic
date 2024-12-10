@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins\CronControllers;
 
 use App\ApolloCronJobLog;
 use Carbon\Carbon;
+use GuzzleHttp\Exception\RequestException;
 use http\Client;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -40,21 +41,62 @@ class ApolloShipmentCronController extends Controller
 
         if($journeys->isNotEmpty()) {
 
-//            $url = 'http://localhost:9001/api/sonic/shipments/journeys/bulk-create'; // Replace with your actual API URL
-            $url = 'https://api-apollo-staging.sonic.pk/api/sonic/shipments/journeys/bulk-create';
-            $client = new \GuzzleHttp\Client();
-            $response = $client->post($url, [
-                'json' => [
-                    'journeys' => $journeys,
-                ]
+            $client = new \GuzzleHttp\Client([
+                'base_uri' => 'https://api-apollo-staging.sonic.pk/api/sonic',
+                'http_errors' => FALSE,
+                'connect_timeout' => 60,
+                'timeout' => 60
             ]);
 
-            $responseBody = $response->getBody()->getContents();
-            $responseData = json_decode($responseBody, true); // Decode JSON response into an associative array
+            try {
+                $response = $client->post('shipments/journeys/bulk-create', [
+                    'json' => [
+                        'journeys' => $journeys,
+                    ]
+                ]);
 
-            if (isset($responseData['response.success'])) {
-                ApolloCronJobLog::where('id', 1)->update(['last_run_time' => $time_stamp]);
+                $responseBody = $response->getBody()->getContents();
+                $responseData = json_decode($responseBody, true);
+
+                // Check for success
+                if (isset($responseData['response.success'])) {
+                    ApolloCronJobLog::where('id', 1)->update(['last_run_time' => $time_stamp]);
+                } else {
+                    // Log failure response if necessary
+                    Log::channel('apolloJobLog')->error('API response does not indicate success', [
+                        'response' => $responseData,
+                        'journeys' => $journeys
+                    ]);
+                }
+            } catch (RequestException $e) {
+                // Catch Guzzle request-specific exceptions
+                Log::channel('apolloJobLog')->error('Request to API failed', [
+                    'error' => $e->getMessage(),
+                    'exception' => $e
+                ]);
+            } catch (\Exception $e) {
+                // Catch any other general exceptions
+                Log::channel('apolloJobLog')->error('An error occurred', [
+                    'error' => $e->getMessage(),
+                    'exception' => $e
+                ]);
             }
+
+
+//            $url = 'http://localhost:9001/api/sonic/shipments/journeys/bulk-create'; // Replace with your actual API URL
+////            $url = 'https://api-apollo-staging.sonic.pk/api/sonic/shipments/journeys/bulk-create';
+//            $response = $client->post('shipments/journeys/bulk-create', [
+//                'json' => [
+//                    'journeys' => $journeys,
+//                ]
+//            ]);
+//
+//            $responseBody = $response->getBody()->getContents();
+//            $responseData = json_decode($responseBody, true); // Decode JSON response into an associative array
+//
+//            if (isset($responseData['response.success'])) {
+//                ApolloCronJobLog::where('id', 1)->update(['last_run_time' => $time_stamp]);
+//            }
         }
 
 //            // Collect unique IDs for batch queries
