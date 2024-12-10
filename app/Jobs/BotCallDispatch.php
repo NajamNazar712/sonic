@@ -55,11 +55,11 @@ class BotCallDispatch implements ShouldQueue
             $status_code = $response->getStatusCode();
             $response = $response->getBody()->getContents();
             $response = json_decode($response);
+            WebhookLogController::zong_call_log($botRecordData['user_id'],  $status_code, $this->shipmentId, 1, json_encode($response));
+
             if ($response->message == 'Data Not Found' && $response->code == 400) {
-                Log::channel('botCallJobLog')->info('s ' . 'Log after  respsone condition call first-record' . $response->message);
                 $this->inValidEntityEntertain($botRecordData['post']['tracking_number']);
             }
-            WebhookLogController::zong_call_log($botRecordData['user_id'],  $status_code, $this->shipmentId, 1, json_encode($response));
 
         } else {
             return json_encode(['status' => 0, 'message' => 'Shipment isn`t at the bot call prefernce']);
