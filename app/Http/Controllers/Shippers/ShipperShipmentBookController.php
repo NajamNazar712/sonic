@@ -5810,7 +5810,7 @@ class ShipperShipmentBookController extends Controller
     public function corporate_min_chargeable_weight(Request $request)
     {
         $min_chargeable_weight = CorporateMinChargeableWeight::where(['user_id' => session('user_id'), 'shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
-        if ($request->estimated_weight < $min_chargeable_weight['min_chargeable_weight']) {
+        if ($min_chargeable_weight && $request->estimated_weight < $min_chargeable_weight['min_chargeable_weight']) {
             return ['status' => 1, 'min' => $min_chargeable_weight['min_chargeable_weight']];
         } else {
             return ['status' => 0];

@@ -55,6 +55,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Validator;
+use Illuminate\Support\Str;
 
 class ShipperAPIController extends Controller
 {
@@ -145,7 +146,7 @@ class ShipperAPIController extends Controller
                     if ($shipper->api_token) {
                         $information['api_token'] = $shipper->api_token;
                     } else {
-                        $api_token = uniqid(base64_encode(str_random(60)));
+                        $api_token = uniqid(base64_encode(Str::random(60)));
 
                         $shipper->api_token = $api_token;
 

@@ -170,6 +170,7 @@ use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
 use App\RvShipmentTicket;
 use App\Http\Traits\RvTrait;
+use Illuminate\Support\Str;
 
 class RiderAPIController extends Controller
 {
@@ -12109,7 +12110,7 @@ class RiderAPIController extends Controller
                         if ($rider->api_token) {
                             $api_token = $rider->api_token;
                         } else {
-                            $api_token = uniqid(base64_encode(str_random(60)));
+                            $api_token = uniqid(base64_encode(Str::random(60)));
                             $rider->api_token = $api_token;
                         }
                         $rider->save();
