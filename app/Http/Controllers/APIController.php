@@ -129,6 +129,7 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
+use Illuminate\Support\Str;
 use App\Http\Models\ShipperSegmentLogs;
 
 class APIController extends Controller
@@ -4119,7 +4120,7 @@ class APIController extends Controller
                                 if ($admin->api_token) {
                                     $information['api_token'] = $admin->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $admin->api_token = $api_token;
 
@@ -4184,7 +4185,7 @@ class APIController extends Controller
                                 if ($rider->api_token) {
                                     $information['api_token'] = $rider->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $rider->api_token = $api_token;
 
@@ -4256,7 +4257,7 @@ class APIController extends Controller
                                 if ($retail_user->api_token) {
                                     $information['api_token'] = $retail_user->api_token;
                                 } else {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
 
                                     $retail_user->api_token = $api_token;
 
@@ -8463,7 +8464,7 @@ class APIController extends Controller
                                 }
 
                                 if (!$user->api_token) {
-                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $api_token = uniqid(base64_encode(Str::random(60)));
                                     $user->api_token = $api_token;
                                     $user->save();
                                 }
@@ -8558,7 +8559,7 @@ class APIController extends Controller
                                     if ($rider->api_token) {
                                         $api_token = $rider->api_token;
                                     } else {
-                                        $api_token = uniqid(base64_encode(str_random(60)));
+                                        $api_token = uniqid(base64_encode(Str::random(60)));
                                         $rider->api_token = $api_token;
                                     }
                                     $rider->save();
