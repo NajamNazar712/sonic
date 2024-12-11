@@ -9459,9 +9459,25 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->where('created_at', '<', $user->created_at)
             ->pluck('id')
             ->toArray();
+
+        // $similarUsersPhone = User::whereNotNull('phone')
+        //     ->where('phone', '!=', '')
+        //     ->where('phone', $duplicate->phone)
+        //     ->where('id', '!=', $shipper_id)
+        //     ->where('created_at', '<', $user->created_at)
+        //     ->pluck('id')
+        //     ->toArray();
     
         // Get user IDs with same CNIC
-        $similarUsersCnic = User::where('cnic', $duplicate->cnic)
+        // $similarUsersCnic = User::where('cnic', $duplicate->cnic)
+        //     ->where('id', '!=', $shipper_id)
+        //     ->where('created_at', '<', $user->created_at)
+        //     ->pluck('id')
+        //     ->toArray();
+
+        $similarUsersCnic = User::whereNotNull('cnic')
+            ->where('cnic', '!=', '')
+            ->where('cnic', $duplicate->cnic)
             ->where('id', '!=', $shipper_id)
             ->where('created_at', '<', $user->created_at)
             ->pluck('id')
@@ -12705,7 +12721,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
         $merged_accounts = MergedAccountHead::leftjoin('admins as ac', 'ac.id', '=', 'merged_account_heads.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'merged_account_heads.updated_by')
-            ->select('merged_account_heads.id as id', 'merged_account_heads.name as name', 'merged_account_heads.created_at as created_at', 'merged_account_heads.updated_at as updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('(select count(id) from merged_sister_accounts where merged_sister_accounts.merged_head_id = merged_account_heads.id) as accounts'));
+            ->select('merged_account_heads.id as id', 'merged_account_heads.name as name', 'merged_account_heads.created_at as created', 'merged_account_heads.updated_at as updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('(select count(id) from merged_sister_accounts where merged_sister_accounts.merged_head_id = merged_account_heads.id) as accounts'));
         return Datatables::of($merged_accounts)
             ->editColumn('accounts_button', function ($users) {
                 return '<div class="text-center"><button type="button" class="btn btn-sm btn-outline-info accounts_button">' . $users->accounts . '</button></div>';
@@ -14662,7 +14678,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             'shipment_receiver_details.receiver_name as receiverName',
             'shipment_receiver_details.receiver_cnic as receiverCnic',
             'shipment_receiver_details.receiver_relationship as relationship',
-            'shipment_receiver_details.created_at',
+            'shipment_receiver_details.created_at as created',
             'admins.name as created_by'
             );
 

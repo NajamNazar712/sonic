@@ -346,7 +346,7 @@
                 // order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'hub_name' ,name: 'c.name', class: 'align-middle text-center hub_name'},
+                    { data:'hub_name' ,name: 'cities.name', class: 'align-middle text-center hub_name'},
                     { data:'booked', class: 'align-middle booked', orderable: false, searchable: false},
                     { data:'arrived_at_destination', class: 'align-middle arrived_at_destination', orderable: false, searchable: false},
                     { data:'in_transit', class: 'align-middle in_transit', orderable: false, searchable: false},

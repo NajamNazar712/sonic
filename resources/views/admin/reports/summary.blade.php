@@ -634,7 +634,7 @@
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'shipper_id' ,name: 'shipper_id', class: 'align-middle shipper'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
-                    { data:'sales_person_name' ,name: 'st.sales_person_name', class: 'align-middle sales_person_name'},
+                    { data:'sales_person_name' ,name: 'sd.name', class: 'align-middle sales_person_name'},
                     { data:'sub_segment' ,name: 'u.sub_segment_id', class: 'align-middle shipper'},
                     { data:'vendor' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'first_attempt_date' ,name: 'first_attempt_date', class: 'align-middle first_attempt_date'},

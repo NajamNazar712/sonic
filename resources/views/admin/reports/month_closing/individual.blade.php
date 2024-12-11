@@ -290,7 +290,7 @@
                     {data: 'claim_type', name: 'crn.type', class: 'align-middle claim_type'},
                     {data: 'closing_type', name: 'mct.name', class: 'align-middle closing_type'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'remarks', name: 'mc.remarks', class: 'align-middle remarks'},
+                    {data: 'remarks', name: 'month_closings.remarks', class: 'align-middle remarks'},
                     {data: 'closing_status', name: 'mcs.name', class: 'align-middle closing_status'},
 
                 ],
