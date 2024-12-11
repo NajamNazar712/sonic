@@ -2734,8 +2734,8 @@ class AdminCargoManifestController extends Controller
             ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
             ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
 
-            ->leftJoin('manifest_bags', 'manifest_bags.cargo_manifest_id', '=', 'cm.id')
-            // ->leftJoin('cargo_manifest_bags', 'cargo_manifest_bags.id', '=', 'manifest_bags.cargo_manifest_bag_id')
+            // ->leftJoin('manifest_bags', 'manifest_bags.cargo_manifest_id', '=', 'cm.id')
+            // ->leftJoin('cargo_manifest_bags as cmb', 'cmb.seal_number', '=', 'manifest_bags.id')
             ->leftJoin('cargo_manifest_bag_shipments as cargo_shipments', 'cargo_shipments.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
             ->leftJoin('shipments', 'shipments.id', '=', 'cargo_shipments.shipment_id')
             ->leftJoin('shipper_segment_logs', 'shipper_segment_logs.shipment_id', '=', 'cargo_shipments.shipment_id')
