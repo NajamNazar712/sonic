@@ -1245,7 +1245,7 @@
                     }
                 },
                 rowId: 'leadid',
-                order: [[13, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {data: 'lead_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -1277,9 +1277,9 @@
 
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason_id', name: 'leads.reason', class: 'align-middle reason_id'},
-                    {data: 'call_status', name: 'leads.call_status', class: 'align-middle call_status'},
+                    {data: 'call_status_name', name: 'leads.call_status', class: 'align-middle call_status_name'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
-                    {data: 'updated_at', name: 'leads.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'leads.updated_at', class: 'align-middle updated'},
                     {data: 'via_channel', name: 'leads.via_channel', class: 'align-middle via_channel'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],

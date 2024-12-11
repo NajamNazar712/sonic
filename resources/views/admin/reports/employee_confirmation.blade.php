@@ -262,17 +262,17 @@
                 order: [[7, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'id', name: 'employee_confirmation.id', class: 'align-middle id', searchable: false},
+                    {data: 'id', name: 'employee_confirmations.id', class: 'align-middle id', searchable: false},
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', searchable: false},
                     {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
                     {data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub'},
                     {data: 'zone', name: 'ez.name', class: 'align-middle zone'},
-                    {data: 'created_at', name: 'employee_confirmation.created_at', class: 'align-middle created_at'},
-                    {data: 'approve_by_lm_at', name: 'employee_confirmation.approve_by_lm_at', class: 'align-middle approve_by_lm_at'},
-                    {data: 'approve_by_hod_at', name: 'employee_confirmation.approve_by_hod_at', class: 'align-middle approve_by_hod_at'},
-                    {data: 'approve_by_hr_at', name: 'employee_confirmation.approve_by_hr_at', class: 'align-middle approve_by_hr_at'},
+                    {data: 'created_at', name: 'employee_confirmations.created_at', class: 'align-middle created_at'},
+                    {data: 'approve_by_lm_at', name: 'employee_confirmations.approve_by_lm_at', class: 'align-middle approve_by_lm_at'},
+                    {data: 'approve_by_hod_at', name: 'employee_confirmations.approve_by_hod_at', class: 'align-middle approve_by_hod_at'},
+                    {data: 'approve_by_hr_at', name: 'employee_confirmations.approve_by_hr_at', class: 'align-middle approve_by_hr_at'},
 
                 ],
                 rowCallback: function(row, data, index) {

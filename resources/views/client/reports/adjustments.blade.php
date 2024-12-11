@@ -257,7 +257,7 @@
                     { data:'shipper_name' ,name: 'u.name', class: 'align-middle shipper_name'},
                     { data:'adjustment_type' ,name: 'at.name', class: 'align-middle adjustment_type'},
                     { data:'adjustment_amount' ,name: 'adjustment_logs.adjustment_amount', class: 'align-middle adjustment_amount'},
-                    { data:'done_payment_link' ,name: 'dp.id', class: 'align-middle done_payment_id'},
+                    { data:'done_payment_link' ,name: 'dps.id', class: 'align-middle done_payment_id'},
                     { data:'remarks' ,name: 'adjustment_logs.remarks', class: 'align-middle remarks'},
                     { data:'created_at' ,name: 'adjustment_logs.created_at', class: 'align-middle created_at'},
 

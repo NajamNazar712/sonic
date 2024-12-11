@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
-
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class UsersTableSeeder extends Seeder
@@ -67,7 +67,7 @@ class UsersTableSeeder extends Seeder
             }
             else
             {
-                $api_token = uniqid(base64_encode(str_random(60)));
+                $api_token = uniqid(base64_encode(Str::random(60)));
             }
             DB::table('users')->insert(array(
                 array('id' => $ids[$i], 'name' => $names[$i], 'address' => $addresses[$i], 'ntn_no' => $ntn[$i], 'poc' => $poc[$i], 'status' => $status, 'phone' => $phone1[$i], 'phone2' => $phone2[$i], 'cnic' => $cnic[$i], 'email' => $emails[$i], 'url' => $urls[$i], 'city_id' => $city_ids[$i], 'email' => $emails[$i],'rates_added_by'=>$rates_activated,'rates_authorized_by'=>$rates_activated,'account_activated_by'=>$rates_activated,'activated_at'=>$timestamp,'product_id'=>$product_id[$i],'password'=>bcrypt($password[$i]),'api_token'=>$api_token,'created_at'=>$timestamp,'updated_at'=>$timestamp),
@@ -122,7 +122,7 @@ class UsersTableSeeder extends Seeder
             }
             else
             {
-                $api_token = uniqid(base64_encode(str_random(60)));
+                $api_token = uniqid(base64_encode(Str::random(60)));
             }
 
             DB::table('users')->insert(array(
@@ -172,7 +172,7 @@ class UsersTableSeeder extends Seeder
             }
             else
             {
-                $api_token = uniqid(base64_encode(str_random(60)));
+                $api_token = uniqid(base64_encode(Str::random(60)));
             }
             DB::table('users')->insert(array(
                 array('id' => $ids[$i], 'name' => $names[$i], 'address' => $addresses[$i], 'ntn_no' => $ntn[$i], 'poc' => $poc[$i], 'status' => $status, 'phone' => $phone1[$i], 'phone2' => $phone2[$i], 'cnic' => $cnic[$i], 'email' => $emails[$i], 'url' => $urls[$i], 'city_id' => $city_ids[$i], 'email' => $emails[$i],'rates_added_by'=>$rates_activated,'rates_authorized_by'=>$rates_activated,'account_activated_by'=>$rates_activated,'activated_at'=>$timestamp,'product_id'=>$product_id[$i],'password'=>bcrypt($password[$i]),'api_token'=>$api_token,'created_at'=>$timestamp,'updated_at'=>$timestamp),
@@ -224,7 +224,7 @@ class UsersTableSeeder extends Seeder
 //            }
 //            else
 //            {
-                $api_token = uniqid(base64_encode(str_random(60)));
+                $api_token = uniqid(base64_encode(Str::random(60)));
             //}
             DB::table('users')->insert(array(
                 array('id' => $ids[$i], 'name' => $names[$i], 'address' => $addresses[$i], 'ntn_no' => $ntn[$i], 'poc' => $poc[$i], 'status' => $statuses[$i], 'phone' => $phone1[$i], 'phone2' => $phone2[$i], 'cnic' => $cnic[$i], 'email' => $emails[$i], 'url' => $urls[$i], 'city_id' => $city_ids[$i], 'email' => $emails[$i],'rates_added_by'=>$rates_activated,'rates_authorized_by'=>$rates_activated,'account_activated_by'=>$rates_activated,'activated_at'=>$timestamp,'product_id'=>$product_id[$i],'password'=>bcrypt($password[$i]),'api_token'=>$api_token,'created_at'=>$timestamp,'updated_at'=>$timestamp),
