@@ -2597,7 +2597,7 @@ class AdminReportsController extends Controller
          $total_shipper_style_cell = "D$total_shipper_rows".":T".$total_shipper_rows;
          $sheet->getStyle($shipper_style_cell)
              ->getFill()
-             ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+             ->setFillType(Fill::FILL_SOLID)
              ->getStartColor()
              ->setRGB('CECECE');
         // $sheet->getStyle($total_style_cell)->applyFromArray($total_cell_st);
@@ -10921,7 +10921,7 @@ class AdminReportsController extends Controller
         }
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipment_items as si', 'si.shipment_id', '=', 'shipments.id')
-            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number as tracking_number', 'u.name as shipper', 'shipments.insurance_charges', 'shipments.created_at', 'si.insurance', 'si.price as price', DB::raw('sum(si.price) as total_insurance'))
+            ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number as tracking_number', 'u.name as shipper', 'shipments.insurance_charges', 'shipments.created_at as created', 'si.insurance', 'si.price as price', DB::raw('sum(si.price) as total_insurance'))
             ->groupBy('tracking_number');
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
@@ -13881,7 +13881,7 @@ class AdminReportsController extends Controller
                 $sheet->getDefaultColumnDimension()->setWidth(20);
                 $sheet->getStyle('A1:AT1')
                     ->getFill()
-                    ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                    ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()
                     ->setRGB('CECECE');
                 $sheet->getStyle('A1:AT1')->getAlignment()->setWrapText(true);
@@ -13961,7 +13961,7 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 690);
         }
-        $trax_pay = TraxPayTransaction::join('shipments', 'trax_pay_transactions.shipment_id', 'shipments.id')->leftjoin('fintech_payment_details as fpd', 'trax_pay_transactions.id', 'fpd.trax_pay_id')->select('trax_pay_transactions.delivery_note_id as delivery_note_id', 'trax_pay_transactions.payment_name_id as payment_name_id', 'trax_pay_transactions.cod_amount as cod_amount', 'fpd.transaction_id as trax_pay_id', 'trax_pay_transactions.created_at as created_at', 'shipments.tracking_number as tracking_number', 'trax_pay_transactions.created_at as created_at');
+        $trax_pay = TraxPayTransaction::join('shipments', 'trax_pay_transactions.shipment_id', 'shipments.id')->leftjoin('fintech_payment_details as fpd', 'trax_pay_transactions.id', 'fpd.trax_pay_id')->select('trax_pay_transactions.delivery_note_id as delivery_note_id', 'trax_pay_transactions.payment_name_id as payment_name_id', 'trax_pay_transactions.cod_amount as cod_amount', 'fpd.transaction_id as trax_pay_id', 'trax_pay_transactions.created_at as created_at', 'shipments.tracking_number as tracking_number', 'trax_pay_transactions.created_at as created');
 
         $datatable = Datatables::of($trax_pay)
 

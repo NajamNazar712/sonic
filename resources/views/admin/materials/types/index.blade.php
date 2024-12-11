@@ -482,7 +482,7 @@
                                 row.push(values.description);
                                 row.push(values.packaging_type);
                                 row.push(values.category);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.created_by);
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
@@ -536,7 +536,7 @@
                     {data: 'description', name: 'packaging_material_types.description', class: 'align-middle description'},
                     {data: 'packaging_type', name: 'packaging_material_types.packaging_type', class: 'align-middle packaging_type'},
                     {data: 'category', name: 'packaging_material_types.category', class: 'align-middle category'},
-                    {data: 'created_at', name: 'packaging_material_types.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'packaging_material_types.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'ac.name', class: 'align-middle created_by'},
                     {data: 'updated_at', name: 'packaging_material_types.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'au.name', class: 'align-middle updated_by'},

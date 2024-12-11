@@ -143,7 +143,7 @@
                                 row.push(values.item_quantity);
                                 row.push(values.item_price);
                                 row.push(values.insurance);
-                                row.push(values.created_at);
+                                row.push(values.created);
 
                                 body.push(row);
                             });
@@ -187,7 +187,7 @@
                     {data: 'item_quantity', name: 'replacement_to_regular_logs.item_quantity', class: 'align-middle item_quantity'},
                     {data: 'item_price', name: 'replacement_to_regular_logs.item_price', class: 'align-middle item_price'},
                     {data: 'insurance', name: 'replacement_to_regular_logs.insurance', class: 'align-middle insurance'},
-                    {data: 'created_at', name: 'replacement_to_regular_logs.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'replacement_to_regular_logs.created_at', class: 'align-middle created_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

@@ -549,7 +549,7 @@
                     { data:'fintech_shipments_charges.link' ,name: 'fintech_shipments_charges.link', class: 'align-middle fintech_shipments_charges.link', orderable: false, searchable: false},
                     { data:'fintech_amount_percent' ,name: 'fintech_amount_percent', class: 'align-middle fintech_amount_percent', orderable: false, searchable: false},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
-                    { data:'hbl_konnect_amount_percent' ,name: 'hbl_konnect_amount_percent', class: 'align-middle hbl_konnect_amount_percent'},
+                    { data:'hbl_konnect_amount_percent' ,name: 'hbl_konnect_amount_percent', class: 'align-middle hbl_konnect_amount_percent', orderable: false, searchable: false},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                     { data: 'created_via', name: 'delivery_notes.created_via_app', class: 'align-middle created_via'},
@@ -605,7 +605,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.fintech_shipments_charges')) {
+                        if ($(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.fintech_shipments_charges') || $(header).is('.fintech_amount_percent') || $(header).is('.hbl_konnect_amount_percent')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))

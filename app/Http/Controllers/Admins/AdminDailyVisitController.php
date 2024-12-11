@@ -225,7 +225,7 @@ class AdminDailyVisitController extends Controller
             ->leftjoin('zones as z', 'z.id', '=', 'c.zone_id')
             ->leftjoin('daily_visit_ratings as rate', 'rate.id', 'daily_visits.rating_id')
             ->leftjoin('admins as ua', 'ua.id', 'daily_visits.updated_by')
-            ->select('daily_visits.id as daily_visit_id', 'a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone', 'rate.name as rating_text', 'daily_visits.comment as rating_comment', 'rate.code as rating', 'ua.name as updated_by');
+            ->select('daily_visits.id as daily_visit_id', 'a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone', 'rate.name as rating_text', 'daily_visits.comment as rating_comment', 'rate.code as rating', 'ua.name as updated_by');
 
 
         $multiple_sales_tags = MultipleSaleLead::join('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
@@ -240,6 +240,21 @@ class AdminDailyVisitController extends Controller
             else{
                 $daily_visit = $daily_visit->where('daily_visits.admin_id', Auth::id());
             }
+        }
+
+        //AdminUser Filter
+        if ($team_member = $request->get('team_member')) {
+            $daily_visit->where('a.id', $team_member);
+        }
+
+        if ($rating = $request->get('rating')) {
+            $daily_visit->where('daily_visits.rating_id', $rating);
+        }
+        //VisitDate filter
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $daily_visit->whereBetween('daily_visits.created_at', [$from, $to]);
         }
 
         $datatables = Datatables::of($daily_visit)
@@ -291,21 +306,6 @@ class AdminDailyVisitController extends Controller
                 }
             });
 
-
-        //AdminUser Filter
-        if ($team_member = $request->get('team_member')) {
-            $datatables->where('a.id', $team_member);
-        }
-
-        if ($rating = $request->get('rating')) {
-            $datatables->where('daily_visits.rating_id', $rating);
-        }
-        //VisitDate filter
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatables->whereBetween('daily_visits.created_at', [$from, $to]);
-        }
 
         return $datatables
         ->rawColumns(['b_c_photo', 'l_photo', 'location', 'action'])

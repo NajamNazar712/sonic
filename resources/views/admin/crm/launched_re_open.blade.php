@@ -404,7 +404,7 @@
                                     row.push(values.case_nature); // {data: 'case_nature', name: 'crcn.id'}
                                     row.push(values.case_nature_type); // {data: 'case_nature_type', name: 'case_nature_type'}
                                     row.push(values.descr); // {data: 'description', name: 'crm_requests.description'}
-                                    row.push(values.created_at); // {data: 'created_at', name: 'crm_requests.created_at'}
+                                    row.push(values.created); // {data: 'created_at', name: 'crm_requests.created_at'}
                                     row.push(values.current_tat); // {data: 'current_tat', name: 'current_tat'}
                                     row.push(values.responsible_hub); // {data: 'responsible_hub', name: 'responsible_hub'}
                                     row.push(values.sub_hub); // {data: 'sub_hub', name: 'ca.name'}
@@ -682,7 +682,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'}, // Origin
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'}, // Destination
                     {data: 'hub', name: 'dh.name', class: 'align-middle hub'}, // Hub
-                    {data: 'zone', name: 'zones', class: 'align-middle zone'}, // Zone
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone'}, // Zone
                     {data: 'arrival_date', name: 's.updated_at', class: 'align-middle arrival_date'}, // Arrival Date
                     {data: 'arrival_today', name: 'sj.updated_at', class: 'align-middle arrival_today'}, // Arrival to Today (TAT)
                     {data: 'shipment_status', name: 'shipment_status', class: 'align-middle shipment_status'}, // Shipment Status
@@ -692,7 +692,7 @@
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'}, // Case Nature
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'}, // Case Nature Type
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'}, // Description
-                    {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'}, // Launched Date
+                    {data: 'created', name: 'crm_requests.created_at', class: 'align-middle created_at'}, // Launched Date
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false}, // Aging (From Launched Date To Today)
                     {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub'}, // Responsible Hub
                     {data: 'sub_hub', name: 'ca.name', class: 'align-middle sub_hub', orderable: false}, // Sub Hub

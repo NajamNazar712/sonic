@@ -1255,7 +1255,7 @@ class AdminPackagingMaterialController extends Controller
         }
         $types = PackagingMaterialTypes::leftjoin('admins as ac', 'ac.id', '=', 'packaging_material_types.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'packaging_material_types.updated_by')
-            ->select('packaging_material_types.id', 'packaging_material_types.type', 'packaging_material_types.category', 'packaging_material_types.description', 'packaging_material_types.status', 'packaging_material_types.created_at', 'packaging_material_types.updated_at', 'ac.name as created_by', 'au.name as updated_by','packaging_material_types.packaging_type');
+            ->select('packaging_material_types.id', 'packaging_material_types.type', 'packaging_material_types.category', 'packaging_material_types.description', 'packaging_material_types.status', 'packaging_material_types.created_at as created', 'packaging_material_types.updated_at', 'ac.name as created_by', 'au.name as updated_by','packaging_material_types.packaging_type');
         return Datatables::of($types)
             ->editColumn('status', function ($type) {
                 if ($type->status == 0) {
@@ -1748,7 +1748,7 @@ class AdminPackagingMaterialController extends Controller
             ->leftJoin('warehouse_fulfilment_hubs as wfh', function ($join) {
                 $join->on('wfh.warehouse_id', '=', 'warehouses.id');
             })
-            ->select('warehouses.id', 'h.name as hub', 'warehouses.status', 'warehouses.created_at', 'warehouses.updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('count(wfh.id) as associated_hubs'))
+            ->select('warehouses.id', 'h.name as hub', 'warehouses.status', 'warehouses.created_at as created', 'warehouses.updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('count(wfh.id) as associated_hubs'))
             ->where('warehouses.master_type', '!=', 1)
             ->groupBy('warehouses.id');
         return Datatables::of($types)

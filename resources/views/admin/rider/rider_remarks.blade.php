@@ -588,10 +588,10 @@
                             row.push(values.rider_remarks);
                             row.push(values.response);
                             row.push(values.response_2);
-                            row.push(values.created_at);
+                            row.push(values.created);
                             row.push(values.status);
                             row.push(values.admin_name);
-                            row.push(values.updated_at);
+                            row.push(values.updated);
                             body.push(row);
                         });
                     }
@@ -701,7 +701,7 @@
                     , class: 'align-middle response_2'
                 }
                 , {
-                    data: 'created_at'
+                    data: 'created'
                     , name: 'rider_remarks.created_at'
                     , class: 'align-middle created_at text-center'
                    
@@ -717,7 +717,7 @@
                     , class: 'align-middle admin_name'
                 }
                 , {
-                    data: 'updated_at'
+                    data: 'updated'
                     , name: 'rider_remarks.updated_at'
                     , class: 'align-middle updated_at'
                 }

@@ -141,7 +141,7 @@
                     {data: 'date', name: 'date', class: 'align-middle date'},
                     {data: 'total_amount', name: 'petty_cash_statement_drafts.total_amount', class: 'align-middle total_amount'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
-                    {data: 'created_at', name: 'petty_cash_statement_drafts.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'petty_cash_statement_drafts.created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],

@@ -1630,7 +1630,9 @@ class AdminShipmentHandoverController extends Controller
         $route = route('admin.tracking.index');
         return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
       });
-      return $datatable->make(true);
+      return $datatable
+      ->rawColumns(['tracking_number'])
+      ->make(true);
     }
 
     // public function same_hub_handover_count(Request $request)
