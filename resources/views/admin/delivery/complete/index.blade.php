@@ -676,7 +676,7 @@
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
-                    { data:'fintech_charges.link' ,name: 'fintech_charges.link', class: 'align-middle fintech_charges.link'},
+                    { data:'fintech_charges.link' ,name: 'fintech_charges.link', class: 'align-middle fintech_charges' , orderable: false, searchable: false},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
@@ -724,7 +724,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.deposit_slip_view')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.deposit_slip_view') || $(header).is('.fintech_charges')) {
                             $(td).appendTo($(search));
                         }
                         else {

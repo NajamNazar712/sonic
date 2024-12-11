@@ -412,7 +412,7 @@
                     // { data:'booking_date' ,name: 'bkg_date.created_at', class: 'align-middle text-center booking_date'},
                     { data:'arrival_date' ,name: 'arv_date.created_at', class: 'align-middle text-center arrival_date'},
                     { data:'hub_name' ,name: 'hub_name', class: 'align-middle text-center hub_name'},
-                    { data:'area_name' ,name: 'area.area_name', class: 'align-middle text-center area_name'},
+                    { data:'area_name' ,name: 'area.name', class: 'align-middle text-center area_name'},
                     { data:'estimated_weight' ,name: 'shipments.estimated_weight', class: 'align-middle text-center estimated_weight'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},

@@ -41,7 +41,7 @@ class AdminRunnerController extends Controller
         }
         $runner_details = RunnerDetail::join('runners as r', 'r.id', '=', 'runner_details.runner_id')
             ->join('admins as a', 'a.id', '=', 'runner_details.created_by')
-            ->select('runner_details.id', 'r.name as runner', 'runner_details.driver_name', 'runner_details.vehicle_no', 'runner_details.contact_no', 'runner_details.created_at', 'a.name as created_by','runner_details.status as status')
+            ->select('runner_details.id', 'r.name as runner', 'runner_details.driver_name', 'runner_details.vehicle_no', 'runner_details.contact_no', 'runner_details.created_at as created', 'a.name as created_by','runner_details.status as status')
          /*   ->where('runner_details.status', 0)*/;
         $datatable = Datatables::of($runner_details)
             ->editColumn('status',function($runner_details){

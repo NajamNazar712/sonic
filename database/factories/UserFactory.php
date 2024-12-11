@@ -1,6 +1,8 @@
 <?php
 
 use Faker\Generator as Faker;
+use Illuminate\Support\Str;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -18,7 +20,7 @@ $factory->define(App\User::class, function (Faker $faker) {
         'name' => $faker->name,
         'email' => $faker->unique()->safeEmail,
         'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
-        'remember_token' => str_random(10),
+        'remember_token' => Str::random(10),
     ];
 });
 
@@ -38,7 +40,7 @@ $factory->define(App\Http\Models\Shipper\User::class,function(Faker $faker){
                 'url' => $faker->url(),
                 'city_id' => '202',
                 'status' => '0',
-                'api_token' => uniqid(base64_encode(str_random(60)))
+                'api_token' => uniqid(base64_encode(Str::random(60)))
 
         ];
 });
