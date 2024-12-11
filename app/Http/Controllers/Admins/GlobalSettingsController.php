@@ -3748,7 +3748,7 @@ class GlobalSettingsController extends Controller
         }
         $restricted_parcels_attempt = RestrictParcelsAttempt::join('users as u', 'u.id', '=', 'restrict_parcels_attempts.shipper_id')
             ->join('admins as a', 'a.id', '=', 'restrict_parcels_attempts.updated_by')
-            ->select('restrict_parcels_attempts.id', 'u.name as shipper', 'restrict_parcels_attempts.attempt_days', 'restrict_parcels_attempts.status', 'restrict_parcels_attempts.created_at', 'restrict_parcels_attempts.updated_at', 'a.name as updated_by');
+            ->select('restrict_parcels_attempts.id', 'u.name as shipper', 'restrict_parcels_attempts.attempt_days', 'restrict_parcels_attempts.status', 'restrict_parcels_attempts.created_at as created', 'restrict_parcels_attempts.updated_at as updated', 'a.name as updated_by');
         $datatable = Datatables::of($restricted_parcels_attempt)
             ->editColumn('status', function ($data) {
                 if ($data->status == 1) {
@@ -3857,7 +3857,7 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 252);
         }
         $runner_report = Runner::join('admins as a', 'a.id', '=', 'runners.created_by')
-            ->select('runners.id as id', 'runners.name as runner', 'runners.created_at', 'a.name as created_by', 'runners.status as status');
+            ->select('runners.id as id', 'runners.name as runner', 'runners.created_at as created', 'a.name as created_by', 'runners.status as status');
         $datatable = Datatables::of($runner_report)
             ->editColumn('status', function ($runner) {
                 if ($runner->status == 0 || $runner->status == 1) {
@@ -8010,7 +8010,7 @@ class GlobalSettingsController extends Controller
         $admins = DeliveryLocationMapping::join('admins as ad', 'ad.id', '=', 'delivery_location_mappings.added_by')
             ->join('cities as ct', 'ct.id', '=', 'delivery_location_mappings.city_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_location_mappings.updated_by')
-            ->select('delivery_location_mappings.id', 'delivery_location_mappings.area_name', 'ct.name as city_name', 'ub.name as updated_by', 'ad.name as added_by', 'delivery_location_mappings.updated_at', 'delivery_location_mappings.status');
+            ->select('delivery_location_mappings.id', 'delivery_location_mappings.area_name', 'ct.name as city_name', 'ub.name as updated_by', 'ad.name as added_by', 'delivery_location_mappings.updated_at as updated', 'delivery_location_mappings.status');
         $datatables = Datatables::of($admins)
             ->addColumn('status', function ($admins) {
                 if ($admins->status == 1) {
@@ -10130,7 +10130,7 @@ class GlobalSettingsController extends Controller
                 'lead_progress_settings.percent as percent',
                 'lead_progress_settings.color as color',
                 'a.name as updated_by',
-                'lead_progress_settings.updated_at as updated_at'
+                'lead_progress_settings.updated_at as updated'
             );
         $datatable = Datatables::of($query)
             ->addColumn('action', function ($datatable) {
