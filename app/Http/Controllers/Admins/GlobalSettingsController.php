@@ -147,7 +147,7 @@ use App\Http\Models\OvernightOverlandReportOriginHubs;
 use App\Http\Models\Admin\CrmAgentAutoAssignCaseNature;
 use App\Http\Models\Admin\CrmAgentAutoAssignShipStatus;
 use App\Http\Models\Admin\CrmAgentAutoAssignSubSegment;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
