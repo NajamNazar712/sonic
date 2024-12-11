@@ -296,8 +296,8 @@
                     { data: 'requested_by', name: 'rb.name', class: 'align-middle requested_by'},
                     { data: 'aging', name: 'aging', class: 'align-middle aging'},
                     { data: 'training_by', name: 'tb.name', class: 'align-middle training_by'},
-                    { data: 'updated_at', name: 'cx_trainings.updated_at', class: 'align-middle updated_at'},
-                    { data: 'status_name', name: 'status_name', class: 'align-middle status_name', orderable: false, searchable: false},
+                    { data: 'updated', name: 'cx_trainings.updated_at', class: 'align-middle updated_at'},
+                    { data: 'status_name', name: 'status_name.status', class: 'align-middle status_name', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
