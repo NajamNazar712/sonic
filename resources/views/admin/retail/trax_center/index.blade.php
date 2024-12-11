@@ -490,8 +490,8 @@
                                 row.push(values.email);
                                 row.push(values.cnic);
                                 row.push(values.default_hub);
-                                row.push(values.created_at);
-                                row.push(values.updated_at);
+                                row.push(values.created);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
                                 row.push(values.status);
                                 row.push(values.code);
@@ -547,8 +547,8 @@
                     { data:'email' ,name: 'retail_trax_centers.email', class: 'align-middle text-center email'},
                     { data:'cnic' ,name: 'retail_trax_centers.cnic', class: 'align-middle text-center cnic'},
                     { data:'default_hub' ,name: 'c.name', class: 'align-middle text-center default_hub'},
-                    { data:'created_at' ,name: 'retail_trax_centers.created_at', class: 'align-middle text-center created_at'},
-                    { data:'updated_at' ,name: 'retail_trax_centers.updated_at', class: 'align-middle text-center updated_at'},
+                    { data:'created' ,name: 'retail_trax_centers.created_at', class: 'align-middle text-center created_at'},
+                    { data:'updated' ,name: 'retail_trax_centers.updated_at', class: 'align-middle text-center updated_at'},
                     { data:'updated_by' ,name: 'a.name', class: 'align-middle text-center updated_by'},
                     { data:'status' ,name: 'retail_trax_centers.status', class: 'align-middle text-center status'},
                     { data:'code' ,name: 'retail_trax_centers.code', class: 'align-middle text-center code'},

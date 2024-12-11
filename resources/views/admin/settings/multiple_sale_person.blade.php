@@ -229,7 +229,7 @@
                                 row.push(index + 1);
                                 row.push(values.head_admin);
                                 row.push(values.tagged_admins);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
                                 body.push(row);
                             });
@@ -282,7 +282,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'head_admin', name: 'a.name', class: 'align-middle head_admin'},
                     {data: 'tagged_admins_count', class: 'align-middle tagged_admins', orderable: false, searchable: false},
-                    {data: 'updated_at', name: 'multiple_sale_leads.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'multiple_sale_leads.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'ua.name', class: 'align-middle updated_by'},
                     {data: 'action', class: 'align-middle action', orderable: false, searchable: false}
 

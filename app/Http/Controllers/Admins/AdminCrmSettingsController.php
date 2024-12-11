@@ -61,7 +61,7 @@ class AdminCrmSettingsController extends Controller
     }
     public function crm_cut_off_time_and_holidays_list(){
         $holidays = CrmTatHolidays::leftjoin('admins as a', 'a.id', '=', 'crm_tat_holidays.created_by')
-            ->select('crm_tat_holidays.reason as reason', 'crm_tat_holidays.holiday as holiday', 'crm_tat_holidays.created_at as created_at', 'a.name as created_by');
+            ->select('crm_tat_holidays.reason as reason', 'crm_tat_holidays.holiday as holiday', 'crm_tat_holidays.created_at as created', 'a.name as created_by');
 
         return Datatables::of($holidays)
             ->make(true);
@@ -91,7 +91,7 @@ class AdminCrmSettingsController extends Controller
         $launched = CrmEscalation::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_escalations.case_nature')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_escalations.case_nature_type')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_escalations.updated_by')
-            ->select('crm_escalations.id as id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_escalations.tat as tat', 'crm_escalations.mark_as as mark_as', 'crm_escalations.comment as comment', 'crm_escalations.updated_at as updated_at', 'a.name as updated_by', 'crm_escalations.status as status')
+            ->select('crm_escalations.id as id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_escalations.tat as tat', 'crm_escalations.mark_as as mark_as', 'crm_escalations.comment as comment', 'crm_escalations.updated_at as updated', 'a.name as updated_by', 'crm_escalations.status as status')
             ->where('crm_escalations.crm_request_status', 1);
 
 
@@ -147,7 +147,9 @@ class AdminCrmSettingsController extends Controller
                     return '';
                 }
             });
-        return $datatables->make(true);
+        return $datatables
+        ->rawColumns(['action' ,'view_statuses'])
+        ->make(true);
     }
 
     public function escalation_launched_add_index(){
@@ -251,7 +253,7 @@ class AdminCrmSettingsController extends Controller
         $in_process = CrmEscalation::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_escalations.case_nature')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_escalations.case_nature_type')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_escalations.updated_by')
-            ->select('crm_escalations.id as id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_escalations.tat as tat', 'crm_escalations.mark_as as mark_as', 'crm_escalations.comment as comment', 'crm_escalations.updated_at as updated_at', 'a.name as updated_by', 'crm_escalations.status as status')
+            ->select('crm_escalations.id as id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_escalations.tat as tat', 'crm_escalations.mark_as as mark_as', 'crm_escalations.comment as comment', 'crm_escalations.updated_at as updated', 'a.name as updated_by', 'crm_escalations.status as status')
         ->where('crm_escalations.crm_request_status', 2);
 
 
@@ -457,7 +459,7 @@ class AdminCrmSettingsController extends Controller
         $tagging = CrmEscalationTagging::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_escalation_taggings.case_nature')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_escalation_taggings.case_nature_type')
             ->leftjoin('admins as a', 'a.id', '=', 'crm_escalation_taggings.updated_by')
-            ->select('crm_escalation_taggings.id as id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_escalation_taggings.updated_at as updated_at', 'a.name as updated_by', 'crm_escalation_taggings.status as status');
+            ->select('crm_escalation_taggings.id as id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crm_escalation_taggings.updated_at as updated', 'a.name as updated_by', 'crm_escalation_taggings.status as status');
 
 
         $datatables = Datatables::of($tagging)

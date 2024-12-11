@@ -339,7 +339,7 @@
             {data: 'tier_type', name: 'tt.name', class: 'align-middle tier_type'},
             {data: 'added_at', name: 'sales_tiers.created_at', class: 'align-middle added_at'},
             {data: 'added_by', name: 'a.name', class: 'align-middle added_by'},
-            {data: 'updated_at', name: 'sales_tiers.updated_at', class: 'align-middle updated_at'},
+            {data: 'updated', name: 'sales_tiers.updated_at', class: 'align-middle updated_at'},
             {data: 'updated_by', name: 'u.name', class: 'align-middle updated_by'},
             {data: 'category_status', name: 'sales_tiers.status', class: 'align-middle status'},
 

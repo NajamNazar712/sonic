@@ -217,7 +217,7 @@
                                 row.push(index + 1);
                                 row.push(values.holiday);
                                 row.push(values.reason);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.created_by);
 
 
@@ -270,7 +270,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'holiday', name: 'crm_tat_holidays.holiday', class: 'align-middle holiday'},
                     {data: 'reason', name: 'crm_tat_holidays.reason', class: 'align-middle reason'},
-                    {data: 'created_at', name: 'crm_tat_holidays.created_at', class: 'align-middle created_at'},
+                    {data: 'created', name: 'crm_tat_holidays.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
 
                 ],
