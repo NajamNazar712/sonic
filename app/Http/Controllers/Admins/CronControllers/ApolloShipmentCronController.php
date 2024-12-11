@@ -28,8 +28,8 @@ class ApolloShipmentCronController extends Controller
             ->join('shipments as s','s.id','sj.shipment_id')
 //            ->join('user_shipping_infos as us','us.id','sj.pickup_address_id')
             ->join('shipment_additional_charges as sd', 'sj.shipment_id', '=', 'sd.shipment_id')
-            ->whereNotNull('sd.apollo_shipment_id')
-            ->whereNotIn('sj.shipper_status_id',[1]);
+            ->whereNotNull('sd.apollo_shipment_id');
+//            ->whereNotIn('sj.shipper_status_id',[1]);
 
         if($apollo_cron && $apollo_cron->last_run_time) {
             $shipmentJourneys->where('sj.updated_at', '>=', $apollo_cron->last_run_time);
@@ -38,26 +38,26 @@ class ApolloShipmentCronController extends Controller
         }
         $shipmentJourneys->select('sj.*','sd.apollo_shipment_id','s.actual_weight','sd.apollo_is_piece');
         $journeys = $shipmentJourneys->orderBy('sj.id')->get();
-
         if($journeys->isNotEmpty()) {
 
             $client = new \GuzzleHttp\Client([
-                'base_uri' => 'https://api-apollo-staging.sonic.pk/api/sonic',
+//                'base_uri' => 'http://192.168.100.146:9001/api/',
+                'base_uri' => 'https://api-apollo-staging.sonic.pk/api/',
                 'http_errors' => FALSE,
                 'connect_timeout' => 60,
                 'timeout' => 60
             ]);
 
             try {
-                $response = $client->post('shipments/journeys/bulk-create', [
+                $response = $client->post('sonic/shipments/journeys/bulk-create', [
                     'json' => [
                         'journeys' => $journeys,
                     ]
                 ]);
 
                 $responseBody = $response->getBody()->getContents();
-                $responseData = json_decode($responseBody, true);
 
+                $responseData = json_decode($responseBody, true);
                 // Check for success
                 if (isset($responseData['response.success'])) {
                     ApolloCronJobLog::where('id', 1)->update(['last_run_time' => $time_stamp]);
