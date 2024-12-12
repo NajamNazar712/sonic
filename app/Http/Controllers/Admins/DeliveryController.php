@@ -4701,30 +4701,33 @@ class DeliveryController extends Controller
                 ->where('dns.delivery_note_id', $request->id)
                 ->groupBy('scs.name', 'dns.delivery_note_id')
                 ->get();
-            
-            $main_details .= '
-                <table class="table table-sm table-bordered border small">
-                    <tbody>
-                    <tr>
-                        <td class="text-center align-middle color primary" colspan="3"><strong>Delivery Note Cash Collection</strong></td>
-                    </tr>
-                    <tr>
-                        <td class="text-center align-middle"><strong>Sub Segment</strong></td>
-                        <td class="text-center align-middle"><strong>No. of Delivered Shipments</strong></td>
-                        <td class="text-center align-middle"><strong>COD Amount</strong></td>
-                    </tr>';
 
-            foreach ($sub_seg_shipments as $sub_seg) {
-                $main_details .= '<tr>
-                    <td class="color secondary"><strong>' . $sub_seg->sub_segment . '</strong></td>
-                    <td class="text-center align-middle">' . $sub_seg->no_of_delivered_shipments . '</td>
-                    <td class="text-center align-middle">' . $sub_seg->cod_amount . '</td>
-                </tr>';          
+            if (count($sub_seg_shipments) > 0) {
+                $main_details .= '
+                    <table class="table table-sm table-bordered border small">
+                        <tbody>
+                        <tr>
+                            <td class="text-center align-middle color primary" colspan="3"><strong>Delivery Note Cash Collection</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center align-middle"><strong>Sub Segment</strong></td>
+                            <td class="text-center align-middle"><strong>No. of Delivered Shipments</strong></td>
+                            <td class="text-center align-middle"><strong>COD Amount</strong></td>
+                        </tr>';
+    
+                foreach ($sub_seg_shipments as $sub_seg) {
+                    $main_details .= '<tr>
+                        <td class="color secondary"><strong>' . $sub_seg->sub_segment . '</strong></td>
+                        <td class="text-center align-middle">' . $sub_seg->no_of_delivered_shipments . '</td>
+                        <td class="text-center align-middle">' . $sub_seg->cod_amount . '</td>
+                    </tr>';          
+                }
+    
+                $main_details .= '</tbody>
+                    </table>
+                    <hr>';
             }
-
-            $main_details .= '</tbody>
-                </table>
-                <hr>';
+            
             $html .= $main_details;
             $html .= $main_details;
             //            $html .= '<div class="row justify-content-end mt-2">
