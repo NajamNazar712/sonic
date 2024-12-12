@@ -131,7 +131,7 @@ class RiderManagementController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (session('role_id') == 1 || in_array(98, session('permissions')) && !in_array($rider->rider, $names)) {
+                    if ((session('role_id') == 1 || in_array(98, session('permissions'))) && !in_array($rider->rider, $names)) {
                         $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $rider->id . ' rel="editRider" data-toggle="modal" data-target="#editRider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
                     }
 
@@ -144,10 +144,10 @@ class RiderManagementController extends Controller
                             }
                         }
                     }
-                    if (session('role_id') == 1 || in_array(381, session('permissions')) && !in_array($rider->rider, $names)) {
+                    if ((session('role_id') == 1 || in_array(381, session('permissions'))) && !in_array($rider->rider, $names)) {
                         $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Make Rider Incentive</div></button>';
                     }
-                    if (session('role_id') == 1 || in_array(382, session('permissions')) && !in_array($rider->rider, $names)) {
+                    if ((session('role_id') == 1 || in_array(382, session('permissions'))) && !in_array($rider->rider, $names)) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
                     }
 
