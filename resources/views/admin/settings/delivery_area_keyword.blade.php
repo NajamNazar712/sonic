@@ -90,7 +90,7 @@
                                 row.push(values.city_name);
                                 row.push(values.added_by);
                                 row.push(values.updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.status);
                                 body.push(row);
                             });
@@ -135,11 +135,11 @@
                 order: [[0, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'area_name', name: 'delivery_location_mappings.name', class: 'align-middle area_name'},
+                    {data: 'area_name', name: 'delivery_location_mappings.area_name', class: 'align-middle area_name'},
                     {data: 'city_name', name: 'ct.name', class: 'align-middle city_name'},
-                    {data: 'added_by', name: 'ab.name', class: 'align-middle added_by'},
+                    {data: 'added_by', name: 'ad.name', class: 'align-middle added_by'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
-                    {data: 'updated_at', name: 'delivery_location_mappings.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'delivery_location_mappings.updated_at', class: 'align-middle updated_at'},
                     {data: 'status', name: 'delivery_location_mappings.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
