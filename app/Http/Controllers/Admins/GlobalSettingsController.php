@@ -7537,6 +7537,7 @@ class GlobalSettingsController extends Controller
             'c.name as city_name',
             'auto_tag_territories.status',
             't.name as territory_name', 
+            'auto_tag_territories.created_at as created',
             DB::raw("
                 IF(
                     (
@@ -7556,7 +7557,7 @@ class GlobalSettingsController extends Controller
                     '-'
                 ) as territory_names")
         )
-        ->orderBy('auto_tag_territories.created_at', 'desc')
+        //->orderBy('auto_tag_territories.created_at', 'desc')
         ->groupBy('auto_tag_territories.admin_id');
 
         $datatables = Datatables::of($roles)
