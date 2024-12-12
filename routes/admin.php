@@ -3688,6 +3688,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('scanning_history')->name('scanning_history.')->group(function () {
         Route::get('', 'Admins\AdminShipmentScanningHistoryController@index')->name('index');
         Route::post('details', 'Admins\AdminShipmentScanningHistoryController@details')->name('details');
+        Route::post('details_new', 'Admins\AdminShipmentScanningHistoryController@details_new')->name('details_new');
     });
     Route::prefix('airway_journey')->name('airway_journey.')->group(function () {
         Route::get('', 'AdminAirwayBillJournyController@index')->name('index');
