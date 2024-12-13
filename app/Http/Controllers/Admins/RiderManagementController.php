@@ -65,6 +65,19 @@ class RiderManagementController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 118);
         }
+
+        $names = [
+            'NSA/OSA',
+            'Incomplete Address',
+            'Hold for Self Collection',
+            'Friday/ Saturday Closed',
+            'Restricted Area',
+            'Hold in OPS',
+            'Damaged',
+            'Delivery Stopped',
+            'Wrong Destination'
+        ];
+
         $rider = Rider::join('cities', 'riders.city_id', '=', 'cities.id')
             ->join('cities as c', 'cities.hub_id', '=', 'c.id')
             ->leftjoin('zones as z', 'cities.zone_id', '=', 'z.id')
@@ -74,7 +87,7 @@ class RiderManagementController extends Controller
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'riders.trax_id')
-            ->select('cities.name as city', 'c.name as hub', 'z.name as zone', 'riders.id as rider_id', 'riders.id', 'riders.name as rider', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.address', 'routes.code as route', 'routes.start', 'routes.end', 'rider_categories.name as category', 'rider_main_categories.name as main_category', 'riders.status as status', 'riders.created_at as created', 'cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id', 'riders.blacklist', 'riders.updated_at as updated', 'emp.first_inactive', 'riders.incentive_amount')
+            ->select('cities.name as city', 'c.name as hub', 'z.name as zone', 'riders.id as rider_id', 'riders.id', 'riders.name as rider', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.address', 'routes.code as route', 'routes.start', 'routes.end', 'rider_categories.name as category', 'rider_main_categories.name as main_category', 'riders.status as status', 'riders.created_at as created_at', 'cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id', 'riders.blacklist', 'riders.updated_at', 'emp.first_inactive', 'riders.incentive_amount','riders.operation_rider_id as operation_rider_type')
             ->where('riders.rider_type_id', 1)
             ->where('riders.blacklist', 0);
         if (session('role_id') != 1) {
@@ -110,7 +123,7 @@ class RiderManagementController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn("action", function ($rider) {
+            ->addColumn("action", function ($rider) use ($names) {
                 if ((session('role_id') == 1 || count(array_intersect([98, 99, 381, 382, 620], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id', $rider->rider_id)->doesntExist())) {
                     $dropdown = '
                       <div class="btn-group">
@@ -118,7 +131,7 @@ class RiderManagementController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (session('role_id') == 1 || in_array(98, session('permissions'))) {
+                    if ((session('role_id') == 1 || in_array(98, session('permissions'))) && !in_array($rider->rider, $names)) {
                         $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $rider->id . ' rel="editRider" data-toggle="modal" data-target="#editRider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
                     }
 
@@ -126,13 +139,15 @@ class RiderManagementController extends Controller
                         if ($rider->status == 1) {
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
                         } else {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                            if(in_array($rider->rider, $names) || $rider->operation_rider_type == 1){
+                                $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                            }
                         }
                     }
-                    if (session('role_id') == 1 || in_array(381, session('permissions'))) {
+                    if ((session('role_id') == 1 || in_array(381, session('permissions'))) && !in_array($rider->rider, $names)) {
                         $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Make Rider Incentive</div></button>';
                     }
-                    if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                    if ((session('role_id') == 1 || in_array(382, session('permissions'))) && !in_array($rider->rider, $names)) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
                     }
 
@@ -167,13 +182,20 @@ class RiderManagementController extends Controller
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
         $route_types = RouteType::all();
-        $operation_riders = OperationRidersCategory::all();
+        // {Ticket Number - 6892} //
+
+        // $operation_riders = OperationRidersCategory::where('id', 1)->first();
+        $operation_rider = OperationRidersCategory::find(1);
+
+        // {End Ticket Number - 6892} //
+
+
         $shifts = EmployeeShift::where('status', 1)->get();
         $hubs = City::select('id', 'name')->where('hub', 1)->get();
 
         $reporting_locations = ReportingLocation::where('status', 1)->get();
 
-        return view('admin.management.add_rider_form')->with(['cities' => $city, 'categories' => $category, 'route_types' => $route_types, 'cities' => $city, 'operation_riders' => $operation_riders, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations, 'hubs' => $hubs]);
+        return view('admin.management.add_rider_form')->with(['cities' => $city, 'categories' => $category, 'route_types' => $route_types, 'cities' => $city, 'operation_rider' => $operation_rider, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations, 'hubs' => $hubs]);
     }
     public function addRiderDetails(Request $request)
     {
@@ -302,13 +324,18 @@ class RiderManagementController extends Controller
         $route_types = RouteType::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id', $rider->city_id)->get();
-        $operation_rider_ids =  OperationRidersCategory::all();
+        // {Ticket Number - 6892} //
+
+        // $operation_rider_ids =  OperationRidersCategory::all();
+        $operation_rider = OperationRidersCategory::find(1);
+
+        // {End Ticket Number - 6892} //
         $shifts =  EmployeeShift::where('status', 1)->get();
         $reporting_locations = ReportingLocation::where('status', 1)->get();
         $areas_list = CityArea::where('city_id', $rider->city_id)->select('id', 'name')->get();
         $hubs = City::select('id', 'name')->where('hub', 1)->get();
         $riderhubIsd = RiderAssignedHubForDeliveryNote::where('rider_id', $id)->select('hubs')->first();
-        return view('admin.management.edit_rider_form')->with(['rider_id' => $id, 'cities' => $city, 'categories' => $category, 'rider' => $rider, 'routes' => $route, 'route_types' => $route_types, 'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations, 'areas_list' => $areas_list, 'hubs' => $hubs, 'hubIds' => $riderhubIsd]);
+        return view('admin.management.edit_rider_form')->with(['rider_id' => $id, 'cities' => $city, 'categories' => $category, 'rider' => $rider, 'routes' => $route, 'route_types' => $route_types, 'operation_rider' => $operation_rider, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations, 'areas_list' => $areas_list, 'hubs' => $hubs, 'hubIds' => $riderhubIsd]);
     }
     public function editRiderDetails(Request $request, $id)
     {
@@ -785,6 +812,7 @@ class RiderManagementController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 351);
         }
+
         $rider = Rider::join('cities', 'riders.city_id', '=', 'cities.id')
             ->join('cities as c', 'cities.hub_id', '=', 'c.id')
             ->leftjoin('zones as z', 'cities.zone_id', '=', 'z.id')
@@ -829,7 +857,7 @@ class RiderManagementController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn("action", function ($rider) {
+            ->addColumn("action", function ($rider){
                 if ((session('role_id') == 1 || count(array_intersect([99, 382], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id', $rider->rider_id)->doesntExist())) {
                     $dropdown = '
                       <div class="btn-group">

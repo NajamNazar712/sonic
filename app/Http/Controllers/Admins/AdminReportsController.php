@@ -14191,7 +14191,7 @@ class AdminReportsController extends Controller
                 'ordinary_discrepancy_reports.picture_path as images',
                 'ordinary_discrepancy_reports.quantity as quantity_by_admin',
                 'ordinary_discrepancy_reports.remarks as remarks_by_admin',
-                'ordinary_discrepancy_reports.created_at as created_at',
+                'ordinary_discrepancy_reports.created_at as created',
                 'admins.name as updated_by',
                 'ch.name as admin_hub',
                 'odr_natures.name  as odr_nature'
@@ -14220,6 +14220,10 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $tracking_data->whereBetween('ordinary_discrepancy_reports.created_at', [$from, $to]);
+        }
+
+        if ($search_tracking_no = $request->get('tracking_filter')) {
+            $tracking_data->where('shipments.tracking_number', $search_tracking_no);
         }
 
         return $datatables
@@ -14298,8 +14302,6 @@ class AdminReportsController extends Controller
             $directory = 'ordinary_discrepancy_report\attachment' . $data->id . '';
             Storage::disk('public')->putFileAs($directory, $file, $filename);
             $image = $directory . '/' . $filename;
-        } else {
-            return redirect()->back()->with('error', 'Incomplete Information!');
         }
 
         $ordinary_discrepancy_reports = new OrdinaryDiscrepancyReport;
@@ -14308,7 +14310,7 @@ class AdminReportsController extends Controller
         $ordinary_discrepancy_reports->shipment_status_id = $data->shipper_status_id;
         $ordinary_discrepancy_reports->city_id = $data->consignee_city_id;
         $ordinary_discrepancy_reports->product_content = $request->shipment_content_admin;
-        $ordinary_discrepancy_reports->picture_path = $image;
+        $ordinary_discrepancy_reports->picture_path = $image ?? null;
         $ordinary_discrepancy_reports->quantity = $request->quantity;
         $ordinary_discrepancy_reports->remarks = $request->remarks;
         $ordinary_discrepancy_reports->admin_id = Auth::id();
@@ -15996,7 +15998,8 @@ class AdminReportsController extends Controller
     {
         $details = OrdinaryDiscrepancyReport::leftjoin('odr_natures', 'odr_natures.id', 'ordinary_discrepancy_reports.odr_nature_id')
         ->leftjoin('admins', 'admins.id', 'ordinary_discrepancy_reports.admin_id')
-        ->select(['ordinary_discrepancy_reports.*' , 'odr_natures.name as odr_nature', 'admins.name as created_by'])
+        ->leftjoin('cities as hub', 'hub.id', 'admins.default_hub_id')
+        ->select(['ordinary_discrepancy_reports.product_content' , 'ordinary_discrepancy_reports.remarks', 'ordinary_discrepancy_reports.quantity' ,'ordinary_discrepancy_reports.picture_path', 'ordinary_discrepancy_reports.created_at as created', 'ordinary_discrepancy_reports.created_at','odr_natures.name as odr_nature', 'admins.name as created_by', 'hub.name as hub_name'])
         ->where('ordinary_discrepancy_reports.shipment_id', $request->shipment_id)
         ->latest('created_at')
         ->get();
