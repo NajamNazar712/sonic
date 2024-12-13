@@ -648,6 +648,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_try_and_buy_shipment_details')->name('shipment_details');
                 });
                 Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@individual_arrival_submit')->name('store');
+                Route::post('shipment_sub_segment_check', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_shipment_sub_segment_check')->name('shipment_sub_segment_check');
             });
 
             Route::prefix('project_shippers')->name('project_shippers.')->group(function () {

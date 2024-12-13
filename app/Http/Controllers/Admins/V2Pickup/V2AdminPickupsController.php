@@ -4813,4 +4813,16 @@ class V2AdminPickupsController extends Controller
 
         return $html;
     }
+
+    public function arrival_individual_shipment_sub_segment_check (Request $request) {
+
+        $tracking_number = $request->tracking_number;
+
+        $subSegmentId = DB::table('shipments')
+        ->join('users', 'users.id', '=', 'shipments.user_id')
+        ->where('shipments.tracking_number', $tracking_number)
+        ->value('users.sub_segment_id');
+        return response()->json(['subSegment' => $subSegmentId]);
+
+    }
 }
