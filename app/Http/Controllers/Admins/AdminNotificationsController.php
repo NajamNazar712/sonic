@@ -46,7 +46,7 @@ class AdminNotificationsController extends Controller
     public function list(Request $request) {
         $notifications = Notification::join('notification_types as nt', 'notifications.type_id', '=', 'nt.id')
         ->join('admins as a', 'notifications.updated_by', '=', 'a.id')
-        ->select('notifications.id', 'notifications.name', 'notifications.type_id', 'nt.name as type', 'notifications.updated_at', 'a.name as updated_by', 'notifications.status');
+        ->select('notifications.id', 'notifications.name', 'notifications.type_id', 'nt.name as type', 'notifications.updated_at as updated', 'a.name as updated_by', 'notifications.status');
 
         $datatables = Datatables::of($notifications)
         ->setRowAttr([
@@ -1331,7 +1331,7 @@ class AdminNotificationsController extends Controller
     {
         $notifications = AppNotification::join('admins as a', 'app_notifications.updated_by', '=', 'a.id')
             ->join('app_types as at', 'app_notifications.app_id', '=', 'at.id')
-            ->select('app_notifications.id as id', 'app_notifications.name as name', 'app_notifications.app_id as app_id', 'app_notifications.updated_at as updated_at', 'a.name as updated_by', 'app_notifications.status as status', 'at.name as app_name');
+            ->select('app_notifications.id as id', 'app_notifications.name as name', 'app_notifications.app_id as app_id', 'app_notifications.updated_at as updated', 'a.name as updated_by', 'app_notifications.status as status', 'at.name as app_name');
         $datatables = Datatables::of($notifications)
             ->setRowAttr([
                 'data-type' => function($notification) {

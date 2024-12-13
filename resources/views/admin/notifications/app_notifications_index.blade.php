@@ -118,7 +118,7 @@
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'app_notifications.name', class: 'align-middle name'},
 					{data: 'app_name', name: 'app_notifications.app_id', class: 'align-middle app_name'},
-					{data: 'updated_at', name: 'app_notifications.updated_at', class: 'align-middle updated_at'},
+					{data: 'updated', name: 'app_notifications.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data: 'status', name: 'app_notifications.status', class: 'align-middle status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

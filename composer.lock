@@ -118,16 +118,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.334.1",
+            "version": "3.328.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "3938b3467f64a30fed7ee1762a6785f808a5ae4d"
+                "reference": "52d8219935146c3261181de2da4d36bf04c76298"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/3938b3467f64a30fed7ee1762a6785f808a5ae4d",
-                "reference": "3938b3467f64a30fed7ee1762a6785f808a5ae4d",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/52d8219935146c3261181de2da4d36bf04c76298",
+                "reference": "52d8219935146c3261181de2da4d36bf04c76298",
                 "shasum": ""
             },
             "require": {
@@ -156,8 +156,8 @@
                 "nette/neon": "^2.3",
                 "paragonie/random_compat": ">= 2",
                 "phpunit/phpunit": "^5.6.3 || ^8.5 || ^9.5",
-                "psr/cache": "^1.0 || ^2.0 || ^3.0",
-                "psr/simple-cache": "^1.0 || ^2.0 || ^3.0",
+                "psr/cache": "^1.0",
+                "psr/simple-cache": "^1.0",
                 "sebastian/comparator": "^1.2.3 || ^4.0",
                 "yoast/phpunit-polyfills": "^1.0"
             },
@@ -210,9 +210,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.334.1"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.328.1"
             },
-            "time": "2024-12-05T01:17:41+00:00"
+            "time": "2024-11-18T19:13:28+00:00"
         },
         {
             "name": "barryvdh/laravel-snappy",
