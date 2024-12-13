@@ -67,7 +67,8 @@
 
                         <div class="col ml-auto">
                             <div class="form-group text-right">
-                                <a href="{{ asset('file/International Tracking Upload Template.xlsx') }}?v=28_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                {{-- <a href="{{ asset('file/International Tracking Upload Template.xlsx') }}?v=28_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Template</a> --}}
+                                <a href="{{ asset('file/International Tracking Upload Template New.xlsx') }}?v=28_11_2024" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                             </div>
                         </div>
                     </div>
@@ -81,6 +82,7 @@
                         <th class="border-primary border-darken-1">Tracking No. Booking Date</th>
                         <th class="border-primary border-darken-1">3PL Tracking Number</th>
                         <th class="border-primary border-darken-1">3PL Service Provider</th>
+                        <th class="border-primary border-darken-1">Cost</th>
                         <th class="border-primary border-darken-1">Seal Number</th>
                         <th class="border-primary border-darken-1">Postal Code</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
@@ -127,6 +129,11 @@
                                     <option value="{{$service_provider->id}}">{{$service_provider->name}}</option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label" for="cost">Cost</label>
+                            <input type="text" class="form-control" name="cost" id="edit_cost">
                         </div>
                         
                     </div>
@@ -226,6 +233,11 @@
                 'max':100000,
             });
 
+            $('#edit_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             $('#EditTrackingModal #service_provider').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Service Provider",
@@ -251,6 +263,7 @@
                             head.push('Tracking No. Booking Date');
                             head.push('3PL Tracking Number');
                             head.push('3PL Service Provider');
+                            head.push('Cost');
                             head.push('Seal Number');
                             head.push('Postal Code');
                             head.push('Actual Weight');
@@ -264,6 +277,7 @@
                                 row.push(values.booking_date);
                                 row.push(values.international_tracking_number);
                                 row.push(values.provider);
+                                row.push(values.cost);
                                 row.push(values.seal_number);
                                 row.push(values.postal_code);
                                 row.push(values.actual_weight);
@@ -302,6 +316,7 @@
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'international_tracking_number', name: 'international_shipments.international_tracking_number', class: 'align-middle international_tracking_number'},
                     {data: 'provider', name: 'issp.name', class: 'align-middle provider'},
+                    {data: 'cost', name: 'international_shipments.cost', class: 'align-middle international_shipments_cost'},
                     {data: 'seal_number', name: 'international_shipments.seal_number', class: 'align-middle seal_number'},
                     {data: 'postal_code', name: 'international_shipments.postal_code', class: 'align-middle postal_code'},
                     {data: 'actual_weight', name: 'international_shipments.actual_weight', class: 'align-middle actual_weight'},
@@ -382,6 +397,8 @@
                                 $('#edit_international_tracking_number').val(data.details.international_tracking_number);
                                 $('#edit_shipment_id').val(data.details.id);
                                 $('#actual_weight').val(data.details.actual_weight);
+                                $('#edit_cost').val(data.details.cost);
+                                $('#EditTrackingModal #service_provider').val(data.details.service_provider_id).trigger('change');
 
                                 if(data.details.shipment_status == 1){
                                     $("#edit_actual_weight").prop("readonly", true);
