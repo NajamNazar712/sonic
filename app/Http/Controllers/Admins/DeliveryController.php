@@ -1080,12 +1080,13 @@ class DeliveryController extends Controller
 
     public function create_delivery_note(Request $request)
     {
+        $holdInCheck = $request->holdInCheck ?? true; //TO-6892
 
         if ($request->hub_id == '') {
             return redirect()->back()->with('error', 'Hub not found!');
         }
 
-        if ($request->selected_route_id == '') {
+        if ($request->selected_route_id == '' && !$holdInCheck) { //TO-6892
             return redirect()->back()->with('error', 'Route not selected!');
         }
 
@@ -1157,7 +1158,7 @@ class DeliveryController extends Controller
                 $note = DeliveryNote::create([
                     'hub_id' => $request->hub_id,
                     'rider_id' => $request->selected_rider_id,
-                    'route_id' => $request->selected_route_id,
+                    'route_id' => empty($request->selected_route_id) ? '1837' : $request->selected_route_id,  //TO-6892
                     'shipments_count' => $shipments_count,
                     'admin_id' => $admin,
                     'total_cod_amount' => $total_cod_amount,
@@ -2087,7 +2088,7 @@ class DeliveryController extends Controller
                 $rider_id = $rider->trax_id;
             }
             $category = $rider->rider_category->name;
-            $route_name = $delivery_note_details->route->code . '( ' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ' )';
+            $route_name = $delivery_note_details->route ? $delivery_note_details->route->code . '( ' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ' )' : 'Hold In Route';
 
             //HBL Konnect Integration
             $hbl_transactions_amount = 0;
@@ -9308,33 +9309,48 @@ class DeliveryController extends Controller
 
     public function operation_riders(Request $request)
     {
-
         $operation_id = $request->operation_rider_type;
-
-        $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
-            ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
-            //            ->select(['riders.*','h.name as hub_name'])
-            ->where('riders.operation_rider_id', $operation_id)
-            ->whereNotNull('riders.employee_id')
-            ->where('riders.status', 1);
-        if (session('role_id') != 1) {
-            if ($operation_id == 1) {
-                if (!$request->has('carrefour')) {
-                    $riders->where('riders.rider_type_id', 2);
+        $holdInCheck = false;
+        if($operation_id != 1){
+            /*TO-6892*/
+            $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+                ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')->whereIn('riders.name', [
+                    'NSA/OSA',
+                    'Incomplete Address',
+                    'Hold for Self Collection',
+                    'Friday/ Saturday Closed',
+                    'Restricted Area',
+                    'Hold in OPS',
+                    'Damaged',
+                    'Delivery Stopped',
+                    'Wrong Destination'
+            ])->where('blacklist', 0);
+            $holdInCheck = true;
+            /*END*/
+        }else{
+            $riders = Rider::leftjoin('cities as c', 'riders.city_id', '=', 'c.id')
+                ->leftjoin('cities as h', 'c.hub_id', '=', 'h.id')
+                ->where('riders.operation_rider_id', $operation_id)
+                ->whereNotNull('riders.employee_id')
+                ->where('riders.status', 1);
+            if (session('role_id') != 1) {
+                if ($operation_id == 1) {
+                    if (!$request->has('carrefour')) {
+                        $riders->where('riders.rider_type_id', 2);
+                    }
                 }
+            }
+
+            if (session('role_id') != 1) {
+                $riders = $riders->whereHas('city', function ($query) {
+                    $query->whereIn('hub_id', session('hubs'));
+                });
             }
         }
 
-
-        if (session('role_id') != 1) {
-            $riders = $riders->whereHas('city', function ($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            });
-        }
         if ($riders) {
             $riders = $riders->select('riders.id', 'riders.name', 'riders.trax_id', 'h.name as hub_name')->get();
-            //            dd($riders);
-            return response()->json(['status' => 1, 'riders' => $riders, 'success' => 'Riders Found']);
+            return response()->json(['status' => 1, 'holdInCheck' => $holdInCheck, 'riders' => $riders, 'success' => 'Riders Found']);
         } else {
             return response()->json(['status' => 0, 'error' => 'No Riders Found']);
         }
