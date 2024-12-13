@@ -145,7 +145,7 @@
                     {data: 'view_statuses', class: 'align-middle text-center view_statuses', orderable: false, searchable: false},
                     {data: 'view_levels', class: 'align-middle text-center view_levels', orderable: false, searchable: false},
                     {data: 'status', name: 'crm_escalation_taggings.status', class: 'align-middle status'},
-                    {data: 'updated_at', name: 'crm_escalation_taggings.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'crm_escalation_taggings.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],

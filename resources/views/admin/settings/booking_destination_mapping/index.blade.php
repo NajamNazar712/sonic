@@ -87,7 +87,7 @@
                                 row.push(values.city_name);
                                 row.push(values.added_by);
                                 row.push(values.updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.status);
                                 body.push(row);
                             });
@@ -137,7 +137,7 @@
                     {data: 'city_name', name: 'ct.name', class: 'align-middle city_name'},
                     {data: 'added_by', name: 'ad.name', class: 'align-middle added_by'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
-                    {data: 'updated_at', name: 'booking_destination_mappings.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated', name: 'booking_destination_mappings.updated_at', class: 'align-middle updated_at'},
                     {data: 'status', name: 'booking_destination_mappings.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],

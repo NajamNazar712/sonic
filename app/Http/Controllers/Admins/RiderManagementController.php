@@ -74,7 +74,7 @@ class RiderManagementController extends Controller
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'riders.trax_id')
-            ->select('cities.name as city', 'c.name as hub', 'z.name as zone', 'riders.id as rider_id', 'riders.id', 'riders.name as rider', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.address', 'routes.code as route', 'routes.start', 'routes.end', 'rider_categories.name as category', 'rider_main_categories.name as main_category', 'riders.status as status', 'riders.created_at as created_at', 'cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id', 'riders.blacklist', 'riders.updated_at', 'emp.first_inactive', 'riders.incentive_amount')
+            ->select('cities.name as city', 'c.name as hub', 'z.name as zone', 'riders.id as rider_id', 'riders.id', 'riders.name as rider', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.address', 'routes.code as route', 'routes.start', 'routes.end', 'rider_categories.name as category', 'rider_main_categories.name as main_category', 'riders.status as status', 'riders.created_at as created', 'cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id', 'riders.blacklist', 'riders.updated_at as updated', 'emp.first_inactive', 'riders.incentive_amount')
             ->where('riders.rider_type_id', 1)
             ->where('riders.blacklist', 0);
         if (session('role_id') != 1) {
@@ -675,7 +675,7 @@ class RiderManagementController extends Controller
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'riders.trax_id')
-            ->select('cities.name as city', 'c.name as hub', 'z.name as zone', 'riders.id as rider_id', 'riders.id', 'riders.name as rider', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.address', 'routes.code as route', 'routes.start', 'routes.end', 'rider_main_categories.name as main_category', 'riders.rider_main_category_id as main_category_id', 'rider_categories.name as category', 'riders.status as status', 'riders.created_at', 'cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id', 'riders.blacklist', 'riders.updated_at', 'emp.first_inactive')
+            ->select('cities.name as city', 'c.name as hub', 'z.name as zone', 'riders.id as rider_id', 'riders.id', 'riders.name as rider', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.address', 'routes.code as route', 'routes.start', 'routes.end', 'rider_main_categories.name as main_category', 'riders.rider_main_category_id as main_category_id', 'rider_categories.name as category', 'riders.status as status', 'riders.created_at as created', 'cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id', 'riders.blacklist', 'riders.updated_at as updated', 'emp.first_inactive')
             ->where('riders.rider_type_id', 2)
             ->where('riders.blacklist', 0);
 
@@ -794,7 +794,7 @@ class RiderManagementController extends Controller
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
-            ->select('cities.name as city', 'c.name as hub', 'z.name as zone', 'riders.id as rider_id', 'riders.id', 'riders.name as rider', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.address', 'routes.code as route', 'routes.start', 'routes.end', 'rider_categories.name as category', 'rider_main_categories.name as main_category', 'riders.status as status', 'riders.created_at', 'cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id', 'riders.blacklist', 'rt.name as rider_type')
+            ->select('cities.name as city', 'c.name as hub', 'z.name as zone', 'riders.id as rider_id', 'riders.id', 'riders.name as rider', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.address', 'routes.code as route', 'routes.start', 'routes.end', 'rider_categories.name as category', 'rider_main_categories.name as main_category', 'riders.status as status', 'riders.created_at as created', 'cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id', 'riders.blacklist', 'rt.name as rider_type')
             ->where('riders.blacklist', 1);
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
@@ -867,7 +867,7 @@ class RiderManagementController extends Controller
         }
 
         $sms = SmsHistory::join('admins', 'admins.id', '=', 'sms_histories.sender_id')
-            ->select('sms_histories.id', 'sms_histories.body', 'sms_histories.created_at', 'admins.name as send_by', DB::raw('(SELECT COUNT(sr.id) FROM sms_history_riders AS sr  where sr.sms_history_id = sms_histories.id) AS riders'));
+            ->select('sms_histories.id', 'sms_histories.body', 'sms_histories.created_at as created', 'admins.name as send_by', DB::raw('(SELECT COUNT(sr.id) FROM sms_history_riders AS sr  where sr.sms_history_id = sms_histories.id) AS riders'));
         return Datatables::of($sms)
             ->editColumn('riders_count', function ($sms) {
                 return '<center><button class="btn btn-sm btn-outline-info align-middle">' . $sms->riders . '</button></center>';
