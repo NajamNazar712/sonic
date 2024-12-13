@@ -205,7 +205,7 @@ class ShipperShipmentPieceController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            })->rawColumns('tracking_number_link');
+            })->rawColumns(['tracking_number_link']);
 
 
 

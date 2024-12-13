@@ -564,7 +564,7 @@
                     {data: 'remarks', name: 'remarks', class: 'align-middle remarks',searchable: false},
                     {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false},
                     {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle action_updated_by',searchable: false},
-                    {data: 'rcp_agent_updated_by', name: 'ad.name', class: 'align-middle rcp_agent_updated_by',searchable: false},
+                    {data: 'rcp_agent_updated_by', name: 'rcp_agent_updated_by', class: 'align-middle rcp_agent_updated_by',searchable: false},
                     {data: 'rv_status_name', name: 'rv_status.name', class: 'align-middle rv_status_name',searchable: false},
                     {data: 'rv_reason', name: 'rv_reason.name', class: 'align-middle rv_reason',searchable: false},
                     {data: 'rv_status_date', name: 'sj.updated_at', class: 'align-middle rv_status_date',searchable: false},

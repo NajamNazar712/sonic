@@ -498,10 +498,10 @@
                                 row.push(values.bank_account);
                                 row.push(values.ntn);
                                 row.push(values.created_by);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.margin);
                                 row.push(values.updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                                 row.push(values.user_status);
                                 body.push(row);
                             });
@@ -564,10 +564,10 @@
                     { data:'ntn' ,name: 'wholesale_users.ntn', class: 'align-middle text-center ntn'},
                     { data:'document' ,name: 'document', class: 'align-middle text-center document', orderable: false, searchable: false},
                     { data:'created_by' ,name: 'cb.name', class: 'align-middle text-center created_by'},
-                    { data:'created_at' ,name: 'wholesale_users.created_at', class: 'align-middle text-center created_at'},
+                    { data:'created' ,name: 'wholesale_users.created_at', class: 'align-middle text-center created_at'},
                     { data:'margin_percentage' ,name: 'wholesale_users.margin', class: 'align-middle text-center margin_percentage'},
                     { data:'updated_by' ,name: 'ub.name', class: 'align-middle text-center updated_by'},
-                    { data:'updated_at' ,name: 'wholesale_users.updated_at', class: 'align-middle text-center updated_at'},
+                    { data:'updated' ,name: 'wholesale_users.updated_at', class: 'align-middle text-center updated_at'},
                     { data:'user_status' ,name: 'user_status', class: 'align-middle text-center user_status', orderable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],

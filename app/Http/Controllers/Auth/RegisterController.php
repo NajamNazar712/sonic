@@ -44,6 +44,7 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Controllers\Admins\AdminDashboardController;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -517,7 +518,7 @@ class RegisterController extends Controller
                         'sub_segment_id' => $data['sub_segments'],
                         'referral_id' => $referral_id,
                         'lead_id' => $lead_id,
-                        'api_token' => uniqid(base64_encode(str_random(60))),
+                        'api_token' => uniqid(base64_encode(Str::random(60))),
                         'territory_id' =>  $territory_id,
                         'payment_cycle_id' =>  $data['payment_cycles'],
                         'payment_cycle_days' => $payment_cycle_days
@@ -556,7 +557,7 @@ class RegisterController extends Controller
                     'sub_segment_id' => $data['sub_segments'],
                     'referral_id' => $referral_id,
                     'lead_id' => $lead_id,
-                    'api_token' => uniqid(base64_encode(str_random(60))),
+                    'api_token' => uniqid(base64_encode(Str::random(60))),
                     'territory_id' =>  $territory_id,
                     'payment_cycle_id' =>  $data['payment_cycles'],
                     'payment_cycle_days' => $payment_cycle_days
@@ -676,7 +677,7 @@ class RegisterController extends Controller
 
             self::duplicate_user_info($newUser->id, $data['name'], $data['phone'], $data['phone2'], $data['cnic'], $iban_array);
 
-            $token = uniqid(base64_encode(str_random(60)));
+            $token = uniqid(base64_encode(Str::random(60)));
             $crf_terms_and_conditions = new CRFTermsConditions();
             $crf_terms_and_conditions->user_id = $newUser->id;
             $crf_terms_and_conditions->token = $token;

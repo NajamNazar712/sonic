@@ -14,6 +14,7 @@ use App\Http\Models\ShipmentStatusReason;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Controllers\NotificationsController;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 trait OperationReportTrait{
     public function operations_performance_export_to_excel_automated($from, $to, $id, $mode)
@@ -392,7 +393,7 @@ trait OperationReportTrait{
                 $sheet->getDefaultColumnDimension()->setWidth(20);
                 $sheet->getStyle('A1:AT1')
                     ->getFill()
-                    ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+                    ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()
                     ->setRGB('CECECE');
                 $sheet->getStyle('A1:AT1')->getAlignment()->setWrapText(true);

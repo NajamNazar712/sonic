@@ -217,7 +217,7 @@
                                 row.push(values.shipper);
                                 row.push(values.insurance);
                                 row.push(values.total_insurance);
-                                row.push(values.created_at);
+                                row.push(values.created);
 
                                 body.push(row);
                             });
@@ -322,7 +322,7 @@
                     { data:'insurance' ,name: 'insurance', class: 'align-middle text-center insurance'},
                     {data: 'charges', name: 'si.price', class: 'align-middle text-center charges'},
                     {data: 'total_insurance', name: 'total_insurance', class: 'align-middle text-center total_insurance'},
-                    { data:'created_at' ,name: 'created_at', class: 'align-middle created_at text-center'},
+                    { data:'created' ,name: 'shipments.created_at', class: 'align-middle created_at text-center'},
 
                 ],
                 rowCallback: function(row, data, index) {

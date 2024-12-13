@@ -17,6 +17,7 @@ use PHPExcel_Style_Fill;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use DB;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class SalesPersonNumbersReportController extends Controller
 {
@@ -177,16 +178,16 @@ class SalesPersonNumbersReportController extends Controller
         $sheet->fromArray($sale_person_array, NULL, 'A2', true);
         $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
         // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-        $sheet->getStyle($ts)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-        $sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+        $sheet->getStyle($ts)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
+        $sheet->getStyle($tas)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
         $sheet->getStyle($tr)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('FFE699');
         $sheet->getStyle($tar)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('C7E0B4');
         // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
@@ -363,16 +364,16 @@ class SalesPersonNumbersReportController extends Controller
         $sheet->fromArray($sale_person_array, NULL, 'A2', true);
         $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
         // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-        $sheet->getStyle($ts)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-        $sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+        $sheet->getStyle($ts)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
+        $sheet->getStyle($tas)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
         $sheet->getStyle($tr)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('FFE699');
         $sheet->getStyle($tar)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('C7E0B4');
         // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
@@ -460,16 +461,16 @@ class SalesPersonNumbersReportController extends Controller
         $sheet->fromArray($sale_person_array, NULL, 'A2', true);
         $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
         // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-        $sheet->getStyle($ts)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-        $sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+        $sheet->getStyle($ts)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
+        $sheet->getStyle($tas)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
         $sheet->getStyle($tr)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('FFE699');
         $sheet->getStyle($tar)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('C7E0B4');
         // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');
@@ -602,16 +603,16 @@ class SalesPersonNumbersReportController extends Controller
         $sheet->fromArray($sale_person_array, NULL, 'A2', true);
         $sheet->getStyle("A2:J2")->applyFromArray($cell_st);
         // $sheet->getStyle('G')->getFont()->getColor()->setARGB('FFFF00');
-        $sheet->getStyle($ts)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
-        $sheet->getStyle($tas)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
+        $sheet->getStyle($ts)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFE699');
+        $sheet->getStyle($tas)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7E0B4');
         $sheet->getStyle($tr)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('FFE699');
         $sheet->getStyle($tar)
             ->getFill()
-            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('C7E0B4');
         // $sheet->getStyle('H')->getFont()->getColor()->setARGB('00FF00');

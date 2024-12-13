@@ -192,10 +192,10 @@
                                 row.push(values.total_courier_charges);
                                 row.push(values.service_charges);
                                 row.push(values.gst);
-                                row.push(values.created_at);
+                                row.push(values.created);
                                 row.push(values.invoice_status);
                                 row.push(values.updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
 
                                 body.push(row);
                             });
@@ -371,10 +371,10 @@
                     {data:'total_courier_charges', name: 'wholesale_invoices.total_courier_charges', class: 'align-middle text-center total_courier_charges'},
                     {data:'service_charges', name: 'wholesale_invoices.service_charges', class: 'align-middle text-center service_charges'},
                     {data:'gst', name: 'wholesale_invoices.gst', class: 'align-middle text-center gst'},
-                    {data:'created_at', name: 'wholesale_invoices.created_at', class: 'align-middle text-center created_at'},
+                    {data:'created', name: 'wholesale_invoices.created_at', class: 'align-middle text-center created_at'},
                     {data:'invoice_status', name: 'invoice_status', class: 'align-middle text-center status', orderable: false},
                     {data:'updated_by', name: 'ub.name', class: 'align-middle text-center updated_by'},
-                    {data:'updated_at', name: 'wholesale_invoices.updated_at', class: 'align-middle text-center updated_at'},
+                    {data:'updated', name: 'wholesale_invoices.updated_at', class: 'align-middle text-center updated_at'},
 
                     {data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
