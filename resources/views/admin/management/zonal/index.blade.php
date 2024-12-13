@@ -144,8 +144,8 @@
                                 row.push(values.GST);
                                 row.push(values.business_category);
                                 row.push(values.status);
-                                row.push(values.created_at);
-                                row.push(values.updated_at);
+                                row.push(values.created);
+                                row.push(values.updated);
 
                                 body.push(row);
                             });
@@ -203,8 +203,8 @@
 					{data: 'gst', name: 'zones.gst', class: 'align-middle gst'},
 					{data: 'business_category', name: 'bc.id', class: 'align-middle business_category'},
 					{data: 'status', name: 'zones.status', class: 'align-middle status'},
-					{data: 'created_at', name: 'zones.created_at', class: 'align-middle created_at'},
-					{data: 'updated_at', name: 'zones.updated_at', class: 'align-middle updated_at'},
+					{data: 'created', name: 'zones.created_at', class: 'align-middle created_at'},
+					{data: 'updated', name: 'zones.updated_at', class: 'align-middle updated_at'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {

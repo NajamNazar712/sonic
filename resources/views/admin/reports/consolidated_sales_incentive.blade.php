@@ -178,10 +178,10 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'trax_id' ,name: 'a.trax_id', class: 'align-middle trax_id'},
                     { data:'admin' ,name: 'a.name', class: 'align-middle admin'},
-                    { data:'shipper_count' ,name: 'sales_incentives.shipper_count', class: 'align-middle shipper_count'},
-                    { data:'shipment_count' ,name: 'sales_incentives.shipment_count', class: 'align-middle shipment_count'},
-                    { data:'revenue' ,name: 'sales_incentives.revenue', class: 'align-middle revenue'},
-                    { data:'commission' ,name: 'sales_incentives.commission', class: 'align-middle commission'}
+                    { data:'shipper_count' ,name: 'sales_consolidated_incentives.shipper_count', class: 'align-middle shipper_count'},
+                    { data:'shipment_count' ,name: 'sales_consolidated_incentives.shipment_count', class: 'align-middle shipment_count'},
+                    { data:'revenue' ,name: 'sales_consolidated_incentives.revenue', class: 'align-middle revenue'},
+                    { data:'commission' ,name: 'sales_consolidated_incentives.commission', class: 'align-middle commission'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

@@ -1626,7 +1626,7 @@
                     {data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id'},
                     {data: 'old_trax_id', name: 'employees.old_trax_id', class: 'align-middle old_trax_id'},
                     {data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name'},
-                    {data: 'father_name', name: 'employees.father_name', class: 'align-middle father_name'},
+                    {data: 'father_name', name: 'employees.guardian_name', class: 'align-middle father_name'},
                     {data: 'gender', name: 'eg.name', class: 'align-middle gender'},
                     {data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},

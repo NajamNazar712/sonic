@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Validator;
 use DB;
+use Illuminate\Support\Str;
 
 class ConsigneeAPIController extends Controller
 {
@@ -220,7 +221,7 @@ class ConsigneeAPIController extends Controller
             if ($consignee_info->exists()) {
                 return response()->json(['status' => 1, 'message' => 'Account Already registered']);
             } else {
-                $api_token = uniqid(base64_encode(str_random(60)));
+                $api_token = uniqid(base64_encode(Str::random(60)));
                 $consignee_info = new ConsigneeUser();
                 $consignee_info->name = $request->name;
                 $consignee_info->address = $request->address;
@@ -261,7 +262,7 @@ class ConsigneeAPIController extends Controller
                             $information['api_token'] = $consignee_user->api_token;
                         }
                         else {
-                            $api_token = uniqid(base64_encode(str_random(60)));
+                            $api_token = uniqid(base64_encode(Str::random(60)));
 
                             $consignee_user->api_token = $api_token;
 

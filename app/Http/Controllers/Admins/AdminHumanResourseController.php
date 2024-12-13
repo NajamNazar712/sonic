@@ -37,7 +37,7 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\Admin\EmployeeLog;
 use App\Http\Models\HR\EmployeeGender;
-use App\http\Models\HR\EmployeeNature;
+use App\Http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\ReportingLocation;
 use Barryvdh\Snappy\Facades\SnappyPdf;

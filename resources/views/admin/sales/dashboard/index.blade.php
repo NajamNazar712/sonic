@@ -345,7 +345,7 @@
                     {data: 'phone', name: 'u.phone', class: 'align-middle phone'},
                     {data: 'address', name: 'u.address', class: 'align-middle address'},
                     {data: 'email', name: 'u.email', class: 'align-middle email'},
-                    {data: 'shipper_status', name: 'shipper_status', class: 'align-middle shipper_status'},
+                    {data: 'shipper_status', name: 'u.status', class: 'align-middle shipper_status'},
                     {data: 'sales_person', name: 'sp.name', class: 'align-middle sales_person'},
                     {data: 'average_shipment', name: 'business_projection_accounts.average_shipment', class: 'align-middle average_shipment'},
                     {data: 'projected_shipment', name: 'business_projection_accounts.projected_shipment', class: 'align-middle projected_shipment'},

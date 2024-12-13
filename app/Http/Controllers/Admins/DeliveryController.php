@@ -2513,6 +2513,7 @@ class DeliveryController extends Controller
                       <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
                     </div></span>";
             })
+            ->rawColumns(['action','relation', 'cnic', 'ccd_image','remarks', 'reason', 'status','open_box' ,'received_or_refused_by'])
             ->make(true);
     }
 
@@ -3860,6 +3861,7 @@ class DeliveryController extends Controller
             //                    return $relation;
             //                }
             //            })
+            ->rawColumns(['ccd_image','existing_location', 'rider_location', 'confirm_location', 'open_box' ,'fake_status', 'call_verification', 'remarks' ,'reason', 'status', 'consignee_phone' ,'tracking_number_link'])
             ->make(true);
     }
 
@@ -5579,7 +5581,7 @@ class DeliveryController extends Controller
                     $count = $this->get_segment_type('delivery_note_shipments', $delivered_shipments, [1,2], [1,3,4,6,8,9,10,11], 'delivered', 'delivery_note_id');
                 }
                 return $count > 0 ? $count : '-';
-            })->rawColumns(['delivery_note', 'fintech_charges.link', 'shipments_count_link', 'one_link_payment_count_button','deposit_slip_view','transactions_amount_link','action']);
+            })->rawColumns(['delivery_note', 'fintech_charges.link', 'shipments_count_link', 'one_link_payment_count_button','deposit_slip_view','transactions_amount_link','action' ,'delivered_shipments_link']);
         //        if ($tracking_number = $request->get('search_tracking')) {
         //            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
         //                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
@@ -5919,6 +5921,7 @@ class DeliveryController extends Controller
                 $reason = '<input class="form-control" name="remarks[' . $deliveries->delivery_note_id . ']" placeholder="Enter Remarks">';
                 return $reason;
             })
+            ->rawColumns(['remarks'])
             ->make(true);
     }
 
@@ -8849,7 +8852,7 @@ class DeliveryController extends Controller
         $replacement_to_regular_logs = ReplacementToRegularLog::leftjoin('shipments as s', 's.id', '=', 'replacement_to_regular_logs.shipment_id')
             ->leftjoin('products as p', 'p.id', '=', 'replacement_to_regular_logs.product_type_id')
             ->leftjoin('admins as a', 'a.id', '=', 'replacement_to_regular_logs.updated_by')
-            ->select('s.tracking_number as tracking_number', 'p.product_name as product_type', 'replacement_to_regular_logs.replacement_charges as replacement_charges', 'replacement_to_regular_logs.item_description as item_description', 'replacement_to_regular_logs.item_quantity as item_quantity', 'replacement_to_regular_logs.item_price as item_price', 'replacement_to_regular_logs.insurance as insurance', 'replacement_to_regular_logs.created_at as created_at');
+            ->select('s.tracking_number as tracking_number', 'p.product_name as product_type', 'replacement_to_regular_logs.replacement_charges as replacement_charges', 'replacement_to_regular_logs.item_description as item_description', 'replacement_to_regular_logs.item_quantity as item_quantity', 'replacement_to_regular_logs.item_price as item_price', 'replacement_to_regular_logs.insurance as insurance', 'replacement_to_regular_logs.created_at as created');
 
         $datatables = Datatables::of($replacement_to_regular_logs)
             ->editColumn('tracking_number_link', function ($shipment) {
