@@ -81,6 +81,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Session;
 use SnappyPDF;
 use Validator;
+use App\Http\Models\ShipperSegmentLogs;
+use Illuminate\Support\Facades\Log;
 
 class ShipperShipmentBookController extends Controller
 {
@@ -575,6 +577,10 @@ class ShipperShipmentBookController extends Controller
 
     public function store(Request $request) {
 
+        // dd(
+        //     $request->all()
+        // );
+
         $user_id = session('user_id');
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
@@ -1068,7 +1074,19 @@ class ShipperShipmentBookController extends Controller
                     $shipment_parcel_image->save();
                 }
 
-                    return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
+                try {
+                    // Maintaining shipper segment logs on booking when origin and destination are different
+                    if ($consignee_city_id != $user_shipping_info->city_id) {
+                        ShipperSegmentLogs::create([
+                            'shipment_id' => $shipment_id,
+                            'segment_id' => auth()->user()->segment_id,
+                            'sub_segment_id' => auth()->user()->sub_segment_id
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+                }
+                return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
             else {
                 return redirect()->back()->with('error', 'Shipping Mode needs to be Selected');
@@ -4526,6 +4544,19 @@ class ShipperShipmentBookController extends Controller
                 $shipment_parcel_image->picture_path = $picture_path;
                 $shipment_parcel_image->save();
             }
+
+                try {
+                    // Maintaining shipper segment logs on booking when origin and destination are different
+                    if ($consignee_city_id != $user_shipping_info->city_id) {
+                        ShipperSegmentLogs::create([
+                            'shipment_id' => $shipment_id,
+                            'segment_id' => auth()->user()->segment_id,
+                            'sub_segment_id' => auth()->user()->sub_segment_id
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+                }
 
                 return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }

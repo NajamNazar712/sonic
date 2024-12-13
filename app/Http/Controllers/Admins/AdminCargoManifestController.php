@@ -2612,14 +2612,61 @@ class AdminCargoManifestController extends Controller
             ->join('admins as a', 'cargo_manifest_bags.created_by', '=', 'a.id')
             ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
             ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
-            ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'tm.name as transport_mode', 'cargo_manifest_bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_manifest_bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`cargo_manifest_bag_id` = `cargo_manifest_bags`.`id`) AS `chargeable_weight`'), 'cargo_manifest_bags.actual_weight', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type', 'cargo_manifest_bags.seal_number', 'bs.name as status', 'cm.id as manifest_id', 'cargo_manifest_bags.junction_mapping_id as junction_mapping_id', 'cargo_manifest_bags.created_at as transitted_at', 'cm.id as manifest', 'sm.mode as shipping_mode', 'cargo_manifest_bags.short_received_shipments as short_received_shipments', 'cargo_manifest_bags.short_received_shipments as short_received', 'cargo_manifest_bags.lost_shipments as lost_shipments', 'cargo_manifest_bags.lost_shipments as ls', 'cargo_manifest_bags.received_at as received_at');
+
+            // ->leftJoin('manifest_bags', 'manifest_bags.cargo_manifest_id', '=', 'cm.id')
+            // ->leftJoin('cargo_manifest_bags as cmb', 'cmb.seal_number', '=', 'manifest_bags.id')
+            ->leftJoin('cargo_manifest_bag_shipments as cargo_shipments', 'cargo_shipments.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
+            ->leftJoin('shipments', 'shipments.id', '=', 'cargo_shipments.shipment_id')
+            ->leftJoin('shipper_segment_logs', 'shipper_segment_logs.shipment_id', '=', 'cargo_shipments.shipment_id')
+            ->leftJoin('sub_category_segments as sub_segment', 'shipper_segment_logs.sub_segment_id', '=', 'sub_segment.id')
+
+            ->select(
+                'cargo_manifest_bags.id',
+                'cargo_manifest_bags.status_id',
+                'oh.id as origin_id',
+                'oh.name as origin',
+                'dh.id as destination_id',
+                'dh.name as destination',
+                'cargo_manifest_bags.shipments',
+                'tm.name as transport_mode',
+                'cargo_manifest_bags.shipments_weight',
+                DB::raw(
+                    '(
+                        SELECT SUM(`s`.`chargeable_weight`) 
+                        FROM `shipments` AS `s`
+                        INNER JOIN `cargo_manifest_bag_shipments` AS `bss` 
+                        ON `s`.`id` = `bss`.`shipment_id`
+                        WHERE `bss`.`cargo_manifest_bag_id` = `cargo_manifest_bags`.`id`) 
+                        AS `chargeable_weight`'
+                ),
+                'cargo_manifest_bags.actual_weight',
+                'a.name as transitted_by',
+                'oh.hub_id as origin_hub_id',
+                'dh.hub_id as destination_hub_id',
+                'cargo_manifest_bags.type as bag_type',
+                'cargo_manifest_bags.seal_number',
+                'bs.name as status',
+                'cm.id as manifest_id',
+                'cargo_manifest_bags.junction_mapping_id as junction_mapping_id',
+                'cargo_manifest_bags.created_at as transitted_at',
+                'cm.id as manifest',
+                'sm.mode as shipping_mode',
+                'cargo_manifest_bags.short_received_shipments as short_received_shipments',
+                'cargo_manifest_bags.short_received_shipments as short_received',
+                'cargo_manifest_bags.lost_shipments as lost_shipments',
+                'cargo_manifest_bags.lost_shipments as ls',
+                'cargo_manifest_bags.received_at as received_at',
+                DB::raw('GROUP_CONCAT(sub_segment.name) as segment_names'),
+                DB::raw('COUNT(DISTINCT sub_segment.name) as segment_count'),
+                DB::raw('GROUP_CONCAT(shipments.actual_weight) as segment_weights')
+            )
+            ->groupBy('cargo_manifest_bags.id');
 
         if (session('role_id') != 1) {
             $bags = $bags->where(function ($query) {
                 $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'));
             });
         }
-
 
         if ($bag_type = $request->get('bag_type')) {
             if ($bag_type != 0) {
@@ -2706,7 +2753,131 @@ class AdminCargoManifestController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
-            })->rawColumns(['shipments','junctions','short_received_shipments','manifest_id','lost_shipments']);
+            })
+            
+            ->editColumn('express_count', function ($row) {
+                return substr_count($row->segment_names, 'Express');
+            })
+            ->editColumn('cod_count', function ($row) {
+                return substr_count($row->segment_names, 'COD');
+            })
+            ->editColumn('logistics_count', function ($row) {
+                return substr_count($row->segment_names, 'Logistics');
+            })
+            ->editColumn('warehouse_count', function ($row) {
+                return substr_count($row->segment_names, 'Warehouse');
+            })
+            ->editColumn('international_count', function ($row) {
+                return substr_count($row->segment_names, 'International');
+            })
+            ->editColumn('hyperlocal_count', function ($row) {
+                return substr_count($row->segment_names, 'Hyperlocal');
+            })
+            ->editColumn('fod_count', function ($row) {
+                return substr_count($row->segment_names, 'FOD');
+            })
+            ->editColumn('retail_count', function ($row) {
+                return substr_count($row->segment_names, 'Retail');
+            })
+
+            ->editColumn('logistics_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'Logistics') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('express_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'Express') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('warehouse_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'Warehouse') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('international_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'International') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('cod_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'COD') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('hyperlocal_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'Hyperlocal') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('fod_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'FOD') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('retail_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'Retail') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+
+            ->rawColumns(['shipments','junctions','short_received_shipments','manifest_id','lost_shipments']);
 
         return $datatables->make(true);
     }
@@ -5061,22 +5232,53 @@ class AdminCargoManifestController extends Controller
 
     public function manifest_history_list(Request $request)
     {
-
-        //        dd($request->get('transit_from_date') , $request->get('transit_to_date') , $request->get('search_filter_origin') , $request->get('search_filter_destination'));
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 410);
         }
-
         $receive_cargo = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
-            //        $receive_cargo = DB::connection('reports')->table('cargo_manifests')
-            //            ->join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
             ->leftJoin('shipping_modes as sm', 'cargo_manifests.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'cargo_manifests.created_by', '=', 'a.id')
             ->leftjoin('fleets as f', 'cargo_manifests.vehicle_id', '=', 'f.id')
             ->leftjoin('transport_modes as tm', 'cargo_manifests.transport_mode_id', '=', 'tm.id')
-            //            ->select('cargo_manifests.id as manifest_id','cargo_manifests.route_name', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id','cargo_manifests.vendor_name as vendor' ,'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status','cargo_manifests.id as manifest','cargo_manifests.short_received_bags as short_received_bags');
-            ->select('cargo_manifests.id as manifest_id', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifests.vendor_name as vendor', 'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status', 'cargo_manifests.id as manifest', 'cargo_manifests.short_received_bags as short_received_bags');
+
+            ->leftJoin('manifest_bags', 'manifest_bags.cargo_manifest_id', '=', 'cargo_manifests.id')
+            ->leftJoin('cargo_manifest_bags', 'cargo_manifest_bags.id', '=', 'manifest_bags.cargo_manifest_bag_id')
+            ->leftJoin('cargo_manifest_bag_shipments as cargo_shipments', 'cargo_shipments.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
+            ->leftJoin('shipments', 'shipments.id', '=', 'cargo_shipments.shipment_id')
+            ->leftJoin('shipper_segment_logs', 'shipper_segment_logs.shipment_id', '=', 'cargo_shipments.shipment_id')
+            ->leftJoin('sub_category_segments as sub_segment', 'shipper_segment_logs.sub_segment_id', '=', 'sub_segment.id')
+
+            ->select(
+                'cargo_manifests.id as manifest_id',
+                'cargo_manifests.status_id',
+                'oh.id as origin_id',
+                'oh.name as origin',
+                'dh.id as destination_id',
+                'dh.name as destination',
+                'cargo_manifests.shipments',
+                'cargo_manifests.bags',
+                'cargo_manifests.driver_name',
+                'f.reg_number as vehicle',
+                'cargo_manifests.driver_phone',
+                'sm.mode as shipping_mode',
+                'tm.name as transport_mode',
+                'cargo_manifests.bags_weight',
+                'cargo_manifests.actual_weight',
+                'cargo_manifests.created_at as transit_at',
+                'a.name as transitted_by',
+                'oh.hub_id as origin_hub_id',
+                'dh.hub_id as destination_hub_id',
+                'cargo_manifests.vendor_name as vendor',
+                'cargo_manifests.driver_phone as phone_number',
+                'cargo_manifests.status_id as status',
+                'cargo_manifests.id as manifest',
+                'cargo_manifests.short_received_bags as short_received_bags',
+                DB::raw('GROUP_CONCAT(sub_segment.name) as segment_names'),
+                DB::raw('COUNT(DISTINCT sub_segment.name) as segment_count'),
+                DB::raw('GROUP_CONCAT(shipments.actual_weight) as segment_weights'),
+            )
+            ->groupBy('cargo_manifests.id');
 
         if (($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != '') {
             $receive_cargo->join('manifest_bags as mb', 'cargo_manifests.id', '=', 'mb.cargo_manifest_id')
@@ -5274,11 +5476,132 @@ class AdminCargoManifestController extends Controller
                     return $shipment_mode_count;
                 else
                     return '--';
-            })->rawColumns(['short_received_bags', 'bags','manifest_id','shipments']);
+            })
+            
 
+            ->editColumn('express_count', function ($row) {
+                return substr_count($row->segment_names, 'Express');
+            })
+            ->editColumn('cod_count', function ($row) {
+                return substr_count($row->segment_names, 'COD');
+            })
+            ->editColumn('logistics_count', function ($row) {
+                return substr_count($row->segment_names, 'Logistics');
+            })
+            ->editColumn('warehouse_count', function ($row) {
+                return substr_count($row->segment_names, 'Warehouse');
+            })
+            ->editColumn('international_count', function ($row) {
+                return substr_count($row->segment_names, 'International');
+            })
+            ->editColumn('hyperlocal_count', function ($row) {
+                return substr_count($row->segment_names, 'Hyperlocal');
+            })
+            ->editColumn('fod_count', function ($row) {
+                return substr_count($row->segment_names, 'FOD');
+            })
+            ->editColumn('retail_count', function ($row) {
+                return substr_count($row->segment_names, 'Retail');
+            })
+            
 
-
-
+            ->editColumn('logistics_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'Logistics') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('express_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'Express') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('warehouse_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'Warehouse') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('international_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'International') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('cod_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'COD') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('hyperlocal_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'Hyperlocal') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('fod_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'FOD') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->editColumn('retail_weight', function ($row) {
+                $segmentNames = explode(',', $row->segment_names);
+                $segmentWeights = explode(',', $row->segment_weights);
+                $totalWeight = 0;
+            
+                foreach ($segmentNames as $index => $name) {
+                    if (trim($name) === 'Retail') {
+                        $totalWeight += (float)$segmentWeights[$index];
+                    }
+                }
+                return $totalWeight;
+            })
+            ->rawColumns(['short_received_bags', 'bags','manifest_id','shipments']);
         return $datatables->make(true);
     }
 
