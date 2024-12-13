@@ -220,8 +220,8 @@
                                 row.push(values.shipper);
                                 row.push(values.attempt_days);
                                 row.push(values.status);
-                                row.push(values.created_at);
-                                row.push(values.updated_at);
+                                row.push(values.created);
+                                row.push(values.updated);
                                 row.push(values.updated_by);
 
                                 body.push(row);
@@ -269,8 +269,8 @@
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'attempt_days', name: 'restrict_parcels_attempts.attempt_days', class: 'align-middle text-center attempt_days'},
                     {data: 'status', name: 'restrict_parcels_attempts.status', class: 'align-middle text-center status'},
-                    {data: 'created_at', name: 'restrict_parcels_attempts.created_at', class: 'align-middle text-center created_at'},
-                    {data: 'updated_at', name: 'restrict_parcels_attempts.updated_at', class: 'align-middle text-center updated_at'},
+                    {data: 'created', name: 'restrict_parcels_attempts.created_at', class: 'align-middle text-center created_at'},
+                    {data: 'updated', name: 'restrict_parcels_attempts.updated_at', class: 'align-middle text-center updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle text-center updated_by'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 

@@ -47,7 +47,7 @@ class AdminCommissionController extends Controller
         $salesTier = SalesTier::join('admins as a', 'a.id', '=', 'sales_tiers.added_by')
             ->leftjoin('admins as u', 'u.id', '=', 'sales_tiers.updated_by')
             ->join('tier_types as tt', 'tt.id', '=', 'sales_tiers.tier_type')
-            ->select('sales_tiers.id as tier_id', 'sales_tiers.tier_name as name', 'tt.name as tier_type', 'a.name as added_by', 'u.name as updated_by', 'sales_tiers.status', 'sales_tiers.created_at as added_at', 'sales_tiers.updated_at', 'tt.id as type_id','sales_tiers.sales_status');
+            ->select('sales_tiers.id as tier_id', 'sales_tiers.tier_name as name', 'tt.name as tier_type', 'a.name as added_by', 'u.name as updated_by', 'sales_tiers.status', 'sales_tiers.created_at as added_at', 'sales_tiers.updated_at as updated', 'tt.id as type_id','sales_tiers.sales_status');
         $datatable = Datatables::of($salesTier)
             ->addColumn('category_status', function ($data){
                 if($data->status == 0){

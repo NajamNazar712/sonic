@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Retail;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\KeyAccountDailyShipment;
 use App\Http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\MasterCargo\Bag;
@@ -17,6 +18,7 @@ use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
+use App\Http\Models\CityArea;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
@@ -25,13 +27,16 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\Handover\Handover;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentScanningJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\SubstituteUserShipment;
+use App\Http\Traits\CommonTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,6 +44,7 @@ use Yajra\Datatables\Datatables;
 
 class RetailTrackingController extends Controller
 {
+    use CommonTrait;
     public function __construct()
     {
         $this->middleware('auth:retail');
@@ -248,77 +254,151 @@ class RetailTrackingController extends Controller
                                     }
                                 }
 
-    //                        if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
-    //                            if ($journey->shipper_status_id == 3) {
-    //                                $bag = Bag::where('id', $journey->reference_1_id);
-    //                                if($bag->exists()){
-    //                                    $bag = $bag->first();
-    //                                    $master_cargo_bags = MasterCargoBag::where('bag_id', $bag->id);
-    //                                    if($master_cargo_bags->exists()){
-    //                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
-    //                                    }
-    //                                    else{
-    //                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
-    //                                    }
-    //                                }
-    //                                else{
-    //                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
-    //                                }
-    //                            }
-    //                            elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
-    //                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-    //                            }
-    //                            else {
-    //                                if(in_array($journey->shipper_status_id, [23, 24, 25, 28, 29, 31, 44, 45, 47, 48])){
-    ////                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle return_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                           if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
+                               if ($journey->shipper_status_id == 3) {
+                                   $bag = Bag::where('id', $journey->reference_1_id);
+                                   if($bag->exists()){
+                                       $bag = $bag->first();
+                                       $master_cargo_bags = MasterCargoBag::where('bag_id', $bag->id);
+                                       if($master_cargo_bags->exists()){
+                                           $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                                       }
+                                       else{
+                                           $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                       }
+                                   }
+                                   else{
+                                       $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
+                                   }
+                               }
+                               elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
+                                   $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                               }
+                               else {
+                                   if(in_array($journey->shipper_status_id, [23, 24, 25, 28, 29, 31, 44, 45, 47, 48])){
+    //                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle return_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                       $journey_details['status'] .= $journey->reference_1_id;
+                                       if($journey->shipper_status_id == 25 && $journey->reference_1_id){
+                                           $return_note = ReturnNote::find($journey->reference_1_id);
+                                           if($return_note && $return_note->actual_date != null){
+                                               $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
+                                           }
+                                       }
+                                   }
+                                   else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
+                                       $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
     //                                    $journey_details['status'] .= $journey->reference_1_id;
-    //                                    if($journey->shipper_status_id == 25 && $journey->reference_1_id){
-    //                                        $return_note = ReturnNote::find($journey->reference_1_id);
-    //                                        if($return_note && $return_note->actual_date != null){
-    //                                            $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
-    //                                        }
-    //                                    }
-    //                                }
-    //                                else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
-    ////                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-    ////                                    $journey_details['status'] .= $journey->reference_1_id;
-    //                                }
-    //                                else{
-    //                                    //$journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
-    //                                    $journey_details['status'] .= $journey->reference_1_id;
-    //                                }
-    //
-    //                                if ($journey->reference_2_id) {
-    //                                    if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
-    //                                        $rider = Rider::find($journey->reference_2_id);
-    //                                        if($rider){
-    ////                                            $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
-    //
-    //                                        }
-    //
-    //                                    }
-    //                                    else {
-    //                                        $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
-    //                                    }
-    //                                }
-    //                            }
+                                   }
+                                   else{
+                                       //$journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+                                       $journey_details['status'] .= $journey->reference_1_id;
+                                   }
+    
+                                   if ($journey->reference_2_id) {
+                                       if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
+                                           $rider = Rider::find($journey->reference_2_id);
+                                           if($rider){
+                                               $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+    
+                                           }
+    
+                                       }
+                                       else {
+                                           $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                       }
+                                   }
+                               }
 
-                                //$journey_details['status'] .= ')';
-                                //}
+                                $journey_details['status'] .= ')';
+                                }
                                 $user = '';
                                 if($journey->admin_id){
                                     $user = $journey->admin->name;
                                 }else if($journey->user_id){
                                     $user = $journey->user->name;
                                 }
+                            $shipment_scanning_query = ShipmentScanningJourney::select(
+                                'ssjal.location_status',
+                                'shipment_scanning_journeys.latitude',
+                                'shipment_scanning_journeys.longitude',
+                                'ssjal.area_id',
+                                'shipment_scanning_journeys.created_at',
+                                'ssjal.hub_id as hub_id_scanning',
+                                'ssjal.shipment_scanning_journey_id as shipment_scanning_journey_id',
+                                'sj.city_id as city_id_scanning'
 
+                            )
+                            ->join('shipments_journey as sj', function ($join) use ($journey) {
+                                $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                                ->where('sj.id', '=', $journey->id);
+                            })
+                                ->join('shipment_scanning_journey_area_logs as ssjal', function ($join) use ($journey) {
+                                    $join->on('ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                                        ->where('ssjal.hub_id', '=', $journey->city_id);
+                                })
+                                ->where('shipment_scanning_journeys.updated_at', '<=', $journey->updated_at);
+                            if (isset($journey->admin['role_id']) && $journey->admin['role_id'] != 1 || isset($journey->rider_id)) {
+                                switch ($journey->shipper_status_id) {
+                                    case 2:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                                        break;
+                                    case 3:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                                        break;
+                                    case 4:
+                                        $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                                        break;
+                                    case 5:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                                        break;
+                                    case 11:
+                                        $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                                        break;
+                                    case 21:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                                        break;
+                                    case 22:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 20)->latest()->first();
+                                        break;
+                                    case 23:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                                        break;
+                                    case 26:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                                        break;
+                                    case 27:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 20)->latest()->first();
+                                        break;
+                                    case 28:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                                        break;
+                                    case 32:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                                        break;
+                                    case 33:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 20)->latest()->first();
+                                        break;
+                                    case 34:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                                        break;
+                                    case 53:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                                        break;
+                                    default:
+                                        $scanning_data = null;
+                                        break;
+                                }
+                            } else {
+                                $scanning_data = null;
+                            }
+                            $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
                                 $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                                 $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                                 $journey_details['user'] = $user;
                                 $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
                                 $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
-    //                        $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
-    //                        $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
+                                $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
+                                $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
 
                                 $details['tracking_history'][] = $journey_details;
                             }
@@ -429,11 +509,50 @@ class RetailTrackingController extends Controller
 
                             if ($handover_shipment_journey) {
                                 foreach ($handover_shipment_journey as $journey) {
+                                if ($journey->status == 1) {
+                                    $handover_created_by = Handover::find($journey->handover_id)->created_by;
+                                    $admin_created_by = Admin::find($handover_created_by);
+                                } else {
+                                    $handover_received_by = Handover::find($journey->handover_id)->received_by;
+                                    $admin_received_by = Admin::find($handover_received_by);
+                                }
+
+                                if ((isset($admin_created_by->role_id) && $admin_created_by->role_id != 1) || (isset($admin_received_by->role_id) && $admin_received_by->role_id != 1)) {
+                                    $shipment_scanning_query = ShipmentScanningJourney::select(
+                                        'ssjal.location_status',
+                                        'shipment_scanning_journeys.latitude',
+                                        'shipment_scanning_journeys.longitude',
+                                        'ssjal.area_id',
+                                        'shipment_scanning_journeys.created_at',
+                                        'ssjal.hub_id'
+                                    )
+                                        ->join('handover_shipments_journeys as hsj', 'hsj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                                        ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                                        ->join('handovers', 'hsj.handover_id', '=', 'handovers.id') // added this join
+                                        ->where('shipment_scanning_journeys.updated_at', '<=', $journey->updated_at)
+                                        ->where('hsj.handover_id', '=', $journey->handover_id);
+
+                                    switch ($journey->status) {
+                                        case 1:
+                                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 26)->latest()->first();
+                                            break;
+                                        case 2:
+                                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 27)->latest()->first();
+                                            break;
+
+                                        default:
+                                            $scanning_data = null;
+                                            break;
+                                    }
+                                    } else {
+                                        $scanning_data = null;
+                                    }
                                     $journey_details = array();
 
                                     $journey_details['handover_id'] = $journey->handover_id;
                                     $journey_details['status'] = $journey->my_status->name;
-                                    // $journey_details['status'] = "adf>name";
+                                // $journey_details['status'] = "adf>name";
+                                    $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
                                     $journey_details['created_at'] = Carbon::parse($journey->created_at)->toDateTimeString();
 
                                     $details['handover_history'][] = $journey_details;
@@ -563,7 +682,13 @@ class RetailTrackingController extends Controller
                                 $key_accounts_daily_shipment->shipment_id = $shipment->id;
                                 $key_accounts_daily_shipment->save();
                             }
+                            $cargo_manifest_bag_shipments = CargoManifestBagShipments::with('bag', 'manifestBag_latest', 'manifestBag_latest.cargo_manifest', 'manifestBag_latest.cargo_manifest.fleet.driver')
+                            ->where('shipment_id', $shipment->id);
 
+                            if ($cargo_manifest_bag_shipments->exists()) {
+                                $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
+                                $details['manifest_history']  = $cargo_manifest_bag_shipments;
+                            }
                             $details['shipment_id'] = $shipment->id;
 
                             $tracking['shipments'][] = $details;
@@ -582,5 +707,22 @@ class RetailTrackingController extends Controller
 
         return $tracking;
     }
+    
 
+    public function rider_information(Request $request)
+    {
+        $rider = Rider::find($request->id);
+        $information = array();
+        $information['id'] = $rider->id;
+        $information['name'] = $rider->name;
+        $information['phone_number'] = $rider->phone;
+        $information['city'] = $rider->city->name;
+        $information['category'] = $rider->rider_category->name;
+        if ($rider->route) {
+            $information['route'] = $rider->route->code . ' (' . $rider->route->start . ' to ' . $rider->route->end . ')';
+        } else {
+            $information['route'] = '';
+        }
+        return $information;
+    }
 }

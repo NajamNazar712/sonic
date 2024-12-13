@@ -37,7 +37,7 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\Admin\EmployeeLog;
 use App\Http\Models\HR\EmployeeGender;
-use App\http\Models\HR\EmployeeNature;
+use App\Http\Models\HR\EmployeeNature;
 use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\ReportingLocation;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -434,7 +434,12 @@ class AdminHumanResourseController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 57);
         $rider_type = RiderType::all();
         $route = Route::all();
-        $operation_rider_category = OperationRidersCategory::all();
+
+        /* TO-6892 */
+        //$operation_rider_category = OperationRidersCategory::all();
+        $operation_rider_category = OperationRidersCategory::find(1);
+        /* */
+
         $rider_categories = RiderCategory::all();
         $rider_main_categories = RiderMainCategory::all();
         $route_types = RouteType::all();
@@ -1396,7 +1401,7 @@ class AdminHumanResourseController extends Controller
         $genders = EmployeeGender::all();
         $rider_types = RiderType::all();
         $main_categories = RiderMainCategory::all();
-        $functional_categories = OperationRidersCategory::all();
+        $functional_categories = OperationRidersCategory::find(1);
         $sub_categories = RiderCategory::all();
         $rider_routes = Route::all();
         $rider_functional_category = $employee->rider->operation_rider_id ?? null;

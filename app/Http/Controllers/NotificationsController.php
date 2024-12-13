@@ -2747,9 +2747,9 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['waqas@trax.pk', 'noman.aziz@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['waqas@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk', 'Tauseef.sarfaraz@trax.pk', 'Mansoor.ahmad@trax.pk'];
 
-                    $bcc = ['faisal.hasan@trax.pk'];
+                    $bcc = ['Sahban.ghani@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 27) {
 

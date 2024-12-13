@@ -363,9 +363,9 @@
                                 row.push(values.company_name);
                                 row.push(values.status);
                                 row.push(values.admin1);
-                                row.push(values.created_at);
+                                row.push(values.added);
                                 row.push(values.admin2);
-                                row.push(values.updated_at);
+                                row.push(values.updated);
                  
                              
                                 body.push(row);
@@ -413,16 +413,16 @@
                 serverSide: true,
                 ajax: '{{ route('admin.settings.fintech_company_charges.list') }}',
                 rowId: 'id',
-                order: [[6, 'asc']],
+                order: [[0, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'company_name', name: 'company_name', class: 'align-middle company_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'admin1', name: 'admin1', class: 'align-middle admin'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
-                    {data: 'admin2', name: 'admin2', class: 'align-middle admin'},
-                    {data: 'updated_at', name: 'updated_at', class: 'align-middle created_at'},
-                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                    {data: 'admin1', name: 'created_by.name', class: 'align-middle admin'},
+                    {data: 'added', name: 'fintech_companies.created_at', class: 'align-middle created_at'},
+                    {data: 'admin2', name: 'updated_by.name', class: 'align-middle admin'},
+                    {data: 'updated', name: 'fintech_companies.updated_at', class: 'align-middle created_at'},
+                    {data: 'action', name: '.', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

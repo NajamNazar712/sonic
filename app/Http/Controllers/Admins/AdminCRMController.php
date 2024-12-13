@@ -4704,7 +4704,7 @@ class AdminCRMController extends Controller
     public function crm_list(){
         $roles = AdminRole::join('admin_departments as ad', 'admin_roles.department_id', '=', 'ad.id')
             ->join('admins as a', 'admin_roles.updated_by', '=', 'a.id')
-            ->select('admin_roles.id', 'admin_roles.name', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by')
+            ->select('admin_roles.id', 'admin_roles.name', 'ad.name as department', 'admin_roles.created_at as created', 'admin_roles.updated_at as updated', 'a.name as updated_by')
 
             ->where('admin_roles.department_id', '!=', 1);
 
