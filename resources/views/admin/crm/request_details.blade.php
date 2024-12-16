@@ -684,7 +684,7 @@
                                                             <td>{{$index}}</td>
                                                             <td>{{$status_history->status->name}}</td>
                                                             @if($status_history->agent_id != null)
-                                                                <td>{{$status_history->agent->name}}</td>
+                                                                <td>{{(isset($status_history->agent->name) ? $status_history->agent->name : '-')}}</td>
                                                             @else
                                                                 @if($status_history->status_id == 5)
                                                                     <td>{{$shipper}} (Shipper)</td>
