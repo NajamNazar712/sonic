@@ -4907,7 +4907,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
         $messages = [
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be an Integer.',
-            'exists' => 'Given :attribute is Invalid / not ready for update.',
+            'exists' => 'Given :attribute is Invalid',
         ];
         $rules = [
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')->where(function ($query) {
@@ -4990,12 +4990,12 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                                 }
                             }
                         }
-                        if (!Shipment::where('tracking_number', $row['tracking_number'])->exists()) {
-                            $errors['Row #' . $row_id][] = 'Shipment is already updated from Booked Status #' . $row['tracking_number'];
-                        }
-                        if (Shipment::where('tracking_number', $row['tracking_number'])->where('booking_type_id', 2)->exists()) {
-                            $errors['Row #' . $row_id][] = 'Replacement shipment can not updated from excel #' . $row['tracking_number'];
-                        }
+                        // if (!Shipment::where('tracking_number', $row['tracking_number'])->exists()) {
+                        //     $errors['Row #' . $row_id][] = 'Shipment is already updated from Booked Status #' . $row['tracking_number'];
+                        // }
+                        // if (Shipment::where('tracking_number', $row['tracking_number'])->where('booking_type_id', 2)->exists()) {
+                        //     $errors['Row #' . $row_id][] = 'Replacement shipment can not updated from excel #' . $row['tracking_number'];
+                        // }
                     }
                 }
                 if (empty($errors)) {
@@ -5019,19 +5019,19 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         }
 
                         if ($shipment->actual_weight == null) {
-                            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
+                            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet!');
                         }
 
                         $old_shipment_weight = $shipment->actual_weight;
 
+                        // $shipment->actual_weight = $weight;
+                        // $shipment->save();
 
-                        $shipment->actual_weight = $weight;
-                        $shipment->save();
+                        $weight_view = ShipmentChargesController::weight_view($shipment_id, $weight);
+                        $weight_charges_calculated = $weight_view['weight_charges'];
+                        $fuel_surcharge_view = ShipmentChargesController::fuel_surcharge_view($shipment_id, $weight_charges_calculated);
+                        $faf_charges_view = ShipmentChargesController::faf_charges_view($shipment_id, $weight_charges_calculated);
 
-
-                        ShipmentChargesController::weight($shipment_id);
-                        ShipmentChargesController::fuel_surcharge($shipment_id);
-                        ShipmentChargesController::faf_charges($shipment_id);
                         $faf_charges = ShipmentAdditionalCharges::fetch_faf_charges($shipment_id);
                         $shipment = $shipment->refresh();
                         if($arrival_charges_applied){
@@ -5040,15 +5040,14 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                             $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges+$faf_charges;
                         }
 
-                        $change_shipment_weight = new ChangeShipmentWeightLog();
-
-                        $change_shipment_weight->shipment_id = $shipment->id;
-                        $change_shipment_weight->old_weight = $old_shipment_weight;
-                        $change_shipment_weight->new_weight = $weight;
-                        $change_shipment_weight->admin_id = Auth::id();
-                        $change_shipment_weight->old_charges = $previous_weight_charges;
-                        $change_shipment_weight->new_charges = $new_weight_charges;
-                        $change_shipment_weight->save();
+                        // $change_shipment_weight = new ChangeShipmentWeightLog();
+                        // $change_shipment_weight->shipment_id = $shipment->id;
+                        // $change_shipment_weight->old_weight = $old_shipment_weight;
+                        // $change_shipment_weight->new_weight = $weight;
+                        // $change_shipment_weight->admin_id = Auth::id();
+                        // $change_shipment_weight->old_charges = $previous_weight_charges;
+                        // $change_shipment_weight->new_charges = $new_weight_charges;
+                        // $change_shipment_weight->save();
 
                         $adjustment_amount = $previous_weight_charges - $new_weight_charges;
 
@@ -5105,6 +5104,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         $tracking_numbers['Row #' . $row_id] = $tracking;
 
                     }
+
                     $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
                         return $row . ': ' . $tracking_number;
                     }, array_keys($tracking_numbers), $tracking_numbers));
@@ -5135,16 +5135,18 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
 
                     // Write data rows starting from second row
                     foreach ($rows as $key => $row) {
+
                         $shipment = Shipment::where('tracking_number', $row['tracking_number'])->first();
+
                         $rowData = [
                             $row['tracking_number'],
                             $row['actual_weight'],
                             $shipment->amount,
-                            $shipment->weight_charges,
+                            $weight_view['weight_charges'],
                             $shipment->cash_handling_charges,
                             $shipment->insurance_charges,
                             $shipment->return_charges,
-                            $shipment->fuel_surcharge,
+                            $fuel_surcharge_view['fuel_surcharge'],
                             $shipment->replacement_charges,
                             $shipment->try_and_buy_charges,
                             $shipment->intercept_charges,
