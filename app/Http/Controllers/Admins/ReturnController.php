@@ -3674,6 +3674,7 @@ class ReturnController extends Controller
                                             </div></span>";
                 }
             })
+            ->rawColumns(['action', 'open_box', 'status', 'reason', 'remarks', 'received_or_refused_by', 'open_box'] )
             ->make(true);
     }
 
