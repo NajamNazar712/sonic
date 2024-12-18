@@ -22,6 +22,8 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\City;
 use Carbon\Carbon;
 use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ShipperSegmentLogs;
+use Illuminate\Support\Facades\Log;
 
 class ProcessShipmentBookingDBPriority implements ShouldQueue
 {
@@ -484,6 +486,19 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
                 NotificationsController::send(153, $shipment_id);
             }
 
+            // Maintaining shipper segment logs on booking when different origin and destination
+            try {
+                if ($pickup_city_id != $consignee_city_id)
+                {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => auth()->user()->segment_id,
+                        'sub_segment_id' => auth()->user()->sub_segment_id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
+            }
         }
     }
 }

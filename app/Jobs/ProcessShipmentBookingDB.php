@@ -22,6 +22,8 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\City;
 use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ShipperSegmentLogs;
+use Illuminate\Support\Facades\Log;
 
 class ProcessShipmentBookingDB implements ShouldQueue
 {
@@ -488,6 +490,20 @@ class ProcessShipmentBookingDB implements ShouldQueue
             if ($now > $cutofftime) {
                 NotificationsController::send(152, $shipment_id);
                 NotificationsController::send(153, $shipment_id);
+            }
+
+            try {
+                // Maintaining shipper segment logs on booking when different origin and destination
+                if ($pickup_city_id != $consignee_city_id)
+                {
+                    ShipperSegmentLogs::create([
+                        'shipment_id' => $shipment_id,
+                        'segment_id' => auth()->user()->segment_id,
+                        'sub_segment_id' => auth()->user()->sub_segment_id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error creating shipper segment log for shipment ' . $shipment_id . ': ' . $e->getMessage());
             }
 
         }
