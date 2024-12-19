@@ -725,4 +725,10 @@ class RetailTrackingController extends Controller
         }
         return $information;
     }
+
+    public function deliveryNotePrint(Request $request){
+        $delivery_note_id = $request->id;
+        $data = $this->receiveDeliveryPrint($delivery_note_id);
+        return $data;
+    }
 }

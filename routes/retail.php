@@ -83,6 +83,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('track', 'Retail\RetailTrackingController@track')->name('track');
         Route::post('track_v2', 'Retail\RetailTrackingController@track_v2')->name('track_v2');
         Route::post('rider_information', 'Retail\RetailTrackingController@rider_information')->name('rider_information');
+        Route::post('deliveryNotePrint', 'Retail\RetailTrackingController@deliveryNotePrint')->name('print');
     });
 
     Route::prefix('crm')->name('crm.')->group(function () {
