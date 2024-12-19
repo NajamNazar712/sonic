@@ -5028,7 +5028,7 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                         // $shipment->save();
 
                         $weight_view = ShipmentChargesController::weight_view($shipment_id, $weight);
-                        $weight_charges_calculated = $weight_view['weight_charges'];
+                        $weight_charges_calculated = $weight_view['weight_charges'] ?? 0;
                         $fuel_surcharge_view = ShipmentChargesController::fuel_surcharge_view($shipment_id, $weight_charges_calculated);
                         $faf_charges_view = ShipmentChargesController::faf_charges_view($shipment_id, $weight_charges_calculated);
 
@@ -5137,12 +5137,11 @@ use Illuminate\Support\Str;class AdminFinanceController extends Controller
                     foreach ($rows as $key => $row) {
 
                         $shipment = Shipment::where('tracking_number', $row['tracking_number'])->first();
-
                         $rowData = [
                             $row['tracking_number'],
                             $row['actual_weight'],
                             $shipment->amount,
-                            $weight_view['weight_charges'],
+                            $weight_charges_calculated,
                             $shipment->cash_handling_charges,
                             $shipment->insurance_charges,
                             $shipment->return_charges,
