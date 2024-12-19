@@ -1151,34 +1151,34 @@
             });
 
         });
-        // $('#tracking').on('click', '.delivery_note_print', function() {
-        //     id = $(this).attr('data-id');
-        //     $.ajax({
-        //             url: '{!! route('admin.delivery.receive.print') !!}',
-        //             method: 'POST',
-        //             data: {
-        //                 'id': id,
-        //                 '_token': '{{ csrf_token() }}'
-        //             }
-        //         })
-        //         .done(function(data) {
-        //             var tab = window.open('', '_blank');
+        $('#tracking').on('click', '.delivery_note_print', function() {
+            id = $(this).attr('data-id');
+            $.ajax({
+                    url: '{!! route('retail.tracking.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                .done(function(data) {
+                    var tab = window.open('', '_blank');
 
-        //             if (!tab) {
-        //                 swal({
-        //                     title: 'Popup Blocker Enabled!',
-        //                     text: 'Please add this site to your exception list.',
-        //                     icon: 'error',
-        //                     closeOnClickOutside: false,
-        //                     closeOnEsc: false
-        //                 });
-        //             } else {
-        //                 tab.document.write(data);
-        //                 tab.document.close();
-        //                 tab.focus();
-        //             }
-        //         });
-        // });
+                    if (!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    } else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
+        });
         $('#tracking').on('click', '.rider_information', function() {
                 id = $(this).attr('data-id');
                 var showRiderResponseBtn = $(this).attr('data-showRiderRespone');
