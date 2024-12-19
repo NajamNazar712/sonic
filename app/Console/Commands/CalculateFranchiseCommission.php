@@ -290,6 +290,8 @@ class CalculateFranchiseCommission extends Command
                 'franchise_gst_amount' => $shipment->gst_amount,
                 'total_charges' => $shipment->total_charges,
                 'weight_charges' => $shipment->weight_charges,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ];
             // error_log('bulkInsertData'.print_r($bulkInsertData, true));
 
