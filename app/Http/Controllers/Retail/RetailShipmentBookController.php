@@ -2445,8 +2445,7 @@ class RetailShipmentBookController extends Controller
         $paid_status = $request->paid_status;
 
         $retail_user_commission = RetailUserCommission::where('franchise_id', $user->id)->first();
-        $retail_franchise_code = RetailFranchise::pluck('code');
-        $franchise_commission = RetailFranchiseCommission::whereIn('franchise_code', $retail_franchise_code)->first(); 
+        $franchise_commission = RetailFranchiseCommission::where('franchise_code', $user->store->code)->first(); 
 
         if ($retail_user_commission && $user->id == $retail_user_commission->franchise_id){
             $query = RetailUserCommission::where('month', $month)
@@ -2464,7 +2463,7 @@ class RetailShipmentBookController extends Controller
                 'data' => $results,
             ]);
         }
-        elseif ($franchise_commission->franchise_code == $user->store->code)
+        else
         {
             $query = RetailFranchiseCommission::where('month', $month)
             ->where('franchise_code', $user->store->code)

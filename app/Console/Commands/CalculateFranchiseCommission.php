@@ -267,7 +267,7 @@ class CalculateFranchiseCommission extends Command
             'rs.retail_user_id'
         ])
         ->get();
-
+        $bulkInsertData = [];    
         foreach ($shipments as $shipment) {
             $weight_charges = $shipment->total_charges - $shipment->gst_amount;
             $net_commission = ($shipment->product_percentage / 100) * $shipment->weight_charges;
