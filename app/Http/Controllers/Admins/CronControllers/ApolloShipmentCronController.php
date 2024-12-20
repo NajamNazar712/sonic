@@ -41,7 +41,7 @@ class ApolloShipmentCronController extends Controller
         if($journeys->isNotEmpty()) {
 
             $client = new \GuzzleHttp\Client([
-                'base_uri' => rtrim(env('APOLLO_API_URL'), '/'),
+                'base_uri' => 'https://api-apollo-staging.sonic.pk/api/',
                 'http_errors' => FALSE,
                 'connect_timeout' => 60,
                 'timeout' => 60
