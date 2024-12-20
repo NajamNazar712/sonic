@@ -639,6 +639,7 @@ class UserManagementController extends Controller
 
 
         } else {
+            $delete_hub_ids = [];
             $current_hub_ids = AdminHub::where('admin_id', $id)->pluck('hub_id')->toArray();
             $deleted_name_hubs = City::whereIn('id', $delete_hub_ids)->pluck('name')
             ->implode(', ');
